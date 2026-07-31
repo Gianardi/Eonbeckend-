@@ -681,6 +681,60 @@
   .ai-toast-close svg{ width:14px;height:14px; }
 
   /* notifica "landing" a tutto schermo per i consigli AI sugli obiettivi */
+  /* pulsante "Aggiungi ..." in cima alle pagine con elenchi */
+  .add-btn{
+    width:100%; justify-content:center; margin-bottom:14px; padding:13px 18px;
+    font-size:13.5px; border-radius:14px;
+  }
+  .add-btn svg{ width:16px; height:16px; }
+
+  /* pannello che si apre dal basso per inserire e modificare i dati */
+  .sheet-overlay{
+    position:fixed; inset:0; z-index:9998; background:rgba(20,23,29,.5);
+    display:flex; align-items:flex-end; justify-content:center;
+    animation:overlayIn .2s ease;
+  }
+  .sheet{
+    background:var(--card); width:100%; max-width:460px;
+    border-radius:22px 22px 0 0; padding:10px 18px calc(20px + env(safe-area-inset-bottom,0px));
+    max-height:88vh; display:flex; flex-direction:column;
+    animation:sheetIn .28s cubic-bezier(.25,.8,.4,1);
+  }
+  @keyframes sheetIn{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
+  .sheet-handle{ width:38px; height:4px; border-radius:20px; background:var(--border-strong); margin:0 auto 12px; flex:none; }
+  .sheet-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex:none; }
+  .sheet-title{ font-family:'Manrope'; font-size:17px; font-weight:900; letter-spacing:-.01em; }
+  .sheet-close{
+    width:30px; height:30px; border-radius:50%; border:none; cursor:pointer; flex:none;
+    background:rgba(20,23,29,.05); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .sheet-close svg{ width:15px; height:15px; }
+  .sheet-body{ overflow-y:auto; display:flex; flex-direction:column; gap:13px; padding-bottom:4px; }
+  .sheet-error{
+    background:var(--coral-soft); color:var(--coral); font-size:12px; font-weight:600;
+    padding:10px 12px; border-radius:10px; margin-top:12px;
+  }
+  .sheet-actions{ display:flex; gap:9px; align-items:center; margin-top:16px; flex:none; }
+  .sheet-delete-btn{
+    background:var(--coral-soft); color:var(--coral); border:none; border-radius:11px;
+    padding:12px 16px; font-weight:700; font-size:13px; cursor:pointer; flex:none;
+  }
+  .sheet-field label{ display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; }
+  .sheet-field input, .sheet-field select, .sheet-field textarea{
+    width:100%; border:1px solid var(--border); background:#FBFAF8;
+    border-radius:11px; padding:11px 13px; font-size:14px; font-family:inherit;
+    color:var(--text); resize:none;
+  }
+  .sheet-field textarea{ min-height:70px; }
+  .sheet-field input:focus, .sheet-field select:focus, .sheet-field textarea:focus{ outline:2px solid var(--indigo); outline-offset:1px; }
+
+  /* stato vuoto: guida chi apre l'app per la prima volta */
+  .empty-hint{
+    text-align:center; padding:26px 18px; color:var(--muted); font-size:13px; line-height:1.6;
+  }
+  .empty-hint b{ color:var(--text); display:block; font-size:14px; margin-bottom:5px; }
+
   .ai-landing-overlay{
     position:fixed; inset:0; z-index:9999; background:rgba(20,23,29,.5);
     display:flex; align-items:center; justify-content:center; padding:20px;
@@ -881,6 +935,26 @@
 
 <div class="accent-arc" aria-hidden="true"></div>
 <div class="ai-toast-container" id="aiToastContainer"></div>
+<!-- Pannello per aggiungere/modificare dati: si apre dal basso.
+     Riutilizzato per clienti, opportunità, pagamenti ed entrate. -->
+<div class="sheet-overlay" id="sheetOverlay" style="display:none;">
+  <div class="sheet" id="sheetPanel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title" id="sheetTitle">Aggiungi</div>
+      <button class="sheet-close" id="sheetCloseBtn" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+    <div class="sheet-error" id="sheetError" style="display:none;"></div>
+    <div class="sheet-actions">
+      <button class="sheet-delete-btn" id="sheetDeleteBtn" style="display:none;">Elimina</button>
+      <button class="primary-btn" id="sheetSaveBtn" style="flex:1;justify-content:center;">Salva</button>
+    </div>
+  </div>
+</div>
+
 <div class="ai-landing-overlay" id="aiLandingOverlay" style="display:none;">
   <div class="ai-landing-card">
     <div class="ai-landing-icon">
@@ -1368,6 +1442,11 @@
         </button>
       </div>
 
+      <button class="primary-btn add-btn" id="addClientBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi cliente
+      </button>
+
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--teal-soft); color:var(--teal);">
@@ -1480,6 +1559,11 @@
         </button>
         <div id="oppStrategyResult" class="ai-strategy-result" style="display:none;"></div>
       </div>
+
+      <button class="primary-btn add-btn" id="addOppBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi opportunità
+      </button>
 
       <div class="card-panel">
         <div class="card-header">
@@ -1658,6 +1742,10 @@
           <div class="stat-label">Già pagati</div>
         </div>
       </div>
+      <button class="primary-btn add-btn" id="addPaymentBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi pagamento
+      </button>
       <div class="card-panel">
         <div class="card-header"><h2>Pagamenti</h2><span class="count" id="payCount">0</span></div>
         <div id="paymentsList" style="padding:8px 0 16px;"></div>
@@ -1687,6 +1775,10 @@
           <div class="stat-label">Scaduti</div>
         </div>
       </div>
+      <button class="primary-btn add-btn" id="addIncomeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi entrata
+      </button>
       <div class="card-panel">
         <div class="card-header"><h2>Entrate</h2><span class="count" id="incCount">0</span></div>
         <div id="incomeList" style="padding:8px 0 16px;"></div>
@@ -2933,8 +3025,13 @@ function buildClientCard(c){
     <div class="client-archive-foot">
       <div class="row-action-btn" title="Invia email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/></svg></div>
       <div class="row-action-btn" title="Chiama"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg></div>
+      <div class="row-action-btn client-edit-btn" title="Modifica" style="margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></div>
     </div>
   `;
+  card.querySelector(".client-edit-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    openSheet("cliente", c);
+  });
   return card;
 }
 
@@ -2950,11 +3047,19 @@ function renderClientArchive(){
 
   const clientWrap = document.getElementById("clientArchiveList");
   clientWrap.innerHTML = "";
+  if(activeClients.length === 0){
+    clientWrap.innerHTML = query
+      ? '<div class="empty-hint">Nessun cliente trovato per "' + query + '".</div>'
+      : '<div class="empty-hint"><b>Nessun cliente ancora</b>Tocca "Aggiungi cliente" qui sopra per inserire il primo.</div>';
+  }
   activeClients.forEach(c => clientWrap.appendChild(buildClientCard(c)));
   document.getElementById("clientCount").textContent = activeClients.length;
 
   const prospectWrap = document.getElementById("prospectArchiveList");
   prospectWrap.innerHTML = "";
+  if(prospects.length === 0){
+    prospectWrap.innerHTML = '<div class="empty-hint">Nessun potenziale cliente al momento.</div>';
+  }
   prospects.forEach(c => prospectWrap.appendChild(buildClientCard(c)));
   document.getElementById("prospectCount").textContent = prospects.length;
 }
@@ -2962,13 +3067,248 @@ function renderClientArchive(){
 document.getElementById("clientSearchInput").addEventListener("input", renderClientArchive);
 document.getElementById("clientVoiceBtn").addEventListener("click", function(){ this.classList.toggle("listening"); });
 
+/* ============================================================
+   PANNELLO DI INSERIMENTO / MODIFICA
+   Un unico pannello usato per clienti, opportunità, pagamenti
+   ed entrate: cambia solo l'elenco dei campi.
+   ============================================================ */
+
+const PALETTE = [
+  "linear-gradient(135deg,#2FD9C7,#22B8AA)",
+  "linear-gradient(135deg,#5C7CFA,#7C9BFF)",
+  "linear-gradient(135deg,#FFC15E,#E8A63C)",
+  "linear-gradient(135deg,#3DDC84,#2BB86A)",
+  "linear-gradient(135deg,#FF6F6F,#E85A5A)",
+  "linear-gradient(135deg,#B78BFA,#8F6BE8)",
+];
+
+/* Definizione dei moduli: campi, tabella del database, come si salva. */
+const sheetForms = {
+  cliente: {
+    title: "cliente",
+    fields: [
+      { key:"name", label:"Nome del cliente", type:"text", placeholder:"Es. Mara Nini", required:true },
+      { key:"status", label:"Stato", type:"select", options:[
+        { value:"attivo", label:"Attivo" },
+        { value:"trattativa", label:"In trattativa" },
+        { value:"inattivo", label:"Inattivo" },
+      ], default:"attivo" },
+      { key:"value", label:"Valore (€)", type:"number", placeholder:"0" },
+      { key:"desc", label:"Note", type:"textarea", placeholder:"Cosa devi ricordare su questo cliente..." },
+    ],
+    table: "clients",
+    toDb: v => ({
+      name: v.name, status: v.status, value: Number(v.value) || 0,
+      description: v.desc || "", last_contact: "oggi",
+      color: PALETTE[Math.floor(Math.random() * PALETTE.length)]
+    }),
+    toLocal: (v, saved) => ({
+      id: saved ? saved.id : undefined,
+      name: v.name, status: v.status, value: Number(v.value) || 0,
+      desc: v.desc || "", last: "oggi",
+      color: saved ? saved.color : PALETTE[0]
+    }),
+    array: () => clients,
+    afterSave: () => { renderClientArchive(); renderClientStats(); populateClientDropdowns(); renderSummary(); }
+  },
+
+  opportunita: {
+    title: "opportunità",
+    fields: [
+      { key:"name", label:"Titolo", type:"text", placeholder:"Es. Inserimento nuovo mandato", required:true },
+      { key:"client", label:"Cliente", type:"text", placeholder:"Nome del cliente o contatto" },
+      { key:"value", label:"Valore stimato (€)", type:"number", placeholder:"0" },
+      { key:"probability", label:"Probabilità", type:"select", options:[
+        { value:"Alta", label:"Alta" }, { value:"Media", label:"Media" }, { value:"Bassa", label:"Bassa" },
+      ], default:"Media" },
+      { key:"deadline", label:"Scadenza", type:"text", placeholder:"Es. 15 ago 2026" },
+      { key:"stage", label:"A che punto sei", type:"text", placeholder:"Es. Preventivo inviato" },
+    ],
+    table: "opportunities",
+    toDb: v => ({
+      name: v.name, client_name: v.client || "", value: Number(v.value) || 0,
+      probability: v.probability, deadline: v.deadline || null, stage: v.stage || ""
+    }),
+    toLocal: (v, saved) => ({
+      id: saved ? saved.id : undefined,
+      name: v.name, client: v.client || "", value: Number(v.value) || 0,
+      probability: v.probability, deadline: v.deadline || "", stage: v.stage || ""
+    }),
+    array: () => opportunities,
+    afterSave: () => { renderOpportunities(); renderSummary(); }
+  },
+
+  pagamento: {
+    title: "pagamento",
+    fields: [
+      { key:"supplier", label:"A chi devi pagare", type:"text", placeholder:"Es. Assicurazione RC", required:true },
+      { key:"desc", label:"Per cosa", type:"text", placeholder:"Es. Polizza annuale" },
+      { key:"amount", label:"Importo (€)", type:"number", placeholder:"0", required:true },
+      { key:"due", label:"Scadenza", type:"text", placeholder:"Es. 05 ago 2026" },
+      { key:"status", label:"Stato", type:"select", options:[
+        { value:"dapagare", label:"Da pagare" }, { value:"pagato", label:"Pagato" }, { value:"ritardo", label:"In ritardo" },
+      ], default:"dapagare" },
+    ],
+    table: "payments",
+    toDb: v => ({
+      supplier: v.supplier, description: v.desc || "", amount: Number(v.amount) || 0,
+      due_date: v.due || null, status: v.status
+    }),
+    toLocal: (v, saved) => ({
+      id: saved ? saved.id : undefined,
+      supplier: v.supplier, desc: v.desc || "", amount: Number(v.amount) || 0,
+      due: v.due || "", status: v.status
+    }),
+    array: () => payments,
+    afterSave: () => { renderPayments(); renderSummary(); }
+  },
+
+  entrata: {
+    title: "entrata",
+    fields: [
+      { key:"client", label:"Da chi", type:"text", placeholder:"Es. Lorenzo Ischino", required:true },
+      { key:"desc", label:"Per cosa", type:"text", placeholder:"Es. Primo acconto commissioni" },
+      { key:"amount", label:"Importo (€)", type:"number", placeholder:"0", required:true },
+      { key:"due", label:"Data prevista", type:"text", placeholder:"Es. 12 ago 2026" },
+      { key:"status", label:"Stato", type:"select", options:[
+        { value:"attesa", label:"In attesa" }, { value:"incassato", label:"Incassato" }, { value:"scaduto", label:"Scaduto" },
+      ], default:"attesa" },
+    ],
+    table: "incomes",
+    toDb: v => ({
+      client_name: v.client, description: v.desc || "", amount: Number(v.amount) || 0,
+      due_date: v.due || null, status: v.status
+    }),
+    toLocal: (v, saved) => ({
+      id: saved ? saved.id : undefined,
+      client: v.client, desc: v.desc || "", amount: Number(v.amount) || 0,
+      due: v.due || "", status: v.status
+    }),
+    array: () => incomes,
+    afterSave: () => { renderIncomes(); renderSummary(); }
+  },
+};
+
+let sheetState = { form:null, editing:null };
+
+function openSheet(formKey, existingItem){
+  const form = sheetForms[formKey];
+  if(!form) return;
+  sheetState = { form:formKey, editing: existingItem || null };
+
+  document.getElementById("sheetTitle").textContent =
+    (existingItem ? "Modifica " : "Aggiungi ") + form.title;
+  document.getElementById("sheetError").style.display = "none";
+  document.getElementById("sheetDeleteBtn").style.display = existingItem ? "block" : "none";
+
+  const body = document.getElementById("sheetBody");
+  body.innerHTML = form.fields.map(f => {
+    const current = existingItem ? (existingItem[f.key] ?? "") : (f.default ?? "");
+    if(f.type === "select"){
+      return `<div class="sheet-field">
+        <label>${f.label}</label>
+        <select data-field="${f.key}">
+          ${f.options.map(o => `<option value="${o.value}"${o.value === current ? " selected" : ""}>${o.label}</option>`).join("")}
+        </select>
+      </div>`;
+    }
+    if(f.type === "textarea"){
+      return `<div class="sheet-field">
+        <label>${f.label}</label>
+        <textarea data-field="${f.key}" placeholder="${f.placeholder || ""}">${current}</textarea>
+      </div>`;
+    }
+    return `<div class="sheet-field">
+      <label>${f.label}</label>
+      <input type="${f.type}" data-field="${f.key}" placeholder="${f.placeholder || ""}" value="${current}">
+    </div>`;
+  }).join("");
+
+  document.getElementById("sheetOverlay").style.display = "flex";
+}
+
+function closeSheet(){
+  document.getElementById("sheetOverlay").style.display = "none";
+  sheetState = { form:null, editing:null };
+}
+document.getElementById("sheetCloseBtn").addEventListener("click", closeSheet);
+document.getElementById("sheetOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "sheetOverlay") closeSheet();
+});
+
+document.getElementById("sheetSaveBtn").addEventListener("click", async () => {
+  const form = sheetForms[sheetState.form];
+  if(!form) return;
+
+  const values = {};
+  document.querySelectorAll("#sheetBody [data-field]").forEach(el => {
+    values[el.dataset.field] = el.value.trim();
+  });
+
+  const missing = form.fields.filter(f => f.required && !values[f.key]);
+  if(missing.length){
+    const err = document.getElementById("sheetError");
+    err.textContent = "Compila: " + missing.map(f => f.label).join(", ");
+    err.style.display = "block";
+    return;
+  }
+
+  const btn = document.getElementById("sheetSaveBtn");
+  btn.disabled = true;
+
+  try{
+    const arr = form.array();
+    if(sheetState.editing){
+      const item = sheetState.editing;
+      const updated = form.toLocal(values, item);
+      Object.keys(updated).forEach(k => { if(updated[k] !== undefined) item[k] = updated[k]; });
+      if(isDbReady() && item.id) await dbUpdate(form.table, item.id, form.toDb(values));
+    } else {
+      let saved = null;
+      if(isDbReady()) saved = await dbInsert(form.table, form.toDb(values));
+      arr.push(form.toLocal(values, saved));
+    }
+    form.afterSave();
+    closeSheet();
+  }catch(err){
+    console.error("Errore salvataggio:", err);
+    const box = document.getElementById("sheetError");
+    box.textContent = "Non sono riuscita a salvare: " + (err.message || "riprova.");
+    box.style.display = "block";
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById("sheetDeleteBtn").addEventListener("click", async () => {
+  const form = sheetForms[sheetState.form];
+  const item = sheetState.editing;
+  if(!form || !item) return;
+
+  const arr = form.array();
+  const idx = arr.indexOf(item);
+  if(idx > -1) arr.splice(idx, 1);
+  if(isDbReady() && item.id) await dbDelete(form.table, item.id);
+  form.afterSave();
+  closeSheet();
+});
+
+document.getElementById("addClientBtn").addEventListener("click", () => openSheet("cliente"));
+document.getElementById("addOppBtn").addEventListener("click", () => openSheet("opportunita"));
+document.getElementById("addPaymentBtn").addEventListener("click", () => openSheet("pagamento"));
+document.getElementById("addIncomeBtn").addEventListener("click", () => openSheet("entrata"));
+
 /* ============ OPPORTUNITÀ ============ */
 function renderOpportunities(){
   const wrap = document.getElementById("oppList");
   wrap.innerHTML = "";
+  if(opportunities.length === 0){
+    wrap.innerHTML = '<div class="empty-hint"><b>Nessuna opportunità ancora</b>Tocca "Aggiungi opportunità" per inserire la prima trattativa.</div>';
+  }
   opportunities.forEach(o => {
     const card = document.createElement("div");
     card.className = "opp-card";
+    card.style.cursor = "pointer";
     card.innerHTML = `
       <div class="opp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg></div>
       <div class="opp-body">
@@ -2982,6 +3322,7 @@ function renderOpportunities(){
       </div>
       <div class="opp-value">€${o.value.toLocaleString("it-IT")}<small>valore stimato</small></div>
     `;
+    card.addEventListener("click", () => openSheet("opportunita", o));
     wrap.appendChild(card);
   });
   document.getElementById("oppCount").textContent = opportunities.length;
@@ -3329,9 +3670,13 @@ document.getElementById("taskAssignBtn").addEventListener("click", async () => {
 function renderPayments(){
   const wrap = document.getElementById("paymentsList");
   wrap.innerHTML = "";
+  if(payments.length === 0){
+    wrap.innerHTML = '<div class="empty-hint"><b>Nessun pagamento ancora</b>Tocca "Aggiungi pagamento" per inserire il primo.</div>';
+  }
   payments.forEach(p => {
     const row = document.createElement("div");
     row.className = "list-row";
+    row.style.cursor = "pointer";
     row.innerHTML = `
       <div class="row-avatar" style="background:var(--coral-soft);color:var(--coral);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/></svg></div>
       <div class="row-body">
@@ -3342,10 +3687,13 @@ function renderPayments(){
     `;
     const badge = row.querySelector(".pill");
     badge.style.cursor = "pointer";
-    badge.addEventListener("click", () => {
+    badge.addEventListener("click", (e) => {
+      e.stopPropagation();
       p.status = p.status === "pagato" ? "dapagare" : "pagato";
+      if(isDbReady() && p.id) dbUpdate("payments", p.id, { status: p.status });
       renderPayments();
     });
+    row.addEventListener("click", () => openSheet("pagamento", p));
     wrap.appendChild(row);
   });
   document.getElementById("payCount").textContent = payments.length;
@@ -3361,9 +3709,13 @@ function renderPayments(){
 function renderIncomes(){
   const wrap = document.getElementById("incomeList");
   wrap.innerHTML = "";
+  if(incomes.length === 0){
+    wrap.innerHTML = '<div class="empty-hint"><b>Nessuna entrata ancora</b>Tocca "Aggiungi entrata" per registrare il primo incasso previsto.</div>';
+  }
   incomes.forEach(i => {
     const row = document.createElement("div");
     row.className = "list-row";
+    row.style.cursor = "pointer";
     row.innerHTML = `
       <div class="row-avatar" style="background:var(--green-soft);color:var(--green);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div>
       <div class="row-body">
@@ -3372,6 +3724,7 @@ function renderIncomes(){
       </div>
       <div class="row-value">€${i.amount.toLocaleString("it-IT")}</div>
     `;
+    row.addEventListener("click", () => openSheet("entrata", i));
     wrap.appendChild(row);
   });
   document.getElementById("incCount").textContent = incomes.length;
