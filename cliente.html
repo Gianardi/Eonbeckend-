@@ -144,6 +144,59 @@
   .chat-event-amount{ font-size:14.5px; font-weight:900; margin-top:5px; }
   .chat-event-time{ font-size:9.5px; opacity:.55; margin-top:5px; display:block; }
 
+  /* allegati */
+  .attach{
+    width:44px; height:44px; border-radius:50%; flex:none; border:none; cursor:pointer;
+    background:rgba(20,23,29,.05); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .attach:hover{ background:rgba(20,23,29,.09); color:var(--indigo); }
+  .attach svg{ width:20px; height:20px; }
+  .attach:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .upload-bar{ padding:10px 16px; border-top:1px solid var(--border); flex:none; }
+  .upload-text{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .upload-track{ height:5px; border-radius:20px; background:rgba(20,23,29,.07); overflow:hidden; }
+  .upload-fill{ height:100%; width:0%; border-radius:20px; background:var(--grad-blue); transition:width .25s; }
+
+  .msg-media{
+    max-width:76%; border-radius:16px; overflow:hidden; cursor:pointer; line-height:0;
+    box-shadow:var(--shadow-sm); border:1px solid var(--border);
+  }
+  .msg-media.mine{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-media.pro{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-media img, .msg-media video{ width:100%; display:block; max-height:340px; object-fit:cover; background:#000; }
+  .msg-media-time{ font-size:10px; color:var(--muted); padding:5px 10px 7px; background:var(--card); line-height:1.2; display:block; }
+
+  .msg-doc{
+    display:flex; align-items:center; gap:11px; max-width:80%;
+    padding:11px 13px; border-radius:16px; cursor:pointer;
+    background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
+  }
+  .msg-doc.mine{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-doc.pro{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-doc-icon{
+    width:36px; height:36px; border-radius:11px; flex:none; color:#fff;
+    background:var(--indigo); display:flex; align-items:center; justify-content:center;
+  }
+  .msg-doc-icon svg{ width:16px; height:16px; }
+  .msg-doc-body{ min-width:0; }
+  .msg-doc-name{ font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .msg-doc-sub{ font-size:11px; color:var(--muted); margin-top:2px; }
+
+  .media-viewer{
+    position:fixed; inset:0; z-index:9999; background:rgba(10,12,18,.93);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .media-viewer img, .media-viewer video{ max-width:100%; max-height:82vh; border-radius:12px; }
+  .media-viewer-close{
+    position:absolute; top:calc(16px + env(safe-area-inset-top,0px)); right:16px;
+    width:38px; height:38px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,.15); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .media-viewer-close svg{ width:18px; height:18px; }
+
   .input-row{
     display:flex; gap:9px; padding:12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
     border-top:1px solid var(--border); flex:none; background:var(--card);
@@ -231,7 +284,15 @@
   <!-- scheda: messaggi -->
   <div class="panel" id="panelMessaggi">
     <div class="messages" id="messages"></div>
+    <div class="upload-bar" id="uploadBar" style="display:none;">
+      <div class="upload-text" id="uploadText">Sto caricando…</div>
+      <div class="upload-track"><div class="upload-fill" id="uploadFill"></div></div>
+    </div>
     <div class="input-row">
+      <button class="attach" id="attachBtn" aria-label="Allega foto, video o documento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.4 11.05L12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.67 3.67 0 0 1 5.18 5.18l-9.2 9.2a1.83 1.83 0 0 1-2.59-2.59l8.49-8.48"/></svg>
+      </button>
+      <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
       <input type="text" id="msgInput" placeholder="Scrivi un messaggio…">
       <button class="send" id="sendBtn" aria-label="Invia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
@@ -425,6 +486,39 @@ function renderMessages(){
       wrap.appendChild(card);
       return;
     }
+    /* Allegati: foto e video si vedono, i documenti sono una riga */
+    if(m.file_url){
+      const lato = m.sender === "me" ? "pro" : "mine";
+      if(m.file_type && m.file_type.startsWith("image/")){
+        const w = document.createElement("div");
+        w.className = "msg-media " + lato;
+        w.innerHTML = `<img src="${m.file_url}" alt="${m.file_name || "Foto"}" loading="lazy"><span class="msg-media-time">${formatTime(m.created_at)}</span>`;
+        w.addEventListener("click", () => apriMedia(m.file_url, m.file_type));
+        wrap.appendChild(w);
+        return;
+      }
+      if(m.file_type && m.file_type.startsWith("video/")){
+        const w = document.createElement("div");
+        w.className = "msg-media " + lato;
+        w.innerHTML = `<video src="${m.file_url}" preload="metadata" playsinline></video><span class="msg-media-time">${formatTime(m.created_at)}</span>`;
+        w.addEventListener("click", () => apriMedia(m.file_url, m.file_type));
+        wrap.appendChild(w);
+        return;
+      }
+      const d = document.createElement("div");
+      d.className = "msg-doc " + lato;
+      d.innerHTML = `
+        <div class="msg-doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg></div>
+        <div class="msg-doc-body">
+          <div class="msg-doc-name">${m.file_name || "Documento"}</div>
+          <div class="msg-doc-sub">Tocca per aprire · ${formatTime(m.created_at)}</div>
+        </div>
+      `;
+      d.addEventListener("click", () => window.open(m.file_url, "_blank"));
+      wrap.appendChild(d);
+      return;
+    }
+
     const b = document.createElement("div");
     /* "me" nel database = il professionista. Per il cliente sta a sinistra. */
     b.className = "bubble " + (m.sender === "me" ? "pro" : "mine");
@@ -458,6 +552,100 @@ document.getElementById("sendBtn").addEventListener("click", send);
 document.getElementById("msgInput").addEventListener("keydown", (e) => {
   if(e.key === "Enter") send();
 });
+
+/* ---- Allegati: foto, video e documenti ---- */
+const LIMITI = { foto: 10, video: 50, documento: 20 };
+
+function tipoAllegato(file){
+  if(file.type.startsWith("image/")) return "foto";
+  if(file.type.startsWith("video/")) return "video";
+  return "documento";
+}
+function pesoLeggibile(bytes){
+  if(bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1).replace(".", ",") + " MB";
+}
+function nomeFileSicuro(originale){
+  const casuale = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const est = (originale.split(".").pop() || "").toLowerCase().slice(0, 5);
+  return casuale + (est ? "." + est : "");
+}
+function mostraCaricamento(testo, pct){
+  const bar = document.getElementById("uploadBar");
+  bar.style.display = testo ? "block" : "none";
+  if(testo){
+    document.getElementById("uploadText").textContent = testo;
+    document.getElementById("uploadFill").style.width = (pct || 0) + "%";
+  }
+}
+
+async function inviaAllegato(file){
+  if(!conversation) return;
+  const tipo = tipoAllegato(file);
+  const limite = LIMITI[tipo];
+
+  if(file.size > limite * 1024 * 1024){
+    showGate(`Questo ${tipo} pesa ${pesoLeggibile(file.size)}, il massimo è ${limite} MB.`);
+    setTimeout(hideGate, 3200);
+    return;
+  }
+
+  const btn = document.getElementById("attachBtn");
+  btn.disabled = true;
+  mostraCaricamento("Sto inviando " + file.name + " (" + pesoLeggibile(file.size) + ")…", 20);
+
+  try{
+    const percorso = "clienti/" + conversation.id + "/" + nomeFileSicuro(file.name);
+    mostraCaricamento("Sto inviando " + file.name + "…", 50);
+
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, file, { contentType: file.type, upsert: false });
+    if(upErr) throw upErr;
+
+    mostraCaricamento("Quasi fatto…", 85);
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+
+    const { error: msgErr } = await supabaseClient.from("messages").insert({
+      conversation_id: conversation.id, sender: "them", body: "",
+      file_url: pub.publicUrl, file_name: file.name, file_type: file.type
+    });
+    if(msgErr) throw msgErr;
+
+    mostraCaricamento("", 100);
+  }catch(err){
+    console.error("Invio allegato non riuscito:", err);
+    mostraCaricamento("", 0);
+    showGate("Non sono riuscito a inviare il file. Controlla la connessione e riprova.");
+    setTimeout(hideGate, 3000);
+  }finally{
+    btn.disabled = false;
+    document.getElementById("fileInput").value = "";
+  }
+}
+
+document.getElementById("attachBtn").addEventListener("click", () => {
+  document.getElementById("fileInput").click();
+});
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) inviaAllegato(f);
+});
+
+function apriMedia(url, tipo){
+  const v = document.createElement("div");
+  v.className = "media-viewer";
+  v.innerHTML = (tipo || "").startsWith("video/")
+    ? `<video src="${url}" controls autoplay playsinline></video>`
+    : `<img src="${url}" alt="">`;
+  const c = document.createElement("button");
+  c.className = "media-viewer-close";
+  c.setAttribute("aria-label", "Chiudi");
+  c.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+  c.addEventListener("click", () => v.remove());
+  v.appendChild(c);
+  v.addEventListener("click", (e) => { if(e.target === v) v.remove(); });
+  document.body.appendChild(v);
+}
 
 /* ---- Realtime: i messaggi arrivano subito ---- */
 function subscribeRealtime(){
