@@ -2540,9 +2540,15 @@ function subscribeToMessages(){
         renderChatList();
         if(chats[activeChatIndex] === chat) renderChatWindow();
 
+        /* Se e' un appuntamento o un documento, il calendario deve
+           aggiornarsi: il messaggio arriva qui dopo che l'AI l'ha
+           salvato, quindi e' questo il momento giusto. */
+        if(m.event_type) renderCalendar();
+
         /* L'AI rilegge le ultime battute, da qualunque lato arrivi il
-           messaggio: cosi' capisce anche "ci vediamo domani" -> "ok". */
-        analyzeMessage(m, chat);
+           messaggio: cosi' capisce anche "ci vediamo domani" -> "ok".
+           I messaggi-evento li ha creati lei: non li rianalizza. */
+        if(!m.event_type) analyzeMessage(m, chat);
       })
     .subscribe();
 }
@@ -3006,7 +3012,9 @@ function renderCalendar(){
   chats.forEach(c => {
     c.messages.forEach(m => {
       if(m.eventType === "appt"){
-        items.push({ icon:"appt", title:m.title, sub:c.name + " · " + m.text, when:m.time, urgent:false });
+        /* m.text contiene il "quando" scritto dall'AI (es. "gio 7 ago, 16:00"):
+           e' quello che serve vedere, non l'ora in cui e' arrivato il messaggio. */
+        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false });
       }
     });
   });
