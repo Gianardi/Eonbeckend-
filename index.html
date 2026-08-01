@@ -762,7 +762,7 @@
   .ai-landing-icon svg{ width:22px; height:22px; }
   .ai-landing-eyebrow{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--violet); margin-bottom:6px; }
   .ai-landing-title{ font-size:16px; font-weight:800; color:var(--text); margin-bottom:9px; letter-spacing:-.01em; }
-  .ai-landing-text{ font-size:13px; color:var(--muted); line-height:1.55; }
+  .ai-landing-text{ font-size:13px; color:var(--muted); line-height:1.55; white-space:pre-wrap; }
   .goal-text{ flex:1; font-size:12.5px; font-weight:600; color:var(--text); }
   .goal-text.done{ text-decoration:line-through; color:var(--faint); font-weight:500; }
   .goal-cat-pill{ font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:20px; flex:none; }
@@ -2549,8 +2549,13 @@ function subscribeToMessages(){
 
 /* Chiamata unica e sicura all'AI: passa dal backend (che nasconde la chiave),
    invece di chiamare direttamente api.anthropic.com dal telefono dell'utente. */
+let ultimoErroreAI = null;   // utile per capire perche' l'AI non risponde
+
 async function callAI(prompt, maxTokens){
   if(!BACKEND_CONFIGURED || !currentSession){
+    ultimoErroreAI = !BACKEND_CONFIGURED
+      ? "Backend non configurato (Supabase non collegato)"
+      : "Non sei collegato: sessione assente";
     // Nessun backend configurato ancora: proviamo comunque la chiamata diretta,
     // che funziona solo se l'artifact gira dentro l'ambiente di Claude.
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -2565,17 +2570,38 @@ async function callAI(prompt, maxTokens){
     return text;
   }
 
-  const response = await fetch(AI_ENDPOINT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + currentSession.access_token
-    },
-    body: JSON.stringify({ prompt, maxTokens: maxTokens || 400 })
-  });
-  if(!response.ok) throw new Error("Il backend AI ha risposto con errore (" + response.status + ")");
+  let response;
+  try{
+    response = await fetch(AI_ENDPOINT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + currentSession.access_token
+      },
+      body: JSON.stringify({ prompt, maxTokens: maxTokens || 400 })
+    });
+  }catch(netErr){
+    ultimoErroreAI = "Il backend non risponde: " + netErr.message;
+    throw new Error(ultimoErroreAI);
+  }
+
+  if(!response.ok){
+    let dettaglio = "";
+    try{
+      const errJson = await response.json();
+      dettaglio = errJson.error || "";
+    }catch(e){ /* risposta non leggibile */ }
+    ultimoErroreAI = "Il backend ha risposto " + response.status +
+      (dettaglio ? " — " + dettaglio : "");
+    throw new Error(ultimoErroreAI);
+  }
+
   const json = await response.json();
-  if(!json.text) throw new Error("Risposta AI vuota dal backend");
+  if(!json.text){
+    ultimoErroreAI = "Il backend ha risposto ma senza testo";
+    throw new Error(ultimoErroreAI);
+  }
+  ultimoErroreAI = null;
   return json.text;
 }
 
@@ -4786,7 +4812,10 @@ document.getElementById("aiClockBtn").addEventListener("click", async (e) => {
     showAILanding("Ecco come organizzarti", text);
   }catch(err){
     console.warn("AI non disponibile, uso il piano di riserva:", err.message);
-    showAILanding("Ecco come organizzarti", generateDailyPlanFallback(ctx));
+    /* Mostriamo anche il motivo: cosi' se l'AI non risponde si capisce
+       subito perche', invece di sembrare che funzioni a meta'. */
+    const motivo = ultimoErroreAI ? "\n\n⚠️ AI non raggiunta: " + ultimoErroreAI : "";
+    showAILanding("Ecco come organizzarti", generateDailyPlanFallback(ctx) + motivo);
   }
 });
 
