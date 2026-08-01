@@ -814,14 +814,13 @@
   .voice-state{ font-family:'Manrope'; font-size:16px; font-weight:900; margin-bottom:6px; }
   .voice-hint{ font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:14px; }
   .voice-transcript{
-    font-size:13.5px; color:var(--text); line-height:1.55; text-align:left;
+    width:100%; font-family:inherit;
+    font-size:14px; color:var(--text); line-height:1.55; text-align:left;
     background:#FBFAF8; border:1px solid var(--border); border-radius:13px;
-    padding:13px 14px; min-height:60px; max-height:180px; overflow-y:auto;
-    white-space:pre-wrap;
+    padding:13px 14px; min-height:100px; max-height:200px; resize:none;
   }
-  .voice-transcript:empty::before{
-    content:"Le tue parole compariranno qui…"; color:var(--faint);
-  }
+  .voice-transcript::placeholder{ color:var(--faint); }
+  .voice-transcript:focus{ outline:2px solid var(--violet); outline-offset:1px; }
   .voice-result{ text-align:left; margin-top:14px; overflow-y:auto; }
   .voice-result-row{
     display:flex; gap:10px; align-items:flex-start; padding:11px 12px;
@@ -1183,7 +1182,8 @@
     </div>
     <div class="voice-state" id="voiceState">Ti ascolto…</div>
     <div class="voice-hint" id="voiceHint">Racconta com'è andata: chi hai sentito, cosa avete detto, cosa devi fare.</div>
-    <div class="voice-transcript" id="voiceTranscript"></div>
+    <textarea class="voice-transcript" id="voiceTranscript" rows="4"
+      placeholder="Es. Ho sentito Lorenzo, conferma il mandato, ci vediamo giovedì alle 16 e devo preparargli il riepilogo"></textarea>
     <div class="voice-result" id="voiceResult" style="display:none;"></div>
     <div class="voice-actions">
       <button class="voice-btn-secondary" id="voiceCancelBtn">Annulla</button>
@@ -1436,7 +1436,7 @@
         </span>
         <span class="voice-note-text">
           <b id="voiceNoteTitle">Racconta com'è andata</b>
-          <small id="voiceNoteSub">Dopo una chiamata, parla: l'AI aggiorna EON da sola</small>
+          <small id="voiceNoteSub">Dopo una chiamata: scrivi o detta, l'AI aggiorna EON da sola</small>
         </span>
       </button>
     </div>
@@ -2524,6 +2524,7 @@ async function loadChatsFromDB(){
       from: m.sender,
       eventType: m.event_type || undefined,
       title: m.title || undefined,
+      annullato: !!(m.title && m.title.startsWith("❌")),
       text: m.body || "",
       amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
       fileUrl: m.file_url || undefined,
@@ -2624,11 +2625,25 @@ async function analyzeMessage(msg, chat){
   const oggi = new Date();
   const cliente = clients.find(c => c.name === chat.name);
 
+  /* Gli appuntamenti gia' presi con questo cliente: senza questi l'AI
+     non puo' capire che "spostiamo a giovedi" riguarda uno esistente,
+     e ne creerebbe un secondo che contraddice il primo. */
+  const appuntamentiEsistenti = chat.messages
+    .filter(m => m.eventType === "appt" && !m.annullato)
+    .map((m, i) => ({ n: i + 1, id: m.id, titolo: m.title, quando: m.text }));
+
+  const elencoAppuntamenti = appuntamentiEsistenti.length
+    ? "Appuntamenti già fissati con questo cliente:\n" +
+      appuntamentiEsistenti.map(a => `${a.n}. "${a.titolo}" — ${a.quando}`).join("\n")
+    : "Non ci sono appuntamenti già fissati con questo cliente.";
+
   const prompt = `Sei l'assistente dentro EON, un'app per professionisti italiani.
 Oggi è ${oggi.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}.
 
 Ecco le ultime battute della conversazione con il cliente "${chat.name}":
 ${conversazione}
+
+${elencoAppuntamenti}
 
 ${cliente ? `Stato attuale del cliente: ${cliente.status}. Valore registrato: €${cliente.value}.` : ""}
 
@@ -2637,18 +2652,31 @@ Guarda la conversazione NEL SUO INSIEME e capisci cosa è stato concordato. Atte
 Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick:
 
 {
-  "appuntamento": { "titolo": "...", "quando": "gio 7 ago, 16:00" } oppure null,
+  "appuntamento": {
+    "azione": "nuovo" | "sposta" | "annulla",
+    "riferimento": numero dell'appuntamento esistente (solo per sposta/annulla),
+    "titolo": "...",
+    "quando": "gio 10 ago, 16:00"
+  } oppure null,
   "attivita": "..." oppure null,
   "cambioStato": "attivo" | "trattativa" | "inattivo" oppure null,
   "valore": numero oppure null
 }
 
-Regole:
-- "appuntamento": solo se un incontro o una chiamata è stato proposto E accettato. Traduci "domani", "giovedì" in data vera partendo da oggi. Non importa chi dei due l'abbia proposto.
-- "attivita": solo se il professionista deve fare qualcosa di concreto (preparare, mandare, richiamare). Scrivila come azione breve dal suo punto di vista.
+Regole sugli appuntamenti — leggile con attenzione:
+- Se parlano di spostare, rimandare, anticipare, cambiare data o ora di un incontro già fissato, usa "sposta" e indica in "riferimento" il numero dell'appuntamento dall'elenco sopra. NON crearne uno nuovo.
+- Frasi come "possiamo spostare a giovedì", "facciamo giovedì invece", "rimandiamo", "ci vediamo giovedì anziché lunedì" sono spostamenti se esiste già un appuntamento.
+- Se disdicono senza rifissare ("non ce la faccio", "annulliamo", "salta"), usa "annulla" con il riferimento.
+- Usa "nuovo" solo se non esiste già un appuntamento a cui si riferiscono.
+- Se c'è un solo appuntamento in elenco e parlano di spostarlo, il riferimento è 1.
+- Traduci "domani", "giovedì", "giovedì 10" in data vera partendo da oggi.
+- Non importa chi dei due l'abbia proposto: conta che l'altro abbia accettato.
+
+Altre regole:
+- "attivita": solo se il professionista deve fare qualcosa di concreto (preparare, mandare, richiamare). Azione breve dal suo punto di vista.
 - "cambioStato": "attivo" solo se il cliente accetta di procedere col lavoro; "inattivo" solo se rinuncia esplicitamente.
 - "valore": solo se viene citata una cifra in euro riferita al lavoro, e concordata.
-- Se qualcosa è stato solo proposto ma non ancora accettato, mettilo a null: aspetterai la conferma.
+- Se qualcosa è stato solo proposto ma non ancora accettato, mettilo a null.
 - Se un campo non è presente, null. Non inventare mai.`;
 
   let parsed;
@@ -2662,22 +2690,64 @@ Regole:
   }
   if(!parsed) return;
 
-  /* ---- AUTOMATICO: appuntamento ---- */
-  if(parsed.appuntamento && parsed.appuntamento.titolo){
-    const titolo = parsed.appuntamento.titolo;
-    const quando = parsed.appuntamento.quando || "";
-    const gia = chat.messages.some(m => m.eventType === "appt" && m.title === titolo);
-    if(!gia){
-      if(isDbReady() && chat.id){
-        await supabaseClient.from("messages").insert({
-          conversation_id: chat.id, sender: "me", event_type: "appt",
-          title: titolo, body: quando
-        });
-      } else {
-        chat.messages.push({ eventType:"appt", title:titolo, text:quando, time:"ora" });
+  /* ---- AUTOMATICO: appuntamento (nuovo, spostato o annullato) ---- */
+  if(parsed.appuntamento){
+    const app = parsed.appuntamento;
+    const azione = app.azione || "nuovo";
+    const quando = app.quando || "";
+
+    /* Ritroviamo l'appuntamento a cui si riferisce, se e' uno spostamento */
+    const esistenti = chat.messages.filter(m => m.eventType === "appt" && !m.annullato);
+    const riferito = (azione === "sposta" || azione === "annulla")
+      ? (esistenti[(Number(app.riferimento) || 1) - 1] || esistenti[esistenti.length - 1])
+      : null;
+
+    if(azione === "sposta" && riferito){
+      const prima = riferito.text;
+      riferito.text = quando || riferito.text;
+      if(app.titolo) riferito.title = app.titolo;
+
+      if(isDbReady() && riferito.id){
+        await supabaseClient.from("messages")
+          .update({ body: riferito.text, title: riferito.title })
+          .eq("id", riferito.id);
       }
       renderCalendar();
-      showAIToast("Appuntamento aggiunto", titolo + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
+      renderChatWindow();
+      showAIToast("Appuntamento spostato",
+        riferito.title + ": da " + (prima || "data precedente") + " a " + riferito.text + ".");
+
+    } else if(azione === "annulla" && riferito){
+      riferito.annullato = true;
+      const titoloAnn = riferito.title;
+      riferito.title = "❌ " + riferito.title + " (annullato)";
+
+      if(isDbReady() && riferito.id){
+        await supabaseClient.from("messages")
+          .update({ title: riferito.title })
+          .eq("id", riferito.id);
+      }
+      renderCalendar();
+      renderChatWindow();
+      showAIToast("Appuntamento annullato", titoloAnn + " è stato tolto dal calendario.");
+
+    } else if(app.titolo){
+      /* Nuovo: evitiamo doppioni sullo stesso titolo e stessa data */
+      const gia = chat.messages.some(m =>
+        m.eventType === "appt" && !m.annullato &&
+        m.title === app.titolo && m.text === quando);
+      if(!gia){
+        if(isDbReady() && chat.id){
+          await supabaseClient.from("messages").insert({
+            conversation_id: chat.id, sender: "me", event_type: "appt",
+            title: app.titolo, body: quando
+          });
+        } else {
+          chat.messages.push({ eventType:"appt", title:app.titolo, text:quando, time:"ora" });
+        }
+        renderCalendar();
+        showAIToast("Appuntamento aggiunto", app.titolo + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
+      }
     }
   }
 
@@ -2795,6 +2865,7 @@ function subscribeToMessages(){
           id: m.id, from: m.sender,
           eventType: m.event_type || undefined,
           title: m.title || undefined,
+      annullato: !!(m.title && m.title.startsWith("❌")),
           text: m.body || "",
           amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
           fileUrl: m.file_url || undefined,
@@ -3284,7 +3355,7 @@ function renderCalendar(){
 
   chats.forEach(c => {
     c.messages.forEach(m => {
-      if(m.eventType === "appt"){
+      if(m.eventType === "appt" && !m.annullato){
         /* m.text contiene il "quando" scritto dall'AI (es. "gio 7 ago, 16:00"):
            e' quello che serve vedere, non l'ora in cui e' arrivato il messaggio. */
         items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false });
@@ -5355,85 +5426,47 @@ function proponiNotaDopoChiamata(cliente, minuti){
    propri, e su valori e stati serve poterlo correggere.
    ============================================================ */
 
-const VoiceNoteAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-let voiceRecognizer = null;
-let voiceTesto = "";
-let voiceInAscolto = false;
 let voiceClienteNoto = null;   // se la nota parte dopo una chiamata
 
 function apriNotaVocale(clienteNoto){
-  if(!VoiceNoteAPI){
-    showAILanding(
-      "Dettatura non disponibile",
-      "Questo browser non supporta il riconoscimento vocale. Su iPhone funziona da Safari, su Android da Chrome."
-    );
-    return;
-  }
+  /* Nota: su iPhone la dettatura del browser non e' affidabile, mentre
+     quella della tastiera funziona sempre. Quindi qui usiamo un campo
+     di testo: si scrive, oppure si detta col microfono della tastiera.
+     Quando attiveremo la trascrizione audio, questa diventera' una
+     registrazione vera come quella delle chat. */
 
   voiceClienteNoto = clienteNoto && clienteNoto.name ? clienteNoto : null;
   voiceTesto = "";
-  document.getElementById("voiceTranscript").textContent = "";
+
+  const campo = document.getElementById("voiceTranscript");
+  campo.value = "";
   document.getElementById("voiceResult").style.display = "none";
   document.getElementById("voiceResult").innerHTML = "";
   document.getElementById("voiceState").textContent = voiceClienteNoto
     ? "Com'è andata con " + voiceClienteNoto.name + "?"
-    : "Ti ascolto…";
-  document.getElementById("voiceHint").textContent = voiceClienteNoto
-    ? "Racconta cosa vi siete detti e cosa devi fare: so già di chi si tratta."
-    : "Racconta com'è andata: chi hai sentito, cosa avete detto, cosa devi fare.";
-  document.getElementById("voicePulse").className = "voice-pulse listening";
+    : "Racconta com'è andata";
+  document.getElementById("voiceHint").innerHTML = voiceClienteNoto
+    ? "Scrivi o detta col microfono della tastiera: so già di chi si tratta."
+    : "Scrivi o detta col microfono della tastiera: chi hai sentito, cosa vi siete detti, cosa devi fare.";
+  document.getElementById("voicePulse").className = "voice-pulse";
   document.getElementById("voiceStopBtn").textContent = "Ho finito";
   document.getElementById("voiceStopBtn").style.display = "block";
   document.getElementById("voiceStopBtn").onclick = elaboraNotaVocale;
   document.getElementById("voiceCancelBtn").textContent = "Annulla";
   document.getElementById("voiceOverlay").style.display = "flex";
 
-  voiceRecognizer = new VoiceNoteAPI();
-  voiceRecognizer.lang = "it-IT";
-  voiceRecognizer.continuous = true;      // note lunghe, non una frase sola
-  voiceRecognizer.interimResults = true;
-
-  voiceRecognizer.onstart = () => { voiceInAscolto = true; };
-  voiceRecognizer.onend = () => { voiceInAscolto = false; };
-  voiceRecognizer.onerror = (e) => {
-    voiceInAscolto = false;
-    if(e.error === "not-allowed" || e.error === "service-not-allowed"){
-      chiudiNotaVocale();
-      showAILanding("Microfono non autorizzato", "Per dettare le note, consenti l'accesso al microfono nelle impostazioni del browser.");
-    }
-  };
-  voiceRecognizer.onresult = (e) => {
-    let definitivo = "";
-    let provvisorio = "";
-    for(let i = 0; i < e.results.length; i++){
-      const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal) definitivo += t;
-      else provvisorio += t;
-    }
-    voiceTesto = definitivo;
-    document.getElementById("voiceTranscript").textContent = definitivo + provvisorio;
-  };
-
-  try{ voiceRecognizer.start(); }
-  catch(err){ console.warn("Dettatura non avviata:", err.message); }
+  setTimeout(() => campo.focus(), 200);
 }
 
 function chiudiNotaVocale(){
-  if(voiceRecognizer && voiceInAscolto){
-    try{ voiceRecognizer.stop(); }catch(e){}
-  }
   document.getElementById("voiceOverlay").style.display = "none";
 }
 
 async function elaboraNotaVocale(){
-  if(voiceRecognizer && voiceInAscolto){
-    try{ voiceRecognizer.stop(); }catch(e){}
-  }
-
-  const testo = (voiceTesto || document.getElementById("voiceTranscript").textContent || "").trim();
+  const testo = (document.getElementById("voiceTranscript").value || "").trim();
   if(testo.length < 10){
-    document.getElementById("voiceState").textContent = "Non ho sentito abbastanza";
-    document.getElementById("voiceHint").textContent = "Prova a ripetere parlando un po' più a lungo.";
+    document.getElementById("voiceState").textContent = "Racconta ancora un po'";
+    document.getElementById("voiceHint").textContent = "Serve qualche parola in piu' per capire cosa aggiornare.";
     return;
   }
 
