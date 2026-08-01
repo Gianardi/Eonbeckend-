@@ -364,6 +364,84 @@ async function handleSeed(req, res, user, accessToken) {
 }
 
 /* ============================================================
+   TRASCRIZIONE DEI MESSAGGI VOCALI
+   ------------------------------------------------------------
+   Riceve un audio (gia' caricato nello spazio file) e restituisce
+   il testo. Serve per i vocali in chat: si ascoltano, ma sotto
+   compare la trascrizione e l'AI puo' lavorarci sopra.
+
+   Usa OpenAI Whisper, che al momento e' il servizio piu' accurato
+   sull'italiano e costa pochissimo (circa 0,006 $ al minuto).
+   Richiede la variabile OPENAI_API_KEY su Vercel.
+   ============================================================ */
+async function handleTranscribe(req, res) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+
+  const OPENAI_KEY = process.env.OPENAI_API_KEY;
+  if (!OPENAI_KEY) {
+    throw fail(
+      "Trascrizione non configurata: manca OPENAI_API_KEY nelle variabili di Vercel",
+      501
+    );
+  }
+
+  const body = await readBody(req);
+  const audioUrl = body.audioUrl;
+  if (!audioUrl || typeof audioUrl !== "string") {
+    throw fail("Campo 'audioUrl' mancante");
+  }
+
+  /* Scarichiamo l'audio dallo spazio file e lo giriamo al servizio */
+  let audioResp;
+  try {
+    audioResp = await fetch(audioUrl);
+  } catch (netErr) {
+    throw fail("Non riesco a scaricare l'audio: " + netErr.message, 502);
+  }
+  if (!audioResp.ok) throw fail("Audio non raggiungibile (" + audioResp.status + ")", 502);
+
+  const audioBuf = await audioResp.arrayBuffer();
+  const MAX_MB = 25;
+  if (audioBuf.byteLength > MAX_MB * 1024 * 1024) {
+    throw fail("Audio troppo lungo: il limite è " + MAX_MB + " MB", 413);
+  }
+
+  const tipo = audioResp.headers.get("content-type") || "audio/webm";
+  const estensione = tipo.includes("mp4") || tipo.includes("m4a") ? "m4a"
+    : tipo.includes("mpeg") ? "mp3"
+    : tipo.includes("ogg") ? "ogg" : "webm";
+
+  const form = new FormData();
+  form.append("file", new Blob([audioBuf], { type: tipo }), "nota." + estensione);
+  form.append("model", "whisper-1");
+  form.append("language", "it");
+
+  let r;
+  try {
+    r = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + OPENAI_KEY },
+      body: form,
+    });
+  } catch (netErr) {
+    throw fail("Servizio di trascrizione irraggiungibile: " + netErr.message, 502);
+  }
+
+  if (!r.ok) {
+    let motivo = "";
+    try {
+      const j = await r.json();
+      motivo = (j.error && (j.error.message || j.error.type)) || "";
+    } catch (e) { /* niente */ }
+    console.error("Errore trascrizione:", r.status, motivo);
+    throw fail("Trascrizione rifiutata (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+  }
+
+  const out = await r.json();
+  return send(res, 200, { text: (out.text || "").trim() });
+}
+
+/* ============================================================
    Punto di ingresso unico
    ============================================================ */
 
@@ -393,10 +471,12 @@ export default async function handler(req, res) {
           SUPABASE_ANON_KEY: !!ANON_KEY,
           SUPABASE_SERVICE_ROLE_KEY: !!SERVICE_ROLE_KEY,
           ANTHROPIC_API_KEY: !!ANTHROPIC_API_KEY,
+          OPENAI_API_KEY: !!process.env.OPENAI_API_KEY,
         },
         supabaseUrlUsato: SUPABASE_URL || "(non impostato)",
         endpoints: {
           ai: "POST /api?action=ai",
+          transcribe: "POST /api?action=transcribe",
           seed: "POST /api?action=seed",
           resources: "GET|POST|PATCH|DELETE /api?resource=<nome>",
         },
@@ -406,6 +486,7 @@ export default async function handler(req, res) {
     const { user, accessToken } = await requireUser(req);
 
     if (action === "ai") return await handleAI(req, res);
+    if (action === "transcribe") return await handleTranscribe(req, res);
     if (action === "seed") return await handleSeed(req, res, user, accessToken);
     if (resource) return await handleResource(req, res, resource, user, accessToken);
 
