@@ -890,13 +890,14 @@
 
   /* foto e video dentro le bolle */
   .msg-media{
-    max-width:74%; border-radius:16px; overflow:hidden;
+    width:72%; max-width:280px; flex:none;
+    border-radius:16px; overflow:hidden;
     box-shadow:var(--shadow-sm); cursor:pointer; line-height:0;
     border:1px solid var(--border);
   }
   .msg-media.me{ align-self:flex-end; border-bottom-right-radius:4px; }
   .msg-media.them{ align-self:flex-start; border-bottom-left-radius:4px; }
-  .msg-media img, .msg-media video{ width:100%; display:block; max-height:340px; object-fit:cover; background:#000; }
+  .msg-media img, .msg-media video{ width:100%; display:block; height:auto; min-height:120px; max-height:340px; object-fit:cover; background:#0E1424; }
   .msg-media-time{
     font-size:10px; color:var(--muted); padding:5px 10px 7px;
     background:var(--card); line-height:1.2; display:block;
@@ -904,7 +905,7 @@
 
   /* documenti: riga con icona e nome */
   .msg-doc{
-    display:flex; align-items:center; gap:11px; max-width:78%;
+    display:flex; align-items:center; gap:11px; max-width:78%; flex:none;
     padding:11px 13px; border-radius:16px; cursor:pointer;
     background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
   }
