@@ -160,16 +160,17 @@
   .upload-fill{ height:100%; width:0%; border-radius:20px; background:var(--grad-blue); transition:width .25s; }
 
   .msg-media{
-    max-width:76%; border-radius:16px; overflow:hidden; cursor:pointer; line-height:0;
+    width:74%; max-width:280px; flex:none;
+    border-radius:16px; overflow:hidden; cursor:pointer; line-height:0;
     box-shadow:var(--shadow-sm); border:1px solid var(--border);
   }
   .msg-media.mine{ align-self:flex-end; border-bottom-right-radius:4px; }
   .msg-media.pro{ align-self:flex-start; border-bottom-left-radius:4px; }
-  .msg-media img, .msg-media video{ width:100%; display:block; max-height:340px; object-fit:cover; background:#000; }
+  .msg-media img, .msg-media video{ width:100%; display:block; height:auto; min-height:120px; max-height:340px; object-fit:cover; background:#0E1424; }
   .msg-media-time{ font-size:10px; color:var(--muted); padding:5px 10px 7px; background:var(--card); line-height:1.2; display:block; }
 
   .msg-doc{
-    display:flex; align-items:center; gap:11px; max-width:80%;
+    display:flex; align-items:center; gap:11px; max-width:80%; flex:none;
     padding:11px 13px; border-radius:16px; cursor:pointer;
     background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
   }
