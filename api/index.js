@@ -284,26 +284,43 @@ async function handleAI(req, res) {
   if (!prompt || typeof prompt !== "string") throw fail("Campo 'prompt' mancante");
 
   const maxTokens = Number(body.maxTokens) > 0 ? Math.min(Number(body.maxTokens), 2000) : 400;
-  const model = typeof body.model === "string" && body.model ? body.model : "claude-sonnet-4-6";
+  const model = typeof body.model === "string" && body.model ? body.model : "claude-sonnet-4-5";
 
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: maxTokens,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+  } catch (netErr) {
+    console.error("Anthropic irraggiungibile:", netErr);
+    throw fail("Non riesco a contattare l'AI: " + netErr.message, 502);
+  }
 
   if (!r.ok) {
-    const detail = await r.text();
-    console.error("Errore Anthropic:", r.status, detail);
-    throw fail("L'AI non ha risposto correttamente", 502);
+    /* Diciamo il motivo vero (modello sbagliato, credito esaurito,
+       chiave non valida...) invece di un generico "non ha risposto". */
+    let motivo = "";
+    try {
+      const errJson = await r.json();
+      motivo = (errJson.error && (errJson.error.message || errJson.error.type)) || "";
+    } catch (e) {
+      try { motivo = (await r.text()).slice(0, 200); } catch (e2) { /* niente */ }
+    }
+    console.error("Errore Anthropic:", r.status, motivo);
+    throw fail(
+      "L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""),
+      502
+    );
   }
 
   const data = await r.json();
