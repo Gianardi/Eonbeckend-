@@ -2344,9 +2344,19 @@ let realtimeChannel = null;
 let pendingSuggestions = [];
 
 async function analyzeMessage(msg, chat){
-  if(!msg || !msg.text || msg.eventType) return;
-  if(msg.from !== "them") return;          // analizza solo cio' che scrive l'altro
-  if(msg.text.trim().length < 8) return;   // "ok", "grazie": niente da estrarre
+  if(!msg || !chat) return;
+
+  /* L'AI legge le ultime battute della conversazione, non il singolo
+     messaggio: e' l'unico modo per capire scambi come
+     "ci vediamo domani alle 16" -> "ok". */
+  const recenti = chat.messages
+    .filter(m => !m.eventType && m.text)
+    .slice(-6);
+  if(recenti.length === 0) return;
+
+  const conversazione = recenti
+    .map(m => (m.from === "me" ? "Professionista: " : "Cliente: ") + m.text)
+    .join("\n");
 
   const oggi = new Date();
   const cliente = clients.find(c => c.name === chat.name);
@@ -2354,12 +2364,14 @@ async function analyzeMessage(msg, chat){
   const prompt = `Sei l'assistente dentro EON, un'app per professionisti italiani.
 Oggi è ${oggi.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}.
 
-Un cliente di nome "${chat.name}" ha appena scritto questo messaggio:
-"${msg.text}"
+Ecco le ultime battute della conversazione con il cliente "${chat.name}":
+${conversazione}
 
 ${cliente ? `Stato attuale del cliente: ${cliente.status}. Valore registrato: €${cliente.value}.` : ""}
 
-Estrai SOLO ciò che è davvero presente nel messaggio. Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick, con questa forma:
+Guarda la conversazione NEL SUO INSIEME e capisci cosa è stato concordato. Attenzione: una proposta vale solo se l'altra parte l'ha accettata, anche con una risposta breve tipo "ok", "va bene", "perfetto", "confermo", "ci sono".
+
+Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick:
 
 {
   "appuntamento": { "titolo": "...", "quando": "gio 7 ago, 16:00" } oppure null,
@@ -2369,11 +2381,12 @@ Estrai SOLO ciò che è davvero presente nel messaggio. Rispondi esclusivamente 
 }
 
 Regole:
-- "appuntamento": solo se indica un incontro, una chiamata o una data concordata. Traduci "giovedì", "domani" in data vera partendo da oggi.
-- "attivita": solo se chiede qualcosa da fare (mandare un documento, preparare, richiamare). Scrivila come un'azione breve dal punto di vista del professionista.
-- "cambioStato": "attivo" solo se accetta o conferma di procedere; "inattivo" solo se rinuncia esplicitamente.
-- "valore": solo se cita una cifra in euro riferita al lavoro.
-- Se un campo non è presente nel messaggio, mettilo a null. Non inventare mai.`;
+- "appuntamento": solo se un incontro o una chiamata è stato proposto E accettato. Traduci "domani", "giovedì" in data vera partendo da oggi. Non importa chi dei due l'abbia proposto.
+- "attivita": solo se il professionista deve fare qualcosa di concreto (preparare, mandare, richiamare). Scrivila come azione breve dal suo punto di vista.
+- "cambioStato": "attivo" solo se il cliente accetta di procedere col lavoro; "inattivo" solo se rinuncia esplicitamente.
+- "valore": solo se viene citata una cifra in euro riferita al lavoro, e concordata.
+- Se qualcosa è stato solo proposto ma non ancora accettato, mettilo a null: aspetterai la conferma.
+- Se un campo non è presente, null. Non inventare mai.`;
 
   let parsed;
   try{
@@ -2381,7 +2394,7 @@ Regole:
     const clean = raw.replace(/```json|```/g, "").trim();
     parsed = JSON.parse(clean);
   }catch(err){
-    console.warn("Analisi AI del messaggio non riuscita:", err.message);
+    console.warn("Analisi AI della conversazione non riuscita:", err.message);
     return;
   }
   if(!parsed) return;
@@ -2527,11 +2540,9 @@ function subscribeToMessages(){
         renderChatList();
         if(chats[activeChatIndex] === chat) renderChatWindow();
 
-        /* L'AI legge il messaggio e aggiorna EON di conseguenza */
-        if(m.sender === "them"){
-          const appena = chat.messages[chat.messages.length - 1];
-          analyzeMessage(appena, chat);
-        }
+        /* L'AI rilegge le ultime battute, da qualunque lato arrivi il
+           messaggio: cosi' capisce anche "ci vediamo domani" -> "ok". */
+        analyzeMessage(m, chat);
       })
     .subscribe();
 }
