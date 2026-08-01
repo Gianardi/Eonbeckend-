@@ -36,7 +36,19 @@
  * ============================================================
  */
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
+/* L'indirizzo del progetto Supabase deve essere solo il dominio.
+   Se su Vercel è stato inserito con una coda (es. .../rest/v1/ oppure
+   una barra finale), qui viene ripulito: così l'app funziona comunque
+   invece di dare "Invalid path specified in request URL". */
+function pulisciUrlSupabase(url){
+  if(!url) return url;
+  let u = url.trim();
+  u = u.replace(/\/(rest|auth|storage|realtime)\/v\d+\/?$/i, ""); // toglie /rest/v1/ e simili
+  u = u.replace(/\/+$/, "");                                      // toglie le barre finali
+  return u;
+}
+
+const SUPABASE_URL = pulisciUrlSupabase(process.env.SUPABASE_URL);
 const ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
@@ -365,6 +377,7 @@ export default async function handler(req, res) {
           SUPABASE_SERVICE_ROLE_KEY: !!SERVICE_ROLE_KEY,
           ANTHROPIC_API_KEY: !!ANTHROPIC_API_KEY,
         },
+        supabaseUrlUsato: SUPABASE_URL || "(non impostato)",
         endpoints: {
           ai: "POST /api?action=ai",
           seed: "POST /api?action=seed",
