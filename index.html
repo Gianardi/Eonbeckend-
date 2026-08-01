@@ -2664,12 +2664,20 @@ Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza bac
 }
 
 Regole sugli appuntamenti — leggile con attenzione:
-- Se parlano di spostare, rimandare, anticipare, cambiare data o ora di un incontro già fissato, usa "sposta" e indica in "riferimento" il numero dell'appuntamento dall'elenco sopra. NON crearne uno nuovo.
-- Frasi come "possiamo spostare a giovedì", "facciamo giovedì invece", "rimandiamo", "ci vediamo giovedì anziché lunedì" sono spostamenti se esiste già un appuntamento.
+- Se nell'elenco sopra c'è già un appuntamento e nella conversazione parlano di cambiarne data od ora, allora l'azione è SEMPRE "sposta", MAI "nuovo".
+- Esempi che sono tutti spostamenti (se esiste già un appuntamento):
+  "possiamo modificare a giovedì 10 ore 10?" → sposta
+  "possiamo spostare a giovedì" → sposta
+  "slittiamo a venerdì" → sposta
+  "facciamo giovedì invece" → sposta
+  "non ce la faccio lunedì, meglio giovedì" → sposta
+  "anticipiamo a mercoledì" → sposta
+  "si può fare più avanti?" seguito da una data → sposta
+- Vale anche se a proporre il cambio è il professionista e il cliente risponde solo "ok", "va bene", "perfetto".
 - Se disdicono senza rifissare ("non ce la faccio", "annulliamo", "salta"), usa "annulla" con il riferimento.
-- Usa "nuovo" solo se non esiste già un appuntamento a cui si riferiscono.
-- Se c'è un solo appuntamento in elenco e parlano di spostarlo, il riferimento è 1.
-- Traduci "domani", "giovedì", "giovedì 10" in data vera partendo da oggi.
+- Usa "nuovo" SOLO se l'elenco sopra è vuoto, oppure se stanno chiaramente fissando un secondo incontro diverso, in aggiunta a quello esistente.
+- Se c'è un solo appuntamento in elenco e parlano di cambiarne la data, il riferimento è 1.
+- Traduci "domani", "giovedì", "giovedì 10", "giovedì 10 ore 10" in data e ora vere partendo da oggi.
 - Non importa chi dei due l'abbia proposto: conta che l'altro abbia accettato.
 
 Altre regole:
@@ -2693,11 +2701,27 @@ Altre regole:
   /* ---- AUTOMATICO: appuntamento (nuovo, spostato o annullato) ---- */
   if(parsed.appuntamento){
     const app = parsed.appuntamento;
-    const azione = app.azione || "nuovo";
+    let azione = app.azione || "nuovo";
     const quando = app.quando || "";
 
-    /* Ritroviamo l'appuntamento a cui si riferisce, se e' uno spostamento */
     const esistenti = chat.messages.filter(m => m.eventType === "appt" && !m.annullato);
+
+    /* Rete di sicurezza: se l'AI dice "nuovo" ma con questo cliente c'e'
+       gia' un appuntamento aperto e nella conversazione si parla di
+       cambiare data, quasi certamente e' uno spostamento. Meglio
+       correggere qui che ritrovarsi due appuntamenti in contraddizione. */
+    if(azione === "nuovo" && esistenti.length > 0){
+      const testoRecente = recenti.map(m => m.text.toLowerCase()).join(" ");
+      const parlaDiCambio = /spost|modific|slitt|rimand|anticip|invece|anzich|cambi|altro giorno|piu[' ]avanti|più avanti|riman/.test(testoRecente);
+      const stessoTitolo = esistenti.some(m =>
+        (m.title || "").toLowerCase() === (app.titolo || "").toLowerCase());
+      if(parlaDiCambio || stessoTitolo){
+        azione = "sposta";
+        if(!app.riferimento) app.riferimento = esistenti.length; // il piu' recente
+      }
+    }
+
+    /* Ritroviamo l'appuntamento a cui si riferisce, se e' uno spostamento */
     const riferito = (azione === "sposta" || azione === "annulla")
       ? (esistenti[(Number(app.riferimento) || 1) - 1] || esistenti[esistenti.length - 1])
       : null;
@@ -2748,6 +2772,11 @@ Altre regole:
         renderCalendar();
         showAIToast("Appuntamento aggiunto", app.titolo + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
       }
+    } else if((azione === "sposta" || azione === "annulla") && !riferito){
+      /* L'AI ha capito uno spostamento ma non trova l'appuntamento:
+         meglio dirlo che lasciare il calendario sbagliato in silenzio. */
+      showAIToast("Non trovo l'appuntamento",
+        "Ho capito che volete cambiare un appuntamento, ma non lo trovo in questa conversazione. Controlla il Calendario.");
     }
   }
 
