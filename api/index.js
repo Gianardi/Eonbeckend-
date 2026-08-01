@@ -129,15 +129,29 @@ async function requireUser(req) {
 
   let r;
   try {
+    /* La verifica del biglietto d'ingresso si fa con la chiave di servizio:
+       e' quella pensata per il server ed e' sempre valida, a differenza
+       della chiave pubblica che puo' esistere in formati diversi. */
     r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: { apikey: ANON_KEY, Authorization: `Bearer ${accessToken}` },
+      headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${accessToken}` },
     });
   } catch (netErr) {
     console.error("Supabase irraggiungibile:", netErr);
     throw fail("Impossibile contattare il database: controlla SUPABASE_URL o riprova tra poco", 503);
   }
 
-  if (!r.ok) throw fail("Sessione non valida o scaduta", 401);
+  if (!r.ok) {
+    let dettaglio = "";
+    try {
+      const errBody = await r.json();
+      dettaglio = errBody.msg || errBody.message || errBody.error_description || "";
+    } catch (e) { /* corpo non leggibile */ }
+    console.error("Verifica utente rifiutata da Supabase:", r.status, dettaglio);
+    throw fail(
+      "Sessione non valida o scaduta" + (dettaglio ? " (" + dettaglio + ")" : ""),
+      401
+    );
+  }
   const user = await r.json();
   if (!user || !user.id) throw fail("Utente non riconosciuto", 401);
 
