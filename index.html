@@ -873,6 +873,70 @@
   .ai-sugg-yes{ background:var(--violet); color:#fff; }
   .ai-sugg-no{ background:rgba(20,23,29,.05); color:var(--muted); }
 
+  /* allegati: foto, video e documenti nella conversazione */
+  .chat-attach{
+    width:42px; height:42px; border-radius:50%; flex:none; border:none; cursor:pointer;
+    background:rgba(20,23,29,.05); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chat-attach:hover{ background:rgba(20,23,29,.09); color:var(--indigo); }
+  .chat-attach svg{ width:19px; height:19px; }
+  .chat-attach:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .chat-upload-bar{ padding:10px 16px; border-top:1px solid var(--border); flex:none; }
+  .chat-upload-text{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .chat-upload-bar-track{ height:5px; border-radius:20px; background:rgba(20,23,29,.07); overflow:hidden; }
+  .chat-upload-bar-fill{ height:100%; width:0%; border-radius:20px; background:var(--grad-blue); transition:width .25s; }
+
+  /* foto e video dentro le bolle */
+  .msg-media{
+    max-width:74%; border-radius:16px; overflow:hidden;
+    box-shadow:var(--shadow-sm); cursor:pointer; line-height:0;
+    border:1px solid var(--border);
+  }
+  .msg-media.me{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-media.them{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-media img, .msg-media video{ width:100%; display:block; max-height:340px; object-fit:cover; background:#000; }
+  .msg-media-time{
+    font-size:10px; color:var(--muted); padding:5px 10px 7px;
+    background:var(--card); line-height:1.2; display:block;
+  }
+
+  /* documenti: riga con icona e nome */
+  .msg-doc{
+    display:flex; align-items:center; gap:11px; max-width:78%;
+    padding:11px 13px; border-radius:16px; cursor:pointer;
+    background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
+  }
+  .msg-doc.me{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-doc.them{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-doc-icon{
+    width:36px; height:36px; border-radius:11px; flex:none; color:#fff;
+    background:var(--indigo); display:flex; align-items:center; justify-content:center;
+  }
+  .msg-doc-icon svg{ width:16px; height:16px; }
+  .msg-doc-body{ min-width:0; }
+  .msg-doc-name{
+    font-size:13px; font-weight:700; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .msg-doc-sub{ font-size:11px; color:var(--muted); margin-top:2px; }
+
+  /* foto a schermo intero */
+  .media-viewer{
+    position:fixed; inset:0; z-index:9999; background:rgba(10,12,18,.93);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    animation:overlayIn .2s ease;
+  }
+  .media-viewer img, .media-viewer video{ max-width:100%; max-height:82vh; border-radius:12px; }
+  .media-viewer-close{
+    position:absolute; top:calc(16px + env(safe-area-inset-top,0px)); right:16px;
+    width:38px; height:38px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,.15); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .media-viewer-close svg{ width:18px; height:18px; }
+
   .chat-messages{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:9px; }
   .bubble{ max-width:75%; padding:10px 14px; border-radius:17px; font-size:14px; line-height:1.45; }
   .bubble.them{ background:#F1F0EC; color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; }
@@ -2084,7 +2148,15 @@
           <div id="chatContextPin"></div>
           <div id="chatSuggestions"></div>
           <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-upload-bar" id="chatUploadBar" style="display:none;">
+            <div class="chat-upload-text" id="chatUploadText">Sto caricando…</div>
+            <div class="chat-upload-bar-track"><div class="chat-upload-bar-fill" id="chatUploadFill"></div></div>
+          </div>
           <div class="chat-input-row">
+            <button class="chat-attach" id="chatAttachBtn" aria-label="Allega foto, video o documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.4 11.05L12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.67 3.67 0 0 1 5.18 5.18l-9.2 9.2a1.83 1.83 0 0 1-2.59-2.59l8.49-8.48"/></svg>
+            </button>
+            <input type="file" id="chatFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
             <input type="text" id="chatInput" placeholder="Scrivi un messaggio...">
             <button class="chat-send" id="chatSendBtn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
@@ -2266,6 +2338,9 @@ async function loadChatsFromDB(){
       title: m.title || undefined,
       text: m.body || "",
       amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
+      fileUrl: m.file_url || undefined,
+      fileName: m.file_name || undefined,
+      fileType: m.file_type || undefined,
       time: formatMsgTime(m.created_at)
     }));
     chats.push({
@@ -2534,7 +2609,10 @@ function subscribeToMessages(){
           title: m.title || undefined,
           text: m.body || "",
           amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
-          time: formatMsgTime(m.created_at)
+          fileUrl: m.file_url || undefined,
+      fileName: m.file_name || undefined,
+      fileType: m.file_type || undefined,
+      time: formatMsgTime(m.created_at)
         });
         if(m.sender === "them" && chats[activeChatIndex] !== chat) chat.unread++;
         renderChatList();
@@ -4461,6 +4539,19 @@ document.getElementById("giftEmpBtn").addEventListener("click", () => {
 });
 
 /* ============ CHAT (WhatsApp-style) ============ */
+
+/* Cosa mostrare nell'elenco quando l'ultimo messaggio non e' testo */
+function anteprimaMessaggio(m){
+  if(!m) return "";
+  if(m.fileType && m.fileType.startsWith("image/")) return "📷 Foto";
+  if(m.fileType && m.fileType.startsWith("video/")) return "🎥 Video";
+  if(m.fileUrl) return "📎 " + (m.fileName || "Documento");
+  if(m.eventType === "appt") return "📅 " + (m.title || "Appuntamento");
+  if(m.eventType === "doc") return "📄 " + (m.title || "Documento");
+  if(m.eventType === "update") return "✓ " + (m.title || "Aggiornamento");
+  return m.text || "";
+}
+
 function renderChatList(){
   const wrap = document.getElementById("chatList");
   wrap.innerHTML = "";
@@ -4497,7 +4588,7 @@ function renderChatList(){
       <div class="row-avatar" style="background:${c.online ? 'var(--wa)' : 'var(--faint)'};">${initials}</div>
       <div class="chat-item-body">
         <div class="chat-item-name">${c.name}</div>
-        <div class="chat-item-last">${last ? last.text : ""}</div>
+        <div class="chat-item-last">${anteprimaMessaggio(last)}</div>
         ${tag}
       </div>
       <div class="chat-item-meta">
@@ -4606,6 +4697,39 @@ function renderChatWindow(){
       messagesEl.appendChild(card);
       return;
     }
+    /* Allegati: foto e video si vedono, i documenti sono una riga */
+    if(m.fileUrl){
+      const lato = m.from === "me" ? "me" : "them";
+      if(m.fileType && m.fileType.startsWith("image/")){
+        const w = document.createElement("div");
+        w.className = "msg-media " + lato;
+        w.innerHTML = `<img src="${m.fileUrl}" alt="${m.fileName || "Foto"}" loading="lazy"><span class="msg-media-time">${m.time}</span>`;
+        w.addEventListener("click", () => apriMedia(m.fileUrl, m.fileType));
+        messagesEl.appendChild(w);
+        return;
+      }
+      if(m.fileType && m.fileType.startsWith("video/")){
+        const w = document.createElement("div");
+        w.className = "msg-media " + lato;
+        w.innerHTML = `<video src="${m.fileUrl}" preload="metadata" playsinline></video><span class="msg-media-time">${m.time}</span>`;
+        w.addEventListener("click", () => apriMedia(m.fileUrl, m.fileType));
+        messagesEl.appendChild(w);
+        return;
+      }
+      const d = document.createElement("div");
+      d.className = "msg-doc " + lato;
+      d.innerHTML = `
+        <div class="msg-doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg></div>
+        <div class="msg-doc-body">
+          <div class="msg-doc-name">${m.fileName || "Documento"}</div>
+          <div class="msg-doc-sub">Tocca per aprire · ${m.time}</div>
+        </div>
+      `;
+      d.addEventListener("click", () => window.open(m.fileUrl, "_blank"));
+      messagesEl.appendChild(d);
+      return;
+    }
+
     const b = document.createElement("div");
     b.className = "bubble " + (m.from === "me" ? "me" : "them");
     b.innerHTML = m.text + '<span class="bubble-time">' + m.time + '</span>';
@@ -4644,6 +4768,131 @@ async function sendChatMessage(){
   chat.messages.push({ from:"me", text:val, time });
   renderChatWindow();
   renderChatList();
+}
+
+/* ============================================================
+   ALLEGATI: FOTO, VIDEO E DOCUMENTI
+   ============================================================ */
+
+const LIMITE_FOTO_MB = 10;
+const LIMITE_VIDEO_MB = 50;
+const LIMITE_DOC_MB = 20;
+
+function tipoAllegato(file){
+  if(file.type.startsWith("image/")) return "foto";
+  if(file.type.startsWith("video/")) return "video";
+  return "documento";
+}
+
+function limiteMB(tipo){
+  if(tipo === "foto") return LIMITE_FOTO_MB;
+  if(tipo === "video") return LIMITE_VIDEO_MB;
+  return LIMITE_DOC_MB;
+}
+
+function pesoLeggibile(bytes){
+  if(bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1).replace(".", ",") + " MB";
+}
+
+/* Nome del file sul server: casuale, cosi' due persone che caricano
+   "foto.jpg" non si sovrascrivono a vicenda, e il link non e' indovinabile. */
+function nomeFileSicuro(originale){
+  const casuale = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const estensione = (originale.split(".").pop() || "").toLowerCase().slice(0, 5);
+  return casuale + (estensione ? "." + estensione : "");
+}
+
+function mostraCaricamento(testo, percentuale){
+  const bar = document.getElementById("chatUploadBar");
+  if(!bar) return;
+  bar.style.display = testo ? "block" : "none";
+  if(testo){
+    document.getElementById("chatUploadText").textContent = testo;
+    document.getElementById("chatUploadFill").style.width = (percentuale || 0) + "%";
+  }
+}
+
+async function inviaAllegato(file){
+  if(activeChatIndex === null) return;
+  const chat = chats[activeChatIndex];
+  const tipo = tipoAllegato(file);
+  const limite = limiteMB(tipo);
+
+  if(file.size > limite * 1024 * 1024){
+    showAILanding(
+      "File troppo pesante",
+      `Questo ${tipo} pesa ${pesoLeggibile(file.size)}, il massimo è ${limite} MB.` +
+      (tipo === "video" ? " Per i video lunghi conviene ridurre la qualità dalle impostazioni della fotocamera, oppure inviare solo la parte che serve." : "")
+    );
+    return;
+  }
+
+  if(!isDbReady() || !chat.id){
+    showAILanding("Non collegato", "Per inviare file serve la connessione al database. Riprova quando sei online.");
+    return;
+  }
+
+  const btn = document.getElementById("chatAttachBtn");
+  btn.disabled = true;
+  mostraCaricamento("Sto inviando " + file.name + " (" + pesoLeggibile(file.size) + ")…", 15);
+
+  try{
+    const percorso = currentSession.user.id + "/" + nomeFileSicuro(file.name);
+    mostraCaricamento("Sto inviando " + file.name + "…", 45);
+
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, file, { contentType: file.type, upsert: false });
+    if(upErr) throw upErr;
+
+    mostraCaricamento("Quasi fatto…", 80);
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+
+    const { error: msgErr } = await supabaseClient.from("messages").insert({
+      conversation_id: chat.id, sender: "me", body: "",
+      file_url: pub.publicUrl, file_name: file.name, file_type: file.type
+    });
+    if(msgErr) throw msgErr;
+
+    mostraCaricamento("", 100);
+  }catch(err){
+    console.error("Invio allegato non riuscito:", err);
+    mostraCaricamento("", 0);
+    showAILanding("Invio non riuscito", "Non sono riuscita a inviare " + file.name + ": " + (err.message || "riprova tra poco."));
+  }finally{
+    btn.disabled = false;
+    document.getElementById("chatFileInput").value = "";
+  }
+}
+
+document.getElementById("chatAttachBtn").addEventListener("click", () => {
+  if(activeChatIndex === null){
+    showAILanding("Nessuna conversazione aperta", "Apri prima una conversazione, poi potrai inviare foto, video e documenti.");
+    return;
+  }
+  document.getElementById("chatFileInput").click();
+});
+
+document.getElementById("chatFileInput").addEventListener("change", (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(file) inviaAllegato(file);
+});
+
+/* Visore a schermo intero per foto e video */
+function apriMedia(url, tipo){
+  const v = document.createElement("div");
+  v.className = "media-viewer";
+  v.innerHTML = tipo.startsWith("video/")
+    ? `<video src="${url}" controls autoplay playsinline></video>`
+    : `<img src="${url}" alt="">`;
+  const close = document.createElement("button");
+  close.className = "media-viewer-close";
+  close.setAttribute("aria-label", "Chiudi");
+  close.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+  close.addEventListener("click", () => v.remove());
+  v.appendChild(close);
+  v.addEventListener("click", (e) => { if(e.target === v) v.remove(); });
+  document.body.appendChild(v);
 }
 
 /* ============ NAVIGAZIONE ============ */
