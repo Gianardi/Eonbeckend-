@@ -2633,9 +2633,14 @@ async function analyzeMessage(msg, chat){
     .map((m, i) => ({ n: i + 1, id: m.id, titolo: m.title, quando: m.text }));
 
   const elencoAppuntamenti = appuntamentiEsistenti.length
-    ? "Appuntamenti già fissati con questo cliente:\n" +
+    ? "APPUNTAMENTI GIÀ FISSATI con questo cliente:\n" +
       appuntamentiEsistenti.map(a => `${a.n}. "${a.titolo}" — ${a.quando}`).join("\n")
-    : "Non ci sono appuntamenti già fissati con questo cliente.";
+    : "APPUNTAMENTI GIÀ FISSATI: nessuno.";
+
+  const ultimo = recenti[recenti.length - 1];
+  const chiHaScrittoPerUltimo = ultimo
+    ? (ultimo.from === "me" ? "il Professionista" : "il Cliente")
+    : "";
 
   const prompt = `Sei l'assistente dentro EON, un'app per professionisti italiani.
 Oggi è ${oggi.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}.
@@ -2643,49 +2648,69 @@ Oggi è ${oggi.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", mont
 Ecco le ultime battute della conversazione con il cliente "${chat.name}":
 ${conversazione}
 
+L'ultimo messaggio l'ha scritto ${chiHaScrittoPerUltimo}.
+
 ${elencoAppuntamenti}
 
 ${cliente ? `Stato attuale del cliente: ${cliente.status}. Valore registrato: €${cliente.value}.` : ""}
-
-Guarda la conversazione NEL SUO INSIEME e capisci cosa è stato concordato. Attenzione: una proposta vale solo se l'altra parte l'ha accettata, anche con una risposta breve tipo "ok", "va bene", "perfetto", "confermo", "ci sono".
 
 Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick:
 
 {
   "appuntamento": {
     "azione": "nuovo" | "sposta" | "annulla",
-    "riferimento": numero dell'appuntamento esistente (solo per sposta/annulla),
+    "riferimento": numero dell'appuntamento esistente (per sposta e annulla),
     "titolo": "...",
-    "quando": "gio 10 ago, 16:00"
+    "quando": "gio 8 ago, 09:00"
   } oppure null,
   "attivita": "..." oppure null,
   "cambioStato": "attivo" | "trattativa" | "inattivo" oppure null,
   "valore": numero oppure null
 }
 
-Regole sugli appuntamenti — leggile con attenzione:
-- Se nell'elenco sopra c'è già un appuntamento e nella conversazione parlano di cambiarne data od ora, allora l'azione è SEMPRE "sposta", MAI "nuovo".
-- Esempi che sono tutti spostamenti (se esiste già un appuntamento):
-  "possiamo modificare a giovedì 10 ore 10?" → sposta
-  "possiamo spostare a giovedì" → sposta
-  "slittiamo a venerdì" → sposta
-  "facciamo giovedì invece" → sposta
-  "non ce la faccio lunedì, meglio giovedì" → sposta
-  "anticipiamo a mercoledì" → sposta
-  "si può fare più avanti?" seguito da una data → sposta
-- Vale anche se a proporre il cambio è il professionista e il cliente risponde solo "ok", "va bene", "perfetto".
-- Se disdicono senza rifissare ("non ce la faccio", "annulliamo", "salta"), usa "annulla" con il riferimento.
-- Usa "nuovo" SOLO se l'elenco sopra è vuoto, oppure se stanno chiaramente fissando un secondo incontro diverso, in aggiunta a quello esistente.
-- Se c'è un solo appuntamento in elenco e parlano di cambiarne la data, il riferimento è 1.
-- Traduci "domani", "giovedì", "giovedì 10", "giovedì 10 ore 10" in data e ora vere partendo da oggi.
-- Non importa chi dei due l'abbia proposto: conta che l'altro abbia accettato.
+=== REGOLA FONDAMENTALE: LA CONFERMA ===
+Un appuntamento si registra, si sposta o si annulla SOLO quando chi NON ha fatto la proposta ha risposto accettando.
+- Se il Professionista propone e il Cliente risponde "ok", "va bene", "perfetto", "confermo", "ci sono", "sì" → CONFERMATO, procedi.
+- Se il Cliente propone e il Professionista risponde accettando → CONFERMATO, procedi.
+- Se la proposta è l'ultimo messaggio e l'altro non ha ancora risposto → metti "appuntamento": null. NON registrare nulla, aspetta.
 
-Altre regole:
+=== QUANDO ESISTE GIÀ UN APPUNTAMENTO ===
+Se nell'elenco sopra c'è già un appuntamento con questo cliente e nella conversazione si parla di cambiarne il giorno o l'ora, allora l'azione è SEMPRE "sposta" e MAI "nuovo".
+
+Casi di spostamento, tutti quanti:
+- "possiamo fare sabato 10 ore 11?" → sposta a sabato 10 ore 11:00
+- "possiamo modificare a giovedì 10 ore 10?" → sposta
+- "slittiamo a venerdì" → sposta
+- "facciamo giovedì invece" → sposta
+- "anticipiamo a mercoledì" → sposta
+
+CAMBIO SOLO DELL'ORA — molto importante:
+Se dicono solo un orario nuovo senza nominare il giorno ("possiamo fare alle 10?", "meglio alle 15", "un'ora dopo"), il giorno resta quello dell'appuntamento esistente. Devi scrivere in "quando" lo STESSO GIORNO dell'appuntamento in elenco, con l'ORA NUOVA.
+Esempio: esiste "mer 6 ago, 09:00" e dicono "possiamo fare alle 10?" → quando = "mer 6 ago, 10:00"
+
+CAMBIO SOLO DEL GIORNO:
+Se dicono solo un giorno nuovo senza orario ("possiamo fare domani?", "spostiamo a venerdì"), tieni l'ORA dell'appuntamento esistente e cambia il giorno.
+Esempio: esiste "mer 6 ago, 09:00" e dicono "possiamo fare domani?" → quando = il giorno successivo, ore 09:00
+
+ANNULLAMENTO:
+Se disdicono senza proporre una data nuova ("non ce la faccio", "annulliamo", "salta") e l'altro accetta → azione "annulla".
+
+=== QUANDO USARE "nuovo" ===
+Solo in due casi:
+1. L'elenco degli appuntamenti sopra è vuoto.
+2. Stanno chiaramente fissando un incontro IN AGGIUNTA a quello esistente, con uno scopo diverso (es. esiste "Incontro" e aggiungono "Firma del contratto").
+
+=== FORMATO DELLA DATA ===
+Scrivi sempre "quando" in questa forma: "gio 8 ago, 09:00" (giorno abbreviato, numero, mese abbreviato, virgola, ora).
+Traduci "domani", "giovedì", "sabato 10", "il 10 di agosto" in data vera partendo da oggi.
+Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: "gio 8 ago".
+
+=== ALTRE REGOLE ===
 - "attivita": solo se il professionista deve fare qualcosa di concreto (preparare, mandare, richiamare). Azione breve dal suo punto di vista.
 - "cambioStato": "attivo" solo se il cliente accetta di procedere col lavoro; "inattivo" solo se rinuncia esplicitamente.
 - "valore": solo se viene citata una cifra in euro riferita al lavoro, e concordata.
-- Se qualcosa è stato solo proposto ma non ancora accettato, mettilo a null.
 - Se un campo non è presente, null. Non inventare mai.`;
+
 
   let parsed;
   try{
@@ -2735,6 +2760,14 @@ Altre regole:
         await supabaseClient.from("messages")
           .update({ body: riferito.text, title: riferito.title })
           .eq("id", riferito.id);
+
+        /* Lasciamo traccia in chat: cosi' si vede cosa e' cambiato
+           senza dover aprire il calendario. */
+        await supabaseClient.from("messages").insert({
+          conversation_id: chat.id, sender: "me", event_type: "update",
+          title: "Appuntamento spostato",
+          body: riferito.title + ": da " + (prima || "—") + " a " + riferito.text
+        });
       }
       renderCalendar();
       renderChatWindow();
