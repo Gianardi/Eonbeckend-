@@ -198,6 +198,33 @@
   }
   .media-viewer-close svg{ width:18px; height:18px; }
 
+  .mic{
+    width:44px; height:44px; border-radius:50%; flex:none; border:none; cursor:pointer;
+    background:rgba(20,23,29,.05); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .mic:hover{ background:rgba(20,23,29,.09); color:var(--indigo); }
+  .mic svg{ width:20px; height:20px; }
+  .mic.recording{ background:var(--coral); color:#fff; animation:micPulse 1.4s ease-in-out infinite; }
+  @keyframes micPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(228,87,46,.5); }
+    50%{ box-shadow:0 0 0 12px rgba(228,87,46,0); }
+  }
+  .rec-timer{ display:none; align-items:center; gap:7px; flex:1; font-size:13px; font-weight:700; color:var(--coral); }
+  .rec-timer.on{ display:flex; }
+  .rec-dot{ width:9px; height:9px; border-radius:50%; background:var(--coral); animation:micPulse 1.2s infinite; }
+
+  .msg-audio{
+    max-width:82%; padding:11px 13px; border-radius:16px; flex:none;
+    background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
+  }
+  .msg-audio.mine{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-audio.pro{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-audio audio{ width:100%; height:38px; display:block; }
+  .msg-audio-text{ font-size:12.5px; line-height:1.5; margin-top:9px; padding-top:9px; border-top:1px dashed var(--border); }
+  .msg-audio-text.pending{ color:var(--faint); font-style:italic; }
+  .msg-audio-time{ font-size:10px; color:var(--faint); margin-top:6px; display:block; }
+
   .input-row{
     display:flex; gap:9px; padding:12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
     border-top:1px solid var(--border); flex:none; background:var(--card);
@@ -295,6 +322,17 @@
       </button>
       <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
       <input type="text" id="msgInput" placeholder="Scrivi un messaggio…">
+      <div class="rec-timer" id="recTimer">
+        <span class="rec-dot"></span><span id="recTimerText">0:00</span>
+        <span style="font-weight:500;color:var(--muted);font-size:11.5px;">tocca per inviare</span>
+      </div>
+      <button class="mic" id="micBtn" aria-label="Registra un vocale">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
       <button class="send" id="sendBtn" aria-label="Invia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
       </button>
@@ -490,6 +528,21 @@ function renderMessages(){
     /* Allegati: foto e video si vedono, i documenti sono una riga */
     if(m.file_url){
       const lato = m.sender === "me" ? "pro" : "mine";
+
+      /* Vocale: si ascolta, sotto la trascrizione */
+      if(m.file_type && m.file_type.startsWith("audio/")){
+        const a = document.createElement("div");
+        a.className = "msg-audio " + lato;
+        const tr = m.body && m.body.trim();
+        a.innerHTML = `
+          <audio src="${m.file_url}" controls preload="metadata"></audio>
+          ${tr ? '<div class="msg-audio-text">' + tr + '</div>' : ''}
+          <span class="msg-audio-time">${formatTime(m.created_at)}</span>
+        `;
+        wrap.appendChild(a);
+        return;
+      }
+
       if(m.file_type && m.file_type.startsWith("image/")){
         const w = document.createElement("div");
         w.className = "msg-media " + lato;
@@ -647,6 +700,95 @@ function apriMedia(url, tipo){
   v.addEventListener("click", (e) => { if(e.target === v) v.remove(); });
   document.body.appendChild(v);
 }
+
+/* ---- Vocali: si registrano, si ascoltano, vengono trascritti ---- */
+let recorder = null, recChunks = [], recStart = 0, recTimer = null;
+const MAX_SEC_VOCALE = 300;
+
+function formattaDurata(sec){
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m + ":" + (s < 10 ? "0" : "") + s;
+}
+function uiRegistrazione(attiva){
+  document.getElementById("micBtn").classList.toggle("recording", attiva);
+  document.getElementById("msgInput").style.display = attiva ? "none" : "";
+  document.getElementById("recTimer").classList.toggle("on", attiva);
+}
+
+async function avviaRegistrazione(){
+  if(!navigator.mediaDevices || !window.MediaRecorder){
+    showGate("Questo browser non permette di registrare audio.");
+    setTimeout(hideGate, 2800);
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recChunks = [];
+    const tipo = MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "audio/webm";
+    recorder = new MediaRecorder(stream, { mimeType: tipo });
+
+    recorder.ondataavailable = (e) => { if(e.data.size > 0) recChunks.push(e.data); };
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      clearInterval(recTimer);
+      uiRegistrazione(false);
+      const durata = Math.round((Date.now() - recStart) / 1000);
+      if(durata < 1 || recChunks.length === 0) return;
+      await inviaVocale(new Blob(recChunks, { type: tipo }), tipo, durata);
+    };
+
+    recorder.start();
+    recStart = Date.now();
+    uiRegistrazione(true);
+    recTimer = setInterval(() => {
+      const sec = Math.round((Date.now() - recStart) / 1000);
+      document.getElementById("recTimerText").textContent = formattaDurata(sec);
+      if(sec >= MAX_SEC_VOCALE) fermaRegistrazione();
+    }, 500);
+  }catch(err){
+    showGate("Per registrare un vocale serve il permesso del microfono.");
+    setTimeout(hideGate, 3000);
+  }
+}
+
+function fermaRegistrazione(){
+  if(recorder && recorder.state === "recording") recorder.stop();
+}
+
+async function inviaVocale(blob, tipo, durata){
+  if(!conversation) return;
+  mostraCaricamento("Sto inviando il vocale (" + formattaDurata(durata) + ")…", 35);
+  try{
+    const est = tipo.includes("mp4") ? "m4a" : "webm";
+    const percorso = "clienti/" + conversation.id + "/vocali/" +
+      Math.random().toString(36).slice(2) + Date.now().toString(36) + "." + est;
+
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, blob, { contentType: tipo, upsert: false });
+    if(upErr) throw upErr;
+
+    mostraCaricamento("Quasi fatto…", 80);
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+
+    const { error: msgErr } = await supabaseClient.from("messages").insert({
+      conversation_id: conversation.id, sender: "them", body: "",
+      file_url: pub.publicUrl, file_name: "Vocale " + formattaDurata(durata), file_type: tipo
+    });
+    if(msgErr) throw msgErr;
+
+    mostraCaricamento("", 100);
+  }catch(err){
+    console.error("Invio vocale non riuscito:", err);
+    mostraCaricamento("", 0);
+    showGate("Non sono riuscito a inviare il vocale. Riprova.");
+    setTimeout(hideGate, 3000);
+  }
+}
+
+document.getElementById("micBtn").addEventListener("click", () => {
+  if(recorder && recorder.state === "recording") fermaRegistrazione();
+  else avviaRegistrazione();
+});
 
 /* ---- Realtime: i messaggi arrivano subito ---- */
 function subscribeRealtime(){
