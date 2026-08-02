@@ -1897,26 +1897,6 @@
         Torna alla Home
       </div>
       <div class="azienda-list">
-        <div class="azienda-link-card" data-page="opportunita">
-          <div class="module-icon" style="background:var(--green);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title" id="aziendaOppTitle">Opportunità</div>
-            <div class="module-sub" id="aziendaOppSub">Trattative e clienti da prendere</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="obiettivi">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Obiettivi</div>
-            <div class="module-sub">Il tuo futuro, lavorativo e personale</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
         <div class="azienda-link-card" data-page="assegna-compiti">
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
@@ -3795,11 +3775,6 @@ async function applyProfession(key, skipDemoData){
 
   document.getElementById("tabLabelClienti").textContent = p.clientiTitle;
   document.getElementById("tabLabelOpportunita").textContent = p.oppTileTitle;
-  const aziendaOpp = document.getElementById("aziendaOppTitle");
-  if(aziendaOpp){
-    aziendaOpp.textContent = p.oppTileTitle;
-    document.getElementById("aziendaOppSub").textContent = p.oppTileSub;
-  }
 
   pageMeta.clienti.title = p.clientiTitle;
   pageMeta.clienti.sub = p.clientiSub;
