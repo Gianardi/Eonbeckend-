@@ -684,7 +684,16 @@
   .ai-toast-icon svg{ width:15px;height:15px; }
   .ai-toast-body{ flex:1; min-width:0; }
   .ai-toast-title{ font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:3px; }
-  .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; }
+  .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; white-space:pre-line; }
+  .ai-toast.decisione{ background:var(--card); border:2px solid var(--amber); box-shadow:0 12px 34px rgba(20,23,29,.16); }
+  .ai-toast-actions{ display:flex; gap:8px; margin-top:12px; }
+  .ai-toast-actions button{
+    flex:1; border:none; border-radius:10px; padding:10px 12px; cursor:pointer;
+    font-family:inherit; font-size:12.5px; font-weight:800;
+  }
+  .ai-toast-yes{ background:var(--amber); color:#fff; }
+  .ai-toast-no{ background:rgba(20,23,29,.06); color:var(--muted); }
+  .ai-toast-actions button:disabled{ opacity:.5; }
   .ai-toast-close{ cursor:pointer; color:var(--faint); flex:none; background:none; border:none; padding:2px; }
   .ai-toast-close svg{ width:14px;height:14px; }
 
@@ -2264,6 +2273,7 @@ async function loadChatsFromDB(){
       from: m.sender,
       eventType: m.event_type || undefined,
       title: m.title || undefined,
+      annullato: !!(m.title && m.title.startsWith("❌")),
       text: m.body || "",
       amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
       time: formatMsgTime(m.created_at)
@@ -2344,76 +2354,211 @@ let realtimeChannel = null;
 let pendingSuggestions = [];
 
 async function analyzeMessage(msg, chat){
-  if(!msg || !msg.text || msg.eventType) return;
-  if(msg.from !== "them") return;          // analizza solo cio' che scrive l'altro
-  if(msg.text.trim().length < 8) return;   // "ok", "grazie": niente da estrarre
+  if(!msg || !chat) return;
+
+  /* L'AI legge le ultime battute della conversazione, non il singolo
+     messaggio: e' l'unico modo per capire scambi come
+     "ci vediamo lunedi alle 16" -> "ok". */
+  const recenti = chat.messages
+    .filter(m => !m.eventType && m.text)
+    .slice(-6);
+  if(recenti.length === 0) return;
+
+  const conversazione = recenti
+    .map(m => (m.from === "me" ? "Professionista: " : "Cliente: ") + m.text)
+    .join("\n");
 
   const oggi = new Date();
   const cliente = clients.find(c => c.name === chat.name);
 
+  /* Gli appuntamenti gia' presi con questo cliente */
+  const esistenti = chat.messages.filter(m => m.eventType === "appt" && !m.annullato);
+  const elencoAppuntamenti = esistenti.length
+    ? "APPUNTAMENTI GIÀ FISSATI con questo cliente:\n" +
+      esistenti.map((a, i) => (i+1) + '. "' + a.title + '" — ' + a.text).join("\n")
+    : "APPUNTAMENTI GIÀ FISSATI: nessuno.";
+
   const prompt = `Sei l'assistente dentro EON, un'app per professionisti italiani.
 Oggi è ${oggi.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}.
 
-Un cliente di nome "${chat.name}" ha appena scritto questo messaggio:
-"${msg.text}"
+Ecco le ultime battute della conversazione con il cliente "${chat.name}":
+${conversazione}
+
+${elencoAppuntamenti}
 
 ${cliente ? `Stato attuale del cliente: ${cliente.status}. Valore registrato: €${cliente.value}.` : ""}
 
-Estrai SOLO ciò che è davvero presente nel messaggio. Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick, con questa forma:
+Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick:
 
 {
-  "appuntamento": { "titolo": "...", "quando": "gio 7 ago, 16:00" } oppure null,
+  "appuntamento": {
+    "azione": "nuovo" | "sposta" | "annulla",
+    "titolo": "...",
+    "quando": "lun 8 ago, 16:00"
+  } oppure null,
   "attivita": "..." oppure null,
   "cambioStato": "attivo" | "trattativa" | "inattivo" oppure null,
   "valore": numero oppure null
 }
 
-Regole:
-- "appuntamento": solo se indica un incontro, una chiamata o una data concordata. Traduci "giovedì", "domani" in data vera partendo da oggi.
-- "attivita": solo se chiede qualcosa da fare (mandare un documento, preparare, richiamare). Scrivila come un'azione breve dal punto di vista del professionista.
-- "cambioStato": "attivo" solo se accetta o conferma di procedere; "inattivo" solo se rinuncia esplicitamente.
-- "valore": solo se cita una cifra in euro riferita al lavoro.
-- Se un campo non è presente nel messaggio, mettilo a null. Non inventare mai.`;
+=== REGOLA DELLA CONFERMA ===
+Un appuntamento si registra o si sposta SOLO quando chi NON ha fatto la proposta ha risposto accettando.
+- Professionista propone + Cliente risponde "ok"/"va bene"/"confermo"/"perfetto"/"sì" → procedi.
+- Cliente propone + Professionista accetta → procedi.
+- Se la proposta è l'ultimo messaggio e l'altro non ha ancora risposto → "appuntamento": null. Aspetta.
+
+=== SPOSTAMENTO ===
+Se nell'elenco sopra c'è già un appuntamento e nella conversazione si parla di cambiarne giorno od ora, l'azione è "sposta", MAI "nuovo".
+Se dicono solo l'ora nuova ("possiamo fare alle 10?"), tieni il giorno dell'appuntamento esistente.
+Se dicono solo il giorno nuovo ("facciamo giovedì"), tieni l'ora dell'appuntamento esistente.
+Se disdicono senza rifissare, azione "annulla".
+
+=== FORMATO ===
+"quando" sempre così: "lun 8 ago, 16:00". Traduci "domani", "lunedì", "il 10" in data vera partendo da oggi.
+
+=== ALTRE REGOLE ===
+- "attivita": solo se il professionista deve fare qualcosa di concreto. Azione breve.
+- "cambioStato": "attivo" solo se accetta di procedere; "inattivo" solo se rinuncia.
+- "valore": solo se citano una cifra concordata.
+- Se un campo non c'è, null. Non inventare mai.`;
 
   let parsed;
   try{
     const raw = await callAI(prompt, 300);
-    const clean = raw.replace(/```json|```/g, "").trim();
-    parsed = JSON.parse(clean);
+    parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
   }catch(err){
-    console.warn("Analisi AI del messaggio non riuscita:", err.message);
+    console.warn("Analisi AI non riuscita:", err.message);
     return;
   }
   if(!parsed) return;
 
-  /* ---- AUTOMATICO: appuntamento ---- */
-  if(parsed.appuntamento && parsed.appuntamento.titolo){
-    const titolo = parsed.appuntamento.titolo;
-    const quando = parsed.appuntamento.quando || "";
-    const gia = chat.messages.some(m => m.eventType === "appt" && m.title === titolo);
-    if(!gia){
-      if(isDbReady() && chat.id){
-        await supabaseClient.from("messages").insert({
-          conversation_id: chat.id, sender: "me", event_type: "appt",
-          title: titolo, body: quando
-        });
-      } else {
-        chat.messages.push({ eventType:"appt", title:titolo, text:quando, time:"ora" });
+  /* ---- APPUNTAMENTI ---- */
+  if(parsed.appuntamento){
+    const app = parsed.appuntamento;
+    let azione = app.azione || "nuovo";
+    const quando = app.quando || "";
+
+    /* Se esiste gia' un appuntamento, un orario nuovo e' uno spostamento */
+    if(azione === "nuovo" && esistenti.length > 0) azione = "sposta";
+
+    /* Chi ha proposto il cambio? Lo ricaviamo dai messaggi.
+       L'ultimo messaggio che NON e' una semplice conferma e' la proposta. */
+    const soloConferma = /^\s*(ok|okay|va bene|vabbene|perfetto|confermo|s[iì]|certo|d'accordo|daccordo|ci sono|grazie|👍)\s*[.!]?\s*$/i;
+    let chiPropone = "professionista";
+    for(let i = recenti.length - 1; i >= 0; i--){
+      if(!soloConferma.test(recenti[i].text || "")){
+        chiPropone = recenti[i].from === "me" ? "professionista" : "cliente";
+        break;
       }
-      renderCalendar();
-      showAIToast("Appuntamento aggiunto", titolo + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
+    }
+
+    const riferito = esistenti.length ? esistenti[esistenti.length - 1] : null;
+
+    /* CASO 3: lo chiede il CLIENTE -> notifica con tasto Conferma */
+    if(chiPropone === "cliente" && riferito && (azione === "sposta" || azione === "annulla")){
+      const appRif = riferito, chatRif = chat, quandoNuovo = quando, titoloNuovo = app.titolo;
+
+      if(azione === "sposta"){
+        showAIToastConDecisione(
+          "Richiesta spostamento appuntamento",
+          chatRif.name + ' chiede di spostare "' + appRif.title + '"\nda ' +
+            (appRif.text || "—") + '\na ' + (quandoNuovo || "una nuova data"),
+          async () => {
+            appRif.text = quandoNuovo || appRif.text;
+            if(titoloNuovo) appRif.title = titoloNuovo;
+            if(isDbReady() && appRif.id){
+              await supabaseClient.from("messages")
+                .update({ body: appRif.text, title: appRif.title }).eq("id", appRif.id);
+            }
+            await rispondiAlCliente(chatRif, "Ok, confermo: " + appRif.text + ".");
+            renderCalendar(); renderChatWindow();
+            showAIToast("Appuntamento modificato",
+              appRif.title + " con " + chatRif.name + " spostato a " + appRif.text + ".");
+          },
+          async () => {
+            await rispondiAlCliente(chatRif,
+              "Purtroppo non riesco a spostare. Riusciamo a tenere " + (appRif.text || "l'orario concordato") + "?");
+          }
+        );
+      } else {
+        showAIToastConDecisione(
+          "Richiesta annullamento appuntamento",
+          chatRif.name + ' chiede di annullare "' + appRif.title + '" del ' + (appRif.text || "—"),
+          async () => {
+            const titoloAnn = appRif.title;
+            appRif.annullato = true;
+            appRif.title = "❌ " + appRif.title + " (annullato)";
+            if(isDbReady() && appRif.id){
+              await supabaseClient.from("messages").update({ title: appRif.title }).eq("id", appRif.id);
+            }
+            await rispondiAlCliente(chatRif, "Ok, annullo l'appuntamento. Ci risentiamo per fissarne un altro.");
+            renderCalendar(); renderChatWindow();
+            showAIToast("Appuntamento annullato", titoloAnn + " tolto dal calendario.");
+          },
+          async () => {
+            await rispondiAlCliente(chatRif, "Preferirei tenerlo. Riusciamo a confermare " + (appRif.text || "l'orario") + "?");
+          },
+          "Conferma", "No, non posso"
+        );
+      }
+      return; /* aspettiamo la decisione del professionista */
+    }
+
+    /* CASO 2: lo propongo IO e il cliente conferma -> sposto in automatico */
+    if(azione === "sposta" && riferito){
+      const prima = riferito.text;
+      riferito.text = quando || riferito.text;
+      if(app.titolo) riferito.title = app.titolo;
+      if(isDbReady() && riferito.id){
+        await supabaseClient.from("messages")
+          .update({ body: riferito.text, title: riferito.title }).eq("id", riferito.id);
+      }
+      renderCalendar(); renderChatWindow();
+      showAIToast("Appuntamento modificato",
+        riferito.title + " con " + chat.name + ": da " + (prima || "—") + " a " + riferito.text + ".");
+      return;
+    }
+
+    /* Annullamento proposto da me e accettato dal cliente */
+    if(azione === "annulla" && riferito){
+      const titoloAnn = riferito.title;
+      riferito.annullato = true;
+      riferito.title = "❌ " + riferito.title + " (annullato)";
+      if(isDbReady() && riferito.id){
+        await supabaseClient.from("messages").update({ title: riferito.title }).eq("id", riferito.id);
+      }
+      renderCalendar(); renderChatWindow();
+      showAIToast("Appuntamento annullato", titoloAnn + " tolto dal calendario.");
+      return;
+    }
+
+    /* CASO 1: appuntamento nuovo, confermato -> in calendario con notifica */
+    if(app.titolo){
+      const gia = chat.messages.some(m =>
+        m.eventType === "appt" && !m.annullato && m.title === app.titolo && m.text === quando);
+      if(!gia){
+        if(isDbReady() && chat.id){
+          await supabaseClient.from("messages").insert({
+            conversation_id: chat.id, sender: "me", event_type: "appt",
+            title: app.titolo, body: quando
+          });
+        } else {
+          chat.messages.push({ eventType:"appt", title:app.titolo, text:quando, time:"ora" });
+        }
+        renderCalendar();
+        showAIToast("Appuntamento fissato",
+          app.titolo + " con " + chat.name + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
+      }
     }
   }
 
-  /* ---- AUTOMATICO: attività da fare ---- */
+  /* ---- ATTIVITÀ DA FARE ---- */
   if(parsed.attivita){
     const gia = tasks.some(t => t.title.toLowerCase() === parsed.attivita.toLowerCase());
     if(!gia){
       const nuova = { title: parsed.attivita, time: "—", status: "todo", owner: "user" };
       if(isDbReady()){
-        const saved = await dbInsert("tasks", {
-          title: nuova.title, owner_type: "user", status: "todo", time: ""
-        });
+        const saved = await dbInsert("tasks", { title: nuova.title, owner_type: "user", status: "todo", time: "" });
         if(saved) nuova.id = saved.id;
       }
       tasks.push(nuova);
@@ -2422,25 +2567,69 @@ Regole:
     }
   }
 
-  /* ---- CON CONFERMA: cambio stato e valore ---- */
+  /* ---- CON CONFERMA: stato e valore del cliente ---- */
   if(cliente){
     if(parsed.cambioStato && parsed.cambioStato !== cliente.status){
       addSuggestion({
-        tipo: "stato",
-        cliente: cliente,
-        valoreNuovo: parsed.cambioStato,
+        tipo: "stato", cliente: cliente, valoreNuovo: parsed.cambioStato,
         testo: `${chat.name} sembra passato a "${clientStatusLabel[parsed.cambioStato]}". Aggiorno la scheda?`
       });
     }
     if(parsed.valore && Number(parsed.valore) > 0 && Number(parsed.valore) !== cliente.value){
       addSuggestion({
-        tipo: "valore",
-        cliente: cliente,
-        valoreNuovo: Number(parsed.valore),
+        tipo: "valore", cliente: cliente, valoreNuovo: Number(parsed.valore),
         testo: `Ho letto un importo di €${Number(parsed.valore).toLocaleString("it-IT")} per ${chat.name}. Aggiorno il valore?`
       });
     }
   }
+}
+
+/* Manda un messaggio al cliente a nome tuo. */
+async function rispondiAlCliente(chat, testo){
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+  if(isDbReady() && chat.id){
+    const { error } = await supabaseClient.from("messages").insert({
+      conversation_id: chat.id, sender: "me", body: testo
+    });
+    if(!error) return;
+    console.error("Risposta automatica non inviata:", error.message);
+  }
+  chat.messages.push({ from:"me", text:testo, time });
+  renderChatWindow();
+  renderChatList();
+}
+
+/* Notifica con i pulsanti dentro: si conferma da qui, senza aprire la chat. */
+function showAIToastConDecisione(titolo, testo, onSi, onNo, etichettaSi, etichettaNo){
+  const container = document.getElementById("aiToastContainer");
+  const toast = document.createElement("div");
+  toast.className = "ai-toast decisione";
+  toast.innerHTML = `
+    <div class="ai-toast-icon" style="background:var(--amber);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </div>
+    <div class="ai-toast-body">
+      <div class="ai-toast-title">${titolo}</div>
+      <div class="ai-toast-text">${testo}</div>
+      <div class="ai-toast-actions">
+        <button class="ai-toast-yes">${etichettaSi || "Conferma"}</button>
+        <button class="ai-toast-no">${etichettaNo || "No, non posso"}</button>
+      </div>
+    </div>
+  `;
+  toast.querySelector(".ai-toast-yes").addEventListener("click", async () => {
+    toast.querySelectorAll("button").forEach(b => b.disabled = true);
+    await onSi();
+    toast.remove();
+  });
+  toast.querySelector(".ai-toast-no").addEventListener("click", async () => {
+    toast.querySelectorAll("button").forEach(b => b.disabled = true);
+    if(onNo) await onNo();
+    toast.remove();
+  });
+  container.appendChild(toast);
+  /* Resta finche' non decidi: e' una scelta, non un avviso di passaggio. */
 }
 
 function addSuggestion(s){
@@ -2519,6 +2708,7 @@ function subscribeToMessages(){
           id: m.id, from: m.sender,
           eventType: m.event_type || undefined,
           title: m.title || undefined,
+          annullato: !!(m.title && m.title.startsWith("❌")),
           text: m.body || "",
           amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
           time: formatMsgTime(m.created_at)
@@ -2527,11 +2717,12 @@ function subscribeToMessages(){
         renderChatList();
         if(chats[activeChatIndex] === chat) renderChatWindow();
 
-        /* L'AI legge il messaggio e aggiorna EON di conseguenza */
-        if(m.sender === "them"){
-          const appena = chat.messages[chat.messages.length - 1];
-          analyzeMessage(appena, chat);
-        }
+        /* Se e' un appuntamento, il calendario deve aggiornarsi */
+        if(m.event_type) renderCalendar();
+
+        /* L'AI rilegge le ultime battute, da qualunque lato arrivi il
+           messaggio: cosi' capisce anche "ci vediamo lunedi" -> "ok". */
+        if(!m.event_type) analyzeMessage(m, chat);
       })
     .subscribe();
 }
@@ -2968,8 +3159,8 @@ function renderCalendar(){
 
   chats.forEach(c => {
     c.messages.forEach(m => {
-      if(m.eventType === "appt"){
-        items.push({ icon:"appt", title:m.title, sub:c.name + " · " + m.text, when:m.time, urgent:false });
+      if(m.eventType === "appt" && !m.annullato){
+        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false });
       }
     });
   });
