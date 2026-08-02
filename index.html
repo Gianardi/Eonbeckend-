@@ -2396,7 +2396,8 @@ Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza bac
     "titolo": "...",
     "quando": "lun 8 ago, 16:00",
     "messaggioProposta": numero del messaggio [n] che contiene la proposta,
-    "messaggioConferma": numero del messaggio [n] in cui l'altro accetta, oppure null se nessuno ha ancora accettato
+    "messaggioConferma": numero del messaggio [n] in cui l'altro accetta, oppure null se nessuno ha ancora accettato,
+    "rimastoInSospeso": true se l'altro NON ha detto né sì né no, ma ha rimandato la risposta
   } oppure null,
   "attivita": "..." oppure null,
   "cambioStato": "attivo" | "trattativa" | "inattivo" oppure null,
@@ -2422,6 +2423,17 @@ Esempio A:
 Esempio B:
   [1] Cliente: scusa possiamo fare giovedì?
   → messaggioProposta = 1, messaggioConferma = null
+
+=== RISPOSTE RIMASTE IN SOSPESO ===
+"rimastoInSospeso": mettilo a true quando l'altra parte non accetta e non rifiuta,
+  ma rimanda la decisione. Esempi: "non so se riesco", "vediamo", "ti faccio sapere",
+  "devo controllare", "ti dico più tardi", "forse", "provo a organizzarmi", "ci penso".
+  In questi casi messaggioConferma resta null.
+
+Esempio C:
+  [1] Professionista: possiamo fare martedì alle 10?
+  [2] Cliente: mah, non so se riesco, ti faccio sapere
+  → messaggioProposta = 1, messaggioConferma = null, rimastoInSospeso = true
 
 === SPOSTAMENTO ===
 Se nell'elenco sopra c'è già un appuntamento e nella conversazione si parla di cambiarne giorno od ora, l'azione è "sposta", MAI "nuovo".
@@ -2484,10 +2496,18 @@ Se disdicono senza rifissare, azione "annulla".
 
     const riferito = esistenti.length ? esistenti[esistenti.length - 1] : null;
 
-    /* --- Proposta MIA non ancora confermata -> non faccio niente ---
+    /* --- Proposta MIA non ancora confermata ---
        Se ho scritto io e il cliente non ha ancora accettato, non tocco
-       il calendario e non mando nessuna notifica: aspetto. */
-    if(chiPropone === "professionista" && !confermato) return;
+       il calendario e non mando notifiche: aspetto.
+       Ma se ha risposto in modo vago ("ti faccio sapere", "vediamo"),
+       segno in silenzio un promemoria per ricontattarlo: sono proprio
+       queste le cose che si perdono per strada. */
+    if(chiPropone === "professionista" && !confermato){
+      if(app.rimastoInSospeso){
+        segnaDaRicontattare(chat, app.titolo, quando);
+      }
+      return;
+    }
 
     /* --- Proposta del CLIENTE per un appuntamento NUOVO, non ancora
        accettata da me: aspetto che risponda io in chat. */
@@ -2511,6 +2531,7 @@ Se disdicono senza rifissare, azione "annulla".
                 .update({ body: appRif.text, title: appRif.title }).eq("id", appRif.id);
             }
             await rispondiAlCliente(chatRif, "Ok, confermo: " + appRif.text + ".");
+            togliDaRicontattare(chatRif);
             renderCalendar(); renderChatWindow();
             showAIToast("Appuntamento confermato",
               appRif.title + " con " + chatRif.name + " spostato a " + appRif.text +
@@ -2554,6 +2575,7 @@ Se disdicono senza rifissare, azione "annulla".
         await supabaseClient.from("messages")
           .update({ body: riferito.text, title: riferito.title }).eq("id", riferito.id);
       }
+      togliDaRicontattare(chat);
       renderCalendar(); renderChatWindow();
       showAIToast("Appuntamento confermato",
         riferito.title + " con " + chat.name + " spostato a " + riferito.text +
@@ -2587,6 +2609,7 @@ Se disdicono senza rifissare, azione "annulla".
         } else {
           chat.messages.push({ eventType:"appt", title:app.titolo, text:quando, time:"ora" });
         }
+        togliDaRicontattare(chat);
         renderCalendar();
         showAIToast("Appuntamento confermato",
           app.titolo + " con " + chat.name + (quando ? "\n" + quando : "") + "\nLo trovi in Calendario.");
@@ -2624,6 +2647,67 @@ Se disdicono senza rifissare, azione "annulla".
       });
     }
   }
+}
+
+/* ============================================================
+   LE COSE RIMASTE IN SOSPESO
+   ------------------------------------------------------------
+   Quando un cliente risponde "ti faccio sapere" o "vediamo", la
+   cosa resta a metà: non e' un appuntamento, non e' un no. Sono
+   proprio queste le cose che si perdono. EON le segna in silenzio
+   e te le ricorda quando e' il momento.
+   ============================================================ */
+
+const GIORNI_PRIMA_DI_RICONTATTARE = 2;
+
+function segnaDaRicontattare(chat, titoloAppuntamento, quando){
+  const titolo = "Ricontattare " + chat.name;
+
+  /* Se c'e' gia' un promemoria per questo cliente, non ne aggiungiamo
+     un altro: uno basta. */
+  const gia = tasks.some(t => t.title === titolo && t.status !== "done");
+  if(gia) return;
+
+  const quandoRicontattare = new Date();
+  quandoRicontattare.setDate(quandoRicontattare.getDate() + GIORNI_PRIMA_DI_RICONTATTARE);
+  const dataLeggibile = quandoRicontattare.toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" });
+
+  /* Il promemoria si porta dietro il motivo: cosi' quando lo leggi
+     sai gia' cosa dire, senza dover ricostruire la conversazione. */
+  const motivo = quando
+    ? "doveva confermare " + (titoloAppuntamento ? titoloAppuntamento.toLowerCase() + " " : "") + "per " + quando
+    : "aveva lasciato in sospeso una risposta";
+
+  const nuova = {
+    title: titolo,
+    time: dataLeggibile,
+    status: "todo",
+    owner: "user",
+    inSospesoCon: chat.name,
+    motivo: motivo
+  };
+
+  if(isDbReady()){
+    dbInsert("tasks", {
+      title: titolo, owner_type: "user", status: "todo", time: dataLeggibile
+    }).then(saved => { if(saved) nuova.id = saved.id; });
+  }
+
+  tasks.push(nuova);
+  renderTasks(); renderRing(); renderDifficulty(); renderCalendar();
+  /* Nessuna notifica: e' una cosa da ricordare, non un'urgenza di adesso. */
+}
+
+/* Se poi il cliente conferma davvero, il promemoria non serve più:
+   sarebbe fastidioso ricontattare chi ti ha già risposto. */
+function togliDaRicontattare(chat){
+  const titolo = "Ricontattare " + chat.name;
+  const idx = tasks.findIndex(t => t.title === titolo && t.status !== "done");
+  if(idx === -1) return;
+  const t = tasks[idx];
+  tasks.splice(idx, 1);
+  if(isDbReady() && t.id) dbDelete("tasks", t.id);
+  renderTasks(); renderRing(); renderDifficulty(); renderCalendar();
 }
 
 /* Manda un messaggio al cliente a nome tuo. */
@@ -3222,6 +3306,12 @@ function renderCalendar(){
     });
   }
 
+  /* Le cose rimaste in sospeso: chi ti ha detto "ti faccio sapere" */
+  tasks.filter(t => t.inSospesoCon && t.status !== "done").forEach(t => {
+    items.push({ icon:"attesa", title:t.title, sub:t.motivo || "risposta rimasta in sospeso",
+      when:t.time, urgent:false });
+  });
+
   clients.filter(c => c.status === "attivo" || c.status === "trattativa").forEach(c => {
     if(chats.some(ch => ch.name === c.name && ch.toSeeToday)){
       items.push({ icon:"visit", title:"Vedere di persona — " + c.name, sub:c.desc.slice(0, 60) + "…", when:"Oggi", urgent:true });
@@ -3234,13 +3324,14 @@ function renderCalendar(){
   }
   const icons = {
     appt:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
-    visit:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'
+    visit:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+    attesa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
   };
   items.forEach(it => {
     const row = document.createElement("div");
     row.className = "list-row";
     row.innerHTML = `
-      <div class="row-avatar" style="background:${it.urgent ? 'var(--coral)' : 'var(--indigo)'};">${icons[it.icon]}</div>
+      <div class="row-avatar" style="background:${it.urgent ? 'var(--coral)' : (it.icon === 'attesa' ? 'var(--amber)' : 'var(--indigo)')};">${icons[it.icon]}</div>
       <div class="row-body">
         <div class="row-name">${it.title}</div>
         <div class="row-meta"><span>${it.sub}</span></div>
@@ -3534,7 +3625,9 @@ function buildTaskRow(t){
         ? '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>'
         : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>');
   const titleStyle = t.status === "done" ? "text-decoration:line-through;color:var(--faint);" : "";
-  const subLabel = t.owner === "ai" ? "Se ne occupa l'AI" : t.time;
+  const subLabel = t.inSospesoCon
+    ? (t.motivo || "risposta rimasta in sospeso")
+    : (t.owner === "ai" ? "Se ne occupa l'AI" : t.time);
   row.innerHTML = `
     <div class="module-icon" style="background:${iconColor};">${iconSvg}</div>
     <div class="azienda-link-card-body">
