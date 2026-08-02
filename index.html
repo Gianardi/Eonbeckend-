@@ -684,7 +684,7 @@
   .ai-toast-icon svg{ width:15px;height:15px; }
   .ai-toast-body{ flex:1; min-width:0; }
   .ai-toast-title{ font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:3px; }
-  .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; }
+  .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; white-space:pre-line; }
   .ai-toast-close{ cursor:pointer; color:var(--faint); flex:none; background:none; border:none; padding:2px; }
   .ai-toast-close svg{ width:14px;height:14px; }
 
@@ -742,6 +742,28 @@
     text-align:center; padding:26px 18px; color:var(--muted); font-size:13px; line-height:1.6;
   }
   .empty-hint b{ color:var(--text); display:block; font-size:14px; margin-bottom:5px; }
+
+  /* righe del calendario, con scrivi e chiama a portata di mano */
+  .cal-row{
+    padding:12px 10px 10px; border-radius:14px; margin-bottom:8px;
+    border:1px solid var(--border); background:var(--card);
+  }
+  .cal-head{ display:flex; align-items:center; gap:10px; }
+  .cal-when{
+    font-size:11.5px; font-weight:800; color:var(--muted);
+    flex:none; text-align:right; max-width:110px; line-height:1.3;
+  }
+  .cal-actions{ display:flex; gap:8px; margin-top:10px; margin-left:42px; }
+  .cal-btn{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:9px; border-radius:11px; cursor:pointer; font-family:inherit;
+    font-size:12px; font-weight:700; border:1px solid var(--border);
+  }
+  .cal-btn svg{ width:14px; height:14px; }
+  .cal-chat{ background:var(--wa-soft); color:var(--wa); border-color:rgba(31,174,85,.28); }
+  .cal-chat:hover{ background:rgba(31,174,85,.18); }
+  .cal-call{ background:var(--coral-soft); color:var(--coral); border-color:rgba(228,87,46,.28); }
+  .cal-call:hover{ background:rgba(228,87,46,.18); }
 
   /* proposta che compare al rientro da una chiamata */
   .callback-card{
@@ -2607,6 +2629,25 @@ let realtimeChannel = null;
 /* Le proposte in attesa di conferma, mostrate in cima alla chat */
 let pendingSuggestions = [];
 
+/* Riepilogo degli altri impegni, da mostrare quando se ne fissa uno:
+   serve a non accavallare appuntamenti senza accorgersene. */
+function altriImpegni(escludi, escludiQuando){
+  const altri = [];
+  chats.forEach(c => {
+    c.messages.forEach(m => {
+      if(m.eventType !== "appt" || m.annullato) return;
+      if(m === escludi) return;
+      /* Quando l'appuntamento arriva dal database non e' lo stesso
+         oggetto: lo riconosciamo dalla data. */
+      if(escludiQuando && m.text === escludiQuando) return;
+      altri.push((m.text || "") + " — " + c.name);
+    });
+  });
+  if(altri.length === 0) return "";
+  const primi = altri.slice(0, 3).join(" · ");
+  return "\n\nHai anche: " + primi + (altri.length > 3 ? " e altri " + (altri.length - 3) : "");
+}
+
 async function analyzeMessage(msg, chat){
   if(!msg || !chat) return;
 
@@ -2660,6 +2701,7 @@ Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza bac
   "appuntamento": {
     "azione": "nuovo" | "sposta" | "annulla",
     "riferimento": numero dell'appuntamento esistente (per sposta e annulla),
+    "eUnIncontroInPiu": true solo se è un SECONDO incontro che si aggiunge a quello esistente,
     "titolo": "...",
     "quando": "gio 8 ago, 09:00"
   } oppure null,
@@ -2698,7 +2740,9 @@ Se disdicono senza proporre una data nuova ("non ce la faccio", "annulliamo", "s
 === QUANDO USARE "nuovo" ===
 Solo in due casi:
 1. L'elenco degli appuntamenti sopra è vuoto.
-2. Stanno chiaramente fissando un incontro IN AGGIUNTA a quello esistente, con uno scopo diverso (es. esiste "Incontro" e aggiungono "Firma del contratto").
+2. Stanno fissando un incontro IN AGGIUNTA a quello esistente, con uno scopo chiaramente diverso (es. esiste "Incontro" e aggiungono "Firma del contratto", tenendo valido anche il primo). In questo caso metti "eUnIncontroInPiu": true.
+
+ATTENZIONE: se l'elenco NON è vuoto e stanno parlando di una data o un'ora per lo stesso tipo di incontro, l'azione è "sposta". Non usare "nuovo" per sostituire: usa "sposta".
 
 === FORMATO DELLA DATA ===
 Scrivi sempre "quando" in questa forma: "gio 8 ago, 09:00" (giorno abbreviato, numero, mese abbreviato, virgola, ora).
@@ -2731,19 +2775,14 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
 
     const esistenti = chat.messages.filter(m => m.eventType === "appt" && !m.annullato);
 
-    /* Rete di sicurezza: se l'AI dice "nuovo" ma con questo cliente c'e'
-       gia' un appuntamento aperto e nella conversazione si parla di
-       cambiare data, quasi certamente e' uno spostamento. Meglio
-       correggere qui che ritrovarsi due appuntamenti in contraddizione. */
-    if(azione === "nuovo" && esistenti.length > 0){
-      const testoRecente = recenti.map(m => m.text.toLowerCase()).join(" ");
-      const parlaDiCambio = /spost|modific|slitt|rimand|anticip|invece|anzich|cambi|altro giorno|piu[' ]avanti|più avanti|riman/.test(testoRecente);
-      const stessoTitolo = esistenti.some(m =>
-        (m.title || "").toLowerCase() === (app.titolo || "").toLowerCase());
-      if(parlaDiCambio || stessoTitolo){
-        azione = "sposta";
-        if(!app.riferimento) app.riferimento = esistenti.length; // il piu' recente
-      }
+    /* Regola netta: se con questo cliente c'e' gia' un appuntamento aperto,
+       un nuovo orario e' quasi sempre uno SPOSTAMENTO di quello, non un
+       secondo incontro. Aggiungiamo un appuntamento in piu' solo se l'AI
+       lo dichiara espressamente. Meglio sbagliare spostando che ritrovarsi
+       due appuntamenti in contraddizione sullo stesso calendario. */
+    if(azione === "nuovo" && esistenti.length > 0 && app.eUnIncontroInPiu !== true){
+      azione = "sposta";
+      if(!app.riferimento) app.riferimento = esistenti.length; // il piu' recente
     }
 
     /* Ritroviamo l'appuntamento a cui si riferisce, se e' uno spostamento */
@@ -2771,8 +2810,9 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
       }
       renderCalendar();
       renderChatWindow();
-      showAIToast("Appuntamento spostato",
-        riferito.title + ": da " + (prima || "data precedente") + " a " + riferito.text + ".");
+      showAIToast("Appuntamento modificato",
+        riferito.title + " con " + chat.name + ": da " + (prima || "data precedente") +
+        " a " + riferito.text + "." + altriImpegni(riferito));
 
     } else if(azione === "annulla" && riferito){
       riferito.annullato = true;
@@ -2786,7 +2826,8 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
       }
       renderCalendar();
       renderChatWindow();
-      showAIToast("Appuntamento annullato", titoloAnn + " è stato tolto dal calendario.");
+      showAIToast("Appuntamento annullato",
+        titoloAnn + " con " + chat.name + " è stato tolto dal calendario." + altriImpegni(riferito));
 
     } else if(app.titolo){
       /* Nuovo: evitiamo doppioni sullo stesso titolo e stessa data */
@@ -2794,16 +2835,19 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
         m.eventType === "appt" && !m.annullato &&
         m.title === app.titolo && m.text === quando);
       if(!gia){
+        let nuovoMsg = null;
         if(isDbReady() && chat.id){
           await supabaseClient.from("messages").insert({
             conversation_id: chat.id, sender: "me", event_type: "appt",
             title: app.titolo, body: quando
           });
         } else {
-          chat.messages.push({ eventType:"appt", title:app.titolo, text:quando, time:"ora" });
+          nuovoMsg = { eventType:"appt", title:app.titolo, text:quando, time:"ora" };
+          chat.messages.push(nuovoMsg);
         }
         renderCalendar();
-        showAIToast("Appuntamento aggiunto", app.titolo + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
+        showAIToast("Appuntamento aggiunto",
+          app.titolo + " con " + chat.name + (quando ? " — " + quando : "") + "." + altriImpegni(nuovoMsg, quando));
       }
     } else if((azione === "sposta" || azione === "annulla") && !riferito){
       /* L'AI ha capito uno spostamento ma non trova l'appuntamento:
@@ -3420,7 +3464,7 @@ function renderCalendar(){
       if(m.eventType === "appt" && !m.annullato){
         /* m.text contiene il "quando" scritto dall'AI (es. "gio 7 ago, 16:00"):
            e' quello che serve vedere, non l'ora in cui e' arrivato il messaggio. */
-        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false });
+        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false, contatto:c.name });
       }
     });
   });
@@ -3442,7 +3486,7 @@ function renderCalendar(){
 
   clients.filter(c => c.status === "attivo" || c.status === "trattativa").forEach(c => {
     if(chats.some(ch => ch.name === c.name && ch.toSeeToday)){
-      items.push({ icon:"visit", title:"Vedere di persona — " + c.name, sub:c.desc.slice(0, 60) + "…", when:"Oggi", urgent:true });
+      items.push({ icon:"visit", title:"Vedere di persona — " + c.name, sub:c.desc.slice(0, 60) + "…", when:"Oggi", urgent:true, contatto:c.name });
     }
   });
 
@@ -3456,15 +3500,56 @@ function renderCalendar(){
   };
   items.forEach(it => {
     const row = document.createElement("div");
-    row.className = "list-row";
+    row.className = "cal-row";
+    /* Da qui si scrive o si chiama subito, senza tornare ai Clienti */
+    const cliente = it.contatto ? clients.find(c => c.name === it.contatto) : null;
     row.innerHTML = `
-      <div class="row-avatar" style="background:${it.urgent ? 'var(--coral)' : 'var(--indigo)'};">${icons[it.icon]}</div>
-      <div class="row-body">
-        <div class="row-name">${it.title}</div>
-        <div class="row-meta"><span>${it.sub}</span></div>
+      <div class="cal-head">
+        <div class="row-avatar" style="background:${it.urgent ? 'var(--coral)' : 'var(--indigo)'};">${icons[it.icon]}</div>
+        <div class="row-body">
+          <div class="row-name">${it.title}</div>
+          <div class="row-meta"><span>${it.sub}</span></div>
+        </div>
+        <div class="cal-when">${it.when}</div>
       </div>
-      <div class="row-value" style="font-size:11.5px;font-weight:700;color:var(--muted);">${it.when}</div>
+      ${it.contatto ? `
+      <div class="cal-actions">
+        <button class="cal-btn cal-chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
+          Scrivi
+        </button>
+        <button class="cal-btn cal-call">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Chiama
+        </button>
+      </div>` : ''}
     `;
+
+    const btnChat = row.querySelector(".cal-chat");
+    if(btnChat) btnChat.addEventListener("click", async () => {
+      if(cliente){ await openClientChat(cliente); return; }
+      /* Il contatto non e' in archivio: apriamo comunque la sua chat */
+      const chat = chats.find(c => c.name === it.contatto);
+      if(chat){
+        activeChatIndex = chats.indexOf(chat);
+        chat.unread = 0;
+        navigateTo("chat");
+        renderChatList(); renderChatWindow();
+        document.getElementById("chatSlider").classList.add("show-conv");
+      }
+    });
+
+    const btnCall = row.querySelector(".cal-call");
+    if(btnCall) btnCall.addEventListener("click", () => {
+      if(cliente && cliente.phone && cliente.phone.trim()){
+        chiamataInCorso = { cliente: cliente, iniziata: Date.now() };
+        window.location.href = "tel:" + cliente.phone.replace(/\s/g, "");
+      } else {
+        showAILanding("Numero mancante",
+          "Non ho il telefono di " + it.contatto + ". Aggiungilo alla sua scheda in Clienti e potrai chiamare da qui.");
+      }
+    });
+
     wrap.appendChild(row);
   });
   document.getElementById("calendarCount").textContent = items.length;
