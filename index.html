@@ -2830,6 +2830,22 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
       if(!app.riferimento) app.riferimento = esistenti.length; // il piu' recente
     }
 
+    /* Chi ha chiesto il cambio? Non ci fidiamo del giudizio dell'AI:
+       lo ricaviamo dai messaggi, che e' un dato certo.
+       L'ultimo messaggio che NON e' una semplice conferma ("ok", "va
+       bene"...) e' la proposta vera: chi l'ha scritto ha proposto. */
+    const soloConferma = /^\s*(ok|okay|va bene|vabbene|perfetto|confermo|conferm\w*|s[iì]|certo|d'accordo|daccordo|ci sono|going|👍|ok!|ok\.)\s*[.!]?\s*$/i;
+    let chiPropone = null;
+    for(let i = recenti.length - 1; i >= 0; i--){
+      if(!soloConferma.test(recenti[i].text || "")){
+        chiPropone = recenti[i].from === "me" ? "professionista" : "cliente";
+        break;
+      }
+    }
+    /* Se non troviamo nulla di diverso da una conferma, usiamo quello
+       che dice l'AI come ripiego. */
+    if(!chiPropone) chiPropone = app.chiHaProposto || "professionista";
+
     /* Ritroviamo l'appuntamento a cui si riferisce, se e' uno spostamento */
     const riferito = (azione === "sposta" || azione === "annulla")
       ? (esistenti[(Number(app.riferimento) || 1) - 1] || esistenti[esistenti.length - 1])
@@ -2839,7 +2855,7 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
        il calendario da soli: la decisione e' del professionista. Gli
        mostriamo la richiesta con un OK da toccare, e al suo via
        rispondiamo anche al cliente. */
-    const loChiedeIlCliente = app.chiHaProposto === "cliente";
+    const loChiedeIlCliente = chiPropone === "cliente";
     if(loChiedeIlCliente && riferito && (azione === "sposta" || azione === "annulla")){
       addSuggestion({
         tipo: azione === "sposta" ? "spostaAppuntamento" : "annullaAppuntamento",
