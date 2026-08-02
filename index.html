@@ -98,7 +98,7 @@
 
   /* tab bar in basso, stile app mobile */
   .tabbar{
-    position:sticky; bottom:0; z-index:20;
+    position:sticky; bottom:0; z-index:30;
     display:flex; align-items:stretch; justify-content:space-around;
     background:rgba(255,255,255,.92); backdrop-filter:blur(18px);
     border-top:1px solid var(--border);
@@ -112,6 +112,12 @@
   .tab-item svg{ width:21px; height:21px; }
   .tab-item span{ font-size:9.5px; font-weight:700; }
   .tab-item.active{ color:var(--indigo); }
+  .tab-badge{
+    position:absolute; top:2px; right:calc(50% - 22px);
+    background:var(--coral); color:#fff; font-size:9.5px; font-weight:800;
+    min-width:16px; height:16px; border-radius:20px;
+    display:flex; align-items:center; justify-content:center; padding:0 4px;
+  }
 
   /* main */
   main{ flex:1; padding:16px 16px 20px; }
@@ -232,6 +238,9 @@
     position:fixed; inset:0; z-index:50; max-width:460px; margin:0 auto;
     background:var(--bg); overflow-y:auto; display:flex; flex-direction:column;
   }
+  /* Finche' l'onboarding e' aperto, la barra in basso non deve esserci:
+     altrimenti copre il pulsante Continua sugli schermi piccoli. */
+  body:has(.onboarding:not(.hidden)) .tabbar{ display:none; }
   .onboarding.hidden{ display:none; }
   .onboarding-inner{ flex:1; display:flex; flex-direction:column; padding:40px 22px 30px; }
   .ob-step{ display:none; flex:1; flex-direction:column; }
@@ -684,7 +693,7 @@
   .ai-toast-icon svg{ width:15px;height:15px; }
   .ai-toast-body{ flex:1; min-width:0; }
   .ai-toast-title{ font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:3px; }
-  .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; }
+  .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; white-space:pre-line; }
   .ai-toast-close{ cursor:pointer; color:var(--faint); flex:none; background:none; border:none; padding:2px; }
   .ai-toast-close svg{ width:14px;height:14px; }
 
@@ -742,6 +751,28 @@
     text-align:center; padding:26px 18px; color:var(--muted); font-size:13px; line-height:1.6;
   }
   .empty-hint b{ color:var(--text); display:block; font-size:14px; margin-bottom:5px; }
+
+  /* righe del calendario, con scrivi e chiama a portata di mano */
+  .cal-row{
+    padding:12px 10px 10px; border-radius:14px; margin-bottom:8px;
+    border:1px solid var(--border); background:var(--card);
+  }
+  .cal-head{ display:flex; align-items:center; gap:10px; }
+  .cal-when{
+    font-size:11.5px; font-weight:800; color:var(--muted);
+    flex:none; text-align:right; max-width:110px; line-height:1.3;
+  }
+  .cal-actions{ display:flex; gap:8px; margin-top:10px; margin-left:42px; }
+  .cal-btn{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:9px; border-radius:11px; cursor:pointer; font-family:inherit;
+    font-size:12px; font-weight:700; border:1px solid var(--border);
+  }
+  .cal-btn svg{ width:14px; height:14px; }
+  .cal-chat{ background:var(--wa-soft); color:var(--wa); border-color:rgba(31,174,85,.28); }
+  .cal-chat:hover{ background:rgba(31,174,85,.18); }
+  .cal-call{ background:var(--coral-soft); color:var(--coral); border-color:rgba(228,87,46,.28); }
+  .cal-call:hover{ background:rgba(228,87,46,.18); }
 
   /* proposta che compare al rientro da una chiamata */
   .callback-card{
@@ -891,6 +922,9 @@
     position:fixed; inset:0; max-width:460px; margin:0 auto;
     background:var(--card); z-index:25;
     display:flex; flex-direction:column;
+    /* lascia scoperta la barra in basso, altrimenti da Messaggi
+       non si potrebbe tornare alle altre sezioni */
+    padding-bottom:calc(58px + env(safe-area-inset-bottom, 0px));
   }
   .chat-slider{ flex:1; position:relative; overflow:hidden; }
   .chat-list-panel, .chat-conv-panel{
@@ -969,6 +1003,14 @@
   }
   .ai-sugg-yes{ background:var(--violet); color:#fff; }
   .ai-sugg-no{ background:rgba(20,23,29,.05); color:var(--muted); }
+
+  /* richiesta arrivata dal cliente: piu' evidente, richiede una decisione */
+  .ai-suggestion.da-cliente{
+    background:var(--amber-soft); border-color:rgba(201,134,11,.4);
+  }
+  .ai-suggestion.da-cliente .ai-suggestion-icon{ background:var(--amber); }
+  .ai-suggestion.da-cliente .ai-suggestion-eyebrow{ color:var(--amber); }
+  .ai-suggestion.da-cliente .ai-sugg-yes{ background:var(--amber); }
 
   /* vocali in chat */
   .chat-mic{
@@ -1538,6 +1580,7 @@
           <div class="module-sub">Da fare oggi, programmate, recenti</div>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- ==================== PAGINA: CALENDARIO ==================== -->
@@ -1854,6 +1897,26 @@
         Torna alla Home
       </div>
       <div class="azienda-list">
+        <div class="azienda-link-card" data-page="opportunita">
+          <div class="module-icon" style="background:var(--green);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title" id="aziendaOppTitle">Opportunità</div>
+            <div class="module-sub" id="aziendaOppSub">Trattative e clienti da prendere</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="obiettivi">
+          <div class="module-icon" style="background:var(--violet);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Obiettivi</div>
+            <div class="module-sub">Il tuo futuro, lavorativo e personale</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
         <div class="azienda-link-card" data-page="assegna-compiti">
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
@@ -2607,6 +2670,25 @@ let realtimeChannel = null;
 /* Le proposte in attesa di conferma, mostrate in cima alla chat */
 let pendingSuggestions = [];
 
+/* Riepilogo degli altri impegni, da mostrare quando se ne fissa uno:
+   serve a non accavallare appuntamenti senza accorgersene. */
+function altriImpegni(escludi, escludiQuando){
+  const altri = [];
+  chats.forEach(c => {
+    c.messages.forEach(m => {
+      if(m.eventType !== "appt" || m.annullato) return;
+      if(m === escludi) return;
+      /* Quando l'appuntamento arriva dal database non e' lo stesso
+         oggetto: lo riconosciamo dalla data. */
+      if(escludiQuando && m.text === escludiQuando) return;
+      altri.push((m.text || "") + " — " + c.name);
+    });
+  });
+  if(altri.length === 0) return "";
+  const primi = altri.slice(0, 3).join(" · ");
+  return "\n\nHai anche: " + primi + (altri.length > 3 ? " e altri " + (altri.length - 3) : "");
+}
+
 async function analyzeMessage(msg, chat){
   if(!msg || !chat) return;
 
@@ -2660,6 +2742,8 @@ Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza bac
   "appuntamento": {
     "azione": "nuovo" | "sposta" | "annulla",
     "riferimento": numero dell'appuntamento esistente (per sposta e annulla),
+    "chiHaProposto": "cliente" | "professionista",
+    "eUnIncontroInPiu": true solo se è un SECONDO incontro che si aggiunge a quello esistente,
     "titolo": "...",
     "quando": "gio 8 ago, 09:00"
   } oppure null,
@@ -2667,6 +2751,9 @@ Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza bac
   "cambioStato": "attivo" | "trattativa" | "inattivo" oppure null,
   "valore": numero oppure null
 }
+
+=== CHI HA PROPOSTO ===
+Indica sempre in "chiHaProposto" chi dei due ha avanzato la proposta di appuntamento, spostamento o annullamento. Guarda chi l'ha detto per primo nella conversazione, non chi ha risposto.
 
 === REGOLA FONDAMENTALE: LA CONFERMA ===
 Un appuntamento si registra, si sposta o si annulla SOLO quando chi NON ha fatto la proposta ha risposto accettando.
@@ -2698,7 +2785,9 @@ Se disdicono senza proporre una data nuova ("non ce la faccio", "annulliamo", "s
 === QUANDO USARE "nuovo" ===
 Solo in due casi:
 1. L'elenco degli appuntamenti sopra è vuoto.
-2. Stanno chiaramente fissando un incontro IN AGGIUNTA a quello esistente, con uno scopo diverso (es. esiste "Incontro" e aggiungono "Firma del contratto").
+2. Stanno fissando un incontro IN AGGIUNTA a quello esistente, con uno scopo chiaramente diverso (es. esiste "Incontro" e aggiungono "Firma del contratto", tenendo valido anche il primo). In questo caso metti "eUnIncontroInPiu": true.
+
+ATTENZIONE: se l'elenco NON è vuoto e stanno parlando di una data o un'ora per lo stesso tipo di incontro, l'azione è "sposta". Non usare "nuovo" per sostituire: usa "sposta".
 
 === FORMATO DELLA DATA ===
 Scrivi sempre "quando" in questa forma: "gio 8 ago, 09:00" (giorno abbreviato, numero, mese abbreviato, virgola, ora).
@@ -2731,25 +2820,45 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
 
     const esistenti = chat.messages.filter(m => m.eventType === "appt" && !m.annullato);
 
-    /* Rete di sicurezza: se l'AI dice "nuovo" ma con questo cliente c'e'
-       gia' un appuntamento aperto e nella conversazione si parla di
-       cambiare data, quasi certamente e' uno spostamento. Meglio
-       correggere qui che ritrovarsi due appuntamenti in contraddizione. */
-    if(azione === "nuovo" && esistenti.length > 0){
-      const testoRecente = recenti.map(m => m.text.toLowerCase()).join(" ");
-      const parlaDiCambio = /spost|modific|slitt|rimand|anticip|invece|anzich|cambi|altro giorno|piu[' ]avanti|più avanti|riman/.test(testoRecente);
-      const stessoTitolo = esistenti.some(m =>
-        (m.title || "").toLowerCase() === (app.titolo || "").toLowerCase());
-      if(parlaDiCambio || stessoTitolo){
-        azione = "sposta";
-        if(!app.riferimento) app.riferimento = esistenti.length; // il piu' recente
-      }
+    /* Regola netta: se con questo cliente c'e' gia' un appuntamento aperto,
+       un nuovo orario e' quasi sempre uno SPOSTAMENTO di quello, non un
+       secondo incontro. Aggiungiamo un appuntamento in piu' solo se l'AI
+       lo dichiara espressamente. Meglio sbagliare spostando che ritrovarsi
+       due appuntamenti in contraddizione sullo stesso calendario. */
+    if(azione === "nuovo" && esistenti.length > 0 && app.eUnIncontroInPiu !== true){
+      azione = "sposta";
+      if(!app.riferimento) app.riferimento = esistenti.length; // il piu' recente
     }
 
     /* Ritroviamo l'appuntamento a cui si riferisce, se e' uno spostamento */
     const riferito = (azione === "sposta" || azione === "annulla")
       ? (esistenti[(Number(app.riferimento) || 1) - 1] || esistenti[esistenti.length - 1])
       : null;
+
+    /* Se e' il CLIENTE a chiedere di spostare o annullare, non tocchiamo
+       il calendario da soli: la decisione e' del professionista. Gli
+       mostriamo la richiesta con un OK da toccare, e al suo via
+       rispondiamo anche al cliente. */
+    const loChiedeIlCliente = app.chiHaProposto === "cliente";
+    if(loChiedeIlCliente && riferito && (azione === "sposta" || azione === "annulla")){
+      addSuggestion({
+        tipo: azione === "sposta" ? "spostaAppuntamento" : "annullaAppuntamento",
+        chat: chat,
+        appuntamento: riferito,
+        quandoNuovo: quando,
+        titoloNuovo: app.titolo,
+        testo: azione === "sposta"
+          ? `${chat.name} chiede di spostare "${riferito.title}" da ${riferito.text || "—"} a <b>${quando || "una nuova data"}</b>.`
+          : `${chat.name} chiede di annullare "${riferito.title}" del ${riferito.text || "—"}.`
+      });
+      showAIToast(
+        azione === "sposta" ? "Richiesta di spostamento" : "Richiesta di annullamento",
+        chat.name + (azione === "sposta"
+          ? " chiede di spostare a " + (quando || "una nuova data") + ". Apri la conversazione per confermare."
+          : " chiede di annullare l'appuntamento. Apri la conversazione per confermare.")
+      );
+      return; /* niente altro: aspettiamo la tua conferma */
+    }
 
     if(azione === "sposta" && riferito){
       const prima = riferito.text;
@@ -2771,8 +2880,9 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
       }
       renderCalendar();
       renderChatWindow();
-      showAIToast("Appuntamento spostato",
-        riferito.title + ": da " + (prima || "data precedente") + " a " + riferito.text + ".");
+      showAIToast("Appuntamento modificato",
+        riferito.title + " con " + chat.name + ": da " + (prima || "data precedente") +
+        " a " + riferito.text + "." + altriImpegni(riferito));
 
     } else if(azione === "annulla" && riferito){
       riferito.annullato = true;
@@ -2786,7 +2896,8 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
       }
       renderCalendar();
       renderChatWindow();
-      showAIToast("Appuntamento annullato", titoloAnn + " è stato tolto dal calendario.");
+      showAIToast("Appuntamento annullato",
+        titoloAnn + " con " + chat.name + " è stato tolto dal calendario." + altriImpegni(riferito));
 
     } else if(app.titolo){
       /* Nuovo: evitiamo doppioni sullo stesso titolo e stessa data */
@@ -2794,16 +2905,19 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
         m.eventType === "appt" && !m.annullato &&
         m.title === app.titolo && m.text === quando);
       if(!gia){
+        let nuovoMsg = null;
         if(isDbReady() && chat.id){
           await supabaseClient.from("messages").insert({
             conversation_id: chat.id, sender: "me", event_type: "appt",
             title: app.titolo, body: quando
           });
         } else {
-          chat.messages.push({ eventType:"appt", title:app.titolo, text:quando, time:"ora" });
+          nuovoMsg = { eventType:"appt", title:app.titolo, text:quando, time:"ora" };
+          chat.messages.push(nuovoMsg);
         }
         renderCalendar();
-        showAIToast("Appuntamento aggiunto", app.titolo + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
+        showAIToast("Appuntamento aggiunto",
+          app.titolo + " con " + chat.name + (quando ? " — " + quando : "") + "." + altriImpegni(nuovoMsg, quando));
       }
     } else if((azione === "sposta" || azione === "annulla") && !riferito){
       /* L'AI ha capito uno spostamento ma non trova l'appuntamento:
@@ -2852,7 +2966,10 @@ Se non viene detta un'ora e non ce n'è una precedente da tenere, ometti l'ora: 
 }
 
 function addSuggestion(s){
-  const gia = pendingSuggestions.some(p => p.tipo === s.tipo && p.cliente === s.cliente && p.valoreNuovo === s.valoreNuovo);
+  const gia = pendingSuggestions.some(p =>
+    p.tipo === s.tipo &&
+    p.cliente === s.cliente && p.valoreNuovo === s.valoreNuovo &&
+    p.appuntamento === s.appuntamento && p.quandoNuovo === s.quandoNuovo);
   if(gia) return;
   pendingSuggestions.push(s);
   renderSuggestions();
@@ -2862,21 +2979,28 @@ function renderSuggestions(){
   const wrap = document.getElementById("chatSuggestions");
   if(!wrap) return;
   wrap.innerHTML = "";
-  if(pendingSuggestions.length === 0) return;
+  const chatAperta = activeChatIndex !== null ? chats[activeChatIndex] : null;
+  /* Mostriamo qui solo cio' che riguarda la conversazione aperta:
+     le altre restano in attesa e compaiono quando la apri. */
+  const daMostrare = pendingSuggestions
+    .map((s, i) => ({ s, i }))
+    .filter(({s}) => !s.chat || s.chat === chatAperta);
+  if(daMostrare.length === 0) return;
 
-  pendingSuggestions.forEach((s, i) => {
+  daMostrare.forEach(({ s, i }) => {
+    const eDelCliente = s.tipo === "spostaAppuntamento" || s.tipo === "annullaAppuntamento";
     const card = document.createElement("div");
-    card.className = "ai-suggestion";
+    card.className = "ai-suggestion" + (eDelCliente ? " da-cliente" : "");
     card.innerHTML = `
       <div class="ai-suggestion-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
       </div>
       <div class="ai-suggestion-body">
-        <div class="ai-suggestion-eyebrow">L'AI ha notato</div>
+        <div class="ai-suggestion-eyebrow">${eDelCliente ? "Richiesta del cliente" : "L'AI ha notato"}</div>
         <div class="ai-suggestion-text">${s.testo}</div>
         <div class="ai-suggestion-actions">
-          <button class="ai-sugg-yes" data-i="${i}">Sì, aggiorna</button>
-          <button class="ai-sugg-no" data-i="${i}">No, lascia</button>
+          <button class="ai-sugg-yes" data-i="${i}">${eDelCliente ? "OK, confermo" : "Sì, aggiorna"}</button>
+          <button class="ai-sugg-no" data-i="${i}">${eDelCliente ? "No, non posso" : "No, lascia"}</button>
         </div>
       </div>
     `;
@@ -2887,28 +3011,92 @@ function renderSuggestions(){
     b.addEventListener("click", async () => {
       const s = pendingSuggestions[Number(b.dataset.i)];
       if(!s) return;
+      b.disabled = true;
+
+      /* --- Spostamento chiesto dal cliente: confermo e gli rispondo --- */
+      if(s.tipo === "spostaAppuntamento"){
+        const app = s.appuntamento;
+        const prima = app.text;
+        app.text = s.quandoNuovo || app.text;
+        if(s.titoloNuovo) app.title = s.titoloNuovo;
+
+        if(isDbReady() && app.id){
+          await supabaseClient.from("messages")
+            .update({ body: app.text, title: app.title }).eq("id", app.id);
+        }
+        /* Rispondiamo al cliente al posto tuo: sa subito che va bene */
+        await rispondiAlCliente(s.chat, "Va bene, confermo: " + app.text + ".");
+
+        renderCalendar();
+        showAIToast("Appuntamento modificato",
+          app.title + " con " + s.chat.name + ": da " + (prima || "data precedente") +
+          " a " + app.text + "." + altriImpegni(app));
+      }
+
+      /* --- Annullamento chiesto dal cliente --- */
+      if(s.tipo === "annullaAppuntamento"){
+        const app = s.appuntamento;
+        const titoloAnn = app.title;
+        app.annullato = true;
+        app.title = "❌ " + app.title + " (annullato)";
+
+        if(isDbReady() && app.id){
+          await supabaseClient.from("messages").update({ title: app.title }).eq("id", app.id);
+        }
+        await rispondiAlCliente(s.chat, "Va bene, annullo l'appuntamento. Ci risentiamo per fissarne un altro.");
+
+        renderCalendar();
+        showAIToast("Appuntamento annullato",
+          titoloAnn + " con " + s.chat.name + " è stato tolto dal calendario." + altriImpegni(app));
+      }
+
       if(s.tipo === "stato"){
         s.cliente.status = s.valoreNuovo;
         if(isDbReady() && s.cliente.id) await dbUpdate("clients", s.cliente.id, { status: s.valoreNuovo });
+        showAIToast("Aggiornato", "La scheda di " + s.cliente.name + " è stata aggiornata.");
       }
       if(s.tipo === "valore"){
         s.cliente.value = s.valoreNuovo;
         if(isDbReady() && s.cliente.id) await dbUpdate("clients", s.cliente.id, { value: s.valoreNuovo });
+        showAIToast("Aggiornato", "La scheda di " + s.cliente.name + " è stata aggiornata.");
       }
+
       pendingSuggestions = pendingSuggestions.filter(p => p !== s);
       renderSuggestions();
+      renderChatWindow();
       renderClientArchive(); renderClientStats(); renderSummary();
-      showAIToast("Aggiornato", "La scheda di " + s.cliente.name + " è stata aggiornata.");
     });
   });
 
   wrap.querySelectorAll(".ai-sugg-no").forEach(b => {
-    b.addEventListener("click", () => {
+    b.addEventListener("click", async () => {
       const s = pendingSuggestions[Number(b.dataset.i)];
+      /* Se rifiuti uno spostamento, lo diciamo al cliente: cosi' non
+         resta in attesa di una risposta che non arriva. */
+      if(s && (s.tipo === "spostaAppuntamento" || s.tipo === "annullaAppuntamento")){
+        await rispondiAlCliente(s.chat, "Purtroppo non riesco a spostare. Riusciamo a tenere " + (s.appuntamento.text || "l'orario concordato") + "?");
+      }
       pendingSuggestions = pendingSuggestions.filter(p => p !== s);
       renderSuggestions();
     });
   });
+}
+
+/* Manda un messaggio al cliente a nome tuo, come se l'avessi scritto tu. */
+async function rispondiAlCliente(chat, testo){
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+
+  if(isDbReady() && chat.id){
+    const { error } = await supabaseClient.from("messages").insert({
+      conversation_id: chat.id, sender: "me", body: testo
+    });
+    if(!error) return;   /* arriva dal realtime */
+    console.error("Risposta automatica non inviata:", error.message);
+  }
+  chat.messages.push({ from:"me", text:testo, time });
+  renderChatWindow();
+  renderChatList();
 }
 
 function subscribeToMessages(){
@@ -3420,7 +3608,7 @@ function renderCalendar(){
       if(m.eventType === "appt" && !m.annullato){
         /* m.text contiene il "quando" scritto dall'AI (es. "gio 7 ago, 16:00"):
            e' quello che serve vedere, non l'ora in cui e' arrivato il messaggio. */
-        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false });
+        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false, contatto:c.name });
       }
     });
   });
@@ -3442,7 +3630,7 @@ function renderCalendar(){
 
   clients.filter(c => c.status === "attivo" || c.status === "trattativa").forEach(c => {
     if(chats.some(ch => ch.name === c.name && ch.toSeeToday)){
-      items.push({ icon:"visit", title:"Vedere di persona — " + c.name, sub:c.desc.slice(0, 60) + "…", when:"Oggi", urgent:true });
+      items.push({ icon:"visit", title:"Vedere di persona — " + c.name, sub:c.desc.slice(0, 60) + "…", when:"Oggi", urgent:true, contatto:c.name });
     }
   });
 
@@ -3456,15 +3644,56 @@ function renderCalendar(){
   };
   items.forEach(it => {
     const row = document.createElement("div");
-    row.className = "list-row";
+    row.className = "cal-row";
+    /* Da qui si scrive o si chiama subito, senza tornare ai Clienti */
+    const cliente = it.contatto ? clients.find(c => c.name === it.contatto) : null;
     row.innerHTML = `
-      <div class="row-avatar" style="background:${it.urgent ? 'var(--coral)' : 'var(--indigo)'};">${icons[it.icon]}</div>
-      <div class="row-body">
-        <div class="row-name">${it.title}</div>
-        <div class="row-meta"><span>${it.sub}</span></div>
+      <div class="cal-head">
+        <div class="row-avatar" style="background:${it.urgent ? 'var(--coral)' : 'var(--indigo)'};">${icons[it.icon]}</div>
+        <div class="row-body">
+          <div class="row-name">${it.title}</div>
+          <div class="row-meta"><span>${it.sub}</span></div>
+        </div>
+        <div class="cal-when">${it.when}</div>
       </div>
-      <div class="row-value" style="font-size:11.5px;font-weight:700;color:var(--muted);">${it.when}</div>
+      ${it.contatto ? `
+      <div class="cal-actions">
+        <button class="cal-btn cal-chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
+          Scrivi
+        </button>
+        <button class="cal-btn cal-call">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Chiama
+        </button>
+      </div>` : ''}
     `;
+
+    const btnChat = row.querySelector(".cal-chat");
+    if(btnChat) btnChat.addEventListener("click", async () => {
+      if(cliente){ await openClientChat(cliente); return; }
+      /* Il contatto non e' in archivio: apriamo comunque la sua chat */
+      const chat = chats.find(c => c.name === it.contatto);
+      if(chat){
+        activeChatIndex = chats.indexOf(chat);
+        chat.unread = 0;
+        navigateTo("chat");
+        renderChatList(); renderChatWindow();
+        document.getElementById("chatSlider").classList.add("show-conv");
+      }
+    });
+
+    const btnCall = row.querySelector(".cal-call");
+    if(btnCall) btnCall.addEventListener("click", () => {
+      if(cliente && cliente.phone && cliente.phone.trim()){
+        chiamataInCorso = { cliente: cliente, iniziata: Date.now() };
+        window.location.href = "tel:" + cliente.phone.replace(/\s/g, "");
+      } else {
+        showAILanding("Numero mancante",
+          "Non ho il telefono di " + it.contatto + ". Aggiungilo alla sua scheda in Clienti e potrai chiamare da qui.");
+      }
+    });
+
     wrap.appendChild(row);
   });
   document.getElementById("calendarCount").textContent = items.length;
@@ -3550,6 +3779,11 @@ async function applyProfession(key, skipDemoData){
 
   document.getElementById("tabLabelClienti").textContent = p.clientiTitle;
   document.getElementById("tabLabelOpportunita").textContent = p.oppTileTitle;
+  const aziendaOpp = document.getElementById("aziendaOppTitle");
+  if(aziendaOpp){
+    aziendaOpp.textContent = p.oppTileTitle;
+    document.getElementById("aziendaOppSub").textContent = p.oppTileSub;
+  }
 
   pageMeta.clienti.title = p.clientiTitle;
   pageMeta.clienti.sub = p.clientiSub;
@@ -4942,6 +5176,7 @@ function renderChatList(){
   document.getElementById("chatBadge").textContent = chats.reduce((s,c)=>s+c.unread,0);
   const totalUnread = chats.reduce((s,c)=>s+c.unread,0);
   document.getElementById("chatBadge").style.display = totalUnread > 0 ? "flex" : "none";
+
   renderSummary();
   saveState("eon-chats", chats);
 }
@@ -5085,6 +5320,7 @@ function renderChatWindow(){
     messagesEl.appendChild(b);
   });
   messagesEl.scrollTop = messagesEl.scrollHeight;
+  renderSuggestions();
 }
 
 document.getElementById("chatSendBtn").addEventListener("click", sendChatMessage);
