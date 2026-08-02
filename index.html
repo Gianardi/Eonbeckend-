@@ -2441,9 +2441,21 @@ Se disdicono senza rifissare, azione "annulla".
     /* Se esiste gia' un appuntamento, un orario nuovo e' uno spostamento */
     if(azione === "nuovo" && esistenti.length > 0) azione = "sposta";
 
-    /* Chi ha proposto il cambio? Lo ricaviamo dai messaggi.
-       L'ultimo messaggio che NON e' una semplice conferma e' la proposta. */
-    const soloConferma = /^\s*(ok|okay|va bene|vabbene|perfetto|confermo|s[iì]|certo|d'accordo|daccordo|ci sono|grazie|👍)\s*[.!]?\s*$/i;
+    /* ============================================================
+       CHI HA PROPOSTO E CHI HA CONFERMATO
+       ------------------------------------------------------------
+       Non ci affidiamo al giudizio dell'AI: lo ricaviamo dai
+       messaggi, che e' un dato certo.
+
+       - L'ultimo messaggio e' una conferma?  -> qualcuno ha detto sì
+       - Chi ha scritto la proposta?          -> l'ultimo messaggio
+                                                 che NON e' una conferma
+       ============================================================ */
+    const soloConferma = /^\s*(ok|okay|va bene|vabbene|perfetto|confermo|s[iì]|certo|d'accordo|daccordo|ci sono|va benissimo|per me va bene|grazie|👍|ok!|ok\.)\s*[.!]?\s*$/i;
+
+    const ultimo = recenti[recenti.length - 1];
+    const ultimoEUnaConferma = ultimo && soloConferma.test(ultimo.text || "");
+
     let chiPropone = "professionista";
     for(let i = recenti.length - 1; i >= 0; i--){
       if(!soloConferma.test(recenti[i].text || "")){
@@ -2453,6 +2465,16 @@ Se disdicono senza rifissare, azione "annulla".
     }
 
     const riferito = esistenti.length ? esistenti[esistenti.length - 1] : null;
+
+    /* --- REGOLA 1: proposta MIA non ancora confermata -> non faccio niente ---
+       Se ho appena scritto io e il cliente non ha ancora risposto,
+       non tocco il calendario e non mando nessuna notifica: aspetto. */
+    if(chiPropone === "professionista" && !ultimoEUnaConferma) return;
+
+    /* --- REGOLA 2: la proposta e' del CLIENTE e non ho ancora risposto ---
+       Gli appuntamenti nuovi si registrano solo dopo la mia conferma
+       in chat; gli spostamenti passano dalla notifica con Conferma. */
+    if(chiPropone === "cliente" && !ultimoEUnaConferma && !riferito) return;
 
     /* CASO 3: lo chiede il CLIENTE -> notifica con tasto Conferma */
     if(chiPropone === "cliente" && riferito && (azione === "sposta" || azione === "annulla")){
@@ -2472,8 +2494,9 @@ Se disdicono senza rifissare, azione "annulla".
             }
             await rispondiAlCliente(chatRif, "Ok, confermo: " + appRif.text + ".");
             renderCalendar(); renderChatWindow();
-            showAIToast("Appuntamento modificato",
-              appRif.title + " con " + chatRif.name + " spostato a " + appRif.text + ".");
+            showAIToast("Appuntamento confermato",
+              appRif.title + " con " + chatRif.name + " spostato a " + appRif.text +
+              ".\nAggiornato in Calendario, e ho già risposto al cliente.");
           },
           async () => {
             await rispondiAlCliente(chatRif,
@@ -2514,8 +2537,9 @@ Se disdicono senza rifissare, azione "annulla".
           .update({ body: riferito.text, title: riferito.title }).eq("id", riferito.id);
       }
       renderCalendar(); renderChatWindow();
-      showAIToast("Appuntamento modificato",
-        riferito.title + " con " + chat.name + ": da " + (prima || "—") + " a " + riferito.text + ".");
+      showAIToast("Appuntamento confermato",
+        riferito.title + " con " + chat.name + " spostato a " + riferito.text +
+        ".\nPrima era: " + (prima || "—") + ". Aggiornato in Calendario.");
       return;
     }
 
@@ -2546,8 +2570,8 @@ Se disdicono senza rifissare, azione "annulla".
           chat.messages.push({ eventType:"appt", title:app.titolo, text:quando, time:"ora" });
         }
         renderCalendar();
-        showAIToast("Appuntamento fissato",
-          app.titolo + " con " + chat.name + (quando ? " — " + quando : "") + ". Lo trovi in Calendario.");
+        showAIToast("Appuntamento confermato",
+          app.titolo + " con " + chat.name + (quando ? "\n" + quando : "") + "\nLo trovi in Calendario.");
       }
     }
   }
