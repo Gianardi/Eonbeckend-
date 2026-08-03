@@ -28,22 +28,31 @@
     --muted:#5B6478;
     --faint:#98A0B4;
 
-    --indigo:#2F5CF6;
-    --indigo-dark:#1B3FCC;
-    --indigo-soft:rgba(47,92,246,.09);
-    --grad-blue:linear-gradient(135deg, #3E6BFF 0%, #2144D6 100%);
-    --teal:#0E9F84;
-    --teal-soft:rgba(14,159,132,.11);
-    --coral:#E4572E;
-    --coral-soft:rgba(228,87,46,.10);
-    --amber:#C9860B;
-    --amber-soft:rgba(201,134,11,.12);
-    --green:#16A34A;
-    --green-soft:rgba(22,163,74,.11);
-    --violet:#7C5CFA;
-    --violet-soft:rgba(124,92,250,.10);
-    --wa:#1FAE55;
-    --wa-soft:rgba(31,174,85,.11);
+    /* Arcobaleno pastello: sei colori molto distanti tra loro, ognuno
+       in due intensita'. Il pastello (-tint) fa da sfondo alle card,
+       la versione carica sta sulle icone e sui numeri. */
+    --indigo:#3B6FFF;
+    --indigo-dark:#2050D8;
+    --indigo-soft:rgba(59,111,255,.12);
+    --indigo-tint:#8FB4FF;
+    --grad-blue:linear-gradient(135deg, #5A87FF 0%, #2E5FE8 100%);
+    --teal:#00BFA0;
+    --teal-soft:rgba(0,191,160,.13);
+    --teal-tint:#5EDFC4;
+    --coral:#FF4757;
+    --coral-soft:rgba(255,71,87,.12);
+    --coral-tint:#FF8A8A;
+    --amber:#F0A500;
+    --amber-soft:rgba(240,165,0,.15);
+    --amber-tint:#FFCF5E;
+    --green:#12C971;
+    --green-soft:rgba(18,201,113,.13);
+    --green-tint:#7FE39C;
+    --violet:#9B5CFF;
+    --violet-soft:rgba(155,92,255,.12);
+    --violet-tint:#C9A7FF;
+    --wa:#12C971;
+    --wa-soft:rgba(18,201,113,.13);
 
     --radius:16px;
     --shadow-sm:0 1px 2px rgba(20,23,29,.05), 0 1px 1px rgba(20,23,29,.04);
@@ -341,14 +350,23 @@
     box-shadow:var(--shadow-sm);
   }
   .module-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
-  .module-card.tint-teal{ background:var(--teal-soft); border-color:rgba(14,159,132,.22); }
-  .module-card.tint-indigo{ background:var(--indigo-soft); border-color:rgba(41,82,204,.22); }
-  .module-card.tint-green{ background:var(--green-soft); border-color:rgba(22,163,74,.22); }
-  .module-card.tint-violet{ background:var(--violet-soft); border-color:rgba(124,92,250,.22); }
+  /* Le card della Home prendono il colore pastello pieno, con i testi
+     scuri sopra: cosi' ogni sezione si riconosce a colpo d'occhio e
+     resta comunque leggibile. */
+  .module-card.tint-teal{ background:var(--teal-tint); border-color:transparent; }
+  .module-card.tint-indigo{ background:var(--indigo-tint); border-color:transparent; }
+  .module-card.tint-green{ background:var(--green-tint); border-color:transparent; }
+  .module-card.tint-violet{ background:var(--violet-tint); border-color:transparent; }
   .module-card.tint-wa{ background:var(--wa-soft); border-color:rgba(31,174,85,.22); }
-  .module-card.tint-coral{ background:var(--coral-soft); border-color:rgba(228,87,46,.22); }
-  .module-card.tint-amber{ background:var(--amber-soft); border-color:rgba(201,134,11,.22); }
-  .module-card.tint-faint{ background:rgba(20,23,29,.035); border-color:var(--border-strong); }
+  .module-card.tint-coral{ background:var(--coral-tint); border-color:transparent; }
+  .module-card.tint-amber{ background:var(--amber-tint); border-color:transparent; }
+  .module-card.tint-faint{ background:#E3E7EF; border-color:transparent; }
+
+  /* Sulle card colorate i testi restano scuri e l'etichetta si attenua,
+     invece di usare il colore che ora fa da sfondo. */
+  .module-card[class*="tint-"] .module-eyebrow{ color:rgba(20,23,38,.6) !important; }
+  .module-card[class*="tint-"] .module-title{ color:#141726; }
+  .module-card[class*="tint-"] .module-sub{ color:rgba(20,23,38,.68); }
   .module-icon{
     width:40px; height:40px; border-radius:13px;
     display:flex; align-items:center; justify-content:center; margin-bottom:10px;
