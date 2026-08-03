@@ -546,6 +546,52 @@
   .stat-label{ font-size:12px; color:var(--muted); margin-top:2px; }
 
   /* client / list rows generici */
+  /* ---- Calendario a linea del tempo ---- */
+  .cal-giorno{
+    display:flex; align-items:center; gap:9px; margin:18px 0 9px;
+    font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.09em;
+    color:var(--faint);
+  }
+  .cal-giorno:first-child{ margin-top:2px; }
+  .cal-giorno i{
+    font-style:normal; font-size:9.5px; background:rgba(20,30,60,.06);
+    color:var(--muted); border-radius:20px; padding:2px 7px; font-weight:800;
+  }
+  .cal-giorno::after{ content:""; flex:1; height:1px; background:var(--border); }
+  .cal-giorno.oggi{ color:var(--indigo); }
+  .cal-giorno.oggi i{ background:var(--indigo-soft); color:var(--indigo); }
+  .cal-giorno.oggi::after{ background:rgba(59,111,255,.2); }
+
+  .cal-voce{
+    display:flex; align-items:flex-start; gap:11px;
+    padding:12px 13px; margin-bottom:8px; border-radius:15px;
+    background:var(--card); border:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .cal-voce.oggi{ border-color:rgba(59,111,255,.3); box-shadow:0 2px 10px rgba(59,111,255,.08); }
+  .cal-ora{
+    font-family:'Manrope'; font-size:13px; font-weight:900; color:var(--text);
+    min-width:42px; flex:none; padding-top:9px; letter-spacing:-.02em;
+  }
+  .cal-voce:not(.oggi) .cal-ora{ color:var(--muted); }
+  .cal-corpo{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+  .cal-icona{
+    width:34px; height:34px; border-radius:11px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cal-testo{ min-width:0; }
+  .cal-nome{ font-size:13.5px; font-weight:700; color:var(--text); }
+  .cal-sotto{ font-size:11px; color:var(--muted); margin-top:2px; }
+  .cal-azioni{ display:flex; gap:7px; width:100%; margin-top:9px; padding-left:53px; }
+  .cal-btn{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:8px; border-radius:10px; cursor:pointer; font-family:inherit;
+    font-size:11.5px; font-weight:700; border:1px solid var(--border);
+  }
+  .cal-btn svg{ width:13px; height:13px; }
+  .cal-scrivi{ background:var(--teal-soft); color:#0A8A72; border-color:rgba(0,191,160,.28); }
+  .cal-chiama{ background:var(--coral-soft); color:#D62F3F; border-color:rgba(255,71,87,.26); }
+
   .list-row{
     display:flex; align-items:center; gap:10px;
     padding:10px 8px; border-radius:12px; transition:background .12s;
@@ -3304,7 +3350,7 @@ function renderCalendar(){
   chats.forEach(c => {
     c.messages.forEach(m => {
       if(m.eventType === "appt" && !m.annullato){
-        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false });
+        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false, contatto:c.name });
       }
     });
   });
@@ -3327,12 +3373,12 @@ function renderCalendar(){
   /* Le cose rimaste in sospeso: chi ti ha detto "ti faccio sapere" */
   tasks.filter(t => t.inSospesoCon && t.status !== "done").forEach(t => {
     items.push({ icon:"attesa", title:t.title, sub:t.motivo || "risposta rimasta in sospeso",
-      when:t.time, urgent:false });
+      when:t.time, urgent:false, contatto:t.inSospesoCon });
   });
 
   clients.filter(c => c.status === "attivo" || c.status === "trattativa").forEach(c => {
     if(chats.some(ch => ch.name === c.name && ch.toSeeToday)){
-      items.push({ icon:"visit", title:"Vedere di persona — " + c.name, sub:c.desc.slice(0, 60) + "…", when:"Oggi", urgent:true });
+      items.push({ icon:"visit", title:"Vedere di persona — " + c.name, sub:c.desc.slice(0, 60) + "…", when:"Oggi", urgent:true, contatto:c.name });
     }
   });
 
@@ -3345,20 +3391,150 @@ function renderCalendar(){
     visit:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
     attesa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
   };
+  /* Raggruppiamo per giorno: "Oggi", "Domani", "Giovedi 8 agosto"...
+     E' quello che serve davvero — cosa ho nei prossimi giorni — invece
+     di una griglia oraria che resterebbe quasi sempre vuota. */
   items.forEach(it => {
-    const row = document.createElement("div");
-    row.className = "list-row";
-    row.innerHTML = `
-      <div class="row-avatar" style="background:${it.urgent ? 'var(--coral)' : (it.icon === 'attesa' ? 'var(--amber)' : 'var(--indigo)')};">${icons[it.icon]}</div>
-      <div class="row-body">
-        <div class="row-name">${it.title}</div>
-        <div class="row-meta"><span>${it.sub}</span></div>
-      </div>
-      <div class="row-value" style="font-size:11.5px;font-weight:700;color:var(--muted);">${it.when}</div>
-    `;
-    wrap.appendChild(row);
+    it._data = interpretaQuando(it.when);
   });
+  items.sort((a,b) => {
+    if(!a._data && !b._data) return 0;
+    if(!a._data) return 1;      /* senza data vanno in fondo */
+    if(!b._data) return -1;
+    return a._data - b._data;
+  });
+
+  const gruppi = [];
+  items.forEach(it => {
+    const et = etichettaGiorno(it._data, it.when);
+    let g = gruppi.find(x => x.et === et);
+    if(!g){ g = { et, oggi: et === "Oggi", voci: [] }; gruppi.push(g); }
+    g.voci.push(it);
+  });
+
+  gruppi.forEach(g => {
+    const intest = document.createElement("div");
+    intest.className = "cal-giorno" + (g.oggi ? " oggi" : "");
+    intest.innerHTML = `<span>${g.et}</span><i>${g.voci.length}</i>`;
+    wrap.appendChild(intest);
+
+    g.voci.forEach(it => {
+      const row = document.createElement("div");
+      row.className = "cal-voce" + (g.oggi ? " oggi" : "");
+      const cliente = it.contatto ? clients.find(c => c.name === it.contatto) : null;
+      const ora = estraiOra(it.when);
+
+      row.innerHTML = `
+        <div class="cal-ora">${ora || "—"}</div>
+        <div class="cal-corpo">
+          <div class="cal-icona" style="background:${it.urgent ? 'var(--coral)' : (it.icon === 'attesa' ? 'var(--amber)' : 'var(--indigo)')};">${icons[it.icon]}</div>
+          <div class="cal-testo">
+            <div class="cal-nome">${it.title}</div>
+            <div class="cal-sotto">${it.sub}</div>
+          </div>
+        </div>
+        ${it.contatto ? `
+        <div class="cal-azioni">
+          <button class="cal-btn cal-scrivi">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
+            Scrivi
+          </button>
+          <button class="cal-btn cal-chiama">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg>
+            Chiama
+          </button>
+        </div>` : ''}
+      `;
+
+      const bScrivi = row.querySelector(".cal-scrivi");
+      if(bScrivi) bScrivi.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if(cliente){ await openClientChat(cliente); return; }
+        const chat = chats.find(c => c.name === it.contatto);
+        if(chat){
+          activeChatIndex = chats.indexOf(chat);
+          chat.unread = 0;
+          navigateTo("chat");
+          renderChatList(); renderChatWindow();
+          document.getElementById("chatSlider").classList.add("show-conv");
+        }
+      });
+
+      const bChiama = row.querySelector(".cal-chiama");
+      if(bChiama) bChiama.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if(cliente && cliente.phone && cliente.phone.trim()){
+          chiamataInCorso = { cliente: cliente, iniziata: Date.now() };
+          window.location.href = "tel:" + cliente.phone.replace(/\s/g, "");
+        } else {
+          showAILanding("Numero mancante",
+            "Non ho il telefono di " + it.contatto + ". Aggiungilo alla sua scheda in Clienti e potrai chiamare da qui.");
+        }
+      });
+
+      wrap.appendChild(row);
+    });
+  });
+
   document.getElementById("calendarCount").textContent = items.length;
+}
+
+/* ---- Lettura delle date scritte dall'AI ---- */
+const MESI_IT = { gen:0, feb:1, mar:2, apr:3, mag:4, giu:5, lug:6, ago:7, set:8, ott:9, nov:10, dic:11 };
+
+/* Riconosce "gio 8 ago, 16:00", "Oggi", "ven 9 ago" e simili.
+   Restituisce una data vera, o null se non riesce a capirla. */
+function interpretaQuando(testo){
+  if(!testo) return null;
+  const t = String(testo).toLowerCase().trim();
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+
+  if(t.startsWith("oggi")) return new Date(oggi);
+  if(t.startsWith("domani")){ const d = new Date(oggi); d.setDate(d.getDate()+1); return d; }
+  if(t.startsWith("dopodomani")){ const d = new Date(oggi); d.setDate(d.getDate()+2); return d; }
+
+  /* forma "8 ago" o "gio 8 ago" */
+  const m = t.match(/(\d{1,2})\s+([a-z]{3})/);
+  if(m){
+    const giorno = parseInt(m[1], 10);
+    const mese = MESI_IT[m[2]];
+    if(mese !== undefined){
+      const anno = oggi.getFullYear();
+      let d = new Date(anno, mese, giorno);
+      /* se la data e' gia' passata di molto, sara' dell'anno prossimo */
+      if(d < oggi && (oggi - d) > 180*24*3600*1000) d = new Date(anno+1, mese, giorno);
+      return d;
+    }
+  }
+
+  /* forma "08/08" o "08/08/2026" */
+  const m2 = t.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+  if(m2){
+    const anno = m2[3] ? (m2[3].length === 2 ? 2000 + parseInt(m2[3],10) : parseInt(m2[3],10)) : oggi.getFullYear();
+    return new Date(anno, parseInt(m2[2],10)-1, parseInt(m2[1],10));
+  }
+  return null;
+}
+
+/* "Oggi", "Domani", "Giovedì 8 agosto" */
+function etichettaGiorno(data, testoGrezzo){
+  if(!data) return testoGrezzo && String(testoGrezzo).trim() ? "Da fissare" : "Da fissare";
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const d = new Date(data); d.setHours(0,0,0,0);
+  const giorni = Math.round((d - oggi) / (24*3600*1000));
+  if(giorni === 0) return "Oggi";
+  if(giorni === 1) return "Domani";
+  if(giorni === -1) return "Ieri";
+  if(giorni < 0) return d.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" });
+  return d.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" });
+}
+
+/* Estrae "16:00" da "gio 8 ago, 16:00" */
+function estraiOra(testo){
+  if(!testo) return "";
+  const m = String(testo).match(/(\d{1,2})[:.](\d{2})/);
+  if(!m) return "";
+  return m[1].padStart(2,"0") + ":" + m[2];
 }
 
 /* ---- Chiamate: da fare oggi / programmate / recenti ---- */
