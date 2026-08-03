@@ -816,6 +816,65 @@
   }
   .empty-hint b{ color:var(--text); display:block; font-size:14px; margin-bottom:5px; }
 
+  /* ---- Card e pannello EON AI ---- */
+  .module-card.card-ai{
+    background:linear-gradient(140deg, #A78BFA 0%, #8B5CF6 100%);
+    border-color:transparent;
+  }
+  .module-card.card-ai .module-eyebrow{ color:rgba(255,255,255,.8) !important; }
+  .module-card.card-ai .module-title{ color:#fff; }
+  .module-card.card-ai .module-sub{ color:rgba(255,255,255,.82); }
+  .module-card.card-ai .module-icon{ background:rgba(255,255,255,.24) !important; }
+
+  .ai-hub-overlay{
+    position:fixed; inset:0; z-index:9998; background:rgba(20,23,29,.55);
+    display:flex; align-items:flex-end; justify-content:center;
+    animation:overlayIn .2s ease;
+  }
+  .ai-hub{
+    background:var(--card); width:100%; max-width:460px;
+    border-radius:24px 24px 0 0; padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px));
+    animation:sheetUp .28s cubic-bezier(.32,.72,0,1); max-height:86vh; overflow-y:auto;
+  }
+  .ai-hub-top{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .ai-hub-logo{
+    width:44px; height:44px; border-radius:14px; flex:none;
+    background:linear-gradient(140deg,#A78BFA,#8B5CF6);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ai-hub-logo svg{ width:20px; height:20px; }
+  .ai-hub-titolo{ font-family:'Manrope'; font-size:18px; font-weight:900; letter-spacing:-.01em; }
+  .ai-hub-sotto{ font-size:11.5px; color:var(--muted); margin-top:1px; }
+  .ai-hub-chiudi{
+    width:32px; height:32px; border-radius:50%; border:none; cursor:pointer; flex:none;
+    background:rgba(20,23,29,.05); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ai-hub-chiudi svg{ width:15px; height:15px; }
+  .ai-hub-lista{ display:flex; flex-direction:column; gap:9px; }
+  .ai-hub-voce{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    padding:14px; border-radius:16px; cursor:pointer; font-family:inherit;
+    background:var(--card); border:1px solid var(--border);
+    transition:transform .14s, box-shadow .14s;
+  }
+  .ai-hub-voce:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
+  .ai-hub-voce:active{ transform:scale(.99); }
+  .ai-hub-ico{
+    width:40px; height:40px; border-radius:13px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ai-hub-ico svg{ width:18px; height:18px; }
+  .ai-hub-testo{ flex:1; min-width:0; }
+  .ai-hub-testo b{ display:block; font-family:'Manrope'; font-size:14px; font-weight:800; color:var(--text); }
+  .ai-hub-testo small{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.4; }
+  .ai-hub-freccia{ width:16px; height:16px; color:var(--faint); flex:none; }
+  .ai-hub-nota{
+    margin-top:16px; padding:13px 14px; border-radius:13px;
+    background:var(--violet-soft); border:1px solid rgba(155,92,255,.2);
+    font-size:11.5px; color:var(--muted); line-height:1.55;
+  }
+
   .ai-landing-overlay{
     position:fixed; inset:0; z-index:9999; background:rgba(20,23,29,.5);
     display:flex; align-items:center; justify-content:center; padding:20px;
@@ -1044,6 +1103,64 @@
 <div class="ai-toast-container" id="aiToastContainer"></div>
 <!-- Pannello per aggiungere/modificare dati: si apre dal basso.
      Riutilizzato per clienti, opportunità, pagamenti ed entrate. -->
+<!-- EON AI: le funzioni dell'assistente raccolte in un posto solo -->
+<div class="ai-hub-overlay" id="aiHubOverlay" style="display:none;">
+  <div class="ai-hub">
+    <div class="ai-hub-top">
+      <div class="ai-hub-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div class="ai-hub-titolo">EON AI</div>
+        <div class="ai-hub-sotto">Il tuo assistente</div>
+      </div>
+      <button class="ai-hub-chiudi" id="aiHubChiudi" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="ai-hub-lista">
+      <button class="ai-hub-voce" id="aiHubGiornata">
+        <div class="ai-hub-ico" style="background:var(--amber);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Organizza la giornata</b>
+          <small>Legge attività, pagamenti e conversazioni, e ti dice da dove partire</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+
+      <button class="ai-hub-voce" id="aiHubOggi">
+        <div class="ai-hub-ico" style="background:var(--indigo);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Cosa fa l'AI per te</b>
+          <small>Le cose di cui si occupa lei e quelle che restano a te</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+
+      <button class="ai-hub-voce" id="aiHubStrategia">
+        <div class="ai-hub-ico" style="background:var(--green);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Strategia trattative</b>
+          <small>In che ordine seguire le trattative aperte</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <div class="ai-hub-nota">
+      L'AI legge già le tue conversazioni: fissa gli appuntamenti, segna le cose
+      da fare e ti avvisa quando un cliente chiede di spostare.
+    </div>
+  </div>
+</div>
+
 <div class="sheet-overlay" id="sheetOverlay" style="display:none;">
   <div class="sheet" id="sheetPanel">
     <div class="sheet-handle"></div>
@@ -1285,16 +1402,6 @@
 
     <!-- ==================== PAGINA: HOME ==================== -->
     <div class="page visible" id="page-home">
-      <div class="module-oggi" data-page="oggi">
-        <div class="module-icon sun">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" stroke-linecap="round"/></svg>
-        </div>
-        <div class="module-text">
-          <div class="module-eyebrow" style="color:var(--amber);">Priorità di oggi</div>
-          <div class="module-title">La tua giornata, gestita con l'AI</div>
-          <div class="module-sub">Insieme.</div>
-        </div>
-      </div>
 
       <div class="module-grid">
         <div class="module-card tint-coral" data-catfilter="urgenti" style="position:relative;">
@@ -1350,6 +1457,15 @@
           <div class="module-eyebrow" style="color:var(--indigo);">Agenda</div>
           <div class="module-title">Calendario</div>
           <div class="module-sub">L'AI lo compila da sola dalle tue conversazioni</div>
+        </div>
+
+        <div class="module-card card-ai" id="cardEonAI">
+          <div class="module-icon" style="background:var(--violet);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+          <div class="module-eyebrow" style="color:var(--violet);">Assistente</div>
+          <div class="module-title">EON AI</div>
+          <div class="module-sub">La tua giornata, gestita insieme</div>
         </div>
 
         <div class="module-card tint-coral" data-page="chiamate">
@@ -5017,6 +5133,43 @@ async function sendChatMessage(){
   renderChatWindow();
   renderChatList();
 }
+
+
+/* ============================================================
+   EON AI — le funzioni dell'assistente raccolte in un posto solo.
+   Ogni voce richiama qualcosa che gia' esiste: non duplichiamo
+   nulla, diamo solo una casa all'assistente.
+   ============================================================ */
+function apriHubAI(){ document.getElementById("aiHubOverlay").style.display = "flex"; }
+function chiudiHubAI(){ document.getElementById("aiHubOverlay").style.display = "none"; }
+
+document.getElementById("cardEonAI").addEventListener("click", apriHubAI);
+document.getElementById("aiHubChiudi").addEventListener("click", chiudiHubAI);
+document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "aiHubOverlay") chiudiHubAI();
+});
+
+/* Organizza la giornata: la stessa cosa dell'orologio nel logo */
+document.getElementById("aiHubGiornata").addEventListener("click", () => {
+  chiudiHubAI();
+  document.getElementById("aiClockBtn").click();
+});
+
+/* Cosa fa l'AI per te: la pagina "Oggi" */
+document.getElementById("aiHubOggi").addEventListener("click", () => {
+  chiudiHubAI();
+  navigateTo("oggi");
+});
+
+/* Strategia trattative */
+document.getElementById("aiHubStrategia").addEventListener("click", () => {
+  chiudiHubAI();
+  navigateTo("opportunita");
+  setTimeout(() => {
+    const b = document.getElementById("oppStrategyBtn");
+    if(b) b.click();
+  }, 320);
+});
 
 /* ============ NAVIGAZIONE ============ */
 const pageMeta = {
