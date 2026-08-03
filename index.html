@@ -1005,6 +1005,79 @@
   .ai-sugg-yes{ background:var(--violet); color:#fff; }
   .ai-sugg-no{ background:rgba(20,23,29,.05); color:var(--muted); }
 
+  /* ---- Allegati e vocali in chat ---- */
+  .chat-attach, .chat-mic{
+    width:40px; height:40px; border-radius:50%; flex:none; border:none; cursor:pointer;
+    background:rgba(20,23,29,.05); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chat-attach:hover{ background:rgba(20,23,29,.09); color:var(--indigo); }
+  .chat-mic:hover{ background:rgba(20,23,29,.09); color:var(--violet); }
+  .chat-attach svg, .chat-mic svg{ width:18px; height:18px; }
+  .chat-attach:disabled{ opacity:.4; }
+  .chat-mic.recording{ background:var(--coral); color:#fff; animation:micPulse 1.4s ease-in-out infinite; }
+  @keyframes micPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,71,87,.5); }
+    50%{ box-shadow:0 0 0 12px rgba(255,71,87,0); }
+  }
+  .rec-timer{ display:none; align-items:center; gap:7px; flex:1; font-size:12.5px; font-weight:700; color:var(--coral); }
+  .rec-timer.on{ display:flex; }
+  .rec-dot{ width:9px; height:9px; border-radius:50%; background:var(--coral); animation:micPulse 1.2s infinite; }
+
+  .chat-upload-bar{ padding:10px 16px; border-top:1px solid var(--border); flex:none; }
+  .chat-upload-text{ font-size:11.5px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .chat-upload-track{ height:5px; border-radius:20px; background:rgba(20,23,29,.07); overflow:hidden; }
+  .chat-upload-fill{ height:100%; width:0%; border-radius:20px; background:var(--grad-blue); transition:width .25s; }
+
+  .msg-media{
+    width:72%; max-width:280px; flex:none; border-radius:16px; overflow:hidden;
+    cursor:pointer; line-height:0; box-shadow:var(--shadow-sm); border:1px solid var(--border);
+  }
+  .msg-media.me{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-media.them{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-media img, .msg-media video{
+    width:100%; display:block; height:auto; min-height:120px; max-height:340px;
+    object-fit:cover; background:#141726;
+  }
+  .msg-media-time{ font-size:10px; color:var(--muted); padding:5px 10px 7px; background:var(--card); line-height:1.2; display:block; }
+
+  .msg-doc{
+    display:flex; align-items:center; gap:11px; max-width:78%; flex:none;
+    padding:11px 13px; border-radius:16px; cursor:pointer;
+    background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
+  }
+  .msg-doc.me{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-doc.them{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-doc-icon{
+    width:36px; height:36px; border-radius:11px; flex:none; color:#fff; background:var(--indigo);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .msg-doc-icon svg{ width:16px; height:16px; }
+  .msg-doc-name{ font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .msg-doc-sub{ font-size:11px; color:var(--muted); margin-top:2px; }
+
+  .msg-audio{
+    max-width:80%; padding:11px 13px; border-radius:16px; flex:none;
+    background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
+  }
+  .msg-audio.me{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-audio.them{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-audio audio{ width:100%; height:38px; display:block; }
+  .msg-audio-time{ font-size:10px; color:var(--faint); margin-top:6px; display:block; }
+
+  .media-viewer{
+    position:fixed; inset:0; z-index:9999; background:rgba(10,12,18,.93);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .media-viewer img, .media-viewer video{ max-width:100%; max-height:82vh; border-radius:12px; }
+  .media-viewer-close{
+    position:absolute; top:calc(16px + env(safe-area-inset-top,0px)); right:16px;
+    width:38px; height:38px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,.15); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .media-viewer-close svg{ width:18px; height:18px; }
+
   .chat-messages{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:9px; }
   .bubble{ max-width:75%; padding:10px 14px; border-radius:17px; font-size:14px; line-height:1.45; }
   .bubble.them{ background:#F1F0EC; color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; }
@@ -2257,8 +2330,23 @@
           <div id="chatContextPin"></div>
           <div id="chatSuggestions"></div>
           <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-upload-bar" id="chatUploadBar" style="display:none;">
+            <div class="chat-upload-text" id="chatUploadText">Sto caricando…</div>
+            <div class="chat-upload-track"><div class="chat-upload-fill" id="chatUploadFill"></div></div>
+          </div>
           <div class="chat-input-row">
+            <button class="chat-attach" id="chatAttachBtn" aria-label="Allega foto, video o documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.4 11.05L12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.67 3.67 0 0 1 5.18 5.18l-9.2 9.2a1.83 1.83 0 0 1-2.59-2.59l8.49-8.48"/></svg>
+            </button>
+            <input type="file" id="chatFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
             <input type="text" id="chatInput" placeholder="Scrivi un messaggio...">
+            <div class="rec-timer" id="recTimer">
+              <span class="rec-dot"></span><span id="recTimerText">0:00</span>
+              <span style="font-weight:500;color:var(--muted);font-size:11px;">tocca per inviare</span>
+            </div>
+            <button class="chat-mic" id="chatMicBtn" aria-label="Registra un vocale">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
             <button class="chat-send" id="chatSendBtn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
             </button>
@@ -2440,6 +2528,9 @@ async function loadChatsFromDB(){
       annullato: !!(m.title && m.title.startsWith("❌")),
       text: m.body || "",
       amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
+      fileUrl: m.file_url || undefined,
+      fileName: m.file_name || undefined,
+      fileType: m.file_type || undefined,
       time: formatMsgTime(m.created_at)
     }));
     chats.push({
@@ -3001,7 +3092,10 @@ function subscribeToMessages(){
           annullato: !!(m.title && m.title.startsWith("❌")),
           text: m.body || "",
           amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
-          time: formatMsgTime(m.created_at)
+          fileUrl: m.file_url || undefined,
+      fileName: m.file_name || undefined,
+      fileType: m.file_type || undefined,
+      time: formatMsgTime(m.created_at)
         });
         if(m.sender === "them" && chats[activeChatIndex] !== chat) chat.unread++;
         renderChatList();
@@ -4942,6 +5036,19 @@ document.getElementById("giftEmpBtn").addEventListener("click", () => {
 });
 
 /* ============ CHAT (WhatsApp-style) ============ */
+
+/* Cosa mostrare nell'elenco quando l'ultimo messaggio non e' testo */
+function anteprimaMessaggio(m){
+  if(!m) return "";
+  if(m.fileType && m.fileType.startsWith("audio/")) return "🎤 Vocale";
+  if(m.fileType && m.fileType.startsWith("image/")) return "📷 Foto";
+  if(m.fileType && m.fileType.startsWith("video/")) return "🎥 Video";
+  if(m.fileUrl) return "📎 " + (m.fileName || "Documento");
+  if(m.eventType === "appt") return "📅 " + (m.title || "Appuntamento");
+  if(m.eventType === "doc") return "📄 " + (m.title || "Documento");
+  if(m.eventType === "update") return "✓ " + (m.title || "Aggiornamento");
+  return m.text || "";
+}
 function renderChatList(){
   const wrap = document.getElementById("chatList");
   wrap.innerHTML = "";
@@ -4978,7 +5085,7 @@ function renderChatList(){
       <div class="row-avatar" style="background:${c.online ? 'var(--wa)' : 'var(--faint)'};">${initials}</div>
       <div class="chat-item-body">
         <div class="chat-item-name">${c.name}</div>
-        <div class="chat-item-last">${last ? last.text : ""}</div>
+        <div class="chat-item-last">${anteprimaMessaggio(last)}</div>
         ${tag}
       </div>
       <div class="chat-item-meta">
@@ -5087,6 +5194,48 @@ function renderChatWindow(){
       messagesEl.appendChild(card);
       return;
     }
+    /* Allegati: foto e video si vedono, i vocali si ascoltano,
+       i documenti sono una riga da toccare */
+    if(m.fileUrl){
+      const lato = m.from === "me" ? "me" : "them";
+
+      if(m.fileType && m.fileType.startsWith("audio/")){
+        const a = document.createElement("div");
+        a.className = "msg-audio " + lato;
+        a.innerHTML = `<audio src="${m.fileUrl}" controls preload="metadata"></audio>
+          <span class="msg-audio-time">${m.time}</span>`;
+        messagesEl.appendChild(a);
+        return;
+      }
+      if(m.fileType && m.fileType.startsWith("image/")){
+        const w = document.createElement("div");
+        w.className = "msg-media " + lato;
+        w.innerHTML = `<img src="${m.fileUrl}" alt="${m.fileName || "Foto"}" loading="lazy"><span class="msg-media-time">${m.time}</span>`;
+        w.addEventListener("click", () => apriMedia(m.fileUrl, m.fileType));
+        messagesEl.appendChild(w);
+        return;
+      }
+      if(m.fileType && m.fileType.startsWith("video/")){
+        const w = document.createElement("div");
+        w.className = "msg-media " + lato;
+        w.innerHTML = `<video src="${m.fileUrl}" preload="metadata" playsinline></video><span class="msg-media-time">${m.time}</span>`;
+        w.addEventListener("click", () => apriMedia(m.fileUrl, m.fileType));
+        messagesEl.appendChild(w);
+        return;
+      }
+      const d = document.createElement("div");
+      d.className = "msg-doc " + lato;
+      d.innerHTML = `
+        <div class="msg-doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg></div>
+        <div style="min-width:0;">
+          <div class="msg-doc-name">${m.fileName || "Documento"}</div>
+          <div class="msg-doc-sub">Tocca per aprire · ${m.time}</div>
+        </div>`;
+      d.addEventListener("click", () => window.open(m.fileUrl, "_blank"));
+      messagesEl.appendChild(d);
+      return;
+    }
+
     const b = document.createElement("div");
     b.className = "bubble " + (m.from === "me" ? "me" : "them");
     b.innerHTML = m.text + '<span class="bubble-time">' + m.time + '</span>';
@@ -5163,6 +5312,202 @@ document.getElementById("aiHubStrategia").addEventListener("click", () => {
     if(b) b.click();
   }, 320);
 });
+
+
+/* ============================================================
+   ALLEGATI E VOCALI IN CHAT
+   Foto, video, documenti e messaggi vocali, da entrambe le parti.
+   ============================================================ */
+const LIMITI_MB = { foto:10, video:50, documento:20 };
+
+function tipoAllegato(file){
+  if(file.type.startsWith("image/")) return "foto";
+  if(file.type.startsWith("video/")) return "video";
+  return "documento";
+}
+function pesoLeggibile(bytes){
+  if(bytes < 1024*1024) return Math.round(bytes/1024) + " KB";
+  return (bytes/(1024*1024)).toFixed(1).replace(".", ",") + " MB";
+}
+function nomeFileSicuro(originale){
+  const casuale = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const est = (originale.split(".").pop() || "").toLowerCase().slice(0,5);
+  return casuale + (est ? "." + est : "");
+}
+function mostraCaricamento(testo, pct){
+  const bar = document.getElementById("chatUploadBar");
+  if(!bar) return;
+  bar.style.display = testo ? "block" : "none";
+  if(testo){
+    document.getElementById("chatUploadText").textContent = testo;
+    document.getElementById("chatUploadFill").style.width = (pct||0) + "%";
+  }
+}
+
+async function inviaAllegato(file){
+  if(activeChatIndex === null) return;
+  const chat = chats[activeChatIndex];
+  const tipo = tipoAllegato(file);
+  const limite = LIMITI_MB[tipo];
+
+  if(file.size > limite*1024*1024){
+    showAILanding("File troppo pesante",
+      `Questo ${tipo} pesa ${pesoLeggibile(file.size)}, il massimo è ${limite} MB.` +
+      (tipo === "video" ? " Per i video lunghi conviene ridurre la qualità dalle impostazioni della fotocamera." : ""));
+    return;
+  }
+  if(!isDbReady() || !chat.id){
+    showAILanding("Non collegato", "Per inviare file serve la connessione al database.");
+    return;
+  }
+
+  const btn = document.getElementById("chatAttachBtn");
+  btn.disabled = true;
+  mostraCaricamento("Sto inviando " + file.name + " (" + pesoLeggibile(file.size) + ")…", 20);
+  try{
+    const percorso = currentSession.user.id + "/" + nomeFileSicuro(file.name);
+    mostraCaricamento("Sto inviando " + file.name + "…", 55);
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
+    if(upErr) throw upErr;
+    mostraCaricamento("Quasi fatto…", 85);
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+    const { error: msgErr } = await supabaseClient.from("messages").insert({
+      conversation_id: chat.id, sender:"me", body:"",
+      file_url: pub.publicUrl, file_name: file.name, file_type: file.type
+    });
+    if(msgErr) throw msgErr;
+    mostraCaricamento("", 100);
+  }catch(err){
+    console.error("Invio allegato non riuscito:", err);
+    mostraCaricamento("", 0);
+    showAILanding("Invio non riuscito", "Non sono riuscita a inviare " + file.name + ": " + (err.message || "riprova."));
+  }finally{
+    btn.disabled = false;
+    document.getElementById("chatFileInput").value = "";
+  }
+}
+
+document.getElementById("chatAttachBtn").addEventListener("click", () => {
+  if(activeChatIndex === null){
+    showAILanding("Nessuna conversazione aperta", "Apri prima una conversazione, poi potrai inviare foto, video e documenti.");
+    return;
+  }
+  document.getElementById("chatFileInput").click();
+});
+document.getElementById("chatFileInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) inviaAllegato(f);
+});
+
+/* ---- Vocali ---- */
+let recorder = null, recChunks = [], recStart = 0, recTimer = null;
+const MAX_SEC_VOCALE = 300;
+
+function formattaDurata(sec){
+  const m = Math.floor(sec/60), r = sec % 60;
+  return m + ":" + (r < 10 ? "0" : "") + r;
+}
+function uiRegistrazione(attiva){
+  const mic = document.getElementById("chatMicBtn");
+  if(!mic) return;
+  mic.classList.toggle("recording", attiva);
+  document.getElementById("chatInput").style.display = attiva ? "none" : "";
+  document.getElementById("chatAttachBtn").style.display = attiva ? "none" : "";
+  document.getElementById("recTimer").classList.toggle("on", attiva);
+}
+
+async function avviaRegistrazione(){
+  if(activeChatIndex === null){
+    showAILanding("Nessuna conversazione aperta", "Apri prima una conversazione, poi potrai registrare un vocale.");
+    return;
+  }
+  if(!navigator.mediaDevices || !window.MediaRecorder){
+    showAILanding("Registrazione non disponibile", "Questo browser non permette di registrare audio. Su iPhone funziona da Safari.");
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    recChunks = [];
+    const tipo = MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "audio/webm";
+    recorder = new MediaRecorder(stream, { mimeType: tipo });
+    recorder.ondataavailable = e => { if(e.data.size > 0) recChunks.push(e.data); };
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      clearInterval(recTimer);
+      uiRegistrazione(false);
+      const durata = Math.round((Date.now() - recStart)/1000);
+      if(durata < 1 || recChunks.length === 0) return;
+      await inviaVocale(new Blob(recChunks, { type: tipo }), tipo, durata);
+    };
+    recorder.start();
+    recStart = Date.now();
+    uiRegistrazione(true);
+    recTimer = setInterval(() => {
+      const sec = Math.round((Date.now() - recStart)/1000);
+      const el = document.getElementById("recTimerText");
+      if(el) el.textContent = formattaDurata(sec);
+      if(sec >= MAX_SEC_VOCALE) fermaRegistrazione();
+    }, 500);
+  }catch(err){
+    showAILanding("Microfono non autorizzato", "Per registrare un vocale, consenti l'accesso al microfono nelle impostazioni del browser.");
+  }
+}
+function fermaRegistrazione(){
+  if(recorder && recorder.state === "recording") recorder.stop();
+}
+
+async function inviaVocale(blob, tipo, durata){
+  const chat = chats[activeChatIndex];
+  if(!chat) return;
+  if(!isDbReady() || !chat.id){
+    showAILanding("Non collegato", "Per inviare vocali serve la connessione al database.");
+    return;
+  }
+  mostraCaricamento("Sto inviando il vocale (" + formattaDurata(durata) + ")…", 35);
+  try{
+    const est = tipo.includes("mp4") ? "m4a" : "webm";
+    const percorso = currentSession.user.id + "/vocali/" +
+      Math.random().toString(36).slice(2) + Date.now().toString(36) + "." + est;
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, blob, { contentType: tipo, upsert:false });
+    if(upErr) throw upErr;
+    mostraCaricamento("Quasi fatto…", 80);
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+    const { error: msgErr } = await supabaseClient.from("messages").insert({
+      conversation_id: chat.id, sender:"me", body:"",
+      file_url: pub.publicUrl, file_name:"Vocale " + formattaDurata(durata), file_type: tipo
+    });
+    if(msgErr) throw msgErr;
+    mostraCaricamento("", 100);
+  }catch(err){
+    console.error("Invio vocale non riuscito:", err);
+    mostraCaricamento("", 0);
+    showAILanding("Invio non riuscito", "Non sono riuscita a inviare il vocale.");
+  }
+}
+
+document.getElementById("chatMicBtn").addEventListener("click", () => {
+  if(recorder && recorder.state === "recording") fermaRegistrazione();
+  else avviaRegistrazione();
+});
+
+/* Visore a schermo intero per foto e video */
+function apriMedia(url, tipo){
+  const v = document.createElement("div");
+  v.className = "media-viewer";
+  v.innerHTML = (tipo || "").startsWith("video/")
+    ? `<video src="${url}" controls autoplay playsinline></video>`
+    : `<img src="${url}" alt="">`;
+  const c = document.createElement("button");
+  c.className = "media-viewer-close";
+  c.setAttribute("aria-label","Chiudi");
+  c.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+  c.addEventListener("click", () => v.remove());
+  v.appendChild(c);
+  v.addEventListener("click", e => { if(e.target === v) v.remove(); });
+  document.body.appendChild(v);
+}
 
 /* ============ NAVIGAZIONE ============ */
 const pageMeta = {
