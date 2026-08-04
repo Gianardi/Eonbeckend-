@@ -1078,6 +1078,137 @@
   }
   .media-viewer-close svg{ width:18px; height:18px; }
 
+  /* ---- Preventivo e fattura in chat ---- */
+  .doc-overlay{
+    position:fixed; inset:0; z-index:9997; background:rgba(20,23,29,.55);
+    display:flex; align-items:flex-end; justify-content:center;
+    animation:overlayIn .2s ease;
+  }
+  .doc-panel{
+    background:var(--card); width:100%; max-width:460px;
+    border-radius:24px 24px 0 0; max-height:90vh;
+    display:flex; flex-direction:column;
+    animation:sheetUp .28s cubic-bezier(.32,.72,0,1);
+  }
+  .doc-head{
+    display:flex; align-items:center; padding:18px 18px 14px;
+    border-bottom:1px solid var(--border); flex:none;
+  }
+  .doc-head-titolo{ font-family:'Manrope'; font-size:17px; font-weight:900; flex:1; }
+  .doc-chiudi{
+    width:32px; height:32px; border-radius:50%; border:none; cursor:pointer; flex:none;
+    background:rgba(20,23,29,.05); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .doc-chiudi svg{ width:15px; height:15px; }
+  .doc-corpo{ flex:1; overflow-y:auto; padding:16px 18px; }
+  .doc-cliente{
+    display:flex; align-items:center; gap:11px; padding:12px 13px; margin-bottom:16px;
+    background:var(--indigo-soft); border:1px solid rgba(59,111,255,.2); border-radius:13px;
+  }
+  .doc-cliente-av{
+    width:34px; height:34px; border-radius:50%; flex:none; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Manrope'; font-size:12px; font-weight:900;
+  }
+  .doc-cliente-nome{ font-size:13.5px; font-weight:800; }
+  .doc-cliente-sub{ font-size:11px; color:var(--muted); margin-top:1px; }
+  .doc-sezione{
+    font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--faint); margin:16px 0 9px;
+  }
+  .doc-voce{
+    display:flex; gap:7px; align-items:flex-start; margin-bottom:8px;
+    padding:11px; border:1px solid var(--border); border-radius:12px; background:#FBFBFD;
+  }
+  .doc-voce-campi{ flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+  .doc-voce input{
+    width:100%; border:1px solid var(--border); background:var(--card);
+    border-radius:9px; padding:9px 11px; font-size:13px; font-family:inherit; color:var(--text);
+  }
+  .doc-voce input:focus{ outline:2px solid var(--indigo); outline-offset:1px; }
+  .doc-voce-riga{ display:flex; gap:7px; }
+  .doc-voce-riga input{ flex:1; }
+  .doc-voce-togli{
+    width:30px; height:30px; border-radius:9px; border:none; cursor:pointer; flex:none;
+    background:var(--coral-soft); color:var(--coral);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .doc-voce-togli svg{ width:14px; height:14px; }
+  .doc-aggiungi-voce{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:11px; border-radius:12px; cursor:pointer; font-family:inherit;
+    font-size:12.5px; font-weight:700; color:var(--indigo);
+    background:var(--indigo-soft); border:1px dashed rgba(59,111,255,.35);
+  }
+  .doc-aggiungi-voce svg{ width:14px; height:14px; }
+  .doc-totali{
+    margin-top:16px; padding:14px; border-radius:13px;
+    background:#FBFBFD; border:1px solid var(--border);
+  }
+  .doc-riga-tot{
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:13px; color:var(--muted); padding:5px 0;
+  }
+  .doc-riga-tot b{ font-family:'Manrope'; font-weight:800; color:var(--text); }
+  .doc-riga-tot.totale{
+    border-top:1px solid var(--border); margin-top:7px; padding-top:11px;
+    font-size:14px; color:var(--text); font-weight:700;
+  }
+  .doc-riga-tot.totale b{ font-size:18px; font-weight:900; color:var(--indigo); }
+  .doc-riga-tot select{
+    border:1px solid var(--border); border-radius:8px; padding:3px 7px;
+    font-family:inherit; font-size:12px; color:var(--text); background:var(--card); margin-left:5px;
+  }
+  .doc-campo{ margin-bottom:11px; }
+  .doc-campo label{
+    display:block; font-size:11px; font-weight:700; color:var(--muted); margin-bottom:5px;
+  }
+  .doc-campo input, .doc-campo textarea{
+    width:100%; border:1px solid var(--border); background:#FBFBFD;
+    border-radius:11px; padding:11px 13px; font-size:13.5px; font-family:inherit;
+    color:var(--text); resize:none;
+  }
+  .doc-campo input:focus, .doc-campo textarea:focus{ outline:2px solid var(--indigo); outline-offset:1px; }
+  .doc-azioni{
+    display:flex; gap:9px; padding:14px 18px calc(16px + env(safe-area-inset-bottom,0px));
+    border-top:1px solid var(--border); flex:none;
+  }
+  .doc-btn-secondario{
+    background:rgba(20,23,29,.05); color:var(--muted); border:none; border-radius:11px;
+    padding:12px 18px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
+  }
+
+  /* la scheda del documento dentro la conversazione */
+  .msg-documento{
+    max-width:80%; flex:none; border-radius:16px; overflow:hidden; cursor:pointer;
+    background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
+  }
+  .msg-documento.me{ align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg-documento.them{ align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg-doc-top{ display:flex; align-items:center; gap:11px; padding:13px 14px 11px; }
+  .msg-doc-badge{
+    width:38px; height:38px; border-radius:12px; flex:none; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .msg-doc-badge svg{ width:17px; height:17px; }
+  .msg-doc-tipo{
+    font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.07em;
+  }
+  .msg-doc-numero{ font-size:13.5px; font-weight:800; color:var(--text); margin-top:1px; }
+  .msg-doc-cifra{
+    font-family:'Manrope'; font-size:19px; font-weight:900; margin-left:auto; color:var(--text);
+  }
+  .msg-doc-voci{
+    padding:0 14px 11px; font-size:11.5px; color:var(--muted); line-height:1.5;
+  }
+  .msg-doc-piede{
+    display:flex; align-items:center; gap:6px; padding:10px 14px;
+    border-top:1px solid var(--border); background:#FBFBFD;
+    font-size:11.5px; font-weight:700; color:var(--indigo);
+  }
+  .msg-doc-piede svg{ width:13px; height:13px; }
+
   .chat-messages{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:9px; }
   .bubble{ max-width:75%; padding:10px 14px; border-radius:17px; font-size:14px; line-height:1.45; }
   .bubble.them{ background:#F1F0EC; color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; }
@@ -1230,6 +1361,60 @@
     <div class="ai-hub-nota">
       L'AI legge già le tue conversazioni: fissa gli appuntamenti, segna le cose
       da fare e ti avvisa quando un cliente chiede di spostare.
+    </div>
+  </div>
+</div>
+
+<!-- Preventivo e fattura: si creano dentro la conversazione -->
+<div class="doc-overlay" id="docOverlay" style="display:none;">
+  <div class="doc-panel">
+    <div class="doc-head">
+      <div class="doc-head-titolo" id="docTitolo">Nuovo preventivo</div>
+      <button class="doc-chiudi" id="docChiudi" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="doc-corpo">
+      <div class="doc-cliente" id="docCliente"></div>
+
+      <div class="doc-sezione">Voci</div>
+      <div id="docVoci"></div>
+      <button class="doc-aggiungi-voce" id="docAggiungiVoce">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi voce
+      </button>
+
+      <div class="doc-totali">
+        <div class="doc-riga-tot"><span>Imponibile</span><b id="docImponibile">€0,00</b></div>
+        <div class="doc-riga-tot">
+          <span>IVA
+            <select id="docIva">
+              <option value="22">22%</option>
+              <option value="10">10%</option>
+              <option value="4">4%</option>
+              <option value="0">esente</option>
+            </select>
+          </span>
+          <b id="docIvaValore">€0,00</b>
+        </div>
+        <div class="doc-riga-tot totale"><span>Totale</span><b id="docTotale">€0,00</b></div>
+      </div>
+
+      <div class="doc-sezione">Dettagli</div>
+      <div class="doc-campo">
+        <label id="docLabelCondizioni">Validità</label>
+        <input type="text" id="docCondizioni" placeholder="30 giorni dalla data di emissione">
+      </div>
+      <div class="doc-campo">
+        <label>Note (facoltative)</label>
+        <textarea id="docNote" rows="2" placeholder="Es. Pagamento a 30 giorni, bonifico bancario"></textarea>
+      </div>
+    </div>
+
+    <div class="doc-azioni">
+      <button class="doc-btn-secondario" id="docAnnulla">Annulla</button>
+      <button class="primary-btn" id="docInvia" style="flex:1;justify-content:center;">Invia al cliente</button>
     </div>
   </div>
 </div>
@@ -2339,6 +2524,9 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.4 11.05L12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.67 3.67 0 0 1 5.18 5.18l-9.2 9.2a1.83 1.83 0 0 1-2.59-2.59l8.49-8.48"/></svg>
             </button>
             <input type="file" id="chatFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
+            <button class="chat-attach" id="chatDocBtn" aria-label="Crea preventivo o fattura">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/></svg>
+            </button>
             <input type="text" id="chatInput" placeholder="Scrivi un messaggio...">
             <div class="rec-timer" id="recTimer">
               <span class="rec-dot"></span><span id="recTimerText">0:00</span>
@@ -2530,6 +2718,9 @@ async function loadChatsFromDB(){
       amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
       fileUrl: m.file_url || undefined,
       fileName: m.file_name || undefined,
+      docDati: leggiDatiDocumento(m),
+      docTipo: leggiDatiDocumento(m) ? leggiDatiDocumento(m).tipo : undefined,
+      docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
       fileType: m.file_type || undefined,
       time: formatMsgTime(m.created_at)
     }));
@@ -2547,6 +2738,16 @@ async function loadChatsFromDB(){
       messages: msgs
     });
   });
+}
+
+/* I dati di preventivi e fatture viaggiano insieme al messaggio,
+   cosi' il PDF si puo' rigenerare in qualsiasi momento. */
+function leggiDatiDocumento(m){
+  if(m.event_type !== "doc" || !m.file_name) return undefined;
+  try{
+    const d = JSON.parse(m.file_name);
+    return (d && d.voci) ? d : undefined;
+  }catch(e){ return undefined; }
 }
 
 function formatMsgTime(iso){
@@ -3094,6 +3295,9 @@ function subscribeToMessages(){
           amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
           fileUrl: m.file_url || undefined,
       fileName: m.file_name || undefined,
+      docDati: leggiDatiDocumento(m),
+      docTipo: leggiDatiDocumento(m) ? leggiDatiDocumento(m).tipo : undefined,
+      docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
       fileType: m.file_type || undefined,
       time: formatMsgTime(m.created_at)
         });
@@ -5181,6 +5385,36 @@ function renderChatWindow(){
   const eventLabel = { doc:"Documento", appt:"Appuntamento", update:"Aggiornamento" };
 
   c.messages.forEach(m => {
+    /* Preventivi e fatture: scheda leggibile, si tocca per il PDF */
+    if(m.eventType === "doc" && m.docDati){
+      const d = m.docDati;
+      const fattura = d.tipo === "fattura";
+      const card = document.createElement("div");
+      card.className = "msg-documento " + (m.from === "them" ? "them" : "me");
+      card.innerHTML = `
+        <div class="msg-doc-top">
+          <div class="msg-doc-badge" style="background:${fattura ? 'var(--green)' : 'var(--teal)'};">
+            ${fattura
+              ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
+              : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/></svg>'}
+          </div>
+          <div style="min-width:0;">
+            <div class="msg-doc-tipo" style="color:${fattura ? 'var(--green)' : 'var(--teal)'};">${fattura ? 'Fattura' : 'Preventivo'}</div>
+            <div class="msg-doc-numero">n. ${d.numero}</div>
+          </div>
+          <div class="msg-doc-cifra">€${Number(d.totale).toLocaleString("it-IT",{minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+        </div>
+        <div class="msg-doc-voci">${d.voci.map(v => v.desc).join(" · ")}</div>
+        <div class="msg-doc-piede">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          Tocca per aprire e scaricare
+        </div>
+      `;
+      card.addEventListener("click", () => apriPdfDocumento(d));
+      messagesEl.appendChild(card);
+      return;
+    }
+
     if(m.eventType){
       const card = document.createElement("div");
       card.className = "chat-event";
@@ -5507,6 +5741,357 @@ function apriMedia(url, tipo){
   v.appendChild(c);
   v.addEventListener("click", e => { if(e.target === v) v.remove(); });
   document.body.appendChild(v);
+}
+
+
+/* ============================================================
+   PREVENTIVO E FATTURA IN CHAT
+   ------------------------------------------------------------
+   Si creano dentro la conversazione, dove sta la relazione col
+   cliente. Restano come scheda leggibile in chat, e il cliente
+   puo' scaricarli in PDF.
+   ============================================================ */
+
+/* Legge un importo scritto come si scrive in Italia: "2.500" sono
+   duemilacinquecento, "800,50" sono ottocento e cinquanta. */
+function leggiImporto(v){
+  if(v === null || v === undefined || v === "") return 0;
+  if(typeof v === "number") return v;
+  let t = String(v).trim().replace(/[€\s]/g, "");
+  if(t === "") return 0;
+
+  const haVirgola = t.includes(","), haPunto = t.includes(".");
+  if(haVirgola && haPunto){
+    t = t.replace(/\./g, "").replace(",", ".");     /* 1.200,50 */
+  } else if(haVirgola){
+    t = t.replace(",", ".");                        /* 1200,50 */
+  } else if(haPunto){
+    /* Solo il punto: in Italia separa le migliaia se seguito da 3 cifre */
+    const gruppi = t.split(".");
+    if(gruppi.slice(1).every(g => g.length === 3)) t = t.replace(/\./g, "");
+  }
+  const n = parseFloat(t);
+  return isNaN(n) ? 0 : n;
+}
+
+let docTipo = "preventivo";   /* oppure "fattura" */
+let docVoci = [];
+
+function apriDocumento(tipo){
+  if(activeChatIndex === null){
+    showAILanding("Nessuna conversazione aperta", "Apri prima la conversazione col cliente, poi potrai creare il documento.");
+    return;
+  }
+  docTipo = tipo;
+  docVoci = [{ desc:"", qta:1, prezzo:0 }];
+
+  const chat = chats[activeChatIndex];
+  const cliente = clients.find(c => c.name === chat.name);
+
+  document.getElementById("docTitolo").textContent =
+    tipo === "fattura" ? "Nuova fattura" : "Nuovo preventivo";
+  document.getElementById("docLabelCondizioni").textContent =
+    tipo === "fattura" ? "Termini di pagamento" : "Validità";
+  document.getElementById("docCondizioni").value =
+    tipo === "fattura" ? "30 giorni data fattura" : "30 giorni dalla data di emissione";
+  document.getElementById("docCondizioni").placeholder =
+    tipo === "fattura" ? "Es. 30 giorni data fattura" : "Es. 30 giorni dalla data di emissione";
+  document.getElementById("docNote").value = "";
+  document.getElementById("docIva").value = "22";
+
+  const iniziali = chat.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
+  const colore = cliente && cliente.color ? cliente.color : "var(--indigo)";
+  document.getElementById("docCliente").innerHTML = `
+    <div class="doc-cliente-av" style="background:${colore};">${iniziali}</div>
+    <div>
+      <div class="doc-cliente-nome">${chat.name}</div>
+      <div class="doc-cliente-sub">${tipo === "fattura" ? "Fattura" : "Preventivo"} n. ${prossimoNumero(tipo)} · ${new Date().toLocaleDateString("it-IT")}</div>
+    </div>
+  `;
+
+  disegnaVoci();
+  document.getElementById("docOverlay").style.display = "flex";
+}
+
+function chiudiDocumento(){
+  document.getElementById("docOverlay").style.display = "none";
+}
+
+/* Numerazione progressiva per anno, contando quelli gia' emessi */
+function prossimoNumero(tipo){
+  const anno = new Date().getFullYear();
+  let n = 0;
+  chats.forEach(c => c.messages.forEach(m => {
+    if(m.eventType === "doc" && m.docTipo === tipo && m.docAnno === anno) n++;
+  }));
+  return (n + 1) + "/" + anno;
+}
+
+function disegnaVoci(){
+  const wrap = document.getElementById("docVoci");
+  wrap.innerHTML = "";
+  docVoci.forEach((v, i) => {
+    const el = document.createElement("div");
+    el.className = "doc-voce";
+    el.innerHTML = `
+      <div class="doc-voce-campi">
+        <input type="text" placeholder="Descrizione" value="${v.desc}" data-campo="desc" data-i="${i}">
+        <div class="doc-voce-riga">
+          <input type="text" inputmode="decimal" placeholder="Quantità" value="${v.qta}" data-campo="qta" data-i="${i}">
+          <input type="text" inputmode="decimal" placeholder="Prezzo €" value="${v.prezzo || ''}" data-campo="prezzo" data-i="${i}">
+        </div>
+      </div>
+      ${docVoci.length > 1 ? `<button class="doc-voce-togli" data-togli="${i}" aria-label="Togli">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>` : ''}
+    `;
+    wrap.appendChild(el);
+  });
+
+  wrap.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const i = Number(inp.dataset.i), campo = inp.dataset.campo;
+      docVoci[i][campo] = campo === "desc" ? inp.value : leggiImporto(inp.value);
+      calcolaTotali();
+    });
+  });
+  wrap.querySelectorAll("[data-togli]").forEach(b => {
+    b.addEventListener("click", () => {
+      docVoci.splice(Number(b.dataset.togli), 1);
+      disegnaVoci(); calcolaTotali();
+    });
+  });
+  calcolaTotali();
+}
+
+function calcolaTotali(){
+  const imponibile = docVoci.reduce((t,v) => t + (Number(v.qta)||0) * (Number(v.prezzo)||0), 0);
+  const aliquota = Number(document.getElementById("docIva").value) || 0;
+  const iva = imponibile * aliquota / 100;
+  const euro = n => "€" + n.toLocaleString("it-IT", { minimumFractionDigits:2, maximumFractionDigits:2 });
+  document.getElementById("docImponibile").textContent = euro(imponibile);
+  document.getElementById("docIvaValore").textContent = euro(iva);
+  document.getElementById("docTotale").textContent = euro(imponibile + iva);
+  return { imponibile, iva, totale: imponibile + iva, aliquota };
+}
+
+document.getElementById("docAggiungiVoce").addEventListener("click", () => {
+  docVoci.push({ desc:"", qta:1, prezzo:0 });
+  disegnaVoci();
+});
+document.getElementById("docIva").addEventListener("change", calcolaTotali);
+document.getElementById("docChiudi").addEventListener("click", chiudiDocumento);
+document.getElementById("docAnnulla").addEventListener("click", chiudiDocumento);
+document.getElementById("docOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "docOverlay") chiudiDocumento();
+});
+
+/* Il pulsante nella chat chiede quale dei due creare */
+document.getElementById("chatDocBtn").addEventListener("click", () => {
+  if(activeChatIndex === null){
+    showAILanding("Nessuna conversazione aperta", "Apri prima una conversazione col cliente.");
+    return;
+  }
+  const scelta = document.createElement("div");
+  scelta.className = "doc-overlay";
+  scelta.innerHTML = `
+    <div class="doc-panel" style="padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));">
+      <div class="doc-head" style="border:none; padding:0 0 16px;">
+        <div class="doc-head-titolo">Cosa vuoi creare?</div>
+      </div>
+      <button class="ai-hub-voce" data-tipo="preventivo" style="margin-bottom:9px;">
+        <div class="ai-hub-ico" style="background:var(--teal);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Preventivo</b>
+          <small>Una proposta con voci e importi, valida per un periodo</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button class="ai-hub-voce" data-tipo="fattura">
+        <div class="ai-hub-ico" style="background:var(--green);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Fattura</b>
+          <small>Il documento da pagare, con IVA e termini</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>`;
+  scelta.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-tipo]");
+    if(b){ scelta.remove(); apriDocumento(b.dataset.tipo); return; }
+    if(e.target === scelta) scelta.remove();
+  });
+  document.body.appendChild(scelta);
+});
+
+/* ---- Invio del documento ---- */
+document.getElementById("docInvia").addEventListener("click", async () => {
+  const btn = document.getElementById("docInvia");
+  const chat = chats[activeChatIndex];
+  if(!chat) return;
+
+  const voci = docVoci.filter(v => v.desc.trim() && (Number(v.prezzo) || 0) > 0);
+  if(voci.length === 0){
+    showAILanding("Manca qualcosa", "Aggiungi almeno una voce con descrizione e prezzo.");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Invio…";
+
+  const t = calcolaTotali();
+  const numero = prossimoNumero(docTipo);
+  const dati = {
+    tipo: docTipo,
+    numero,
+    anno: new Date().getFullYear(),
+    data: new Date().toLocaleDateString("it-IT"),
+    cliente: chat.name,
+    voci,
+    imponibile: t.imponibile,
+    aliquota: t.aliquota,
+    iva: t.iva,
+    totale: t.totale,
+    condizioni: document.getElementById("docCondizioni").value.trim(),
+    note: document.getElementById("docNote").value.trim(),
+    professionista: nomeProfessionista()
+  };
+
+  const titolo = (docTipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + numero;
+  const riassunto = voci.map(v => v.desc).join(" · ");
+
+  try{
+    if(isDbReady() && chat.id){
+      await supabaseClient.from("messages").insert({
+        conversation_id: chat.id, sender:"me", event_type:"doc",
+        title: titolo, body: riassunto, amount: t.totale,
+        file_name: JSON.stringify(dati)      /* i dati per rigenerare il PDF */
+      });
+    } else {
+      chat.messages.push({
+        eventType:"doc", title:titolo, text:riassunto,
+        amount:"€" + t.totale.toLocaleString("it-IT", {minimumFractionDigits:2}),
+        docTipo, docAnno:dati.anno, docDati:dati, time:"ora"
+      });
+      renderChatWindow();
+    }
+
+    /* La fattura diventa anche un'entrata attesa */
+    if(docTipo === "fattura"){
+      const entrata = {
+        client: chat.name, desc: riassunto.slice(0,60),
+        amount: t.totale, date: dati.data, status: "attesa"
+      };
+      if(isDbReady()){
+        const saved = await dbInsert("incomes", {
+          client_name: chat.name, description: riassunto.slice(0,60),
+          amount: t.totale, date: dati.data, status: "attesa"
+        });
+        if(saved) entrata.id = saved.id;
+      }
+      incomes.push(entrata);
+      renderIncomes(); renderSummary();
+    }
+
+    chiudiDocumento();
+    showAIToast(docTipo === "fattura" ? "Fattura inviata" : "Preventivo inviato",
+      titolo + " a " + chat.name + " — €" + t.totale.toLocaleString("it-IT", {minimumFractionDigits:2}) +
+      (docTipo === "fattura" ? "\nL'ho segnata anche tra le entrate attese." : ""));
+  }catch(err){
+    console.error("Invio documento non riuscito:", err);
+    showAILanding("Invio non riuscito", err.message || "Riprova tra poco.");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "Invia al cliente";
+  }
+});
+
+function nomeProfessionista(){
+  const t = pageMeta.home.title || "";
+  return t.replace("Buongiorno, ", "").replace("Buonasera, ", "").trim() || "Il professionista";
+}
+
+/* ---- Il PDF ---- */
+function apriPdfDocumento(dati){
+  if(!dati){ return; }
+  const euro = n => "€ " + Number(n).toLocaleString("it-IT", { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const titolo = (dati.tipo === "fattura" ? "FATTURA" : "PREVENTIVO");
+
+  const righe = dati.voci.map(v => `
+    <tr>
+      <td>${v.desc}</td>
+      <td class="c">${v.qta}</td>
+      <td class="r">${euro(v.prezzo)}</td>
+      <td class="r">${euro((Number(v.qta)||0) * (Number(v.prezzo)||0))}</td>
+    </tr>`).join("");
+
+  const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
+<title>${titolo} ${dati.numero}</title>
+<style>
+  @page { size:A4; margin:18mm; }
+  *{ box-sizing:border-box; }
+  body{ font-family:-apple-system,'Helvetica Neue',Arial,sans-serif; color:#141726; margin:0; font-size:13px; line-height:1.5; }
+  .testata{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #141726; padding-bottom:14px; margin-bottom:22px; }
+  .marchio{ font-size:22px; font-weight:800; letter-spacing:.12em; }
+  .marchio small{ display:block; font-size:11px; font-weight:400; letter-spacing:0; color:#5F667C; margin-top:3px; }
+  .tipo{ text-align:right; }
+  .tipo h1{ margin:0; font-size:19px; letter-spacing:.06em; }
+  .tipo p{ margin:3px 0 0; font-size:12px; color:#5F667C; }
+  .parti{ display:flex; gap:26px; margin-bottom:24px; }
+  .parte{ flex:1; }
+  .parte h3{ margin:0 0 5px; font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:#9AA1B4; }
+  .parte p{ margin:0; font-size:14px; font-weight:600; }
+  table{ width:100%; border-collapse:collapse; margin-bottom:18px; }
+  th{ text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#9AA1B4; border-bottom:1px solid #E2E5EC; padding:0 8px 7px; }
+  td{ padding:10px 8px; border-bottom:1px solid #F0F1F5; }
+  .c{ text-align:center; } .r{ text-align:right; }
+  .totali{ margin-left:auto; width:250px; }
+  .totali div{ display:flex; justify-content:space-between; padding:6px 0; color:#5F667C; }
+  .totali .tot{ border-top:2px solid #141726; margin-top:6px; padding-top:11px; font-size:17px; font-weight:800; color:#141726; }
+  .piede{ margin-top:26px; padding-top:14px; border-top:1px solid #E2E5EC; font-size:11.5px; color:#5F667C; }
+  .piede b{ color:#141726; }
+  @media print{ .stampa{ display:none; } }
+  .stampa{
+    position:fixed; bottom:20px; right:20px; padding:13px 22px; border-radius:11px;
+    background:#3B6FFF; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer;
+    box-shadow:0 6px 18px rgba(59,111,255,.35);
+  }
+</style></head><body>
+  <div class="testata">
+    <div class="marchio">E·O·N<small>${dati.professionista}</small></div>
+    <div class="tipo"><h1>${titolo}</h1><p>n. ${dati.numero} — ${dati.data}</p></div>
+  </div>
+  <div class="parti">
+    <div class="parte"><h3>Da</h3><p>${dati.professionista}</p></div>
+    <div class="parte"><h3>A</h3><p>${dati.cliente}</p></div>
+  </div>
+  <table>
+    <thead><tr><th>Descrizione</th><th class="c">Q.tà</th><th class="r">Prezzo</th><th class="r">Totale</th></tr></thead>
+    <tbody>${righe}</tbody>
+  </table>
+  <div class="totali">
+    <div><span>Imponibile</span><span>${euro(dati.imponibile)}</span></div>
+    <div><span>IVA ${dati.aliquota}%</span><span>${euro(dati.iva)}</span></div>
+    <div class="tot"><span>Totale</span><span>${euro(dati.totale)}</span></div>
+  </div>
+  <div class="piede">
+    ${dati.condizioni ? "<b>" + (dati.tipo === "fattura" ? "Termini di pagamento" : "Validità") + ":</b> " + dati.condizioni + "<br>" : ""}
+    ${dati.note ? dati.note.replace(/\n/g,"<br>") : ""}
+  </div>
+  <button class="stampa" onclick="window.print()">Salva come PDF</button>
+</body></html>`;
+
+  const w = window.open("", "_blank");
+  if(!w){
+    showAILanding("Apertura bloccata", "Il browser ha bloccato la nuova finestra. Consenti le finestre pop-up per aprire il documento.");
+    return;
+  }
+  w.document.write(html);
+  w.document.close();
 }
 
 /* ============ NAVIGAZIONE ============ */
