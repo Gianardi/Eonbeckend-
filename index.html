@@ -1007,7 +1007,7 @@
 
   /* ---- Allegati e vocali in chat ---- */
   .chat-attach, .chat-mic{
-    width:40px; height:40px; border-radius:50%; flex:none; border:none; cursor:pointer;
+    width:38px; height:38px; border-radius:50%; flex:none; border:none; cursor:pointer;
     background:rgba(20,23,29,.05); color:var(--muted);
     display:flex; align-items:center; justify-content:center;
   }
@@ -1233,13 +1233,19 @@
   .chat-event-amount{ font-size:14.5px; font-weight:900; margin-top:5px; }
   .chat-event-time{ font-size:9.5px; opacity:.55; margin-top:5px; display:block; }
 
-  .chat-input-row{ display:flex; gap:9px; padding:12px 14px; border-top:1px solid var(--border); flex:none; }
-  .chat-input-row input{
-    flex:1; border:1px solid var(--border); background:#FBFAF8;
-    border-radius:20px; padding:11px 16px; font-size:14px; color:var(--text); font-family:inherit;
+  .chat-input-row{
+    display:flex; gap:7px; align-items:center; flex:none;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    border-top:1px solid var(--border);
+  }
+  /* Il campo si stringe quanto serve: i pulsanti restano sempre tutti visibili */
+  .chat-input-row input[type="text"]{
+    flex:1 1 0; min-width:0;
+    border:1px solid var(--border); background:#FBFAF8;
+    border-radius:20px; padding:11px 14px; font-size:14px; color:var(--text); font-family:inherit;
   }
   .chat-send{
-    width:42px;height:42px;border-radius:50%;flex:none; border:none; cursor:pointer;
+    width:40px;height:40px;border-radius:50%;flex:none; border:none; cursor:pointer;
     background:var(--grad-blue); color:#fff;
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 4px 12px rgba(47,92,246,.3);
@@ -2520,13 +2526,12 @@
             <div class="chat-upload-track"><div class="chat-upload-fill" id="chatUploadFill"></div></div>
           </div>
           <div class="chat-input-row">
-            <button class="chat-attach" id="chatAttachBtn" aria-label="Allega foto, video o documento">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.4 11.05L12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.67 3.67 0 0 1 5.18 5.18l-9.2 9.2a1.83 1.83 0 0 1-2.59-2.59l8.49-8.48"/></svg>
+            <button class="chat-attach" id="chatPiuBtn" aria-label="Allega o crea un documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
             </button>
             <input type="file" id="chatFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
-            <button class="chat-attach" id="chatDocBtn" aria-label="Crea preventivo o fattura">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/></svg>
-            </button>
+            <button id="chatAttachBtn" style="display:none;"></button>
+            <button id="chatDocBtn" style="display:none;"></button>
             <input type="text" id="chatInput" placeholder="Scrivi un messaggio...">
             <div class="rec-timer" id="recTimer">
               <span class="rec-dot"></span><span id="recTimerText">0:00</span>
@@ -5622,13 +5627,7 @@ async function inviaAllegato(file){
   }
 }
 
-document.getElementById("chatAttachBtn").addEventListener("click", () => {
-  if(activeChatIndex === null){
-    showAILanding("Nessuna conversazione aperta", "Apri prima una conversazione, poi potrai inviare foto, video e documenti.");
-    return;
-  }
-  document.getElementById("chatFileInput").click();
-});
+
 document.getElementById("chatFileInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
   if(f) inviaAllegato(f);
@@ -5647,7 +5646,8 @@ function uiRegistrazione(attiva){
   if(!mic) return;
   mic.classList.toggle("recording", attiva);
   document.getElementById("chatInput").style.display = attiva ? "none" : "";
-  document.getElementById("chatAttachBtn").style.display = attiva ? "none" : "";
+  const piu = document.getElementById("chatPiuBtn");
+  if(piu) piu.style.display = attiva ? "none" : "";
   document.getElementById("recTimer").classList.toggle("on", attiva);
 }
 
@@ -5886,12 +5886,67 @@ document.getElementById("docOverlay").addEventListener("click", (e) => {
   if(e.target.id === "docOverlay") chiudiDocumento();
 });
 
-/* Il pulsante nella chat chiede quale dei due creare */
-document.getElementById("chatDocBtn").addEventListener("click", () => {
+/* Il "+" apre il menu: allegati o documenti */
+document.getElementById("chatPiuBtn").addEventListener("click", () => {
   if(activeChatIndex === null){
     showAILanding("Nessuna conversazione aperta", "Apri prima una conversazione col cliente.");
     return;
   }
+  const menu = document.createElement("div");
+  menu.className = "doc-overlay";
+  menu.innerHTML = `
+    <div class="doc-panel" style="padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));">
+      <div class="doc-head" style="border:none; padding:0 0 16px;">
+        <div class="doc-head-titolo">Cosa vuoi inviare?</div>
+      </div>
+      <button class="ai-hub-voce" data-azione="file" style="margin-bottom:9px;">
+        <div class="ai-hub-ico" style="background:var(--indigo);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Foto, video o documento</b>
+          <small>Dalla galleria o dai file del telefono</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button class="ai-hub-voce" data-azione="preventivo" style="margin-bottom:9px;">
+        <div class="ai-hub-ico" style="background:var(--teal);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Preventivo</b>
+          <small>Una proposta con voci e importi</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button class="ai-hub-voce" data-azione="fattura">
+        <div class="ai-hub-ico" style="background:var(--green);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="ai-hub-testo">
+          <b>Fattura</b>
+          <small>Il documento da pagare, con IVA e termini</small>
+        </div>
+        <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>`;
+  menu.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-azione]");
+    if(b){
+      const a = b.dataset.azione;
+      menu.remove();
+      if(a === "file") document.getElementById("chatFileInput").click();
+      else apriDocumento(a);
+      return;
+    }
+    if(e.target === menu) menu.remove();
+  });
+  document.body.appendChild(menu);
+});
+
+/* Vecchio percorso, tenuto per compatibilita' */
+document.getElementById("chatDocBtn").addEventListener("click", () => {
+  if(activeChatIndex === null) return;
   const scelta = document.createElement("div");
   scelta.className = "doc-overlay";
   scelta.innerHTML = `
