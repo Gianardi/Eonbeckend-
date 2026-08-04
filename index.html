@@ -3029,8 +3029,25 @@ Se dicono solo l'ora nuova ("possiamo fare alle 10?"), tieni il giorno dell'appu
 Se dicono solo il giorno nuovo ("facciamo giovedì"), tieni l'ora dell'appuntamento esistente.
 Se disdicono senza rifissare, azione "annulla".
 
-=== FORMATO ===
+=== FORMATO E MODI DI DIRE ===
 "quando" sempre così: "lun 8 ago, 16:00". Traduci "domani", "lunedì", "il 10" in data vera partendo da oggi.
+
+Quando l'ora non viene detta, usa questi orari convenzionali:
+  "domattina", "domani mattina", "in mattinata"     → 09:00
+  "domani pomeriggio", "nel pomeriggio"             → 15:00
+  "stasera", "in serata", "domani sera"             → 18:00
+  "a pranzo"                                        → 13:00
+  nessun riferimento all'ora ("ci vediamo giovedì") → scrivi solo il giorno, senza ora
+
+Esempi:
+  "ci vediamo domattina" + "ok"      → quando = "mer 5 ago, 09:00"
+  "ci vediamo giovedì" + "va bene"   → quando = "gio 6 ago"
+  "passo nel pomeriggio" + "perfetto" → quando = "mer 5 ago, 15:00"
+
+IMPORTANTE: un appuntamento senza ora precisa vale lo stesso. Non lasciarlo
+a null solo perché manca l'orario: registra il giorno.
+
+Se manca anche il titolo, usa "Incontro".
 
 === ALTRE REGOLE ===
 - "attivita": solo se il professionista deve fare qualcosa di concreto. Azione breve.
@@ -3184,7 +3201,10 @@ Se disdicono senza rifissare, azione "annulla".
       return;
     }
 
-    /* CASO 1: appuntamento nuovo, confermato -> in calendario con notifica */
+    /* CASO 1: appuntamento nuovo, confermato -> in calendario con notifica.
+       Se l'AI non ha trovato un titolo ma la data c'e', lo registriamo
+       lo stesso: meglio "Incontro" che perdere l'appuntamento. */
+    if(!app.titolo && quando) app.titolo = "Incontro";
     if(app.titolo){
       const gia = chat.messages.some(m =>
         m.eventType === "appt" && !m.annullato && m.title === app.titolo && m.text === quando);
