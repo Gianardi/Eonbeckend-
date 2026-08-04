@@ -125,7 +125,7 @@
   /* main */
   main{ flex:1; padding:16px 16px 20px; }
 
-  .brand-hero{ text-align:center; padding:18px 0 10px; }
+  .brand-hero{ text-align:center; padding:14px 0 8px; }
   .brand-hero-wordmark{
     display:flex; align-items:center; justify-content:center; gap:3px;
     font-family:'Manrope'; font-weight:900; font-size:32px; letter-spacing:-.02em;
@@ -199,7 +199,7 @@
   .back-link:hover{ color:var(--text); }
   .back-link svg{ width:13px; height:13px; }
 
-  .topbar{
+  .topbar{ padding-top:2px;
     display:flex; align-items:center; justify-content:center;
     text-align:center; margin-bottom:16px;
   }
@@ -1743,7 +1743,6 @@
         </button>
         <span>N</span>
       </div>
-      <div class="brand-hero-hint">Tocca l'orologio: l'AI organizza la giornata e le cose da fare</div>
       <div class="brand-hero-search">
         <div class="search-lg">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -1844,10 +1843,6 @@
 
     <!-- ==================== PAGINA: CALENDARIO ==================== -->
     <div class="page" id="page-calendario">
-      <div class="back-link" data-page="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna alla Home
-      </div>
       <div class="ai-strategy-panel">
         <div class="ai-strategy-head">
           <div class="ai-strategy-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg></div>
@@ -1868,10 +1863,6 @@
 
     <!-- ==================== PAGINA: CHIAMATE ==================== -->
     <div class="page" id="page-chiamate">
-      <div class="back-link" data-page="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna alla Home
-      </div>
       <div class="card-panel" style="margin-bottom:14px;">
         <div class="card-header"><h2>Da fare oggi</h2><span class="count" id="callTodayCount">0</span></div>
         <div id="callTodayList" style="padding:8px 0 16px;"></div>
@@ -1887,21 +1878,6 @@
     </div>
 
     <!-- ==================== PAGINA: ASSEMBLEE (Amministratore di Condominio) ==================== -->
-    <div class="page" id="page-assemblee">
-      <div class="back-link" data-page="gestisci-azienda">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
-      </div>
-      <div class="card-panel">
-        <div class="card-header">
-          <h2>Assemblee</h2>
-          <span class="count" id="assembleeCount">0</span>
-        </div>
-        <div id="assembleeList" style="padding:8px 0 16px;"></div>
-      </div>
-    </div>
-
-    <!-- ==================== PAGINA: UDIENZE E SCADENZE (Avvocato) ==================== -->
     <div class="page" id="page-udienze">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1916,27 +1892,7 @@
       </div>
     </div>
 
-    <!-- ==================== PAGINA: REVISIONI PORTAFOGLIO (Consulente Finanziario) ==================== -->
-    <div class="page" id="page-revisioni">
-      <div class="back-link" data-page="gestisci-azienda">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
-      </div>
-      <div class="card-panel">
-        <div class="card-header">
-          <h2>Revisioni Portafoglio</h2>
-          <span class="count" id="revisioniCount">0</span>
-        </div>
-        <div id="revisioniList" style="padding:8px 0 16px;"></div>
-      </div>
-    </div>
-
-    <!-- ==================== PAGINA: OGGI ==================== -->
-    <div class="page" id="page-oggi">
-      <div class="back-link" data-page="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna alla Home
-      </div>
+    <div class="page" id="page-assemblee">
       <div class="oggi-hero">
         <div class="oggi-hero-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" stroke-linecap="round"/></svg>
@@ -1996,11 +1952,66 @@
     </div>
 
     <!-- ==================== PAGINA: CLIENTI (ARCHIVIO) ==================== -->
-    <div class="page" id="page-clienti">
-      <div class="back-link" data-page="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna alla Home
+    <div class="page" id="page-oggi">
+      <div class="oggi-hero">
+        <div class="oggi-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" stroke-linecap="round"/></svg>
+        </div>
+        <h2 class="oggi-hero-title">Oggi</h2>
+        <div class="oggi-hero-date" id="oggiHeroDate">—</div>
+        <div class="difficulty-meter">
+          <div class="difficulty-label">Livello di difficoltà della giornata</div>
+          <div class="difficulty-bar"><div class="difficulty-fill" id="difficultyFill"></div></div>
+          <div class="difficulty-text" id="difficultyText">Calcolo in corso…</div>
+        </div>
       </div>
+
+      <div class="card-panel" style="margin-bottom:14px;">
+        <div class="card-header">
+          <h2>Riepilogo di oggi, in breve</h2>
+        </div>
+        <div class="summary-grid" id="summaryGrid"></div>
+      </div>
+      <div class="card-panel">
+        <div class="card-header">
+          <h2>Attività di oggi</h2>
+          <div class="mini-ring">
+            <div class="mini-ring-wrap">
+              <svg width="40" height="40">
+                <defs>
+                  <linearGradient id="miniRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#008C45"/>
+                    <stop offset="50%" stop-color="#F4F5F0"/>
+                    <stop offset="100%" stop-color="#CD212A"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="20" cy="20" r="16" stroke="rgba(20,23,29,.08)" stroke-width="4.5" fill="none"/>
+                <circle id="miniRingFg" cx="20" cy="20" r="16" stroke="url(#miniRingGrad)" stroke-width="4.5" fill="none"
+                  stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5"/>
+              </svg>
+              <div class="mini-ring-pct" id="miniRingPct">0%</div>
+            </div>
+            <div class="mini-ring-label">Avanzamento<b id="miniRingCount">0/7</b></div>
+          </div>
+        </div>
+
+        <div class="section-label">
+          <span class="badge-ai">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
+            AI
+          </span>
+          Ci penso io — un click e lo fa l'AI
+        </div>
+        <div class="task-list" id="taskListAI"></div>
+
+        <div class="section-divider"></div>
+
+        <div class="section-label">Tocca a te</div>
+        <div class="task-list manual" id="taskListUser"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-clienti">
 
       <div class="client-search-row">
         <div class="search">
@@ -2071,11 +2082,31 @@
     </div>
 
     <!-- ==================== PAGINA: OBIETTIVI ==================== -->
-    <div class="page" id="page-obiettivi">
-      <div class="back-link" data-page="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna alla Home
+    <div class="page" id="page-opportunita">
+      <div class="ai-strategy-panel ai-strategy-simple">
+        <div class="ai-strategy-icon-lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg></div>
+        <button class="primary-btn" id="oppStrategyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg>
+          GENERA STRATEGIA
+        </button>
+        <div id="oppStrategyResult" class="ai-strategy-result" style="display:none;"></div>
       </div>
+
+      <button class="primary-btn add-btn" id="addOppBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi opportunità
+      </button>
+
+      <div class="card-panel">
+        <div class="card-header">
+          <h2 id="oppPageTitle">Progetti, lavori e clienti da prendere</h2>
+          <span class="count" id="oppCount">0</span>
+        </div>
+        <div id="oppList" style="padding:8px 0 16px;"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-obiettivi">
 
       <div class="card-panel">
         <div class="card-header">
@@ -2103,28 +2134,21 @@
     </div>
 
     <!-- ==================== PAGINA: BUSINESS ==================== -->
-    <div class="page" id="page-business">
+    <div class="page" id="page-revisioni">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Torna a Gestisci Azienda
       </div>
-      <div class="card-panel placeholder-page">
-        <div class="module-icon" style="background:var(--coral-soft);color:var(--coral);margin-left:auto;margin-right:auto;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 20.5h18"/><rect x="5.5" y="13" width="3" height="7.5" rx="1"/><rect x="10.5" y="8.5" width="3" height="12" rx="1"/><rect x="15.5" y="4" width="3" height="16.5" rx="1"/>
-          </svg>
+      <div class="card-panel">
+        <div class="card-header">
+          <h2>Revisioni Portafoglio</h2>
+          <span class="count" id="revisioniCount">0</span>
         </div>
-        <h2>Business</h2>
-        <p>Qui vedrai come sta andando il business: fatturato, andamento mensile, indicatori chiave. Dimmi quali metriche contano di più per te.</p>
+        <div id="revisioniList" style="padding:8px 0 16px;"></div>
       </div>
     </div>
 
-    <!-- ==================== PAGINA: OPPORTUNITÀ ==================== -->
-    <div class="page" id="page-opportunita">
-      <div class="back-link" data-page="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna alla Home
-      </div>
+    <div class="page" id="page-business">
 
       <div class="ai-strategy-panel ai-strategy-simple">
         <div class="ai-strategy-icon-lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg></div>
@@ -2151,10 +2175,6 @@
 
     <!-- ==================== PAGINA: GESTISCI AZIENDA ==================== -->
     <div class="page" id="page-gestisci-azienda">
-      <div class="back-link" data-page="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna alla Home
-      </div>
       <div class="azienda-list">
         <div class="azienda-link-card" data-page="assegna-compiti">
           <div class="module-icon" style="background:var(--indigo);">
@@ -4128,10 +4148,10 @@ async function applyProfession(key, skipDemoData){
   document.getElementById("tabLabelClienti").textContent = p.clientiTitle;
   document.getElementById("tabLabelOpportunita").textContent = p.oppTileTitle;
 
+  /* Il titolo cambia con la professione; il sottotitolo resta vuoto:
+     il nome della sezione basta. */
   pageMeta.clienti.title = p.clientiTitle;
-  pageMeta.clienti.sub = p.clientiSub;
   pageMeta.opportunita.title = p.oppTileTitle;
-  pageMeta.opportunita.sub = p.oppTileSub;
 
   document.getElementById("oppStrategyResult").style.display = "none";
 
@@ -6433,26 +6453,28 @@ document.querySelectorAll(".arch-filtro").forEach(b => {
 });
 
 /* ============ NAVIGAZIONE ============ */
+/* Solo il titolo: i sottotitoli spiegavano cose che si capiscono
+   guardando la pagina. In Home il sottotitolo e' la data. */
 const pageMeta = {
   home: { title:"Buongiorno, Marco", sub:null },
-  oggi: { title:"Oggi", sub:"Cosa fa l'AI e cosa tocca a te" },
-  clienti: { title:"Clienti", sub:"Archivio e relazioni con i tuoi clienti" },
-  obiettivi: { title:"Obiettivi", sub:"Il tuo futuro, lavorativo e personale" },
-  business: { title:"Business", sub:"Come sta andando" },
-  opportunita: { title:"Opportunità", sub:"Progetti, lavori e clienti da prendere" },
-  "gestisci-azienda": { title:"Gestisci Azienda", sub:"Compiti, pagamenti, entrate e documenti" },
-  "assegna-compiti": { title:"Assegna Compiti", sub:"Manda un compito a uno o più dipendenti" },
-  pagamenti: { title:"Pagamenti da Fare", sub:"Fornitori, rate e scadenze da saldare" },
-  entrate: { title:"Entrate", sub:"Incassi previsti e ricevuti" },
-  "crea-fattura": { title:"Crea Fattura", sub:"Genera una nuova fattura" },
-  "crea-preventivo": { title:"Crea Preventivo", sub:"Prepara un'offerta per il cliente" },
-  "regalo": { title:"Regalo", sub:"Un pensiero per clienti e dipendenti" },
-  chat: { title:"Messaggi", sub:"Le tue conversazioni" },
-  assemblee: { title:"Assemblee", sub:"Le prossime convocazioni" },
-  udienze: { title:"Udienze e Scadenze", sub:"I prossimi impegni processuali" },
-  calendario: { title:"Calendario", sub:"I tuoi prossimi impegni, compilati dall'AI" },
-  chiamate: { title:"Chiamate", sub:"Da fare oggi, programmate, recenti" },
-  revisioni: { title:"Revisioni Portafoglio", sub:"Le prossime revisioni programmate" },
+  oggi: { title:"Oggi", sub:null },
+  clienti: { title:"Clienti", sub:null },
+  obiettivi: { title:"Obiettivi", sub:null },
+  business: { title:"Business", sub:null },
+  opportunita: { title:"Opportunità", sub:null },
+  "gestisci-azienda": { title:"Azienda", sub:null },
+  "assegna-compiti": { title:"Assegna Compiti", sub:null },
+  pagamenti: { title:"Pagamenti", sub:null },
+  entrate: { title:"Entrate", sub:null },
+  "crea-fattura": { title:"Crea Fattura", sub:null },
+  "crea-preventivo": { title:"Crea Preventivo", sub:null },
+  "regalo": { title:"Regalo", sub:null },
+  chat: { title:"Messaggi", sub:null },
+  assemblee: { title:"Assemblee", sub:null },
+  udienze: { title:"Udienze e Scadenze", sub:null },
+  calendario: { title:"Calendario", sub:null },
+  chiamate: { title:"Chiamate", sub:null },
+  revisioni: { title:"Revisioni Portafoglio", sub:null },
 };
 
 const tabForPage = {
@@ -6483,7 +6505,19 @@ function navigateTo(page){
 
   const meta = pageMeta[page];
   document.getElementById("pageTitle").textContent = meta.title;
-  document.getElementById("pageSub").textContent = meta.sub || document.getElementById("todayDateText").textContent;
+
+  /* Il sottotitolo compare solo in Home, dove porta la data.
+     Nelle altre sezioni il titolo basta: la riga sparisce del tutto. */
+  const sub = document.getElementById("pageSub");
+  if(page === "home"){
+    sub.textContent = document.getElementById("todayDateText").textContent;
+    sub.style.display = "";
+  } else if(meta.sub){
+    sub.textContent = meta.sub;
+    sub.style.display = "";
+  } else {
+    sub.style.display = "none";
+  }
 
   if(page === "chat"){
     document.getElementById("chatSlider").classList.remove("show-conv");
