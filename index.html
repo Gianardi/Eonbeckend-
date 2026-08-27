@@ -125,7 +125,14 @@
   /* main */
   main{ flex:1; padding:16px 16px 20px; }
 
-  .brand-hero{ text-align:center; padding:14px 0 8px; }
+  .brand-hero{ text-align:center; padding:10px 0 8px; }
+  /* Il marchio e la ricerca generale stanno solo in Home: nelle altre
+     sezioni ci sarebbero due barre di ricerca e due titoli. */
+  .brand-hero.nascosto{ display:none; }
+  .brand-data{
+    font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--faint); margin-bottom:10px;
+  }
   .brand-hero-wordmark{
     display:flex; align-items:center; justify-content:center; gap:3px;
     font-family:'Manrope'; font-weight:900; font-size:32px; letter-spacing:-.02em;
@@ -211,6 +218,7 @@
     display:flex; align-items:center; justify-content:center;
     text-align:center; margin-bottom:16px;
   }
+  .topbar.sola{ padding-top:14px; margin-bottom:14px; }
   .topbar h1{
     font-size:21px; font-weight:900; letter-spacing:-.02em; margin:0;
     color:var(--text);
@@ -972,6 +980,15 @@
   }
   .chat-filter-tab:hover{ color:var(--text); }
   .chat-filter-tab.active{ background:var(--indigo-soft); color:var(--indigo); border-color:rgba(47,92,246,.4); }
+  .chat-aggiungi{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:0 14px 10px; padding:11px; border-radius:12px; cursor:pointer;
+    width:calc(100% - 28px); font-family:inherit; font-size:12.5px; font-weight:700;
+    background:var(--indigo-soft); color:var(--indigo); border:1px dashed rgba(59,111,255,.32);
+  }
+  .chat-aggiungi:hover{ background:rgba(59,111,255,.16); }
+  .chat-aggiungi svg{ width:15px; height:15px; }
+
   .chat-list{ padding:8px; overflow-y:auto; flex:1; }
   .chat-list-empty{ padding:40px 20px; text-align:center; font-size:13px; color:var(--muted); line-height:1.6; }
   .chat-item{
@@ -1770,7 +1787,8 @@
   </aside>
 
   <main>
-    <div class="brand-hero">
+    <div class="brand-hero" id="brandHero">
+      <div class="brand-data" id="brandData">&nbsp;</div>
       <div class="brand-hero-wordmark">
         <span>E</span>
         <button class="logo-o ai-clock-btn" id="aiClockBtn" title="Chiedi all'AI di organizzarti la giornata" aria-label="Organizza la giornata con l'AI">
@@ -2662,6 +2680,10 @@
             <div class="chat-filter-tab" id="chatFilterAcquisire" data-filter="acquisire">Da acquisire</div>
             <div class="chat-filter-tab" id="chatFilterTeam" data-filter="team">Team</div>
           </div>
+          <button class="chat-aggiungi" id="chatAggiungiBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+            <span id="chatAggiungiTesto">Aggiungi</span>
+          </button>
           <div class="chat-list" id="chatList"></div>
         </div>
 
@@ -4562,6 +4584,36 @@ const PALETTE = [
 
 /* Definizione dei moduli: campi, tabella del database, come si salva. */
 const sheetForms = {
+  collaboratore: {
+    title: "persona del team",
+    fields: [
+      { key:"name", label:"Nome", type:"text", placeholder:"Es. Marco Rossi", required:true },
+      { key:"role", label:"Ruolo", type:"text", placeholder:"Es. Tecnico, Segretaria, Socio" },
+    ],
+    table: "employees",
+    toDb: v => ({
+      name: v.name, role: v.role || "",
+      color: PALETTE[Math.floor(Math.random() * PALETTE.length)]
+    }),
+    toLocal: (v, saved) => ({
+      id: saved ? saved.id : undefined,
+      name: v.name, role: v.role || "",
+      color: saved ? saved.color : PALETTE[0]
+    }),
+    array: () => employees,
+    afterSave: (persona) => {
+      /* Appena aggiunta, la persona ha la sua conversazione */
+      if(!chats.some(c => c.name === persona.name)){
+        chats.push({
+          name: persona.name, online:true, unread:0,
+          isClient:false, isTeam:true, archived:false,
+          toSeeToday:false, toCallToday:false, messages:[]
+        });
+      }
+      renderChatList();
+    }
+  },
+
   cliente: {
     title: "cliente",
     fields: [
@@ -4736,17 +4788,22 @@ document.getElementById("sheetSaveBtn").addEventListener("click", async () => {
 
   try{
     const arr = form.array();
+    let appenaCreato = null;
     if(sheetState.editing){
       const item = sheetState.editing;
       const updated = form.toLocal(values, item);
       Object.keys(updated).forEach(k => { if(updated[k] !== undefined) item[k] = updated[k]; });
       if(isDbReady() && item.id) await dbUpdate(form.table, item.id, form.toDb(values));
+      appenaCreato = item;
     } else {
       let saved = null;
       if(isDbReady()) saved = await dbInsert(form.table, form.toDb(values));
-      arr.push(form.toLocal(values, saved));
+      appenaCreato = form.toLocal(values, saved);
+      arr.push(appenaCreato);
     }
-    form.afterSave();
+    /* Passiamo l'elemento appena salvato: serve a chi deve fare
+       qualcosa con lui, come creare la conversazione col collaboratore. */
+    form.afterSave(appenaCreato);
     closeSheet();
   }catch(err){
     console.error("Errore salvataggio:", err);
@@ -5522,7 +5579,33 @@ function updateChatFilterTabs(){
   ["archivio","urgenti","clienti","chiudere","acquisire","team"].forEach(f => {
     document.getElementById("chatFilter" + f.charAt(0).toUpperCase() + f.slice(1)).classList.toggle("active", chatFilter === f);
   });
+  aggiornaPulsanteAggiungi();
 }
+
+/* Il pulsante "Aggiungi" cambia a seconda di dove sei: in Team aggiunge
+   una persona, in Clienti un cliente. Dove non ha senso, sparisce. */
+function aggiornaPulsanteAggiungi(){
+  const btn = document.getElementById("chatAggiungiBtn");
+  const testo = document.getElementById("chatAggiungiTesto");
+  if(!btn) return;
+  if(chatFilter === "team"){
+    btn.style.display = "flex";
+    testo.textContent = "Aggiungi collaboratore";
+  } else if(chatFilter === "clienti"){
+    btn.style.display = "flex";
+    testo.textContent = "Aggiungi cliente";
+  } else if(chatFilter === "acquisire"){
+    btn.style.display = "flex";
+    testo.textContent = "Aggiungi contatto";
+  } else {
+    btn.style.display = "none";
+  }
+}
+
+document.getElementById("chatAggiungiBtn").addEventListener("click", () => {
+  if(chatFilter === "team") openSheet("collaboratore");
+  else openSheet("cliente");
+});
 
 function renderChatWindow(){
   const nameEl = document.getElementById("chatWinName");
@@ -6560,18 +6643,20 @@ function navigateTo(page){
   const meta = pageMeta[page];
   document.getElementById("pageTitle").textContent = meta.title;
 
-  /* Il sottotitolo compare solo in Home, dove porta la data.
-     Nelle altre sezioni il titolo basta: la riga sparisce del tutto. */
+  /* Marchio e ricerca generale: solo in Home. Nelle altre sezioni
+     resta il titolo, e la ricerca e' quella della sezione. */
+  const hero = document.getElementById("brandHero");
+  const topbar = document.querySelector(".topbar");
+  const inHome = (page === "home");
+  hero.classList.toggle("nascosto", !inHome);
+  topbar.classList.toggle("sola", !inHome);
+
+  /* La data sta in alto, piccola, sopra il marchio */
+  const brandData = document.getElementById("brandData");
+  if(brandData) brandData.textContent = dataBreve;
+
   const sub = document.getElementById("pageSub");
-  if(page === "home"){
-    sub.textContent = document.getElementById("todayDateText").textContent;
-    sub.style.display = "";
-  } else if(meta.sub){
-    sub.textContent = meta.sub;
-    sub.style.display = "";
-  } else {
-    sub.style.display = "none";
-  }
+  sub.style.display = "none";
 
   if(page === "chat"){
     document.getElementById("chatSlider").classList.remove("show-conv");
@@ -6796,11 +6881,15 @@ const days = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì"
 const months = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 const nowDate = new Date();
 const todayDateText = days[nowDate.getDay()].charAt(0).toUpperCase()+days[nowDate.getDay()].slice(1) + " " + nowDate.getDate() + " " + months[nowDate.getMonth()] + " · Ecco il riepilogo della tua giornata";
+/* La data in alto: corta, senza commenti. Solo quando siamo */
+const dataBreve = days[nowDate.getDay()].charAt(0).toUpperCase()+days[nowDate.getDay()].slice(1) + " " + nowDate.getDate() + " " + months[nowDate.getMonth()];
 const hiddenDateHolder = document.createElement("span");
 hiddenDateHolder.id = "todayDateText";
 hiddenDateHolder.style.display = "none";
 hiddenDateHolder.textContent = todayDateText;
-document.getElementById("pageSub").textContent = todayDateText;
+document.getElementById("pageSub").style.display = "none";
+const bd = document.getElementById("brandData");
+if(bd) bd.textContent = dataBreve;
 document.getElementById("oggiHeroDate").textContent = days[nowDate.getDay()].charAt(0).toUpperCase()+days[nowDate.getDay()].slice(1) + " " + nowDate.getDate() + " " + months[nowDate.getMonth()];
 document.body.appendChild(hiddenDateHolder);
 
