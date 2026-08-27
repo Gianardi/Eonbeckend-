@@ -1627,40 +1627,40 @@
 
       <div class="ob-label">Che lavoro fai?</div>
       <div class="ob-cards" id="obProfessionCards">
-        <div class="ob-card" data-profession="artigiano">
+        <div class="ob-card" data-profession="edile">
           <div class="ob-card-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg>
           </div>
           <div class="ob-card-body">
-            <div class="ob-card-title">Artigiano / Impresa</div>
+            <div class="ob-card-title">Edile</div>
             <div class="ob-card-sub">Cantieri, clienti, preventivi e pagamenti</div>
           </div>
         </div>
-        <div class="ob-card" data-profession="amministratore">
+        <div class="ob-card" data-profession="idraulico">
           <div class="ob-card-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.7s6 5.4 6 10.1a6 6 0 0 1-12 0c0-4.7 6-10.1 6-10.1z"/></svg>
+          </div>
+          <div class="ob-card-body">
+            <div class="ob-card-title">Idraulico</div>
+            <div class="ob-card-sub">Interventi, impianti, manutenzioni</div>
+          </div>
+        </div>
+        <div class="ob-card" data-profession="elettricista">
+          <div class="ob-card-icon" style="background:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          </div>
+          <div class="ob-card-body">
+            <div class="ob-card-title">Elettricista</div>
+            <div class="ob-card-sub">Impianti, quadri, certificazioni</div>
+          </div>
+        </div>
+        <div class="ob-card" data-profession="amministratore">
+          <div class="ob-card-icon" style="background:var(--teal);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
           </div>
           <div class="ob-card-body">
             <div class="ob-card-title">Amministratore di Condominio</div>
             <div class="ob-card-sub">Condomìni, assemblee, incarichi</div>
-          </div>
-        </div>
-        <div class="ob-card" data-profession="avvocato">
-          <div class="ob-card-icon" style="background:var(--teal);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          </div>
-          <div class="ob-card-body">
-            <div class="ob-card-title">Avvocato</div>
-            <div class="ob-card-sub">Pratiche, udienze, scadenze</div>
-          </div>
-        </div>
-        <div class="ob-card" data-profession="consulente">
-          <div class="ob-card-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg>
-          </div>
-          <div class="ob-card-body">
-            <div class="ob-card-title">Consulente Finanziario</div>
-            <div class="ob-card-sub">Clienti, portafogli, revisioni periodiche</div>
           </div>
         </div>
       </div>
@@ -3651,7 +3651,7 @@ const opportunities = [
 const probColor = { "Alta":"green", "Media":"amber", "Bassa":"coral" };
 
 /* ============ PERSONALIZZAZIONE PER PROFESSIONE ============ */
-let currentProfession = "artigiano";
+let currentProfession = "edile";
 
 const professionData = {
   artigiano: {
@@ -3871,6 +3871,28 @@ const professionData = {
     ]
   }
 };
+
+/* Edile, Idraulico ed Elettricista lavorano allo stesso modo: stessi
+   clienti, stessi cantieri, stesse trattative. Cambia il nome del
+   mestiere e poco altro. Quando emergeranno differenze vere dall'uso,
+   si specializzeranno una per una. */
+professionData.edile = Object.assign({}, professionData.artigiano, {
+  oppTileTitle: "Lavori",
+  oppTileSub: "Cantieri e lavori da prendere",
+  oppPageTitle: "Cantieri e lavori da prendere"
+});
+professionData.idraulico = Object.assign({}, professionData.artigiano, {
+  oppTileTitle: "Interventi",
+  oppTileSub: "Interventi e impianti da prendere",
+  oppPageTitle: "Interventi e impianti da prendere"
+});
+professionData.elettricista = Object.assign({}, professionData.artigiano, {
+  oppTileTitle: "Impianti",
+  oppTileSub: "Impianti e lavori da prendere",
+  oppPageTitle: "Impianti e lavori da prendere"
+});
+/* L'artigiano resta come base tecnica, ma non compare piu' nella scelta */
+
 
 /* ---- Revisioni Portafoglio (Consulente Finanziario) ---- */
 function renderRevisioni(){
@@ -6894,7 +6916,7 @@ document.getElementById("oggiHeroDate").textContent = days[nowDate.getDay()].cha
 document.body.appendChild(hiddenDateHolder);
 
 async function loadProfession(){
-  if(!STORAGE_AVAILABLE) return "artigiano";
+  if(!STORAGE_AVAILABLE) return "edile";
   try{
     const res = await window.storage.get("eon-profession", false);
     if(res && res.value){
@@ -6902,7 +6924,7 @@ async function loadProfession(){
       if(parsed && parsed.key && professionData[parsed.key]) return parsed.key;
     }
   }catch(e){ /* nessuna professione salvata: parte da Artigiano */ }
-  return "artigiano";
+  return "edile";
 }
 
 /* ============ ONBOARDING ============ */
