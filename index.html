@@ -132,10 +132,18 @@
     color:var(--text); margin-bottom:8px;
   }
   .logo-o{ display:inline-flex; align-items:center; justify-content:center; }
+  /* Il cerchio del marchio prende i colori delle card: turchese, blu
+     e viola. Tre dei sei, non tutti: riconoscibile senza diventare
+     un arcobaleno. */
   .brand-hero-wordmark .logo-o{
     width:30px; height:30px; margin:0 1px; border-radius:50%;
-    background:var(--grad-blue); color:#fff;
-    box-shadow:0 3px 10px rgba(47,92,246,.4);
+    background:conic-gradient(from 210deg,
+      var(--teal) 0deg,
+      var(--indigo) 130deg,
+      var(--violet) 250deg,
+      var(--teal) 360deg);
+    color:#fff;
+    box-shadow:0 3px 12px rgba(59,111,255,.35);
   }
   .brand-hero-wordmark .logo-o svg{ width:60%; height:60%; }
   .ai-clock-btn{
@@ -639,6 +647,17 @@
   .client-chat-btn svg{ width:15px; height:15px; }
 
   /* opportunità */
+  /* La strategia AI: una riga discreta, non un riquadro che occupa
+     mezza schermata prima ancora di vedere le opportunita'. */
+  .opp-strategia{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px; margin-bottom:14px; border-radius:13px; cursor:pointer;
+    font-family:inherit; font-size:12.5px; font-weight:700; color:var(--violet);
+    background:var(--violet-soft); border:1px solid rgba(155,92,255,.22);
+  }
+  .opp-strategia:hover{ background:rgba(155,92,255,.16); }
+  .opp-strategia svg{ width:15px; height:15px; }
+
   .ai-strategy-panel{
     background:var(--card); border:1.5px solid rgba(124,92,250,.3); border-radius:16px;
     padding:16px 16px; margin-bottom:14px; box-shadow:var(--shadow-sm);
@@ -1286,10 +1305,26 @@
   }
   .arch-vuoto b{ display:block; color:var(--text); font-size:14px; margin-bottom:5px; }
 
-  .chat-messages{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:9px; }
+  /* La chat non e' piu' bianca: un fondo appena caldo con una trama
+     leggerissima, cosi' le bolle si staccano e l'occhio riposa. */
+  .chat-messages{
+    flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:9px;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(0,191,160,.05) 0%, transparent 42%),
+      radial-gradient(circle at 82% 78%, rgba(155,92,255,.05) 0%, transparent 45%),
+      linear-gradient(180deg, #FDFCFA 0%, #FAF8F5 100%);
+  }
   .bubble{ max-width:75%; padding:10px 14px; border-radius:17px; font-size:14px; line-height:1.45; }
-  .bubble.them{ background:#F1F0EC; color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; }
-  .bubble.me{ background:var(--grad-blue); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; font-weight:500; }
+  .bubble.them{
+    background:#FFFFFF; color:var(--text); align-self:flex-start;
+    border-bottom-left-radius:4px; border:1px solid rgba(20,30,60,.06);
+    box-shadow:0 1px 2px rgba(20,23,29,.04);
+  }
+  .bubble.me{
+    background:var(--grad-blue); color:#fff; align-self:flex-end;
+    border-bottom-right-radius:4px; font-weight:500;
+    box-shadow:0 2px 8px rgba(59,111,255,.22);
+  }
   .bubble-time{ font-size:10px; opacity:.65; margin-top:4px; display:block; }
 
   /* card-evento incorporata nella chat: fattura, aggiornamento, appuntamento */
@@ -1313,7 +1348,7 @@
   .chat-input-row{
     display:flex; gap:7px; align-items:center; flex:none;
     padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-    border-top:1px solid var(--border);
+    border-top:1px solid var(--border); background:var(--card);
   }
   /* Il campo si stringe quanto serve: i pulsanti restano sempre tutti visibili */
   .chat-input-row input[type="text"]{
@@ -2083,19 +2118,18 @@
 
     <!-- ==================== PAGINA: OBIETTIVI ==================== -->
     <div class="page" id="page-opportunita">
-      <div class="ai-strategy-panel ai-strategy-simple">
-        <div class="ai-strategy-icon-lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg></div>
-        <button class="primary-btn" id="oppStrategyBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg>
-          GENERA STRATEGIA
-        </button>
-        <div id="oppStrategyResult" class="ai-strategy-result" style="display:none;"></div>
-      </div>
-
+      <!-- La strategia non ha piu' un riquadro tutto suo: e' una riga
+           discreta sotto il pulsante principale. -->
       <button class="primary-btn add-btn" id="addOppBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
         Aggiungi opportunità
       </button>
+
+      <button class="opp-strategia" id="oppStrategyBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
+        Chiedi all'AI da dove partire
+      </button>
+      <div id="oppStrategyResult" class="ai-strategy-result" style="display:none;"></div>
 
       <div class="card-panel">
         <div class="card-header">
