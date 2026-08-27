@@ -3872,26 +3872,111 @@ const professionData = {
   }
 };
 
-/* Edile, Idraulico ed Elettricista lavorano allo stesso modo: stessi
-   clienti, stessi cantieri, stesse trattative. Cambia il nome del
-   mestiere e poco altro. Quando emergeranno differenze vere dall'uso,
-   si specializzeranno una per una. */
+/* I tre mestieri edili condividono la struttura, ma parlano la lingua
+   di chi li fa: un idraulico legge "Interventi", non "Opportunità".
+   Le funzioni per ora sono le stesse: quando i tester diranno cosa
+   serve davvero a ciascuno, si specializzeranno una alla volta. */
+
 professionData.edile = Object.assign({}, professionData.artigiano, {
-  oppTileTitle: "Lavori",
-  oppTileSub: "Cantieri e lavori da prendere",
-  oppPageTitle: "Cantieri e lavori da prendere"
+  clientiTitle:"Clienti", clientiSub:"Committenti e cantieri seguiti",
+  section1:"Cantieri attivi", section2:"Preventivi in corso",
+  statTotalLabel:"Committenti", statTrattativaLabel:"Preventivi aperti",
+  statValueLabel:"Valore cantieri",
+  oppTileTitle:"Lavori", oppTileSub:"Cantieri e lavori da prendere",
+  oppTileEyebrow:"Cantieri",
+  oppPageTitle:"Cantieri e lavori da prendere",
+  oppStrategyTitle:"AI — Quali lavori chiudere per primi",
+  oppStrategySub:"Guardo valore, probabilità e scadenze di ogni cantiere e ti dico da dove partire.",
+  clients:[
+    { name:"Famiglia Colombo", status:"attivo", value:48000, last:"2 giorni fa", color:"linear-gradient(135deg,#2FD9C7,#22B8AA)",
+      desc:"Ristrutturazione completa appartamento 120mq. Demolizioni finite, si parte con i massetti." },
+    { name:"Condominio Via Verdi 12", status:"trattativa", value:22500, last:"ieri", color:"linear-gradient(135deg,#FFC15E,#E8A63C)",
+      desc:"Rifacimento facciata e balconi. Preventivo consegnato all'amministratore, attendo delibera assemblea." },
+    { name:"Immobiliare Sole S.r.l.", status:"attivo", value:61200, last:"5 giorni fa", color:"linear-gradient(135deg,#3DDC84,#2BB86A)",
+      desc:"Due villette a schiera, grezzo avanzato. Consegna prevista in autunno." },
+    { name:"Sig. Ferrari", status:"inattivo", value:0, last:"3 mesi fa", color:"linear-gradient(135deg,#8B96AE,#5B6580)",
+      desc:"Bagno rifatto la scorsa primavera. Aveva accennato al terrazzo, da ricontattare." },
+    { name:"Bar Centrale", status:"trattativa", value:15800, last:"oggi", color:"linear-gradient(135deg,#FF6F6F,#E85A5A)",
+      desc:"Ampliamento dehors e nuovo bancone. Molto interessati, decisione entro agosto." },
+    { name:"Studio Marino", status:"attivo", value:33400, last:"1 settimana fa", color:"linear-gradient(135deg,#5C7CFA,#7C9BFF)",
+      desc:"Ristrutturazione uffici, lavori a fasi per non fermare l'attività." }
+  ],
+  opportunities:[
+    { name:"Ristrutturazione Villa Serena", client:"Nuovo cliente — Fam. Colombo", value:32000, probability:"Alta", deadline:"15 ago 2026", stage:"Preventivo inviato" },
+    { name:"Rifacimento tetto capannone", client:"Immobiliare Sole S.r.l.", value:54000, probability:"Media", deadline:"20 ago 2026", stage:"In trattativa" },
+    { name:"Manutenzione condominio annuale", client:"Condominio Via Verdi 12", value:12500, probability:"Alta", deadline:"10 set 2026", stage:"Da confermare" },
+    { name:"Nuovo bancone e dehors", client:"Bar Centrale", value:15800, probability:"Media", deadline:"31 ago 2026", stage:"Sopralluogo fatto" },
+    { name:"Ampliamento showroom", client:"Studio Marino", value:28000, probability:"Bassa", deadline:"30 set 2026", stage:"Primo contatto" }
+  ]
 });
+
 professionData.idraulico = Object.assign({}, professionData.artigiano, {
-  oppTileTitle: "Interventi",
-  oppTileSub: "Interventi e impianti da prendere",
-  oppPageTitle: "Interventi e impianti da prendere"
+  clientiTitle:"Clienti", clientiSub:"Chi segui per impianti e manutenzioni",
+  section1:"Clienti con contratto", section2:"Preventivi in corso",
+  statTotalLabel:"Clienti", statTrattativaLabel:"Preventivi aperti",
+  statValueLabel:"Valore lavori",
+  oppTileTitle:"Interventi", oppTileSub:"Interventi e impianti da prendere",
+  oppTileEyebrow:"Lavori",
+  oppPageTitle:"Interventi e impianti da prendere",
+  oppStrategyTitle:"AI — Quali interventi chiudere per primi",
+  oppStrategySub:"Guardo valore, urgenza e scadenze di ogni intervento e ti dico da dove partire.",
+  clients:[
+    { name:"Condominio Le Rose", status:"attivo", value:18000, last:"2 giorni fa", color:"linear-gradient(135deg,#2FD9C7,#22B8AA)",
+      desc:"Contratto di manutenzione centrale termica. Prossima revisione a settembre." },
+    { name:"Hotel Belvedere", status:"attivo", value:34000, last:"ieri", color:"linear-gradient(135deg,#3DDC84,#2BB86A)",
+      desc:"Rifacimento bagni piano primo. Lavori a stanze alternate per non fermare l'hotel." },
+    { name:"Famiglia Ricci", status:"trattativa", value:8500, last:"oggi", color:"linear-gradient(135deg,#FFC15E,#E8A63C)",
+      desc:"Sostituzione caldaia e termosifoni. Aspettano il preventivo per la pompa di calore." },
+    { name:"Ristorante Da Gino", status:"attivo", value:12200, last:"5 giorni fa", color:"linear-gradient(135deg,#5C7CFA,#7C9BFF)",
+      desc:"Cliente fisso per la cucina. Chiamano spesso per urgenze, pagano puntuali." },
+    { name:"Sig.ra Bianchi", status:"inattivo", value:0, last:"4 mesi fa", color:"linear-gradient(135deg,#8B96AE,#5B6580)",
+      desc:"Perdita riparata a primavera. Aveva parlato di rifare il bagno, da risentire." },
+    { name:"Palestra Energy", status:"trattativa", value:21000, last:"1 settimana fa", color:"linear-gradient(135deg,#FF6F6F,#E85A5A)",
+      desc:"Nuovi spogliatoi, impianto sanitario completo. Decidono dopo l'estate." }
+  ],
+  opportunities:[
+    { name:"Impianto pompa di calore", client:"Famiglia Ricci", value:8500, probability:"Alta", deadline:"15 ago 2026", stage:"Preventivo inviato" },
+    { name:"Spogliatoi nuovi", client:"Palestra Energy", value:21000, probability:"Media", deadline:"20 set 2026", stage:"In trattativa" },
+    { name:"Manutenzione annuale centrale", client:"Condominio Le Rose", value:6500, probability:"Alta", deadline:"10 set 2026", stage:"Da confermare" },
+    { name:"Rifacimento bagni secondo piano", client:"Hotel Belvedere", value:28000, probability:"Media", deadline:"31 ott 2026", stage:"Sopralluogo fatto" },
+    { name:"Sostituzione colonne montanti", client:"Condominio Le Rose", value:34000, probability:"Bassa", deadline:"30 nov 2026", stage:"Primo contatto" }
+  ]
 });
+
 professionData.elettricista = Object.assign({}, professionData.artigiano, {
-  oppTileTitle: "Impianti",
-  oppTileSub: "Impianti e lavori da prendere",
-  oppPageTitle: "Impianti e lavori da prendere"
+  clientiTitle:"Clienti", clientiSub:"Chi segui per impianti e certificazioni",
+  section1:"Clienti con contratto", section2:"Preventivi in corso",
+  statTotalLabel:"Clienti", statTrattativaLabel:"Preventivi aperti",
+  statValueLabel:"Valore lavori",
+  oppTileTitle:"Impianti", oppTileSub:"Impianti e lavori da prendere",
+  oppTileEyebrow:"Lavori",
+  oppPageTitle:"Impianti e lavori da prendere",
+  oppStrategyTitle:"AI — Quali impianti chiudere per primi",
+  oppStrategySub:"Guardo valore, urgenza e scadenze di ogni lavoro e ti dico da dove partire.",
+  clients:[
+    { name:"Capannone Rossi S.r.l.", status:"attivo", value:42000, last:"2 giorni fa", color:"linear-gradient(135deg,#2FD9C7,#22B8AA)",
+      desc:"Quadro elettrico nuovo e illuminazione LED. Certificazione da consegnare a fine lavori." },
+    { name:"Villa Marchetti", status:"attivo", value:26000, last:"ieri", color:"linear-gradient(135deg,#3DDC84,#2BB86A)",
+      desc:"Impianto domotico completo. Il cliente aggiunge richieste in corsa, tenere aggiornato il preventivo." },
+    { name:"Studio Dentistico Sorriso", status:"trattativa", value:14500, last:"oggi", color:"linear-gradient(135deg,#FFC15E,#E8A63C)",
+      desc:"Adeguamento impianto per nuovi macchinari. In attesa che confermino le potenze." },
+    { name:"Condominio Aurora", status:"attivo", value:9800, last:"5 giorni fa", color:"linear-gradient(135deg,#5C7CFA,#7C9BFF)",
+      desc:"Manutenzione parti comuni e luci scale. Contratto annuale con l'amministratore." },
+    { name:"Sig. Neri", status:"inattivo", value:0, last:"5 mesi fa", color:"linear-gradient(135deg,#8B96AE,#5B6580)",
+      desc:"Rifatto quadro casa in primavera. Parlava di fotovoltaico, da ricontattare." },
+    { name:"Supermercato Conad", status:"trattativa", value:38000, last:"1 settimana fa", color:"linear-gradient(135deg,#FF6F6F,#E85A5A)",
+      desc:"Rifacimento illuminazione sala vendita. Vogliono lavorare di notte, decidono a settembre." }
+  ],
+  opportunities:[
+    { name:"Impianto fotovoltaico capannone", client:"Capannone Rossi S.r.l.", value:54000, probability:"Alta", deadline:"20 ago 2026", stage:"Preventivo inviato" },
+    { name:"Illuminazione sala vendita", client:"Supermercato Conad", value:38000, probability:"Media", deadline:"15 set 2026", stage:"In trattativa" },
+    { name:"Adeguamento studio dentistico", client:"Studio Dentistico Sorriso", value:14500, probability:"Alta", deadline:"31 ago 2026", stage:"Da confermare" },
+    { name:"Colonnine ricarica auto", client:"Condominio Aurora", value:22000, probability:"Media", deadline:"30 set 2026", stage:"Sopralluogo fatto" },
+    { name:"Domotica secondo piano", client:"Villa Marchetti", value:12000, probability:"Bassa", deadline:"31 ott 2026", stage:"Primo contatto" }
+  ]
 });
-/* L'artigiano resta come base tecnica, ma non compare piu' nella scelta */
+/* L'artigiano resta come base tecnica: non compare piu' nella scelta,
+   ma i tre mestieri ereditano da lui tutto cio' che non hanno riscritto. */
 
 
 /* ---- Revisioni Portafoglio (Consulente Finanziario) ---- */
