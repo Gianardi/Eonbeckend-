@@ -870,6 +870,19 @@
   .dettatura-divisore::before, .dettatura-divisore::after{
     content:""; flex:1; height:1px; background:var(--border);
   }
+  /* Cosa finira' in calendario e tra le cose da fare */
+  .dettatura-impegni{ margin-top:11px; display:none; }
+  .dett-impegno{
+    display:flex; align-items:center; gap:10px; padding:9px 10px; margin-top:7px;
+    background:var(--card); border:1px solid var(--border); border-radius:11px;
+  }
+  .dett-imp-ico{
+    width:28px; height:28px; border-radius:9px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .dett-imp-ico svg{ width:14px; height:14px; }
+  .dett-impegno b{ display:block; font-size:12.5px; font-weight:700; color:var(--text); }
+  .dett-impegno small{ display:block; font-size:10.5px; color:var(--muted); margin-top:1px; }
   /* Le onde: ferme quando aspetta, in movimento mentre lavora */
   .onde{ display:flex; align-items:center; gap:2.5px; height:17px; }
   .onde i{ width:2.5px; border-radius:2px; background:#fff; display:block; }
@@ -4905,7 +4918,57 @@ let sheetState = { form:null, editing:null };
    e compila i campi del modulo: nome, valore, telefono, note.
    Nulla viene salvato senza che lui abbia visto e confermato.
    ============================================================ */
+let impegniDaCreare = { appuntamento:null, attivita:null, quandoAttivita:null };
+
+/* Crea in una volta sola l'appuntamento e la cosa da fare che erano
+   nella frase dettata, agganciandoli al cliente appena salvato. */
+async function creaImpegniDaDettatura(cliente){
+  const fatti = [];
+
+  if(impegniDaCreare.appuntamento){
+    const app = impegniDaCreare.appuntamento;
+    /* L'appuntamento vive nella conversazione col cliente: da li'
+       finisce in Calendario, come quelli nati dalle chat. */
+    const chat = await ensureConversationFor(cliente);
+    if(isDbReady() && chat.id){
+      await supabaseClient.from("messages").insert({
+        conversation_id: chat.id, sender:"me", event_type:"appt",
+        title: app.titolo, body: app.quando || ""
+      });
+    } else {
+      chat.messages.push({ eventType:"appt", title:app.titolo, text:app.quando || "", time:"ora" });
+    }
+    fatti.push("📅 " + app.titolo + (app.quando ? " — " + app.quando : ""));
+  }
+
+  if(impegniDaCreare.attivita){
+    const titolo = impegniDaCreare.attivita;
+    const gia = tasks.some(t => t.title.toLowerCase() === titolo.toLowerCase());
+    if(!gia){
+      const nuova = { title: titolo, time: impegniDaCreare.quandoAttivita || "—",
+                      status:"todo", owner:"user" };
+      if(isDbReady()){
+        const saved = await dbInsert("tasks", {
+          title: titolo, owner_type:"user", status:"todo",
+          time: impegniDaCreare.quandoAttivita || ""
+        });
+        if(saved) nuova.id = saved.id;
+      }
+      tasks.push(nuova);
+      fatti.push("✓ " + titolo);
+    }
+  }
+
+  renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
+  impegniDaCreare = { appuntamento:null, attivita:null, quandoAttivita:null };
+
+  if(fatti.length){
+    showAIToast("Segnato anche questo", fatti.join("\n"));
+  }
+}
+
 function collegaDettatura(){
+  impegniDaCreare = { appuntamento:null, attivita:null, quandoAttivita:null };
   const box = document.getElementById("dettatura");
   const campo = document.getElementById("dettaturaCampo");
   const btn = document.getElementById("dettaturaBtn");
@@ -4932,23 +4995,38 @@ function collegaDettatura(){
 Il professionista ha appena raccontato di un cliente nuovo, dettando o scrivendo:
 "${testo}"
 
-Ricava i dati per la scheda cliente. Rispondi SOLO con un oggetto JSON, senza testo prima o dopo, senza backtick:
+Oggi è ${new Date().toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}.
+
+Ricava i dati per la scheda cliente e gli impegni presi. Rispondi SOLO con un oggetto JSON, senza testo prima o dopo, senza backtick:
 
 {
   "name": "nome e cognome, o nome dell'azienda",
   "status": "attivo" | "trattativa" | "inattivo",
   "value": numero senza simboli (es. 15000) oppure null,
   "phone": "numero di telefono" oppure null,
-  "desc": "che lavoro deve fare e ogni altra cosa utile da ricordare"
+  "desc": "che lavoro deve fare e ogni altra cosa utile da ricordare",
+  "appuntamento": { "titolo": "...", "quando": "lun 8 set, 09:00" } oppure null,
+  "attivita": "cosa devi fare tu" oppure null,
+  "quandoAttivita": "lun 8 set" oppure null
 }
 
-Regole:
+Regole sui dati:
 - "name": mettilo nell'ordine naturale italiano (se dice "Rossi Mario", scrivi "Mario Rossi").
 - "value": il testo arriva da una dettatura, quindi puoi trovare numeri scritti a parole ("quindicimila" = 15000). Se non viene detta nessuna cifra, null.
 - "status": "trattativa" se deve ancora decidere o aspetta un preventivo; "attivo" se il lavoro è già confermato o in corso. Nel dubbio "trattativa".
 - "phone": solo se viene detto un numero di telefono.
-- "desc": una o due frasi in italiano corretto, che riassumano il lavoro e gli impegni presi. Non ripetere il nome.
-- Non inventare mai dati che non ci sono.`;
+- "desc": una o due frasi in italiano corretto, che riassumano il lavoro. Non ripetere il nome, non ripetere l'appuntamento.
+
+Regole su appuntamenti e cose da fare — importanti:
+- "appuntamento": quando si parla di VEDERSI di persona. Esempi: "vederlo lunedì", "passo giovedì", "sopralluogo martedì", "ci vediamo la settimana prossima".
+- "attivita": quando c'è qualcosa che deve fare il professionista, ma non un incontro. Esempi: "chiamarlo lunedì", "mandargli il preventivo", "richiamare venerdì", "preparare il computo".
+- Se dice sia una cosa sia l'altra, compila entrambi.
+- "quando": traduci "lunedì", "domani", "la settimana prossima" in data vera partendo da oggi. Formato: "lun 8 set, 09:00".
+- Se non viene detta un'ora usa questi orari: mattina 09:00, pomeriggio 15:00, sera 18:00. Se non c'è nessun riferimento all'ora, scrivi solo il giorno senza orario.
+- "titolo" dell'appuntamento: breve e concreto, es. "Sopralluogo tetto", "Incontro in cantiere".
+- "attivita": scrivila come azione dal punto di vista del professionista, es. "Chiamare per il lavoro del tetto".
+- "quandoAttivita": il giorno in cui va fatta, se viene detto. Altrimenti null.
+- Non inventare mai impegni che non sono stati detti.`;
 
     let dati;
     try{
@@ -4989,11 +5067,55 @@ Regole:
       riempiti++;
     });
 
+    /* Appuntamento e cosa da fare: li teniamo da parte e li creiamo
+       al salvataggio, cosi' nascono insieme al cliente. */
+    impegniDaCreare = {
+      appuntamento: (dati.appuntamento && dati.appuntamento.titolo) ? dati.appuntamento : null,
+      attivita: dati.attivita || null,
+      quandoAttivita: dati.quandoAttivita || null
+    };
+    mostraImpegni();
+
+    const extra = [];
+    if(impegniDaCreare.appuntamento) extra.push("1 appuntamento");
+    if(impegniDaCreare.attivita) extra.push("1 cosa da fare");
+
     mostraStato("fatto", "Ecco cosa ho capito",
       riempiti + (riempiti === 1 ? " campo compilato" : " campi compilati") +
+      (extra.length ? " · " + extra.join(" · ") : "") +
       " — correggi quello che serve, poi salva");
     btn.disabled = false;
     btn.textContent = "Rifai";
+  }
+
+  /* Mostra sotto il riquadro cosa finira' in calendario e tra le attivita' */
+  function mostraImpegni(){
+    let box = document.getElementById("dettaturaImpegni");
+    if(!box){
+      box = document.createElement("div");
+      box.id = "dettaturaImpegni";
+      box.className = "dettatura-impegni";
+      document.getElementById("dettatura").appendChild(box);
+    }
+    const righe = [];
+    if(impegniDaCreare.appuntamento){
+      righe.push(`<div class="dett-impegno">
+        <div class="dett-imp-ico" style="background:var(--amber);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div><b>${impegniDaCreare.appuntamento.titolo}</b><small>${impegniDaCreare.appuntamento.quando || "data da definire"} · va in Calendario</small></div>
+      </div>`);
+    }
+    if(impegniDaCreare.attivita){
+      righe.push(`<div class="dett-impegno">
+        <div class="dett-imp-ico" style="background:var(--indigo);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div><b>${impegniDaCreare.attivita}</b><small>${impegniDaCreare.quandoAttivita || "quando puoi"} · va tra le cose da fare</small></div>
+      </div>`);
+    }
+    box.innerHTML = righe.join("");
+    box.style.display = righe.length ? "block" : "none";
   }
 
   function mostraStato(stato, titolo, sotto){
@@ -5116,6 +5238,13 @@ document.getElementById("sheetSaveBtn").addEventListener("click", async () => {
     /* Passiamo l'elemento appena salvato: serve a chi deve fare
        qualcosa con lui, come creare la conversazione col collaboratore. */
     form.afterSave(appenaCreato);
+
+    /* Se la dettatura aveva trovato un appuntamento o una cosa da fare,
+       li creiamo ora: nascono insieme al cliente, senza altri passaggi. */
+    if(sheetState.form === "cliente" && !sheetState.editing &&
+       (impegniDaCreare.appuntamento || impegniDaCreare.attivita)){
+      await creaImpegniDaDettatura(appenaCreato);
+    }
     closeSheet();
   }catch(err){
     console.error("Errore salvataggio:", err);
