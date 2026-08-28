@@ -563,6 +563,19 @@
 
   /* client / list rows generici */
   /* ---- Calendario a linea del tempo ---- */
+  .cal-vuoto{
+    text-align:center; padding:34px 22px; color:var(--muted);
+    font-size:12.5px; line-height:1.6;
+  }
+  .cal-vuoto b{
+    display:block; font-family:'Manrope'; font-size:15px; font-weight:900;
+    color:var(--text); margin-bottom:7px;
+  }
+  .cal-passati{
+    display:inline-block; margin-top:14px; padding:5px 11px; border-radius:20px;
+    background:rgba(20,30,60,.05); font-size:11px; color:var(--faint); font-weight:700;
+  }
+
   .cal-giorno{
     display:flex; align-items:center; gap:9px; margin:18px 0 9px;
     font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.09em;
@@ -4138,7 +4151,7 @@ function renderUdienze(){
 function renderCalendar(){
   const wrap = document.getElementById("calendarList");
   if(!wrap) return;
-  const items = [];
+  let items = [];
 
   chats.forEach(c => {
     c.messages.forEach(m => {
@@ -4190,6 +4203,13 @@ function renderCalendar(){
   items.forEach(it => {
     it._data = interpretaQuando(it.when);
   });
+
+  /* Un calendario che mostra il mese scorso non serve a niente: teniamo
+     solo da oggi in avanti. Le cose senza data restano, perche' sono
+     ancora da fissare. */
+  const inizioOggi = new Date(); inizioOggi.setHours(0,0,0,0);
+  const passati = items.filter(it => it._data && it._data < inizioOggi);
+  items = items.filter(it => !it._data || it._data >= inizioOggi);
   items.sort((a,b) => {
     if(!a._data && !b._data) return 0;
     if(!a._data) return 1;      /* senza data vanno in fondo */
@@ -4204,6 +4224,18 @@ function renderCalendar(){
     if(!g){ g = { et, oggi: et === "Oggi", voci: [] }; gruppi.push(g); }
     g.voci.push(it);
   });
+
+  if(items.length === 0){
+    wrap.innerHTML = `<div class="cal-vuoto">
+      <b>Nessun impegno in arrivo</b>
+      Gli appuntamenti si segnano da soli quando li concordi in chat,
+      o quando li racconti a EON AI aggiungendo un cliente.
+      ${passati.length ? '<span class="cal-passati">' + passati.length +
+        (passati.length === 1 ? " impegno passato" : " impegni passati") + " non mostrati</span>" : ""}
+    </div>`;
+    document.getElementById("calendarCount").textContent = "0";
+    return;
+  }
 
   gruppi.forEach(g => {
     const intest = document.createElement("div");
@@ -4491,7 +4523,7 @@ const chats = [
     {from:"me", text:"Grazie Sara, lo controllo oggi pomeriggio.", time:"Ieri"},
   ]},
   { name:"Verdi Impianti S.p.A.", online:true, unread:0, isClient:true, isProspect:false, archived:false, toSeeToday:true, toCallToday:false, messages:[
-    {eventType:"appt", title:"Sopralluogo impianti", text:"Confermato per oggi alle 15:00 in cantiere", time:"09:00"},
+    {eventType:"appt", title:"Sopralluogo impianti", text:"Oggi, 15:00", time:"09:00"},
     {from:"them", text:"Confermato il sopralluogo di oggi alle 15:00 in cantiere.", time:"09:05"},
     {from:"me", text:"Perfetto, ci vediamo lì con Luca.", time:"09:07"},
   ]},
