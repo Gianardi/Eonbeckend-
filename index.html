@@ -828,6 +828,73 @@
     background:var(--coral-soft); color:var(--coral); border:none; border-radius:11px;
     padding:12px 16px; font-weight:700; font-size:13px; cursor:pointer; flex:none;
   }
+  /* ---- Raccontalo a EON AI ---- */
+  .dettatura{
+    border-radius:16px; padding:14px; margin-bottom:6px;
+    background:var(--violet-soft); border:1.5px solid rgba(155,92,255,.25);
+    transition:background .25s, border-color .25s;
+  }
+  .dettatura.pensa{ border-color:var(--violet); }
+  .dettatura.fatto{ background:var(--teal-soft); border-color:rgba(0,191,160,.3); }
+  .dettatura-testa{ display:flex; align-items:center; gap:11px; margin-bottom:11px; }
+  .dettatura-ico{
+    width:36px; height:36px; border-radius:12px; flex:none; color:#fff;
+    background:var(--violet); display:flex; align-items:center; justify-content:center;
+  }
+  .dettatura.fatto .dettatura-ico{ background:var(--teal); }
+  .dettatura-titolo{ font-size:13px; font-weight:700; color:var(--violet); }
+  .dettatura-titolo b{ font-weight:900; }
+  .dettatura.fatto .dettatura-titolo{ color:#00907A; }
+  .dettatura-sotto{ font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.4; }
+  .dettatura-campo{
+    width:100%; border-radius:12px; padding:12px 13px; font-family:inherit;
+    border:1px solid rgba(155,92,255,.25); background:var(--card);
+    font-size:13.5px; line-height:1.5; color:var(--text); resize:none;
+  }
+  .dettatura-campo:focus{ outline:2px solid var(--violet); outline-offset:1px; }
+  .dettatura-piede{
+    display:flex; align-items:center; gap:7px; margin-top:10px;
+    font-size:10.5px; color:var(--muted); line-height:1.35;
+  }
+  .dettatura-piede svg{ width:13px; height:13px; flex:none; color:var(--violet); }
+  .dettatura-piede span{ flex:1; min-width:0; }
+  .dettatura-btn{
+    flex:none; border:none; border-radius:9px; padding:8px 14px; cursor:pointer;
+    background:var(--violet); color:#fff; font-family:inherit; font-size:11.5px; font-weight:800;
+  }
+  .dettatura-btn:disabled{ opacity:.5; }
+  .dettatura-divisore{
+    display:flex; align-items:center; gap:10px; margin:16px 0 14px;
+    font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
+  }
+  .dettatura-divisore::before, .dettatura-divisore::after{
+    content:""; flex:1; height:1px; background:var(--border);
+  }
+  /* Le onde: ferme quando aspetta, in movimento mentre lavora */
+  .onde{ display:flex; align-items:center; gap:2.5px; height:17px; }
+  .onde i{ width:2.5px; border-radius:2px; background:#fff; display:block; }
+  .onde i:nth-child(1){ height:6px; }
+  .onde i:nth-child(2){ height:11px; }
+  .onde i:nth-child(3){ height:16px; }
+  .onde i:nth-child(4){ height:10px; }
+  .onde i:nth-child(5){ height:6px; }
+  .dettatura.pensa .onde i{ animation:onda 1.05s ease-in-out infinite; }
+  .dettatura.pensa .onde i:nth-child(2){ animation-delay:.14s; }
+  .dettatura.pensa .onde i:nth-child(3){ animation-delay:.28s; }
+  .dettatura.pensa .onde i:nth-child(4){ animation-delay:.42s; }
+  .dettatura.pensa .onde i:nth-child(5){ animation-delay:.56s; }
+  @keyframes onda{
+    0%,100%{ transform:scaleY(.45); opacity:.7; }
+    50%{ transform:scaleY(1); opacity:1; }
+  }
+  .sheet-field input.riempito, .sheet-field textarea.riempito, .sheet-field select.riempito{
+    animation:brillaCampo .9s ease;
+  }
+  @keyframes brillaCampo{
+    0%{ background:rgba(0,191,160,.3); }
+    100%{ background:#FBFAF8; }
+  }
+
   .sheet-field label{ display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; }
   .sheet-field input, .sheet-field select, .sheet-field textarea{
     width:100%; border:1px solid var(--border); background:#FBFAF8;
@@ -2858,7 +2925,7 @@ async function loadUserDataFromDB(){
   ]);
 
   clients.length = 0; dbClients.forEach(c => clients.push({
-    id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description, last:c.last_contact, color:c.color
+    id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description, last:c.last_contact, phone:c.phone || "", color:c.color
   }));
   opportunities.length = 0; dbOpps.forEach(o => opportunities.push({
     id:o.id, name:o.name, client:o.client_name, value:Number(o.value)||0, probability:o.probability, deadline:o.deadline, stage:o.stage
@@ -4730,19 +4797,20 @@ const sheetForms = {
         { value:"trattativa", label:"In trattativa" },
         { value:"inattivo", label:"Inattivo" },
       ], default:"attivo" },
-      { key:"value", label:"Valore (€)", type:"number", placeholder:"0" },
+      { key:"value", label:"Valore (€)", type:"text", inputmode:"decimal", placeholder:"Es. 15.000" },
+      { key:"phone", label:"Telefono", type:"text", inputmode:"tel", placeholder:"Es. 335 1234567" },
       { key:"desc", label:"Note", type:"textarea", placeholder:"Cosa devi ricordare su questo cliente..." },
     ],
     table: "clients",
     toDb: v => ({
-      name: v.name, status: v.status, value: Number(v.value) || 0,
-      description: v.desc || "", last_contact: "oggi",
+      name: v.name, status: v.status, value: leggiImporto(v.value),
+      description: v.desc || "", last_contact: "oggi", phone: v.phone || "",
       color: PALETTE[Math.floor(Math.random() * PALETTE.length)]
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
-      name: v.name, status: v.status, value: Number(v.value) || 0,
-      desc: v.desc || "", last: "oggi",
+      name: v.name, status: v.status, value: leggiImporto(v.value),
+      desc: v.desc || "", last: "oggi", phone: v.phone || "",
       color: saved ? saved.color : PALETTE[0]
     }),
     array: () => clients,
@@ -4754,7 +4822,7 @@ const sheetForms = {
     fields: [
       { key:"name", label:"Titolo", type:"text", placeholder:"Es. Inserimento nuovo mandato", required:true },
       { key:"client", label:"Cliente", type:"text", placeholder:"Nome del cliente o contatto" },
-      { key:"value", label:"Valore stimato (€)", type:"number", placeholder:"0" },
+      { key:"value", label:"Valore stimato (€)", type:"text", inputmode:"decimal", placeholder:"Es. 7.000" },
       { key:"probability", label:"Probabilità", type:"select", options:[
         { value:"Alta", label:"Alta" }, { value:"Media", label:"Media" }, { value:"Bassa", label:"Bassa" },
       ], default:"Media" },
@@ -4763,12 +4831,12 @@ const sheetForms = {
     ],
     table: "opportunities",
     toDb: v => ({
-      name: v.name, client_name: v.client || "", value: Number(v.value) || 0,
+      name: v.name, client_name: v.client || "", value: leggiImporto(v.value),
       probability: v.probability, deadline: v.deadline || null, stage: v.stage || ""
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
-      name: v.name, client: v.client || "", value: Number(v.value) || 0,
+      name: v.name, client: v.client || "", value: leggiImporto(v.value),
       probability: v.probability, deadline: v.deadline || "", stage: v.stage || ""
     }),
     array: () => opportunities,
@@ -4780,7 +4848,7 @@ const sheetForms = {
     fields: [
       { key:"supplier", label:"A chi devi pagare", type:"text", placeholder:"Es. Assicurazione RC", required:true },
       { key:"desc", label:"Per cosa", type:"text", placeholder:"Es. Polizza annuale" },
-      { key:"amount", label:"Importo (€)", type:"number", placeholder:"0", required:true },
+      { key:"amount", label:"Importo (€)", type:"text", inputmode:"decimal", placeholder:"Es. 1.500", required:true },
       { key:"due", label:"Scadenza", type:"text", placeholder:"Es. 05 ago 2026" },
       { key:"status", label:"Stato", type:"select", options:[
         { value:"dapagare", label:"Da pagare" }, { value:"pagato", label:"Pagato" }, { value:"ritardo", label:"In ritardo" },
@@ -4788,12 +4856,12 @@ const sheetForms = {
     ],
     table: "payments",
     toDb: v => ({
-      supplier: v.supplier, description: v.desc || "", amount: Number(v.amount) || 0,
+      supplier: v.supplier, description: v.desc || "", amount: leggiImporto(v.amount),
       due_date: v.due || null, status: v.status
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
-      supplier: v.supplier, desc: v.desc || "", amount: Number(v.amount) || 0,
+      supplier: v.supplier, desc: v.desc || "", amount: leggiImporto(v.amount),
       due: v.due || "", status: v.status
     }),
     array: () => payments,
@@ -4805,7 +4873,7 @@ const sheetForms = {
     fields: [
       { key:"client", label:"Da chi", type:"text", placeholder:"Es. Lorenzo Ischino", required:true },
       { key:"desc", label:"Per cosa", type:"text", placeholder:"Es. Primo acconto commissioni" },
-      { key:"amount", label:"Importo (€)", type:"number", placeholder:"0", required:true },
+      { key:"amount", label:"Importo (€)", type:"text", inputmode:"decimal", placeholder:"Es. 1.500", required:true },
       { key:"due", label:"Data prevista", type:"text", placeholder:"Es. 12 ago 2026" },
       { key:"status", label:"Stato", type:"select", options:[
         { value:"attesa", label:"In attesa" }, { value:"incassato", label:"Incassato" }, { value:"scaduto", label:"Scaduto" },
@@ -4813,12 +4881,12 @@ const sheetForms = {
     ],
     table: "incomes",
     toDb: v => ({
-      client_name: v.client, description: v.desc || "", amount: Number(v.amount) || 0,
+      client_name: v.client, description: v.desc || "", amount: leggiImporto(v.amount),
       due_date: v.due || null, status: v.status
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
-      client: v.client, desc: v.desc || "", amount: Number(v.amount) || 0,
+      client: v.client, desc: v.desc || "", amount: leggiImporto(v.amount),
       due: v.due || "", status: v.status
     }),
     array: () => incomes,
@@ -4827,6 +4895,113 @@ const sheetForms = {
 };
 
 let sheetState = { form:null, editing:null };
+
+
+/* ============================================================
+   RACCONTALO A EON AI
+   ------------------------------------------------------------
+   Il professionista detta col microfono della tastiera (l'unico
+   che funziona sempre su iPhone) o scrive. L'AI legge la frase
+   e compila i campi del modulo: nome, valore, telefono, note.
+   Nulla viene salvato senza che lui abbia visto e confermato.
+   ============================================================ */
+function collegaDettatura(){
+  const box = document.getElementById("dettatura");
+  const campo = document.getElementById("dettaturaCampo");
+  const btn = document.getElementById("dettaturaBtn");
+  if(!box || !campo || !btn) return;
+
+  btn.addEventListener("click", () => leggiEcompila());
+  /* Anche il tasto Invio della tastiera fa partire la lettura */
+  campo.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); leggiEcompila(); }
+  });
+
+  async function leggiEcompila(){
+    const testo = campo.value.trim();
+    if(testo.length < 4){
+      mostraStato("attesa", "Raccontalo a <b>EON AI</b>", "Scrivi o detta almeno qualche parola");
+      return;
+    }
+
+    mostraStato("pensa", "Sto capendo…", "Un attimo, leggo quello che hai scritto");
+    btn.disabled = true;
+
+    const prompt = `Sei l'assistente dentro EON, un'app per artigiani e professionisti italiani.
+
+Il professionista ha appena raccontato di un cliente nuovo, dettando o scrivendo:
+"${testo}"
+
+Ricava i dati per la scheda cliente. Rispondi SOLO con un oggetto JSON, senza testo prima o dopo, senza backtick:
+
+{
+  "name": "nome e cognome, o nome dell'azienda",
+  "status": "attivo" | "trattativa" | "inattivo",
+  "value": numero senza simboli (es. 15000) oppure null,
+  "phone": "numero di telefono" oppure null,
+  "desc": "che lavoro deve fare e ogni altra cosa utile da ricordare"
+}
+
+Regole:
+- "name": mettilo nell'ordine naturale italiano (se dice "Rossi Mario", scrivi "Mario Rossi").
+- "value": il testo arriva da una dettatura, quindi puoi trovare numeri scritti a parole ("quindicimila" = 15000). Se non viene detta nessuna cifra, null.
+- "status": "trattativa" se deve ancora decidere o aspetta un preventivo; "attivo" se il lavoro è già confermato o in corso. Nel dubbio "trattativa".
+- "phone": solo se viene detto un numero di telefono.
+- "desc": una o due frasi in italiano corretto, che riassumano il lavoro e gli impegni presi. Non ripetere il nome.
+- Non inventare mai dati che non ci sono.`;
+
+    let dati;
+    try{
+      const raw = await callAI(prompt, 350);
+      dati = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    }catch(err){
+      console.warn("Dettatura non compresa:", err.message);
+      mostraStato("attesa", "Non sono riuscita a capirla",
+        ultimoErroreAI ? "AI non raggiunta: " + ultimoErroreAI : "Riprova, oppure compila i campi a mano");
+      btn.disabled = false;
+      return;
+    }
+
+    if(!dati || !dati.name){
+      mostraStato("attesa", "Non ho trovato un nome",
+        "Prova a dire chi è il cliente, per esempio: Rossi Mario, deve rifare il tetto");
+      btn.disabled = false;
+      return;
+    }
+
+    /* Riempio i campi e li faccio lampeggiare, cosi' si vede cosa ha capito */
+    const daScrivere = {
+      name: dati.name,
+      status: dati.status || "trattativa",
+      value: (dati.value !== null && dati.value !== undefined && Number(dati.value) > 0)
+        ? Number(dati.value).toLocaleString("it-IT") : "",
+      phone: dati.phone || "",
+      desc: dati.desc || ""
+    };
+    let riempiti = 0;
+    Object.keys(daScrivere).forEach(chiave => {
+      const el = document.querySelector('#sheetBody [data-field="' + chiave + '"]');
+      if(!el || !daScrivere[chiave]) return;
+      el.value = daScrivere[chiave];
+      el.classList.remove("riempito");
+      void el.offsetWidth;          /* fa ripartire l'animazione */
+      el.classList.add("riempito");
+      riempiti++;
+    });
+
+    mostraStato("fatto", "Ecco cosa ho capito",
+      riempiti + (riempiti === 1 ? " campo compilato" : " campi compilati") +
+      " — correggi quello che serve, poi salva");
+    btn.disabled = false;
+    btn.textContent = "Rifai";
+  }
+
+  function mostraStato(stato, titolo, sotto){
+    box.className = "dettatura" + (stato === "attesa" ? "" : " " + stato);
+    document.getElementById("dettaturaTitolo").innerHTML = titolo;
+    document.getElementById("dettaturaSotto").textContent = sotto;
+  }
+}
 
 function openSheet(formKey, existingItem){
   const form = sheetForms[formKey];
@@ -4838,8 +5013,33 @@ function openSheet(formKey, existingItem){
   document.getElementById("sheetError").style.display = "none";
   document.getElementById("sheetDeleteBtn").style.display = existingItem ? "block" : "none";
 
+  /* Il riquadro "raccontalo a EON AI" compare solo quando si aggiunge
+     un cliente nuovo: in modifica i dati ci sono gia'. */
+  const conVoce = (formKey === "cliente" && !existingItem);
+  const bloccoVoce = conVoce ? `
+    <div class="dettatura" id="dettatura">
+      <div class="dettatura-testa">
+        <div class="dettatura-ico" id="dettaturaIco">
+          <span class="onde"><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="dettatura-titolo" id="dettaturaTitolo">Raccontalo a <b>EON AI</b></div>
+          <div class="dettatura-sotto" id="dettaturaSotto">Detta o scrivi: compilo io i campi qui sotto</div>
+        </div>
+      </div>
+      <textarea class="dettatura-campo" id="dettaturaCampo" rows="3"
+        placeholder="Es. Rossi Mario, deve rifare il tetto, circa 15.000, ci sentiamo giovedì"></textarea>
+      <div class="dettatura-piede" id="dettaturaPiede">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        <span>Per dettare tocca il microfono sulla tastiera</span>
+        <button class="dettatura-btn" id="dettaturaBtn">Compila</button>
+      </div>
+    </div>
+    <div class="dettatura-divisore">Oppure compila a mano</div>
+  ` : "";
+
   const body = document.getElementById("sheetBody");
-  body.innerHTML = form.fields.map(f => {
+  body.innerHTML = bloccoVoce + form.fields.map(f => {
     const current = existingItem ? (existingItem[f.key] ?? "") : (f.default ?? "");
     if(f.type === "select"){
       return `<div class="sheet-field">
@@ -4855,11 +5055,16 @@ function openSheet(formKey, existingItem){
         <textarea data-field="${f.key}" placeholder="${f.placeholder || ""}">${current}</textarea>
       </div>`;
     }
+    /* Per gli importi apriamo la tastiera numerica ma lasciamo scrivere
+       il punto e la virgola: 15.000 e 1.200,50 devono passare. */
+    const modo = f.inputmode ? ` inputmode="${f.inputmode}"` : "";
     return `<div class="sheet-field">
       <label>${f.label}</label>
-      <input type="${f.type}" data-field="${f.key}" placeholder="${f.placeholder || ""}" value="${current}">
+      <input type="${f.type}"${modo} data-field="${f.key}" placeholder="${f.placeholder || ""}" value="${current}">
     </div>`;
   }).join("");
+
+  if(conVoce) collegaDettatura();
 
   document.getElementById("sheetOverlay").style.display = "flex";
 }
