@@ -17,13 +17,23 @@ create index if not exists messages_scheduled_at_idx
 create index if not exists tasks_scheduled_at_idx
   on public.tasks (scheduled_at);
 
+-- 1bis) "annullato" è uno stato nuovo per i task (annulla_impegno lo usa
+--       per gli impegni che non sono appuntamenti). Il vincolo esistente
+--       non lo ammette: lo allarghiamo, senza toccare gli altri valori.
+alter table public.tasks drop constraint tasks_status_check;
+alter table public.tasks add constraint tasks_status_check
+  check (status = ANY (ARRAY['todo'::text, 'progress'::text, 'late'::text, 'done'::text, 'annullato'::text]));
+
 -- 2) Registro delle operazioni compiute dall'AI.
 --    L'utente può leggerlo (per vedere "cosa ha fatto l'AI"), ma solo
 --    il backend (service role) può scriverci: nessuna policy di insert
 --    per il ruolo authenticated.
+--    owner_id punta a profiles, come tutte le altre tabelle di EON (non
+--    direttamente a auth.users): c'è sempre una riga profiles per ogni
+--    utente, creata dal trigger on_auth_user_created al momento dell'iscrizione.
 create table if not exists public.ai_audit_log (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  id uuid primary key default extensions.uuid_generate_v4(),
+  owner_id uuid not null references public.profiles(id) on delete cascade,
   tool text not null,
   input jsonb not null default '{}'::jsonb,
   esito jsonb,
@@ -42,8 +52,8 @@ create policy "ai_audit_log_select_own" on public.ai_audit_log
 --    backend soltanto: nessuna policy, il client non ci accede mai
 --    direttamente, nemmeno in lettura.
 create table if not exists public.ai_runs (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  id uuid primary key default extensions.uuid_generate_v4(),
+  owner_id uuid not null references public.profiles(id) on delete cascade,
   stato text not null default 'in_corso', -- in_corso | in_attesa_conferma | concluso | incompleto
   messaggi jsonb not null default '[]'::jsonb,
   in_sospeso jsonb,
@@ -56,7 +66,7 @@ alter table public.ai_runs enable row level security;
 -- 4) Limite di richieste per utente, per evitare che un abuso consumi
 --    il credito Anthropic. Anche questa è a uso esclusivo del backend.
 create table if not exists public.ai_rate_limits (
-  owner_id uuid primary key references auth.users(id) on delete cascade,
+  owner_id uuid primary key references public.profiles(id) on delete cascade,
   finestra_iniziata_il timestamptz not null default now(),
   conteggio int not null default 0
 );

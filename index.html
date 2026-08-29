@@ -3807,7 +3807,7 @@ const tasks = [
   { title:"Pausa pranzo", time:"13:00", status:"todo", owner:"user" },
   { title:"Chiamata cliente Rossi SpA", time:"15:30", status:"progress", owner:"user" },
 ];
-const statusLabel = { todo:"Da fare", progress:"In corso", done:"Completata", late:"In ritardo" };
+const statusLabel = { todo:"Da fare", progress:"In corso", done:"Completata", late:"In ritardo", annullato:"Annullata" };
 
 const clients = [
   { name:"Bianchi Costruzioni S.r.l.", status:"attivo", value:48000, last:"2 giorni fa", color:"linear-gradient(135deg,#2FD9C7,#22B8AA)",
@@ -4779,7 +4779,7 @@ function buildTaskRow(t){
     : (t.status === "done"
         ? '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>'
         : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>');
-  const titleStyle = t.status === "done" ? "text-decoration:line-through;color:var(--faint);" : "";
+  const titleStyle = (t.status === "done" || t.status === "annullato") ? "text-decoration:line-through;color:var(--faint);" : "";
   const subLabel = t.inSospesoCon
     ? (t.motivo || "risposta rimasta in sospeso")
     : (t.owner === "ai" ? "Se ne occupa l'AI" : t.time);
