@@ -42,6 +42,15 @@ Questa guida presuppone **zero esperienza tecnica**. Ogni passaggio dice esattam
    - `ANTHROPIC_API_KEY`
 6. Premi **Deploy**. Dopo 1-2 minuti avrai un indirizzo tipo `https://eon-backend.vercel.app` — è il tuo endpoint AI vero, online 24 ore su 24.
 
+## Parte 5 — Assistente AI con tool calling (aggiornamento)
+
+L'AI ora può eseguire operazioni da sola (creare impegni, cercare clienti, ecc.), non solo scrivere testo. Serve un piccolo aggiornamento al database, additivo: non tocca nulla di quello che già c'è.
+
+1. Su Supabase, vai su **SQL Editor**.
+2. Apri il file `supabase/ai_tools_schema.sql`, copia tutto il contenuto, incollalo nell'editor, premi **Run**.
+3. Se vedi "Success", ha funzionato: ora ci sono le colonne e le tabelle che servono all'assistente (data vera per gli impegni, registro delle operazioni, limite di richieste).
+4. Non serve nessuna nuova variabile d'ambiente su Vercel: l'assistente usa le stesse `SUPABASE_SERVICE_ROLE_KEY` e `ANTHROPIC_API_KEY` già impostate.
+
 ## Cosa manca ancora dopo questo
 
 Questi 4 passaggi ti danno: database vero, login vero, endpoint AI sicuro online.
