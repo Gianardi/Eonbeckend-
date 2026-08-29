@@ -4177,9 +4177,20 @@ function renderCalendar(){
   }
 
   /* Le cose rimaste in sospeso: chi ti ha detto "ti faccio sapere" */
-  tasks.filter(t => t.inSospesoCon && t.status !== "done").forEach(t => {
-    items.push({ icon:"attesa", title:t.title, sub:t.motivo || "risposta rimasta in sospeso",
-      when:t.time, urgent:false, contatto:t.inSospesoCon });
+  /* In calendario finisce TUTTO cio' che ha una data: appuntamenti,
+     telefonate da fare, cose da consegnare. Se ha un giorno e un'ora,
+     e' un impegno — non importa come si chiama. */
+  tasks.filter(t => t.status !== "done").forEach(t => {
+    const haData = t.time && interpretaQuando(t.time);
+    if(!haData && !t.inSospesoCon) return;   /* senza data e senza attesa: resta solo tra le cose da fare */
+    items.push({
+      icon: t.inSospesoCon ? "attesa" : "todo",
+      title: t.title,
+      sub: t.motivo || t.clienteCollegato || "da fare",
+      when: t.time,
+      urgent: false,
+      contatto: t.inSospesoCon || t.clienteCollegato || null
+    });
   });
 
   clients.filter(c => c.status === "attivo" || c.status === "trattativa").forEach(c => {
@@ -4195,7 +4206,8 @@ function renderCalendar(){
   const icons = {
     appt:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
     visit:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
-    attesa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    attesa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    todo:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>'
   };
   /* Raggruppiamo per giorno: "Oggi", "Domani", "Giovedi 8 agosto"...
      E' quello che serve davvero — cosa ho nei prossimi giorni — invece
@@ -4252,7 +4264,7 @@ function renderCalendar(){
       row.innerHTML = `
         <div class="cal-ora">${ora || "—"}</div>
         <div class="cal-corpo">
-          <div class="cal-icona" style="background:${it.urgent ? 'var(--coral)' : (it.icon === 'attesa' ? 'var(--amber)' : 'var(--indigo)')};">${icons[it.icon]}</div>
+          <div class="cal-icona" style="background:${it.urgent ? 'var(--coral)' : (it.icon === 'attesa' ? 'var(--amber)' : it.icon === 'todo' ? 'var(--teal)' : 'var(--indigo)')};">${icons[it.icon]}</div>
           <div class="cal-testo">
             <div class="cal-nome">${it.title}</div>
             <div class="cal-sotto">${it.sub}</div>
@@ -4978,7 +4990,8 @@ async function creaImpegniDaDettatura(cliente){
     const gia = tasks.some(t => t.title.toLowerCase() === titolo.toLowerCase());
     if(!gia){
       const nuova = { title: titolo, time: impegniDaCreare.quandoAttivita || "—",
-                      status:"todo", owner:"user" };
+                      status:"todo", owner:"user",
+                      clienteCollegato: cliente ? cliente.name : null };
       if(isDbReady()){
         const saved = await dbInsert("tasks", {
           title: titolo, owner_type:"user", status:"todo",
@@ -5039,7 +5052,7 @@ Ricava i dati per la scheda cliente e gli impegni presi. Rispondi SOLO con un og
   "desc": "che lavoro deve fare e ogni altra cosa utile da ricordare",
   "appuntamento": { "titolo": "...", "quando": "lun 8 set, 09:00" } oppure null,
   "attivita": "cosa devi fare tu" oppure null,
-  "quandoAttivita": "lun 8 set" oppure null
+  "quandoAttivita": "lun 8 set, 15:00" oppure null
 }
 
 Regole sui dati:
@@ -5049,15 +5062,29 @@ Regole sui dati:
 - "phone": solo se viene detto un numero di telefono.
 - "desc": una o due frasi in italiano corretto, che riassumano il lavoro. Non ripetere il nome, non ripetere l'appuntamento.
 
-Regole su appuntamenti e cose da fare — importanti:
-- "appuntamento": quando si parla di VEDERSI di persona. Esempi: "vederlo lunedì", "passo giovedì", "sopralluogo martedì", "ci vediamo la settimana prossima".
-- "attivita": quando c'è qualcosa che deve fare il professionista, ma non un incontro. Esempi: "chiamarlo lunedì", "mandargli il preventivo", "richiamare venerdì", "preparare il computo".
-- Se dice sia una cosa sia l'altra, compila entrambi.
+Regole su appuntamenti e cose da fare — LE PIÙ IMPORTANTI:
+
+**Ogni impegno che il professionista nomina deve finire nel calendario.**
+Non solo gli incontri: anche le telefonate, i materiali da comprare, i documenti
+da preparare, le pratiche da fare. Se lo ha detto, va segnato con un giorno.
+
+- "appuntamento": quando si VEDONO di persona. Esempi: "vederlo lunedì",
+  "passo giovedì", "sopralluogo martedì", "ci vediamo la settimana prossima".
+- "attivita": tutto il resto che deve fare lui. Esempi: "chiamarlo lunedì alle 15",
+  "prendere le mattonelle", "mandargli il preventivo", "fare il contratto",
+  "preparare il computo", "ordinare il materiale".
+- Se dice più cose, compila entrambi i campi.
+- **Se non viene detto quando**, decidi tu una data ragionevole e mettila comunque:
+  cose urgenti o legate a un lavoro in corso → domani;
+  cose che possono aspettare → entro tre giorni.
+  Non lasciare mai "quandoAttivita" a null se c'è un'attività: deve avere un giorno.
 - "quando": traduci "lunedì", "domani", "la settimana prossima" in data vera partendo da oggi. Formato: "lun 8 set, 09:00".
 - Se non viene detta un'ora usa questi orari: mattina 09:00, pomeriggio 15:00, sera 18:00. Se non c'è nessun riferimento all'ora, scrivi solo il giorno senza orario.
 - "titolo" dell'appuntamento: breve e concreto, es. "Sopralluogo tetto", "Incontro in cantiere".
 - "attivita": scrivila come azione dal punto di vista del professionista, es. "Chiamare per il lavoro del tetto".
-- "quandoAttivita": il giorno in cui va fatta, se viene detto. Altrimenti null.
+- "quandoAttivita": quando va fatta, con l'ora se viene detta. Formato: "lun 8 set, 15:00" oppure solo "lun 8 set". **Mettilo sempre**, anche quando devi deciderlo tu.
+- Anche le telefonate sono impegni veri: "chiamarlo lunedì alle 15" → attivita "Chiamare Mario Rossi", quandoAttivita "lun 8 set, 15:00".
+- Anche le commissioni sono impegni: "prendere le mattonelle" → attivita "Prendere le mattonelle", quandoAttivita il giorno che decidi tu.
 - Non inventare mai impegni che non sono stati detti.`;
 
     let dati;
@@ -5101,10 +5128,20 @@ Regole su appuntamenti e cose da fare — importanti:
 
     /* Appuntamento e cosa da fare: li teniamo da parte e li creiamo
        al salvataggio, cosi' nascono insieme al cliente. */
+    /* Ogni impegno deve avere un giorno: e' il calendario che organizza
+       il lavoro, non una lista senza tempo. Se l'AI non l'ha messo,
+       lo mettiamo noi a domani. */
+    let quandoAtt = dati.quandoAttivita || null;
+    if(dati.attivita && !quandoAtt){
+      const domani = new Date();
+      domani.setDate(domani.getDate() + 1);
+      quandoAtt = domani.toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" })
+        .replace(".", "");
+    }
     impegniDaCreare = {
       appuntamento: (dati.appuntamento && dati.appuntamento.titolo) ? dati.appuntamento : null,
       attivita: dati.attivita || null,
-      quandoAttivita: dati.quandoAttivita || null
+      quandoAttivita: quandoAtt
     };
     mostraImpegni();
 
@@ -5143,7 +5180,7 @@ Regole su appuntamenti e cose da fare — importanti:
         <div class="dett-imp-ico" style="background:var(--indigo);">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
         </div>
-        <div><b>${impegniDaCreare.attivita}</b><small>${impegniDaCreare.quandoAttivita || "quando puoi"} · va tra le cose da fare</small></div>
+        <div><b>${impegniDaCreare.attivita}</b><small>${impegniDaCreare.quandoAttivita || "domani"} · va in Calendario</small></div>
       </div>`);
     }
     box.innerHTML = righe.join("");
