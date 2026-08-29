@@ -1,10 +1,12 @@
 name: Test manuale assistente AI
 
-# Workflow temporaneo, solo su richiesta (mai automatico): crea un utente di
-# prova nuovo, gli fa dettare i 5 impegni dell'esempio, verifica che siano
-# stati scritti davvero nel database, prova il flusso di conferma su
-# un'azione delicata (manda_messaggio) e poi ripulisce i dati di prova che
-# ha creato. Non tocca account o dati reali: RLS isola l'utente di prova.
+# Workflow temporaneo, solo su richiesta (mai automatico): accede con un
+# account vero (via i secret EON_TEST_EMAIL / EON_TEST_PASSWORD), prova i
+# cinque impegni dell'esempio, verifica che siano stati scritti davvero,
+# prova il flusso di conferma su un'azione delicata (manda_messaggio) e
+# infine ripulisce SOLO le righe create durante il test, tracciate per id
+# — mai un "cancella tutto quello che appartiene a questo utente", perché
+# qui l'utente è un account vero con dati veri.
 on:
   workflow_dispatch:
     inputs:
@@ -20,95 +22,104 @@ jobs:
       # Nessun checkout: non serve alcun file del repository per questo
       # test. I due valori sotto sono pubblici (la chiave "anon" è pensata
       # per stare nel codice del browser, protetta dalle regole RLS), sono
-      # già visibili in chiaro in index.html — copiati qui per non dover
-      # dipendere da un'azione di terze parti.
+      # già visibili in chiaro in index.html.
       - name: Configurazione (valori pubblici, presi da index.html)
         id: config
         run: |
           echo "supabase_url=https://alxtmsfbxrkrevbioogv.supabase.co" >> "$GITHUB_OUTPUT"
           echo "anon=sb_publishable_cx-aRXg-ZCFDmsTfqBBccg_Li9rqqEa" >> "$GITHUB_OUTPUT"
 
-      - name: Crea un utente di prova nuovo
-        id: signup
+      - name: Accedi con l'account fornito
+        id: login
         env:
           SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
           ANON_KEY: ${{ steps.config.outputs.anon }}
+          EMAIL: ${{ secrets.EON_TEST_EMAIL }}
+          PASSWORD: ${{ secrets.EON_TEST_PASSWORD }}
         run: |
-          EMAIL="eon-test-$(date +%s)-$RANDOM@example.com"
-          PASSWORD="Prova-$(date +%s)-$RANDOM!"
-          echo "Email di prova: $EMAIL"
-
-          RESP=$(curl -sS -X POST "$SUPABASE_URL/auth/v1/signup" \
-            -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
-            -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}")
-
-          echo "Risposta signup:"
-          echo "$RESP" | jq . || echo "$RESP"
-
-          TOKEN=$(echo "$RESP" | jq -r '.access_token // empty')
-          if [ -z "$TOKEN" ]; then
-            echo "::warning::Nessun access_token nella risposta: il progetto probabilmente richiede conferma email prima del login. Impossibile procedere in automatico da qui — serve un utente di prova già confermato."
+          if [ -z "$EMAIL" ] || [ -z "$PASSWORD" ]; then
+            echo "::error::Mancano i secret EON_TEST_EMAIL e/o EON_TEST_PASSWORD (Settings → Secrets and variables → Actions)."
             echo "puo_procedere=no" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          RESP=$(curl -sS -X POST "$SUPABASE_URL/auth/v1/token?grant_type=password" \
+            -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
+            -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}")
+
+          TOKEN=$(echo "$RESP" | jq -r '.access_token // empty')
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Login non riuscito: $(echo "$RESP" | jq -r '.error_description // .msg // "risposta non valida"')"
+            echo "puo_procedere=no" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
           echo "puo_procedere=si" >> "$GITHUB_OUTPUT"
+          echo "Login riuscito."
 
-      - name: "Test 1 — cinque impegni in una frase"
-        if: steps.signup.outputs.puo_procedere == 'si'
+      - name: "Test 1 — cinque impegni in una frase (nomi chiaramente finti, per non toccare clienti veri)"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: impegni
         env:
-          TOKEN: ${{ steps.signup.outputs.token }}
+          TOKEN: ${{ steps.login.outputs.token }}
           PREVIEW_URL: ${{ inputs.preview_url }}
         run: |
           RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
             -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-            -d '{"messaggio":"Segnare lunedì Hannah Tricklebanck PAC 500 euro al mese. Aggiornare profilo AML. Chiamare Guidi ore 17:00. Comprare fascette. Martedì sopralluogo tetto ore 19:00."}')
+            -d '{"messaggio":"Segnare lunedì ZZZ-test-contatto-9001 pagamento mensile di prova. Aggiornare pratica ZZZ-test-AML-9002. Chiamare ZZZ-test-numero-9003 alle 17:00. Comprare ZZZ-test-materiale-9004. Martedì sopralluogo ZZZ-test-9005 alle 19:00."}')
           echo "$RESP" | jq . || echo "$RESP"
-          echo "$RESP" > /tmp/test1.json
 
           N=$(echo "$RESP" | jq '[.azioni[]? | select(.tool=="crea_impegno")] | length')
           echo "Impegni creati secondo la risposta: $N (attesi: 5)"
-          echo "STATO=$(echo "$RESP" | jq -r '.stato')"
+          echo "stato=$(echo "$RESP" | jq -r '.stato')" >> "$GITHUB_OUTPUT"
+
+          # Id esatti creati, per la pulizia mirata a fine test — MAI un
+          # cancella-tutto su un account con dati veri.
+          IDS=$(echo "$RESP" | jq -r '[.azioni[]? | select(.tool=="crea_impegno") | .esito.id] | join(",")')
+          echo "task_ids=$IDS" >> "$GITHUB_OUTPUT"
+          echo "Id creati (da ripulire a fine test): $IDS"
 
       - name: "Verifica su Supabase — i task esistono davvero"
-        if: steps.signup.outputs.puo_procedere == 'si'
+        if: steps.login.outputs.puo_procedere == 'si' && steps.impegni.outputs.task_ids != ''
         env:
           SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
           ANON_KEY: ${{ steps.config.outputs.anon }}
-          TOKEN: ${{ steps.signup.outputs.token }}
+          TOKEN: ${{ steps.login.outputs.token }}
+          TASK_IDS: ${{ steps.impegni.outputs.task_ids }}
         run: |
-          curl -sS "$SUPABASE_URL/rest/v1/tasks?select=id,title,time,scheduled_at&order=created_at.desc&limit=10" \
+          curl -sS "$SUPABASE_URL/rest/v1/tasks?select=id,title,time,scheduled_at&id=in.($TASK_IDS)" \
             -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq . || true
 
       - name: "Test 2 — crea un cliente di prova (per testare la conferma)"
-        if: steps.signup.outputs.puo_procedere == 'si'
+        if: steps.login.outputs.puo_procedere == 'si'
         id: cliente
         env:
-          TOKEN: ${{ steps.signup.outputs.token }}
+          TOKEN: ${{ steps.login.outputs.token }}
           PREVIEW_URL: ${{ inputs.preview_url }}
         run: |
           # Passiamo dal backend (api/index.js), non da Supabase diretto:
           # è lui che aggiunge correttamente owner_id, esattamente come
-          # farebbe l'app vera.
+          # farebbe l'app vera. Nome inequivocabilmente di test.
           RESP=$(curl -sS -X POST "$PREVIEW_URL/api?resource=clients" \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"name":"TEST cancellare — Mario Rossi","status":"attivo"}')
+            -d '{"name":"ZZZ-TEST-CANCELLARE-9099","status":"attivo"}')
           echo "$RESP" | jq . || echo "$RESP"
           ID=$(echo "$RESP" | jq -r '.data[0].id // empty')
           echo "cliente_id=$ID" >> "$GITHUB_OUTPUT"
 
       - name: "Test 3 — un'azione delicata deve chiedere conferma, non eseguire subito"
-        if: steps.signup.outputs.puo_procedere == 'si' && steps.cliente.outputs.cliente_id != ''
+        if: steps.login.outputs.puo_procedere == 'si' && steps.cliente.outputs.cliente_id != ''
         id: delicata
         env:
-          TOKEN: ${{ steps.signup.outputs.token }}
+          TOKEN: ${{ steps.login.outputs.token }}
           PREVIEW_URL: ${{ inputs.preview_url }}
         run: |
           RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
             -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-            -d '{"messaggio":"Manda un messaggio a Mario Rossi dicendogli: ciao, è un test."}')
+            -d '{"messaggio":"Manda un messaggio a ZZZ-TEST-CANCELLARE-9099 dicendogli: ciao, è un test."}')
           echo "$RESP" | jq . || echo "$RESP"
 
           STATO=$(echo "$RESP" | jq -r '.stato')
@@ -119,7 +130,7 @@ jobs:
         if: steps.delicata.outputs.run_id != ''
         id: conferma
         env:
-          TOKEN: ${{ steps.signup.outputs.token }}
+          TOKEN: ${{ steps.login.outputs.token }}
           PREVIEW_URL: ${{ inputs.preview_url }}
           RUN_ID: ${{ steps.delicata.outputs.run_id }}
         run: |
@@ -127,11 +138,12 @@ jobs:
             -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
             -d "{\"runId\":\"$RUN_ID\",\"conferma\":true}")
           echo "$RESP" | jq . || echo "$RESP"
+          echo "messaggio_id=$(echo "$RESP" | jq -r '[.azioni[]? | select(.tool=="manda_messaggio")][0].esito.id // empty')" >> "$GITHUB_OUTPUT"
 
       - name: "Test 5 — un secondo tentativo con lo stesso runId non deve rieseguire"
         if: steps.delicata.outputs.run_id != ''
         env:
-          TOKEN: ${{ steps.signup.outputs.token }}
+          TOKEN: ${{ steps.login.outputs.token }}
           PREVIEW_URL: ${{ inputs.preview_url }}
           RUN_ID: ${{ steps.delicata.outputs.run_id }}
         run: |
@@ -141,16 +153,38 @@ jobs:
           echo "Codice HTTP replay: $CODE (atteso: 409)"
           cat /tmp/replay.json | jq . || cat /tmp/replay.json
 
-      - name: Pulizia dati di prova
-        if: always() && steps.signup.outputs.puo_procedere == 'si'
+      - name: "Pulizia mirata — solo le righe create da questo test, mai un cancella-tutto"
+        if: always() && steps.login.outputs.puo_procedere == 'si'
         env:
           SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
           ANON_KEY: ${{ steps.config.outputs.anon }}
-          TOKEN: ${{ steps.signup.outputs.token }}
+          TOKEN: ${{ steps.login.outputs.token }}
+          TASK_IDS: ${{ steps.impegni.outputs.task_ids }}
+          CLIENTE_ID: ${{ steps.cliente.outputs.cliente_id }}
         run: |
-          for TABELLA in tasks messages conversations clients; do
-            echo "Pulizia $TABELLA creati dall'utente di prova..."
-            curl -sS -X DELETE "$SUPABASE_URL/rest/v1/$TABELLA?owner_id=eq.$(curl -sS "$SUPABASE_URL/auth/v1/user" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq -r '.id')" \
+          if [ -n "$TASK_IDS" ]; then
+            echo "Elimino i task di test: $TASK_IDS"
+            curl -sS -X DELETE "$SUPABASE_URL/rest/v1/tasks?id=in.($TASK_IDS)" \
               -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
-          done
-          echo "Nota: l'utente di autenticazione di prova resta su Supabase (serve la service role per eliminarlo); è innocuo, non ha dati collegati dopo questa pulizia."
+          fi
+
+          if [ -n "$CLIENTE_ID" ]; then
+            echo "Cerco la conversazione legata al cliente di test..."
+            CONV=$(curl -sS "$SUPABASE_URL/rest/v1/conversations?select=id&contact_name=eq.ZZZ-TEST-CANCELLARE-9099" \
+              -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id // empty')
+
+            if [ -n "$CONV" ]; then
+              echo "Elimino i messaggi della conversazione di test ($CONV)..."
+              curl -sS -X DELETE "$SUPABASE_URL/rest/v1/messages?conversation_id=eq.$CONV" \
+                -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+              echo "Elimino la conversazione di test..."
+              curl -sS -X DELETE "$SUPABASE_URL/rest/v1/conversations?id=eq.$CONV" \
+                -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+            fi
+
+            echo "Elimino il cliente di test ($CLIENTE_ID)..."
+            curl -sS -X DELETE "$SUPABASE_URL/rest/v1/clients?id=eq.$CLIENTE_ID" \
+              -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+          fi
+
+          echo "Pulizia completata: toccate solo le righe create da questo test."
