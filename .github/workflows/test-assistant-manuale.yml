@@ -153,6 +153,196 @@ jobs:
           echo "Codice HTTP replay: $CODE (atteso: 409)"
           cat /tmp/replay.json | jq . || cat /tmp/replay.json
 
+      # ------------------------------------------------------------
+      # Test 6-10: analisi della chat (action=analizza_messaggio e
+      # action=rispondi_richiesta_cliente). Prima questa logica girava
+      # nel frontend; qui verifichiamo che, spostata sul backend, si
+      # comporti come prima nei casi che la revisione del codice ha
+      # trattato con più attenzione: chi propone/chi conferma, la
+      # richiesta di decisione quando è il cliente a chiedere uno
+      # spostamento o un annullamento, e il promemoria silenzioso per
+      # le risposte rimaste in sospeso.
+      #
+      # Nota: questi test chiamano davvero Claude per interpretare la
+      # conversazione (non solo tool calling deterministico): come per
+      # il Test 1, stampano atteso/ottenuto ma non fanno fallire la job
+      # su un singolo disaccordo di interpretazione — vanno letti da
+      # una persona, specie se qualcosa non torna.
+      # ------------------------------------------------------------
+
+      - name: "Test 6 — analisi chat: appuntamento nuovo proposto e confermato"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: analisi_nuovo
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          CONV=$(curl -sS -X POST "$PREVIEW_URL/api?resource=conversations" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"contact_name":"ZZZ-TEST-ANALISI-NUOVO-9201","is_client":true,"is_prospect":false}' \
+            | jq -r '.data[0].id // empty')
+          echo "conv_id=$CONV" >> "$GITHUB_OUTPUT"
+          [ -z "$CONV" ] && { echo "::error::Conversazione di test non creata"; exit 0; }
+
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"me\",\"body\":\"Possiamo vederci martedì alle 16 per il preventivo?\"}" > /dev/null
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"them\",\"body\":\"Ok perfetto, ci vediamo allora\"}" > /dev/null
+
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=analizza_messaggio" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\"}")
+          echo "$RESP" | jq . || echo "$RESP"
+          N=$(echo "$RESP" | jq '[.azioni[]? | select(.tool=="crea_impegno")] | length')
+          echo "Appuntamenti creati secondo la risposta: $N (atteso: 1)"
+
+      - name: "Test 7 — analisi chat: proposta del cliente non ancora confermata, nessuna azione automatica"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: analisi_proposta
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          CONV=$(curl -sS -X POST "$PREVIEW_URL/api?resource=conversations" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"contact_name":"ZZZ-TEST-ANALISI-PROPOSTA-9202","is_client":true,"is_prospect":false}' \
+            | jq -r '.data[0].id // empty')
+          echo "conv_id=$CONV" >> "$GITHUB_OUTPUT"
+          [ -z "$CONV" ] && { echo "::error::Conversazione di test non creata"; exit 0; }
+
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"them\",\"body\":\"Ciao, possiamo vederci giovedì alle 10 per parlare del progetto?\"}" > /dev/null
+
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=analizza_messaggio" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\"}")
+          echo "$RESP" | jq . || echo "$RESP"
+          N=$(echo "$RESP" | jq '.azioni | length')
+          echo "Azioni eseguite: $N (atteso: 0, deve aspettare che risponda il professionista)"
+
+      - name: "Test 8 — analisi chat: il cliente chiede di spostare, il professionista conferma"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: analisi_sposta
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          CONV=$(curl -sS -X POST "$PREVIEW_URL/api?resource=conversations" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"contact_name":"ZZZ-TEST-ANALISI-SPOSTA-9203","is_client":true,"is_prospect":false}' \
+            | jq -r '.data[0].id // empty')
+          echo "conv_id=$CONV" >> "$GITHUB_OUTPUT"
+          [ -z "$CONV" ] && { echo "::error::Conversazione di test non creata"; exit 0; }
+
+          QUANDO=$(date -u -d '+5 days 15:00' +"%Y-%m-%dT%H:%M:%S")
+          APPT=$(curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"me\",\"event_type\":\"appt\",\"title\":\"Sopralluogo\",\"body\":\"$QUANDO\",\"scheduled_at\":\"$QUANDO\"}" \
+            | jq -r '.data[0].id // empty')
+          echo "appt_id=$APPT" >> "$GITHUB_OUTPUT"
+          [ -z "$APPT" ] && { echo "::error::Appuntamento di test non creato"; exit 0; }
+
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"them\",\"body\":\"Possiamo spostare il sopralluogo alle 17 invece che alle 15?\"}" > /dev/null
+
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=analizza_messaggio" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\"}")
+          echo "$RESP" | jq . || echo "$RESP"
+          AZIONE=$(echo "$RESP" | jq -r '.richiesta_decisione.azione // empty')
+          RIFERITO=$(echo "$RESP" | jq -r '.richiesta_decisione.riferito_id // empty')
+          QUANDO_NUOVO=$(echo "$RESP" | jq -r '.richiesta_decisione.quando_nuovo_iso // empty')
+          echo "Richiesta di decisione: azione=$AZIONE (atteso: sposta), riferito=$RIFERITO (atteso: $APPT)"
+
+          CONFRESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=rispondi_richiesta_cliente" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"riferito_id\":\"$APPT\",\"azione\":\"sposta\",\"conferma\":true,\"quando_nuovo_iso\":\"$QUANDO_NUOVO\"}")
+          echo "$CONFRESP" | jq . || echo "$CONFRESP"
+          echo "Confermato: $(echo "$CONFRESP" | jq -r '.confermato') (atteso: true)"
+
+      - name: "Test 9 — analisi chat: il cliente chiede di annullare, il professionista rifiuta"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: analisi_annulla
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          CONV=$(curl -sS -X POST "$PREVIEW_URL/api?resource=conversations" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"contact_name":"ZZZ-TEST-ANALISI-ANNULLA-9204","is_client":true,"is_prospect":false}' \
+            | jq -r '.data[0].id // empty')
+          echo "conv_id=$CONV" >> "$GITHUB_OUTPUT"
+          [ -z "$CONV" ] && { echo "::error::Conversazione di test non creata"; exit 0; }
+
+          QUANDO=$(date -u -d '+6 days 11:00' +"%Y-%m-%dT%H:%M:%S")
+          APPT=$(curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"me\",\"event_type\":\"appt\",\"title\":\"Chiamata di aggiornamento\",\"body\":\"$QUANDO\",\"scheduled_at\":\"$QUANDO\"}" \
+            | jq -r '.data[0].id // empty')
+          echo "appt_id=$APPT" >> "$GITHUB_OUTPUT"
+          [ -z "$APPT" ] && { echo "::error::Appuntamento di test non creato"; exit 0; }
+
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"them\",\"body\":\"Devo disdire l'appuntamento, non riesco più a venire\"}" > /dev/null
+
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=analizza_messaggio" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\"}")
+          echo "$RESP" | jq . || echo "$RESP"
+          AZIONE=$(echo "$RESP" | jq -r '.richiesta_decisione.azione // empty')
+          echo "Richiesta di decisione: azione=$AZIONE (atteso: annulla)"
+
+          RIFRESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=rispondi_richiesta_cliente" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"riferito_id\":\"$APPT\",\"azione\":\"annulla\",\"conferma\":false}")
+          echo "$RIFRESP" | jq . || echo "$RIFRESP"
+          echo "Confermato: $(echo "$RIFRESP" | jq -r '.confermato') (atteso: false, il professionista ha rifiutato)"
+
+      - name: "Test 10 — analisi chat: risposta rimasta in sospeso -> promemoria, poi conferma -> promemoria tolto"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: analisi_promemoria
+        env:
+          SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
+          ANON_KEY: ${{ steps.config.outputs.anon }}
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          CONV=$(curl -sS -X POST "$PREVIEW_URL/api?resource=conversations" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"contact_name":"ZZZ-TEST-ANALISI-PROMEMORIA-9205","is_client":true,"is_prospect":false}' \
+            | jq -r '.data[0].id // empty')
+          echo "conv_id=$CONV" >> "$GITHUB_OUTPUT"
+          [ -z "$CONV" ] && { echo "::error::Conversazione di test non creata"; exit 0; }
+
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"me\",\"body\":\"Possiamo vederci mercoledì alle 9 per la revisione dei conti?\"}" > /dev/null
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"them\",\"body\":\"Mah, non so se riesco, ti faccio sapere\"}" > /dev/null
+
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=analizza_messaggio" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\"}")
+          echo "$RESP" | jq . || echo "$RESP"
+
+          REMINDER=$(curl -sS "$SUPABASE_URL/rest/v1/tasks?select=id&title=eq.Ricontattare%20ZZZ-TEST-ANALISI-PROMEMORIA-9205" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id // empty')
+          echo "reminder_id=$REMINDER" >> "$GITHUB_OUTPUT"
+          echo "Promemoria creato: $([ -n "$REMINDER" ] && echo si || echo NO) (atteso: si)"
+
+          curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"them\",\"body\":\"Va bene, allora confermo mercoledì alle 9\"}" > /dev/null
+
+          RESP2=$(curl -sS -X POST "$PREVIEW_URL/api?action=analizza_messaggio" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\"}")
+          echo "$RESP2" | jq . || echo "$RESP2"
+          N=$(echo "$RESP2" | jq '[.azioni[]? | select(.tool=="crea_impegno")] | length')
+          echo "Appuntamenti creati alla conferma: $N (atteso: 1)"
+
+          if [ -n "$REMINDER" ]; then
+            ANCORA=$(curl -sS "$SUPABASE_URL/rest/v1/tasks?select=id&id=eq.$REMINDER" \
+              -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq 'length')
+            echo "Promemoria ancora presente dopo la conferma: $ANCORA (atteso: 0, va tolto)"
+          fi
+
       - name: "Pulizia mirata — solo le righe create da questo test, mai un cancella-tutto"
         if: always() && steps.login.outputs.puo_procedere == 'si'
         env:
@@ -186,5 +376,28 @@ jobs:
             curl -sS -X DELETE "$SUPABASE_URL/rest/v1/clients?id=eq.$CLIENTE_ID" \
               -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
           fi
+
+          # Conversazioni create dai test 6-10 dell'analisi chat: nomi
+          # fissi e inequivocabilmente finti, cerchiamo per nome invece
+          # di fare affidamento sugli output dei singoli step (così la
+          # pulizia funziona anche se uno step precedente è fallito a
+          # metà, senza per questo lasciare righe di test in giro).
+          for NOME in ZZZ-TEST-ANALISI-NUOVO-9201 ZZZ-TEST-ANALISI-PROPOSTA-9202 ZZZ-TEST-ANALISI-SPOSTA-9203 ZZZ-TEST-ANALISI-ANNULLA-9204 ZZZ-TEST-ANALISI-PROMEMORIA-9205; do
+            CONV=$(curl -sS "$SUPABASE_URL/rest/v1/conversations?select=id&contact_name=eq.$NOME" \
+              -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id // empty')
+            if [ -n "$CONV" ]; then
+              echo "Elimino la conversazione di test $NOME ($CONV)..."
+              curl -sS -X DELETE "$SUPABASE_URL/rest/v1/messages?conversation_id=eq.$CONV" \
+                -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+              curl -sS -X DELETE "$SUPABASE_URL/rest/v1/conversations?id=eq.$CONV" \
+                -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+            fi
+          done
+
+          # Il promemoria del Test 10 dovrebbe già essere stato tolto
+          # dal codice stesso; lo cerchiamo comunque per sicurezza, nel
+          # caso quel passaggio non sia arrivato fino in fondo.
+          curl -sS -X DELETE "$SUPABASE_URL/rest/v1/tasks?title=eq.Ricontattare%20ZZZ-TEST-ANALISI-PROMEMORIA-9205" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
 
           echo "Pulizia completata: toccate solo le righe create da questo test."
