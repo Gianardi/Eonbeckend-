@@ -44,9 +44,10 @@ create policy "ai_audit_log_select_own" on public.ai_audit_log
 create table if not exists public.ai_runs (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
-  stato text not null default 'in_corso', -- in_corso | in_attesa_conferma
+  stato text not null default 'in_corso', -- in_corso | in_attesa_conferma | concluso | incompleto
   messaggi jsonb not null default '[]'::jsonb,
   in_sospeso jsonb,
+  azioni jsonb not null default '[]'::jsonb, -- azioni già eseguite in questo run, per non perderle tra una conferma e l'altra
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -97,3 +98,15 @@ begin
   return true;
 end;
 $$;
+
+-- IMPORTANTE: questa funzione accetta p_owner_id come parametro a piacere,
+-- senza verificare che corrisponda a chi chiama (è security definer proprio
+-- per poter scrivere sulla tabella indipendentemente da chi è loggato).
+-- Postgres concede l'esecuzione a PUBLIC di default: senza queste righe,
+-- un qualsiasi utente autenticato potrebbe chiamarla passando l'id di un
+-- altro professionista con un limite già esaurito, bloccandogli per sempre
+-- l'assistente. La funzione deve restare uso esclusivo del backend (che la
+-- chiama con la service role key), mai raggiungibile con il token di un utente.
+revoke all on function public.ai_check_rate_limit(uuid, int, int) from public;
+revoke all on function public.ai_check_rate_limit(uuid, int, int) from anon, authenticated;
+grant execute on function public.ai_check_rate_limit(uuid, int, int) to service_role;

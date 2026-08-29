@@ -6488,13 +6488,24 @@ function collegaHubRacconta(){
     btn.disabled = false;
     stato("attesa", "Raccontami la giornata", "Dimmi tutto quello che devi fare: lo metto in calendario");
 
+    if(risposta.stato === "incompleto"){
+      showAIToast("Non ho fatto in tempo a finire", risposta.testo);
+    }
+
     const impegniCreati = risposta.azioni.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length === 0){
-      stato("attesa", "Non ho trovato impegni",
-        "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17");
+      if(risposta.stato !== "incompleto"){
+        stato("attesa", "Non ho trovato impegni",
+          "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17");
+      }
       return;
     }
 
+    /* crea_impegno ha scritto direttamente su Supabase: gli array locali
+       (tasks, chats) non lo sanno ancora, vanno ricaricati prima di
+       disegnare, altrimenti il nuovo impegno non comparirebbe finché
+       non si ricarica l'app da zero. */
+    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
     chiudiHubAI();
     navigateTo("calendario");

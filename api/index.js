@@ -387,6 +387,18 @@ async function trovaProprio(resource, id, ctx) {
   return Array.isArray(righe) && righe.length ? righe[0] : null;
 }
 
+/* Un "impegno" (per sposta_impegno/annulla_impegno) è o un appuntamento
+   dentro messages, o un task: si cerca nell'uno, poi nell'altro. Usato
+   sia per descrivere la conferma sia per eseguire l'azione, così i due
+   posti non possono disallinearsi su dove si trova il record. */
+async function trovaImpegno(id, ctx) {
+  const messaggio = await trovaProprio("messages", id, ctx);
+  if (messaggio) return { tabella: "messages", record: messaggio };
+  const task = await trovaProprio("tasks", id, ctx);
+  if (task) return { tabella: "tasks", record: task };
+  return null;
+}
+
 async function trovaOCreaConversazione(cliente, ctx) {
   const nome = encodeURIComponent(cliente.name);
   const trovate = await db(`conversations?select=*&contact_name=eq.${nome}&limit=1`, { method: "GET" }, ctx.accessToken);
@@ -670,6 +682,23 @@ const TOOLS = {
         return { id: m.id, titolo, quando_visualizzato: quandoVisualizzato, tipo: "incontro", cliente: cliente.name };
       }
 
+      /* Se un task identico (stesso titolo, stessa data/ora) è già
+         segnato e non è chiuso o annullato, non ne creiamo un doppione:
+         capita se l'AI viene richiamata due volte sulla stessa frase
+         (es. un doppio tap). Controlliamo anche la data, non solo il
+         titolo: due impegni diversi possono chiamarsi allo stesso modo
+         in giorni diversi ("Chiamare Mario" la settimana scorsa e di
+         nuovo domani), e non devono fondersi in uno solo. */
+      const esistente = await db(
+        `tasks?select=id,title,time&title=ilike.${encodeURIComponent(titolo)}&scheduled_at=eq.${encodeURIComponent(input.quando_iso)}&status=neq.done&status=neq.annullato&limit=1`,
+        { method: "GET" },
+        ctx.accessToken
+      );
+      if (Array.isArray(esistente) && esistente.length) {
+        const e = esistente[0];
+        return { id: e.id, titolo: e.title, quando_visualizzato: e.time || quandoVisualizzato, tipo: input.tipo, gia_esistente: true };
+      }
+
       const creato = await db(
         "tasks",
         {
@@ -707,24 +736,22 @@ const TOOLS = {
     },
     async describe(input, ctx) {
       const quando = eIso(input.nuovo_quando_iso) ? formattaQuando(input.nuovo_quando_iso) : input.nuovo_quando_iso;
-      const record = (await trovaProprio("messages", input.id, ctx)) || (await trovaProprio("tasks", input.id, ctx));
-      return `Spostare "${record ? record.title : "questo impegno"}" a ${quando}?`;
+      const trovato = await trovaImpegno(input.id, ctx);
+      return `Spostare "${trovato ? trovato.record.title : "questo impegno"}" a ${quando}?`;
     },
     async run(input, ctx) {
       if (!eIso(input.nuovo_quando_iso)) throw fail("Parametro 'nuovo_quando_iso' non è una data valida");
       const quandoVisualizzato = formattaQuando(input.nuovo_quando_iso);
 
-      let record = await trovaProprio("messages", input.id, ctx);
-      if (record) {
-        await db(`messages?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ body: quandoVisualizzato, scheduled_at: input.nuovo_quando_iso }) }, ctx.accessToken);
-        return { id: record.id, titolo: record.title, quando_visualizzato: quandoVisualizzato };
-      }
-      record = await trovaProprio("tasks", input.id, ctx);
-      if (record) {
-        await db(`tasks?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ time: quandoVisualizzato, scheduled_at: input.nuovo_quando_iso }) }, ctx.accessToken);
-        return { id: record.id, titolo: record.title, quando_visualizzato: quandoVisualizzato };
-      }
-      throw fail("Impegno non trovato", 404);
+      const trovato = await trovaImpegno(input.id, ctx);
+      if (!trovato) throw fail("Impegno non trovato", 404);
+      const { tabella, record } = trovato;
+
+      const patch = tabella === "messages"
+        ? { body: quandoVisualizzato, scheduled_at: input.nuovo_quando_iso }
+        : { time: quandoVisualizzato, scheduled_at: input.nuovo_quando_iso };
+      await db(`${tabella}?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify(patch) }, ctx.accessToken);
+      return { id: record.id, titolo: record.title, quando_visualizzato: quandoVisualizzato };
     },
   },
 
@@ -740,21 +767,23 @@ const TOOLS = {
       },
     },
     async describe(input, ctx) {
-      const record = (await trovaProprio("messages", input.id, ctx)) || (await trovaProprio("tasks", input.id, ctx));
-      return `Annullare "${record ? record.title : "questo impegno"}"?`;
+      const trovato = await trovaImpegno(input.id, ctx);
+      return `Annullare "${trovato ? trovato.record.title : "questo impegno"}"?`;
     },
     async run(input, ctx) {
-      let record = await trovaProprio("messages", input.id, ctx);
-      if (record) {
-        await db(`messages?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ title: "❌ " + record.title + " (annullato)" }) }, ctx.accessToken);
-        return { id: record.id, titolo: record.title };
-      }
-      record = await trovaProprio("tasks", input.id, ctx);
-      if (record) {
+      const trovato = await trovaImpegno(input.id, ctx);
+      if (!trovato) throw fail("Impegno non trovato", 404);
+      const { tabella, record } = trovato;
+
+      if (tabella === "messages") {
+        /* scheduled_at a null lo toglie anche da elenca_appuntamenti
+           (che filtra per intervallo di date): senza questo, un
+           appuntamento annullato risulterebbe ancora "in programma". */
+        await db(`messages?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ title: "❌ " + record.title + " (annullato)", scheduled_at: null }) }, ctx.accessToken);
+      } else {
         await db(`tasks?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ status: "annullato" }) }, ctx.accessToken);
-        return { id: record.id, titolo: record.title };
       }
-      throw fail("Impegno non trovato", 404);
+      return { id: record.id, titolo: record.title };
     },
   },
 
@@ -850,15 +879,27 @@ async function salvaRun(runId, user, patch) {
   return row;
 }
 
-async function caricaRun(runId, user) {
+/* Reclama in modo atomico un run in attesa di conferma: la condizione
+   stato=eq.in_attesa_conferma nell'URL fa sì che, se due richieste con lo
+   stesso runId arrivano insieme (un doppio tap, un retry di rete), solo
+   una delle due trovi la riga e la faccia passare a "in_corso" — l'altra
+   non trova nulla e si ferma, invece di eseguire due volte la stessa
+   azione delicata (mandare due volte lo stesso messaggio, per esempio). */
+async function reclamaRun(runId, user) {
   let r;
   try {
-    r = await fetch(`${SUPABASE_URL}/rest/v1/ai_runs?id=eq.${runId}&owner_id=eq.${user.id}&select=*`, {
-      headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
-    });
+    r = await fetch(
+      `${SUPABASE_URL}/rest/v1/ai_runs?id=eq.${runId}&owner_id=eq.${user.id}&stato=eq.in_attesa_conferma`,
+      {
+        method: "PATCH",
+        headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=representation" },
+        body: JSON.stringify({ stato: "in_corso", updated_at: new Date().toISOString() }),
+      }
+    );
   } catch (netErr) {
     throw fail("Impossibile recuperare lo stato dell'assistente: " + netErr.message, 502);
   }
+  if (!r.ok) throw fail("Impossibile recuperare lo stato dell'assistente", 500);
   const rows = await r.json();
   return Array.isArray(rows) && rows[0] ? rows[0] : null;
 }
@@ -879,6 +920,12 @@ Se un impegno riguarda una persona già cliente, cercala prima con cerca_cliente
 Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
 }
 
+/* Prepara la domanda di conferma per la prossima azione delicata in coda. */
+async function descriviProssimaAzione(pendente, ctx) {
+  const tool = TOOLS[pendente.nome];
+  return tool.describe ? await tool.describe(pendente.input, ctx) : `Confermi l'operazione "${pendente.nome}"?`;
+}
+
 async function handleAssistant(req, res, user, accessToken) {
   if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
   if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
@@ -887,17 +934,47 @@ async function handleAssistant(req, res, user, accessToken) {
 
   const body = await readBody(req);
   const ctx = { user, accessToken };
-  const azioniEseguite = [];
-  let runId = body.runId || null;
+  const runId = body.runId || null;
   let messages;
+  let azioniEseguite = [];
+  let runReclamato = false; // true dal momento in cui il run passa a "in_corso": da qui in poi va sempre richiuso, mai lasciato a metà
 
+  try {
+    return await proseguiAssistente();
+  } catch (err) {
+    if (runReclamato) {
+      /* Il run era già stato reclamato (stato passato a "in_corso"): se non
+         lo richiudiamo qui resta bloccato per sempre, e ogni tentativo
+         successivo con lo stesso runId fallirebbe con "già gestita" invece
+         di mostrare l'errore vero. Salviamo quello che è già stato fatto
+         (scritto per davvero nel database) e rilanciamo l'errore originale:
+         chi ha chiamato vede comunque il problema reale. */
+      try {
+        await salvaRun(runId, user, { stato: "incompleto", messaggi: messages || [], in_sospeso: null, azioni: azioniEseguite });
+      } catch (eSalvataggio) {
+        console.error("Impossibile chiudere il run dopo un errore:", eSalvataggio);
+      }
+    }
+    throw err;
+  }
+
+  async function proseguiAssistente() {
   if (runId) {
-    /* Riprendiamo una conversazione che era in attesa di conferma */
-    const run = await caricaRun(runId, user);
-    if (!run) throw fail("Richiesta scaduta o non trovata", 404);
-    if (run.stato !== "in_attesa_conferma" || !run.in_sospeso) throw fail("Questa richiesta non è in attesa di conferma");
+    /* runId arriva dal client: prima di infilarlo in un URL verso il
+       database (con la chiave di servizio, che scavalca RLS) lo
+       validiamo come uuid, esattamente come si fa altrove nel file. */
+    if (!eUuid(runId)) throw fail("runId non valido", 400);
 
-    const pendente = run.in_sospeso;
+    /* Riprendiamo una conversazione che era in attesa di conferma. */
+    const run = await reclamaRun(runId, user);
+    if (!run || !run.in_sospeso) throw fail("Questa richiesta è già stata gestita o non è più valida", 409);
+    runReclamato = true;
+    messages = run.messaggi; // base di sicurezza: sempre valorizzata da qui in poi
+
+    azioniEseguite = Array.isArray(run.azioni) ? run.azioni.slice() : [];
+    const { coda, pronti } = run.in_sospeso;
+    const [pendente, ...restoCoda] = coda;
+
     let risultatoTool;
     if (body.conferma === true) {
       try {
@@ -913,9 +990,26 @@ async function handleAssistant(req, res, user, accessToken) {
       await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "negato");
     }
 
-    messages = run.messaggi.concat([
-      { role: "user", content: [{ type: "tool_result", tool_use_id: pendente.tool_use_id, content: JSON.stringify(risultatoTool) }] },
-    ]);
+    const nuoviPronti = pronti.concat([{ type: "tool_result", tool_use_id: pendente.tool_use_id, content: JSON.stringify(risultatoTool) }]);
+
+    if (restoCoda.length) {
+      /* C'erano altre azioni delicate richieste nello stesso turno di
+         Claude: le chiediamo una alla volta. Finché non sono risolte
+         tutte, non possiamo rispondere a Claude — il formato dei
+         messaggi richiede una risposta per OGNI azione chiesta in
+         quel turno, tutte insieme. */
+      const prossimo = restoCoda[0];
+      const domanda = await descriviProssimaAzione(prossimo, ctx);
+      const salvato = await salvaRun(runId, user, {
+        stato: "in_attesa_conferma",
+        messaggi: run.messaggi,
+        in_sospeso: { coda: restoCoda, pronti: nuoviPronti },
+        azioni: azioniEseguite,
+      });
+      return send(res, 200, { stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
+    }
+
+    messages = run.messaggi.concat([{ role: "user", content: nuoviPronti }]);
   } else {
     if (!eStringaNonVuota(body.messaggio)) throw fail("Campo 'messaggio' mancante o vuoto");
     messages = [{ role: "user", content: body.messaggio }];
@@ -951,12 +1045,13 @@ async function handleAssistant(req, res, user, accessToken) {
 
     if (data.stop_reason !== "tool_use") {
       const testo = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+      if (runId) await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
       return send(res, 200, { stato: "concluso", testo: testo || "Fatto.", azioni: azioniEseguite });
     }
 
     const richieste = data.content.filter((b) => b.type === "tool_use");
     const risultati = [];
-    let sospeso = null;
+    const coda = [];
 
     for (const richiesta of richieste) {
       const tool = TOOLS[richiesta.name];
@@ -965,11 +1060,11 @@ async function handleAssistant(req, res, user, accessToken) {
         continue;
       }
       if (tool.sensitive) {
-        /* Ci fermiamo qui: eventuali altre richieste di questo stesso
-           turno restano senza risposta finché l'utente non decide,
-           come richiede il formato dei messaggi di Anthropic. */
-        sospeso = { nome: richiesta.name, input: richiesta.input, tool_use_id: richiesta.id };
-        break;
+        /* Non eseguiamo subito: la mettiamo in coda e continuiamo a
+           esaminare le altre richieste dello stesso turno, così le
+           azioni sicure partono comunque senza aspettare. */
+        coda.push({ nome: richiesta.name, input: richiesta.input, tool_use_id: richiesta.id });
+        continue;
       }
       try {
         const esito = await tool.run(richiesta.input, ctx);
@@ -983,17 +1078,38 @@ async function handleAssistant(req, res, user, accessToken) {
       }
     }
 
-    if (sospeso) {
-      const tool = TOOLS[sospeso.nome];
-      const domanda = tool.describe ? await tool.describe(sospeso.input, ctx) : `Confermi l'operazione "${sospeso.nome}"?`;
-      const salvato = await salvaRun(runId, user, { stato: "in_attesa_conferma", messaggi: messages, in_sospeso: sospeso });
+    if (coda.length) {
+      /* Una o più azioni di questo turno richiedono conferma: le
+         risposte già pronte (risultati) restano in sospeso insieme a
+         quelle mancanti, cosi' quando saranno risolte tutte potremo
+         rispondere a Claude con il turno completo, come richiede il
+         formato dei messaggi di Anthropic. */
+      const prossimo = coda[0];
+      const domanda = await descriviProssimaAzione(prossimo, ctx);
+      const salvato = await salvaRun(runId, user, {
+        stato: "in_attesa_conferma",
+        messaggi: messages,
+        in_sospeso: { coda, pronti: risultati },
+        azioni: azioniEseguite,
+      });
       return send(res, 200, { stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
     }
 
     messages.push({ role: "user", content: risultati });
   }
 
-  throw fail("L'assistente non è riuscito a completare la richiesta in tempo utile: riprova con una frase più semplice", 504);
+  /* Tetto di round raggiunto. Le azioni non delicate già eseguite in
+     questo giro (o nei giri precedenti, se c'era stata una conferma di
+     mezzo) sono comunque scritte nel database: le restituiamo sempre,
+     invece di un errore secco, così l'utente sa cosa è andato a buon
+     fine e cosa no, invece di scoprirlo dal calendario. */
+  if (runId) await salvaRun(runId, user, { stato: "incompleto", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+  return send(res, 200, {
+    stato: "incompleto",
+    testo: "Non ho fatto in tempo a completare tutto: ho segnato quello che sono riuscita a fare. Riprova con una frase più semplice per il resto.",
+    azioni: azioniEseguite,
+  });
+  } // fine proseguiAssistente
 }
 
 /* ============================================================
