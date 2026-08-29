@@ -1,0 +1,156 @@
+name: Test manuale assistente AI
+
+# Workflow temporaneo, solo su richiesta (mai automatico): crea un utente di
+# prova nuovo, gli fa dettare i 5 impegni dell'esempio, verifica che siano
+# stati scritti davvero nel database, prova il flusso di conferma su
+# un'azione delicata (manda_messaggio) e poi ripulisce i dati di prova che
+# ha creato. Non tocca account o dati reali: RLS isola l'utente di prova.
+on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: "Indirizzo del deployment di preview da testare (senza slash finale)"
+        required: true
+        default: "https://eonbeckend-git-claude-ciao-ipc3fm-gianardi1.vercel.app"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Estrai SUPABASE_URL e ANON_KEY da index.html
+        id: config
+        run: |
+          URL=$(grep -oP 'const SUPABASE_URL = "\K[^"]+' index.html)
+          ANON=$(grep -oP 'const SUPABASE_ANON_KEY = "\K[^"]+' index.html)
+          echo "supabase_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "anon=$ANON" >> "$GITHUB_OUTPUT"
+          echo "Supabase URL: $URL"
+
+      - name: Crea un utente di prova nuovo
+        id: signup
+        env:
+          SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
+          ANON_KEY: ${{ steps.config.outputs.anon }}
+        run: |
+          EMAIL="eon-test-$(date +%s)-$RANDOM@example.com"
+          PASSWORD="Prova-$(date +%s)-$RANDOM!"
+          echo "Email di prova: $EMAIL"
+
+          RESP=$(curl -sS -X POST "$SUPABASE_URL/auth/v1/signup" \
+            -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
+            -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}")
+
+          echo "Risposta signup:"
+          echo "$RESP" | jq . || echo "$RESP"
+
+          TOKEN=$(echo "$RESP" | jq -r '.access_token // empty')
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::Nessun access_token nella risposta: il progetto probabilmente richiede conferma email prima del login. Impossibile procedere in automatico da qui — serve un utente di prova già confermato."
+            echo "puo_procedere=no" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+          echo "puo_procedere=si" >> "$GITHUB_OUTPUT"
+
+      - name: "Test 1 — cinque impegni in una frase"
+        if: steps.signup.outputs.puo_procedere == 'si'
+        env:
+          TOKEN: ${{ steps.signup.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"messaggio":"Segnare lunedì Hannah Tricklebanck PAC 500 euro al mese. Aggiornare profilo AML. Chiamare Guidi ore 17:00. Comprare fascette. Martedì sopralluogo tetto ore 19:00."}')
+          echo "$RESP" | jq . || echo "$RESP"
+          echo "$RESP" > /tmp/test1.json
+
+          N=$(echo "$RESP" | jq '[.azioni[]? | select(.tool=="crea_impegno")] | length')
+          echo "Impegni creati secondo la risposta: $N (attesi: 5)"
+          echo "STATO=$(echo "$RESP" | jq -r '.stato')"
+
+      - name: "Verifica su Supabase — i task esistono davvero"
+        if: steps.signup.outputs.puo_procedere == 'si'
+        env:
+          SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
+          ANON_KEY: ${{ steps.config.outputs.anon }}
+          TOKEN: ${{ steps.signup.outputs.token }}
+        run: |
+          curl -sS "$SUPABASE_URL/rest/v1/tasks?select=id,title,time,scheduled_at&order=created_at.desc&limit=10" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq . || true
+
+      - name: "Test 2 — crea un cliente di prova (per testare la conferma)"
+        if: steps.signup.outputs.puo_procedere == 'si'
+        id: cliente
+        env:
+          TOKEN: ${{ steps.signup.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          # Passiamo dal backend (api/index.js), non da Supabase diretto:
+          # è lui che aggiunge correttamente owner_id, esattamente come
+          # farebbe l'app vera.
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?resource=clients" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"TEST cancellare — Mario Rossi","status":"attivo"}')
+          echo "$RESP" | jq . || echo "$RESP"
+          ID=$(echo "$RESP" | jq -r '.data[0].id // empty')
+          echo "cliente_id=$ID" >> "$GITHUB_OUTPUT"
+
+      - name: "Test 3 — un'azione delicata deve chiedere conferma, non eseguire subito"
+        if: steps.signup.outputs.puo_procedere == 'si' && steps.cliente.outputs.cliente_id != ''
+        id: delicata
+        env:
+          TOKEN: ${{ steps.signup.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"messaggio":"Manda un messaggio a Mario Rossi dicendogli: ciao, è un test."}')
+          echo "$RESP" | jq . || echo "$RESP"
+
+          STATO=$(echo "$RESP" | jq -r '.stato')
+          echo "Stato ricevuto: $STATO (atteso: in_attesa_conferma)"
+          echo "run_id=$(echo "$RESP" | jq -r '.runId // empty')" >> "$GITHUB_OUTPUT"
+
+      - name: "Test 4 — conferma l'azione e verifica che parta"
+        if: steps.delicata.outputs.run_id != ''
+        id: conferma
+        env:
+          TOKEN: ${{ steps.signup.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+          RUN_ID: ${{ steps.delicata.outputs.run_id }}
+        run: |
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"runId\":\"$RUN_ID\",\"conferma\":true}")
+          echo "$RESP" | jq . || echo "$RESP"
+
+      - name: "Test 5 — un secondo tentativo con lo stesso runId non deve rieseguire"
+        if: steps.delicata.outputs.run_id != ''
+        env:
+          TOKEN: ${{ steps.signup.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+          RUN_ID: ${{ steps.delicata.outputs.run_id }}
+        run: |
+          CODE=$(curl -sS -o /tmp/replay.json -w "%{http_code}" -X POST "$PREVIEW_URL/api?action=assistant" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"runId\":\"$RUN_ID\",\"conferma\":true}")
+          echo "Codice HTTP replay: $CODE (atteso: 409)"
+          cat /tmp/replay.json | jq . || cat /tmp/replay.json
+
+      - name: Pulizia dati di prova
+        if: always() && steps.signup.outputs.puo_procedere == 'si'
+        env:
+          SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
+          ANON_KEY: ${{ steps.config.outputs.anon }}
+          TOKEN: ${{ steps.signup.outputs.token }}
+        run: |
+          for TABELLA in tasks messages conversations clients; do
+            echo "Pulizia $TABELLA creati dall'utente di prova..."
+            curl -sS -X DELETE "$SUPABASE_URL/rest/v1/$TABELLA?owner_id=eq.$(curl -sS "$SUPABASE_URL/auth/v1/user" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq -r '.id')" \
+              -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+          done
+          echo "Nota: l'utente di autenticazione di prova resta su Supabase (serve la service role per eliminarlo); è innocuo, non ha dati collegati dopo questa pulizia."
