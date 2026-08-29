@@ -1629,8 +1629,6 @@
           <span>Per dettare tocca il microfono sulla tastiera</span>
           <button class="hub-racconta-btn" id="hubRaccontaBtn">Organizza</button>
         </div>
-        <div class="hub-impegni" id="hubImpegni"></div>
-        <button class="hub-conferma" id="hubConferma" style="display:none;">Metti tutto in calendario</button>
       </div>
 
       <button class="ai-hub-voce" id="aiHubGiornata">
@@ -2940,6 +2938,9 @@ const SUPABASE_URL = "https://alxtmsfbxrkrevbioogv.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_cx-aRXg-ZCFDmsTfqBBccg_Li9rqqEa";
 /* Indirizzo del backend AI (quello pubblicato su Vercel). */
 const AI_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=ai";
+/* Assistente con tool calling: legge/scrive i dati da solo, dietro conferma
+   per le operazioni delicate. Vedi ASSISTENTE AI in api/index.js. */
+const ASSISTANT_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=assistant";
 
 /* Il backend si considera attivo solo se ci sono i valori di configurazione
    E la libreria Supabase si e' caricata davvero. Se la rete e' lenta o
@@ -3729,6 +3730,48 @@ async function callAI(prompt, maxTokens){
   return json.text;
 }
 
+/* ============ ASSISTENTE AI (tool calling) ============
+   A differenza di callAI (che restituisce solo testo), questa passa da
+   /api?action=assistant: l'AI legge e scrive i dati da sola, chiamando
+   funzioni autorizzate ed eseguite lato server (mai dal browser).
+   Per le operazioni delicate (mandare un messaggio, spostare o annullare
+   un impegno) il backend si ferma e restituisce una domanda: la mostriamo
+   con lo stesso toast di conferma già usato altrove nell'app, e riprendiamo
+   solo dopo la risposta dell'utente. */
+async function chiediAssistente(messaggio){
+  if(!BACKEND_CONFIGURED || !currentSession){
+    throw new Error("l'assistente richiede un backend configurato e una sessione attiva");
+  }
+
+  async function chiamaBackend(payload){
+    const response = await fetch(ASSISTANT_ENDPOINT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      body: JSON.stringify(payload)
+    });
+    const json = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(json.error || ("l'assistente ha risposto con errore (" + response.status + ")"));
+    return json;
+  }
+
+  async function gestisci(payload){
+    const risposta = await chiamaBackend(payload);
+    if(risposta.stato === "in_attesa_conferma"){
+      return new Promise((resolve, reject) => {
+        showAIToastConDecisione(
+          "L'assistente chiede conferma",
+          risposta.domanda,
+          () => gestisci({ runId: risposta.runId, conferma: true }).then(resolve, reject),
+          () => gestisci({ runId: risposta.runId, conferma: false }).then(resolve, reject)
+        );
+      });
+    }
+    return risposta; // { stato:"concluso", testo, azioni:[{tool, esito}] }
+  }
+
+  return gestisci({ messaggio });
+}
+
 /* ============ PERSISTENZA (salvataggio automatico) ============
    Usa lo storage integrato dell'artifact quando disponibile (dati privati,
    non condivisi). Se l'app viene aperta fuori da Claude (es. file salvato
@@ -3764,7 +3807,7 @@ const tasks = [
   { title:"Pausa pranzo", time:"13:00", status:"todo", owner:"user" },
   { title:"Chiamata cliente Rossi SpA", time:"15:30", status:"progress", owner:"user" },
 ];
-const statusLabel = { todo:"Da fare", progress:"In corso", done:"Completata", late:"In ritardo" };
+const statusLabel = { todo:"Da fare", progress:"In corso", done:"Completata", late:"In ritardo", annullato:"Annullata" };
 
 const clients = [
   { name:"Bianchi Costruzioni S.r.l.", status:"attivo", value:48000, last:"2 giorni fa", color:"linear-gradient(135deg,#2FD9C7,#22B8AA)",
@@ -4736,7 +4779,7 @@ function buildTaskRow(t){
     : (t.status === "done"
         ? '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>'
         : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>');
-  const titleStyle = t.status === "done" ? "text-decoration:line-through;color:var(--faint);" : "";
+  const titleStyle = (t.status === "done" || t.status === "annullato") ? "text-decoration:line-through;color:var(--faint);" : "";
   const subLabel = t.inSospesoCon
     ? (t.motivo || "risposta rimasta in sospeso")
     : (t.owner === "ai" ? "Se ne occupa l'AI" : t.time);
@@ -6400,218 +6443,81 @@ async function sendChatMessage(){
    frase sola. EON ricava OGNI impegno — nessuno escluso — e li
    mette in calendario, ognuno al suo posto.
    ============================================================ */
-let hubImpegni = [];
 
 function collegaHubRacconta(){
   const box = document.getElementById("hubRacconta");
   const campo = document.getElementById("hubRaccontaCampo");
   const btn = document.getElementById("hubRaccontaBtn");
-  const conferma = document.getElementById("hubConferma");
   if(!box || !campo || !btn) return;
 
   btn.addEventListener("click", organizza);
-  conferma.addEventListener("click", metti);
 
+  /* Non chiediamo più all'AI un JSON da interpretare a mano: le chiediamo
+     di ESEGUIRE, chiamando crea_impegno una volta per ogni impegno che
+     riconosce (vedi ASSISTENTE AI in api/index.js). L'unica cosa che
+     resta da fare qui è mostrare cosa ha fatto e aggiornare la vista. */
   async function organizza(){
     const testo = campo.value.trim();
     if(testo.length < 3){
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
     }
+    if(!BACKEND_CONFIGURED || !currentSession){
+      stato("attesa", "Serve essere collegati",
+        "L'assistente scrive nel calendario vero: accedi per usarlo");
+      return;
+    }
+
     stato("pensa", "Sto organizzando…", "Un attimo, metto in ordine quello che mi hai detto");
     btn.disabled = true;
 
-    const oggi = new Date();
-    const prompt = `Sei l'assistente dentro EON, l'app di un professionista italiano.
-
-Oggi è ${oggi.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}.
-
-Il professionista ti ha appena raccontato cosa deve fare:
-"${testo}"
-
-Il tuo compito è UNO SOLO: ricavare TUTTI gli impegni, senza perderne nemmeno uno.
-
-Rispondi SOLO con questo oggetto JSON, senza testo prima o dopo, senza backtick:
-
-{
-  "impegni": [
-    { "titolo": "...", "quando": "lun 8 set, 17:00", "tipo": "incontro" | "chiamata" | "commissione", "persona": "nome della persona" oppure null }
-  ]
-}
-
-REGOLE — la prima è la più importante:
-
-1. **Conta gli impegni nella frase e mettine ESATTAMENTE lo stesso numero nell'elenco.**
-   Se ne nomina cinque, l'elenco ne ha cinque. Ogni frase separata da un punto,
-   da una virgola o da "e" è di solito un impegno a sé.
-   Non riassumere, non accorpare, non scartare niente.
-
-2. Ogni cosa è un impegno: telefonate, incontri, cose da comprare, pratiche da
-   aggiornare, persone da sentire, documenti da preparare, appunti da segnare.
-   Anche "segnare Tizio 500 euro al mese" è un impegno.
-
-3. "titolo": breve e concreto, come lo direbbe lui. Mantieni nomi propri e cifre.
-   Esempi: "Chiamare Guidi", "Aggiornare profilo AML", "Comprare fascette",
-   "Segnare Hannah Tricklebanck PAC 500 euro al mese".
-
-4. "quando": formato "lun 8 set, 17:00" oppure solo "lun 8 set".
-   Traduci "lunedì", "martedì", "domani", "la prossima settimana" in date vere
-   partendo da oggi. Se un giorno viene detto una volta e poi si elencano altre
-   cose, quel giorno vale solo per la cosa a cui è attaccato.
-
-5. **Se per un impegno non viene detto quando, decidilo tu**: primo giorno utile,
-   alle 08:00. Non lasciare mai un impegno senza data.
-
-6. "tipo": "incontro" se ci si vede di persona (sopralluogo, visita, appuntamento),
-   "chiamata" se è una telefonata o un "sentire qualcuno", "commissione" per tutto il resto.
-
-7. "persona": il nome proprio nominato in quell'impegno, se c'è. Altrimenti null.
-
-ESEMPIO. Se dice:
-"Segnare lunedì Hannah Tricklebanck PAC 500 euro al mese. Aggiornare profilo AML.
-Chiamare Guidi ore 17:00. Comprare fascette. Martedì sopralluogo tetto ore 19:00."
-
-→ CINQUE impegni:
-[
-  { "titolo":"Segnare Hannah Tricklebanck PAC 500 euro al mese", "quando":"lun 1 set, 08:00", "tipo":"commissione", "persona":"Hannah Tricklebanck" },
-  { "titolo":"Aggiornare profilo AML", "quando":"sab 30 ago, 08:00", "tipo":"commissione", "persona":null },
-  { "titolo":"Chiamare Guidi", "quando":"sab 30 ago, 17:00", "tipo":"chiamata", "persona":"Guidi" },
-  { "titolo":"Comprare fascette", "quando":"dom 31 ago, 08:00", "tipo":"commissione", "persona":null },
-  { "titolo":"Sopralluogo tetto", "quando":"mar 2 set, 19:00", "tipo":"incontro", "persona":null }
-]`;
-
-    let dati;
+    let risposta;
     try{
-      const raw = await callAI(prompt, 900);
-      dati = JSON.parse(raw.replace(/```json|```/g, "").trim());
+      risposta = await chiediAssistente(
+        `Il professionista ti ha appena raccontato cosa deve fare: "${testo}"`
+      );
     }catch(err){
-      console.warn("Non ho capito la giornata:", err.message);
+      console.warn("Assistente non riuscito:", err.message);
       stato("attesa", "Non sono riuscita a organizzarla",
-        ultimoErroreAI ? "AI non raggiunta: " + ultimoErroreAI : "Riprova, magari con frasi più separate");
+        "AI non raggiunta: " + err.message + " — riprova, magari con frasi più separate");
       btn.disabled = false;
       return;
     }
 
-    const domani = new Date(); domani.setDate(domani.getDate() + 1);
-    const ripiego = domani.toLocaleDateString("it-IT",
-      { weekday:"short", day:"numeric", month:"short" }).replace(".", "") + ", 08:00";
-
-    hubImpegni = (Array.isArray(dati.impegni) ? dati.impegni : [])
-      .filter(i => i && i.titolo)
-      .map(i => ({ titolo:i.titolo, quando:i.quando || ripiego,
-                   tipo:i.tipo || "commissione", persona:i.persona || null }));
-
-    if(hubImpegni.length === 0){
-      stato("attesa", "Non ho trovato impegni",
-        "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17");
-      btn.disabled = false;
-      return;
-    }
-
-    disegnaImpegni();
-    stato("fatto", "Ecco cosa ho capito",
-      hubImpegni.length + (hubImpegni.length === 1 ? " impegno" : " impegni") +
-      " — togli quello che non serve, poi conferma");
-    btn.disabled = false;
-    btn.textContent = "Rifai";
-    conferma.style.display = "block";
-    conferma.textContent = "Metti " + (hubImpegni.length === 1 ? "in calendario" : "tutti in calendario");
-  }
-
-  const segni = {
-    incontro:   { colore:"var(--amber)", svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' },
-    chiamata:   { colore:"var(--coral)", svg:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/>' },
-    commissione:{ colore:"var(--teal)",  svg:'<path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/>' }
-  };
-
-  function disegnaImpegni(){
-    const lista = document.getElementById("hubImpegni");
-    lista.innerHTML = hubImpegni.map((i, k) => {
-      const t = segni[i.tipo] || segni.commissione;
-      return `<div class="hub-impegno">
-        <div class="hub-imp-ico" style="background:${t.colore};">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">${t.svg}</svg>
-        </div>
-        <div style="min-width:0;">
-          <b>${i.titolo}</b>
-          <small>${i.quando}${i.persona ? " · " + i.persona : ""}</small>
-        </div>
-        <button class="hub-imp-togli" data-togli="${k}" aria-label="Togli">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>`;
-    }).join("");
-    lista.style.display = hubImpegni.length ? "block" : "none";
-    lista.querySelectorAll("[data-togli]").forEach(b => {
-      b.addEventListener("click", () => {
-        hubImpegni.splice(Number(b.dataset.togli), 1);
-        disegnaImpegni();
-        const c = document.getElementById("hubConferma");
-        if(hubImpegni.length === 0){ c.style.display = "none"; }
-        else c.textContent = "Metti " + (hubImpegni.length === 1 ? "in calendario" : "tutti in calendario");
-      });
-    });
-  }
-
-  async function metti(){
-    if(!hubImpegni.length) return;
-    conferma.disabled = true;
-    conferma.textContent = "Sto segnando…";
-
-    const fatti = [];
-    for(const imp of hubImpegni){
-      /* Se l'impegno riguarda una persona che e' gia' un cliente, glielo
-         colleghiamo: cosi' dal calendario puoi scrivergli o chiamarlo. */
-      const cliente = imp.persona
-        ? clients.find(c => c.name.toLowerCase().includes(imp.persona.toLowerCase()) ||
-                            imp.persona.toLowerCase().includes(c.name.toLowerCase()))
-        : null;
-
-      if(imp.tipo === "incontro" && cliente){
-        const chat = await ensureConversationFor(cliente);
-        if(isDbReady() && chat.id){
-          await supabaseClient.from("messages").insert({
-            conversation_id: chat.id, sender:"me", event_type:"appt",
-            title: imp.titolo, body: imp.quando || ""
-          });
-        } else {
-          chat.messages.push({ eventType:"appt", title:imp.titolo, text:imp.quando || "", time:"ora" });
-        }
-        fatti.push("📅 " + imp.titolo + " — " + imp.quando);
-        continue;
-      }
-
-      const gia = tasks.some(t => t.title.toLowerCase() === imp.titolo.toLowerCase() && t.status !== "done");
-      if(gia) continue;
-
-      const nuova = { title: imp.titolo, time: imp.quando || "—", status:"todo", owner:"user",
-                      clienteCollegato: cliente ? cliente.name : null };
-      if(isDbReady()){
-        const saved = await dbInsert("tasks", {
-          title: imp.titolo, owner_type:"user", status:"todo", time: imp.quando || ""
-        });
-        if(saved) nuova.id = saved.id;
-      }
-      tasks.push(nuova);
-      fatti.push((imp.tipo === "chiamata" ? "📞 " : imp.tipo === "incontro" ? "📅 " : "✓ ") +
-        imp.titolo + " — " + imp.quando);
-    }
-
-    const quanti = fatti.length;
-    hubImpegni = [];
     campo.value = "";
-    document.getElementById("hubImpegni").style.display = "none";
-    conferma.style.display = "none";
-    conferma.disabled = false;
-    btn.textContent = "Organizza";
+    btn.disabled = false;
     stato("attesa", "Raccontami la giornata", "Dimmi tutto quello che devi fare: lo metto in calendario");
 
+    if(risposta.stato === "incompleto"){
+      showAIToast("Non ho fatto in tempo a finire", risposta.testo);
+    }
+
+    const impegniCreati = risposta.azioni.filter(a => a.tool === "crea_impegno");
+    if(impegniCreati.length === 0){
+      if(risposta.stato !== "incompleto"){
+        stato("attesa", "Non ho trovato impegni",
+          "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17");
+      }
+      return;
+    }
+
+    /* crea_impegno ha scritto direttamente su Supabase: gli array locali
+       (tasks, chats) non lo sanno ancora, vanno ricaricati prima di
+       disegnare, altrimenti il nuovo impegno non comparirebbe finché
+       non si ricarica l'app da zero. */
+    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
     chiudiHubAI();
     navigateTo("calendario");
 
-    showAIToast(quanti === 1 ? "Segnato in calendario" : quanti + " impegni in calendario",
-      fatti.join("\n"));
+    const fatti = impegniCreati.map(a =>
+      (a.esito.tipo === "chiamata" ? "📞 " : a.esito.tipo === "incontro" ? "📅 " : "✓ ") +
+      a.esito.titolo + " — " + a.esito.quando_visualizzato);
+
+    showAIToast(
+      impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
+      fatti.join("\n")
+    );
   }
 
   function stato(s, titolo, sotto){

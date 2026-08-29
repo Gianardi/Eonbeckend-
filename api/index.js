@@ -21,6 +21,7 @@
  * ------------------------------------------------------------
  *   GET    /api                          -> stato del servizio
  *   POST   /api?action=ai                -> genera testo con Claude
+ *   POST   /api?action=assistant         -> assistente con tool calling (legge/scrive i dati da solo)
  *   POST   /api?action=seed              -> crea i dati iniziali dell'utente
  *
  *   GET    /api?resource=clients         -> elenco
@@ -29,7 +30,8 @@
  *   DELETE /api?resource=clients&id=UUID -> elimina
  *
  *   resource ammessi: profiles, clients, opportunities, employees, tasks,
- *   assigned_tasks, payments, incomes, goals, conversations, messages, documents
+ *   assigned_tasks, payments, incomes, goals, conversations, messages, documents,
+ *   ai_audit_log (quest'ultimo di sola lettura: GET soltanto)
  *
  * Tutte le chiamate (tranne GET /api) richiedono l'header:
  *   Authorization: Bearer <access_token dell'utente loggato>
@@ -68,6 +70,7 @@ const ALLOWED_RESOURCES = new Set([
   "conversations",
   "messages",
   "documents",
+  "ai_audit_log",
 ]);
 
 /* Tabelle che hanno la colonna owner_id: compilata dal server, mai dal client,
@@ -83,7 +86,12 @@ const OWNED_RESOURCES = new Set([
   "goals",
   "conversations",
   "documents",
+  "ai_audit_log",
 ]);
+
+/* Tabelle leggibili ma non scrivibili dal client: il registro delle
+   operazioni dell'AI lo scrive solo il backend, mai una richiesta esterna. */
+const READ_ONLY_RESOURCES = new Set(["ai_audit_log"]);
 
 /* ============================================================
    Utility
@@ -212,6 +220,9 @@ async function handleResource(req, res, resource, user, accessToken) {
   if (!ALLOWED_RESOURCES.has(resource)) {
     throw fail(`Risorsa non ammessa: ${resource}`, 400);
   }
+  if (READ_ONLY_RESOURCES.has(resource) && req.method !== "GET") {
+    throw fail(`Risorsa di sola lettura: ${resource}`, 405);
+  }
 
   const url = new URL(req.url, "http://localhost");
   const id = url.searchParams.get("id");
@@ -328,6 +339,777 @@ async function handleAI(req, res) {
   if (!text) throw fail("Risposta AI vuota", 502);
 
   return send(res, 200, { text });
+}
+
+/* ============================================================
+   ASSISTENTE AI — tool calling
+   ------------------------------------------------------------
+   L'AI non tocca mai il database direttamente. Riceve un elenco di
+   funzioni che può chiedere di eseguire (i "tool"); questo file le
+   esegue davvero, dopo aver controllato che l'utente sia autenticato,
+   che il dato sia suo, che i parametri siano validi e che il record
+   esista. Per le operazioni delicate (mandare un messaggio, annullare
+   un impegno, spostarlo) l'esecuzione si ferma e aspetta una conferma
+   esplicita dal professionista prima di procedere.
+   ============================================================ */
+
+const TOOL_MAX_ROUNDS = 8;
+const AI_RATE_LIMIT = 20; // richieste
+const AI_RATE_WINDOW_SECONDS = 600; // 10 minuti
+
+const TIPI_IMPEGNO = new Set(["incontro", "chiamata", "commissione"]);
+const STATI_CLIENTE = new Set(["attivo", "trattativa", "inattivo"]);
+
+function eStringaNonVuota(v) { return typeof v === "string" && v.trim().length > 0; }
+function eNumero(v) { return typeof v === "number" && isFinite(v); }
+function eUuid(v) { return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); }
+function eIso(v) { return typeof v === "string" && !isNaN(new Date(v).getTime()); }
+
+/* "2026-09-01T08:00:00" -> "mar 1 set, 08:00": lo stesso formato che
+   l'app già usa per mostrare gli impegni. Lo decide sempre il server,
+   mai il modello, così il formato resta coerente in tutta l'app. */
+function formattaQuando(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const giorno = d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" }).replace(".", "");
+  const ore = String(d.getHours()).padStart(2, "0");
+  const minuti = String(d.getMinutes()).padStart(2, "0");
+  return `${giorno}, ${ore}:${minuti}`;
+}
+
+/* Legge un record e lo restituisce solo se esiste ed è dell'utente:
+   grazie a RLS, una riga di un altro professionista non torna proprio,
+   quindi "non trovato" e "non tuo" sono indistinguibili per chi chiama
+   (non riveliamo mai che un dato altrui esiste). */
+async function trovaProprio(resource, id, ctx) {
+  if (!eUuid(id)) return null;
+  const righe = await db(`${resource}?id=eq.${id}&select=*`, { method: "GET" }, ctx.accessToken);
+  return Array.isArray(righe) && righe.length ? righe[0] : null;
+}
+
+/* Un "impegno" (per sposta_impegno/annulla_impegno) è o un appuntamento
+   dentro messages, o un task: si cerca nell'uno, poi nell'altro. Usato
+   sia per descrivere la conferma sia per eseguire l'azione, così i due
+   posti non possono disallinearsi su dove si trova il record. */
+async function trovaImpegno(id, ctx) {
+  const messaggio = await trovaProprio("messages", id, ctx);
+  if (messaggio) return { tabella: "messages", record: messaggio };
+  const task = await trovaProprio("tasks", id, ctx);
+  if (task) return { tabella: "tasks", record: task };
+  return null;
+}
+
+async function trovaOCreaConversazione(cliente, ctx) {
+  const nome = encodeURIComponent(cliente.name);
+  const trovate = await db(`conversations?select=*&contact_name=eq.${nome}&limit=1`, { method: "GET" }, ctx.accessToken);
+  if (Array.isArray(trovate) && trovate.length) return trovate[0];
+
+  const creata = await db(
+    "conversations",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        owner_id: ctx.user.id,
+        contact_name: cliente.name,
+        is_client: true,
+        is_prospect: cliente.status === "trattativa",
+        is_archived: false,
+        to_see_today: false,
+        to_call_today: false,
+      }),
+      headers: { Prefer: "return=representation" },
+    },
+    ctx.accessToken
+  );
+  return Array.isArray(creata) ? creata[0] : creata;
+}
+
+/* ------------------------------------------------------------
+   Elenco dei tool. Ognuno ha:
+   - schema: la definizione che vede Claude (nome, descrizione, parametri)
+   - sensitive: true se serve conferma dell'utente prima di eseguirlo
+   - describe: (solo per i sensitive) genera la domanda da mostrare
+   - run: la funzione vera, eseguita solo lato server
+   ------------------------------------------------------------ */
+const TOOLS = {
+
+  cerca_cliente: {
+    sensitive: false,
+    schema: {
+      name: "cerca_cliente",
+      description: "Trova clienti in anagrafica per nome, anche parziale. Usalo per ottenere l'id di un cliente prima di collegargli un impegno o un messaggio.",
+      input_schema: {
+        type: "object",
+        properties: { nome: { type: "string", description: "Nome o parte del nome del cliente da cercare" } },
+        required: ["nome"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      const q = encodeURIComponent(input.nome.trim());
+      const righe = await db(`clients?select=id,name,phone,value,status&name=ilike.*${q}*&limit=5`, { method: "GET" }, ctx.accessToken);
+      return {
+        risultati: (righe || []).map((r) => ({
+          id: r.id, nome: r.name, telefono: r.phone || null, valore: r.value || null, stato: r.status || null,
+        })),
+      };
+    },
+  },
+
+  elenca_appuntamenti: {
+    sensitive: false,
+    schema: {
+      name: "elenca_appuntamenti",
+      description: "Elenca gli impegni già segnati in un intervallo di date (appuntamenti e task), utile per sapere cosa c'è già prima di aggiungerne altri.",
+      input_schema: {
+        type: "object",
+        properties: {
+          da: { type: "string", description: "Inizio intervallo, data/ora in formato ISO 8601" },
+          a: { type: "string", description: "Fine intervallo, data/ora in formato ISO 8601" },
+        },
+        required: ["da", "a"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eIso(input.da) || !eIso(input.a)) throw fail("Parametri 'da'/'a' non validi: usa il formato ISO 8601");
+      const filtro = `scheduled_at=gte.${encodeURIComponent(input.da)}&scheduled_at=lte.${encodeURIComponent(input.a)}`;
+      const [appuntamenti, impegni] = await Promise.all([
+        db(`messages?select=id,title,scheduled_at&event_type=eq.appt&${filtro}&order=scheduled_at.asc`, { method: "GET" }, ctx.accessToken),
+        db(`tasks?select=id,title,scheduled_at,status&${filtro}&order=scheduled_at.asc`, { method: "GET" }, ctx.accessToken),
+      ]);
+      return {
+        appuntamenti: (appuntamenti || []).map((m) => ({ id: m.id, titolo: m.title, quando: m.scheduled_at })),
+        impegni: (impegni || [])
+          .filter((t) => t.status !== "done" && t.status !== "annullato")
+          .map((t) => ({ id: t.id, titolo: t.title, quando: t.scheduled_at })),
+      };
+    },
+  },
+
+  storico_cliente: {
+    sensitive: false,
+    schema: {
+      name: "storico_cliente",
+      description: "Riassunto di un cliente: dati anagrafici, ultimi messaggi e documenti.",
+      input_schema: {
+        type: "object",
+        properties: { cliente_id: { type: "string", description: "Id del cliente (uuid), trovato con cerca_cliente" } },
+        required: ["cliente_id"],
+      },
+    },
+    async run(input, ctx) {
+      const cliente = await trovaProprio("clients", input.cliente_id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+
+      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conversazione = Array.isArray(conv) && conv[0];
+
+      let messaggi = [], documenti = [];
+      if (conversazione) {
+        [messaggi, documenti] = await Promise.all([
+          db(`messages?select=sender,body,title,event_type,created_at&conversation_id=eq.${conversazione.id}&order=created_at.desc&limit=10`, { method: "GET" }, ctx.accessToken),
+          db(`messages?select=id,title,created_at&conversation_id=eq.${conversazione.id}&event_type=eq.doc&order=created_at.desc&limit=10`, { method: "GET" }, ctx.accessToken),
+        ]);
+      }
+
+      return {
+        cliente: { id: cliente.id, nome: cliente.name, telefono: cliente.phone || null, valore: cliente.value || null, stato: cliente.status || null },
+        ultimi_messaggi: (messaggi || []).reverse().map((m) => ({
+          da: m.sender === "me" ? "professionista" : "cliente",
+          testo: m.body || m.title || "",
+          quando: m.created_at,
+        })),
+        documenti: (documenti || []).map((d) => ({ id: d.id, titolo: d.title, quando: d.created_at })),
+      };
+    },
+  },
+
+  leggi_conversazione: {
+    sensitive: false,
+    schema: {
+      name: "leggi_conversazione",
+      description: "Legge gli ultimi messaggi scambiati con un cliente.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente (uuid)" },
+          limite: { type: "integer", description: "Quanti messaggi leggere, default 20" },
+        },
+        required: ["cliente_id"],
+      },
+    },
+    async run(input, ctx) {
+      const cliente = await trovaProprio("clients", input.cliente_id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+      const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 50)) : 20;
+
+      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conversazione = Array.isArray(conv) && conv[0];
+      if (!conversazione) return { messaggi: [] };
+
+      const messaggi = await db(
+        `messages?select=sender,body,title,event_type,created_at&conversation_id=eq.${conversazione.id}&order=created_at.desc&limit=${limite}`,
+        { method: "GET" },
+        ctx.accessToken
+      );
+      return {
+        messaggi: (messaggi || []).reverse().map((m) => ({
+          da: m.sender === "me" ? "professionista" : "cliente",
+          testo: m.body || m.title || "",
+          quando: m.created_at,
+        })),
+      };
+    },
+  },
+
+  crea_cliente: {
+    sensitive: false,
+    schema: {
+      name: "crea_cliente",
+      description: "Aggiunge un nuovo cliente in anagrafica. Usalo solo quando l'utente chiede esplicitamente di aggiungere un cliente, non per un normale impegno che nomina una persona.",
+      input_schema: {
+        type: "object",
+        properties: {
+          nome: { type: "string" },
+          telefono: { type: "string" },
+          valore: { type: "number", description: "Valore economico stimato del cliente, in euro" },
+          note: { type: "string" },
+        },
+        required: ["nome"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      const payload = { owner_id: ctx.user.id, name: input.nome.trim(), status: "trattativa" };
+      if (eStringaNonVuota(input.telefono)) payload.phone = input.telefono.trim();
+      if (eNumero(input.valore)) payload.value = input.valore;
+      if (eStringaNonVuota(input.note)) payload.description = input.note.trim();
+
+      const creati = await db("clients", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+      const c = Array.isArray(creati) ? creati[0] : creati;
+      return { id: c.id, nome: c.name };
+    },
+  },
+
+  aggiorna_cliente: {
+    sensitive: false,
+    schema: {
+      name: "aggiorna_cliente",
+      description: "Modifica i dati di un cliente già esistente. Passa solo i campi che vuoi cambiare. Usalo solo quando l'utente chiede esplicitamente di modificare un cliente, non per un normale impegno.",
+      input_schema: {
+        type: "object",
+        properties: {
+          id: { type: "string", description: "Id del cliente (uuid)" },
+          nome: { type: "string" },
+          telefono: { type: "string" },
+          valore: { type: "number" },
+          stato: { type: "string", enum: ["attivo", "trattativa", "inattivo"] },
+          note: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    async run(input, ctx) {
+      const cliente = await trovaProprio("clients", input.id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+
+      const patch = {};
+      const cambiati = [];
+      if (eStringaNonVuota(input.nome)) { patch.name = input.nome.trim(); cambiati.push("nome"); }
+      if (eStringaNonVuota(input.telefono)) { patch.phone = input.telefono.trim(); cambiati.push("telefono"); }
+      if (eNumero(input.valore)) { patch.value = input.valore; cambiati.push("valore"); }
+      if (eStringaNonVuota(input.note)) { patch.description = input.note.trim(); cambiati.push("note"); }
+      if (input.stato) {
+        if (!STATI_CLIENTE.has(input.stato)) throw fail("Stato non valido: usa attivo, trattativa o inattivo");
+        patch.status = input.stato; cambiati.push("stato");
+      }
+      if (!cambiati.length) throw fail("Nessun campo da aggiornare");
+
+      await db(`clients?id=eq.${cliente.id}`, { method: "PATCH", body: JSON.stringify(patch), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+      return { id: cliente.id, aggiornato: cambiati };
+    },
+  },
+
+  crea_impegno: {
+    sensitive: false,
+    schema: {
+      name: "crea_impegno",
+      description: "Segna un impegno nel calendario: un incontro, una telefonata o una commissione (qualsiasi altra cosa da fare: pratiche, acquisti, documenti). Chiamalo una volta per ogni impegno distinto nominato dall'utente, anche se ne ha nominati molti nella stessa frase.",
+      input_schema: {
+        type: "object",
+        properties: {
+          titolo: { type: "string", description: "Titolo breve e concreto, come lo direbbe l'utente" },
+          quando_iso: { type: "string", description: "Data e ora in formato ISO 8601. Se l'utente non dice quando, usa le 08:00 del primo giorno utile: non lasciare mai un impegno senza data." },
+          tipo: { type: "string", enum: ["incontro", "chiamata", "commissione"] },
+          cliente_id: { type: "string", description: "Id del cliente collegato, se l'impegno riguarda una persona già in anagrafica (cercala prima con cerca_cliente)" },
+        },
+        required: ["titolo", "quando_iso", "tipo"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.titolo)) throw fail("Parametro 'titolo' mancante o vuoto");
+      if (!eIso(input.quando_iso)) throw fail("Parametro 'quando_iso' non è una data valida");
+      if (!TIPI_IMPEGNO.has(input.tipo)) throw fail("Tipo non valido: usa incontro, chiamata o commissione");
+
+      const titolo = input.titolo.trim();
+      const quandoVisualizzato = formattaQuando(input.quando_iso);
+
+      let cliente = null;
+      if (input.cliente_id) {
+        cliente = await trovaProprio("clients", input.cliente_id, ctx);
+        if (!cliente) throw fail("Cliente non trovato", 404);
+      }
+
+      if (input.tipo === "incontro" && cliente) {
+        const conversazione = await trovaOCreaConversazione(cliente, ctx);
+        const creato = await db(
+          "messages",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              conversation_id: conversazione.id,
+              sender: "me",
+              event_type: "appt",
+              title: titolo,
+              body: quandoVisualizzato,
+              scheduled_at: input.quando_iso,
+            }),
+            headers: { Prefer: "return=representation" },
+          },
+          ctx.accessToken
+        );
+        const m = Array.isArray(creato) ? creato[0] : creato;
+        return { id: m.id, titolo, quando_visualizzato: quandoVisualizzato, tipo: "incontro", cliente: cliente.name };
+      }
+
+      /* Se un task identico (stesso titolo, stessa data/ora) è già
+         segnato e non è chiuso o annullato, non ne creiamo un doppione:
+         capita se l'AI viene richiamata due volte sulla stessa frase
+         (es. un doppio tap). Controlliamo anche la data, non solo il
+         titolo: due impegni diversi possono chiamarsi allo stesso modo
+         in giorni diversi ("Chiamare Mario" la settimana scorsa e di
+         nuovo domani), e non devono fondersi in uno solo. */
+      const esistente = await db(
+        `tasks?select=id,title,time&title=ilike.${encodeURIComponent(titolo)}&scheduled_at=eq.${encodeURIComponent(input.quando_iso)}&status=neq.done&status=neq.annullato&limit=1`,
+        { method: "GET" },
+        ctx.accessToken
+      );
+      if (Array.isArray(esistente) && esistente.length) {
+        const e = esistente[0];
+        return { id: e.id, titolo: e.title, quando_visualizzato: e.time || quandoVisualizzato, tipo: input.tipo, gia_esistente: true };
+      }
+
+      const creato = await db(
+        "tasks",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            owner_id: ctx.user.id,
+            title: titolo,
+            owner_type: "user",
+            status: "todo",
+            time: quandoVisualizzato,
+            scheduled_at: input.quando_iso,
+          }),
+          headers: { Prefer: "return=representation" },
+        },
+        ctx.accessToken
+      );
+      const t = Array.isArray(creato) ? creato[0] : creato;
+      return { id: t.id, titolo, quando_visualizzato: quandoVisualizzato, tipo: input.tipo };
+    },
+  },
+
+  sposta_impegno: {
+    sensitive: true,
+    schema: {
+      name: "sposta_impegno",
+      description: "Sposta un appuntamento o un impegno già esistente a una nuova data/ora. Richiede conferma dell'utente.",
+      input_schema: {
+        type: "object",
+        properties: {
+          id: { type: "string", description: "Id dell'impegno da spostare" },
+          nuovo_quando_iso: { type: "string", description: "Nuova data/ora in formato ISO 8601" },
+        },
+        required: ["id", "nuovo_quando_iso"],
+      },
+    },
+    async describe(input, ctx) {
+      const quando = eIso(input.nuovo_quando_iso) ? formattaQuando(input.nuovo_quando_iso) : input.nuovo_quando_iso;
+      const trovato = await trovaImpegno(input.id, ctx);
+      return `Spostare "${trovato ? trovato.record.title : "questo impegno"}" a ${quando}?`;
+    },
+    async run(input, ctx) {
+      if (!eIso(input.nuovo_quando_iso)) throw fail("Parametro 'nuovo_quando_iso' non è una data valida");
+      const quandoVisualizzato = formattaQuando(input.nuovo_quando_iso);
+
+      const trovato = await trovaImpegno(input.id, ctx);
+      if (!trovato) throw fail("Impegno non trovato", 404);
+      const { tabella, record } = trovato;
+
+      const patch = tabella === "messages"
+        ? { body: quandoVisualizzato, scheduled_at: input.nuovo_quando_iso }
+        : { time: quandoVisualizzato, scheduled_at: input.nuovo_quando_iso };
+      await db(`${tabella}?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify(patch) }, ctx.accessToken);
+      return { id: record.id, titolo: record.title, quando_visualizzato: quandoVisualizzato };
+    },
+  },
+
+  annulla_impegno: {
+    sensitive: true,
+    schema: {
+      name: "annulla_impegno",
+      description: "Annulla un appuntamento o un impegno già esistente. Richiede conferma dell'utente.",
+      input_schema: {
+        type: "object",
+        properties: { id: { type: "string", description: "Id dell'impegno da annullare" } },
+        required: ["id"],
+      },
+    },
+    async describe(input, ctx) {
+      const trovato = await trovaImpegno(input.id, ctx);
+      return `Annullare "${trovato ? trovato.record.title : "questo impegno"}"?`;
+    },
+    async run(input, ctx) {
+      const trovato = await trovaImpegno(input.id, ctx);
+      if (!trovato) throw fail("Impegno non trovato", 404);
+      const { tabella, record } = trovato;
+
+      if (tabella === "messages") {
+        /* scheduled_at a null lo toglie anche da elenca_appuntamenti
+           (che filtra per intervallo di date): senza questo, un
+           appuntamento annullato risulterebbe ancora "in programma". */
+        await db(`messages?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ title: "❌ " + record.title + " (annullato)", scheduled_at: null }) }, ctx.accessToken);
+      } else {
+        await db(`tasks?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ status: "annullato" }) }, ctx.accessToken);
+      }
+      return { id: record.id, titolo: record.title };
+    },
+  },
+
+  manda_messaggio: {
+    sensitive: true,
+    schema: {
+      name: "manda_messaggio",
+      description: "Invia un messaggio a un cliente nella chat interna. Richiede conferma dell'utente prima di essere inviato davvero.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente destinatario" },
+          testo: { type: "string", description: "Testo del messaggio" },
+        },
+        required: ["cliente_id", "testo"],
+      },
+    },
+    async describe(input, ctx) {
+      const cliente = await trovaProprio("clients", input.cliente_id, ctx);
+      return `Inviare a ${cliente ? cliente.name : "questo cliente"}: "${input.testo}"?`;
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.testo)) throw fail("Parametro 'testo' mancante o vuoto");
+      const cliente = await trovaProprio("clients", input.cliente_id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+
+      const conversazione = await trovaOCreaConversazione(cliente, ctx);
+      const creato = await db(
+        "messages",
+        { method: "POST", body: JSON.stringify({ conversation_id: conversazione.id, sender: "me", body: input.testo.trim() }), headers: { Prefer: "return=representation" } },
+        ctx.accessToken
+      );
+      const m = Array.isArray(creato) ? creato[0] : creato;
+      return { id: m.id, inviato_a: cliente.name };
+    },
+  },
+};
+
+/* ------------------------------------------------------------
+   Rate limit, registro operazioni e stato delle conversazioni
+   sospese: tutte cose che il client non deve poter manipolare,
+   quindi si usa sempre la chiave di servizio, mai il token utente.
+   ------------------------------------------------------------ */
+
+async function verificaLimiteRichieste(user) {
+  if (!SERVICE_ROLE_KEY) return; // ambiente non configurato: non blocchiamo per un problema di setup
+  let r;
+  try {
+    r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/ai_check_rate_limit`, {
+      method: "POST",
+      headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_owner_id: user.id, p_limite: AI_RATE_LIMIT, p_finestra_secondi: AI_RATE_WINDOW_SECONDS }),
+    });
+  } catch (netErr) {
+    console.error("Controllo rate limit non riuscito:", netErr);
+    return; // un problema di rete lato server non deve bloccare l'utente
+  }
+  if (!r.ok) { console.error("ai_check_rate_limit ha risposto", r.status); return; }
+  const ok = await r.json();
+  if (ok === false) throw fail("Hai fatto troppe richieste all'assistente: riprova tra qualche minuto", 429);
+}
+
+async function registraOperazione(user, tool, input, esito, stato) {
+  if (!SERVICE_ROLE_KEY) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/ai_audit_log`, {
+      method: "POST",
+      headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify({ owner_id: user.id, tool, input, esito, stato }),
+    });
+  } catch (netErr) {
+    console.error("Scrittura registro operazioni non riuscita:", netErr);
+  }
+}
+
+async function salvaRun(runId, user, patch) {
+  const url = runId
+    ? `${SUPABASE_URL}/rest/v1/ai_runs?id=eq.${runId}&owner_id=eq.${user.id}`
+    : `${SUPABASE_URL}/rest/v1/ai_runs`;
+  let r;
+  try {
+    r = await fetch(url, {
+      method: runId ? "PATCH" : "POST",
+      headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=representation" },
+      body: JSON.stringify({ ...patch, owner_id: user.id, updated_at: new Date().toISOString() }),
+    });
+  } catch (netErr) {
+    throw fail("Impossibile salvare lo stato dell'assistente: " + netErr.message, 502);
+  }
+  const rows = await r.json();
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  if (!r.ok || !row) throw fail("Salvataggio dello stato dell'assistente non riuscito", 500);
+  return row;
+}
+
+/* Reclama in modo atomico un run in attesa di conferma: la condizione
+   stato=eq.in_attesa_conferma nell'URL fa sì che, se due richieste con lo
+   stesso runId arrivano insieme (un doppio tap, un retry di rete), solo
+   una delle due trovi la riga e la faccia passare a "in_corso" — l'altra
+   non trova nulla e si ferma, invece di eseguire due volte la stessa
+   azione delicata (mandare due volte lo stesso messaggio, per esempio). */
+async function reclamaRun(runId, user) {
+  let r;
+  try {
+    r = await fetch(
+      `${SUPABASE_URL}/rest/v1/ai_runs?id=eq.${runId}&owner_id=eq.${user.id}&stato=eq.in_attesa_conferma`,
+      {
+        method: "PATCH",
+        headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=representation" },
+        body: JSON.stringify({ stato: "in_corso", updated_at: new Date().toISOString() }),
+      }
+    );
+  } catch (netErr) {
+    throw fail("Impossibile recuperare lo stato dell'assistente: " + netErr.message, 502);
+  }
+  if (!r.ok) throw fail("Impossibile recuperare lo stato dell'assistente", 500);
+  const rows = await r.json();
+  return Array.isArray(rows) && rows[0] ? rows[0] : null;
+}
+
+function systemPromptAssistente() {
+  const oggi = new Date();
+  return `Sei l'assistente operativo dentro EON, un'app per professionisti italiani.
+Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ora ${oggi.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}.
+
+Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
+
+REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno. Se manca la data o l'ora, decidi tu: primo giorno utile, alle 08:00. Non lasciare mai un impegno senza data.
+
+Chiama crea_cliente o aggiorna_cliente SOLO quando l'utente chiede esplicitamente di aggiungere o modificare un cliente in anagrafica — non per un normale impegno che nomina soltanto una persona.
+
+Se un impegno riguarda una persona già cliente, cercala prima con cerca_cliente per collegare l'impegno al cliente giusto; se non la trovi, procedi comunque con l'impegno senza collegarlo a nessuno.
+
+Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
+}
+
+/* Prepara la domanda di conferma per la prossima azione delicata in coda. */
+async function descriviProssimaAzione(pendente, ctx) {
+  const tool = TOOLS[pendente.nome];
+  return tool.describe ? await tool.describe(pendente.input, ctx) : `Confermi l'operazione "${pendente.nome}"?`;
+}
+
+async function handleAssistant(req, res, user, accessToken) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
+
+  await verificaLimiteRichieste(user);
+
+  const body = await readBody(req);
+  const ctx = { user, accessToken };
+  const runId = body.runId || null;
+  let messages;
+  let azioniEseguite = [];
+  let runReclamato = false; // true dal momento in cui il run passa a "in_corso": da qui in poi va sempre richiuso, mai lasciato a metà
+
+  try {
+    return await proseguiAssistente();
+  } catch (err) {
+    if (runReclamato) {
+      /* Il run era già stato reclamato (stato passato a "in_corso"): se non
+         lo richiudiamo qui resta bloccato per sempre, e ogni tentativo
+         successivo con lo stesso runId fallirebbe con "già gestita" invece
+         di mostrare l'errore vero. Salviamo quello che è già stato fatto
+         (scritto per davvero nel database) e rilanciamo l'errore originale:
+         chi ha chiamato vede comunque il problema reale. */
+      try {
+        await salvaRun(runId, user, { stato: "incompleto", messaggi: messages || [], in_sospeso: null, azioni: azioniEseguite });
+      } catch (eSalvataggio) {
+        console.error("Impossibile chiudere il run dopo un errore:", eSalvataggio);
+      }
+    }
+    throw err;
+  }
+
+  async function proseguiAssistente() {
+  if (runId) {
+    /* runId arriva dal client: prima di infilarlo in un URL verso il
+       database (con la chiave di servizio, che scavalca RLS) lo
+       validiamo come uuid, esattamente come si fa altrove nel file. */
+    if (!eUuid(runId)) throw fail("runId non valido", 400);
+
+    /* Riprendiamo una conversazione che era in attesa di conferma. */
+    const run = await reclamaRun(runId, user);
+    if (!run || !run.in_sospeso) throw fail("Questa richiesta è già stata gestita o non è più valida", 409);
+    runReclamato = true;
+    messages = run.messaggi; // base di sicurezza: sempre valorizzata da qui in poi
+
+    azioniEseguite = Array.isArray(run.azioni) ? run.azioni.slice() : [];
+    const { coda, pronti } = run.in_sospeso;
+    const [pendente, ...restoCoda] = coda;
+
+    let risultatoTool;
+    if (body.conferma === true) {
+      try {
+        risultatoTool = await TOOLS[pendente.nome].run(pendente.input, ctx);
+        await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "confermato");
+        azioniEseguite.push({ tool: pendente.nome, esito: risultatoTool });
+      } catch (err) {
+        risultatoTool = { errore: err.message || "operazione non riuscita" };
+        await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "errore");
+      }
+    } else {
+      risultatoTool = { annullato_dall_utente: true };
+      await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "negato");
+    }
+
+    const nuoviPronti = pronti.concat([{ type: "tool_result", tool_use_id: pendente.tool_use_id, content: JSON.stringify(risultatoTool) }]);
+
+    if (restoCoda.length) {
+      /* C'erano altre azioni delicate richieste nello stesso turno di
+         Claude: le chiediamo una alla volta. Finché non sono risolte
+         tutte, non possiamo rispondere a Claude — il formato dei
+         messaggi richiede una risposta per OGNI azione chiesta in
+         quel turno, tutte insieme. */
+      const prossimo = restoCoda[0];
+      const domanda = await descriviProssimaAzione(prossimo, ctx);
+      const salvato = await salvaRun(runId, user, {
+        stato: "in_attesa_conferma",
+        messaggi: run.messaggi,
+        in_sospeso: { coda: restoCoda, pronti: nuoviPronti },
+        azioni: azioniEseguite,
+      });
+      return send(res, 200, { stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
+    }
+
+    messages = run.messaggi.concat([{ role: "user", content: nuoviPronti }]);
+  } else {
+    if (!eStringaNonVuota(body.messaggio)) throw fail("Campo 'messaggio' mancante o vuoto");
+    messages = [{ role: "user", content: body.messaggio }];
+  }
+
+  const schemi = Object.values(TOOLS).map((t) => t.schema);
+
+  for (let round = 0; round < TOOL_MAX_ROUNDS; round++) {
+    let r;
+    try {
+      r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-5",
+          max_tokens: 1200,
+          system: systemPromptAssistente(),
+          tools: schemi,
+          messages,
+        }),
+      });
+    } catch (netErr) {
+      throw fail("Non riesco a contattare l'AI: " + netErr.message, 502);
+    }
+    if (!r.ok) {
+      let motivo = "";
+      try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
+      throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+    }
+
+    const data = await r.json();
+    messages.push({ role: "assistant", content: data.content });
+
+    if (data.stop_reason !== "tool_use") {
+      const testo = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+      if (runId) await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+      return send(res, 200, { stato: "concluso", testo: testo || "Fatto.", azioni: azioniEseguite });
+    }
+
+    const richieste = data.content.filter((b) => b.type === "tool_use");
+    const risultati = [];
+    const coda = [];
+
+    for (const richiesta of richieste) {
+      const tool = TOOLS[richiesta.name];
+      if (!tool) {
+        risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify({ errore: "strumento sconosciuto" }), is_error: true });
+        continue;
+      }
+      if (tool.sensitive) {
+        /* Non eseguiamo subito: la mettiamo in coda e continuiamo a
+           esaminare le altre richieste dello stesso turno, così le
+           azioni sicure partono comunque senza aspettare. */
+        coda.push({ nome: richiesta.name, input: richiesta.input, tool_use_id: richiesta.id });
+        continue;
+      }
+      try {
+        const esito = await tool.run(richiesta.input, ctx);
+        await registraOperazione(user, richiesta.name, richiesta.input, esito, "auto");
+        azioniEseguite.push({ tool: richiesta.name, esito });
+        risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify(esito) });
+      } catch (err) {
+        const erroreEsito = { errore: err.message || "operazione non riuscita" };
+        await registraOperazione(user, richiesta.name, richiesta.input, erroreEsito, "errore");
+        risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify(erroreEsito), is_error: true });
+      }
+    }
+
+    if (coda.length) {
+      /* Una o più azioni di questo turno richiedono conferma: le
+         risposte già pronte (risultati) restano in sospeso insieme a
+         quelle mancanti, cosi' quando saranno risolte tutte potremo
+         rispondere a Claude con il turno completo, come richiede il
+         formato dei messaggi di Anthropic. */
+      const prossimo = coda[0];
+      const domanda = await descriviProssimaAzione(prossimo, ctx);
+      const salvato = await salvaRun(runId, user, {
+        stato: "in_attesa_conferma",
+        messaggi: messages,
+        in_sospeso: { coda, pronti: risultati },
+        azioni: azioniEseguite,
+      });
+      return send(res, 200, { stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
+    }
+
+    messages.push({ role: "user", content: risultati });
+  }
+
+  /* Tetto di round raggiunto. Le azioni non delicate già eseguite in
+     questo giro (o nei giri precedenti, se c'era stata una conferma di
+     mezzo) sono comunque scritte nel database: le restituiamo sempre,
+     invece di un errore secco, così l'utente sa cosa è andato a buon
+     fine e cosa no, invece di scoprirlo dal calendario. */
+  if (runId) await salvaRun(runId, user, { stato: "incompleto", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+  return send(res, 200, {
+    stato: "incompleto",
+    testo: "Non ho fatto in tempo a completare tutto: ho segnato quello che sono riuscita a fare. Riprova con una frase più semplice per il resto.",
+    azioni: azioniEseguite,
+  });
+  } // fine proseguiAssistente
 }
 
 /* ============================================================
@@ -476,6 +1258,7 @@ export default async function handler(req, res) {
         supabaseUrlUsato: SUPABASE_URL || "(non impostato)",
         endpoints: {
           ai: "POST /api?action=ai",
+          assistant: "POST /api?action=assistant",
           transcribe: "POST /api?action=transcribe",
           seed: "POST /api?action=seed",
           resources: "GET|POST|PATCH|DELETE /api?resource=<nome>",
@@ -486,6 +1269,7 @@ export default async function handler(req, res) {
     const { user, accessToken } = await requireUser(req);
 
     if (action === "ai") return await handleAI(req, res);
+    if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
     if (action === "transcribe") return await handleTranscribe(req, res);
     if (action === "seed") return await handleSeed(req, res, user, accessToken);
     if (resource) return await handleResource(req, res, resource, user, accessToken);
