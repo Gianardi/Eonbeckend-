@@ -2941,6 +2941,10 @@ const AI_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=ai";
 /* Assistente con tool calling: legge/scrive i dati da solo, dietro conferma
    per le operazioni delicate. Vedi ASSISTENTE AI in api/index.js. */
 const ASSISTANT_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=assistant";
+/* Analisi della chat (appuntamenti/attività) e decisione del professionista
+   su una richiesta del cliente — vedi ANALISI DELLA CHAT in api/index.js. */
+const ANALIZZA_MESSAGGIO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=analizza_messaggio";
+const RISPONDI_RICHIESTA_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=rispondi_richiesta_cliente";
 
 /* Il backend si considera attivo solo se ci sono i valori di configurazione
    E la libreria Supabase si e' caricata davvero. Se la rete e' lenta o
@@ -3172,397 +3176,129 @@ let realtimeChannel = null;
 /* Le proposte in attesa di conferma, mostrate in cima alla chat */
 let pendingSuggestions = [];
 
+/* analyzeMessage non costruisce più il prompt né chiama l'AI da qui:
+   l'analisi (chi ha proposto, chi ha confermato, cosa fare) gira lato
+   server (vedi ANALISI DELLA CHAT in api/index.js) e scrive tramite le
+   stesse funzioni autorizzate e tracciate del motore assistente. Qui
+   restano solo la chiamata e come mostrare il risultato — le regole
+   di quando agire da sola o chiedere conferma sono invariate. */
 async function analyzeMessage(msg, chat){
-  if(!msg || !chat) return;
+  if(!msg || !chat || !chat.id) return;
+  if(!BACKEND_CONFIGURED || !currentSession) return;
 
-  /* L'AI legge le ultime battute della conversazione, non il singolo
-     messaggio: e' l'unico modo per capire scambi come
-     "ci vediamo lunedi alle 16" -> "ok". */
-  const recenti = chat.messages
-    .filter(m => !m.eventType && m.text)
-    .slice(-6);
-  if(recenti.length === 0) return;
-
-  const conversazione = recenti
-    .map((m, i) => "[" + (i+1) + "] " + (m.from === "me" ? "Professionista" : "Cliente") + ": " + m.text)
-    .join("\n");
-
-  const oggi = new Date();
-  const cliente = clients.find(c => c.name === chat.name);
-
-  /* Gli appuntamenti gia' presi con questo cliente */
-  const esistenti = chat.messages.filter(m => m.eventType === "appt" && !m.annullato);
-  const elencoAppuntamenti = esistenti.length
-    ? "APPUNTAMENTI GIÀ FISSATI con questo cliente:\n" +
-      esistenti.map((a, i) => (i+1) + '. "' + a.title + '" — ' + a.text).join("\n")
-    : "APPUNTAMENTI GIÀ FISSATI: nessuno.";
-
-  const prompt = `Sei l'assistente dentro EON, un'app per professionisti italiani.
-Oggi è ${oggi.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}.
-
-Ecco le ultime battute della conversazione con il cliente "${chat.name}":
-${conversazione}
-
-${elencoAppuntamenti}
-
-${cliente ? `Stato attuale del cliente: ${cliente.status}. Valore registrato: €${cliente.value}.` : ""}
-
-Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick:
-
-{
-  "appuntamento": {
-    "azione": "nuovo" | "sposta" | "annulla",
-    "titolo": "...",
-    "quando": "lun 8 ago, 16:00",
-    "messaggioProposta": numero del messaggio [n] che contiene la proposta,
-    "messaggioConferma": numero del messaggio [n] in cui l'altro accetta, oppure null se nessuno ha ancora accettato,
-    "rimastoInSospeso": true se l'altro NON ha detto né sì né no, ma ha rimandato la risposta
-  } oppure null,
-  "attivita": "..." oppure null,
-  "cambioStato": "attivo" | "trattativa" | "inattivo" oppure null,
-  "valore": numero oppure null
-}
-
-=== I DUE NUMERI, MOLTO IMPORTANTI ===
-I messaggi sopra sono numerati [1], [2], [3]...
-
-"messaggioProposta": il numero del messaggio in cui viene proposta la data o l'ora.
-  Esempio: se [2] Professionista dice "possiamo fare martedì alle 10?", allora messaggioProposta = 2.
-
-"messaggioConferma": il numero del messaggio in cui l'ALTRA parte accetta.
-  Vale come accettazione qualsiasi risposta positiva: "ok", "ok perfetto", "va bene grazie",
-  "sì certo", "per me va bene", "confermo", "perfetto ci sono", "d'accordo", e simili.
-  Se nessuno ha ancora accettato dopo la proposta, metti null.
-
-Esempio A:
-  [1] Professionista: possiamo fare martedì alle 10?
-  [2] Cliente: ok perfetto grazie
-  → messaggioProposta = 1, messaggioConferma = 2
-
-Esempio B:
-  [1] Cliente: scusa possiamo fare giovedì?
-  → messaggioProposta = 1, messaggioConferma = null
-
-=== RISPOSTE RIMASTE IN SOSPESO ===
-"rimastoInSospeso": mettilo a true quando l'altra parte non accetta e non rifiuta,
-  ma rimanda la decisione. Esempi: "non so se riesco", "vediamo", "ti faccio sapere",
-  "devo controllare", "ti dico più tardi", "forse", "provo a organizzarmi", "ci penso".
-  In questi casi messaggioConferma resta null.
-
-Esempio C:
-  [1] Professionista: possiamo fare martedì alle 10?
-  [2] Cliente: mah, non so se riesco, ti faccio sapere
-  → messaggioProposta = 1, messaggioConferma = null, rimastoInSospeso = true
-
-=== SPOSTAMENTO ===
-Se nell'elenco sopra c'è già un appuntamento e nella conversazione si parla di cambiarne giorno od ora, l'azione è "sposta", MAI "nuovo".
-Se dicono solo l'ora nuova ("possiamo fare alle 10?"), tieni il giorno dell'appuntamento esistente.
-Se dicono solo il giorno nuovo ("facciamo giovedì"), tieni l'ora dell'appuntamento esistente.
-Se disdicono senza rifissare, azione "annulla".
-
-=== FORMATO E MODI DI DIRE ===
-"quando" sempre così: "lun 8 ago, 16:00". Traduci "domani", "lunedì", "il 10" in data vera partendo da oggi.
-
-Quando l'ora non viene detta, usa questi orari convenzionali:
-  "domattina", "domani mattina", "in mattinata"     → 09:00
-  "domani pomeriggio", "nel pomeriggio"             → 15:00
-  "stasera", "in serata", "domani sera"             → 18:00
-  "a pranzo"                                        → 13:00
-  nessun riferimento all'ora ("ci vediamo giovedì") → scrivi solo il giorno, senza ora
-
-Esempi:
-  "ci vediamo domattina" + "ok"      → quando = "mer 5 ago, 09:00"
-  "ci vediamo giovedì" + "va bene"   → quando = "gio 6 ago"
-  "passo nel pomeriggio" + "perfetto" → quando = "mer 5 ago, 15:00"
-
-IMPORTANTE: un appuntamento senza ora precisa vale lo stesso. Non lasciarlo
-a null solo perché manca l'orario: registra il giorno.
-
-Se manca anche il titolo, usa "Incontro".
-
-=== ALTRE REGOLE ===
-- "attivita": solo se il professionista deve fare qualcosa di concreto. Azione breve.
-- "cambioStato": "attivo" solo se accetta di procedere; "inattivo" solo se rinuncia.
-- "valore": solo se citano una cifra concordata.
-- Se un campo non c'è, null. Non inventare mai.`;
-
-  let parsed;
+  let risposta;
   try{
-    const raw = await callAI(prompt, 300);
-    parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    const response = await fetch(ANALIZZA_MESSAGGIO_ENDPOINT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      body: JSON.stringify({ conversation_id: chat.id })
+    });
+    const dati = await response.json();
+    if(!response.ok) throw new Error(dati.error || ("il backend ha risposto con errore (" + response.status + ")"));
+    risposta = dati;
   }catch(err){
-    console.warn("Analisi AI non riuscita:", err.message);
+    console.warn("Analisi chat non riuscita:", err.message);
     return;
   }
-  if(!parsed) return;
 
-  /* ---- APPUNTAMENTI ---- */
-  if(parsed.appuntamento){
-    const app = parsed.appuntamento;
-    let azione = app.azione || "nuovo";
-    const quando = app.quando || "";
+  /* Il cliente ha chiesto di spostare/annullare: decide il professionista,
+     con lo stesso toast di sempre — solo che ora, dietro le quinte,
+     l'esecuzione passa dal motore autorizzato, non da Supabase diretto. */
+  if(risposta.richiesta_decisione){
+    const r = risposta.richiesta_decisione;
+    const quandoLeggibile = r.quando_nuovo_iso
+      ? new Date(r.quando_nuovo_iso).toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" }) +
+        ", " + new Date(r.quando_nuovo_iso).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" })
+      : "una nuova data";
 
-    /* Se esiste gia' un appuntamento, un orario nuovo e' uno spostamento */
-    if(azione === "nuovo" && esistenti.length > 0) azione = "sposta";
-
-    /* ============================================================
-       CHI HA PROPOSTO E CHI HA CONFERMATO
-       ------------------------------------------------------------
-       L'AI ci dice in quale messaggio c'e' la proposta e in quale
-       l'accettazione. Noi guardiamo CHI ha scritto quei messaggi:
-       questo e' un dato certo, non un'interpretazione.
-       ============================================================ */
-    const nProposta = Number(app.messaggioProposta);
-    const nConferma = Number(app.messaggioConferma);
-
-    const msgProposta = (nProposta >= 1 && nProposta <= recenti.length)
-      ? recenti[nProposta - 1] : null;
-    const msgConferma = (nConferma >= 1 && nConferma <= recenti.length)
-      ? recenti[nConferma - 1] : null;
-
-    /* Chi ha proposto: se non lo sappiamo, guardiamo l'ultimo messaggio */
-    const chiPropone = msgProposta
-      ? (msgProposta.from === "me" ? "professionista" : "cliente")
-      : (recenti[recenti.length - 1].from === "me" ? "professionista" : "cliente");
-
-    /* La conferma vale solo se arriva dall'ALTRA parte rispetto a chi ha proposto */
-    const confermato = !!msgConferma &&
-      ((chiPropone === "professionista" && msgConferma.from === "them") ||
-       (chiPropone === "cliente" && msgConferma.from === "me"));
-
-    const riferito = esistenti.length ? esistenti[esistenti.length - 1] : null;
-
-    /* --- Proposta MIA non ancora confermata ---
-       Se ho scritto io e il cliente non ha ancora accettato, non tocco
-       il calendario e non mando notifiche: aspetto.
-       Ma se ha risposto in modo vago ("ti faccio sapere", "vediamo"),
-       segno in silenzio un promemoria per ricontattarlo: sono proprio
-       queste le cose che si perdono per strada. */
-    if(chiPropone === "professionista" && !confermato){
-      if(app.rimastoInSospeso){
-        segnaDaRicontattare(chat, app.titolo, quando);
-      }
-      return;
+    if(r.azione === "sposta"){
+      showAIToastConDecisione(
+        "Richiesta spostamento appuntamento",
+        chat.name + ' chiede di spostare "' + r.riferito_titolo + '"\nda ' +
+          (r.riferito_quando || "—") + '\na ' + quandoLeggibile,
+        () => decidiRichiestaCliente(chat, r, true),
+        () => decidiRichiestaCliente(chat, r, false)
+      );
+    } else {
+      showAIToastConDecisione(
+        "Richiesta annullamento appuntamento",
+        chat.name + ' chiede di annullare "' + r.riferito_titolo + '" del ' + (r.riferito_quando || "—"),
+        () => decidiRichiestaCliente(chat, r, true),
+        () => decidiRichiestaCliente(chat, r, false),
+        "Conferma", "No, non posso"
+      );
     }
+    return;
+  }
 
-    /* --- Proposta del CLIENTE per un appuntamento NUOVO, non ancora
-       accettata da me: aspetto che risponda io in chat. */
-    if(chiPropone === "cliente" && !confermato && !riferito) return;
+  /* Tutto il resto (nuovo appuntamento, spostamento/annullamento
+     automatico, promemoria silenzioso, task) è già stato scritto sul
+     database dal backend: ricarichiamo e mostriamo cosa è successo. */
+  if(Array.isArray(risposta.azioni) && risposta.azioni.length){
+    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
+    renderCalendar(); renderChatWindow(); renderTasks(); renderRing(); renderDifficulty();
 
-    /* CASO 3: lo chiede il CLIENTE e io non ho ancora risposto
-       -> notifica con tasto Conferma */
-    if(chiPropone === "cliente" && !confermato && riferito && (azione === "sposta" || azione === "annulla")){
-      const appRif = riferito, chatRif = chat, quandoNuovo = quando, titoloNuovo = app.titolo;
-
-      if(azione === "sposta"){
-        showAIToastConDecisione(
-          "Richiesta spostamento appuntamento",
-          chatRif.name + ' chiede di spostare "' + appRif.title + '"\nda ' +
-            (appRif.text || "—") + '\na ' + (quandoNuovo || "una nuova data"),
-          async () => {
-            appRif.text = quandoNuovo || appRif.text;
-            if(titoloNuovo) appRif.title = titoloNuovo;
-            if(isDbReady() && appRif.id){
-              await supabaseClient.from("messages")
-                .update({ body: appRif.text, title: appRif.title }).eq("id", appRif.id);
-            }
-            await rispondiAlCliente(chatRif, "Ok, confermo: " + appRif.text + ".");
-            togliDaRicontattare(chatRif);
-            renderCalendar(); renderChatWindow();
-            showAIToast("Appuntamento confermato",
-              appRif.title + " con " + chatRif.name + " spostato a " + appRif.text +
-              ".\nAggiornato in Calendario, e ho già risposto al cliente.");
-          },
-          async () => {
-            await rispondiAlCliente(chatRif,
-              "Purtroppo non riesco a spostare. Riusciamo a tenere " + (appRif.text || "l'orario concordato") + "?");
-          }
-        );
-      } else {
-        showAIToastConDecisione(
-          "Richiesta annullamento appuntamento",
-          chatRif.name + ' chiede di annullare "' + appRif.title + '" del ' + (appRif.text || "—"),
-          async () => {
-            const titoloAnn = appRif.title;
-            appRif.annullato = true;
-            appRif.title = "❌ " + appRif.title + " (annullato)";
-            if(isDbReady() && appRif.id){
-              await supabaseClient.from("messages").update({ title: appRif.title }).eq("id", appRif.id);
-            }
-            await rispondiAlCliente(chatRif, "Ok, annullo l'appuntamento. Ci risentiamo per fissarne un altro.");
-            renderCalendar(); renderChatWindow();
-            showAIToast("Appuntamento annullato", titoloAnn + " tolto dal calendario.");
-          },
-          async () => {
-            await rispondiAlCliente(chatRif, "Preferirei tenerlo. Riusciamo a confermare " + (appRif.text || "l'orario") + "?");
-          },
-          "Conferma", "No, non posso"
-        );
-      }
-      return; /* aspettiamo la decisione del professionista */
-    }
-
-    /* CASO 2: lo propongo IO e il cliente conferma -> sposto in automatico */
-    if(azione === "sposta" && riferito){
-      const prima = riferito.text;
-      riferito.text = quando || riferito.text;
-      if(app.titolo) riferito.title = app.titolo;
-      if(isDbReady() && riferito.id){
-        await supabaseClient.from("messages")
-          .update({ body: riferito.text, title: riferito.title }).eq("id", riferito.id);
-      }
-      togliDaRicontattare(chat);
-      renderCalendar(); renderChatWindow();
-      showAIToast("Appuntamento confermato",
-        riferito.title + " con " + chat.name + " spostato a " + riferito.text +
-        ".\nPrima era: " + (prima || "—") + ". Aggiornato in Calendario.");
-      return;
-    }
-
-    /* Annullamento proposto da me e accettato dal cliente */
-    if(azione === "annulla" && riferito){
-      const titoloAnn = riferito.title;
-      riferito.annullato = true;
-      riferito.title = "❌ " + riferito.title + " (annullato)";
-      if(isDbReady() && riferito.id){
-        await supabaseClient.from("messages").update({ title: riferito.title }).eq("id", riferito.id);
-      }
-      renderCalendar(); renderChatWindow();
-      showAIToast("Appuntamento annullato", titoloAnn + " tolto dal calendario.");
-      return;
-    }
-
-    /* CASO 1: appuntamento nuovo, confermato -> in calendario con notifica.
-       Se l'AI non ha trovato un titolo ma la data c'e', lo registriamo
-       lo stesso: meglio "Incontro" che perdere l'appuntamento. */
-    if(!app.titolo && quando) app.titolo = "Incontro";
-    if(app.titolo){
-      const gia = chat.messages.some(m =>
-        m.eventType === "appt" && !m.annullato && m.title === app.titolo && m.text === quando);
-      if(!gia){
-        if(isDbReady() && chat.id){
-          await supabaseClient.from("messages").insert({
-            conversation_id: chat.id, sender: "me", event_type: "appt",
-            title: app.titolo, body: quando
-          });
-        } else {
-          chat.messages.push({ eventType:"appt", title:app.titolo, text:quando, time:"ora" });
-        }
-        togliDaRicontattare(chat);
-        renderCalendar();
+    for(const a of risposta.azioni){
+      if(a.tool === "crea_impegno"){
         showAIToast("Appuntamento confermato",
-          app.titolo + " con " + chat.name + (quando ? "\n" + quando : "") + "\nLo trovi in Calendario.");
+          a.esito.titolo + " con " + chat.name + "\n" + a.esito.quando_visualizzato + "\nLo trovi in Calendario.");
+      } else if(a.tool === "sposta_impegno"){
+        showAIToast("Appuntamento confermato",
+          a.esito.titolo + " con " + chat.name + " spostato a " + a.esito.quando_visualizzato + ". Aggiornato in Calendario.");
+      } else if(a.tool === "annulla_impegno"){
+        showAIToast("Appuntamento annullato", a.esito.titolo + " tolto dal calendario.");
       }
     }
   }
 
-  /* ---- ATTIVITÀ DA FARE ---- */
-  if(parsed.attivita){
-    const gia = tasks.some(t => t.title.toLowerCase() === parsed.attivita.toLowerCase());
-    if(!gia){
-      const nuova = { title: parsed.attivita, time: "—", status: "todo", owner: "user" };
-      if(isDbReady()){
-        const saved = await dbInsert("tasks", { title: nuova.title, owner_type: "user", status: "todo", time: "" });
-        if(saved) nuova.id = saved.id;
-      }
-      tasks.push(nuova);
-      renderTasks(); renderRing(); renderDifficulty();
-      showAIToast("Aggiunto alle cose da fare", parsed.attivita);
-    }
-  }
-
-  /* ---- CON CONFERMA: stato e valore del cliente ---- */
+  /* Stato e valore del cliente restano proposte da confermare, come
+     prima: la scheda di un cliente non si tocca da sola. */
+  const cliente = clients.find(c => c.name === chat.name);
   if(cliente){
-    if(parsed.cambioStato && parsed.cambioStato !== cliente.status){
+    if(risposta.cambioStato){
       addSuggestion({
-        tipo: "stato", cliente: cliente, valoreNuovo: parsed.cambioStato,
-        testo: `${chat.name} sembra passato a "${clientStatusLabel[parsed.cambioStato]}". Aggiorno la scheda?`
+        tipo: "stato", cliente: cliente, valoreNuovo: risposta.cambioStato,
+        testo: `${chat.name} sembra passato a "${clientStatusLabel[risposta.cambioStato]}". Aggiorno la scheda?`
       });
     }
-    if(parsed.valore && Number(parsed.valore) > 0 && Number(parsed.valore) !== cliente.value){
+    if(risposta.valore){
       addSuggestion({
-        tipo: "valore", cliente: cliente, valoreNuovo: Number(parsed.valore),
-        testo: `Ho letto un importo di €${Number(parsed.valore).toLocaleString("it-IT")} per ${chat.name}. Aggiorno il valore?`
+        tipo: "valore", cliente: cliente, valoreNuovo: risposta.valore,
+        testo: `Ho letto un importo di €${Number(risposta.valore).toLocaleString("it-IT")} per ${chat.name}. Aggiorno il valore?`
       });
     }
   }
 }
 
-/* ============================================================
-   LE COSE RIMASTE IN SOSPESO
-   ------------------------------------------------------------
-   Quando un cliente risponde "ti faccio sapere" o "vediamo", la
-   cosa resta a metà: non e' un appuntamento, non e' un no. Sono
-   proprio queste le cose che si perdono. EON le segna in silenzio
-   e te le ricorda quando e' il momento.
-   ============================================================ */
-
-const GIORNI_PRIMA_DI_RICONTATTARE = 2;
-
-function segnaDaRicontattare(chat, titoloAppuntamento, quando){
-  const titolo = "Ricontattare " + chat.name;
-
-  /* Se c'e' gia' un promemoria per questo cliente, non ne aggiungiamo
-     un altro: uno basta. */
-  const gia = tasks.some(t => t.title === titolo && t.status !== "done");
-  if(gia) return;
-
-  const quandoRicontattare = new Date();
-  quandoRicontattare.setDate(quandoRicontattare.getDate() + GIORNI_PRIMA_DI_RICONTATTARE);
-  const dataLeggibile = quandoRicontattare.toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" });
-
-  /* Il promemoria si porta dietro il motivo: cosi' quando lo leggi
-     sai gia' cosa dire, senza dover ricostruire la conversazione. */
-  const motivo = quando
-    ? "doveva confermare " + (titoloAppuntamento ? titoloAppuntamento.toLowerCase() + " " : "") + "per " + quando
-    : "aveva lasciato in sospeso una risposta";
-
-  const nuova = {
-    title: titolo,
-    time: dataLeggibile,
-    status: "todo",
-    owner: "user",
-    inSospesoCon: chat.name,
-    motivo: motivo
-  };
-
-  if(isDbReady()){
-    dbInsert("tasks", {
-      title: titolo, owner_type: "user", status: "todo", time: dataLeggibile
-    }).then(saved => { if(saved) nuova.id = saved.id; });
-  }
-
-  tasks.push(nuova);
-  renderTasks(); renderRing(); renderDifficulty(); renderCalendar();
-  /* Nessuna notifica: e' una cosa da ricordare, non un'urgenza di adesso. */
-}
-
-/* Se poi il cliente conferma davvero, il promemoria non serve più:
-   sarebbe fastidioso ricontattare chi ti ha già risposto. */
-function togliDaRicontattare(chat){
-  const titolo = "Ricontattare " + chat.name;
-  const idx = tasks.findIndex(t => t.title === titolo && t.status !== "done");
-  if(idx === -1) return;
-  const t = tasks[idx];
-  tasks.splice(idx, 1);
-  if(isDbReady() && t.id) dbDelete("tasks", t.id);
-  renderTasks(); renderRing(); renderDifficulty(); renderCalendar();
-}
-
-/* Manda un messaggio al cliente a nome tuo. */
-async function rispondiAlCliente(chat, testo){
-  const now = new Date();
-  const time = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
-  if(isDbReady() && chat.id){
-    const { error } = await supabaseClient.from("messages").insert({
-      conversation_id: chat.id, sender: "me", body: testo
+/* Il professionista ha deciso sulla richiesta del cliente (toast sopra):
+   eseguiamo e la risposta automatica al cliente parte dal backend. */
+async function decidiRichiestaCliente(chat, r, conferma){
+  try{
+    const response = await fetch(RISPONDI_RICHIESTA_ENDPOINT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      body: JSON.stringify({
+        conversation_id: chat.id, riferito_id: r.riferito_id, azione: r.azione,
+        conferma, quando_nuovo_iso: r.quando_nuovo_iso, titolo_nuovo: r.titolo_nuovo
+      })
     });
-    if(!error) return;
-    console.error("Risposta automatica non inviata:", error.message);
+    const dati = await response.json();
+    if(!response.ok) throw new Error(dati.error || "errore");
+
+    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
+    renderCalendar(); renderChatWindow();
+
+    if(dati.confermato && r.azione === "sposta"){
+      showAIToast("Appuntamento confermato",
+        r.riferito_titolo + " con " + chat.name + " spostato a " + dati.esito.quando_visualizzato +
+        ".\nAggiornato in Calendario, e ho già risposto al cliente.");
+    } else if(dati.confermato && r.azione === "annulla"){
+      showAIToast("Appuntamento annullato", r.riferito_titolo + " con " + chat.name + " tolto dal calendario.");
+    }
+  }catch(err){
+    console.warn("Decisione non registrata:", err.message);
+    showAIToast("Non sono riuscita a registrare la decisione", err.message);
   }
-  chat.messages.push({ from:"me", text:testo, time });
-  renderChatWindow();
-  renderChatList();
 }
 
 /* Notifica con i pulsanti dentro: si conferma da qui, senza aprire la chat. */
