@@ -17,16 +17,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Estrai SUPABASE_URL e ANON_KEY da index.html
+      # Nessun checkout: non serve alcun file del repository per questo
+      # test. I due valori sotto sono pubblici (la chiave "anon" è pensata
+      # per stare nel codice del browser, protetta dalle regole RLS), sono
+      # già visibili in chiaro in index.html — copiati qui per non dover
+      # dipendere da un'azione di terze parti.
+      - name: Configurazione (valori pubblici, presi da index.html)
         id: config
         run: |
-          URL=$(grep -oP 'const SUPABASE_URL = "\K[^"]+' index.html)
-          ANON=$(grep -oP 'const SUPABASE_ANON_KEY = "\K[^"]+' index.html)
-          echo "supabase_url=$URL" >> "$GITHUB_OUTPUT"
-          echo "anon=$ANON" >> "$GITHUB_OUTPUT"
-          echo "Supabase URL: $URL"
+          echo "supabase_url=https://alxtmsfbxrkrevbioogv.supabase.co" >> "$GITHUB_OUTPUT"
+          echo "anon=sb_publishable_cx-aRXg-ZCFDmsTfqBBccg_Li9rqqEa" >> "$GITHUB_OUTPUT"
 
       - name: Crea un utente di prova nuovo
         id: signup
