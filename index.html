@@ -6530,7 +6530,8 @@ function collegaHubRacconta(){
        impegni. Prima ignoravamo tutto ciò che non fosse crea_impegno —
        l'azione veniva comunque eseguita sul database (dopo conferma),
        ma l'interfaccia non se ne accorgeva: sembrava non fare nulla. */
-    const risultatiVisibili = azioni.filter(a => a.tool !== "cerca_cliente" && a.tool !== "elenca_appuntamenti" && a.tool !== "storico_cliente" && a.tool !== "leggi_conversazione");
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione"];
+    const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
         stato("attesa", "Fatto",

@@ -549,6 +549,37 @@ const TOOLS = {
     },
   },
 
+  cerca_impegno: {
+    sensitive: false,
+    schema: {
+      name: "cerca_impegno",
+      description: "Trova appuntamenti e impegni già segnati cercando nel titolo, anche solo con una parola (es. 'Rossi', 'sopralluogo'). Usalo per ottenere l'id di un impegno quando l'utente lo nomina invece di darti direttamente l'id o un intervallo di date — es. prima di sposta_impegno, annulla_impegno o elimina_impegno.",
+      input_schema: {
+        type: "object",
+        properties: { testo: { type: "string", description: "Parola o frase da cercare nel titolo dell'impegno" } },
+        required: ["testo"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.testo)) throw fail("Parametro 'testo' mancante o vuoto");
+      const q = encodeURIComponent(input.testo.trim());
+      const [appuntamenti, impegni] = await Promise.all([
+        db(`messages?select=id,title,scheduled_at&event_type=eq.appt&title=ilike.*${q}*&deleted_at=is.null&order=scheduled_at.asc&limit=10`, { method: "GET" }, ctx.accessToken),
+        db(`tasks?select=id,title,scheduled_at,status&title=ilike.*${q}*&deleted_at=is.null&order=scheduled_at.asc&limit=10`, { method: "GET" }, ctx.accessToken),
+      ]);
+      return {
+        risultati: [
+          ...(appuntamenti || [])
+            .filter((m) => !m.title.startsWith("❌"))
+            .map((m) => ({ id: m.id, titolo: m.title, quando: m.scheduled_at, tipo: "appuntamento" })),
+          ...(impegni || [])
+            .filter((t) => t.status !== "done" && t.status !== "annullato")
+            .map((t) => ({ id: t.id, titolo: t.title, quando: t.scheduled_at, tipo: "impegno" })),
+        ],
+      };
+    },
+  },
+
   storico_cliente: {
     sensitive: false,
     schema: {
@@ -1051,6 +1082,8 @@ REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario 
 Chiama crea_cliente o aggiorna_cliente SOLO quando l'utente chiede esplicitamente di aggiungere o modificare un cliente in anagrafica — non per un normale impegno che nomina soltanto una persona.
 
 Se un impegno riguarda una persona già cliente, cercala prima con cerca_cliente per collegare l'impegno al cliente giusto; se non la trovi, procedi comunque con l'impegno senza collegarlo a nessuno.
+
+Quando l'utente nomina un appuntamento o un impegno per titolo invece di darti un id (es. "sposta l'appuntamento di casa Rossi", "elimina l'appuntamento con Hannah") NON dedurre un intervallo di date a caso con elenca_appuntamenti: cerca prima con cerca_impegno usando le parole che ha usato l'utente (anche solo una, es. "Rossi"). Se trovi un solo risultato, procedi con quello. Se ne trovi più di uno, chiedi all'utente quale intende elencandoli brevemente. Solo se cerca_impegno non trova nulla, di' che non l'hai trovato.
 
 Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
 }
