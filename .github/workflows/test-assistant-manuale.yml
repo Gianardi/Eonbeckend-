@@ -423,6 +423,83 @@ jobs:
           CESTINO=$(curl -sS "$PREVIEW_URL/api?resource=messages&conversation_id=$CONV&cestino=1" -H "Authorization: Bearer $TOKEN" | jq --arg id "$MID" '[.data[] | select(.id==$id)] | length')
           echo "Messaggio presente nel cestino: $CESTINO (atteso: 1)"
 
+      # ------------------------------------------------------------
+      # Test 14-15: eliminare detto all'assistente AI (elimina_impegno,
+      # elimina_cliente) — entrambi tool "sensitive", devono fermarsi e
+      # chiedere conferma prima di spostare qualcosa nel cestino.
+      # ------------------------------------------------------------
+
+      - name: "Test 14 — AI: elimina_impegno chiede conferma, poi sposta l'impegno nel cestino"
+        if: steps.login.outputs.puo_procedere == 'si'
+        env:
+          SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
+          ANON_KEY: ${{ steps.config.outputs.anon }}
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"messaggio":"Segna una commissione chiamata ZZZ-test-elimina-impegno-9401 per domani alle 9, poi eliminala subito."}')
+          echo "$RESP" | jq . || echo "$RESP"
+
+          STATO=$(echo "$RESP" | jq -r '.stato')
+          RUNID=$(echo "$RESP" | jq -r '.runId // empty')
+          echo "Stato dopo la richiesta di eliminazione: $STATO (atteso: in_attesa_conferma)"
+
+          if [ -n "$RUNID" ]; then
+            CONFRESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+              -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              -d "{\"runId\":\"$RUNID\",\"conferma\":true}")
+            echo "$CONFRESP" | jq . || echo "$CONFRESP"
+          fi
+
+          CESTINO=$(curl -sS "$SUPABASE_URL/rest/v1/tasks?select=id&title=eq.ZZZ-test-elimina-impegno-9401&deleted_at=not.is.null" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq 'length')
+          echo "Impegno presente nel cestino dopo la conferma: $CESTINO (atteso: 1)"
+
+      - name: "Test 15 — AI: elimina_cliente chiede conferma (inclusa la conversazione), poi sposta entrambi nel cestino"
+        if: steps.login.outputs.puo_procedere == 'si'
+        env:
+          SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
+          ANON_KEY: ${{ steps.config.outputs.anon }}
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          curl -sS -X POST "$PREVIEW_URL/api?resource=clients" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"name":"ZZZ-TEST-AI-ELIMINA-9402","status":"attivo"}' > /dev/null
+          curl -sS -X POST "$PREVIEW_URL/api?resource=conversations" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"contact_name":"ZZZ-TEST-AI-ELIMINA-9402","is_client":true,"is_prospect":false}' > /dev/null
+
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"messaggio":"Cerca il cliente ZZZ-TEST-AI-ELIMINA-9402 ed eliminalo insieme alla sua conversazione."}')
+          echo "$RESP" | jq . || echo "$RESP"
+
+          STATO=$(echo "$RESP" | jq -r '.stato')
+          RUNID=$(echo "$RESP" | jq -r '.runId // empty')
+          DOMANDA=$(echo "$RESP" | jq -r '.domanda // empty')
+          echo "Stato dopo la richiesta di eliminazione: $STATO (atteso: in_attesa_conferma)"
+          echo "Domanda di conferma: $DOMANDA (deve nominare anche la conversazione)"
+
+          if [ -n "$RUNID" ]; then
+            CONFRESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+              -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              -d "{\"runId\":\"$RUNID\",\"conferma\":true}")
+            echo "$CONFRESP" | jq . || echo "$CONFRESP"
+            CONV_ELIMINATA=$(echo "$CONFRESP" | jq -r '[.azioni[]? | select(.tool=="elimina_cliente")][0].esito.conversazione_eliminata // empty')
+            echo "Conversazione eliminata insieme al cliente: $CONV_ELIMINATA (atteso: true)"
+          fi
+
+          CLIENTE_CESTINO=$(curl -sS "$SUPABASE_URL/rest/v1/clients?select=id&name=eq.ZZZ-TEST-AI-ELIMINA-9402&deleted_at=not.is.null" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq 'length')
+          echo "Cliente presente nel cestino dopo la conferma: $CLIENTE_CESTINO (atteso: 1)"
+
+          CONV_CESTINO=$(curl -sS "$SUPABASE_URL/rest/v1/conversations?select=id&contact_name=eq.ZZZ-TEST-AI-ELIMINA-9402&deleted_at=not.is.null" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq 'length')
+          echo "Conversazione presente nel cestino dopo la conferma: $CONV_CESTINO (atteso: 1)"
+
       - name: "Pulizia mirata — solo le righe create da questo test, mai un cancella-tutto"
         if: always() && steps.login.outputs.puo_procedere == 'si'
         env:
@@ -462,7 +539,7 @@ jobs:
           # di fare affidamento sugli output dei singoli step (così la
           # pulizia funziona anche se uno step precedente è fallito a
           # metà, senza per questo lasciare righe di test in giro).
-          for NOME in ZZZ-TEST-ANALISI-NUOVO-9201 ZZZ-TEST-ANALISI-PROPOSTA-9202 ZZZ-TEST-ANALISI-SPOSTA-9203 ZZZ-TEST-ANALISI-ANNULLA-9204 ZZZ-TEST-ANALISI-PROMEMORIA-9205 ZZZ-TEST-CESTINO-MSG-9302; do
+          for NOME in ZZZ-TEST-ANALISI-NUOVO-9201 ZZZ-TEST-ANALISI-PROPOSTA-9202 ZZZ-TEST-ANALISI-SPOSTA-9203 ZZZ-TEST-ANALISI-ANNULLA-9204 ZZZ-TEST-ANALISI-PROMEMORIA-9205 ZZZ-TEST-CESTINO-MSG-9302 ZZZ-TEST-AI-ELIMINA-9402; do
             CONV=$(curl -sS "$SUPABASE_URL/rest/v1/conversations?select=id&contact_name=eq.$NOME" \
               -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id // empty')
             if [ -n "$CONV" ]; then
@@ -487,6 +564,14 @@ jobs:
           # (funziona sia che sia ancora attivo sia che sia nel cestino:
           # DELETE diretto non guarda deleted_at).
           curl -sS -X DELETE "$SUPABASE_URL/rest/v1/clients?name=eq.ZZZ-TEST-CESTINO-9301" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+
+          # L'impegno del Test 14 e il cliente del Test 15: cestinati
+          # dall'assistente durante il test, li eliminiamo per davvero
+          # qui (per nome/titolo, non per id, stessa rete di sicurezza).
+          curl -sS -X DELETE "$SUPABASE_URL/rest/v1/tasks?title=eq.ZZZ-test-elimina-impegno-9401" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+          curl -sS -X DELETE "$SUPABASE_URL/rest/v1/clients?name=eq.ZZZ-TEST-AI-ELIMINA-9402" \
             -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
 
           echo "Pulizia completata: toccate solo le righe create da questo test."
