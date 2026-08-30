@@ -95,6 +95,23 @@ const OWNED_RESOURCES = new Set([
    operazioni dell'AI lo scrive solo il backend, mai una richiesta esterna. */
 const READ_ONLY_RESOURCES = new Set(["ai_audit_log"]);
 
+/* Tabelle con il cestino: "eliminare" non cancella subito la riga, la
+   marca con deleted_at. Da lì si può ripristinare o eliminare per
+   sempre. profiles, documents (non usata) e ai_audit_log restano fuori:
+   non sono liste di cose che un utente "cestina". */
+const TRASHABLE_RESOURCES = new Set([
+  "clients",
+  "opportunities",
+  "employees",
+  "tasks",
+  "assigned_tasks",
+  "payments",
+  "incomes",
+  "goals",
+  "conversations",
+  "messages",
+]);
+
 /* ============================================================
    Utility
    ============================================================ */
@@ -228,12 +245,19 @@ async function handleResource(req, res, resource, user, accessToken) {
 
   const url = new URL(req.url, "http://localhost");
   const id = url.searchParams.get("id");
+  const trashable = TRASHABLE_RESOURCES.has(resource);
 
   if (req.method === "GET") {
-    const qs = resource === "messages" && url.searchParams.get("conversation_id")
-      ? `conversation_id=eq.${url.searchParams.get("conversation_id")}&order=created_at.asc`
-      : "order=created_at.asc";
-    const rows = await db(`${resource}?select=*&${qs}`, { method: "GET" }, accessToken);
+    const filtroConversazione = resource === "messages" && url.searchParams.get("conversation_id")
+      ? `conversation_id=eq.${url.searchParams.get("conversation_id")}&`
+      : "";
+    /* Senza ?cestino=1: solo le righe non eliminate (il comportamento
+       normale). Con ?cestino=1: solo quelle nel cestino, per la
+       schermata Cestino. */
+    const filtroCestino = trashable
+      ? (url.searchParams.get("cestino") === "1" ? "deleted_at=not.is.null&" : "deleted_at=is.null&")
+      : "";
+    const rows = await db(`${resource}?select=*&${filtroConversazione}${filtroCestino}order=created_at.asc`, { method: "GET" }, accessToken);
     return send(res, 200, { data: rows });
   }
 
@@ -276,8 +300,31 @@ async function handleResource(req, res, resource, user, accessToken) {
 
   if (req.method === "DELETE") {
     if (!id) throw fail("Parametro 'id' mancante");
+
+    if (!trashable) {
+      await db(`${resource}?id=eq.${id}`, { method: "DELETE" }, accessToken);
+      return send(res, 200, { ok: true });
+    }
+
+    const permanente = url.searchParams.get("permanente") === "true";
+    if (!permanente) {
+      await db(
+        `${resource}?id=eq.${id}`,
+        { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) },
+        accessToken
+      );
+      return send(res, 200, { ok: true, cestinato: true });
+    }
+
+    /* Eliminazione vera: solo su una riga già nel cestino. Impedisce
+       di scavalcare il cestino per errore da una chiamata diretta. */
+    const righe = await db(`${resource}?id=eq.${id}&select=deleted_at`, { method: "GET" }, accessToken);
+    const riga = Array.isArray(righe) && righe[0];
+    if (!riga) throw fail("Non trovato", 404);
+    if (!riga.deleted_at) throw fail("Si può eliminare per sempre solo ciò che è già nel cestino", 400);
+
     await db(`${resource}?id=eq.${id}`, { method: "DELETE" }, accessToken);
-    return send(res, 200, { ok: true });
+    return send(res, 200, { ok: true, eliminato_per_sempre: true });
   }
 
   throw fail("Metodo non consentito", 405);
@@ -385,7 +432,8 @@ function formattaQuando(iso) {
    (non riveliamo mai che un dato altrui esiste). */
 async function trovaProprio(resource, id, ctx) {
   if (!eUuid(id)) return null;
-  const righe = await db(`${resource}?id=eq.${id}&select=*`, { method: "GET" }, ctx.accessToken);
+  const filtroCestino = TRASHABLE_RESOURCES.has(resource) ? "&deleted_at=is.null" : "";
+  const righe = await db(`${resource}?id=eq.${id}&select=*${filtroCestino}`, { method: "GET" }, ctx.accessToken);
   return Array.isArray(righe) && righe.length ? righe[0] : null;
 }
 
@@ -403,8 +451,21 @@ async function trovaImpegno(id, ctx) {
 
 async function trovaOCreaConversazione(cliente, ctx) {
   const nome = encodeURIComponent(cliente.name);
-  const trovate = await db(`conversations?select=*&contact_name=eq.${nome}&limit=1`, { method: "GET" }, ctx.accessToken);
+  const trovate = await db(`conversations?select=*&contact_name=eq.${nome}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
   if (Array.isArray(trovate) && trovate.length) return trovate[0];
+
+  /* Se la conversazione esiste ma è nel cestino, la ripristiniamo
+     invece di crearne una seconda: sono la stessa conversazione, e
+     due copie separerebbero la cronologia dei messaggi del cliente. */
+  const cestinate = await db(`conversations?select=*&contact_name=eq.${nome}&deleted_at=not.is.null&order=deleted_at.desc&limit=1`, { method: "GET" }, ctx.accessToken);
+  if (Array.isArray(cestinate) && cestinate.length) {
+    const ripristinata = await db(
+      `conversations?id=eq.${cestinate[0].id}`,
+      { method: "PATCH", body: JSON.stringify({ deleted_at: null }), headers: { Prefer: "return=representation" } },
+      ctx.accessToken
+    );
+    return Array.isArray(ripristinata) ? ripristinata[0] : cestinate[0];
+  }
 
   const creata = await db(
     "conversations",
@@ -449,7 +510,7 @@ const TOOLS = {
     async run(input, ctx) {
       if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
       const q = encodeURIComponent(input.nome.trim());
-      const righe = await db(`clients?select=id,name,phone,value,status&name=ilike.*${q}*&limit=5`, { method: "GET" }, ctx.accessToken);
+      const righe = await db(`clients?select=id,name,phone,value,status&name=ilike.*${q}*&deleted_at=is.null&limit=5`, { method: "GET" }, ctx.accessToken);
       return {
         risultati: (righe || []).map((r) => ({
           id: r.id, nome: r.name, telefono: r.phone || null, valore: r.value || null, stato: r.status || null,
@@ -474,7 +535,7 @@ const TOOLS = {
     },
     async run(input, ctx) {
       if (!eIso(input.da) || !eIso(input.a)) throw fail("Parametri 'da'/'a' non validi: usa il formato ISO 8601");
-      const filtro = `scheduled_at=gte.${encodeURIComponent(input.da)}&scheduled_at=lte.${encodeURIComponent(input.a)}`;
+      const filtro = `scheduled_at=gte.${encodeURIComponent(input.da)}&scheduled_at=lte.${encodeURIComponent(input.a)}&deleted_at=is.null`;
       const [appuntamenti, impegni] = await Promise.all([
         db(`messages?select=id,title,scheduled_at&event_type=eq.appt&${filtro}&order=scheduled_at.asc`, { method: "GET" }, ctx.accessToken),
         db(`tasks?select=id,title,scheduled_at,status&${filtro}&order=scheduled_at.asc`, { method: "GET" }, ctx.accessToken),
@@ -503,14 +564,14 @@ const TOOLS = {
       const cliente = await trovaProprio("clients", input.cliente_id, ctx);
       if (!cliente) throw fail("Cliente non trovato", 404);
 
-      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
       const conversazione = Array.isArray(conv) && conv[0];
 
       let messaggi = [], documenti = [];
       if (conversazione) {
         [messaggi, documenti] = await Promise.all([
-          db(`messages?select=sender,body,title,event_type,created_at&conversation_id=eq.${conversazione.id}&order=created_at.desc&limit=10`, { method: "GET" }, ctx.accessToken),
-          db(`messages?select=id,title,created_at&conversation_id=eq.${conversazione.id}&event_type=eq.doc&order=created_at.desc&limit=10`, { method: "GET" }, ctx.accessToken),
+          db(`messages?select=sender,body,title,event_type,created_at&conversation_id=eq.${conversazione.id}&deleted_at=is.null&order=created_at.desc&limit=10`, { method: "GET" }, ctx.accessToken),
+          db(`messages?select=id,title,created_at&conversation_id=eq.${conversazione.id}&event_type=eq.doc&deleted_at=is.null&order=created_at.desc&limit=10`, { method: "GET" }, ctx.accessToken),
         ]);
       }
 
@@ -545,12 +606,12 @@ const TOOLS = {
       if (!cliente) throw fail("Cliente non trovato", 404);
       const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 50)) : 20;
 
-      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
       const conversazione = Array.isArray(conv) && conv[0];
       if (!conversazione) return { messaggi: [] };
 
       const messaggi = await db(
-        `messages?select=sender,body,title,event_type,created_at&conversation_id=eq.${conversazione.id}&order=created_at.desc&limit=${limite}`,
+        `messages?select=sender,body,title,event_type,created_at&conversation_id=eq.${conversazione.id}&deleted_at=is.null&order=created_at.desc&limit=${limite}`,
         { method: "GET" },
         ctx.accessToken
       );
@@ -692,7 +753,7 @@ const TOOLS = {
          in giorni diversi ("Chiamare Mario" la settimana scorsa e di
          nuovo domani), e non devono fondersi in uno solo. */
       const esistente = await db(
-        `tasks?select=id,title,time&title=ilike.${encodeURIComponent(titolo)}&scheduled_at=eq.${encodeURIComponent(input.quando_iso)}&status=neq.done&status=neq.annullato&limit=1`,
+        `tasks?select=id,title,time&title=ilike.${encodeURIComponent(titolo)}&scheduled_at=eq.${encodeURIComponent(input.quando_iso)}&status=neq.done&status=neq.annullato&deleted_at=is.null&limit=1`,
         { method: "GET" },
         ctx.accessToken
       );
@@ -1249,7 +1310,7 @@ async function chiamaClaude(prompt, maxTokens) {
    ricontattare chi ha già risposto sarebbe fastidioso. */
 async function segnaDaRicontattare(nomeCliente, ctx) {
   const titolo = "Ricontattare " + nomeCliente;
-  const esistente = await db(`tasks?select=id&title=eq.${encodeURIComponent(titolo)}&status=neq.done&status=neq.annullato&limit=1`, { method: "GET" }, ctx.accessToken);
+  const esistente = await db(`tasks?select=id&title=eq.${encodeURIComponent(titolo)}&status=neq.done&status=neq.annullato&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
   if (Array.isArray(esistente) && esistente.length) return null;
 
   const quando = new Date();
@@ -1262,8 +1323,11 @@ async function segnaDaRicontattare(nomeCliente, ctx) {
    davvero, insistere sarebbe fastidioso. */
 async function togliDaRicontattare(nomeCliente, ctx) {
   const titolo = "Ricontattare " + nomeCliente;
-  const righe = await db(`tasks?select=id&title=eq.${encodeURIComponent(titolo)}&status=neq.done&status=neq.annullato&limit=1`, { method: "GET" }, ctx.accessToken);
+  const righe = await db(`tasks?select=id&title=eq.${encodeURIComponent(titolo)}&status=neq.done&status=neq.annullato&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
   if (Array.isArray(righe) && righe.length) {
+    /* Cancellazione vera, non nel cestino: è pulizia automatica interna
+       (il cliente ha risposto, il promemoria non serve più), non una
+       scelta dell'utente da poter annullare — non deve comparire lì. */
     await db(`tasks?id=eq.${righe[0].id}`, { method: "DELETE" }, ctx.accessToken);
   }
 }
@@ -1296,9 +1360,9 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
      messaggi vuoti nel mezzo ci farebbero perdere contesto vero, come
      lo scambio "lunedì alle 16" -> "ok" che questa analisi deve vedere. */
   const [messaggiGrezzi, tuttiGliAppuntamenti, clientiTrovati] = await Promise.all([
-    db(`messages?select=id,sender,body,created_at&conversation_id=eq.${conversazione.id}&event_type=is.null&order=created_at.desc&limit=20`, { method: "GET" }, ctx.accessToken),
-    db(`messages?select=id,title,body,scheduled_at&conversation_id=eq.${conversazione.id}&event_type=eq.appt&order=created_at.asc`, { method: "GET" }, ctx.accessToken),
-    db(`clients?select=*&name=eq.${encodeURIComponent(conversazione.contact_name)}&limit=1`, { method: "GET" }, ctx.accessToken),
+    db(`messages?select=id,sender,body,created_at&conversation_id=eq.${conversazione.id}&event_type=is.null&deleted_at=is.null&order=created_at.desc&limit=20`, { method: "GET" }, ctx.accessToken),
+    db(`messages?select=id,title,body,scheduled_at&conversation_id=eq.${conversazione.id}&event_type=eq.appt&deleted_at=is.null&order=created_at.asc`, { method: "GET" }, ctx.accessToken),
+    db(`clients?select=*&name=eq.${encodeURIComponent(conversazione.contact_name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken),
   ]);
 
   const recenti = (messaggiGrezzi || []).filter((m) => m.body && m.body.trim()).slice(0, 6).reverse();
@@ -1450,7 +1514,7 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
 
   /* ---- ATTIVITÀ DA FARE ---- */
   if (parsed.attivita) {
-    const gia = await db(`tasks?select=id&title=ilike.${encodeURIComponent(parsed.attivita)}&status=neq.done&status=neq.annullato&limit=1`, { method: "GET" }, ctx.accessToken);
+    const gia = await db(`tasks?select=id&title=ilike.${encodeURIComponent(parsed.attivita)}&status=neq.done&status=neq.annullato&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
     if (!Array.isArray(gia) || !gia.length) {
       const domani = new Date();
       domani.setDate(domani.getDate() + 1);

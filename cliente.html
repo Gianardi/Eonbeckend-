@@ -393,7 +393,7 @@ async function init(){
   try{
     /* Trova la conversazione dal codice privato del link */
     const { data: convs, error: convErr } = await supabaseClient
-      .from("conversations").select("*").eq("access_code", accessCode).limit(1);
+      .from("conversations").select("*").eq("access_code", accessCode).is("deleted_at", null).limit(1);
 
     if(convErr) throw convErr;
     if(!convs || convs.length === 0){
@@ -420,7 +420,7 @@ async function init(){
     const { data: cls } = await supabaseClient
       .from("clients").select("*")
       .eq("owner_id", conversation.owner_id)
-      .eq("name", conversation.contact_name).limit(1);
+      .eq("name", conversation.contact_name).is("deleted_at", null).limit(1);
     clientInfo = cls && cls.length ? cls[0] : null;
 
     await loadMessages();
@@ -439,6 +439,7 @@ async function loadMessages(){
   const { data } = await supabaseClient
     .from("messages").select("*")
     .eq("conversation_id", conversation.id)
+    .is("deleted_at", null)
     .order("created_at", { ascending:true });
   messages = data || [];
 }
