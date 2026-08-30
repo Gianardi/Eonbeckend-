@@ -343,6 +343,86 @@ jobs:
             echo "Promemoria ancora presente dopo la conferma: $ANCORA (atteso: 0, va tolto)"
           fi
 
+      # ------------------------------------------------------------
+      # Test 11-13: il Cestino (eliminare sposta nel cestino invece di
+      # cancellare, si ripristina o si elimina per sempre da lì) sul
+      # CRUD generico (handleResource in api/index.js), che è lo stesso
+      # percorso usato dal frontend tramite dbDelete/dbRestore.
+      # ------------------------------------------------------------
+
+      - name: "Test 11 — Cestino: eliminare un cliente lo sposta nel cestino, non lo cancella, e si può ripristinare"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: cestino_cliente
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          CID=$(curl -sS -X POST "$PREVIEW_URL/api?resource=clients" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"name":"ZZZ-TEST-CESTINO-9301","status":"attivo"}' | jq -r '.data[0].id // empty')
+          echo "cliente_id=$CID" >> "$GITHUB_OUTPUT"
+          [ -z "$CID" ] && { echo "::error::Cliente di test non creato"; exit 0; }
+
+          curl -sS -X DELETE "$PREVIEW_URL/api?resource=clients&id=$CID" -H "Authorization: Bearer $TOKEN" | jq .
+
+          NORMALE=$(curl -sS "$PREVIEW_URL/api?resource=clients" -H "Authorization: Bearer $TOKEN" | jq --arg id "$CID" '[.data[] | select(.id==$id)] | length')
+          echo "Presente nella lista normale dopo l'eliminazione: $NORMALE (atteso: 0)"
+
+          CESTINO=$(curl -sS "$PREVIEW_URL/api?resource=clients&cestino=1" -H "Authorization: Bearer $TOKEN" | jq --arg id "$CID" '[.data[] | select(.id==$id)] | length')
+          echo "Presente nel cestino dopo l'eliminazione: $CESTINO (atteso: 1)"
+
+          curl -sS -X PATCH "$PREVIEW_URL/api?resource=clients&id=$CID" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"deleted_at":null}' > /dev/null
+
+          RIPRISTINATO=$(curl -sS "$PREVIEW_URL/api?resource=clients" -H "Authorization: Bearer $TOKEN" | jq --arg id "$CID" '[.data[] | select(.id==$id)] | length')
+          echo "Presente nella lista normale dopo il ripristino: $RIPRISTINATO (atteso: 1)"
+
+      - name: "Test 12 — Cestino: non si elimina per sempre qualcosa che non è già cestinato; da cestinato sì, e sparisce anche da lì"
+        if: steps.cestino_cliente.outputs.cliente_id != ''
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+          CID: ${{ steps.cestino_cliente.outputs.cliente_id }}
+        run: |
+          CODE=$(curl -sS -o /tmp/forever.json -w "%{http_code}" -X DELETE "$PREVIEW_URL/api?resource=clients&id=$CID&permanente=true" -H "Authorization: Bearer $TOKEN")
+          echo "Tentativo di eliminazione per sempre SENZA prima cestinare — codice HTTP: $CODE (atteso: 400)"
+          cat /tmp/forever.json | jq . || cat /tmp/forever.json
+
+          curl -sS -X DELETE "$PREVIEW_URL/api?resource=clients&id=$CID" -H "Authorization: Bearer $TOKEN" > /dev/null
+
+          RESP=$(curl -sS -X DELETE "$PREVIEW_URL/api?resource=clients&id=$CID&permanente=true" -H "Authorization: Bearer $TOKEN")
+          echo "$RESP" | jq . || echo "$RESP"
+
+          CESTINO=$(curl -sS "$PREVIEW_URL/api?resource=clients&cestino=1" -H "Authorization: Bearer $TOKEN" | jq --arg id "$CID" '[.data[] | select(.id==$id)] | length')
+          echo "Presente nel cestino dopo l'eliminazione definitiva: $CESTINO (atteso: 0, sparito per sempre)"
+
+      - name: "Test 13 — Cestino: un messaggio di chat si può eliminare e ripristinare senza toccare la conversazione"
+        if: steps.login.outputs.puo_procedere == 'si'
+        id: cestino_messaggio
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          CONV=$(curl -sS -X POST "$PREVIEW_URL/api?resource=conversations" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"contact_name":"ZZZ-TEST-CESTINO-MSG-9302","is_client":true,"is_prospect":false}' \
+            | jq -r '.data[0].id // empty')
+          echo "conv_id=$CONV" >> "$GITHUB_OUTPUT"
+          [ -z "$CONV" ] && { echo "::error::Conversazione di test non creata"; exit 0; }
+
+          MID=$(curl -sS -X POST "$PREVIEW_URL/api?resource=messages" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "{\"conversation_id\":\"$CONV\",\"sender\":\"me\",\"body\":\"Messaggio di prova da eliminare\"}" | jq -r '.data[0].id // empty')
+          [ -z "$MID" ] && { echo "::error::Messaggio di test non creato"; exit 0; }
+
+          curl -sS -X DELETE "$PREVIEW_URL/api?resource=messages&id=$MID" -H "Authorization: Bearer $TOKEN" > /dev/null
+
+          NORMALE=$(curl -sS "$PREVIEW_URL/api?resource=messages&conversation_id=$CONV" -H "Authorization: Bearer $TOKEN" | jq --arg id "$MID" '[.data[] | select(.id==$id)] | length')
+          echo "Messaggio presente nella conversazione dopo l'eliminazione: $NORMALE (atteso: 0)"
+
+          CESTINO=$(curl -sS "$PREVIEW_URL/api?resource=messages&conversation_id=$CONV&cestino=1" -H "Authorization: Bearer $TOKEN" | jq --arg id "$MID" '[.data[] | select(.id==$id)] | length')
+          echo "Messaggio presente nel cestino: $CESTINO (atteso: 1)"
+
       - name: "Pulizia mirata — solo le righe create da questo test, mai un cancella-tutto"
         if: always() && steps.login.outputs.puo_procedere == 'si'
         env:
@@ -382,7 +462,7 @@ jobs:
           # di fare affidamento sugli output dei singoli step (così la
           # pulizia funziona anche se uno step precedente è fallito a
           # metà, senza per questo lasciare righe di test in giro).
-          for NOME in ZZZ-TEST-ANALISI-NUOVO-9201 ZZZ-TEST-ANALISI-PROPOSTA-9202 ZZZ-TEST-ANALISI-SPOSTA-9203 ZZZ-TEST-ANALISI-ANNULLA-9204 ZZZ-TEST-ANALISI-PROMEMORIA-9205; do
+          for NOME in ZZZ-TEST-ANALISI-NUOVO-9201 ZZZ-TEST-ANALISI-PROPOSTA-9202 ZZZ-TEST-ANALISI-SPOSTA-9203 ZZZ-TEST-ANALISI-ANNULLA-9204 ZZZ-TEST-ANALISI-PROMEMORIA-9205 ZZZ-TEST-CESTINO-MSG-9302; do
             CONV=$(curl -sS "$SUPABASE_URL/rest/v1/conversations?select=id&contact_name=eq.$NOME" \
               -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id // empty')
             if [ -n "$CONV" ]; then
@@ -398,6 +478,15 @@ jobs:
           # dal codice stesso; lo cerchiamo comunque per sicurezza, nel
           # caso quel passaggio non sia arrivato fino in fondo.
           curl -sS -X DELETE "$SUPABASE_URL/rest/v1/tasks?title=eq.Ricontattare%20ZZZ-TEST-ANALISI-PROMEMORIA-9205" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+
+          # Il cliente del Test 11/12 dovrebbe già essere stato
+          # eliminato per sempre dal test stesso; una cancellazione
+          # diretta per nome è una rete di sicurezza se un'asserzione
+          # a metà test avesse interrotto lo script prima di arrivarci
+          # (funziona sia che sia ancora attivo sia che sia nel cestino:
+          # DELETE diretto non guarda deleted_at).
+          curl -sS -X DELETE "$SUPABASE_URL/rest/v1/clients?name=eq.ZZZ-TEST-CESTINO-9301" \
             -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
 
           echo "Pulizia completata: toccate solo le righe create da questo test."
