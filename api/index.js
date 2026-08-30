@@ -437,16 +437,65 @@ async function trovaProprio(resource, id, ctx) {
   return Array.isArray(righe) && righe.length ? righe[0] : null;
 }
 
-/* Un "impegno" (per sposta_impegno/annulla_impegno) è o un appuntamento
-   dentro messages, o un task: si cerca nell'uno, poi nell'altro. Usato
-   sia per descrivere la conferma sia per eseguire l'azione, così i due
-   posti non possono disallinearsi su dove si trova il record. */
+/* Un "impegno" (per sposta_impegno/annulla_impegno/elimina_impegno) è o
+   un appuntamento dentro messages, o un task: si cerca nell'uno, poi
+   nell'altro. Usato sia per descrivere la conferma sia per eseguire
+   l'azione, così i due posti non possono disallinearsi su dove si
+   trova il record. */
 async function trovaImpegno(id, ctx) {
-  const messaggio = await trovaProprio("messages", id, ctx);
-  if (messaggio) return { tabella: "messages", record: messaggio };
-  const task = await trovaProprio("tasks", id, ctx);
-  if (task) return { tabella: "tasks", record: task };
-  return null;
+  if (eUuid(id)) {
+    const messaggio = await trovaProprio("messages", id, ctx);
+    if (messaggio) return { tabella: "messages", record: messaggio };
+    const task = await trovaProprio("tasks", id, ctx);
+    if (task) return { tabella: "tasks", record: task };
+    return null;
+  }
+
+  /* Nonostante le istruzioni di cercare prima con cerca_impegno, l'AI
+     a volte passa qui il titolo invece di un id vero: proviamo a
+     risolverlo noi stessi cercandolo per titolo, così un'imprecisione
+     del modello non si traduce in un banale "non trovato" per
+     l'utente. Se il titolo è ambiguo, rinunciamo: meglio segnalarlo
+     che agire sul record sbagliato. */
+  if (!eStringaNonVuota(id)) return null;
+  /* "*" e "_" sono caratteri jolly per ilike (il primo lo usiamo noi
+     stessi per il "contiene"; il secondo è jolly nativo di LIKE) — se
+     comparissero dentro id (es. un titolo con un trattino basso, o un
+     asterisco rimasto da una formattazione) allargherebbero la ricerca
+     ben oltre il previsto, con il rischio concreto di far sembrare
+     "unico" un risultato trovato per un motivo sbagliato, su un
+     percorso che poi scrive/cancella davvero. Li rendiamo letterali. */
+  const q = encodeURIComponent(id.trim().replace(/[\\%_*]/g, (c) => "\\" + c));
+  /* Gli annullati vanno esclusi DENTRO la query, non dopo: un limite
+     applicato prima di scartarli potrebbe tagliare via proprio i
+     risultati ancora vivi (es. venti righe con lo stesso titolo, quasi
+     tutte annullate: se il limite arrivasse prima del filtro, i pochi
+     vivi potrebbero restare fuori dalle prime venti). Il limite resta
+     comunque, come rete di sicurezza finale contro un titolo così
+     ricorrente da avere decine di impegni ancora attivi. */
+  const [messaggi, task] = await Promise.all([
+    db(`messages?select=*&event_type=eq.appt&title=ilike.*${q}*&title=not.ilike.${encodeURIComponent("❌")}*&deleted_at=is.null&limit=20`, { method: "GET" }, ctx.accessToken),
+    db(`tasks?select=*&title=ilike.*${q}*&status=neq.done&status=neq.annullato&deleted_at=is.null&limit=20`, { method: "GET" }, ctx.accessToken),
+  ]);
+  const candidati = [
+    ...(messaggi || []).map((m) => ({ tabella: "messages", record: m })),
+    ...(task || []).map((t) => ({ tabella: "tasks", record: t })),
+  ];
+  if (candidati.length > 1) {
+    throw fail(`Più di un impegno corrisponde a "${id.trim()}": trova prima l'id giusto con cerca_impegno.`, 409);
+  }
+  return candidati.length === 1 ? candidati[0] : null;
+}
+
+/* Se trovaImpegno ha dovuto risolvere un titolo (perché l'AI non ha
+   passato un id vero), fissiamo qui l'id trovato dentro l'input: così
+   describe() ed esecuzione operano di sicuro sullo stesso record,
+   anche se qualcosa cambia nel frattempo (un impegno con lo stesso
+   titolo creato o cancellato tra la conferma richiesta e quella
+   ricevuta). Senza questo, la ricerca per titolo verrebbe ripetuta due
+   volte, con il rischio di risolversi in modo diverso le due volte. */
+function fissaIdRisoltoImpegno(input, trovato) {
+  if (trovato && !eUuid(input.id)) input.id = trovato.record.id;
 }
 
 async function trovaOCreaConversazione(cliente, ctx) {
@@ -879,6 +928,7 @@ const TOOLS = {
     async describe(input, ctx) {
       const quando = eIso(input.nuovo_quando_iso) ? formattaQuando(input.nuovo_quando_iso) : input.nuovo_quando_iso;
       const trovato = await trovaImpegno(input.id, ctx);
+      fissaIdRisoltoImpegno(input, trovato);
       return `Spostare "${trovato ? trovato.record.title : "questo impegno"}" a ${quando}?`;
     },
     async run(input, ctx) {
@@ -910,6 +960,7 @@ const TOOLS = {
     },
     async describe(input, ctx) {
       const trovato = await trovaImpegno(input.id, ctx);
+      fissaIdRisoltoImpegno(input, trovato);
       return `Annullare "${trovato ? trovato.record.title : "questo impegno"}"?`;
     },
     async run(input, ctx) {
@@ -942,6 +993,7 @@ const TOOLS = {
     },
     async describe(input, ctx) {
       const trovato = await trovaImpegno(input.id, ctx);
+      fissaIdRisoltoImpegno(input, trovato);
       return `Spostare "${trovato ? trovato.record.title : "questo impegno"}" nel cestino? Potrai ripristinarlo in seguito.`;
     },
     async run(input, ctx) {
@@ -1091,7 +1143,18 @@ Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello
 /* Prepara la domanda di conferma per la prossima azione delicata in coda. */
 async function descriviProssimaAzione(pendente, ctx) {
   const tool = TOOLS[pendente.nome];
-  return tool.describe ? await tool.describe(pendente.input, ctx) : `Confermi l'operazione "${pendente.nome}"?`;
+  if (!tool.describe) return `Confermi l'operazione "${pendente.nome}"?`;
+  try {
+    return await tool.describe(pendente.input, ctx);
+  } catch (err) {
+    /* Non deve mai far cadere l'intera richiesta: qui prepariamo solo
+       la domanda da mostrare, non eseguiamo ancora nulla. Se qualcosa
+       va storto (es. un titolo ambiguo trovato da trovaImpegno), lo
+       raccontiamo nella domanda stessa — l'esecuzione vera, quando
+       l'utente risponderà, ha già il suo try/catch e non perderà le
+       azioni già fatte in questo stesso turno. */
+    return `Non riesco a preparare la conferma per "${pendente.nome}": ${err.message || "errore sconosciuto"}. Rispondi comunque per continuare, o annulla e riprova specificando meglio.`;
+  }
 }
 
 async function handleAssistant(req, res, user, accessToken) {
