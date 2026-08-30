@@ -4194,7 +4194,7 @@ function renderCalendar(){
   chats.forEach(c => {
     c.messages.forEach(m => {
       if(m.eventType === "appt" && !m.annullato){
-        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false, contatto:c.name });
+        items.push({ icon:"appt", title:m.title, sub:c.name, when:m.text || m.time, urgent:false, contatto:c.name, id:m.id, tabella:"messages" });
       }
     });
   });
@@ -4227,7 +4227,9 @@ function renderCalendar(){
       sub: t.motivo || t.clienteCollegato || "da fare",
       when: t.time,
       urgent: false,
-      contatto: t.inSospesoCon || t.clienteCollegato || null
+      contatto: t.inSospesoCon || t.clienteCollegato || null,
+      id: t.id,
+      tabella: "tasks"
     });
   });
 
@@ -4308,8 +4310,9 @@ function renderCalendar(){
             <div class="cal-sotto">${it.sub}</div>
           </div>
         </div>
-        ${it.contatto ? `
+        ${(it.contatto || it.id) ? `
         <div class="cal-azioni">
+          ${it.contatto ? `
           <button class="cal-btn cal-scrivi">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
             Scrivi
@@ -4317,7 +4320,11 @@ function renderCalendar(){
           <button class="cal-btn cal-chiama">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg>
             Chiama
-          </button>
+          </button>` : ''}
+          ${it.id ? `
+          <button class="cal-btn cal-elimina" title="Elimina">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>` : ''}
         </div>` : ''}
       `;
 
@@ -4345,6 +4352,25 @@ function renderCalendar(){
           showAILanding("Numero mancante",
             "Non ho il telefono di " + it.contatto + ". Aggiungilo alla sua scheda in Clienti e potrai chiamare da qui.");
         }
+      });
+
+      const bElimina = row.querySelector(".cal-elimina");
+      if(bElimina) bElimina.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if(!confirm('Spostare "' + it.title + '" nel cestino?')) return;
+        if(it.tabella === "messages"){
+          const chat = chats.find(c => c.name === it.contatto);
+          if(chat){
+            const idx = chat.messages.findIndex(m => m.id === it.id);
+            if(idx > -1) chat.messages.splice(idx, 1);
+          }
+        } else {
+          const idx = tasks.findIndex(t => t.id === it.id);
+          if(idx > -1) tasks.splice(idx, 1);
+        }
+        if(isDbReady()) await dbDelete(it.tabella, it.id);
+        renderCalendar(); renderTasks(); renderRing(); renderDifficulty();
+        if(it.tabella === "messages") renderChatWindow();
       });
 
       wrap.appendChild(row);
@@ -6498,32 +6524,66 @@ function collegaHubRacconta(){
       showAIToast("Non ho fatto in tempo a finire", risposta.testo);
     }
 
-    const impegniCreati = risposta.azioni.filter(a => a.tool === "crea_impegno");
-    if(impegniCreati.length === 0){
+    const azioni = risposta.azioni || [];
+    /* Non tutte le richieste finiscono in crea_impegno: "cancella cliente
+       Rossi" o "elimina questo appuntamento" sono azioni vere, non
+       impegni. Prima ignoravamo tutto ciò che non fosse crea_impegno —
+       l'azione veniva comunque eseguita sul database (dopo conferma),
+       ma l'interfaccia non se ne accorgeva: sembrava non fare nulla. */
+    const risultatiVisibili = azioni.filter(a => a.tool !== "cerca_cliente" && a.tool !== "elenca_appuntamenti" && a.tool !== "storico_cliente" && a.tool !== "leggi_conversazione");
+    if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
-        stato("attesa", "Non ho trovato impegni",
-          "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17");
+        stato("attesa", "Fatto",
+          risposta.testo || "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17");
       }
       return;
     }
 
-    /* crea_impegno ha scritto direttamente su Supabase: gli array locali
-       (tasks, chats) non lo sanno ancora, vanno ricaricati prima di
-       disegnare, altrimenti il nuovo impegno non comparirebbe finché
-       non si ricarica l'app da zero. */
+    /* Le azioni hanno scritto direttamente su Supabase: gli array locali
+       (clients, tasks, chats...) non lo sanno ancora, vanno ricaricati
+       prima di disegnare, altrimenti il risultato non comparirebbe
+       finché non si ricarica l'app da zero. */
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
+    renderClientArchive(); renderChatList(); renderChatWindow();
     chiudiHubAI();
-    navigateTo("calendario");
 
-    const fatti = impegniCreati.map(a =>
-      (a.esito.tipo === "chiamata" ? "📞 " : a.esito.tipo === "incontro" ? "📅 " : "✓ ") +
-      a.esito.titolo + " — " + a.esito.quando_visualizzato);
+    /* Qualsiasi azione sul calendario porta lì a vedere il risultato,
+       non solo un impegno nuovo — altrimenti spostare o eliminare un
+       appuntamento lascerebbe l'utente dov'era, senza mostrargli nulla. */
+    const toccaCalendario = risultatiVisibili.some(a =>
+      a.tool === "crea_impegno" || a.tool === "sposta_impegno" || a.tool === "annulla_impegno" || a.tool === "elimina_impegno");
+    if(toccaCalendario) navigateTo("calendario");
 
-    showAIToast(
-      impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
-      fatti.join("\n")
-    );
+    const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
+    if(impegniCreati.length){
+      const fatti = impegniCreati.map(a =>
+        (a.esito.tipo === "chiamata" ? "📞 " : a.esito.tipo === "incontro" ? "📅 " : "✓ ") +
+        a.esito.titolo + " — " + a.esito.quando_visualizzato);
+      showAIToast(
+        impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
+        fatti.join("\n")
+      );
+    }
+
+    risultatiVisibili.filter(a => a.tool !== "crea_impegno").forEach(a => {
+      if(a.tool === "sposta_impegno"){
+        showAIToast("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
+      } else if(a.tool === "annulla_impegno"){
+        showAIToast("Impegno annullato", a.esito.titolo);
+      } else if(a.tool === "elimina_impegno"){
+        showAIToast("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
+      } else if(a.tool === "elimina_cliente"){
+        showAIToast("Cliente eliminato",
+          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.");
+      } else if(a.tool === "crea_cliente"){
+        showAIToast("Cliente aggiunto", a.esito.nome);
+      } else if(a.tool === "aggiorna_cliente"){
+        showAIToast("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
+      } else if(a.tool === "manda_messaggio"){
+        showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
+      }
+    });
   }
 
   function stato(s, titolo, sotto){

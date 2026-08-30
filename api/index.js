@@ -693,6 +693,54 @@ const TOOLS = {
     },
   },
 
+  elimina_cliente: {
+    sensitive: true,
+    schema: {
+      name: "elimina_cliente",
+      description: "Sposta un cliente nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Richiede conferma dell'utente.",
+      input_schema: {
+        type: "object",
+        properties: { id: { type: "string", description: "Id del cliente da eliminare, trovato prima con cerca_cliente" } },
+        required: ["id"],
+      },
+    },
+    async describe(input, ctx) {
+      const cliente = await trovaProprio("clients", input.id, ctx);
+      if (!cliente) return "Eliminare questo cliente?";
+      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+      const haConversazione = Array.isArray(conv) && conv.length > 0;
+      /* La domanda sulla conversazione è dentro la stessa conferma,
+         non un secondo giro: una sola risposta dell'utente copre
+         entrambe le eliminazioni. */
+      return haConversazione
+        ? `Spostare ${cliente.name} nel cestino insieme alla sua conversazione? Potrai ripristinare entrambi in seguito.`
+        : `Spostare ${cliente.name} nel cestino? Potrai ripristinarlo in seguito.`;
+    },
+    async run(input, ctx) {
+      const cliente = await trovaProprio("clients", input.id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+
+      await db(`clients?id=eq.${cliente.id}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
+
+      /* Il cliente è già cestinato a questo punto: se la conversazione
+         fallisce, non deve sembrare che l'intera operazione sia fallita
+         (l'utente crederebbe che nulla sia successo, mentre il cliente
+         è già stato spostato) — la segnaliamo solo nell'esito. */
+      let conversazioneEliminata = false;
+      try {
+        const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+        if (Array.isArray(conv) && conv.length) {
+          await db(`conversations?id=eq.${conv[0].id}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
+          conversazioneEliminata = true;
+        }
+      } catch (err) {
+        console.warn("Cliente eliminato ma la conversazione collegata no:", err.message);
+      }
+
+      return { id: cliente.id, nome: cliente.name, conversazione_eliminata: conversazioneEliminata };
+    },
+  },
+
   crea_impegno: {
     sensitive: false,
     schema: {
@@ -846,6 +894,30 @@ const TOOLS = {
       } else {
         await db(`tasks?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ status: "annullato" }) }, ctx.accessToken);
       }
+      return { id: record.id, titolo: record.title };
+    },
+  },
+
+  elimina_impegno: {
+    sensitive: true,
+    schema: {
+      name: "elimina_impegno",
+      description: "Sposta un appuntamento o un impegno nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Diverso da annulla_impegno, che invece lo segna come annullato mantenendolo visibile nello storico. Richiede conferma dell'utente.",
+      input_schema: {
+        type: "object",
+        properties: { id: { type: "string", description: "Id dell'impegno da eliminare" } },
+        required: ["id"],
+      },
+    },
+    async describe(input, ctx) {
+      const trovato = await trovaImpegno(input.id, ctx);
+      return `Spostare "${trovato ? trovato.record.title : "questo impegno"}" nel cestino? Potrai ripristinarlo in seguito.`;
+    },
+    async run(input, ctx) {
+      const trovato = await trovaImpegno(input.id, ctx);
+      if (!trovato) throw fail("Impegno non trovato", 404);
+      const { tabella, record } = trovato;
+      await db(`${tabella}?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
       return { id: record.id, titolo: record.title };
     },
   },
