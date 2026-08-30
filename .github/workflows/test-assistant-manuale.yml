@@ -11,9 +11,9 @@ on:
   workflow_dispatch:
     inputs:
       preview_url:
-        description: "Indirizzo del deployment di preview da testare (senza slash finale)"
+        description: "Indirizzo del deployment da testare (senza slash finale)"
         required: true
-        default: "https://eonbeckend-git-claude-ciao-ipc3fm-gianardi1.vercel.app"
+        default: "https://eonbeckend.vercel.app"
 
 jobs:
   test:
