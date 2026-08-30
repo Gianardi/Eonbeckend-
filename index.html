@@ -987,7 +987,7 @@
   .hub-racconta.fatto .hub-racconta-ico{ background:var(--teal); }
   .hub-racconta-titolo{ font-size:13.5px; font-weight:800; color:var(--violet); }
   .hub-racconta.fatto .hub-racconta-titolo{ color:#00907A; }
-  .hub-racconta-sotto{ font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.4; }
+  .hub-racconta-sotto{ font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.4; white-space:pre-line; }
   .hub-racconta-campo{
     width:100%; border-radius:12px; padding:12px 13px; font-family:inherit;
     border:1px solid rgba(155,92,255,.25); background:var(--card);
@@ -6534,8 +6534,19 @@ function collegaHubRacconta(){
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
-        stato("attesa", "Fatto",
-          risposta.testo || "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17");
+        let testo = risposta.testo || "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17";
+        /* A volte l'assistente scrive la domanda di conferma a parole
+           invece di chiamare davvero lo strumento (che farebbe comparire
+           il pulsante vero): qui non c'è nulla da confermare scrivendo
+           "ok" e ripremendo Organizza, quindi lo spieghiamo subito
+           invece di lasciare l'utente bloccato. Diverso dal caso in cui
+           l'assistente chiede legittimamente "quale dei due intendi" —
+           lì scrivere la risposta in testo funziona davvero, quindi non
+           aggiungiamo l'avviso in quel caso. */
+        if(/\?\s*$/.test(testo.trim()) && /conferm/i.test(testo) && !/quale/i.test(testo)){
+          testo += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
+        }
+        stato("attesa", "Fatto", testo);
       }
       return;
     }
