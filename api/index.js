@@ -22,6 +22,8 @@
  *   GET    /api                          -> stato del servizio
  *   POST   /api?action=ai                -> genera testo con Claude
  *   POST   /api?action=assistant         -> assistente con tool calling (legge/scrive i dati da solo)
+ *   POST   /api?action=analizza_messaggio        -> legge la chat e decide appuntamenti/attività
+ *   POST   /api?action=rispondi_richiesta_cliente -> il professionista decide su una richiesta del cliente
  *   POST   /api?action=seed              -> crea i dati iniziali dell'utente
  *
  *   GET    /api?resource=clients         -> elenco
@@ -1113,6 +1115,406 @@ async function handleAssistant(req, res, user, accessToken) {
 }
 
 /* ============================================================
+   ANALISI DELLA CHAT — appuntamenti e attività dedotti dalla
+   conversazione con il cliente
+   ------------------------------------------------------------
+   Prima questa logica viveva nel frontend: il prompt veniva
+   costruito lì, la chiave Anthropic passava per il browser (tramite
+   /api?action=ai), e le conseguenze (creare o spostare un
+   appuntamento, aggiungere un task) scrivevano su Supabase
+   direttamente dal client. Qui la stessa logica — invariata nelle
+   sue regole, che sono buone e già in produzione da tempo — gira
+   lato server e usa le stesse funzioni autorizzate e tracciate del
+   motore assistente, invece di duplicare le scritture.
+
+   Una sola differenza voluta rispetto a prima: l'AI restituisce
+   sempre una data ISO (come per crea_impegno), mai una stringa già
+   formattata in italiano — è il server a decidere come mostrarla,
+   coerente con il resto del motore.
+   ============================================================ */
+
+const GIORNI_PRIMA_DI_RICONTATTARE = 2;
+
+function promptAnalisiChat(chat, conversazione, elencoAppuntamenti, cliente) {
+  const oggi = new Date();
+  return `Sei l'assistente dentro EON, un'app per professionisti italiani.
+Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}.
+
+Ecco le ultime battute della conversazione con il cliente "${chat}":
+${conversazione}
+
+${elencoAppuntamenti}
+
+${cliente ? `Stato attuale del cliente: ${cliente.status}. Valore registrato: €${cliente.value}.` : ""}
+
+Rispondi esclusivamente con un oggetto JSON, senza testo prima o dopo, senza backtick:
+
+{
+  "appuntamento": {
+    "azione": "nuovo" | "sposta" | "annulla",
+    "titolo": "...",
+    "quando_iso": "data e ora in formato ISO 8601, es. 2026-09-01T16:00:00",
+    "messaggioProposta": numero del messaggio [n] che contiene la proposta,
+    "messaggioConferma": numero del messaggio [n] in cui l'altro accetta, oppure null se nessuno ha ancora accettato,
+    "rimastoInSospeso": true se l'altro NON ha detto né sì né no, ma ha rimandato la risposta
+  } oppure null,
+  "attivita": "..." oppure null,
+  "cambioStato": "attivo" | "trattativa" | "inattivo" oppure null,
+  "valore": numero oppure null
+}
+
+=== I DUE NUMERI, MOLTO IMPORTANTI ===
+I messaggi sopra sono numerati [1], [2], [3]...
+
+"messaggioProposta": il numero del messaggio in cui viene proposta la data o l'ora.
+  Esempio: se [2] Professionista dice "possiamo fare martedì alle 10?", allora messaggioProposta = 2.
+
+"messaggioConferma": il numero del messaggio in cui l'ALTRA parte accetta.
+  Vale come accettazione qualsiasi risposta positiva: "ok", "ok perfetto", "va bene grazie",
+  "sì certo", "per me va bene", "confermo", "perfetto ci sono", "d'accordo", e simili.
+  Se nessuno ha ancora accettato dopo la proposta, metti null.
+
+Esempio A:
+  [1] Professionista: possiamo fare martedì alle 10?
+  [2] Cliente: ok perfetto grazie
+  → messaggioProposta = 1, messaggioConferma = 2
+
+Esempio B:
+  [1] Cliente: scusa possiamo fare giovedì?
+  → messaggioProposta = 1, messaggioConferma = null
+
+=== RISPOSTE RIMASTE IN SOSPESO ===
+"rimastoInSospeso": mettilo a true quando l'altra parte non accetta e non rifiuta,
+  ma rimanda la decisione. Esempi: "non so se riesco", "vediamo", "ti faccio sapere",
+  "devo controllare", "ti dico più tardi", "forse", "provo a organizzarmi", "ci penso".
+  In questi casi messaggioConferma resta null.
+
+Esempio C:
+  [1] Professionista: possiamo fare martedì alle 10?
+  [2] Cliente: mah, non so se riesco, ti faccio sapere
+  → messaggioProposta = 1, messaggioConferma = null, rimastoInSospeso = true
+
+=== SPOSTAMENTO ===
+Se nell'elenco sopra c'è già un appuntamento e nella conversazione si parla di cambiarne giorno od ora, l'azione è "sposta", MAI "nuovo".
+Se dicono solo l'ora nuova ("possiamo fare alle 10?"), tieni il giorno dell'appuntamento esistente.
+Se dicono solo il giorno nuovo ("facciamo giovedì"), tieni l'ora dell'appuntamento esistente.
+Se disdicono senza rifissare, azione "annulla".
+
+=== FORMATO E MODI DI DIRE ===
+Traduci "domani", "lunedì", "il 10" in data vera partendo da oggi, sempre in "quando_iso".
+
+Quando l'ora non viene detta, usa questi orari convenzionali:
+  "domattina", "domani mattina", "in mattinata"     → 09:00
+  "domani pomeriggio", "nel pomeriggio"             → 15:00
+  "stasera", "in serata", "domani sera"             → 18:00
+  "a pranzo"                                        → 13:00
+  nessun riferimento all'ora ("ci vediamo giovedì") → 08:00
+
+IMPORTANTE: un appuntamento senza ora precisa vale lo stesso. Non lasciarlo
+a null solo perché manca l'orario: usa 08:00 e registra comunque il giorno.
+
+Se manca anche il titolo, usa "Incontro".
+
+=== ALTRE REGOLE ===
+- "attivita": solo se il professionista deve fare qualcosa di concreto. Azione breve.
+- "cambioStato": "attivo" solo se accetta di procedere; "inattivo" solo se rinuncia.
+- "valore": solo se citano una cifra concordata.
+- Se un campo non c'è, null. Non inventare mai.`;
+}
+
+async function chiamaClaude(prompt, maxTokens) {
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: maxTokens, messages: [{ role: "user", content: prompt }] }),
+    });
+  } catch (netErr) {
+    throw fail("Non riesco a contattare l'AI: " + netErr.message, 502);
+  }
+  if (!r.ok) {
+    let motivo = "";
+    try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
+    throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+  }
+  const data = await r.json();
+  const text = (data.content || []).map((b) => b.text || "").join("").trim();
+  if (!text) throw fail("Risposta AI vuota", 502);
+  return text;
+}
+
+/* Un promemoria silenzioso per ricontattare un cliente che ha lasciato
+   una risposta in sospeso. Un solo promemoria alla volta per cliente:
+   ricontattare chi ha già risposto sarebbe fastidioso. */
+async function segnaDaRicontattare(nomeCliente, ctx) {
+  const titolo = "Ricontattare " + nomeCliente;
+  const esistente = await db(`tasks?select=id&title=eq.${encodeURIComponent(titolo)}&status=neq.done&status=neq.annullato&limit=1`, { method: "GET" }, ctx.accessToken);
+  if (Array.isArray(esistente) && esistente.length) return null;
+
+  const quando = new Date();
+  quando.setDate(quando.getDate() + GIORNI_PRIMA_DI_RICONTATTARE);
+  quando.setHours(8, 0, 0, 0);
+  return TOOLS.crea_impegno.run({ titolo, quando_iso: quando.toISOString(), tipo: "commissione" }, ctx);
+}
+
+/* Toglie il promemoria "ricontattare": il cliente ha risposto per
+   davvero, insistere sarebbe fastidioso. */
+async function togliDaRicontattare(nomeCliente, ctx) {
+  const titolo = "Ricontattare " + nomeCliente;
+  const righe = await db(`tasks?select=id&title=eq.${encodeURIComponent(titolo)}&status=neq.done&status=neq.annullato&limit=1`, { method: "GET" }, ctx.accessToken);
+  if (Array.isArray(righe) && righe.length) {
+    await db(`tasks?id=eq.${righe[0].id}`, { method: "DELETE" }, ctx.accessToken);
+  }
+}
+
+/* Risponde al cliente a nome del professionista — usato per le
+   risposte automatiche dopo una decisione (conferma/rifiuto di uno
+   spostamento o annullamento chiesto dal cliente). */
+async function inviaRispostaInterna(conversationId, testo, ctx) {
+  const creato = await db(
+    "messages",
+    { method: "POST", body: JSON.stringify({ conversation_id: conversationId, sender: "me", body: testo }), headers: { Prefer: "return=representation" } },
+    ctx.accessToken
+  );
+  return Array.isArray(creato) ? creato[0] : creato;
+}
+
+async function handleAnalizzaMessaggio(req, res, user, accessToken) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
+
+  const body = await readBody(req);
+  const ctx = { user, accessToken };
+  if (!eUuid(body.conversation_id)) throw fail("Parametro 'conversation_id' non valido");
+
+  const conversazione = await trovaProprio("conversations", body.conversation_id, ctx);
+  if (!conversazione) throw fail("Conversazione non trovata", 404);
+
+  /* Prendiamo un margine di righe (20, non 6) prima di scartare quelle
+     senza testo: se filtrassimo dopo aver già tagliato a 6, un paio di
+     messaggi vuoti nel mezzo ci farebbero perdere contesto vero, come
+     lo scambio "lunedì alle 16" -> "ok" che questa analisi deve vedere. */
+  const [messaggiGrezzi, tuttiGliAppuntamenti, clientiTrovati] = await Promise.all([
+    db(`messages?select=id,sender,body,created_at&conversation_id=eq.${conversazione.id}&event_type=is.null&order=created_at.desc&limit=20`, { method: "GET" }, ctx.accessToken),
+    db(`messages?select=id,title,body,scheduled_at&conversation_id=eq.${conversazione.id}&event_type=eq.appt&order=created_at.asc`, { method: "GET" }, ctx.accessToken),
+    db(`clients?select=*&name=eq.${encodeURIComponent(conversazione.contact_name)}&limit=1`, { method: "GET" }, ctx.accessToken),
+  ]);
+
+  const recenti = (messaggiGrezzi || []).filter((m) => m.body && m.body.trim()).slice(0, 6).reverse();
+  if (recenti.length === 0) return send(res, 200, { azioni: [] });
+
+  const testoConversazione = recenti
+    .map((m, i) => "[" + (i + 1) + "] " + (m.sender === "me" ? "Professionista" : "Cliente") + ": " + m.body)
+    .join("\n");
+
+  const esistenti = (tuttiGliAppuntamenti || []).filter((m) => !m.title.startsWith("❌"));
+  const elencoAppuntamenti = esistenti.length
+    ? "APPUNTAMENTI GIÀ FISSATI con questo cliente:\n" + esistenti.map((a, i) => (i + 1) + '. "' + a.title + '" — ' + a.body).join("\n")
+    : "APPUNTAMENTI GIÀ FISSATI: nessuno.";
+
+  const cliente = Array.isArray(clientiTrovati) && clientiTrovati.length ? clientiTrovati[0] : null;
+
+  let parsed;
+  try {
+    const raw = await chiamaClaude(promptAnalisiChat(conversazione.contact_name, testoConversazione, elencoAppuntamenti, cliente), 300);
+    parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+  } catch (err) {
+    console.warn("Analisi chat non riuscita:", err.message);
+    return send(res, 200, { azioni: [] });
+  }
+  if (!parsed) return send(res, 200, { azioni: [] });
+
+  const azioni = [];
+  const registra = async (tool, input, esito) => {
+    await registraOperazione(user, tool, input, esito, "auto_da_chat");
+    azioni.push({ tool, esito });
+  };
+
+  /* ---- APPUNTAMENTO ---- */
+  if (parsed.appuntamento) {
+    const app = parsed.appuntamento;
+    let azione = app.azione || "nuovo";
+    const quandoIso = eIso(app.quando_iso) ? app.quando_iso : null;
+
+    if (azione === "nuovo" && esistenti.length > 0) azione = "sposta";
+
+    const nProposta = Number(app.messaggioProposta);
+    const nConferma = Number(app.messaggioConferma);
+    const msgProposta = nProposta >= 1 && nProposta <= recenti.length ? recenti[nProposta - 1] : null;
+    const msgConferma = nConferma >= 1 && nConferma <= recenti.length ? recenti[nConferma - 1] : null;
+
+    const chiPropone = msgProposta
+      ? (msgProposta.sender === "me" ? "professionista" : "cliente")
+      : (recenti[recenti.length - 1].sender === "me" ? "professionista" : "cliente");
+
+    const confermato = !!msgConferma &&
+      ((chiPropone === "professionista" && msgConferma.sender === "them") ||
+       (chiPropone === "cliente" && msgConferma.sender === "me"));
+
+    const riferito = esistenti.length ? esistenti[esistenti.length - 1] : null;
+
+    /* Da qui in giù, come nella versione originale: quasi ogni ramo
+       chiude la richiesta subito (un messaggio che tocca un appuntamento
+       non controlla anche attività/cambio-stato nello stesso giro) —
+       l'unica eccezione è un appuntamento nuovo appena confermato
+       (in fondo), che continua a controllare anche quelli. */
+
+    if (chiPropone === "professionista" && !confermato) {
+      if (app.rimastoInSospeso) {
+        const esito = await segnaDaRicontattare(conversazione.contact_name, ctx);
+        if (esito) await registra("segnaDaRicontattare", { cliente: conversazione.contact_name }, esito);
+      }
+      return send(res, 200, { azioni });
+    }
+
+    if (chiPropone === "cliente" && !confermato && !riferito) {
+      /* Il cliente propone un appuntamento nuovo: aspettiamo che il
+         professionista risponda lui stesso in chat, come oggi. */
+      return send(res, 200, { azioni });
+    }
+
+    if (chiPropone === "cliente" && !confermato && riferito && (azione === "sposta" || azione === "annulla")) {
+      /* Lo chiede il cliente: serve la decisione del professionista,
+         non eseguiamo da soli. */
+      return send(res, 200, {
+        azioni,
+        richiesta_decisione: {
+          azione,
+          riferito_id: riferito.id,
+          riferito_titolo: riferito.title,
+          riferito_quando: riferito.body,
+          quando_nuovo_iso: quandoIso,
+          titolo_nuovo: app.titolo || null,
+        },
+      });
+    }
+
+    if (azione === "sposta" && riferito) {
+      const esito = await TOOLS.sposta_impegno.run({ id: riferito.id, nuovo_quando_iso: quandoIso || riferito.scheduled_at }, ctx);
+      /* Come nella versione precedente: se insieme allo spostamento
+         cambia anche il titolo, lo aggiorniamo — sposta_impegno da solo
+         tocca solo la data. */
+      if (app.titolo && app.titolo !== riferito.title) {
+        await db(`messages?id=eq.${riferito.id}`, { method: "PATCH", body: JSON.stringify({ title: app.titolo }) }, ctx.accessToken);
+        esito.titolo = app.titolo;
+      }
+      await togliDaRicontattare(conversazione.contact_name, ctx);
+      await registra("sposta_impegno", { id: riferito.id }, esito);
+      return send(res, 200, { azioni });
+    }
+
+    if (azione === "annulla" && riferito) {
+      const esito = await TOOLS.annulla_impegno.run({ id: riferito.id }, ctx);
+      await registra("annulla_impegno", { id: riferito.id }, esito);
+      return send(res, 200, { azioni });
+    }
+
+    /* Appuntamento nuovo, confermato: come l'originale, un titolo
+       mancante non blocca la registrazione — "Incontro" va bene lo
+       stesso, l'importante è non perdere la data. */
+    const titoloNuovo = app.titolo || (quandoIso ? "Incontro" : null);
+    if (titoloNuovo && quandoIso) {
+      const duplicato = esistenti.some(
+        (m) => m.title === titoloNuovo && m.scheduled_at && new Date(m.scheduled_at).getTime() === new Date(quandoIso).getTime()
+      );
+      if (!duplicato) {
+        /* Scriviamo direttamente nella conversazione che stiamo già
+           analizzando: niente bisogno di ritrovare il cliente per nome
+           (a differenza di crea_impegno usato dall'assistente generico,
+           qui la conversazione giusta è già in mano, sempre). */
+        const quandoVisualizzato = formattaQuando(quandoIso);
+        const creato = await db(
+          "messages",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              conversation_id: conversazione.id,
+              sender: "me",
+              event_type: "appt",
+              title: titoloNuovo,
+              body: quandoVisualizzato,
+              scheduled_at: quandoIso,
+            }),
+            headers: { Prefer: "return=representation" },
+          },
+          ctx.accessToken
+        );
+        const m = Array.isArray(creato) ? creato[0] : creato;
+        const esito = { id: m.id, titolo: titoloNuovo, quando_visualizzato: quandoVisualizzato, tipo: "incontro" };
+        await togliDaRicontattare(conversazione.contact_name, ctx);
+        await registra("crea_impegno", { titolo: titoloNuovo }, esito);
+      }
+    }
+  }
+
+  /* ---- ATTIVITÀ DA FARE ---- */
+  if (parsed.attivita) {
+    const gia = await db(`tasks?select=id&title=ilike.${encodeURIComponent(parsed.attivita)}&status=neq.done&status=neq.annullato&limit=1`, { method: "GET" }, ctx.accessToken);
+    if (!Array.isArray(gia) || !gia.length) {
+      const domani = new Date();
+      domani.setDate(domani.getDate() + 1);
+      domani.setHours(8, 0, 0, 0);
+      const esito = await TOOLS.crea_impegno.run({ titolo: parsed.attivita, quando_iso: domani.toISOString(), tipo: "commissione" }, ctx);
+      await registra("crea_impegno", { titolo: parsed.attivita }, esito);
+    }
+  }
+
+  return send(res, 200, {
+    azioni,
+    cambioStato: cliente && parsed.cambioStato && parsed.cambioStato !== cliente.status ? parsed.cambioStato : null,
+    valore: cliente && parsed.valore && Number(parsed.valore) > 0 && Number(parsed.valore) !== Number(cliente.value) ? Number(parsed.valore) : null,
+    cliente_id: cliente ? cliente.id : null,
+  });
+}
+
+/* Il professionista decide su una richiesta di spostamento/annullamento
+   arrivata dal cliente: qui la conferma è già stata chiesta e ottenuta
+   nell'interfaccia (il toast con i due pulsanti), non c'è bisogno del
+   meccanismo generico di conferma dell'assistente. */
+async function handleRispondiRichiestaCliente(req, res, user, accessToken) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+
+  const body = await readBody(req);
+  const ctx = { user, accessToken };
+  if (!eUuid(body.conversation_id)) throw fail("Parametro 'conversation_id' non valido");
+  if (!eUuid(body.riferito_id)) throw fail("Parametro 'riferito_id' non valido");
+  if (body.azione !== "sposta" && body.azione !== "annulla") throw fail("Parametro 'azione' non valido");
+
+  if (body.conferma !== true) {
+    const record = await trovaProprio("messages", body.riferito_id, ctx);
+    const testo = body.azione === "sposta"
+      ? "Purtroppo non riesco a spostare. Riusciamo a tenere " + (record ? record.body : "l'orario concordato") + "?"
+      : "Preferirei tenerlo. Riusciamo a confermare " + (record ? record.body : "l'orario") + "?";
+    const messaggio = await inviaRispostaInterna(body.conversation_id, testo, ctx);
+    return send(res, 200, { confermato: false, messaggio });
+  }
+
+  if (body.azione === "sposta") {
+    /* Il cliente può chiedere di spostare senza dire una nuova ora
+       precisa ("possiamo spostare?"): in quel caso teniamo la data
+       già segnata, esattamente come faceva la versione precedente. */
+    let quandoNuovo = eIso(body.quando_nuovo_iso) ? body.quando_nuovo_iso : null;
+    if (!quandoNuovo) {
+      const record = await trovaProprio("messages", body.riferito_id, ctx);
+      if (record && record.scheduled_at) quandoNuovo = record.scheduled_at;
+    }
+    if (!quandoNuovo) throw fail("Non so a quale data spostarlo: manca sia la nuova data che quella esistente", 400);
+
+    const esito = await TOOLS.sposta_impegno.run({ id: body.riferito_id, nuovo_quando_iso: quandoNuovo }, ctx);
+    if (body.titolo_nuovo) await db(`messages?id=eq.${body.riferito_id}`, { method: "PATCH", body: JSON.stringify({ title: body.titolo_nuovo }) }, ctx.accessToken);
+    await registraOperazione(user, "sposta_impegno", body, esito, "confermato_da_professionista");
+    const messaggio = await inviaRispostaInterna(body.conversation_id, "Ok, confermo: " + esito.quando_visualizzato + ".", ctx);
+    return send(res, 200, { confermato: true, esito, messaggio });
+  }
+
+  const esito = await TOOLS.annulla_impegno.run({ id: body.riferito_id }, ctx);
+  await registraOperazione(user, "annulla_impegno", body, esito, "confermato_da_professionista");
+  const messaggio = await inviaRispostaInterna(body.conversation_id, "Ok, annullo l'appuntamento. Ci risentiamo per fissarne un altro.", ctx);
+  return send(res, 200, { confermato: true, esito, messaggio });
+}
+
+/* ============================================================
    Dati iniziali per un utente appena registrato
    ============================================================ */
 
@@ -1259,6 +1661,8 @@ export default async function handler(req, res) {
         endpoints: {
           ai: "POST /api?action=ai",
           assistant: "POST /api?action=assistant",
+          analizza_messaggio: "POST /api?action=analizza_messaggio",
+          rispondi_richiesta_cliente: "POST /api?action=rispondi_richiesta_cliente",
           transcribe: "POST /api?action=transcribe",
           seed: "POST /api?action=seed",
           resources: "GET|POST|PATCH|DELETE /api?resource=<nome>",
@@ -1270,6 +1674,8 @@ export default async function handler(req, res) {
 
     if (action === "ai") return await handleAI(req, res);
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
+    if (action === "analizza_messaggio") return await handleAnalizzaMessaggio(req, res, user, accessToken);
+    if (action === "rispondi_richiesta_cliente") return await handleRispondiRichiestaCliente(req, res, user, accessToken);
     if (action === "transcribe") return await handleTranscribe(req, res);
     if (action === "seed") return await handleSeed(req, res, user, accessToken);
     if (resource) return await handleResource(req, res, resource, user, accessToken);
