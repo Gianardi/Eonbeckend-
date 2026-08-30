@@ -2304,6 +2304,8 @@
         </div>
         <div id="prospectArchiveList" style="padding:8px 0 16px;"></div>
       </div>
+
+      <div id="clientArchiviatiToggle" style="display:none; text-align:center; padding:10px; color:var(--faint); cursor:pointer; font-size:13px;"></div>
     </div>
 
     <!-- ==================== PAGINA: OBIETTIVI ==================== -->
@@ -2487,6 +2489,29 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
+        <div class="azienda-link-card" data-page="cestino">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Cestino</div>
+            <div class="module-sub">Clienti, messaggi e altro che hai eliminato di recente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Sotto-pagina: Cestino ===== -->
+    <div class="page" id="page-cestino">
+      <div class="back-link" data-page="gestisci-azienda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna a Gestisci Azienda
+      </div>
+      <div class="card-panel">
+        <div class="card-header"><h2>Cestino</h2></div>
+        <p class="module-sub" style="padding:0 4px 12px;">Quello che elimini finisce qui prima di sparire per sempre: da qui puoi ripristinarlo o eliminarlo per davvero.</p>
+        <div id="cestinoList" class="azienda-list"></div>
       </div>
     </div>
 
@@ -2872,6 +2897,12 @@
               </div>
               <svg class="chat-fs-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
             </div>
+            <button type="button" class="row-action-btn" id="chatArchiviaBtn" title="Archivia questa chat" style="margin-left:auto;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+            </button>
+            <button type="button" class="row-action-btn" id="chatEliminaBtn" title="Elimina questa chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            </button>
           </div>
           <div id="chatContextPin"></div>
           <div id="chatSuggestions"></div>
@@ -2970,9 +3001,27 @@ function isDbReady(){
   return BACKEND_CONFIGURED && !!currentSession && !!supabaseClient;
 }
 
+/* Tabelle col cestino: "eliminare" non cancella subito, marca la riga
+   con deleted_at (vedi dbDelete). Le liste normali (dbSelect) escludono
+   sempre quelle righe; solo la schermata Cestino le mostra (dbSelectCestino). */
+const TABELLE_CON_CESTINO = new Set([
+  "clients", "opportunities", "employees", "tasks", "assigned_tasks",
+  "payments", "incomes", "goals", "conversations", "messages",
+]);
+
 async function dbSelect(table){
-  const { data, error } = await supabaseClient.from(table).select("*").order("created_at", { ascending:true });
+  let query = supabaseClient.from(table).select("*").order("created_at", { ascending:true });
+  if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
+  const { data, error } = await query;
   if(error){ console.error("Errore lettura " + table + ":", error.message); return []; }
+  return data || [];
+}
+
+/* Solo per la schermata Cestino: le righe eliminate, non quelle vive. */
+async function dbSelectCestino(table){
+  if(!TABELLE_CON_CESTINO.has(table)) return [];
+  const { data, error } = await supabaseClient.from(table).select("*").not("deleted_at", "is", null).order("deleted_at", { ascending:false });
+  if(error){ console.error("Errore lettura cestino " + table + ":", error.message); return []; }
   return data || [];
 }
 
@@ -2996,9 +3045,31 @@ async function dbUpdate(table, id, patch){
   if(error) console.error("Errore aggiornamento " + table + ":", error.message);
 }
 
+/* "Eliminare" sposta nel cestino (marca deleted_at), non cancella
+   subito — vale per ogni chiamante esistente (clienti, opportunità,
+   pagamenti, incassi, obiettivi, appuntamenti, messaggi...): tutti
+   passano da qui, quindi il cestino li copre automaticamente senza
+   dover toccare ogni punto in cui viene chiamato dbDelete. */
 async function dbDelete(table, id){
-  const { error } = await supabaseClient.from(table).delete().eq("id", id);
+  if(!TABELLE_CON_CESTINO.has(table)){
+    const { error } = await supabaseClient.from(table).delete().eq("id", id);
+    if(error) console.error("Errore eliminazione " + table + ":", error.message);
+    return;
+  }
+  const { error } = await supabaseClient.from(table).update({ deleted_at: new Date().toISOString() }).eq("id", id);
   if(error) console.error("Errore eliminazione " + table + ":", error.message);
+}
+
+/* Cestino -> torna come prima. */
+async function dbRestore(table, id){
+  const { error } = await supabaseClient.from(table).update({ deleted_at: null }).eq("id", id);
+  if(error) console.error("Errore ripristino " + table + ":", error.message);
+}
+
+/* Cestino -> cancellazione vera, senza rimedio. */
+async function dbEliminaPerSempre(table, id){
+  const { error } = await supabaseClient.from(table).delete().eq("id", id);
+  if(error) console.error("Errore eliminazione definitiva " + table + ":", error.message);
 }
 
 /* Quando un utente nuovo si iscrive, gli diamo gli stessi dati di esempio
@@ -3037,7 +3108,7 @@ async function loadUserDataFromDB(){
   ]);
 
   clients.length = 0; dbClients.forEach(c => clients.push({
-    id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description, last:c.last_contact, phone:c.phone || "", color:c.color
+    id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description, last:c.last_contact, phone:c.phone || "", color:c.color, archived:!!c.is_archived
   }));
   opportunities.length = 0; dbOpps.forEach(o => opportunities.push({
     id:o.id, name:o.name, client:o.client_name, value:Number(o.value)||0, probability:o.probability, deadline:o.deadline, stage:o.stage
@@ -3072,7 +3143,7 @@ async function loadChatsFromDB(){
   if(dbConvs.length === 0) return;
 
   const { data: allMsgs } = await supabaseClient
-    .from("messages").select("*").order("created_at", { ascending:true });
+    .from("messages").select("*").is("deleted_at", null).order("created_at", { ascending:true });
 
   dbConvs.forEach(c => {
     const msgs = (allMsgs || []).filter(m => m.conversation_id === c.id).map(m => ({
@@ -3107,6 +3178,98 @@ async function loadChatsFromDB(){
   });
 }
 
+/* Dopo una modifica dal Cestino (ripristina/elimina per sempre) i dati
+   veri possono essere cambiati ovunque: ricarica tutto e ridisegna ogni
+   schermata invece di indovinare quale singolo array è coinvolto. */
+async function ricaricaTuttoERidisegna(){
+  if(!isDbReady()) return;
+  /* loadChatsFromDB ricostruisce chats da zero: il vecchio
+     activeChatIndex potrebbe finire per puntare a una chat diversa
+     dopo il ricaricamento. Lo ritroviamo per id invece di fidarci
+     della posizione. */
+  const idChatAttiva = activeChatIndex !== null && chats[activeChatIndex] ? chats[activeChatIndex].id : null;
+
+  await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
+
+  activeChatIndex = idChatAttiva ? chats.findIndex(c => c.id === idChatAttiva) : -1;
+  if(activeChatIndex === -1){
+    activeChatIndex = null;
+    document.getElementById("chatSlider").classList.remove("show-conv");
+  }
+
+  renderClientArchive(); renderOpportunities(); renderPayments(); renderIncomes();
+  renderGoals(); renderTasks(); renderCalendar(); renderAssignedTasks();
+  renderChatList(); renderChatWindow(); renderRing(); renderDifficulty();
+}
+
+/* Etichette leggibili per la schermata Cestino: chiave = nome tabella. */
+const ETICHETTA_CESTINO = {
+  clients: "Cliente", opportunities: "Opportunità", employees: "Dipendente",
+  tasks: "Impegno", assigned_tasks: "Compito assegnato", payments: "Pagamento",
+  incomes: "Incasso", goals: "Obiettivo", conversations: "Conversazione", messages: "Messaggio",
+};
+
+async function renderCestino(){
+  const wrap = document.getElementById("cestinoList");
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="empty-hint">Carico…</div>';
+
+  if(!isDbReady()){
+    wrap.innerHTML = '<div class="empty-hint">Il cestino è disponibile solo quando sei collegato al database.</div>';
+    return;
+  }
+
+  const tabelle = Object.keys(ETICHETTA_CESTINO);
+  const risultati = await Promise.all(tabelle.map(t => dbSelectCestino(t)));
+  const righe = [];
+  tabelle.forEach((t, i) => (risultati[i] || []).forEach(r => righe.push({ tabella: t, riga: r })));
+  righe.sort((a, b) => new Date(b.riga.deleted_at) - new Date(a.riga.deleted_at));
+
+  wrap.innerHTML = "";
+  if(righe.length === 0){
+    wrap.innerHTML = '<div class="empty-hint"><b>Il cestino è vuoto</b>Quello che elimini finisce qui prima di sparire per sempre.</div>';
+    return;
+  }
+
+  righe.forEach(({ tabella, riga }) => {
+    const nome = riga.name || riga.title || riga.contact_name || riga.body || riga.text || riga.supplier || riga.client_name || "(senza nome)";
+    const quando = riga.deleted_at ? new Date(riga.deleted_at).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" }) : "";
+    const row = document.createElement("div");
+    row.className = "azienda-link-card";
+    row.innerHTML = `
+      <div class="azienda-link-card-body">
+        <div class="module-title">${nome}</div>
+        <div class="module-sub">${ETICHETTA_CESTINO[tabella]} · eliminato il ${quando}</div>
+      </div>
+      <button type="button" class="row-action-btn cestino-restore-btn" title="Ripristina" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+      <button type="button" class="row-action-btn cestino-forever-btn" title="Elimina per sempre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
+    `;
+    row.querySelector(".cestino-restore-btn").addEventListener("click", async () => {
+      await dbRestore(tabella, riga.id);
+      await ricaricaTuttoERidisegna();
+      renderCestino();
+    });
+    row.querySelector(".cestino-forever-btn").addEventListener("click", async () => {
+      if(!confirm('Eliminare per sempre "' + nome + '"? Non si potrà più recuperare.')) return;
+      if(tabella === "conversations"){
+        /* I messaggi non vengono cestinati insieme alla conversazione:
+           senza cancellarli qui esplicitamente resterebbero orfani nel
+           database, invisibili ovunque (nessuna conversazione li mostra,
+           e non hanno un proprio deleted_at che li porti nel cestino). */
+        const { data: msgs } = await supabaseClient.from("messages").select("id").eq("conversation_id", riga.id);
+        await Promise.all((msgs || []).map(m => dbEliminaPerSempre("messages", m.id)));
+      }
+      await dbEliminaPerSempre(tabella, riga.id);
+      renderCestino();
+    });
+    wrap.appendChild(row);
+  });
+}
+
 /* I dati di preventivi e fatture viaggiano insieme al messaggio,
    cosi' il PDF si puo' rigenerare in qualsiasi momento. */
 function leggiDatiDocumento(m){
@@ -3134,6 +3297,21 @@ async function ensureConversationFor(client){
   if(chat) return chat;
 
   if(isDbReady()){
+    /* Se la conversazione esiste ma è nel cestino, la ripristiniamo
+       invece di crearne una seconda: due copie separerebbero la
+       cronologia dei messaggi di questo cliente. */
+    const cestinate = await dbSelectCestino("conversations");
+    const trovataNelCestino = cestinate.find(c => c.contact_name === client.name);
+    if(trovataNelCestino){
+      await dbRestore("conversations", trovataNelCestino.id);
+      /* La conversazione ripristinata porta con sé i messaggi già
+         scambiati (non erano stati cestinati insieme a lei): li
+         ricarichiamo per non mostrarla vuota. */
+      await loadChatsFromDB();
+      chat = chats.find(c => c.id === trovataNelCestino.id);
+      if(chat) return chat;
+    }
+
     const saved = await dbInsert("conversations", {
       contact_name: client.name,
       is_client: true,
@@ -4415,6 +4593,7 @@ const chats = [
 ];
 let activeChatIndex = null;
 let chatFilter = "urgenti";
+let mostraClientiArchiviati = false;
 
 /* ============ TASK OGGI ============ */
 const listAI = document.getElementById("taskListAI");
@@ -4571,6 +4750,11 @@ function buildClientCard(c){
       <div class="row-action-btn" title="Chiama"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg></div>
       <div class="row-action-btn client-link-btn" title="Invia il link al cliente" style="margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></div>
       <div class="row-action-btn client-edit-btn" title="Modifica"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></div>
+      <div class="row-action-btn client-archive-btn" title="${c.archived ? "Riattiva" : "Archivia"}">
+        ${c.archived
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>'}
+      </div>
     </div>
     <button class="client-chat-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
@@ -4588,6 +4772,12 @@ function buildClientCard(c){
   card.querySelector(".client-link-btn").addEventListener("click", async (e) => {
     e.stopPropagation();
     await shareClientLink(c);
+  });
+  card.querySelector(".client-archive-btn").addEventListener("click", async (e) => {
+    e.stopPropagation();
+    c.archived = !c.archived;
+    if(isDbReady() && c.id) await dbUpdate("clients", c.id, { is_archived: c.archived });
+    renderClientArchive();
   });
   return card;
 }
@@ -4633,8 +4823,11 @@ function renderClientArchive(){
     c.desc.toLowerCase().includes(query) ||
     clientStatusLabel[c.status].toLowerCase().includes(query);
 
-  const activeClients = clients.filter(c => c.status !== "trattativa" && matches(c));
-  const prospects = clients.filter(c => c.status === "trattativa" && matches(c));
+  const visibili = mostraClientiArchiviati ? clients : clients.filter(c => !c.archived);
+  const archiviatiCount = clients.filter(c => c.archived).length;
+
+  const activeClients = visibili.filter(c => c.status !== "trattativa" && matches(c));
+  const prospects = visibili.filter(c => c.status === "trattativa" && matches(c));
 
   const clientWrap = document.getElementById("clientArchiveList");
   clientWrap.innerHTML = "";
@@ -4653,9 +4846,25 @@ function renderClientArchive(){
   }
   prospects.forEach(c => prospectWrap.appendChild(buildClientCard(c)));
   document.getElementById("prospectCount").textContent = prospects.length;
+
+  const toggleEl = document.getElementById("clientArchiviatiToggle");
+  if(toggleEl){
+    if(archiviatiCount === 0 && !mostraClientiArchiviati){
+      toggleEl.style.display = "none";
+    } else {
+      toggleEl.style.display = "block";
+      toggleEl.textContent = mostraClientiArchiviati
+        ? "Nascondi i clienti archiviati"
+        : "Mostra i clienti archiviati (" + archiviatiCount + ")";
+    }
+  }
 }
 
 document.getElementById("clientSearchInput").addEventListener("input", renderClientArchive);
+document.getElementById("clientArchiviatiToggle").addEventListener("click", () => {
+  mostraClientiArchiviati = !mostraClientiArchiviati;
+  renderClientArchive();
+});
 document.getElementById("clientVoiceBtn").addEventListener("click", function(){ this.classList.toggle("listening"); });
 
 /* ============================================================
@@ -5206,6 +5415,9 @@ document.getElementById("sheetDeleteBtn").addEventListener("click", async () => 
   const item = sheetState.editing;
   if(!form || !item) return;
 
+  const nome = item.name || item.title || ("questa/o " + form.title);
+  if(!confirm('Spostare "' + nome + '" nel cestino? Da lì potrai ripristinarla/o o eliminarla/o per sempre.')) return;
+
   const arr = form.array();
   const idx = arr.indexOf(item);
   if(idx > -1) arr.splice(idx, 1);
@@ -5340,6 +5552,7 @@ function renderGoals(){
     `;
     row.querySelector(".goal-del-mini").addEventListener("click", (e) => {
       e.stopPropagation();
+      if(!confirm('Spostare "' + g.text + '" nel cestino?')) return;
       const idx = goals.indexOf(g);
       goals.splice(idx,1);
       if(isDbReady() && g.id) dbDelete("goals", g.id);
@@ -5956,6 +6169,34 @@ document.querySelectorAll("[data-catfilter]").forEach(icon => {
 });
 
 document.getElementById("chatFilterArchivio").addEventListener("click", () => { chatFilter = "archivio"; updateChatFilterTabs(); renderChatList(); });
+
+document.getElementById("chatArchiviaBtn").addEventListener("click", async () => {
+  if(activeChatIndex === null) return;
+  const c = chats[activeChatIndex];
+  c.archived = !c.archived;
+  if(isDbReady() && c.id) await dbUpdate("conversations", c.id, { is_archived: c.archived });
+  renderChatList(); renderChatWindow();
+});
+
+document.getElementById("chatEliminaBtn").addEventListener("click", async () => {
+  if(activeChatIndex === null) return;
+  const c = chats[activeChatIndex];
+  if(!confirm('Spostare la chat con "' + c.name + '" nel cestino? Da lì potrai ripristinarla.')) return;
+  if(isDbReady() && c.id) await dbDelete("conversations", c.id);
+  /* Non ci fidiamo più di activeChatIndex dopo l'attesa: nel frattempo
+     l'utente potrebbe aver aperto un'altra chat, e quell'indice ora
+     punterebbe alla conversazione sbagliata. Rimuoviamo per id, e
+     decidiamo se chiudere la vista solo guardando l'oggetto, non
+     l'indice (che sta per cambiare con lo splice). */
+  const eraAttiva = activeChatIndex !== null && chats[activeChatIndex] === c;
+  const idx = c.id ? chats.findIndex(x => x.id === c.id) : chats.indexOf(c);
+  if(idx > -1) chats.splice(idx, 1);
+  if(eraAttiva){
+    activeChatIndex = null;
+    document.getElementById("chatSlider").classList.remove("show-conv");
+  }
+  renderChatList(); renderChatWindow();
+});
 document.getElementById("chatFilterUrgenti").addEventListener("click", () => { chatFilter = "urgenti"; updateChatFilterTabs(); renderChatList(); });
 document.getElementById("chatFilterClienti").addEventListener("click", () => { chatFilter = "clienti"; updateChatFilterTabs(); renderChatList(); });
 document.getElementById("chatFilterChiudere").addEventListener("click", () => { chatFilter = "chiudere"; updateChatFilterTabs(); renderChatList(); });
@@ -5999,12 +6240,16 @@ function renderChatWindow(){
   const avatarEl = document.getElementById("chatWinAvatar");
   const messagesEl = document.getElementById("chatMessages");
   const pinEl = document.getElementById("chatContextPin");
+  const archiviaBtn = document.getElementById("chatArchiviaBtn");
+  const eliminaBtn = document.getElementById("chatEliminaBtn");
   if(activeChatIndex === null){
     nameEl.textContent = "Seleziona una chat";
     statusEl.textContent = "";
     avatarEl.textContent = "–";
     messagesEl.innerHTML = "";
     pinEl.innerHTML = "";
+    if(archiviaBtn) archiviaBtn.style.display = "none";
+    if(eliminaBtn) eliminaBtn.style.display = "none";
     return;
   }
   const c = chats[activeChatIndex];
@@ -6012,6 +6257,12 @@ function renderChatWindow(){
   statusEl.textContent = c.online ? "online" : "offline";
   avatarEl.textContent = c.name.split(" ").map(w=>w[0]).join("").toUpperCase();
   avatarEl.style.background = c.online ? "var(--wa)" : "var(--faint)";
+  if(archiviaBtn){
+    archiviaBtn.style.display = "flex";
+    archiviaBtn.title = c.archived ? "Rimuovi dall'archivio" : "Archivia questa chat";
+    archiviaBtn.classList.toggle("active", !!c.archived);
+  }
+  if(eliminaBtn) eliminaBtn.style.display = "flex";
 
   pinEl.innerHTML = "";
   if(c.isClient){
@@ -6125,10 +6376,29 @@ function renderChatWindow(){
       return;
     }
 
+    const lato = m.from === "me" ? "me" : "them";
+    const riga = document.createElement("div");
+    riga.style.cssText = "display:flex; align-items:flex-end; gap:4px; justify-content:" + (lato === "me" ? "flex-end" : "flex-start") + ";";
+
     const b = document.createElement("div");
-    b.className = "bubble " + (m.from === "me" ? "me" : "them");
+    b.className = "bubble " + lato;
     b.innerHTML = m.text + '<span class="bubble-time">' + m.time + '</span>';
-    messagesEl.appendChild(b);
+
+    const del = document.createElement("div");
+    del.className = "goal-del-mini";
+    del.title = "Elimina messaggio";
+    del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+    del.addEventListener("click", async () => {
+      if(!confirm("Spostare questo messaggio nel cestino?")) return;
+      const idx = c.messages.indexOf(m);
+      if(idx > -1) c.messages.splice(idx, 1);
+      if(isDbReady() && m.id) await dbDelete("messages", m.id);
+      renderChatWindow();
+    });
+
+    if(lato === "me"){ riga.appendChild(del); riga.appendChild(b); }
+    else { riga.appendChild(b); riga.appendChild(del); }
+    messagesEl.appendChild(riga);
   });
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -7091,6 +7361,7 @@ const pageMeta = {
   calendario: { title:"Calendario", sub:null },
   chiamate: { title:"Chiamate", sub:null },
   revisioni: { title:"Revisioni Portafoglio", sub:null },
+  cestino: { title:"Cestino", sub:null },
 };
 
 const tabForPage = {
@@ -7102,7 +7373,8 @@ const tabForPage = {
   "crea-fattura":"azienda", "crea-preventivo":"azienda", regalo:"azienda", business:"azienda",
   "assemblee":"azienda", "udienze":"azienda", "revisioni":"azienda",
   opportunita:"opportunita",
-  calendario:"home", chiamate:"home"
+  calendario:"home", chiamate:"home",
+  cestino:"azienda"
 };
 
 function navigateTo(page){
@@ -7140,6 +7412,8 @@ function navigateTo(page){
   if(page === "chat"){
     document.getElementById("chatSlider").classList.remove("show-conv");
   }
+
+  if(page === "cestino") renderCestino();
 
   window.scrollTo({ top:0, behavior:"instant" in window ? "instant" : "auto" });
 }
