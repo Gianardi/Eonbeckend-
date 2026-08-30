@@ -500,6 +500,41 @@ jobs:
             -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq 'length')
           echo "Conversazione presente nel cestino dopo la conferma: $CONV_CESTINO (atteso: 1)"
 
+      - name: "Test 16 — AI: trova un impegno già esistente per nome (senza id né data) e lo elimina"
+        if: steps.login.outputs.puo_procedere == 'si'
+        env:
+          SUPABASE_URL: ${{ steps.config.outputs.supabase_url }}
+          ANON_KEY: ${{ steps.config.outputs.anon }}
+          TOKEN: ${{ steps.login.outputs.token }}
+          PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          # Creato DIRETTAMENTE su Supabase (non dall'assistente): simula
+          # un impegno già esistente da prima di questa conversazione con
+          # l'AI, esattamente come nel caso segnalato dall'utente (un
+          # appuntamento creato giorni fa, di cui l'AI non ha memoria).
+          curl -sS -X POST "$PREVIEW_URL/api?resource=tasks" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"title":"ZZZ-test-ricerca-impegno-9501","owner_type":"user","status":"todo","time":"domani"}' > /dev/null
+
+          RESP=$(curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"messaggio":"Elimina l'\''impegno ZZZ-test-ricerca-impegno-9501."}')
+          echo "$RESP" | jq . || echo "$RESP"
+
+          STATO=$(echo "$RESP" | jq -r '.stato')
+          RUNID=$(echo "$RESP" | jq -r '.runId // empty')
+          echo "Stato dopo aver nominato l'impegno per titolo (senza id/data): $STATO (atteso: in_attesa_conferma, trovato tramite cerca_impegno)"
+
+          if [ -n "$RUNID" ]; then
+            curl -sS -X POST "$PREVIEW_URL/api?action=assistant" \
+              -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              -d "{\"runId\":\"$RUNID\",\"conferma\":true}" | jq . || true
+          fi
+
+          CESTINO=$(curl -sS "$SUPABASE_URL/rest/v1/tasks?select=id&title=eq.ZZZ-test-ricerca-impegno-9501&deleted_at=not.is.null" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | jq 'length')
+          echo "Impegno trovato per nome e presente nel cestino dopo la conferma: $CESTINO (atteso: 1)"
+
       - name: "Pulizia mirata — solo le righe create da questo test, mai un cancella-tutto"
         if: always() && steps.login.outputs.puo_procedere == 'si'
         env:
@@ -572,6 +607,10 @@ jobs:
           curl -sS -X DELETE "$SUPABASE_URL/rest/v1/tasks?title=eq.ZZZ-test-elimina-impegno-9401" \
             -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
           curl -sS -X DELETE "$SUPABASE_URL/rest/v1/clients?name=eq.ZZZ-TEST-AI-ELIMINA-9402" \
+            -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
+
+          # L'impegno del Test 16.
+          curl -sS -X DELETE "$SUPABASE_URL/rest/v1/tasks?title=eq.ZZZ-test-ricerca-impegno-9501" \
             -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" || true
 
           echo "Pulizia completata: toccate solo le righe create da questo test."
