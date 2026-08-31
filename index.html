@@ -493,6 +493,38 @@
   .section-label .badge-ai svg{ width:10px;height:10px; }
   .section-divider{ height:1px; background:var(--border); margin:6px 16px 0; }
 
+  /* Le 4 schede del cantiere sotto la Home: bianco e nero, stesso
+     linguaggio del riquadro sopra (icona scura piena, card chiara). */
+  .cantiere-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:18px; }
+  .cantiere-card{
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 14px; display:flex; flex-direction:column; align-items:flex-start; gap:9px;
+    cursor:pointer; text-align:left; font-family:inherit; -webkit-tap-highlight-color:transparent;
+  }
+  .cantiere-card-icon{
+    width:36px; height:36px; border-radius:11px; background:var(--text); color:#fff;
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .cantiere-card-icon svg{ width:17px; height:17px; }
+  .cantiere-card-title{ font-family:'Manrope'; font-size:13.5px; font-weight:800; color:var(--text); }
+  .cantiere-card-sub{ font-size:11px; color:var(--muted); margin-top:-5px; }
+
+  .cantiere-foto-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+  .cantiere-foto-item{ position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; background:var(--border); }
+  .cantiere-foto-item img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .cantiere-foto-elimina{
+    position:absolute; top:6px; right:6px; width:24px; height:24px; border-radius:50%;
+    background:rgba(14,20,36,.72); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .cantiere-foto-elimina svg{ width:12px; height:12px; stroke:#fff; }
+
+  .cantiere-appunto{ padding:12px 16px; border-bottom:1px solid var(--border); display:flex; gap:10px; align-items:flex-start; }
+  .cantiere-appunto:last-child{ border-bottom:none; }
+  .cantiere-appunto-testo{ flex:1; min-width:0; font-size:13px; color:var(--text); line-height:1.5; white-space:pre-line; }
+  .cantiere-appunto-data{ font-size:10.5px; color:var(--faint); margin-top:4px; }
+  .cantiere-appunto-elimina{ flex:none; width:26px; height:26px; border-radius:8px; border:none; background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--faint); }
+  .cantiere-appunto-elimina svg{ width:14px; height:14px; }
+
   .task-list{ padding:4px 0 6px; display:flex; flex-direction:column; gap:8px; }
   .task-list.manual{ padding-bottom:4px; }
   .task-row{
@@ -2046,6 +2078,130 @@
         </div>
       </div>
 
+      <div class="section-label">Cantiere</div>
+      <div class="cantiere-grid">
+        <button class="cantiere-card" type="button" data-page="cantiere-cliente">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="cantiere-card-title">Cliente cantiere</div>
+          <div class="cantiere-card-sub" id="cantiereClienteSub">Nessun cliente collegato</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="cantiere-appunti">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div class="cantiere-card-title">Appunti</div>
+          <div class="cantiere-card-sub" id="cantiereAppuntiSub">Nessun appunto</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="cantiere-documenti">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+          </div>
+          <div class="cantiere-card-title">Documenti</div>
+          <div class="cantiere-card-sub" id="cantiereDocumentiSub">Nessun documento</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="cantiere-foto">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <div class="cantiere-card-title">Foto cantiere</div>
+          <div class="cantiere-card-sub" id="cantiereFotoSub">Nessuna foto</div>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ==================== PAGINA: CLIENTE CANTIERE ==================== -->
+    <div class="page" id="page-cantiere-cliente">
+      <div class="back-link" data-page="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna alla Home
+      </div>
+
+      <div class="card-panel" style="margin-bottom:14px;">
+        <div class="card-header"><h2>Cliente collegato</h2></div>
+        <div id="cantiereClienteAttuale" style="padding:2px 16px 16px;"></div>
+      </div>
+
+      <div class="search" style="margin-bottom:12px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="cantiereClienteSearch" placeholder="Cerca cliente da collegare...">
+      </div>
+      <div id="cantiereClienteLista" class="azienda-list"></div>
+    </div>
+
+    <!-- ==================== PAGINA: APPUNTI CANTIERE ==================== -->
+    <div class="page" id="page-cantiere-appunti">
+      <div class="back-link" data-page="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna alla Home
+      </div>
+
+      <div class="home-hero" style="padding:2px 0 4px;">
+        <div class="home-hero-mic-wrap" style="margin-bottom:10px;">
+          <button class="home-hero-mic" id="cantiereAppuntiMic" aria-label="Tocca per dettare" type="button" style="width:84px; height:84px;">
+            <span class="home-hero-mic-ring"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" style="width:28px; height:28px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+          </button>
+        </div>
+        <div class="home-hero-hint" id="cantiereAppuntiHint" style="margin-bottom:14px;">Tocca il microfono per dettare, o scrivi</div>
+        <div class="home-hero-textwrap">
+          <textarea class="home-hero-campo" id="cantiereAppuntiCampo" rows="3" placeholder="Scrivi un appunto sul cantiere..."></textarea>
+          <button class="home-hero-send" id="cantiereAppuntiSend" aria-label="Salva appunto" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="card-panel">
+        <div class="card-header"><h2>Appunti salvati</h2><span class="count" id="cantiereAppuntiCount">0</span></div>
+        <div id="cantiereAppuntiLista"></div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGINA: DOCUMENTI CANTIERE ==================== -->
+    <div class="page" id="page-cantiere-documenti">
+      <div class="back-link" data-page="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna alla Home
+      </div>
+
+      <input type="file" id="cantiereDocumentiInput" accept=".pdf,.doc,.docx,.xls,.xlsx,image/*" style="display:none;">
+      <button class="home-hero-cal" id="cantiereDocumentiCaricaBtn" type="button" style="margin-bottom:16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+        <div class="home-hero-cal-testo">
+          <b>Carica un documento</b>
+          <span id="cantiereDocumentiCaricaSub">Si aggiunge subito all'elenco qui sotto</span>
+        </div>
+      </button>
+
+      <div class="card-panel">
+        <div class="card-header"><h2>Documenti</h2><span class="count" id="cantiereDocumentiCount">0</span></div>
+        <div id="cantiereDocumentiLista" class="azienda-list"></div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGINA: FOTO CANTIERE ==================== -->
+    <div class="page" id="page-cantiere-foto">
+      <div class="back-link" data-page="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna alla Home
+      </div>
+
+      <input type="file" id="cantiereFotoInput" accept="image/*" capture="environment" style="display:none;">
+      <button class="home-hero-cal" id="cantiereFotoScattaBtn" type="button" style="margin-bottom:16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <div class="home-hero-cal-testo">
+          <b>Scatta o carica una foto</b>
+          <span id="cantiereFotoCaricaSub">Si aggiunge subito qui sotto</span>
+        </div>
+      </button>
+
+      <div class="card-panel">
+        <div class="card-header"><h2>Foto</h2><span class="count" id="cantiereFotoCount">0</span></div>
+        <div id="cantiereFotoGrid" class="cantiere-foto-grid" style="padding:8px 16px 16px;"></div>
+      </div>
     </div>
 
     <!-- ==================== PAGINA: CALENDARIO ==================== -->
@@ -3064,6 +3220,7 @@ function isDbReady(){
 const TABELLE_CON_CESTINO = new Set([
   "clients", "opportunities", "employees", "tasks", "assigned_tasks",
   "payments", "incomes", "goals", "conversations", "messages",
+  "cantiere_foto", "cantiere_documenti", "cantiere_appunti",
 ]);
 
 async function dbSelect(table){
@@ -3158,10 +3315,11 @@ async function seedUserData(profession){
    degli array in memoria (clients, opportunities, ecc.) con le sue righe
    vere dal database, invece dei dati demo di professionData. */
 async function loadUserDataFromDB(){
-  const [dbClients, dbOpps, dbEmployees, dbPayments, dbIncomes, dbTasks, dbGoals, dbAssigned] = await Promise.all([
+  const [dbClients, dbOpps, dbEmployees, dbPayments, dbIncomes, dbTasks, dbGoals, dbAssigned, dbCantiereFoto, dbCantiereDocumenti, dbCantiereAppunti, dbCantiereCliente] = await Promise.all([
     dbSelect("clients"), dbSelect("opportunities"), dbSelect("employees"),
     dbSelect("payments"), dbSelect("incomes"), dbSelect("tasks"),
-    dbSelect("goals"), dbSelect("assigned_tasks")
+    dbSelect("goals"), dbSelect("assigned_tasks"),
+    dbSelect("cantiere_foto"), dbSelect("cantiere_documenti"), dbSelect("cantiere_appunti"), dbSelect("cantiere_cliente")
   ]);
 
   clients.length = 0; dbClients.forEach(c => clients.push({
@@ -3186,6 +3344,14 @@ async function loadUserDataFromDB(){
   assignedTasks.length = 0; dbAssigned.forEach(a => assignedTasks.push({
     id:a.id, title:a.title, deadline:a.deadline, employees:a.employee_names || []
   }));
+
+  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at }));
+  cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
+  cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push({ id:a.id, testo:a.testo, created:a.created_at }));
+  const rigaCantiereCliente = dbCantiereCliente[0];
+  const clienteCollegato = rigaCantiereCliente ? clients.find(c => c.id === rigaCantiereCliente.client_id) : null;
+  cantiereClienteCollegato = clienteCollegato ? { id:clienteCollegato.id, name:clienteCollegato.name } : null;
+  aggiornaCantiereSottotitoli();
 }
 
 /* ============ CONVERSAZIONI E MESSAGGI VERI ============
@@ -3264,6 +3430,7 @@ const ETICHETTA_CESTINO = {
   clients: "Cliente", opportunities: "Opportunità", employees: "Dipendente",
   tasks: "Impegno", assigned_tasks: "Compito assegnato", payments: "Pagamento",
   incomes: "Incasso", goals: "Obiettivo", conversations: "Conversazione", messages: "Messaggio",
+  cantiere_foto: "Foto cantiere", cantiere_documenti: "Documento cantiere", cantiere_appunti: "Appunto cantiere",
 };
 
 async function renderCestino(){
@@ -3289,7 +3456,8 @@ async function renderCestino(){
   }
 
   righe.forEach(({ tabella, riga }) => {
-    const nome = riga.name || riga.title || riga.contact_name || riga.body || riga.text || riga.supplier || riga.client_name || "(senza nome)";
+    const nome = riga.name || riga.title || riga.contact_name || riga.body || riga.text || riga.supplier || riga.client_name
+      || riga.nome || riga.testo || (tabella === "cantiere_foto" ? "Foto" : "(senza nome)");
     const quando = riga.deleted_at ? new Date(riga.deleted_at).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" }) : "";
     const row = document.createElement("div");
     row.className = "azienda-link-card";
@@ -3809,6 +3977,14 @@ const employees = [
 ];
 let selectedEmployees = [];
 const assignedTasks = [];
+
+/* Cantiere: un solo cantiere/progetto per volta, condiviso per tutta
+   l'app (non un cantiere per cliente) — foto, documenti e appunti
+   restano quindi semplici liste, senza un id di cantiere a parte. */
+const cantiereFoto = [];
+const cantiereDocumenti = [];
+const cantiereAppunti = [];
+let cantiereClienteCollegato = null; // { id, name } del cliente collegato, o null
 
 const payments = [
   { supplier:"Edilfornitura S.p.A.", desc:"Materiali cantiere Bianchi", amount:8400, due:"05 ago 2026", status:"dapagare" },
@@ -6697,6 +6873,392 @@ document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
   if(e.target.id === "aiHubOverlay") chiudiHubAI();
 });
 
+/* ============ CANTIERE: cliente collegato, foto, documenti, appunti ============
+   Un solo cantiere/progetto per volta, condiviso per tutta l'app: le
+   card sotto la Home riassumono cosa c'è già; le pagine dedicate
+   mostrano l'elenco completo e permettono di aggiungere/togliere.
+   Foto e documenti riusano lo stesso bucket "eon-files" già usato per
+   gli allegati in chat, solo con un percorso diverso. */
+
+function aggiornaCantiereSottotitoli(){
+  const subCliente = document.getElementById("cantiereClienteSub");
+  if(subCliente) subCliente.textContent = cantiereClienteCollegato ? cantiereClienteCollegato.name : "Nessun cliente collegato";
+
+  const subAppunti = document.getElementById("cantiereAppuntiSub");
+  if(subAppunti) subAppunti.textContent = cantiereAppunti.length === 0 ? "Nessun appunto" : (cantiereAppunti.length === 1 ? "1 appunto" : cantiereAppunti.length + " appunti");
+
+  const subDocumenti = document.getElementById("cantiereDocumentiSub");
+  if(subDocumenti) subDocumenti.textContent = cantiereDocumenti.length === 0 ? "Nessun documento" : (cantiereDocumenti.length === 1 ? "1 documento" : cantiereDocumenti.length + " documenti");
+
+  const subFoto = document.getElementById("cantiereFotoSub");
+  if(subFoto) subFoto.textContent = cantiereFoto.length === 0 ? "Nessuna foto" : (cantiereFoto.length === 1 ? "1 foto" : cantiereFoto.length + " foto");
+}
+
+/* ---- Cliente cantiere ---- */
+function renderCantiereCliente(){
+  const attuale = document.getElementById("cantiereClienteAttuale");
+  if(cantiereClienteCollegato){
+    attuale.innerHTML = "";
+    const riga = document.createElement("div");
+    riga.style.cssText = "display:flex; align-items:center; justify-content:space-between; gap:10px;";
+    const nome = document.createElement("div");
+    nome.style.cssText = "font-size:14px; font-weight:700; color:var(--text);";
+    nome.textContent = cantiereClienteCollegato.name;
+    const scollega = document.createElement("button");
+    scollega.type = "button";
+    scollega.style.cssText = "background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer;";
+    scollega.textContent = "Scollega";
+    scollega.addEventListener("click", () => collegaClienteCantiere(null));
+    riga.appendChild(nome); riga.appendChild(scollega);
+    attuale.appendChild(riga);
+  } else {
+    attuale.innerHTML = '<div class="empty-hint" style="padding:8px 0;">Nessun cliente collegato al cantiere in corso.</div>';
+  }
+  renderCantiereClienteLista(document.getElementById("cantiereClienteSearch").value || "");
+}
+
+function renderCantiereClienteLista(query){
+  const wrap = document.getElementById("cantiereClienteLista");
+  const q = query.trim().toLowerCase();
+  const risultati = clients
+    .filter(c => !c.archived && (!q || c.name.toLowerCase().includes(q)))
+    .filter(c => !cantiereClienteCollegato || c.id !== cantiereClienteCollegato.id);
+  wrap.innerHTML = "";
+  if(risultati.length === 0){
+    wrap.innerHTML = '<div class="empty-hint">Nessun cliente trovato.</div>';
+    return;
+  }
+  risultati.slice(0, 30).forEach(c => {
+    const card = document.createElement("div");
+    card.className = "azienda-link-card";
+    const body = document.createElement("div");
+    body.className = "azienda-link-card-body";
+    const titolo = document.createElement("div");
+    titolo.className = "module-title";
+    titolo.textContent = c.name;
+    body.appendChild(titolo);
+    card.innerHTML = '<svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+    card.insertBefore(body, card.firstChild);
+    card.addEventListener("click", () => collegaClienteCantiere(c));
+    wrap.appendChild(card);
+  });
+}
+
+async function collegaClienteCantiere(cliente){
+  cantiereClienteCollegato = cliente ? { id:cliente.id, name:cliente.name } : null;
+  aggiornaCantiereSottotitoli();
+  renderCantiereCliente();
+  if(!isDbReady()) return;
+  const { error } = await supabaseClient.from("cantiere_cliente")
+    .upsert({ owner_id: currentSession.user.id, client_id: cliente ? cliente.id : null, updated_at: new Date().toISOString() });
+  if(error) console.error("Errore collegamento cliente cantiere:", error.message);
+}
+
+document.getElementById("cantiereClienteSearch").addEventListener("input", (e) => renderCantiereClienteLista(e.target.value));
+
+/* ---- Appunti cantiere: microfono che detta nel campo (nessun
+   collegamento all'assistente AI: qui è solo dettatura, come chiesto:
+   "prendere solo appunti", non chiedere all'AI di organizzarli). ---- */
+function renderCantiereAppunti(){
+  const wrap = document.getElementById("cantiereAppuntiLista");
+  document.getElementById("cantiereAppuntiCount").textContent = cantiereAppunti.length;
+  wrap.innerHTML = "";
+  if(cantiereAppunti.length === 0){
+    wrap.innerHTML = '<div class="empty-hint" style="padding:16px;">Ancora nessun appunto per questo cantiere.</div>';
+    return;
+  }
+  cantiereAppunti.slice().reverse().forEach(a => {
+    const riga = document.createElement("div");
+    riga.className = "cantiere-appunto";
+
+    const corpo = document.createElement("div");
+    corpo.style.cssText = "flex:1; min-width:0;";
+    const testoEl = document.createElement("div");
+    testoEl.className = "cantiere-appunto-testo";
+    testoEl.textContent = a.testo;
+    const dataEl = document.createElement("div");
+    dataEl.className = "cantiere-appunto-data";
+    dataEl.textContent = a.created ? new Date(a.created).toLocaleDateString("it-IT", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" }) : "";
+    corpo.appendChild(testoEl); corpo.appendChild(dataEl);
+
+    const elimina = document.createElement("button");
+    elimina.className = "cantiere-appunto-elimina";
+    elimina.type = "button";
+    elimina.setAttribute("aria-label", "Elimina appunto");
+    elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+    elimina.addEventListener("click", () => eliminaCantiereAppunto(a.id));
+
+    riga.appendChild(corpo);
+    riga.appendChild(elimina);
+    wrap.appendChild(riga);
+  });
+}
+
+async function eliminaCantiereAppunto(id){
+  const idx = cantiereAppunti.findIndex(a => a.id === id);
+  if(idx === -1) return;
+  cantiereAppunti.splice(idx, 1);
+  aggiornaCantiereSottotitoli();
+  renderCantiereAppunti();
+  if(isDbReady()) await dbDelete("cantiere_appunti", id);
+}
+
+/* Mic e salvataggio condividono lo stesso ambito: il salvataggio deve
+   poter fermare il microfono se è ancora in ascolto (altrimenti il
+   prossimo risultato dettato riscrive nel campo, appena svuotato, il
+   testo già salvato), e il microfono deve poter vedere se un
+   salvataggio è già in corso, per non farne partire un secondo. */
+(function collegaCantiereAppunti(){
+  const mic = document.getElementById("cantiereAppuntiMic");
+  const campo = document.getElementById("cantiereAppuntiCampo");
+  const send = document.getElementById("cantiereAppuntiSend");
+  const hint = document.getElementById("cantiereAppuntiHint");
+  if(!mic || !campo || !send || !hint) return;
+  const HINT_BASE = "Tocca il microfono per dettare, o scrivi";
+  let inCorso = false;
+  let attivo = false;
+  let fermaAscolto = () => {}; // sostituita sotto se il riconoscimento vocale è disponibile
+
+  async function salva(){
+    const testo = campo.value.trim();
+    if(testo.length < 2 || inCorso) return;
+    fermaAscolto();
+    if(!isDbReady()){
+      showAILanding("Non collegato", "Per salvare gli appunti serve la connessione al database.");
+      return;
+    }
+    inCorso = true;
+    send.disabled = true;
+    mic.disabled = true;
+    const creato = await dbInsert("cantiere_appunti", { testo });
+    inCorso = false;
+    send.disabled = false;
+    mic.disabled = false;
+    if(!creato) return;
+    cantiereAppunti.push({ id:creato.id, testo:creato.testo, created:creato.created_at });
+    campo.value = "";
+    aggiornaCantiereSottotitoli();
+    renderCantiereAppunti();
+  }
+  send.addEventListener("click", salva);
+
+  const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!RecognitionAPI){
+    mic.addEventListener("click", () => {
+      showAILanding("Microfono non disponibile", "Questo browser non supporta il riconoscimento vocale. Su iPhone funziona da Safari; su Android da Chrome. Puoi comunque scrivere qui sotto.");
+    });
+    return;
+  }
+  const riconoscitore = new RecognitionAPI();
+  riconoscitore.lang = "it-IT";
+  riconoscitore.continuous = false;
+  riconoscitore.interimResults = true;
+  let testoSessione = "";
+  let testoIniziale = "";
+
+  fermaAscolto = () => {
+    if(!attivo) return;
+    attivo = false;
+    try{ riconoscitore.stop(); }catch(err){ /* già fermo */ }
+  };
+
+  riconoscitore.onstart = () => {
+    testoSessione = "";
+    testoIniziale = campo.value;
+    mic.classList.add("ascolto");
+    hint.textContent = "Ti ascolto… tocca di nuovo per fermarti";
+  };
+  riconoscitore.onresult = (e) => {
+    let t = "";
+    for(let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    testoSessione = t;
+    campo.value = (testoIniziale ? testoIniziale + " " : "") + testoSessione;
+  };
+  riconoscitore.onerror = (e) => {
+    if(e.error === "no-speech" || e.error === "aborted") return;
+    mic.classList.remove("ascolto");
+    hint.textContent = HINT_BASE;
+    attivo = false;
+    if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+      showAILanding("Microfono non autorizzato", "Per dettare, consenti l'accesso al microfono nelle impostazioni del browser per questa pagina.");
+    }
+  };
+  riconoscitore.onend = () => {
+    mic.classList.remove("ascolto");
+    if(attivo){
+      try{ riconoscitore.start(); }
+      catch(err){ attivo = false; hint.textContent = HINT_BASE; }
+      return;
+    }
+    hint.textContent = HINT_BASE;
+  };
+
+  mic.addEventListener("click", () => {
+    if(attivo){ fermaAscolto(); return; }
+    if(inCorso) return;
+    attivo = true;
+    try{ riconoscitore.start(); }
+    catch(err){ console.warn("Impossibile avviare il microfono:", err.message); attivo = false; }
+  });
+})();
+
+/* ---- Documenti cantiere ---- */
+function renderCantiereDocumenti(){
+  const wrap = document.getElementById("cantiereDocumentiLista");
+  document.getElementById("cantiereDocumentiCount").textContent = cantiereDocumenti.length;
+  wrap.innerHTML = "";
+  if(cantiereDocumenti.length === 0){
+    wrap.innerHTML = '<div class="empty-hint">Ancora nessun documento per questo cantiere.</div>';
+    return;
+  }
+  cantiereDocumenti.slice().reverse().forEach(d => {
+    const card = document.createElement("div");
+    card.className = "azienda-link-card";
+
+    const icon = document.createElement("div");
+    icon.className = "module-icon";
+    icon.style.background = "var(--text)";
+    icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg>';
+
+    const body = document.createElement("div");
+    body.className = "azienda-link-card-body";
+    const titolo = document.createElement("div");
+    titolo.className = "module-title";
+    titolo.textContent = d.nome;
+    body.appendChild(titolo);
+
+    const elimina = document.createElement("button");
+    elimina.className = "cantiere-appunto-elimina";
+    elimina.type = "button";
+    elimina.setAttribute("aria-label", "Elimina documento");
+    elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+    elimina.addEventListener("click", (e) => { e.stopPropagation(); eliminaCantiereDocumento(d.id); });
+
+    card.appendChild(icon); card.appendChild(body); card.appendChild(elimina);
+    card.addEventListener("click", () => window.open(d.url, "_blank"));
+    wrap.appendChild(card);
+  });
+}
+
+async function caricaCantiereDocumento(file){
+  if(!isDbReady()){
+    showAILanding("Non collegato", "Per caricare documenti serve la connessione al database.");
+    return;
+  }
+  const btn = document.getElementById("cantiereDocumentiCaricaBtn");
+  const sub = document.getElementById("cantiereDocumentiCaricaSub");
+  btn.disabled = true;
+  sub.textContent = "Sto caricando " + file.name + "…";
+  try{
+    const percorso = currentSession.user.id + "/cantiere/documenti/" + nomeFileSicuro(file.name);
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
+    if(upErr) throw upErr;
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+    const creato = await dbInsert("cantiere_documenti", { url:pub.publicUrl, nome:file.name, tipo:file.type });
+    if(!creato) throw new Error("scrittura non riuscita");
+    cantiereDocumenti.push({ id:creato.id, url:creato.url, nome:creato.nome, tipo:creato.tipo, created:creato.created_at });
+    aggiornaCantiereSottotitoli();
+    renderCantiereDocumenti();
+  }catch(err){
+    console.error("Caricamento documento non riuscito:", err);
+    showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare " + file.name + ": " + (err.message || "riprova."));
+  }finally{
+    btn.disabled = false;
+    sub.textContent = "Si aggiunge subito all'elenco qui sotto";
+    document.getElementById("cantiereDocumentiInput").value = "";
+  }
+}
+
+async function eliminaCantiereDocumento(id){
+  const idx = cantiereDocumenti.findIndex(d => d.id === id);
+  if(idx === -1) return;
+  cantiereDocumenti.splice(idx, 1);
+  aggiornaCantiereSottotitoli();
+  renderCantiereDocumenti();
+  if(isDbReady()) await dbDelete("cantiere_documenti", id);
+}
+
+document.getElementById("cantiereDocumentiCaricaBtn").addEventListener("click", () => document.getElementById("cantiereDocumentiInput").click());
+document.getElementById("cantiereDocumentiInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) caricaCantiereDocumento(f);
+});
+
+/* ---- Foto cantiere ---- */
+function renderCantiereFoto(){
+  const wrap = document.getElementById("cantiereFotoGrid");
+  document.getElementById("cantiereFotoCount").textContent = cantiereFoto.length;
+  wrap.innerHTML = "";
+  if(cantiereFoto.length === 0){
+    wrap.innerHTML = '<div class="empty-hint" style="grid-column:1/-1;">Ancora nessuna foto per questo cantiere.</div>';
+    return;
+  }
+  cantiereFoto.slice().reverse().forEach(f => {
+    const item = document.createElement("div");
+    item.className = "cantiere-foto-item";
+
+    const img = document.createElement("img");
+    img.src = f.url; img.alt = "";
+    img.addEventListener("click", () => window.open(f.url, "_blank"));
+
+    const elimina = document.createElement("button");
+    elimina.className = "cantiere-foto-elimina";
+    elimina.type = "button";
+    elimina.setAttribute("aria-label", "Elimina foto");
+    elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+    elimina.addEventListener("click", (e) => { e.stopPropagation(); eliminaCantiereFoto(f.id); });
+
+    item.appendChild(img); item.appendChild(elimina);
+    wrap.appendChild(item);
+  });
+}
+
+async function caricaCantiereFoto(file){
+  if(!isDbReady()){
+    showAILanding("Non collegato", "Per caricare foto serve la connessione al database.");
+    return;
+  }
+  const btn = document.getElementById("cantiereFotoScattaBtn");
+  const sub = document.getElementById("cantiereFotoCaricaSub");
+  btn.disabled = true;
+  sub.textContent = "Sto caricando…";
+  try{
+    const percorso = currentSession.user.id + "/cantiere/foto/" + nomeFileSicuro(file.name);
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
+    if(upErr) throw upErr;
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+    const creato = await dbInsert("cantiere_foto", { url:pub.publicUrl });
+    if(!creato) throw new Error("scrittura non riuscita");
+    cantiereFoto.push({ id:creato.id, url:creato.url, created:creato.created_at });
+    aggiornaCantiereSottotitoli();
+    renderCantiereFoto();
+  }catch(err){
+    console.error("Caricamento foto non riuscito:", err);
+    showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare la foto: " + (err.message || "riprova."));
+  }finally{
+    btn.disabled = false;
+    sub.textContent = "Si aggiunge subito qui sotto";
+    document.getElementById("cantiereFotoInput").value = "";
+  }
+}
+
+async function eliminaCantiereFoto(id){
+  const idx = cantiereFoto.findIndex(f => f.id === id);
+  if(idx === -1) return;
+  cantiereFoto.splice(idx, 1);
+  aggiornaCantiereSottotitoli();
+  renderCantiereFoto();
+  if(isDbReady()) await dbDelete("cantiere_foto", id);
+}
+
+document.getElementById("cantiereFotoScattaBtn").addEventListener("click", () => document.getElementById("cantiereFotoInput").click());
+document.getElementById("cantiereFotoInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) caricaCantiereFoto(f);
+});
+
 /* ============ HOME: microfono grande + testo libero ============
    Stessa cosa che fa "Raccontami la giornata" nell'hub EON AI (stesso
    endpoint, stessa gestione delle azioni): qui è solo il primo posto
@@ -7787,6 +8349,10 @@ const pageMeta = {
   chiamate: { title:"Chiamate", sub:null },
   revisioni: { title:"Revisioni Portafoglio", sub:null },
   cestino: { title:"Cestino", sub:null },
+  "cantiere-cliente": { title:"Cliente cantiere", sub:null },
+  "cantiere-appunti": { title:"Appunti", sub:null },
+  "cantiere-documenti": { title:"Documenti", sub:null },
+  "cantiere-foto": { title:"Foto cantiere", sub:null },
 };
 
 const tabForPage = {
@@ -7799,7 +8365,8 @@ const tabForPage = {
   "assemblee":"azienda", "udienze":"azienda", "revisioni":"azienda",
   opportunita:"opportunita",
   calendario:"home", chiamate:"home",
-  cestino:"azienda"
+  cestino:"azienda",
+  "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home"
 };
 
 function navigateTo(page){
@@ -7843,6 +8410,10 @@ function navigateTo(page){
   }
 
   if(page === "cestino") renderCestino();
+  if(page === "cantiere-cliente") renderCantiereCliente();
+  if(page === "cantiere-appunti") renderCantiereAppunti();
+  if(page === "cantiere-documenti") renderCantiereDocumenti();
+  if(page === "cantiere-foto") renderCantiereFoto();
 
   window.scrollTo({ top:0, behavior:"instant" in window ? "instant" : "auto" });
 }
