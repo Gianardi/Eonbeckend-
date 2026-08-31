@@ -162,7 +162,6 @@
   @keyframes clockPulse{ 0%,100%{ box-shadow:0 3px 10px rgba(47,92,246,.4), 0 0 0 0 rgba(47,92,246,.3); } 50%{ box-shadow:0 3px 10px rgba(47,92,246,.4), 0 0 0 9px rgba(47,92,246,0); } }
   .ai-clock-btn{ animation:clockPulse 2.6s ease-in-out infinite; }
   .brand-hero-hint{ font-size:10.5px; color:var(--faint); font-weight:600; margin-bottom:16px; }
-  .brand-hero-search{ display:flex; align-items:center; justify-content:center; gap:9px; max-width:100%; margin:0 auto; }
   .search-lg{
     flex:1; display:flex; align-items:center; gap:9px;
     background:var(--card); border:1px solid var(--border); border-radius:14px;
@@ -179,19 +178,6 @@
   .mic-btn-lg:hover svg{ color:var(--indigo); }
   .mic-btn-lg.listening{ background:var(--indigo-soft); border-color:rgba(41,82,204,.4); }
   .mic-btn-lg.listening svg{ color:var(--indigo); animation:pulse-ring 1.4s ease-in-out infinite; }
-
-  .search-results{
-    margin-top:8px; background:var(--card); border:1px solid var(--border); border-radius:14px;
-    box-shadow:var(--shadow-md); overflow:hidden; max-height:280px; overflow-y:auto;
-  }
-  .search-results-group-label{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); padding:9px 14px 4px; }
-  .search-result-item{ display:flex; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; }
-  .search-result-item:hover{ background:rgba(20,23,29,.035); }
-  .search-result-icon{ width:28px; height:28px; border-radius:9px; flex:none; display:flex; align-items:center; justify-content:center; color:#fff; }
-  .search-result-icon svg{ width:13px; height:13px; }
-  .search-result-title{ font-size:12.5px; font-weight:700; color:var(--text); }
-  .search-result-sub{ font-size:11px; color:var(--muted); }
-  .search-results-empty{ padding:20px 14px; text-align:center; font-size:12px; color:var(--muted); }
 
   .main-brand{ margin-bottom:22px; }
   .main-brand .logo-wordmark{ font-size:24px; }
@@ -2010,21 +1996,6 @@
         </button>
         <span>N</span>
       </div>
-      <div class="brand-hero-search">
-        <div class="search-lg">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input type="text" id="searchInput" placeholder="Cerca attività, clienti, opportunità...">
-        </div>
-        <button class="mic-btn-lg" id="voiceBtn" title="Parla a voce" aria-label="Attiva ricerca vocale">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-            <line x1="8" y1="23" x2="16" y2="23"/>
-          </svg>
-        </button>
-      </div>
-      <div class="search-results" id="searchResults" style="display:none;"></div>
     </div>
 
     <div class="topbar" style="display:none;">
@@ -7824,112 +7795,6 @@ document.getElementById("summaryGrid").addEventListener("keydown", (e) => {
 ["toggleTime","toggleAnxiety","toggleProd"].forEach(id => {
   document.getElementById(id).addEventListener("click", function(){ this.classList.toggle("on"); });
 });
-
-/* ============ RICERCA DAL VIVO ============ */
-const searchInput = document.getElementById("searchInput");
-const searchResults = document.getElementById("searchResults");
-
-function runSearch(query){
-  const q = query.trim().toLowerCase();
-  if(q.length < 2){ searchResults.style.display = "none"; searchResults.innerHTML = ""; return; }
-
-  const matches = [];
-  clients.forEach(c => {
-    if(c.name.toLowerCase().includes(q) || (c.desc && c.desc.toLowerCase().includes(q))){
-      matches.push({ type:"Cliente", title:c.name, sub:c.desc ? c.desc.slice(0,50) + "…" : "", icon:"client", page:"clienti" });
-    }
-  });
-  opportunities.forEach(o => {
-    if(o.name.toLowerCase().includes(q) || o.client.toLowerCase().includes(q)){
-      matches.push({ type:"Opportunità", title:o.name, sub:o.client + " — €" + o.value.toLocaleString("it-IT"), icon:"opp", page:"opportunita" });
-    }
-  });
-  tasks.forEach(t => {
-    if(t.title.toLowerCase().includes(q)){
-      matches.push({ type:"Attività", title:t.title, sub:t.status === "late" ? "In ritardo" : t.status === "progress" ? "In corso" : "Da fare", icon:"task", page:"oggi" });
-    }
-  });
-  goals.forEach(g => {
-    if(g.text.toLowerCase().includes(q)){
-      matches.push({ type:"Obiettivo", title:g.text, sub:g.cat === "lavoro" ? "Lavorativo" : "Personale", icon:"goal", page:"obiettivi" });
-    }
-  });
-
-  const icons = {
-    client:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
-    opp:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>',
-    task:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>',
-    goal:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="4"/></svg>'
-  };
-  const colors = { client:"var(--teal)", opp:"var(--green)", task:"var(--indigo)", goal:"var(--violet)" };
-
-  searchResults.style.display = "block";
-  if(matches.length === 0){
-    searchResults.innerHTML = '<div class="search-results-empty">Nessun risultato per "' + query + '"</div>';
-    return;
-  }
-  searchResults.innerHTML = matches.slice(0, 8).map(m => `
-    <div class="search-result-item" data-page="${m.page}">
-      <div class="search-result-icon" style="background:${colors[m.icon]};">${icons[m.icon]}</div>
-      <div>
-        <div class="search-result-title">${m.title}</div>
-        <div class="search-result-sub">${m.type}${m.sub ? " · " + m.sub : ""}</div>
-      </div>
-    </div>
-  `).join("");
-  searchResults.querySelectorAll(".search-result-item").forEach(el => {
-    el.addEventListener("click", () => {
-      navigateTo(el.dataset.page);
-      searchResults.style.display = "none";
-      searchInput.value = "";
-    });
-  });
-}
-searchInput.addEventListener("input", (e) => runSearch(e.target.value));
-searchInput.addEventListener("blur", () => setTimeout(() => { searchResults.style.display = "none"; }, 150));
-searchInput.addEventListener("focus", () => { if(searchInput.value.trim().length >= 2) runSearch(searchInput.value); });
-
-/* ============ MICROFONO: riconoscimento vocale vero ============ */
-const voiceBtn = document.getElementById("voiceBtn");
-const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognizer = null;
-let isListening = false;
-
-if(SpeechRecognitionAPI){
-  recognizer = new SpeechRecognitionAPI();
-  recognizer.lang = "it-IT";
-  recognizer.continuous = false;
-  recognizer.interimResults = true;
-
-  recognizer.onstart = () => { isListening = true; voiceBtn.classList.add("listening"); };
-  recognizer.onend = () => { isListening = false; voiceBtn.classList.remove("listening"); };
-  recognizer.onerror = (e) => {
-    isListening = false;
-    voiceBtn.classList.remove("listening");
-    if(e.error === "not-allowed" || e.error === "service-not-allowed"){
-      showAILanding("Microfono non autorizzato", "Per usare la ricerca vocale, consenti l'accesso al microfono nelle impostazioni del browser per questa pagina.");
-    }
-  };
-  recognizer.onresult = (e) => {
-    let transcript = "";
-    for(let i = 0; i < e.results.length; i++){ transcript += e.results[i][0].transcript; }
-    searchInput.value = transcript;
-    runSearch(transcript);
-  };
-
-  voiceBtn.addEventListener("click", () => {
-    if(isListening){ recognizer.stop(); return; }
-    try{ recognizer.start(); }
-    catch(err){ console.warn("Impossibile avviare il riconoscimento vocale:", err.message); }
-  });
-} else {
-  /* Il browser non supporta il riconoscimento vocale (es. alcune versioni
-     di Firefox, o WebView non-Safari su iOS): lo segnaliamo invece di
-     far finta che il microfono funzioni. */
-  voiceBtn.addEventListener("click", () => {
-    showAILanding("Ricerca vocale non disponibile", "Questo browser non supporta il riconoscimento vocale. Su iPhone funziona da Safari; su Android da Chrome.");
-  });
-}
 
 /* ---- Orologio EON: l'AI organizza la giornata e le cose future ---- */
 function gatherDayContext(){
