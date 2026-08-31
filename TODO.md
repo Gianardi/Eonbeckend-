@@ -115,3 +115,49 @@ chiedere all'artigiano di inserirla a mano solo in quel caso, non bloccare
 il caricamento.
 
 Richiesto da Gianardi il 31/08/2026.
+
+## Taglio costi: ottimizzazione dell'AI
+
+Oggi ogni azione dell'AI (es. "segna il cliente Mario Rossi") manda al
+modello, ad ogni singola richiesta, le stesse istruzioni di sistema e lo
+stesso elenco di strumenti (crea_cliente, crea_impegno, ecc.) — la parte più
+pesante del costo, ripetuta identica ogni volta. Obiettivo: avvicinarsi a
+1-2 euro al mese per cliente attivo, senza perdere qualità nelle risposte.
+
+Interventi, in ordine di rapporto costo/beneficio:
+
+1. **Prompt caching (Anthropic).** Le istruzioni di sistema e l'elenco degli
+   strumenti sono identici ad ogni chiamata: la cache di Anthropic li tiene
+   "pronti" e li fa pagare circa 1/10 del prezzo normale dalle chiamate
+   successive in poi. Nessuna perdita di qualità, l'AI risponde uguale a
+   oggi — cambia solo come viene fatturata la parte ripetuta. Il singolo
+   intervento a più alto impatto e meno rischio.
+
+2. **Modello più economico per le richieste semplici.** Claude Haiku (molto
+   più economico di Sonnet) per i comandi diretti tipo "chiamare Guidi
+   domani alle 17"; da testare con cura che capisca ugualmente bene i
+   comandi vocali/testuali prima di usarlo di default, altrimenti si
+   rischia di perdere precisione.
+
+3. **Alleggerire l'elenco degli strumenti.** Se alcuni strumenti si usano
+   raramente, valutare se mandarli sempre o solo quando serve — riduce i
+   token di ogni chiamata.
+
+4. **Meno andirivieni per le conferme.** Le azioni delicate oggi a volte
+   richiedono 2 chiamate (descrivi + esegui) invece di una sola: capire dove
+   si può accorciare senza perdere la sicurezza della conferma.
+
+Da fare per prima: il punto 1 (prompt caching), perché è il più sicuro e
+il più semplice da misurare — confrontando il costo per azione prima e dopo
+sulla chiave "Eonbeckend" nella Console Anthropic.
+
+Richiesto da Gianardi il 31/08/2026.
+
+## Pulizia e precisazioni
+
+Voce generica per una passata di rifinitura sull'app: perfezionare alcune
+funzioni esistenti, sistemare dettagli grafici, e in generale "dare una
+pulita" — non un elenco chiuso, si riempie mano a mano che si individuano
+cose da sistemare durante l'uso reale dell'app.
+
+Richiesto da Gianardi il 31/08/2026.
