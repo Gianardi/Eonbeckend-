@@ -2178,6 +2178,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </div>
+        <button type="button" id="cantiereAppuntiAnnullaModifica" style="display:none; margin-top:8px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:4px;">Annulla modifica</button>
       </div>
 
       <div class="card-panel">
@@ -7463,7 +7464,8 @@ function renderCantiereAppunti(){
     riga.className = "cantiere-appunto";
 
     const corpo = document.createElement("div");
-    corpo.style.cssText = "flex:1; min-width:0;";
+    corpo.style.cssText = "flex:1; min-width:0; cursor:pointer;";
+    corpo.title = "Tocca per modificare";
     const testoEl = document.createElement("div");
     testoEl.className = "cantiere-appunto-testo";
     testoEl.textContent = a.testo;
@@ -7471,6 +7473,7 @@ function renderCantiereAppunti(){
     dataEl.className = "cantiere-appunto-data";
     dataEl.textContent = a.created ? new Date(a.created).toLocaleDateString("it-IT", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" }) : "";
     corpo.appendChild(testoEl); corpo.appendChild(dataEl);
+    corpo.addEventListener("click", () => iniziaModificaAppunto(a));
 
     const elimina = document.createElement("button");
     elimina.className = "cantiere-appunto-elimina";
@@ -7485,10 +7488,14 @@ function renderCantiereAppunti(){
   });
 }
 
+let iniziaModificaAppunto = () => {}; // sostituita sotto, dentro collegaCantiereAppunti()
+let annullaModificaAppuntoSeId = () => {}; // idem: usata da eliminaCantiereAppunto()
+
 async function eliminaCantiereAppunto(id){
   const idx = cantiereAppunti.findIndex(a => a.id === id);
   if(idx === -1) return;
   cantiereAppunti.splice(idx, 1);
+  annullaModificaAppuntoSeId(id); // se stavo modificando proprio questo, esco dalla modifica: l'id non esiste più
   aggiornaCantiereSottotitoli();
   renderCantiereAppunti();
   if(isDbReady()) await dbDelete("cantiere_appunti", id);
@@ -7504,11 +7511,43 @@ async function eliminaCantiereAppunto(id){
   const campo = document.getElementById("cantiereAppuntiCampo");
   const send = document.getElementById("cantiereAppuntiSend");
   const hint = document.getElementById("cantiereAppuntiHint");
+  const annullaBtn = document.getElementById("cantiereAppuntiAnnullaModifica");
   if(!mic || !campo || !send || !hint) return;
   const HINT_BASE = "Tocca il microfono per dettare, o scrivi";
   let inCorso = false;
   let attivo = false;
   let fermaAscolto = () => {}; // sostituita sotto se il riconoscimento vocale è disponibile
+  let appuntoInModifica = null; // id dell'appunto in modifica, o null quando si sta scrivendone uno nuovo
+
+  function uscidaModifica(){
+    appuntoInModifica = null;
+    annullaBtn.style.display = "none";
+  }
+
+  iniziaModificaAppunto = (appunto) => {
+    /* Mentre un salvataggio precedente è ancora in corso non
+       cambiamo cosa sta per essere salvato: al termine salva()
+       tocca campo/hint solo se l'id che ha appena salvato è ancora
+       quello in modifica, quindi passare a un altro appunto ora
+       lascerebbe comunque le cose coerenti — ma è più semplice ed
+       esplicito evitarlo del tutto finché non finisce. */
+    if(inCorso) return;
+    fermaAscolto();
+    appuntoInModifica = appunto.id;
+    campo.value = appunto.testo;
+    hint.textContent = "Stai modificando questo appunto — tocca l'invio per salvare";
+    annullaBtn.style.display = "inline";
+    campo.focus();
+    campo.scrollIntoView({ behavior:"smooth", block:"center" });
+  };
+  annullaModificaAppuntoSeId = (id) => {
+    if(appuntoInModifica === id){ uscidaModifica(); campo.value = ""; hint.textContent = HINT_BASE; }
+  };
+  annullaBtn.addEventListener("click", () => {
+    uscidaModifica();
+    campo.value = "";
+    hint.textContent = HINT_BASE;
+  });
 
   async function salva(){
     const testo = campo.value.trim();
@@ -7521,6 +7560,27 @@ async function eliminaCantiereAppunto(id){
     inCorso = true;
     send.disabled = true;
     mic.disabled = true;
+
+    if(appuntoInModifica){
+      const id = appuntoInModifica;
+      const { error } = await supabaseClient.from("cantiere_appunti").update({ testo }).eq("id", id);
+      inCorso = false;
+      send.disabled = false;
+      mic.disabled = false;
+      if(error){
+        console.error("Errore modifica appunto:", error.message);
+        hint.textContent = "Non sono riuscita a salvare la modifica: riprova";
+        return;
+      }
+      const appunto = cantiereAppunti.find(a => a.id === id);
+      if(appunto) appunto.testo = testo;
+      uscidaModifica();
+      campo.value = "";
+      hint.textContent = HINT_BASE;
+      renderCantiereAppunti();
+      return;
+    }
+
     const creato = await dbInsert("cantiere_appunti", { testo });
     inCorso = false;
     send.disabled = false;
