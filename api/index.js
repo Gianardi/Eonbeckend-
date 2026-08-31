@@ -1038,6 +1038,73 @@ const TOOLS = {
       return { id: m.id, inviato_a: cliente.name };
     },
   },
+
+  svuota_cestino: {
+    sensitive: true,
+    schema: {
+      name: "svuota_cestino",
+      description: "Elimina per sempre TUTTO ciò che si trova già nel cestino, in ogni categoria (clienti, conversazioni, messaggi, appuntamenti/impegni, pagamenti, incassi, obiettivi, dipendenti, opportunità, compiti assegnati): un unico comando che svuota tutto il cestino in una volta, non recuperabile dopo. Non tocca nulla che non sia già nel cestino. Usalo quando l'utente chiede di eliminare o svuotare il cestino definitivamente, non per eliminare un singolo elemento (per quello ci sono elimina_cliente/elimina_impegno, e il resto si elimina dalla schermata Cestino). Richiede conferma dell'utente.",
+      input_schema: { type: "object", properties: {}, required: [] },
+    },
+    async describe(input, ctx) {
+      /* Fissiamo QUI gli id esatti da eliminare (non solo il conteggio):
+         run() userà proprio questi, non un filtro "tutto ciò che è nel
+         cestino" rieseguito più tardi — altrimenti qualcosa cestinato nel
+         frattempo (tra la domanda e la risposta dell'utente) verrebbe
+         cancellato per sempre senza che l'utente l'abbia mai visto contare
+         nella conferma. Stesso principio di fissaIdRisoltoImpegno. Una
+         tabella che non si riesce a leggere ora resta fuori da _righe:
+         run() non proverà a toccarla, invece di rischiare di cancellare
+         più di quanto mostrato qui. */
+      const tabelle = [...TRASHABLE_RESOURCES];
+      const perTabella = await Promise.all(
+        tabelle.map((tabella) =>
+          db(`${tabella}?select=id&deleted_at=not.is.null`, { method: "GET" }, ctx.accessToken)
+            .then((righe) => (Array.isArray(righe) ? righe.map((r) => r.id) : null))
+            .catch(() => null)
+        )
+      );
+      const righe = {};
+      tabelle.forEach((tabella, i) => { if (perTabella[i]) righe[tabella] = perTabella[i]; });
+      input._righe = righe;
+
+      const totale = Object.values(righe).reduce((s, ids) => s + ids.length, 0);
+      const nonLette = tabelle.filter((t, i) => perTabella[i] === null);
+      if (totale === 0 && nonLette.length === 0) return "Il cestino è già vuoto: non c'è nulla da eliminare per sempre.";
+      let domanda = `Il cestino contiene ${totale} element${totale === 1 ? "o" : "i"}: eliminarli per sempre? Non si potranno più recuperare.`;
+      if (nonLette.length) domanda += " (Alcune categorie non si riescono a leggere ora: non verranno toccate.)";
+      return domanda;
+    },
+    async run(input, ctx) {
+      const righe = input._righe || {};
+      /* Ogni tabella per conto suo, senza fermarsi alla prima che fallisce:
+         se una fallisce le altre restano comunque svuotate, e lo segnaliamo
+         nell'esito invece di far sembrare che l'intera operazione sia
+         andata storta (stesso principio di elimina_cliente con la
+         conversazione collegata). Elimina solo gli id fissati da describe(),
+         mai un filtro "tutto il cestino" rieseguito ora. */
+      const risultati = await Promise.all(
+        Object.entries(righe).map(async ([tabella, ids]) => {
+          if (!ids.length) return { tabella, eliminati: 0 };
+          try {
+            const filtroId = ids.map((id) => encodeURIComponent(id)).join(",");
+            const cancellate = await db(
+              `${tabella}?id=in.(${filtroId})&select=id`,
+              { method: "DELETE", headers: { Prefer: "return=representation" } },
+              ctx.accessToken
+            );
+            return { tabella, eliminati: Array.isArray(cancellate) ? cancellate.length : 0 };
+          } catch (err) {
+            console.warn(`Svuota cestino: ${tabella} fallita:`, err.message);
+            return { tabella, eliminati: 0, errore: err.message };
+          }
+        })
+      );
+      const totaleEliminati = risultati.reduce((s, r) => s + r.eliminati, 0);
+      const fallite = risultati.filter((r) => r.errore).map((r) => r.tabella);
+      return { totale_eliminati: totaleEliminati, fallite };
+    },
+  },
 };
 
 /* ------------------------------------------------------------
@@ -1137,7 +1204,9 @@ Se un impegno riguarda una persona già cliente, cercala prima con cerca_cliente
 
 Quando l'utente nomina un appuntamento o un impegno per titolo invece di darti un id (es. "sposta l'appuntamento di casa Rossi", "elimina l'appuntamento con Hannah") NON dedurre un intervallo di date a caso con elenca_appuntamenti: cerca prima con cerca_impegno usando le parole che ha usato l'utente (anche solo una, es. "Rossi"). Se trovi un solo risultato, CHIAMA SUBITO lo strumento giusto (sposta_impegno/annulla_impegno/elimina_impegno) con l'id trovato — non fermarti a scriverlo, non chiedere tu stesso conferma in una risposta di testo. Se cerca_impegno trova più di un risultato, allora sì, fermati e chiedi all'utente quale intende, elencandoli brevemente. Solo se cerca_impegno non trova nulla, di' che non l'hai trovato.
 
-IMPORTANTE su manda_messaggio, sposta_impegno, annulla_impegno, elimina_impegno ed elimina_cliente: sono operazioni delicate che il sistema stesso, non tu, sottopone all'utente con un pulsante di conferma reale non appena le chiami — è un meccanismo automatico che scatta sempre, qualunque cosa tu scriva. Per questo devi SEMPRE chiamare direttamente lo strumento quando hai gli elementi per farlo (es. hai trovato con certezza l'impegno o il cliente giusto), MAI scrivere tu una domanda del tipo "Confermi che vuoi eliminarlo?" nel testo della risposta: l'utente non avrebbe modo di risponderti a quella domanda, perché non è una conferma vera — resterebbe bloccato senza sapere cosa fare. Se ti mancano informazioni per capire QUALE record (es. più risultati da cerca_impegno, nessun cliente trovato), allora sì chiedi in testo — ma solo per quello, mai per chiedere il permesso di procedere su qualcosa che hai già identificato con certezza.
+IMPORTANTE su manda_messaggio, sposta_impegno, annulla_impegno, elimina_impegno, elimina_cliente e svuota_cestino: sono operazioni delicate che il sistema stesso, non tu, sottopone all'utente con un pulsante di conferma reale non appena le chiami — è un meccanismo automatico che scatta sempre, qualunque cosa tu scriva. Per questo devi SEMPRE chiamare direttamente lo strumento quando hai gli elementi per farlo (es. hai trovato con certezza l'impegno o il cliente giusto), MAI scrivere tu una domanda del tipo "Confermi che vuoi eliminarlo?" nel testo della risposta: l'utente non avrebbe modo di risponderti a quella domanda, perché non è una conferma vera — resterebbe bloccato senza sapere cosa fare. Se ti mancano informazioni per capire QUALE record (es. più risultati da cerca_impegno, nessun cliente trovato), allora sì chiedi in testo — ma solo per quello, mai per chiedere il permesso di procedere su qualcosa che hai già identificato con certezza.
+
+Se l'utente chiede di eliminare o svuotare il cestino definitivamente (o dice cose come "elimina tutto quello che ho cestinato", "svuota il cestino per sempre"), chiama subito svuota_cestino — è un unico comando che elimina per sempre tutto ciò che si trova già nel cestino, in ogni categoria. Non usarlo per eliminare un singolo cliente o impegno (per quello ci sono elimina_cliente/elimina_impegno), e non usarlo se l'utente vuole solo spostare qualcosa nel cestino, non svuotarlo.
 
 Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
 }

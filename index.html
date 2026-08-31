@@ -6623,7 +6623,7 @@ function collegaHubRacconta(){
        finché non si ricarica l'app da zero. */
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
-    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow();
+    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino();
     chiudiHubAI();
 
     /* Qualsiasi azione sul calendario porta lì a vedere il risultato,
@@ -6660,6 +6660,22 @@ function collegaHubRacconta(){
         showAIToast("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
         showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
+      } else if(a.tool === "svuota_cestino"){
+        const n = a.esito.totale_eliminati || 0;
+        const fallite = a.esito.fallite || [];
+        let msg;
+        if(fallite.length){
+          /* Mai dire "era già vuoto" quando qualcosa e' andato storto:
+             potrebbero essere rimasti elementi mai nemmeno mostrati
+             nel conteggio della conferma. */
+          msg = (n > 0 ? (n === 1 ? "1 elemento eliminato per sempre. " : n + " elementi eliminati per sempre. ") : "") +
+            "Alcune categorie non sono state svuotate: riprova tra poco.";
+        } else if(n === 0){
+          msg = "Il cestino era già vuoto.";
+        } else {
+          msg = n === 1 ? "1 elemento eliminato per sempre." : n + " elementi eliminati per sempre.";
+        }
+        showAIToast("Cestino svuotato", msg);
       }
     });
   }
@@ -6756,7 +6772,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
-    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow();
+    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino();
 
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
@@ -6785,6 +6801,22 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         showAIToast("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
         showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
+      } else if(a.tool === "svuota_cestino"){
+        const n = a.esito.totale_eliminati || 0;
+        const fallite = a.esito.fallite || [];
+        let msg;
+        if(fallite.length){
+          /* Mai dire "era già vuoto" quando qualcosa e' andato storto:
+             potrebbero essere rimasti elementi mai nemmeno mostrati
+             nel conteggio della conferma. */
+          msg = (n > 0 ? (n === 1 ? "1 elemento eliminato per sempre. " : n + " elementi eliminati per sempre. ") : "") +
+            "Alcune categorie non sono state svuotate: riprova tra poco.";
+        } else if(n === 0){
+          msg = "Il cestino era già vuoto.";
+        } else {
+          msg = n === 1 ? "1 elemento eliminato per sempre." : n + " elementi eliminati per sempre.";
+        }
+        showAIToast("Cestino svuotato", msg);
       }
     });
   }
