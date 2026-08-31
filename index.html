@@ -328,6 +328,64 @@
 
   .module-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:18px; }
 
+  /* Home: microfono, testo libero, calendario e "cosa devo fare oggi"
+     — il primo contatto con l'app, prima delle card sotto (che restano
+     per ora, si spostano in Menu in un secondo momento). Stile chiaro,
+     come da foto di riferimento dell'utente. */
+  .home-hero{
+    position:relative;
+    padding:22px 20px 4px; margin-bottom:8px;
+    color:var(--text);
+  }
+  .home-hero-eyebrow{ position:relative; font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:3px; }
+  .home-hero-title{ position:relative; font-family:'Manrope'; font-size:22px; font-weight:900; letter-spacing:-.01em; margin-bottom:26px; }
+  .home-hero-mic-wrap{ position:relative; display:flex; justify-content:center; margin-bottom:12px; }
+  .home-hero-mic{
+    position:relative; width:112px; height:112px; border-radius:50%; border:none; cursor:pointer; padding:0;
+    background:var(--text);
+    box-shadow:0 16px 34px rgba(14,20,36,.22);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .home-hero-mic:active{ transform:scale(.96); }
+  .home-hero-mic svg{ width:36px; height:36px; pointer-events:none; }
+  .home-hero-mic-ring{ position:absolute; inset:-9px; border-radius:50%; border:1.5px solid rgba(14,20,36,.18); pointer-events:none; opacity:0; }
+  .home-hero-mic.ascolto .home-hero-mic-ring{ animation:homeHeroPulse 1.1s ease-in-out infinite; }
+  @keyframes homeHeroPulse{ 0%{ transform:scale(1); opacity:.6; } 100%{ transform:scale(1.22); opacity:0; } }
+  .home-hero-hint{ position:relative; text-align:center; font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:20px; padding:0 10px; }
+  .home-hero-textwrap{ position:relative; margin-bottom:14px; }
+  .home-hero-campo{
+    width:100%; min-height:72px; resize:none; border-radius:18px; border:1px solid var(--border);
+    background:var(--card); color:var(--text); font-family:inherit; font-size:13.5px; padding:14px 50px 14px 16px;
+  }
+  .home-hero-campo::placeholder{ color:var(--faint); }
+  .home-hero-campo:focus{ outline:none; border-color:var(--border-strong); }
+  .home-hero-send{
+    position:absolute; right:9px; bottom:9px; width:33px; height:33px; border-radius:50%;
+    background:var(--text); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .home-hero-send svg{ width:14px; height:14px; stroke:#fff; }
+  .home-hero-cal{
+    position:relative; width:100%; display:flex; align-items:center; gap:12px; text-align:left;
+    background:var(--text); border:none; border-radius:16px;
+    padding:14px 15px; cursor:pointer; margin-bottom:12px; color:#fff; font-family:inherit;
+  }
+  .home-hero-cal svg:first-child{ width:19px; height:19px; flex:none; }
+  .home-hero-cal-testo{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .home-hero-cal-testo b{ font-family:'Manrope'; font-size:14px; font-weight:800; }
+  .home-hero-cal-testo span{ font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px; }
+  .home-hero-cal-freccia{ width:14px; height:14px; flex:none; color:rgba(255,255,255,.6); }
+  .home-hero-oggi{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 15px; }
+  .home-hero-oggi-titolo{ font-family:'Manrope'; font-size:13px; font-weight:800; margin-bottom:9px; color:var(--text); }
+  .home-hero-oggi-riga{ display:flex; align-items:center; gap:10px; padding:7px 0; font-size:13px; color:var(--text); }
+  .home-hero-oggi-riga.fatto{ color:var(--faint); text-decoration:line-through; }
+  .home-hero-oggi-check{ width:19px; height:19px; border-radius:6px; border:1.5px solid var(--border-strong); flex:none; display:flex; align-items:center; justify-content:center; }
+  .home-hero-oggi-check.cliccabile{ cursor:pointer; }
+  .home-hero-oggi-riga.fatto .home-hero-oggi-check{ background:var(--text); border-color:var(--text); }
+  .home-hero-oggi-riga.fatto .home-hero-oggi-check svg{ stroke:#fff; }
+  .home-hero-oggi-vuoto{ font-size:12.5px; color:var(--muted); padding:6px 0; }
+
   .summary-panel{ margin-bottom:14px; }
   .summary-toggle{ cursor:pointer; }
   .summary-chevron{ width:16px; height:16px; color:var(--faint); flex:none; transition:transform .2s; }
@@ -592,26 +650,23 @@
   .cal-giorno.oggi::after{ background:rgba(59,111,255,.2); }
 
   .cal-voce{
-    display:flex; align-items:flex-start; gap:11px;
-    padding:12px 13px; margin-bottom:8px; border-radius:15px;
+    display:flex; align-items:center; gap:14px;
+    padding:15px 16px; margin-bottom:10px; border-radius:20px;
     background:var(--card); border:1px solid var(--border);
+    box-shadow:0 4px 16px rgba(20,20,30,.05);
     flex-wrap:wrap;
   }
-  .cal-voce.oggi{ border-color:rgba(59,111,255,.3); box-shadow:0 2px 10px rgba(59,111,255,.08); }
-  .cal-ora{
-    font-family:'Manrope'; font-size:13px; font-weight:900; color:var(--text);
-    min-width:42px; flex:none; padding-top:9px; letter-spacing:-.02em;
-  }
-  .cal-voce:not(.oggi) .cal-ora{ color:var(--muted); }
-  .cal-corpo{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
-  .cal-icona{
-    width:34px; height:34px; border-radius:11px; flex:none;
-    display:flex; align-items:center; justify-content:center;
-  }
+  .cal-voce.oggi{ box-shadow:0 4px 16px rgba(59,111,255,.1); }
+  .cal-ora-blocco{ flex:none; width:44px; text-align:center; }
+  .cal-ora-hh{ font-family:'Manrope'; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.1; }
+  .cal-ora-mm{ font-size:11px; font-weight:700; color:var(--faint); margin-top:1px; }
+  .cal-divider{ width:1.5px; align-self:stretch; background:var(--border); flex:none; }
+  .cal-corpo{ display:block; flex:1; min-width:0; }
   .cal-testo{ min-width:0; }
-  .cal-nome{ font-size:13.5px; font-weight:700; color:var(--text); }
+  .cal-nome{ font-size:14.5px; font-weight:700; color:var(--text); line-height:1.3; }
+  .cal-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:3px; }
   .cal-sotto{ font-size:11px; color:var(--muted); margin-top:2px; }
-  .cal-azioni{ display:flex; gap:7px; width:100%; margin-top:9px; padding-left:53px; }
+  .cal-azioni{ display:flex; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
   .cal-btn{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
     padding:8px; border-radius:10px; cursor:pointer; font-family:inherit;
@@ -1985,7 +2040,7 @@
       <div class="search-results" id="searchResults" style="display:none;"></div>
     </div>
 
-    <div class="topbar">
+    <div class="topbar" style="display:none;">
       <div>
         <h1 id="pageTitle">Buongiorno, Marco</h1>
         <div class="sub" id="pageSub">—</div>
@@ -1994,6 +2049,40 @@
 
     <!-- ==================== PAGINA: HOME ==================== -->
     <div class="page visible" id="page-home">
+
+      <div class="home-hero">
+        <div class="home-hero-eyebrow">Buongiorno</div>
+        <div class="home-hero-title">Cosa facciamo oggi</div>
+
+        <div class="home-hero-mic-wrap">
+          <button class="home-hero-mic" id="homeHeroMic" aria-label="Tocca per parlare" type="button">
+            <span class="home-hero-mic-ring"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+          </button>
+        </div>
+        <div class="home-hero-hint" id="homeHeroHint">Qualsiasi cosa, crea lavoro, chiama, messaggi, chiedimi</div>
+
+        <div class="home-hero-textwrap">
+          <textarea class="home-hero-campo" id="homeHeroCampo" rows="3" placeholder="Scrivi un preventivo, una nota..."></textarea>
+          <button class="home-hero-send" id="homeHeroSend" aria-label="Invia" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+
+        <button class="home-hero-cal" id="homeHeroCal" type="button" data-page="calendario">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <div class="home-hero-cal-testo">
+            <b>Calendario attività</b>
+            <span id="homeHeroCalSub">Nessun impegno oggi</span>
+          </div>
+          <svg class="home-hero-cal-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+
+        <div class="home-hero-oggi">
+          <div class="home-hero-oggi-titolo">Cosa devo fare oggi</div>
+          <div id="homeHeroOggiLista"><div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div></div>
+        </div>
+      </div>
 
       <div class="module-grid">
         <div class="module-card card-ai" id="cardEonAI">
@@ -4186,6 +4275,12 @@ function renderUdienze(){
 }
 
 /* ---- Calendario: l'AI lo compila leggendo chat, clienti e impegni della professione ---- */
+const ETICHETTE_CALENDARIO = {
+  appt:{ testo:"Appuntamento", colore:"var(--indigo)" },
+  visit:{ testo:"Da vedere", colore:"var(--teal)" },
+  attesa:{ testo:"In sospeso", colore:"var(--amber)" },
+  todo:{ testo:"Da fare", colore:"var(--teal)" }
+};
 function renderCalendar(){
   const wrap = document.getElementById("calendarList");
   if(!wrap) return;
@@ -4243,12 +4338,6 @@ function renderCalendar(){
   if(items.length === 0){
     wrap.innerHTML = '<div class="chat-list-empty">Nessun impegno rilevato al momento.</div>';
   }
-  const icons = {
-    appt:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
-    visit:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
-    attesa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    todo:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>'
-  };
   /* Raggruppiamo per giorno: "Oggi", "Domani", "Giovedi 8 agosto"...
      E' quello che serve davvero — cosa ho nei prossimi giorni — invece
      di una griglia oraria che resterebbe quasi sempre vuota. */
@@ -4286,6 +4375,7 @@ function renderCalendar(){
         (passati.length === 1 ? " impegno passato" : " impegni passati") + " non mostrati</span>" : ""}
     </div>`;
     document.getElementById("calendarCount").textContent = "0";
+    aggiornaHomeHero(gruppi);
     return;
   }
 
@@ -4300,13 +4390,20 @@ function renderCalendar(){
       row.className = "cal-voce" + (g.oggi ? " oggi" : "");
       const cliente = it.contatto ? clients.find(c => c.name === it.contatto) : null;
       const ora = estraiOra(it.when);
+      const [oraHH, oraMM] = ora ? ora.split(":") : ["—", ""];
+      const et = ETICHETTE_CALENDARIO[it.icon] || ETICHETTE_CALENDARIO.appt;
+      const coloreEt = it.urgent ? "var(--coral)" : et.colore;
 
       row.innerHTML = `
-        <div class="cal-ora">${ora || "—"}</div>
+        <div class="cal-ora-blocco">
+          <div class="cal-ora-hh" style="color:${coloreEt};">${oraHH}</div>
+          <div class="cal-ora-mm">${oraMM}</div>
+        </div>
+        <div class="cal-divider"></div>
         <div class="cal-corpo">
-          <div class="cal-icona" style="background:${it.urgent ? 'var(--coral)' : (it.icon === 'attesa' ? 'var(--amber)' : it.icon === 'todo' ? 'var(--teal)' : 'var(--indigo)')};">${icons[it.icon]}</div>
           <div class="cal-testo">
             <div class="cal-nome">${it.title}</div>
+            <div class="cal-label" style="color:${coloreEt};">${et.testo}</div>
             <div class="cal-sotto">${it.sub}</div>
           </div>
         </div>
@@ -4378,6 +4475,7 @@ function renderCalendar(){
   });
 
   document.getElementById("calendarCount").textContent = items.length;
+  aggiornaHomeHero(gruppi);
 }
 
 /* ---- Lettura delle date scritte dall'AI ---- */
@@ -6615,6 +6713,246 @@ document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
   if(e.target.id === "aiHubOverlay") chiudiHubAI();
 });
 
+/* ============ HOME: microfono grande + testo libero ============
+   Stessa cosa che fa "Raccontami la giornata" nell'hub EON AI (stesso
+   endpoint, stessa gestione delle azioni): qui è solo il primo posto
+   che l'utente vede aprendo l'app, con in più il microfono grande al
+   posto di dettare dalla tastiera. Duplica un
+   po' di codice invece di condividerlo con collegaHubRacconta(): è
+   voluto, per non rischiare di rompere quel widget già testato mentre
+   se ne aggiunge uno nuovo. */
+function collegaHomeHero(){
+  const mic = document.getElementById("homeHeroMic");
+  const campo = document.getElementById("homeHeroCampo");
+  const send = document.getElementById("homeHeroSend");
+  const hint = document.getElementById("homeHeroHint");
+  if(!mic || !campo || !send) return;
+
+  const TESTO_HINT_BASE = "Qualsiasi cosa, crea lavoro, chiama, messaggi, chiedimi";
+  let inCorso = false;
+
+  async function elabora(testo){
+    testo = (testo || "").trim();
+    if(testo.length < 3 || inCorso) return;
+    if(!BACKEND_CONFIGURED || !currentSession){
+      hint.textContent = "L'assistente scrive nel calendario vero: accedi per usarlo";
+      return;
+    }
+
+    inCorso = true;
+    send.disabled = true;
+    mic.disabled = true;
+    hint.textContent = "Sto organizzando…";
+
+    let risposta;
+    try{
+      risposta = await chiediAssistente(`Il professionista ti ha appena raccontato cosa deve fare: "${testo}"`);
+    }catch(err){
+      console.warn("Assistente non riuscito:", err.message);
+      hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
+      send.disabled = false;
+      mic.disabled = false;
+      inCorso = false;
+      return;
+    }
+
+    /* Il testo si svuota solo ora, a richiesta riuscita: se la chiamata
+       fallisce l'utente non deve riscrivere tutto da capo. */
+    campo.value = "";
+    send.disabled = false;
+    mic.disabled = false;
+    inCorso = false;
+    hint.textContent = TESTO_HINT_BASE;
+
+    if(risposta.stato === "incompleto"){
+      showAIToast("Non ho fatto in tempo a finire", risposta.testo);
+    }
+
+    const azioni = risposta.azioni || [];
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione"];
+    const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
+    if(risultatiVisibili.length === 0){
+      if(risposta.stato !== "incompleto"){
+        let testoRisp = risposta.testo || "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17";
+        if(/\?\s*$/.test(testoRisp.trim()) && /conferm/i.test(testoRisp) && !/quale/i.test(testoRisp)){
+          testoRisp += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
+        }
+        showAIToast("Fatto", testoRisp);
+      }
+      return;
+    }
+
+    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
+    renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
+    renderClientArchive(); renderChatList(); renderChatWindow();
+
+    const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
+    if(impegniCreati.length){
+      const fatti = impegniCreati.map(a =>
+        (a.esito.tipo === "chiamata" ? "📞 " : a.esito.tipo === "incontro" ? "📅 " : "✓ ") +
+        a.esito.titolo + " — " + a.esito.quando_visualizzato);
+      showAIToast(
+        impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
+        fatti.join("\n")
+      );
+    }
+
+    risultatiVisibili.filter(a => a.tool !== "crea_impegno").forEach(a => {
+      if(a.tool === "sposta_impegno"){
+        showAIToast("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
+      } else if(a.tool === "annulla_impegno"){
+        showAIToast("Impegno annullato", a.esito.titolo);
+      } else if(a.tool === "elimina_impegno"){
+        showAIToast("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
+      } else if(a.tool === "elimina_cliente"){
+        showAIToast("Cliente eliminato",
+          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.");
+      } else if(a.tool === "crea_cliente"){
+        showAIToast("Cliente aggiunto", a.esito.nome);
+      } else if(a.tool === "aggiorna_cliente"){
+        showAIToast("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
+      } else if(a.tool === "manda_messaggio"){
+        showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
+      }
+    });
+  }
+
+  send.addEventListener("click", () => elabora(campo.value));
+
+  /* Microfono: tocca per parlare, tocca di nuovo per fermarti e inviare
+     — usa lo stesso riconoscimento vocale del browser già in uso per la
+     ricerca in alto (nessuna nuova dipendenza, funziona dove funziona
+     già). */
+  const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!RecognitionAPI){
+    mic.addEventListener("click", () => {
+      showAILanding("Microfono non disponibile", "Questo browser non supporta il riconoscimento vocale. Su iPhone funziona da Safari; su Android da Chrome. Puoi comunque scrivere qui sotto.");
+    });
+    return;
+  }
+  const riconoscitore = new RecognitionAPI();
+  riconoscitore.lang = "it-IT";
+  riconoscitore.continuous = false;
+  riconoscitore.interimResults = true;
+  let testoSessione = "";
+  let testoAccumulato = "";
+  let attivo = false;
+
+  riconoscitore.onstart = () => {
+    testoSessione = "";
+    mic.classList.add("ascolto");
+    hint.textContent = "Ti ascolto… tocca di nuovo per inviare";
+  };
+  riconoscitore.onresult = (e) => {
+    let t = "";
+    for(let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    testoSessione = t;
+  };
+  riconoscitore.onerror = (e) => {
+    /* "no-speech" (e a volte "aborted") sono normalissimi durante una
+       pausa nel parlato: il browser li manda invece di un "end" pulito,
+       ma per l'utente che sta ancora parlando e' come se nulla fosse
+       successo. Trattarli come un errore vero fermerebbe l'ascolto a
+       meta' frase — lasciamo che onend() decida se riavviare. */
+    if(e.error === "no-speech" || e.error === "aborted") return;
+    mic.classList.remove("ascolto");
+    hint.textContent = TESTO_HINT_BASE;
+    attivo = false;
+    if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+      showAILanding("Microfono non autorizzato", "Per parlare con l'assistente, consenti l'accesso al microfono nelle impostazioni del browser per questa pagina.");
+    }
+  };
+  riconoscitore.onend = () => {
+    mic.classList.remove("ascolto");
+    testoAccumulato = (testoAccumulato ? testoAccumulato + " " : "") + testoSessione;
+    /* Il browser puo' fermare da solo il riconoscimento dopo una breve
+       pausa nel parlato, anche se l'utente non ha ancora toccato di
+       nuovo il microfono per fermarsi: se e' cosi' lo riavviamo subito,
+       invece di inviare una frase a metà. L'invio vero parte solo al
+       secondo tocco sul microfono, quando "attivo" e' gia' false. */
+    if(attivo){
+      try{ riconoscitore.start(); }
+      catch(err){ attivo = false; hint.textContent = TESTO_HINT_BASE; }
+      return;
+    }
+    const finale = testoAccumulato.trim();
+    testoAccumulato = "";
+    if(finale.length >= 3) elabora(finale);
+    else hint.textContent = TESTO_HINT_BASE;
+  };
+
+  mic.addEventListener("click", () => {
+    if(attivo){
+      attivo = false;
+      try{ riconoscitore.stop(); }catch(err){ /* già fermo */ }
+      return;
+    }
+    if(inCorso) return;
+    attivo = true;
+    testoAccumulato = "";
+    try{ riconoscitore.start(); }
+    catch(err){ console.warn("Impossibile avviare il microfono:", err.message); attivo = false; }
+  });
+}
+collegaHomeHero();
+
+/* Aggiorna il riquadro scuro della Home ("Calendario attività" e "Cosa
+   devo fare oggi") riusando i gruppi già calcolati da renderCalendar():
+   stessa fonte di verità, nessuna logica di date duplicata. */
+function aggiornaHomeHero(gruppiPerGiorno){
+  const sub = document.getElementById("homeHeroCalSub");
+  const lista = document.getElementById("homeHeroOggiLista");
+  if(!sub || !lista) return;
+
+  const oggi = (gruppiPerGiorno || []).find(g => g.et === "Oggi");
+  const voci = oggi ? oggi.voci.slice() : [];
+
+  /* renderCalendar() esclude di proposito i task già fatti (non sono
+     più "da fare"): qui invece un task appena spuntato deve restare
+     visibile, barrato, non sparire di colpo — altrimenti il segno di
+     spunta non si vedrebbe mai. Li aggiungiamo a parte. */
+  const oggiMezzanotte = new Date(); oggiMezzanotte.setHours(0,0,0,0);
+  tasks.filter(t => t.status === "done" && t.time).forEach(t => {
+    const d = interpretaQuando(t.time);
+    if(d && d.getTime() === oggiMezzanotte.getTime()) voci.push({ title:t.title, id:t.id, tabella:"tasks" });
+  });
+
+  sub.textContent = voci.length === 0 ? "Nessun impegno oggi"
+    : (voci.length === 1 ? "1 impegno oggi" : voci.length + " impegni oggi");
+
+  if(voci.length === 0){
+    lista.innerHTML = '<div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div>';
+    return;
+  }
+
+  lista.innerHTML = "";
+  voci.forEach(it => {
+    const riga = document.createElement("div");
+    const t = it.tabella === "tasks" ? tasks.find(x => x.id === it.id) : null;
+    const fatto = t && t.status === "done";
+    riga.className = "home-hero-oggi-riga" + (fatto ? " fatto" : "");
+
+    const segno = document.createElement("span");
+    segno.className = "home-hero-oggi-check" + (t ? " cliccabile" : "");
+    if(t && fatto){
+      segno.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+    }
+    const testo = document.createElement("span");
+    testo.textContent = it.title;
+    riga.appendChild(segno);
+    riga.appendChild(testo);
+
+    if(t){
+      segno.addEventListener("click", () => {
+        t.status = t.status === "done" ? "todo" : "done";
+        if(isDbReady() && t.id) dbUpdate("tasks", t.id, { status: t.status });
+        renderTasks(); renderRing(); renderDifficulty(); renderCalendar();
+      });
+    }
+    lista.appendChild(riga);
+  });
+}
+
 /* Organizza la giornata: la stessa cosa dell'orologio nel logo */
 document.getElementById("aiHubGiornata").addEventListener("click", () => {
   chiudiHubAI();
@@ -7473,6 +7811,10 @@ function navigateTo(page){
   const inHome = (page === "home");
   hero.classList.toggle("nascosto", !inHome);
   topbar.classList.toggle("sola", !inHome);
+  /* Il saluto "Buongiorno" in Home lo dice già il riquadro scuro in
+     cima alla pagina: mostrare anche questo titolo sarebbe un saluto
+     ripetuto due volte di fila. */
+  topbar.style.display = inHome ? "none" : "";
 
   /* La data sta in alto, piccola, sopra il marchio */
   const brandData = document.getElementById("brandData");
