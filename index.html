@@ -854,23 +854,23 @@
   /* notifiche AI in-app */
   .ai-toast-container{ position:fixed; bottom:24px; right:24px; z-index:80; display:flex; flex-direction:column; gap:10px; max-width:340px; }
   .ai-toast{
-    background:var(--card); border:1px solid var(--border); border-radius:15px;
+    background:var(--card); border:2px solid var(--text); border-radius:20px;
     padding:14px 15px; box-shadow:var(--shadow-md); display:flex; gap:11px;
     animation:toastIn .25s ease;
   }
   @keyframes toastIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
-  .ai-toast-icon{ width:30px;height:30px;border-radius:9px;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;flex:none; }
+  .ai-toast-icon{ width:30px;height:30px;border-radius:9px;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;flex:none; }
   .ai-toast-icon svg{ width:15px;height:15px; }
   .ai-toast-body{ flex:1; min-width:0; }
   .ai-toast-title{ font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:3px; }
   .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; white-space:pre-line; }
-  .ai-toast.decisione{ background:var(--card); border:2px solid var(--amber); box-shadow:0 12px 34px rgba(20,23,29,.16); }
+  .ai-toast.decisione{ background:var(--card); border:2px solid var(--text); box-shadow:0 12px 34px rgba(20,23,29,.16); }
   .ai-toast-actions{ display:flex; gap:8px; margin-top:12px; }
   .ai-toast-actions button{
     flex:1; border:none; border-radius:10px; padding:10px 12px; cursor:pointer;
     font-family:inherit; font-size:12.5px; font-weight:800;
   }
-  .ai-toast-yes{ background:var(--amber); color:#fff; }
+  .ai-toast-yes{ background:var(--text); color:#fff; }
   .ai-toast-no{ background:rgba(20,23,29,.06); color:var(--muted); }
   .ai-toast-actions button:disabled{ opacity:.5; }
   .ai-toast-close{ cursor:pointer; color:var(--faint); flex:none; background:none; border:none; padding:2px; }
@@ -3993,7 +3993,7 @@ function showAIToastConDecisione(titolo, testo, onSi, onNo, etichettaSi, etichet
   const toast = document.createElement("div");
   toast.className = "ai-toast decisione";
   toast.innerHTML = `
-    <div class="ai-toast-icon" style="background:var(--amber);">
+    <div class="ai-toast-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     </div>
     <div class="ai-toast-body">
@@ -4984,7 +4984,7 @@ function buildCallRow(c){
     e.stopPropagation();
     showToast(
       '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-      "var(--coral)", "Chiamata avviata", "Stai chiamando " + c.name + "."
+      "Chiamata avviata", "Stai chiamando " + c.name + "."
     );
   });
   return row;
@@ -6154,12 +6154,12 @@ function renderGoals(){
 }
 
 /* --- notifiche AI in-app --- */
-function showToast(iconSvg, iconBg, title, text){
+function showToast(iconSvg, title, text){
   const container = document.getElementById("aiToastContainer");
   const toast = document.createElement("div");
   toast.className = "ai-toast";
   toast.innerHTML = `
-    <div class="ai-toast-icon" style="background:${iconBg};">${iconSvg}</div>
+    <div class="ai-toast-icon">${iconSvg}</div>
     <div class="ai-toast-body">
       <div class="ai-toast-title">${title}</div>
       <div class="ai-toast-text">${text}</div>
@@ -6171,7 +6171,7 @@ function showToast(iconSvg, iconBg, title, text){
   setTimeout(() => { toast.remove(); }, 8000);
 }
 function showAIToast(title, text){
-  showToast('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>', "var(--violet)", title, text);
+  showToast('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>', title, text);
 }
 
 /* Versione di riserva (scriptata): usata solo se la chiamata AI vera fallisce.
@@ -6673,12 +6673,12 @@ const docIcons = {
 };
 function setupDocActions(prefix, getLast, label){
   document.getElementById(prefix + "SaveBtn").addEventListener("click", () => {
-    showToast(docIcons.save, "var(--teal)", label + " salvato", "Il documento è stato salvato ed è disponibile nell'elenco qui sotto.");
+    showToast(docIcons.save, label + " salvato", "Il documento è stato salvato ed è disponibile nell'elenco qui sotto.");
   });
   document.getElementById(prefix + "PrintBtn").addEventListener("click", () => window.print());
   document.getElementById(prefix + "SendBtn").addEventListener("click", () => {
     const doc = getLast();
-    showToast(docIcons.send, "var(--indigo)", label + " inviato", doc ? (label + " inviato a " + doc.client + " via email.") : (label + " inviato."));
+    showToast(docIcons.send, label + " inviato", doc ? (label + " inviato a " + doc.client + " via email.") : (label + " inviato."));
   });
   document.getElementById(prefix + "ShareBtn").addEventListener("click", () => {
     const doc = getLast();
@@ -6686,7 +6686,7 @@ function setupDocActions(prefix, getLast, label){
     if(navigator.share){
       navigator.share(shareData).catch(() => {});
     } else {
-      showToast(docIcons.share, "var(--wa)", "Pronto per la condivisione", "Link del " + label.toLowerCase() + " pronto da condividere.");
+      showToast(docIcons.share, "Pronto per la condivisione", "Link del " + label.toLowerCase() + " pronto da condividere.");
     }
   });
 }
