@@ -256,21 +256,25 @@
   .ob-o svg{ width:100%; height:100%; }
   .ob-tagline{ text-align:center; font-size:13px; color:var(--muted); line-height:1.5; max-width:320px; margin:0 auto 32px; }
   .ob-label{ font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); margin-bottom:12px; }
-  .ob-cards{ display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+  .ob-cards{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:24px; }
   .ob-card{
-    display:flex; align-items:center; gap:13px; padding:15px 16px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    gap:10px; padding:26px 12px;
     background:var(--card); border:1.5px solid var(--border); border-radius:16px;
     cursor:pointer; transition:.15s; box-shadow:var(--shadow-sm);
   }
   .ob-card:hover{ border-color:var(--border-strong); }
-  .ob-card.selected{ border-color:var(--indigo); background:var(--indigo-soft); box-shadow:0 0 0 1.5px var(--indigo); }
-  .ob-card-icon{ width:42px; height:42px; border-radius:13px; color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
-  .ob-card-icon svg{ width:19px; height:19px; }
+  .ob-card.selected{ border-color:var(--text); background:var(--text); box-shadow:none; }
+  .ob-card.selected .ob-card-title{ color:#fff; }
+  .ob-card.selected .ob-card-icon{ color:#fff; }
+  .ob-card-icon{ width:28px; height:28px; color:var(--text); display:flex; align-items:center; justify-content:center; flex:none; }
+  .ob-card-icon svg{ width:100%; height:100%; }
   .ob-card-title{ font-size:14px; font-weight:800; }
-  .ob-card-sub{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .ob-card-sub{ display:none; }
   .ob-continue-btn{
     width:100%; justify-content:center; margin-top:auto; padding:14px 20px; font-size:14px; border-radius:14px;
   }
+  .primary-btn.ob-continue-btn{ background:var(--text); box-shadow:0 16px 34px rgba(14,20,36,.22); }
   .ob-continue-btn:disabled{ opacity:.4; cursor:not-allowed; }
   .ob-continue-btn svg{ width:15px; height:15px; }
   .ob-back{
@@ -1828,7 +1832,7 @@
       <div class="ob-label">Che lavoro fai?</div>
       <div class="ob-cards" id="obProfessionCards">
         <div class="ob-card" data-profession="edile">
-          <div class="ob-card-icon" style="background:var(--coral);">
+          <div class="ob-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg>
           </div>
           <div class="ob-card-body">
@@ -1837,7 +1841,7 @@
           </div>
         </div>
         <div class="ob-card" data-profession="idraulico">
-          <div class="ob-card-icon" style="background:var(--indigo);">
+          <div class="ob-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.7s6 5.4 6 10.1a6 6 0 0 1-12 0c0-4.7 6-10.1 6-10.1z"/></svg>
           </div>
           <div class="ob-card-body">
@@ -1846,7 +1850,7 @@
           </div>
         </div>
         <div class="ob-card" data-profession="elettricista">
-          <div class="ob-card-icon" style="background:var(--amber);">
+          <div class="ob-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
           </div>
           <div class="ob-card-body">
@@ -1855,7 +1859,7 @@
           </div>
         </div>
         <div class="ob-card" data-profession="amministratore">
-          <div class="ob-card-icon" style="background:var(--teal);">
+          <div class="ob-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
           </div>
           <div class="ob-card-body">
