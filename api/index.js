@@ -705,6 +705,59 @@ const TOOLS = {
     },
   },
 
+  trova_o_crea_cliente: {
+    sensitive: false,
+    schema: {
+      name: "trova_o_crea_cliente",
+      description: "Trova il cliente che corrisponde al nome dato, o lo crea se non esiste ancora. A differenza di cerca_cliente (che restituisce un elenco di possibili corrispondenze tra cui scegliere), questo restituisce SEMPRE un solo cliente con un id preciso: usalo quando serve collegare qualcosa (es. una foto appena scattata) a un cliente e ti serve un id certo, non un elenco. Passa il nome nell'ordine naturale italiano se lo conosci (es. \"Mario Rossi\", non \"Rossi Mario\") — funziona comunque anche nell'altro ordine. Se il nome è ambiguo (più clienti simili) lo strumento fallisce con un errore invece di indovinare: in quel caso chiedi tu all'utente il nome e cognome completi. Se cerca_impegno o cerca_cliente hanno già trovato più corrispondenze ambigue per lo stesso nome, chiedi prima all'utente quale intende invece di chiamare questo strumento a caso.",
+      input_schema: {
+        type: "object",
+        properties: {
+          nome: { type: "string", description: "Nome del cliente, come detto o scritto dal professionista" },
+          telefono: { type: "string", description: "Telefono, solo se menzionato" },
+        },
+        required: ["nome"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      const nome = input.nome.trim();
+      const parole = nome.toLowerCase().split(/\s+/).filter(Boolean);
+
+      /* Confrontiamo in JS, non con un filtro ilike sul server: un
+         filtro sul solo nome esatto scritto (o una singola parola)
+         avrebbe mancato "Mario Rossi" quando l'utente detta "Rossi
+         Mario" — capita spesso, l'anagrafica lo salva in ordine
+         naturale ma chi parla spesso dice prima il cognome. */
+      const tutti = await db(`clients?select=id,name&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+      const lista = Array.isArray(tutti) ? tutti : [];
+
+      let candidati = lista.filter((c) => c.name.trim().toLowerCase() === nome.toLowerCase());
+      if (candidati.length === 0) {
+        candidati = lista.filter((c) => {
+          const basso = c.name.toLowerCase();
+          return parole.every((p) => basso.includes(p));
+        });
+      }
+
+      if (candidati.length === 1) {
+        return { id: candidati[0].id, nome: candidati[0].name, creato: false };
+      }
+      if (candidati.length > 1) {
+        /* Meglio fermarsi con un errore chiaro (che l'assistente può
+           girare all'utente in una domanda) che collegare qualcosa
+           al cliente sbagliato senza che nessuno se ne accorga. */
+        throw fail(`Ci sono più clienti che assomigliano a "${nome}": chiedi all'utente il nome e cognome completi per essere sicuri di quale sia.`);
+      }
+
+      const payload = { owner_id: ctx.user.id, name: nome, status: "trattativa" };
+      if (eStringaNonVuota(input.telefono)) payload.phone = input.telefono.trim();
+      const creati = await db("clients", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+      const c = Array.isArray(creati) ? creati[0] : creati;
+      return { id: c.id, nome: c.name, creato: true };
+    },
+  },
+
   crea_cliente: {
     sensitive: false,
     schema: {
@@ -1199,6 +1252,8 @@ Hai delle funzioni per leggere e modificare i dati del professionista: usale dav
 REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno. Se manca la data o l'ora, decidi tu: primo giorno utile, alle 08:00. Non lasciare mai un impegno senza data.
 
 Chiama crea_cliente o aggiorna_cliente SOLO quando l'utente chiede esplicitamente di aggiungere o modificare un cliente in anagrafica — non per un normale impegno che nomina soltanto una persona.
+
+Quando serve collegare qualcosa (es. una foto) a un cliente preciso e ti serve un id certo, non un elenco tra cui scegliere, usa trova_o_crea_cliente invece di cerca_cliente/crea_cliente separati: restituisce sempre un solo cliente, trovato o appena creato.
 
 Se un impegno riguarda una persona già cliente, cercala prima con cerca_cliente per collegare l'impegno al cliente giusto; se non la trovi, procedi comunque con l'impegno senza collegarlo a nessuno.
 
