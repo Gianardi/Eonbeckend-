@@ -427,8 +427,6 @@
   /* Le card della Home prendono il colore pastello pieno, con i testi
      scuri sopra: cosi' ogni sezione si riconosce a colpo d'occhio e
      resta comunque leggibile. */
-  .module-card.tint-teal{ background:var(--teal-tint); border-color:transparent; }
-  .module-card.tint-indigo{ background:var(--indigo-tint); border-color:transparent; }
   .module-card.tint-green{ background:var(--green-tint); border-color:transparent; }
   .module-card.tint-violet{ background:var(--violet-tint); border-color:transparent; }
   .module-card.tint-wa{ background:var(--wa-soft); border-color:rgba(31,174,85,.22); }
@@ -448,8 +446,6 @@
   }
   .module-icon svg{ width:19px; height:19px; display:block; }
   .module-icon.sun{ background:var(--amber); }
-  .module-icon.hands{ background:var(--teal); }
-  .module-icon.rocket{ background:var(--indigo); }
   .module-icon.gem{ background:var(--green); }
   .module-icon.case{ background:var(--violet); }
   .module-icon.chat{ background:var(--wa); }
@@ -991,16 +987,7 @@
   }
   .empty-hint b{ color:var(--text); display:block; font-size:14px; margin-bottom:5px; }
 
-  /* ---- Card e pannello EON AI ---- */
-  .module-card.card-ai{
-    background:linear-gradient(140deg, #A78BFA 0%, #8B5CF6 100%);
-    border-color:transparent;
-  }
-  .module-card.card-ai .module-eyebrow{ color:rgba(255,255,255,.8) !important; }
-  .module-card.card-ai .module-title{ color:#fff; }
-  .module-card.card-ai .module-sub{ color:rgba(255,255,255,.82); }
-  .module-card.card-ai .module-icon{ background:rgba(255,255,255,.24) !important; }
-
+  /* ---- Pannello EON AI ---- */
   .ai-hub-overlay{
     position:fixed; inset:0; z-index:9998; background:rgba(20,23,29,.55);
     display:flex; align-items:flex-end; justify-content:center;
@@ -1991,7 +1978,7 @@
     </div>
     <div class="nav-item" data-page="gestisci-azienda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-      Gestisci Azienda
+      Menu
     </div>
 
     <div class="nav-section-label">Spazio di lavoro</div>
@@ -2084,75 +2071,6 @@
         </div>
       </div>
 
-      <div class="module-grid">
-        <div class="module-card card-ai" id="cardEonAI">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--violet);">Assistente</div>
-          <div class="module-title">EON AI</div>
-          <div class="module-sub">La tua giornata, gestita insieme</div>
-        </div>
-        <div class="module-card tint-coral" data-catfilter="urgenti" style="position:relative;">
-          <span class="badge" id="chatBadge" style="position:absolute; top:16px; right:16px;">3</span>
-          <div class="module-icon coral">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--coral);">Priorità</div>
-          <div class="module-title">Urgenti</div>
-          <div class="module-sub">Cose che aspettano una risposta oggi</div>
-        </div>
-        <div class="module-card tint-teal" data-catfilter="clienti">
-          <div class="module-icon hands">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--teal);">Relazioni</div>
-          <div class="module-title">Clienti</div>
-          <div class="module-sub">Le conversazioni con chi segui ora</div>
-        </div>
-        <div class="module-card tint-green" data-catfilter="chiudere">
-          <div class="module-icon gem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--green);">Pipeline</div>
-          <div class="module-title">Da chiudere</div>
-          <div class="module-sub">Trattative vicine alla firma</div>
-        </div>
-        <div class="module-card tint-amber" data-catfilter="acquisire">
-          <div class="module-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--amber);">Nuovi contatti</div>
-          <div class="module-title">Da acquisire</div>
-          <div class="module-sub">Chi ti ha scritto per la prima volta</div>
-        </div>
-        <div class="module-card tint-violet" data-catfilter="team">
-          <div class="module-icon case">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--violet);">Squadra</div>
-          <div class="module-title">Team</div>
-          <div class="module-sub">Collaboratori e dipendenti</div>
-        </div>
-        <div class="module-card tint-indigo" data-page="calendario">
-          <div class="module-icon rocket">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--indigo);">Agenda</div>
-          <div class="module-title">Calendario</div>
-          <div class="module-sub">L'AI lo compila da sola dalle tue conversazioni</div>
-        </div>
-        <div class="module-card tint-coral" data-page="chiamate">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-          </div>
-          <div class="module-eyebrow" style="color:var(--coral);">Contatti</div>
-          <div class="module-title">Chiamate</div>
-          <div class="module-sub">Da fare oggi, programmate, recenti</div>
-        </div>
-      </div>
     </div>
 
     <!-- ==================== PAGINA: CALENDARIO ==================== -->
@@ -2195,7 +2113,7 @@
     <div class="page" id="page-udienze">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header">
@@ -2452,7 +2370,7 @@
     <div class="page" id="page-revisioni">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header">
@@ -2490,7 +2408,64 @@
 
     <!-- ==================== PAGINA: GESTISCI AZIENDA ==================== -->
     <div class="page" id="page-gestisci-azienda">
+      <div class="module-grid">
+        <div class="module-card tint-coral" data-catfilter="urgenti" style="position:relative;">
+          <span class="badge" id="chatBadge" style="position:absolute; top:16px; right:16px;">3</span>
+          <div class="module-icon coral">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <div class="module-eyebrow" style="color:var(--coral);">Priorità</div>
+          <div class="module-title">Urgenti</div>
+          <div class="module-sub">Cose che aspettano una risposta oggi</div>
+        </div>
+        <div class="module-card tint-green" data-catfilter="chiudere">
+          <div class="module-icon gem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
+          </div>
+          <div class="module-eyebrow" style="color:var(--green);">Pipeline</div>
+          <div class="module-title">Da chiudere</div>
+          <div class="module-sub">Trattative vicine alla firma</div>
+        </div>
+        <div class="module-card tint-amber" data-catfilter="acquisire">
+          <div class="module-icon" style="background:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <div class="module-eyebrow" style="color:var(--amber);">Nuovi contatti</div>
+          <div class="module-title">Da acquisire</div>
+          <div class="module-sub">Chi ti ha scritto per la prima volta</div>
+        </div>
+        <div class="module-card tint-violet" data-catfilter="team">
+          <div class="module-icon case">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="module-eyebrow" style="color:var(--violet);">Squadra</div>
+          <div class="module-title">Team</div>
+          <div class="module-sub">Collaboratori e dipendenti</div>
+        </div>
+      </div>
       <div class="azienda-list">
+        <div class="azienda-link-card" id="cardEonAI">
+          <div class="module-icon" style="background:var(--violet);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">EON AI</div>
+            <div class="module-sub">Organizza la giornata, strategia trattative e altro</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="chiamate">
+          <div class="module-icon" style="background:var(--coral);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Registro chiamate</div>
+            <div class="module-sub">Da fare oggi, programmate, recenti</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
         <div class="azienda-link-card" data-page="assegna-compiti">
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
@@ -2595,7 +2570,7 @@
     <div class="page" id="page-cestino">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header"><h2>Cestino</h2></div>
@@ -2608,7 +2583,7 @@
     <div class="page" id="page-assegna-compiti">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header"><h2>A chi mandi l'ordine di lavoro?</h2></div>
@@ -2656,7 +2631,7 @@
     <div class="page" id="page-pagamenti">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
         <div class="stat-card">
@@ -2689,7 +2664,7 @@
     <div class="page" id="page-entrate">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
         <div class="stat-card">
@@ -2722,7 +2697,7 @@
     <div class="page" id="page-crea-fattura">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header"><h2>Crea fattura</h2></div>
@@ -2803,7 +2778,7 @@
     <div class="page" id="page-crea-preventivo">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header"><h2>Crea preventivo</h2></div>
@@ -2884,7 +2859,7 @@
     <div class="page" id="page-regalo">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna a Gestisci Azienda
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header"><h2>Fai un regalo</h2></div>
@@ -3044,7 +3019,7 @@
     </div>
     <div class="tab-item" data-tab="azienda" data-page="gestisci-azienda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-      <span>Azienda</span>
+      <span>Menu</span>
     </div>
   </nav>
 </div>
@@ -7758,7 +7733,7 @@ const pageMeta = {
   obiettivi: { title:"Obiettivi", sub:null },
   business: { title:"Business", sub:null },
   opportunita: { title:"Opportunità", sub:null },
-  "gestisci-azienda": { title:"Azienda", sub:null },
+  "gestisci-azienda": { title:"Menu", sub:null },
   "assegna-compiti": { title:"Assegna Compiti", sub:null },
   pagamenti: { title:"Pagamenti", sub:null },
   entrate: { title:"Entrate", sub:null },
