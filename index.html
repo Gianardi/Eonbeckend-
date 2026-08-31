@@ -1849,6 +1849,31 @@
   </div>
 </div>
 
+<!-- Dopo aver scattato una foto per il cantiere: a chi si riferisce?
+     Detta o scrivi, l'assistente trova o crea il cliente e la
+     collega alla sua scheda (solo un archivio interno: il cliente
+     non la vede mai). -->
+<div class="ai-landing-overlay" id="cantiereFotoTagOverlay" style="display:none;">
+  <div class="ai-landing-card" style="max-width:320px;">
+    <img id="cantiereFotoTagAnteprima" src="" alt="" style="width:100%; max-height:150px; object-fit:cover; border-radius:14px; margin-bottom:14px; display:block;">
+    <div class="ai-landing-title">Cosa vuoi farci?</div>
+    <div class="ai-landing-text" id="cantiereFotoTagHint" style="margin-bottom:14px;">Dì o scrivi a quale cliente si riferisce: la aggiungo alla sua scheda (creo il cliente se non esiste ancora)</div>
+    <div class="home-hero-mic-wrap" style="margin-bottom:10px;">
+      <button class="home-hero-mic" id="cantiereFotoTagMic" type="button" aria-label="Tocca per parlare" style="width:64px; height:64px;">
+        <span class="home-hero-mic-ring"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" style="width:22px; height:22px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+      </button>
+    </div>
+    <div class="home-hero-textwrap" style="text-align:left;">
+      <textarea class="home-hero-campo" id="cantiereFotoTagCampo" rows="2" placeholder="Es. Lavoro cliente Rossi Mario"></textarea>
+      <button class="home-hero-send" id="cantiereFotoTagSend" type="button" aria-label="Invia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
+    <button type="button" id="cantiereFotoTagSalta" style="margin-top:14px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:4px;">Salta, resta solo nella galleria</button>
+  </div>
+</div>
+
 <div class="app">
 
 <div class="onboarding" id="onboardingScreen">
@@ -3584,7 +3609,7 @@ async function loadUserDataFromDB(){
     id:a.id, title:a.title, deadline:a.deadline, employees:a.employee_names || []
   }));
 
-  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at }));
+  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null }));
   cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push({ id:a.id, testo:a.testo, created:a.created_at }));
   const rigaCantiereCliente = dbCantiereCliente[0];
@@ -5833,6 +5858,22 @@ function openSheet(formKey, existingItem){
     <div class="dettatura-divisore">Oppure compila a mano</div>
   ` : "";
 
+  /* Foto del cantiere collegate a questo cliente (assegnate dopo lo
+     scatto, dicendo/scrivendo a chi si riferiscono): solo in
+     modifica, mai quando si sta ancora creando il cliente. */
+  const conFotoCantiere = (formKey === "cliente" && !!existingItem);
+  const fotoCliente = conFotoCantiere ? cantiereFoto.filter(f => f.clientId === existingItem.id) : [];
+  const bloccoFotoCantiere = conFotoCantiere ? `
+    <div class="sheet-field">
+      <label>Foto cantiere collegate</label>
+      <div class="cantiere-foto-grid" style="margin-top:4px;">
+        ${fotoCliente.length === 0
+          ? '<div class="empty-hint" style="grid-column:1/-1; padding:8px 0;">Nessuna foto collegata ancora. Scattane una da "Foto cantiere" nella Home e di\' il nome di questo cliente.</div>'
+          : fotoCliente.map(f => `<a href="${f.url}" target="_blank" rel="noopener" class="cantiere-foto-item"><img src="${f.url}" alt=""></a>`).join("")}
+      </div>
+    </div>
+  ` : "";
+
   const body = document.getElementById("sheetBody");
   body.innerHTML = bloccoVoce + form.fields.map(f => {
     const current = existingItem ? (existingItem[f.key] ?? "") : (f.default ?? "");
@@ -5857,7 +5898,7 @@ function openSheet(formKey, existingItem){
       <label>${f.label}</label>
       <input type="${f.type}"${modo} data-field="${f.key}" placeholder="${f.placeholder || ""}" value="${current}">
     </div>`;
-  }).join("");
+  }).join("") + bloccoFotoCantiere;
 
   if(conVoce) collegaDettatura();
 
@@ -7681,9 +7722,11 @@ async function caricaCantiereFoto(file){
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
     const creato = await dbInsert("cantiere_foto", { url:pub.publicUrl });
     if(!creato) throw new Error("scrittura non riuscita");
-    cantiereFoto.push({ id:creato.id, url:creato.url, created:creato.created_at });
+    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null };
+    cantiereFoto.push(nuovaFoto);
     aggiornaCantiereSottotitoli();
     renderCantiereFoto();
+    apriTagFotoCantiere(nuovaFoto);
   }catch(err){
     console.error("Caricamento foto non riuscito:", err);
     showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare la foto: " + (err.message || "riprova."));
@@ -7708,6 +7751,186 @@ document.getElementById("cantiereFotoInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
   if(f) caricaCantiereFoto(f);
 });
+
+/* ---- Dopo lo scatto: a chi si riferisce la foto? ----
+   La foto resta comunque nella galleria "Foto cantiere" (già
+   caricata prima di arrivare qui): questo passaggio in più la
+   collega anche alla scheda di un cliente, trovato o creato
+   dall'assistente. Un archivio solo interno, il cliente non lo vede
+   mai (non passa dalla sua conversazione). */
+let cantiereFotoTagId = null;
+
+let fermaAscoltoTagFoto = () => {}; // sostituita sotto se il riconoscimento vocale è disponibile
+
+function apriTagFotoCantiere(foto){
+  cantiereFotoTagId = foto.id;
+  document.getElementById("cantiereFotoTagAnteprima").src = foto.url;
+  document.getElementById("cantiereFotoTagCampo").value = "";
+  document.getElementById("cantiereFotoTagHint").textContent = "Dì o scrivi a quale cliente si riferisce: la aggiungo alla sua scheda (creo il cliente se non esiste ancora)";
+  document.getElementById("cantiereFotoTagOverlay").style.display = "flex";
+}
+function chiudiTagFotoCantiere(){
+  /* Ferma anche un ascolto ancora in corso: altrimenti resterebbe
+     acceso in background e il testo dettato finirebbe per essere
+     inviato più tardi contro la foto che nel frattempo è diventata
+     quella corrente (l'utente potrebbe averne già aperta un'altra). */
+  fermaAscoltoTagFoto();
+  cantiereFotoTagId = null;
+  document.getElementById("cantiereFotoTagOverlay").style.display = "none";
+}
+document.getElementById("cantiereFotoTagSalta").addEventListener("click", chiudiTagFotoCantiere);
+document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "cantiereFotoTagOverlay") chiudiTagFotoCantiere();
+});
+
+(function collegaTagFotoCantiere(){
+  const mic = document.getElementById("cantiereFotoTagMic");
+  const campo = document.getElementById("cantiereFotoTagCampo");
+  const send = document.getElementById("cantiereFotoTagSend");
+  const hint = document.getElementById("cantiereFotoTagHint");
+  const HINT_BASE = "Dì o scrivi a quale cliente si riferisce: la aggiungo alla sua scheda (creo il cliente se non esiste ancora)";
+  let inCorso = false;
+
+  async function assegna(testo){
+    testo = (testo || "").trim();
+    if(testo.length < 2 || inCorso || !cantiereFotoTagId) return;
+    if(!BACKEND_CONFIGURED || !currentSession){
+      hint.textContent = "L'assistente richiede l'accesso: accedi per usarlo";
+      return;
+    }
+    const fotoId = cantiereFotoTagId;
+    inCorso = true;
+    send.disabled = true;
+    mic.disabled = true;
+    hint.textContent = "Sto cercando il cliente…";
+
+    let risposta;
+    try{
+      risposta = await chiediAssistente(`Il professionista ha appena scattato una foto per un lavoro e ha detto a chi si riferisce: "${testo}". Trova il cliente giusto o creane uno nuovo se non esiste (trova_o_crea_cliente).`);
+    }catch(err){
+      console.warn("Assistente non riuscito:", err.message);
+      hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
+      send.disabled = false;
+      mic.disabled = false;
+      inCorso = false;
+      return;
+    }
+    send.disabled = false;
+    mic.disabled = false;
+    inCorso = false;
+
+    /* La richiesta a chiediAssistente può richiedere qualche secondo:
+       nel frattempo l'utente potrebbe aver chiuso questa foto e
+       aperto quella successiva. In quel caso l'overlay ora mostra
+       un'altra foto/un altro testo — non lo tocchiamo, ma il
+       collegamento riguarda comunque fotoId (fissato all'inizio),
+       quindi lo facciamo lo stesso e lo confermiamo con un toast. */
+    const questaFotoEAncoraAperta = (cantiereFotoTagId === fotoId);
+
+    const azioneCliente = (risposta.azioni || []).find(a => a.tool === "trova_o_crea_cliente");
+    if(!azioneCliente){
+      if(questaFotoEAncoraAperta){
+        hint.textContent = risposta.testo || "Non ho capito a quale cliente ti riferisci: prova a scrivere solo nome e cognome";
+      }
+      return;
+    }
+
+    if(isDbReady()){
+      const { error } = await supabaseClient.from("cantiere_foto")
+        .update({ client_id:azioneCliente.esito.id }).eq("id", fotoId);
+      if(error){
+        console.error("Errore collegamento foto al cliente:", error.message);
+        if(questaFotoEAncoraAperta) hint.textContent = "Non sono riuscita a collegare la foto: riprova";
+        return;
+      }
+    }
+    const foto = cantiereFoto.find(f => f.id === fotoId);
+    if(foto) foto.clientId = azioneCliente.esito.id;
+
+    if(questaFotoEAncoraAperta){
+      campo.value = "";
+      chiudiTagFotoCantiere();
+    }
+    showAIToast(
+      azioneCliente.esito.creato ? "Cliente creato e foto collegata" : "Foto collegata alla scheda",
+      azioneCliente.esito.nome
+    );
+    await loadUserDataFromDB();
+    renderClientArchive(); renderClientStats();
+  }
+  send.addEventListener("click", () => assegna(campo.value));
+
+  const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!RecognitionAPI){
+    mic.addEventListener("click", () => {
+      showAILanding("Microfono non disponibile", "Questo browser non supporta il riconoscimento vocale. Su iPhone funziona da Safari; su Android da Chrome. Puoi comunque scrivere qui sotto.");
+    });
+    return;
+  }
+  const riconoscitore = new RecognitionAPI();
+  riconoscitore.lang = "it-IT";
+  riconoscitore.continuous = false;
+  riconoscitore.interimResults = true;
+  let testoSessione = "";
+  let testoAccumulato = "";
+  let attivo = false;
+  let abbandonato = false; // true solo quando l'overlay si chiude (Salta, tap fuori, foto successiva): il testo dettato va scartato, non inviato
+
+  fermaAscoltoTagFoto = () => {
+    abbandonato = true;
+    if(!attivo) return;
+    attivo = false;
+    try{ riconoscitore.stop(); }catch(err){ /* già fermo */ }
+  };
+
+  riconoscitore.onstart = () => {
+    testoSessione = "";
+    mic.classList.add("ascolto");
+    hint.textContent = "Ti ascolto… tocca di nuovo per inviare";
+  };
+  riconoscitore.onresult = (e) => {
+    let t = "";
+    for(let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    testoSessione = t;
+  };
+  riconoscitore.onerror = (e) => {
+    if(e.error === "no-speech" || e.error === "aborted") return;
+    mic.classList.remove("ascolto");
+    hint.textContent = HINT_BASE;
+    attivo = false;
+    if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+      showAILanding("Microfono non autorizzato", "Per parlare con l'assistente, consenti l'accesso al microfono nelle impostazioni del browser per questa pagina.");
+    }
+  };
+  riconoscitore.onend = () => {
+    mic.classList.remove("ascolto");
+    testoAccumulato = (testoAccumulato ? testoAccumulato + " " : "") + testoSessione;
+    if(attivo){
+      try{ riconoscitore.start(); }
+      catch(err){ attivo = false; hint.textContent = HINT_BASE; }
+      return;
+    }
+    const finale = testoAccumulato.trim();
+    testoAccumulato = "";
+    if(abbandonato){ abbandonato = false; return; }
+    if(finale.length >= 2) assegna(finale);
+    else hint.textContent = HINT_BASE;
+  };
+
+  mic.addEventListener("click", () => {
+    if(attivo){
+      attivo = false;
+      try{ riconoscitore.stop(); }catch(err){ /* già fermo */ }
+      return;
+    }
+    if(inCorso) return;
+    abbandonato = false;
+    attivo = true;
+    testoAccumulato = "";
+    try{ riconoscitore.start(); }
+    catch(err){ console.warn("Impossibile avviare il microfono:", err.message); attivo = false; }
+  });
+})();
 
 /* ============ HOME: microfono grande + testo libero ============
    Stessa cosa che fa "Raccontami la giornata" nell'hub EON AI (stesso
