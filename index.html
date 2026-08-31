@@ -2145,16 +2145,29 @@
         Torna alla Home
       </div>
 
-      <div class="card-panel" style="margin-bottom:14px;">
-        <div class="card-header"><h2>Cliente collegato</h2></div>
-        <div id="cantiereClienteAttuale" style="padding:2px 16px 16px;"></div>
+      <div class="home-hero" style="padding:6px 0 4px;">
+        <div class="home-hero-mic-wrap" style="margin-bottom:10px;">
+          <button class="home-hero-mic" id="cantiereClienteMic" aria-label="Tocca per parlare" type="button" style="width:84px; height:84px;">
+            <span class="home-hero-mic-ring"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" style="width:28px; height:28px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+          </button>
+        </div>
+        <div class="home-hero-hint" id="cantiereClienteHint" style="margin-bottom:14px;">Aggiungi o modifica un cliente: nome, contatto, cosa deve fare — ci penso io</div>
+        <div class="home-hero-textwrap">
+          <textarea class="home-hero-campo" id="cantiereClienteCampo" rows="2" placeholder="Es. Mario Rossi, 333 1234567, deve rifare il tetto"></textarea>
+          <button class="home-hero-send" id="cantiereClienteSend" aria-label="Invia" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
       </div>
 
-      <div class="search" style="margin-bottom:12px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="cantiereClienteSearch" placeholder="Cerca cliente da collegare...">
+      <div class="card-panel">
+        <div class="card-header">
+          <h2>Cruscotto clienti</h2>
+          <span class="count" id="cantiereClienteCruscottoCount">0</span>
+        </div>
+        <div id="cantiereClienteCruscottoList" style="padding:8px 0 16px;"></div>
       </div>
-      <div id="cantiereClienteLista" class="azienda-list"></div>
     </div>
 
     <!-- ==================== PAGINA: APPUNTI CANTIERE ==================== -->
@@ -3579,11 +3592,11 @@ async function seedUserData(profession){
    degli array in memoria (clients, opportunities, ecc.) con le sue righe
    vere dal database, invece dei dati demo di professionData. */
 async function loadUserDataFromDB(){
-  const [dbClients, dbOpps, dbEmployees, dbPayments, dbIncomes, dbTasks, dbGoals, dbAssigned, dbCantiereFoto, dbCantiereDocumenti, dbCantiereAppunti, dbCantiereCliente, dbIntestazione] = await Promise.all([
+  const [dbClients, dbOpps, dbEmployees, dbPayments, dbIncomes, dbTasks, dbGoals, dbAssigned, dbCantiereFoto, dbCantiereDocumenti, dbCantiereAppunti, dbIntestazione] = await Promise.all([
     dbSelect("clients"), dbSelect("opportunities"), dbSelect("employees"),
     dbSelect("payments"), dbSelect("incomes"), dbSelect("tasks"),
     dbSelect("goals"), dbSelect("assigned_tasks"),
-    dbSelect("cantiere_foto"), dbSelect("cantiere_documenti"), dbSelect("cantiere_appunti"), dbSelect("cantiere_cliente"),
+    dbSelect("cantiere_foto"), dbSelect("cantiere_documenti"), dbSelect("cantiere_appunti"),
     dbSelect("azienda_intestazione")
   ]);
 
@@ -3613,9 +3626,6 @@ async function loadUserDataFromDB(){
   cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null }));
   cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push({ id:a.id, testo:a.testo, created:a.created_at }));
-  const rigaCantiereCliente = dbCantiereCliente[0];
-  const clienteCollegato = rigaCantiereCliente ? clients.find(c => c.id === rigaCantiereCliente.client_id) : null;
-  cantiereClienteCollegato = clienteCollegato ? { id:clienteCollegato.id, name:clienteCollegato.name } : null;
   aggiornaCantiereSottotitoli();
 
   const rigaIntestazione = dbIntestazione[0];
@@ -4257,7 +4267,6 @@ const assignedTasks = [];
 const cantiereFoto = [];
 const cantiereDocumenti = [];
 const cantiereAppunti = [];
-let cantiereClienteCollegato = null; // { id, name } del cliente collegato, o null
 let aziendaIntestazione = null; // { nome_azienda, indirizzo, piva, telefono, email, logo_url }, o null se non ancora configurata
 
 const payments = [
@@ -5322,6 +5331,8 @@ function buildClientCard(c){
     c.archived = !c.archived;
     if(isDbReady() && c.id) await dbUpdate("clients", c.id, { is_archived: c.archived });
     renderClientArchive();
+    const pagCruscotto = document.getElementById("page-cantiere-cliente");
+    if(pagCruscotto && pagCruscotto.classList.contains("visible")) renderCantiereClienteCruscotto();
   });
   return card;
 }
@@ -7291,7 +7302,7 @@ function collegaHubRacconta(){
        finché non si ricarica l'app da zero. */
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
-    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino();
+    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino(); renderCantiereClienteCruscotto();
     chiudiHubAI();
 
     /* Qualsiasi azione sul calendario porta lì a vedere il risultato,
@@ -7374,7 +7385,10 @@ document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
 
 function aggiornaCantiereSottotitoli(){
   const subCliente = document.getElementById("cantiereClienteSub");
-  if(subCliente) subCliente.textContent = cantiereClienteCollegato ? cantiereClienteCollegato.name : "Nessun cliente collegato";
+  if(subCliente){
+    const nAttivi = clients.filter(c => !c.archived).length;
+    subCliente.textContent = nAttivi === 0 ? "Nessun cliente" : (nAttivi === 1 ? "1 cliente" : nAttivi + " clienti");
+  }
 
   const subAppunti = document.getElementById("cantiereAppuntiSub");
   if(subAppunti) subAppunti.textContent = cantiereAppunti.length === 0 ? "Nessun appunto" : (cantiereAppunti.length === 1 ? "1 appunto" : cantiereAppunti.length + " appunti");
@@ -7386,67 +7400,22 @@ function aggiornaCantiereSottotitoli(){
   if(subFoto) subFoto.textContent = cantiereFoto.length === 0 ? "Nessuna foto" : (cantiereFoto.length === 1 ? "1 foto" : cantiereFoto.length + " foto");
 }
 
-/* ---- Cliente cantiere ---- */
-function renderCantiereCliente(){
-  const attuale = document.getElementById("cantiereClienteAttuale");
-  if(cantiereClienteCollegato){
-    attuale.innerHTML = "";
-    const riga = document.createElement("div");
-    riga.style.cssText = "display:flex; align-items:center; justify-content:space-between; gap:10px;";
-    const nome = document.createElement("div");
-    nome.style.cssText = "font-size:14px; font-weight:700; color:var(--text);";
-    nome.textContent = cantiereClienteCollegato.name;
-    const scollega = document.createElement("button");
-    scollega.type = "button";
-    scollega.style.cssText = "background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer;";
-    scollega.textContent = "Scollega";
-    scollega.addEventListener("click", () => collegaClienteCantiere(null));
-    riga.appendChild(nome); riga.appendChild(scollega);
-    attuale.appendChild(riga);
-  } else {
-    attuale.innerHTML = '<div class="empty-hint" style="padding:8px 0;">Nessun cliente collegato al cantiere in corso.</div>';
-  }
-  renderCantiereClienteLista(document.getElementById("cantiereClienteSearch").value || "");
-}
-
-function renderCantiereClienteLista(query){
-  const wrap = document.getElementById("cantiereClienteLista");
-  const q = query.trim().toLowerCase();
-  const risultati = clients
-    .filter(c => !c.archived && (!q || c.name.toLowerCase().includes(q)))
-    .filter(c => !cantiereClienteCollegato || c.id !== cantiereClienteCollegato.id);
+/* ---- Cliente cantiere: nessun "cliente collegato" unico, qui si
+   aggiungono o modificano clienti a voce/testo e si vede il cruscotto
+   con tutte le schede (stesse card della pagina Clienti). ---- */
+function renderCantiereClienteCruscotto(){
+  const wrap = document.getElementById("cantiereClienteCruscottoList");
+  if(!wrap) return;
+  const visibili = clients.filter(c => !c.archived);
   wrap.innerHTML = "";
-  if(risultati.length === 0){
-    wrap.innerHTML = '<div class="empty-hint">Nessun cliente trovato.</div>';
-    return;
+  if(visibili.length === 0){
+    wrap.innerHTML = '<div class="empty-hint" style="padding:16px;">Ancora nessun cliente: raccontamelo qui sopra, a voce o scrivendo.</div>';
+  } else {
+    visibili.forEach(c => wrap.appendChild(buildClientCard(c)));
   }
-  risultati.slice(0, 30).forEach(c => {
-    const card = document.createElement("div");
-    card.className = "azienda-link-card";
-    const body = document.createElement("div");
-    body.className = "azienda-link-card-body";
-    const titolo = document.createElement("div");
-    titolo.className = "module-title";
-    titolo.textContent = c.name;
-    body.appendChild(titolo);
-    card.innerHTML = '<svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
-    card.insertBefore(body, card.firstChild);
-    card.addEventListener("click", () => collegaClienteCantiere(c));
-    wrap.appendChild(card);
-  });
+  const countEl = document.getElementById("cantiereClienteCruscottoCount");
+  if(countEl) countEl.textContent = visibili.length;
 }
-
-async function collegaClienteCantiere(cliente){
-  cantiereClienteCollegato = cliente ? { id:cliente.id, name:cliente.name } : null;
-  aggiornaCantiereSottotitoli();
-  renderCantiereCliente();
-  if(!isDbReady()) return;
-  const { error } = await supabaseClient.from("cantiere_cliente")
-    .upsert({ owner_id: currentSession.user.id, client_id: cliente ? cliente.id : null, updated_at: new Date().toISOString() });
-  if(error) console.error("Errore collegamento cliente cantiere:", error.message);
-}
-
-document.getElementById("cantiereClienteSearch").addEventListener("input", (e) => renderCantiereClienteLista(e.target.value));
 
 /* ---- Appunti cantiere: microfono che detta nel campo (nessun
    collegamento all'assistente AI: qui è solo dettatura, come chiesto:
@@ -8067,7 +8036,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
-    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino();
+    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino(); renderCantiereClienteCruscotto();
 
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
@@ -8204,6 +8173,12 @@ collegaMicTesto({
   hintBase:"Racconta il cliente: nome, contatto, cosa deve fare — creo la scheda subito",
   fallbackHint:"Prova a raccontarmi un cliente, per esempio: Mario Rossi, 333 1234567, deve rifare il tetto",
   costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo. Se menziona anche impegni o appuntamenti da fissare per questo cliente, creali (crea_impegno).`
+});
+collegaMicTesto({
+  micId:"cantiereClienteMic", campoId:"cantiereClienteCampo", sendId:"cantiereClienteSend", hintId:"cantiereClienteHint",
+  hintBase:"Aggiungi o modifica un cliente: nome, contatto, cosa deve fare — ci penso io",
+  fallbackHint:"Prova a raccontarmi un cliente, per esempio: Mario Rossi, 333 1234567, deve rifare il tetto",
+  costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente del cantiere: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo.`
 });
 
 /* Aggiorna il riquadro scuro della Home ("Calendario attività" e "Cosa
@@ -9148,7 +9123,7 @@ function navigateTo(page){
   }
 
   if(page === "cestino") renderCestino();
-  if(page === "cantiere-cliente") renderCantiereCliente();
+  if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
   if(page === "cantiere-appunti") renderCantiereAppunti();
   if(page === "documenti-impresa") renderCantiereDocumenti();
   if(page === "cantiere-foto") renderCantiereFoto();
