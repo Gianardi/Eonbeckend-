@@ -6151,6 +6151,12 @@ function showToast(iconSvg, title, text){
 function showAIToast(title, text){
   showToast('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>', title, text);
 }
+/* true dopo il primo "sblocco" della sintesi vocale su un tocco vero
+   (serve solo ai browser, Safari in testa, che altrimenti bloccano in
+   silenzio le voci lette più tardi, quando arriva la risposta
+   dell'AI, perché non partono da un tocco diretto). Condiviso da tutte
+   le istanze di collegaMicTesto(): basta sbloccarla una volta sola. */
+let voceSbloccata = false;
 /* Legge ad alta voce la risposta dell'assistente: solo quando l'utente
    ha interagito a voce (non quando ha scritto), cosi' il telefono non
    parla a sorpresa mentre si sta solo digitando. Usa la voce già
@@ -8160,6 +8166,26 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(attivo){
       attivo = false;
       try{ riconoscitore.stop(); }catch(err){ /* già fermo */ }
+      /* Molti browser (Safari in testa) permettono la sintesi vocale
+         solo se il primo speak() della pagina parte da un tocco vero
+         e sincrono: la risposta dell'AI arriva sempre più tardi, a
+         chiamata di rete finita, quindi da sola non basterebbe a farlo
+         parlare la prima volta. Lo "sblocchiamo" qui, sul tocco che
+         ferma l'ascolto (non su quello che lo avvia, per non litigare
+         col microfono che sta per aprirsi), una sola volta per sessione
+         e a volume zero: non si sente, serve solo a dare il permesso. */
+      if("speechSynthesis" in window && !voceSbloccata){
+        try{
+          const muta = new SpeechSynthesisUtterance(" ");
+          muta.volume = 0;
+          window.speechSynthesis.speak(muta);
+          /* Solo se speak() non ha lanciato un errore: se il microfono
+             stava ancora chiudendo la sessione audio e questo tentativo
+             è fallito, meglio riprovare al prossimo tocco piuttosto che
+             restare bloccati per il resto della sessione. */
+          voceSbloccata = true;
+        }catch(err){ /* riprova al prossimo tocco */ }
+      }
       return;
     }
     if(inCorso) return;
