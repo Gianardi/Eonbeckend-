@@ -81,3 +81,37 @@ Da decidere quando ci si mette mano: dove si carica/registra l'audio nell'app
 salvata da qualche parte o serve solo a estrarre gli impegni al volo.
 
 Richiesto da Gianardi il 31/08/2026.
+
+## Documenti impresa: l'AI legge la scadenza da sola e ricorda il rinnovo
+
+In "Documenti impresa" (`page-documenti-impresa`) oggi l'artigiano carica un
+file (es. il DURC) e basta: nessuna data, nessuna descrizione, solo il file
+in `cantiere_documenti` (url, nome, tipo). L'idea è che l'AI legga da sola il
+documento appena caricato, capisca di che documento si tratta e trovi la data
+di scadenza scritta sopra, senza che l'artigiano scriva nulla — poi ricordi
+il rinnovo 30 giorni prima.
+
+È fattibile, e senza un nuovo servizio da collegare: la stessa AI già usata
+per l'assistente (Anthropic/Claude, chiave già configurata sul server) legge
+direttamente PDF e foto di documenti, non serve OCR a parte.
+
+In pratica, tre pezzi:
+1. **Lettura automatica al caricamento.** Appena il file arriva (in
+   `caricaCantiereDocumento()`), mandarlo all'AI con una richiesta tipo
+   "che documento è, e quando scade?" e salvare il risultato (tipo di
+   documento + data di scadenza) insieme al file — serve una colonna in più
+   su `cantiere_documenti` (es. `scadenza`, `tipo_documento`).
+2. **Mostrarlo in lista.** Nell'elenco di "Documenti impresa", far vedere la
+   scadenza trovata (e magari un avviso visivo se è vicina o già passata).
+3. **Il promemoria vero e proprio.** 30 giorni prima della scadenza, avvisare
+   l'artigiano — il modo più semplice è controllarlo ad ogni apertura
+   dell'app (un documento in scadenza entro 30 giorni genera un avviso/
+   toast, come già succede per gli impegni), senza bisogno di un servizio
+   esterno che "sveglia" l'app da solo.
+
+Da decidere quando ci si mette mano: cosa fare se l'AI non riesce a leggere
+la data (foto poco chiara, documento non riconosciuto) — probabilmente
+chiedere all'artigiano di inserirla a mano solo in quel caso, non bloccare
+il caricamento.
+
+Richiesto da Gianardi il 31/08/2026.
