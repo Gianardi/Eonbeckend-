@@ -665,36 +665,35 @@
     color:var(--muted); border-radius:20px; padding:2px 7px; font-weight:800;
   }
   .cal-giorno::after{ content:""; flex:1; height:1px; background:var(--border); }
-  .cal-giorno.oggi{ color:var(--indigo); }
-  .cal-giorno.oggi i{ background:var(--indigo-soft); color:var(--indigo); }
-  .cal-giorno.oggi::after{ background:rgba(59,111,255,.2); }
+  .cal-giorno.oggi{ color:var(--text); }
+  .cal-giorno.oggi i{ background:var(--text); color:#fff; }
+  .cal-giorno.oggi::after{ background:var(--border-strong); }
 
   .cal-voce{
     display:flex; align-items:center; gap:14px;
     padding:15px 16px; margin-bottom:10px; border-radius:20px;
-    background:var(--card); border:1px solid var(--border);
-    box-shadow:0 4px 16px rgba(20,20,30,.05);
+    background:var(--card); border:2px solid var(--text);
+    box-shadow:0 6px 18px rgba(14,20,36,.1);
     flex-wrap:wrap;
   }
-  .cal-voce.oggi{ box-shadow:0 4px 16px rgba(59,111,255,.1); }
+  .cal-voce.oggi{ box-shadow:0 6px 20px rgba(14,20,36,.16); }
   .cal-ora-blocco{ flex:none; width:44px; text-align:center; }
-  .cal-ora-hh{ font-family:'Manrope'; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.1; }
+  .cal-ora-hh{ font-family:'Manrope'; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.1; color:var(--text); }
   .cal-ora-mm{ font-size:11px; font-weight:700; color:var(--faint); margin-top:1px; }
   .cal-divider{ width:1.5px; align-self:stretch; background:var(--border); flex:none; }
   .cal-corpo{ display:block; flex:1; min-width:0; }
   .cal-testo{ min-width:0; }
   .cal-nome{ font-size:14.5px; font-weight:700; color:var(--text); line-height:1.3; }
-  .cal-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:3px; }
+  .cal-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:3px; color:var(--muted); }
+  .cal-label.urgente{ color:var(--text); }
   .cal-sotto{ font-size:11px; color:var(--muted); margin-top:2px; }
   .cal-azioni{ display:flex; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
   .cal-btn{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
     padding:8px; border-radius:10px; cursor:pointer; font-family:inherit;
-    font-size:11.5px; font-weight:700; border:1px solid var(--border);
+    font-size:11.5px; font-weight:700; border:1.5px solid var(--text); background:var(--card); color:var(--text);
   }
   .cal-btn svg{ width:13px; height:13px; }
-  .cal-scrivi{ background:var(--teal-soft); color:#0A8A72; border-color:rgba(0,191,160,.28); }
-  .cal-chiama{ background:var(--coral-soft); color:#D62F3F; border-color:rgba(255,71,87,.26); }
 
   .list-row{
     display:flex; align-items:center; gap:10px;
@@ -758,11 +757,6 @@
     background:var(--card); border:1.5px solid rgba(124,92,250,.3); border-radius:16px;
     padding:16px 16px; margin-bottom:14px; box-shadow:var(--shadow-sm);
   }
-  .ai-strategy-head{ display:flex; gap:10px; align-items:flex-start; margin-bottom:12px; }
-  .ai-strategy-icon{ width:38px;height:38px;border-radius:12px;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;flex:none; }
-  .ai-strategy-icon svg{ width:18px;height:18px; }
-  .ai-strategy-title{ font-size:15px; font-weight:800; color:var(--text); margin-bottom:3px; }
-  .ai-strategy-sub{ font-size:11.5px; color:var(--muted); line-height:1.45; }
   .ai-strategy-simple{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px; padding:24px 16px; }
   .ai-strategy-icon-lg{ width:56px; height:56px; border-radius:18px; background:var(--grad-blue); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(47,92,246,.3); }
   .ai-strategy-icon-lg svg{ width:26px; height:26px; }
@@ -2017,13 +2011,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clienti
     </div>
-    <div class="nav-item" data-page="obiettivi">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-      Obiettivi
-    </div>
-    <div class="nav-item" data-page="opportunita">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l4 6h-8z"/><path d="M4 8h16l-8 13z"/></svg>
-      Opportunità
+    <div class="nav-item" data-page="cresci">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg>
+      Cresci
     </div>
     <div class="nav-item" data-page="gestisci-azienda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -2483,15 +2473,6 @@
 
     <!-- ==================== PAGINA: CALENDARIO ==================== -->
     <div class="page" id="page-calendario">
-      <div class="ai-strategy-panel">
-        <div class="ai-strategy-head">
-          <div class="ai-strategy-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg></div>
-          <div>
-            <div class="ai-strategy-title">Compilato dall'AI</div>
-            <div class="ai-strategy-sub">Legge appuntamenti e impegni da chat, clienti e attività — non serve inserirli a mano.</div>
-          </div>
-        </div>
-      </div>
       <div class="card-panel">
         <div class="card-header">
           <h2>I tuoi prossimi impegni</h2>
@@ -2708,55 +2689,59 @@
       <div id="clientArchiviatiToggle" style="display:none; text-align:center; padding:10px; color:var(--faint); cursor:pointer; font-size:13px;"></div>
     </div>
 
-    <!-- ==================== PAGINA: OBIETTIVI ==================== -->
-    <div class="page" id="page-opportunita">
-      <!-- La strategia non ha piu' un riquadro tutto suo: e' una riga
-           discreta sotto il pulsante principale. -->
-      <button class="primary-btn add-btn" id="addOppBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-        Aggiungi opportunità
-      </button>
+    <!-- ==================== PAGINA: CRESCI (opportunità + obiettivi) ==================== -->
+    <div class="page" id="page-cresci">
+      <div class="section-label">Opportunità</div>
+      <div id="page-opportunita">
+        <!-- La strategia non ha piu' un riquadro tutto suo: e' una riga
+             discreta sotto il pulsante principale. -->
+        <button class="primary-btn add-btn" id="addOppBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          Aggiungi opportunità
+        </button>
 
-      <button class="opp-strategia" id="oppStrategyBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-        Chiedi all'AI da dove partire
-      </button>
-      <div id="oppStrategyResult" class="ai-strategy-result" style="display:none;"></div>
+        <button class="opp-strategia" id="oppStrategyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
+          Chiedi all'AI da dove partire
+        </button>
+        <div id="oppStrategyResult" class="ai-strategy-result" style="display:none;"></div>
 
-      <div class="card-panel">
-        <div class="card-header">
-          <h2 id="oppPageTitle">Progetti, lavori e clienti da prendere</h2>
-          <span class="count" id="oppCount">0</span>
-        </div>
-        <div id="oppList" style="padding:8px 0 16px;"></div>
-      </div>
-    </div>
-
-    <div class="page" id="page-obiettivi">
-
-      <div class="card-panel">
-        <div class="card-header">
-          <h2>I tuoi obiettivi</h2>
-        </div>
-        <div class="goal-hint">Tocca un obiettivo qui sotto: si apre subito "lavoriamo insieme" con un consiglio su come raggiungerlo.</div>
-        <div class="goal-tabs">
-          <div class="goal-tab active lavoro" id="goalTabLavoro" data-cat="lavoro">Lavorativi</div>
-          <div class="goal-tab personale" id="goalTabPersonale" data-cat="personale">Personali</div>
-        </div>
-        <div class="goal-progress-wrap">
-          <div class="goal-progress-bar"><div class="goal-progress-fill" id="goalProgressFill"></div></div>
-          <div class="goal-progress-text" id="goalProgressText">0 di 0 obiettivi raggiunti</div>
-        </div>
-
-        <div class="goal-suggest" id="goalSuggest"></div>
-
-        <div class="goal-add-row">
-          <input type="text" id="goalInput" placeholder="Scrivi un tuo obiettivo personalizzato...">
-          <button id="goalAddBtn">Aggiungi</button>
+        <div class="card-panel">
+          <div class="card-header">
+            <h2 id="oppPageTitle">Progetti, lavori e clienti da prendere</h2>
+            <span class="count" id="oppCount">0</span>
+          </div>
+          <div id="oppList" style="padding:8px 0 16px;"></div>
         </div>
       </div>
 
-      <div class="goal-list" id="goalList"></div>
+      <div class="section-divider" style="margin-top:8px;"></div>
+      <div class="section-label">Obiettivi</div>
+      <div id="page-obiettivi">
+        <div class="card-panel">
+          <div class="card-header">
+            <h2>I tuoi obiettivi</h2>
+          </div>
+          <div class="goal-hint">Tocca un obiettivo qui sotto: si apre subito "lavoriamo insieme" con un consiglio su come raggiungerlo.</div>
+          <div class="goal-tabs">
+            <div class="goal-tab active lavoro" id="goalTabLavoro" data-cat="lavoro">Lavorativi</div>
+            <div class="goal-tab personale" id="goalTabPersonale" data-cat="personale">Personali</div>
+          </div>
+          <div class="goal-progress-wrap">
+            <div class="goal-progress-bar"><div class="goal-progress-fill" id="goalProgressFill"></div></div>
+            <div class="goal-progress-text" id="goalProgressText">0 di 0 obiettivi raggiunti</div>
+          </div>
+
+          <div class="goal-suggest" id="goalSuggest"></div>
+
+          <div class="goal-add-row">
+            <input type="text" id="goalInput" placeholder="Scrivi un tuo obiettivo personalizzato...">
+            <button id="goalAddBtn">Aggiungi</button>
+          </div>
+        </div>
+
+        <div class="goal-list" id="goalList"></div>
+      </div>
     </div>
 
     <!-- ==================== PAGINA: BUSINESS ==================== -->
@@ -3435,13 +3420,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       <span id="tabLabelClienti">Clienti</span>
     </div>
-    <div class="tab-item" data-tab="opportunita" data-page="opportunita">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
-      <span id="tabLabelOpportunita">Opportunità</span>
-    </div>
-    <div class="tab-item" data-tab="obiettivi" data-page="obiettivi">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-      <span>Obiettivi</span>
+    <div class="tab-item" data-tab="cresci" data-page="cresci">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg>
+      <span>Cresci</span>
     </div>
     <div class="tab-item" data-tab="azienda" data-page="gestisci-azienda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -4705,10 +4686,10 @@ function renderUdienze(){
 
 /* ---- Calendario: l'AI lo compila leggendo chat, clienti e impegni della professione ---- */
 const ETICHETTE_CALENDARIO = {
-  appt:{ testo:"Appuntamento", colore:"var(--indigo)" },
-  visit:{ testo:"Da vedere", colore:"var(--teal)" },
-  attesa:{ testo:"In sospeso", colore:"var(--amber)" },
-  todo:{ testo:"Da fare", colore:"var(--teal)" }
+  appt:{ testo:"Appuntamento" },
+  visit:{ testo:"Da vedere" },
+  attesa:{ testo:"In sospeso" },
+  todo:{ testo:"Da fare" }
 };
 function renderCalendar(){
   const wrap = document.getElementById("calendarList");
@@ -4821,18 +4802,17 @@ function renderCalendar(){
       const ora = estraiOra(it.when);
       const [oraHH, oraMM] = ora ? ora.split(":") : ["—", ""];
       const et = ETICHETTE_CALENDARIO[it.icon] || ETICHETTE_CALENDARIO.appt;
-      const coloreEt = it.urgent ? "var(--coral)" : et.colore;
 
       row.innerHTML = `
         <div class="cal-ora-blocco">
-          <div class="cal-ora-hh" style="color:${coloreEt};">${oraHH}</div>
+          <div class="cal-ora-hh">${oraHH}</div>
           <div class="cal-ora-mm">${oraMM}</div>
         </div>
         <div class="cal-divider"></div>
         <div class="cal-corpo">
           <div class="cal-testo">
             <div class="cal-nome">${it.title}</div>
-            <div class="cal-label" style="color:${coloreEt};">${et.testo}</div>
+            <div class="cal-label${it.urgent ? ' urgente' : ''}">${et.testo}${it.urgent ? ' · Urgente' : ''}</div>
             <div class="cal-sotto">${it.sub}</div>
           </div>
         </div>
@@ -5044,12 +5024,10 @@ async function applyProfession(key, skipDemoData){
   document.getElementById("extraTileSub").textContent = p.extraTile.sub;
 
   document.getElementById("tabLabelClienti").textContent = p.clientiTitle;
-  document.getElementById("tabLabelOpportunita").textContent = p.oppTileTitle;
 
   /* Il titolo cambia con la professione; il sottotitolo resta vuoto:
      il nome della sezione basta. */
   pageMeta.clienti.title = p.clientiTitle;
-  pageMeta.opportunita.title = p.oppTileTitle;
 
   document.getElementById("oppStrategyResult").style.display = "none";
 
@@ -5219,13 +5197,13 @@ function renderSummary(){
       text: `<b>€${totalDue.toLocaleString("it-IT")}</b> ancora da pagare ai fornitori` },
     { page:"entrate", bg:"var(--green)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>',
       text: `<b>€${totalIncomePending.toLocaleString("it-IT")}</b> in arrivo dai clienti` },
-    { page:"opportunita", bg:"var(--teal)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>',
+    { page:"cresci", bg:"var(--teal)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>',
       text: `<b>${opportunities.length}</b> trattative aperte, valore <b>€${totalOppValue.toLocaleString("it-IT")}</b>` },
     { page:"chat", bg:"var(--wa)", svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.16 2 11.3c0 2.62 1.16 4.98 3.05 6.66-.1 1.05-.5 2.6-1.32 4.04 1.62-.2 3.38-.86 4.6-1.63 1.16.38 2.4.58 3.67.58 5.52 0 10-4.16 10-9.3S17.52 2 12 2z"/></svg>',
       text: `<b>${unreadMessages}</b> messaggi da leggere` },
     { page:"chat", bg:"var(--indigo)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
       text: `<b>${toSeeToday}</b> clienti da vedere e <b>${toCallToday}</b> da sentire oggi` },
-    { page:"obiettivi", bg:"var(--violet)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>',
+    { page:"cresci", bg:"var(--violet)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>',
       text: `<b>${goalsDone}/${goalsTotal}</b> obiettivi raggiunti` },
   ];
 
@@ -8253,7 +8231,7 @@ document.getElementById("aiHubOggi").addEventListener("click", () => {
 /* Strategia trattative */
 document.getElementById("aiHubStrategia").addEventListener("click", () => {
   chiudiHubAI();
-  navigateTo("opportunita");
+  navigateTo("cresci");
   setTimeout(() => {
     const b = document.getElementById("oppStrategyBtn");
     if(b) b.click();
@@ -9040,9 +9018,8 @@ const pageMeta = {
   home: { title:"Buongiorno, Marco", sub:null },
   oggi: { title:"Oggi", sub:null },
   clienti: { title:"Clienti", sub:null },
-  obiettivi: { title:"Obiettivi", sub:null },
+  cresci: { title:"Cresci", sub:null },
   business: { title:"Business", sub:null },
-  opportunita: { title:"Opportunità", sub:null },
   "gestisci-azienda": { title:"Menu", sub:null },
   "assegna-compiti": { title:"Assegna Compiti", sub:null },
   pagamenti: { title:"Pagamenti", sub:null },
@@ -9071,11 +9048,10 @@ const tabForPage = {
   home:"home", oggi:"home",
   clienti:"clienti",
   chat:"home",
-  obiettivi:"obiettivi",
+  cresci:"cresci",
   "gestisci-azienda":"azienda", "assegna-compiti":"azienda", pagamenti:"azienda", entrate:"azienda",
   "crea-fattura":"azienda", "crea-preventivo":"azienda", regalo:"azienda", business:"azienda",
   "assemblee":"azienda", "udienze":"azienda", "revisioni":"azienda",
-  opportunita:"opportunita",
   calendario:"home", chiamate:"home",
   cestino:"azienda",
   "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home",
