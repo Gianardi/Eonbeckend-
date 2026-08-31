@@ -6151,6 +6151,19 @@ function showToast(iconSvg, title, text){
 function showAIToast(title, text){
   showToast('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>', title, text);
 }
+/* Legge ad alta voce la risposta dell'assistente: solo quando l'utente
+   ha interagito a voce (non quando ha scritto), cosi' il telefono non
+   parla a sorpresa mentre si sta solo digitando. Usa la voce già
+   integrata nel telefono, nessun servizio esterno da configurare. */
+function parlaRisposta(testo){
+  if(!("speechSynthesis" in window) || !testo) return;
+  try{
+    window.speechSynthesis.cancel();
+    const voce = new SpeechSynthesisUtterance(testo);
+    voce.lang = "it-IT";
+    window.speechSynthesis.speak(voce);
+  }catch(err){ console.warn("Sintesi vocale non disponibile:", err.message); }
+}
 
 /* Versione di riserva (scriptata): usata solo se la chiamata AI vera fallisce.
    Riconosce il tema dell'obiettivo da parole chiave, per non dare sempre
@@ -7961,7 +7974,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
   const TESTO_HINT_BASE = hintBase;
   let inCorso = false;
 
-  async function elabora(testo){
+  async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
     if(testo.length < 3 || inCorso) return;
     if(!BACKEND_CONFIGURED || !currentSession){
@@ -7974,12 +7987,24 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     mic.disabled = true;
     hint.textContent = "Sto organizzando…";
 
+    /* Quando l'utente ha parlato (non scritto), leggiamo ad alta voce
+       esattamente quello che finisce nei toast, invece di riscrivere
+       ogni frase due volte: mostra() fa entrambe le cose insieme, cosi'
+       le due versioni non possono disallinearsi col tempo. Un'unica
+       lettura in fondo, non una per ogni azione. */
+    const daDire = [];
+    function mostra(title, text){
+      showAIToast(title, text);
+      daDire.push(title + (text ? ": " + text.replace(/\n+/g, ". ") : ""));
+    }
+
     let risposta;
     try{
       risposta = await chiediAssistente(costruisciPrompt(testo));
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
+      if(viaVoce) parlaRisposta("Non sono riuscita a raggiungere l'assistente, riprova tra poco.");
       send.disabled = false;
       mic.disabled = false;
       inCorso = false;
@@ -7995,7 +8020,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     hint.textContent = TESTO_HINT_BASE;
 
     if(risposta.stato === "incompleto"){
-      showAIToast("Non ho fatto in tempo a finire", risposta.testo);
+      mostra("Non ho fatto in tempo a finire", risposta.testo);
     }
 
     const azioni = risposta.azioni || [];
@@ -8004,11 +8029,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
         let testoRisp = risposta.testo || fallbackHint;
+        daDire.push(testoRisp);
         if(/\?\s*$/.test(testoRisp.trim()) && /conferm/i.test(testoRisp) && !/quale/i.test(testoRisp)){
           testoRisp += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
         }
         showAIToast("Fatto", testoRisp);
       }
+      if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
     }
 
@@ -8021,7 +8048,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       const fatti = impegniCreati.map(a =>
         (a.esito.tipo === "chiamata" ? "Chiamata · " : a.esito.tipo === "incontro" ? "Appuntamento · " : "Da fare · ") +
         a.esito.titolo + " — " + a.esito.quando_visualizzato);
-      showAIToast(
+      mostra(
         impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
         fatti.join("\n")
       );
@@ -8029,20 +8056,20 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     risultatiVisibili.filter(a => a.tool !== "crea_impegno").forEach(a => {
       if(a.tool === "sposta_impegno"){
-        showAIToast("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
+        mostra("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
       } else if(a.tool === "annulla_impegno"){
-        showAIToast("Impegno annullato", a.esito.titolo);
+        mostra("Impegno annullato", a.esito.titolo);
       } else if(a.tool === "elimina_impegno"){
-        showAIToast("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
+        mostra("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
       } else if(a.tool === "elimina_cliente"){
-        showAIToast("Cliente eliminato",
+        mostra("Cliente eliminato",
           a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.");
       } else if(a.tool === "crea_cliente"){
-        showAIToast("Cliente aggiunto", a.esito.nome);
+        mostra("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
-        showAIToast("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
+        mostra("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
-        showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
+        mostra("Messaggio inviato", "A " + a.esito.inviato_a);
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
@@ -8058,9 +8085,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         } else {
           msg = n === 1 ? "1 elemento eliminato per sempre." : n + " elementi eliminati per sempre.";
         }
-        showAIToast("Cestino svuotato", msg);
+        mostra("Cestino svuotato", msg);
       }
     });
+
+    if(viaVoce) parlaRisposta(daDire.join(". "));
   }
 
   send.addEventListener("click", () => elabora(campo.value));
@@ -8123,7 +8152,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
     const finale = testoAccumulato.trim();
     testoAccumulato = "";
-    if(finale.length >= 3) elabora(finale);
+    if(finale.length >= 3) elabora(finale, true);
     else hint.textContent = TESTO_HINT_BASE;
   };
 
@@ -8134,6 +8163,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
     if(inCorso) return;
+    /* Se EON stava ancora leggendo la risposta precedente, la fermiamo
+       subito: altrimenti non si sentirebbe la propria voce mentre
+       parla di nuovo. */
+    if("speechSynthesis" in window) window.speechSynthesis.cancel();
     attivo = true;
     testoAccumulato = "";
     try{ riconoscitore.start(); }

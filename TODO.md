@@ -34,22 +34,21 @@ minuto sulla chiave del modello AI condivisa.
 
 ## Conversazione a voce con EON (microfono + risposta parlata)
 
-Oggi il microfono serve solo a dettare testo: EON legge quello che dici, ma
-risponde sempre e solo per iscritto (notifica/toast). L'idea è poter parlare
-con EON e sentirlo rispondere a voce, come una vera conversazione.
+**Fatto in parte, il 31/08/2026** — EON ora risponde a voce (con la voce
+nativa del telefono, `speechSynthesis`, gratis e senza configurazione)
+quando gli parli tramite il microfono di Home, Clienti o Cliente cantiere.
+Se scrivi invece di parlare, resta muto (solo toast), come deciso.
 
-È fattibile, e la base c'è già:
-- Il "parlare a EON" (riconoscimento vocale) è già implementato.
-- Il backend ha già una chiave OpenAI configurata (oggi usata solo per
-  trascrivere l'audio in testo con Whisper).
-
-Manca solo la parte "EON che risponde a voce": aggiungere una sintesi vocale
-che legga ad alta voce il testo della risposta invece di mostrarlo solo come
-notifica scritta. Due livelli possibili:
-1. **Gratis e immediato**: la voce nativa del telefono (`speechSynthesis` del
-   browser) — zero costi, zero nuove integrazioni, pronto da usare subito.
-2. **Qualità più naturale**: il servizio di sintesi vocale di OpenAI (a
-   pagamento, richiede una piccola aggiunta lato server dato che la chiave
-   OpenAI è già configurata).
+Resta da estendere, se si vuole più avanti:
+- **L'hub AI a schermo intero** (l'icona "EON AI" raggiungibile da più
+  pagine) ha un proprio microfono e una propria logica di risposta,
+  separata da `collegaMicTesto()`: non parla ancora.
+- **Il toast di conferma per le azioni delicate** (es. "Confermi
+  l'appuntamento?") non legge la domanda ad alta voce, anche quando si è
+  arrivati lì parlando.
+- **Voce più naturale**: il servizio di sintesi vocale di OpenAI (a
+  pagamento) al posto della voce di sistema — la chiave OpenAI è già
+  configurata sul server (oggi usata per Whisper), servirebbe solo una
+  piccola aggiunta lato server per il testo-in-voce.
 
 Richiesto da Gianardi il 31/08/2026.
