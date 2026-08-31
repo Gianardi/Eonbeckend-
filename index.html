@@ -2225,7 +2225,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" id="clientSearchInput" placeholder="Cerca qualsiasi cosa su un cliente: nome, stato, descrizione...">
         </div>
-        <button class="icon-btn" id="clientVoiceBtn" title="Cerca a voce" aria-label="Cerca cliente a voce">
+        <button class="icon-btn" id="clientVoiceBtn" title="Cerca a voce" aria-label="Cerca cliente a voce" style="display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M2 7.5c4.5-1.6 7.2-1.6 10-1.6s5.5 0 10 1.6" stroke-linecap="round"/>
             <path d="M2 12c4.5-2.3 7.2-2.3 10-2.3s5.5 0 10 2.3" stroke-linecap="round"/>
@@ -2235,41 +2235,26 @@
         </button>
       </div>
 
-      <button class="primary-btn add-btn" id="addClientBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-        Aggiungi cliente
-      </button>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon" style="background:var(--teal-soft); color:var(--teal);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          </div>
-          <div class="stat-num" id="statTotal">8</div>
-          <div class="stat-label" id="statTotalLabel">Clienti totali</div>
+      <div class="home-hero" style="padding:6px 0 4px;">
+        <div class="home-hero-mic-wrap" style="margin-bottom:10px;">
+          <button class="home-hero-mic" id="clientiHeroMic" aria-label="Tocca per parlare" type="button" style="width:84px; height:84px;">
+            <span class="home-hero-mic-ring"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" style="width:28px; height:28px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+          </button>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="background:var(--green-soft); color:var(--green);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-          </div>
-          <div class="stat-num" id="statActive">4</div>
-          <div class="stat-label">Attivi</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="background:var(--amber-soft); color:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-          </div>
-          <div class="stat-num" id="statTrattativa">3</div>
-          <div class="stat-label" id="statTrattativaLabel">In trattativa</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="background:var(--indigo-soft); color:var(--indigo);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div class="stat-num" id="statValue">€262.800</div>
-          <div class="stat-label" id="statValueLabel">Valore portafoglio</div>
+        <div class="home-hero-hint" id="clientiHeroHint" style="margin-bottom:14px;">Racconta il cliente: nome, contatto, cosa deve fare — creo la scheda subito</div>
+        <div class="home-hero-textwrap">
+          <textarea class="home-hero-campo" id="clientiHeroCampo" rows="2" placeholder="Es. Mario Rossi, 333 1234567, deve rifare il tetto, circa 15.000"></textarea>
+          <button class="home-hero-send" id="clientiHeroSend" aria-label="Invia" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
         </div>
       </div>
+
+      <button class="primary-btn add-btn" id="addClientBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi cliente a mano
+      </button>
 
       <div class="card-panel" style="margin-bottom:18px;">
         <div class="card-header">
@@ -2418,6 +2403,39 @@
           <div class="module-sub">Collaboratori e dipendenti</div>
         </div>
       </div>
+
+      <div class="section-label">Cruscotto Azienda</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--teal-soft); color:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-num" id="statTotal">8</div>
+          <div class="stat-label" id="statTotalLabel">Clienti totali</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--green-soft); color:var(--green);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          </div>
+          <div class="stat-num" id="statActive">4</div>
+          <div class="stat-label">Attivi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--amber-soft); color:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <div class="stat-num" id="statTrattativa">3</div>
+          <div class="stat-label" id="statTrattativaLabel">In trattativa</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--indigo-soft); color:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="stat-num" id="statValue">€262.800</div>
+          <div class="stat-label" id="statValueLabel">Valore portafoglio</div>
+        </div>
+      </div>
+
       <div class="azienda-list">
         <div class="azienda-link-card" id="cardEonAI">
           <div class="module-icon" style="background:var(--violet);">
@@ -6605,7 +6623,7 @@ function collegaHubRacconta(){
        finché non si ricarica l'app da zero. */
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
-    renderClientArchive(); renderChatList(); renderChatWindow();
+    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow();
     chiudiHubAI();
 
     /* Qualsiasi azione sul calendario porta lì a vedere il risultato,
@@ -6671,21 +6689,25 @@ document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
    po' di codice invece di condividerlo con collegaHubRacconta(): è
    voluto, per non rischiare di rompere quel widget già testato mentre
    se ne aggiunge uno nuovo. */
-function collegaHomeHero(){
-  const mic = document.getElementById("homeHeroMic");
-  const campo = document.getElementById("homeHeroCampo");
-  const send = document.getElementById("homeHeroSend");
-  const hint = document.getElementById("homeHeroHint");
+/* Microfono grande + campo di testo libero che parlano con l'assistente
+   vero (stesso motore di "Raccontami la giornata"): usato dalla Home
+   (qualsiasi cosa) e dalla pagina Clienti (aggiungere un cliente). Un
+   solo posto per la logica — cambia solo il prompt e i testi. */
+function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciPrompt, fallbackHint }){
+  const mic = document.getElementById(micId);
+  const campo = document.getElementById(campoId);
+  const send = document.getElementById(sendId);
+  const hint = document.getElementById(hintId);
   if(!mic || !campo || !send) return;
 
-  const TESTO_HINT_BASE = "Qualsiasi cosa, crea lavoro, chiama, messaggi, chiedimi";
+  const TESTO_HINT_BASE = hintBase;
   let inCorso = false;
 
   async function elabora(testo){
     testo = (testo || "").trim();
     if(testo.length < 3 || inCorso) return;
     if(!BACKEND_CONFIGURED || !currentSession){
-      hint.textContent = "L'assistente scrive nel calendario vero: accedi per usarlo";
+      hint.textContent = "L'assistente scrive nei dati veri: accedi per usarlo";
       return;
     }
 
@@ -6696,7 +6718,7 @@ function collegaHomeHero(){
 
     let risposta;
     try{
-      risposta = await chiediAssistente(`Il professionista ti ha appena raccontato cosa deve fare: "${testo}"`);
+      risposta = await chiediAssistente(costruisciPrompt(testo));
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
@@ -6723,7 +6745,7 @@ function collegaHomeHero(){
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
-        let testoRisp = risposta.testo || "Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17";
+        let testoRisp = risposta.testo || fallbackHint;
         if(/\?\s*$/.test(testoRisp.trim()) && /conferm/i.test(testoRisp) && !/quale/i.test(testoRisp)){
           testoRisp += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
         }
@@ -6734,7 +6756,7 @@ function collegaHomeHero(){
 
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
-    renderClientArchive(); renderChatList(); renderChatWindow();
+    renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow();
 
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
@@ -6844,7 +6866,18 @@ function collegaHomeHero(){
     catch(err){ console.warn("Impossibile avviare il microfono:", err.message); attivo = false; }
   });
 }
-collegaHomeHero();
+collegaMicTesto({
+  micId:"homeHeroMic", campoId:"homeHeroCampo", sendId:"homeHeroSend", hintId:"homeHeroHint",
+  hintBase:"Qualsiasi cosa, crea lavoro, chiama, messaggi, chiedimi",
+  fallbackHint:"Prova a dirmi cosa devi fare, per esempio: chiamare Guidi alle 17",
+  costruisciPrompt:(testo) => `Il professionista ti ha appena raccontato cosa deve fare: "${testo}"`
+});
+collegaMicTesto({
+  micId:"clientiHeroMic", campoId:"clientiHeroCampo", sendId:"clientiHeroSend", hintId:"clientiHeroHint",
+  hintBase:"Racconta il cliente: nome, contatto, cosa deve fare — creo la scheda subito",
+  fallbackHint:"Prova a raccontarmi un cliente, per esempio: Mario Rossi, 333 1234567, deve rifare il tetto",
+  costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo. Se menziona anche impegni o appuntamenti da fissare per questo cliente, creali (crea_impegno).`
+});
 
 /* Aggiorna il riquadro scuro della Home ("Calendario attività" e "Cosa
    devo fare oggi") riusando i gruppi già calcolati da renderCalendar():
