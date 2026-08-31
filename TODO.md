@@ -63,17 +63,18 @@ di investirci:
    (oggi usata per Whisper): serve solo una piccola aggiunta lato server, non
    un nuovo servizio da collegare da zero.
 
-2. **Ascoltare registrazioni e telefonate.** Poter caricare (o registrare
-   sul momento) l'audio di una chiamata o di un promemoria vocale, e farlo
-   trascrivere da EON — usa lo stesso Whisper (OpenAI) già integrato oggi per
-   trascrivere i vocali in chat, solo esteso a file audio più lunghi/esterni.
+2. **Ascoltare telefonate e audio dei clienti.** Poter caricare (o registrare
+   sul momento) l'audio di una telefonata o di un promemoria vocale legato a
+   un cliente, e farlo trascrivere da EON — usa lo stesso Whisper (OpenAI)
+   già integrato oggi per trascrivere i vocali in chat, solo esteso a file
+   audio più lunghi/esterni.
 
-3. **Trasformare la trascrizione in impegni veri.** Una volta trascritta la
+3. **Trascrivere direttamente nel calendario.** Una volta trascritta la
    telefonata/registrazione, farla leggere all'assistente AI (lo stesso
    motore che oggi capisce "chiamare Guidi alle 17" dal microfono) e fargli
    estrarre in automatico gli impegni menzionati — appuntamenti, promesse
-   fatte, cose da richiamare — invece di doverli riscrivere a mano dopo aver
-   riascoltato la chiamata.
+   fatte, cose da richiamare — e segnarli lui stesso nel calendario, invece
+   di doverli riscrivere a mano dopo aver riascoltato la chiamata.
 
 Da decidere quando ci si mette mano: dove si carica/registra l'audio nell'app
 (una nuova pagina? dentro la scheda del cliente?), e se la trascrizione va
