@@ -3656,7 +3656,7 @@ async function loadChatsFromDB(){
       id: m.id,
       from: m.sender,
       eventType: m.event_type || undefined,
-      title: m.title || undefined,
+      title: (m.title && m.title.startsWith("❌")) ? m.title.slice(1).trim() : (m.title || undefined),
       annullato: !!(m.title && m.title.startsWith("❌")),
       text: m.body || "",
       amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
@@ -4094,7 +4094,7 @@ function subscribeToMessages(){
         chat.messages.push({
           id: m.id, from: m.sender,
           eventType: m.event_type || undefined,
-          title: m.title || undefined,
+          title: (m.title && m.title.startsWith("❌")) ? m.title.slice(1).trim() : (m.title || undefined),
           annullato: !!(m.title && m.title.startsWith("❌")),
           text: m.body || "",
           amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
@@ -5608,7 +5608,7 @@ async function creaImpegniDaDettatura(cliente){
       } else {
         chat.messages.push({ eventType:"appt", title:imp.titolo, text:imp.quando || "", time:"ora" });
       }
-      fatti.push("📅 " + imp.titolo + (imp.quando ? " — " + imp.quando : ""));
+      fatti.push("Appuntamento · " + imp.titolo + (imp.quando ? " — " + imp.quando : ""));
       continue;
     }
 
@@ -5631,7 +5631,7 @@ async function creaImpegniDaDettatura(cliente){
       if(saved) nuova.id = saved.id;
     }
     tasks.push(nuova);
-    fatti.push((imp.tipo === "chiamata" ? "📞 " : "✓ ") + imp.titolo +
+    fatti.push((imp.tipo === "chiamata" ? "Chiamata · " : "Da fare · ") + imp.titolo +
       (imp.quando ? " — " + imp.quando : ""));
   }
 
@@ -6071,7 +6071,7 @@ Scrivi una strategia in 3-5 frasi, in italiano, tono diretto, che dica in che or
 async function generateOppStrategy(){
   const result = document.getElementById("oppStrategyResult");
   result.style.display = "flex";
-  result.innerHTML = `<div class="ai-strategy-step"><div class="ai-strategy-step-text">🧠 Sto analizzando le trattative aperte…</div></div>`;
+  result.innerHTML = `<div class="ai-strategy-step"><div class="ai-strategy-step-text">Sto analizzando le trattative aperte…</div></div>`;
   try{
     const text = await generateOppStrategyAI();
     result.innerHTML = `<div class="ai-strategy-step"><div class="ai-strategy-step-text">${text}</div></div>`;
@@ -6130,7 +6130,7 @@ function renderGoals(){
       renderGoals();
     });
     row.addEventListener("click", async () => {
-      showAILanding("Lavoriamo insieme per raggiungerla", "🧠 Sto pensando al modo migliore per aiutarti con questo obiettivo…");
+      showAILanding("Lavoriamo insieme per raggiungerla", "Sto pensando al modo migliore per aiutarti con questo obiettivo…");
       try{
         const text = await tipForGoalAI(g);
         showAILanding("Lavoriamo insieme per raggiungerla", text);
@@ -6857,13 +6857,13 @@ document.getElementById("giftEmpBtn").addEventListener("click", () => {
 /* Cosa mostrare nell'elenco quando l'ultimo messaggio non e' testo */
 function anteprimaMessaggio(m){
   if(!m) return "";
-  if(m.fileType && m.fileType.startsWith("audio/")) return "🎤 Vocale";
-  if(m.fileType && m.fileType.startsWith("image/")) return "📷 Foto";
-  if(m.fileType && m.fileType.startsWith("video/")) return "🎥 Video";
-  if(m.fileUrl) return "📎 " + (m.fileName || "Documento");
-  if(m.eventType === "appt") return "📅 " + (m.title || "Appuntamento");
-  if(m.eventType === "doc") return "📄 " + (m.title || "Documento");
-  if(m.eventType === "update") return "✓ " + (m.title || "Aggiornamento");
+  if(m.fileType && m.fileType.startsWith("audio/")) return "Vocale";
+  if(m.fileType && m.fileType.startsWith("image/")) return "Foto";
+  if(m.fileType && m.fileType.startsWith("video/")) return "Video";
+  if(m.fileUrl) return m.fileName || "Documento";
+  if(m.eventType === "appt") return "Appuntamento · " + (m.title || "Appuntamento");
+  if(m.eventType === "doc") return "Documento · " + (m.title || "Documento");
+  if(m.eventType === "update") return "Aggiornamento · " + (m.title || "Aggiornamento");
   return m.text || "";
 }
 function renderChatList(){
@@ -7315,7 +7315,7 @@ function collegaHubRacconta(){
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
       const fatti = impegniCreati.map(a =>
-        (a.esito.tipo === "chiamata" ? "📞 " : a.esito.tipo === "incontro" ? "📅 " : "✓ ") +
+        (a.esito.tipo === "chiamata" ? "Chiamata · " : a.esito.tipo === "incontro" ? "Appuntamento · " : "Da fare · ") +
         a.esito.titolo + " — " + a.esito.quando_visualizzato);
       showAIToast(
         impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
@@ -8041,7 +8041,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
       const fatti = impegniCreati.map(a =>
-        (a.esito.tipo === "chiamata" ? "📞 " : a.esito.tipo === "incontro" ? "📅 " : "✓ ") +
+        (a.esito.tipo === "chiamata" ? "Chiamata · " : a.esito.tipo === "incontro" ? "Appuntamento · " : "Da fare · ") +
         a.esito.titolo + " — " + a.esito.quando_visualizzato);
       showAIToast(
         impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
