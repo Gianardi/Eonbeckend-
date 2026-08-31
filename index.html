@@ -350,7 +350,7 @@
   }
   .home-hero-mic:active{ transform:scale(.96); }
   .home-hero-mic svg{ width:36px; height:36px; pointer-events:none; }
-  .home-hero-mic-ring{ position:absolute; inset:-9px; border-radius:50%; border:1.5px solid rgba(14,20,36,.18); pointer-events:none; }
+  .home-hero-mic-ring{ position:absolute; inset:-9px; border-radius:50%; border:1.5px solid rgba(14,20,36,.18); pointer-events:none; opacity:0; }
   .home-hero-mic.ascolto .home-hero-mic-ring{ animation:homeHeroPulse 1.1s ease-in-out infinite; }
   @keyframes homeHeroPulse{ 0%{ transform:scale(1); opacity:.6; } 100%{ transform:scale(1.22); opacity:0; } }
   .home-hero-hint{ position:relative; text-align:center; font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:20px; padding:0 10px; }
@@ -380,10 +380,10 @@
   .home-hero-oggi-titolo{ font-family:'Manrope'; font-size:13px; font-weight:800; margin-bottom:9px; color:var(--text); }
   .home-hero-oggi-riga{ display:flex; align-items:center; gap:10px; padding:7px 0; font-size:13px; color:var(--text); }
   .home-hero-oggi-riga.fatto{ color:var(--faint); text-decoration:line-through; }
-  .home-hero-oggi-check{ width:19px; height:19px; border-radius:6px; border:1.5px solid var(--border-strong); flex:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .home-hero-oggi-check{ width:19px; height:19px; border-radius:6px; border:1.5px solid var(--border-strong); flex:none; display:flex; align-items:center; justify-content:center; }
+  .home-hero-oggi-check.cliccabile{ cursor:pointer; }
   .home-hero-oggi-riga.fatto .home-hero-oggi-check{ background:var(--text); border-color:var(--text); }
   .home-hero-oggi-riga.fatto .home-hero-oggi-check svg{ stroke:#fff; }
-  .home-hero-oggi-dot{ width:7px; height:7px; border-radius:50%; background:var(--border-strong); flex:none; }
   .home-hero-oggi-vuoto{ font-size:12.5px; color:var(--muted); padding:6px 0; }
 
   .summary-panel{ margin-bottom:14px; }
@@ -6933,7 +6933,7 @@ function aggiornaHomeHero(gruppiPerGiorno){
     riga.className = "home-hero-oggi-riga" + (fatto ? " fatto" : "");
 
     const segno = document.createElement("span");
-    segno.className = t ? "home-hero-oggi-check" : "home-hero-oggi-dot";
+    segno.className = "home-hero-oggi-check" + (t ? " cliccabile" : "");
     if(t && fatto){
       segno.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
     }
