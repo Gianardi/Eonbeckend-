@@ -2161,11 +2161,58 @@
       </div>
     </div>
 
-    <!-- ==================== PAGINA: DOCUMENTI CANTIERE ==================== -->
+    <!-- ==================== PAGINA: DOCUMENTI (hub) ==================== -->
     <div class="page" id="page-cantiere-documenti">
       <div class="back-link" data-page="home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Torna alla Home
+      </div>
+
+      <div class="cantiere-grid">
+        <button class="cantiere-card" type="button" data-page="documenti-impresa">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+          </div>
+          <div class="cantiere-card-title">Documenti impresa</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="crea-cartello">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="4" y="3" width="16" height="10" rx="1"/><path d="M9 13l1.5 1.5L15 10"/><path d="M12 13v8M9 21h6"/></svg>
+          </div>
+          <div class="cantiere-card-title">Cartello fine lavori</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="crea-lettera">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 6l8 6 8-6"/></svg>
+          </div>
+          <div class="cantiere-card-title">Lettera</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="carta-intestata">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 17h6M9 13h3"/></svg>
+          </div>
+          <div class="cantiere-card-title">Carta intestata</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="crea-preventivo">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/><circle cx="17" cy="16" r="4" fill="none"/></svg>
+          </div>
+          <div class="cantiere-card-title">Preventivo</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="crea-fattura">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+          </div>
+          <div class="cantiere-card-title">Fattura</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== PAGINA: DOCUMENTI IMPRESA ==================== -->
+    <div class="page" id="page-documenti-impresa">
+      <div class="back-link" data-page="cantiere-documenti">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna a Documenti
       </div>
 
       <input type="file" id="cantiereDocumentiInput" accept=".pdf,.doc,.docx,.xls,.xlsx,image/*" style="display:none;">
@@ -2180,6 +2227,196 @@
       <div class="card-panel">
         <div class="card-header"><h2>Documenti</h2><span class="count" id="cantiereDocumentiCount">0</span></div>
         <div id="cantiereDocumentiLista" class="azienda-list"></div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGINA: CARTA INTESTATA ==================== -->
+    <div class="page" id="page-carta-intestata">
+      <div class="back-link" data-page="cantiere-documenti">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna a Documenti
+      </div>
+      <div class="card-panel">
+        <div class="card-header"><h2>Carta intestata</h2></div>
+        <p class="module-sub" style="padding:0 16px 4px;">Compilala una volta: Preventivo, Fattura, Lettera e Cartello fine lavori la useranno da sola come intestazione.</p>
+        <div class="form-panel">
+          <div class="form-row">
+            <label>Nome azienda / studio</label>
+            <input type="text" id="intestazioneNome" placeholder="Es. Bianchi Costruzioni S.r.l.">
+          </div>
+          <div class="form-row">
+            <label>Indirizzo</label>
+            <input type="text" id="intestazioneIndirizzo" placeholder="Via, città, CAP">
+          </div>
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label>P.IVA</label>
+              <input type="text" id="intestazionePiva" placeholder="IT00000000000">
+            </div>
+            <div class="form-row">
+              <label>Telefono</label>
+              <input type="text" id="intestazioneTelefono" placeholder="333 1234567">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Email</label>
+            <input type="email" id="intestazioneEmail" placeholder="info@azienda.it">
+          </div>
+          <div class="form-row">
+            <label>Logo</label>
+            <div id="intestazioneLogoAnteprima"></div>
+            <input type="file" id="intestazioneLogoInput" accept="image/*" style="display:none;">
+            <button type="button" class="doc-action-btn" id="intestazioneLogoBtn">Carica logo</button>
+          </div>
+          <button class="primary-btn" id="intestazioneSalvaBtn" style="margin-top:6px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salva carta intestata
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGINA: LETTERA ==================== -->
+    <div class="page" id="page-crea-lettera">
+      <div class="back-link" data-page="cantiere-documenti">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna a Documenti
+      </div>
+      <div class="card-panel">
+        <div class="card-header"><h2>Nuova lettera</h2></div>
+        <div class="form-panel">
+          <div class="form-row">
+            <label>Destinatario</label>
+            <input type="text" id="letterClient" placeholder="Nome cliente o destinatario">
+          </div>
+          <div class="form-row">
+            <label>Oggetto</label>
+            <input type="text" id="letterOggetto" placeholder="Oggetto della lettera">
+          </div>
+          <div class="form-row">
+            <label>Testo</label>
+            <textarea id="letterCorpo" rows="6" placeholder="Scrivi il testo della lettera..."></textarea>
+          </div>
+          <button class="primary-btn" id="letterGenBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg>
+            Genera lettera
+          </button>
+        </div>
+      </div>
+
+      <div class="invoice-preview" id="letterPreview" style="display:none;">
+        <div class="invoice-preview-head">
+          <div>
+            <div class="invoice-preview-brand doc-brand-dynamic">E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N</div>
+            <div class="invoice-preview-doctype">Lettera</div>
+          </div>
+          <div class="invoice-preview-meta">
+            <div>Data: <span id="prevLetterDate">—</span></div>
+          </div>
+        </div>
+        <div class="invoice-preview-label">Destinatario</div>
+        <div class="invoice-preview-value" id="prevLetterClient">—</div>
+        <div class="invoice-preview-label">Oggetto</div>
+        <div class="invoice-preview-value" id="prevLetterOggetto">—</div>
+        <div class="invoice-preview-label">Testo</div>
+        <div class="invoice-preview-value" id="prevLetterCorpo" style="font-weight:400; white-space:pre-line;">—</div>
+        <div class="doc-actions">
+          <button class="doc-action-btn" id="letterSaveBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salva
+          </button>
+          <button class="doc-action-btn" id="letterPrintBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            Stampa
+          </button>
+          <button class="doc-action-btn" id="letterSendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+            Invia
+          </button>
+          <button class="doc-action-btn primary" id="letterShareBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Condividi
+          </button>
+        </div>
+      </div>
+
+      <div class="card-panel" style="margin-top:18px;">
+        <div class="card-header"><h2>Lettere generate</h2><span class="count" id="letterCount">0</span></div>
+        <div id="letterList" style="padding:8px 12px 18px;"></div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGINA: CARTELLO FINE LAVORI ==================== -->
+    <div class="page" id="page-crea-cartello">
+      <div class="back-link" data-page="cantiere-documenti">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna a Documenti
+      </div>
+      <div class="card-panel">
+        <div class="card-header"><h2>Cartello fine lavori</h2></div>
+        <div class="form-panel">
+          <div class="form-row">
+            <label>Committente</label>
+            <input type="text" id="cartelloClient" placeholder="Nome cliente/committente">
+          </div>
+          <div class="form-row">
+            <label>Indirizzo cantiere</label>
+            <input type="text" id="cartelloIndirizzo" placeholder="Via, città">
+          </div>
+          <div class="form-row">
+            <label>Descrizione lavori</label>
+            <textarea id="cartelloDesc" placeholder="Descrivi i lavori eseguiti..."></textarea>
+          </div>
+          <div class="form-row">
+            <label>Data fine lavori</label>
+            <input type="date" id="cartelloData">
+          </div>
+          <button class="primary-btn" id="cartelloGenBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg>
+            Genera cartello
+          </button>
+        </div>
+      </div>
+
+      <div class="invoice-preview" id="cartelloPreview" style="display:none;">
+        <div class="invoice-preview-head">
+          <div>
+            <div class="invoice-preview-brand doc-brand-dynamic">E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N</div>
+            <div class="invoice-preview-doctype">Cartello fine lavori</div>
+          </div>
+          <div class="invoice-preview-meta">
+            <div>Fine lavori: <span id="prevCartelloData">—</span></div>
+          </div>
+        </div>
+        <div class="invoice-preview-label">Committente</div>
+        <div class="invoice-preview-value" id="prevCartelloClient">—</div>
+        <div class="invoice-preview-label">Indirizzo cantiere</div>
+        <div class="invoice-preview-value" id="prevCartelloIndirizzo">—</div>
+        <div class="invoice-preview-label">Descrizione lavori</div>
+        <div class="invoice-preview-value" id="prevCartelloDesc" style="font-weight:400; white-space:pre-line;">—</div>
+        <div class="doc-actions">
+          <button class="doc-action-btn" id="cartelloSaveBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salva
+          </button>
+          <button class="doc-action-btn" id="cartelloPrintBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            Stampa
+          </button>
+          <button class="doc-action-btn" id="cartelloSendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+            Invia
+          </button>
+          <button class="doc-action-btn primary" id="cartelloShareBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Condividi
+          </button>
+        </div>
+      </div>
+
+      <div class="card-panel" style="margin-top:18px;">
+        <div class="card-header"><h2>Cartelli generati</h2><span class="count" id="cartelloCount">0</span></div>
+        <div id="cartelloList" style="padding:8px 12px 18px;"></div>
       </div>
     </div>
 
@@ -2880,7 +3117,7 @@
       <div class="invoice-preview" id="invoicePreview" style="display:none;">
         <div class="invoice-preview-head">
           <div>
-            <div class="invoice-preview-brand">E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N</div>
+            <div class="invoice-preview-brand doc-brand-dynamic">E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N</div>
             <div class="invoice-preview-doctype">Fattura</div>
           </div>
           <div class="invoice-preview-meta">
@@ -2961,7 +3198,7 @@
       <div class="invoice-preview" id="quotePreview" style="display:none;">
         <div class="invoice-preview-head">
           <div>
-            <div class="invoice-preview-brand">E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N</div>
+            <div class="invoice-preview-brand doc-brand-dynamic">E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N</div>
             <div class="invoice-preview-doctype">Preventivo</div>
           </div>
           <div class="invoice-preview-meta">
@@ -3316,11 +3553,12 @@ async function seedUserData(profession){
    degli array in memoria (clients, opportunities, ecc.) con le sue righe
    vere dal database, invece dei dati demo di professionData. */
 async function loadUserDataFromDB(){
-  const [dbClients, dbOpps, dbEmployees, dbPayments, dbIncomes, dbTasks, dbGoals, dbAssigned, dbCantiereFoto, dbCantiereDocumenti, dbCantiereAppunti, dbCantiereCliente] = await Promise.all([
+  const [dbClients, dbOpps, dbEmployees, dbPayments, dbIncomes, dbTasks, dbGoals, dbAssigned, dbCantiereFoto, dbCantiereDocumenti, dbCantiereAppunti, dbCantiereCliente, dbIntestazione] = await Promise.all([
     dbSelect("clients"), dbSelect("opportunities"), dbSelect("employees"),
     dbSelect("payments"), dbSelect("incomes"), dbSelect("tasks"),
     dbSelect("goals"), dbSelect("assigned_tasks"),
-    dbSelect("cantiere_foto"), dbSelect("cantiere_documenti"), dbSelect("cantiere_appunti"), dbSelect("cantiere_cliente")
+    dbSelect("cantiere_foto"), dbSelect("cantiere_documenti"), dbSelect("cantiere_appunti"), dbSelect("cantiere_cliente"),
+    dbSelect("azienda_intestazione")
   ]);
 
   clients.length = 0; dbClients.forEach(c => clients.push({
@@ -3353,6 +3591,14 @@ async function loadUserDataFromDB(){
   const clienteCollegato = rigaCantiereCliente ? clients.find(c => c.id === rigaCantiereCliente.client_id) : null;
   cantiereClienteCollegato = clienteCollegato ? { id:clienteCollegato.id, name:clienteCollegato.name } : null;
   aggiornaCantiereSottotitoli();
+
+  const rigaIntestazione = dbIntestazione[0];
+  aziendaIntestazione = rigaIntestazione ? {
+    nome_azienda:rigaIntestazione.nome_azienda || "", indirizzo:rigaIntestazione.indirizzo || "",
+    piva:rigaIntestazione.piva || "", telefono:rigaIntestazione.telefono || "",
+    email:rigaIntestazione.email || "", logo_url:rigaIntestazione.logo_url || null
+  } : null;
+  aggiornaMarchiDocumento();
 }
 
 /* ============ CONVERSAZIONI E MESSAGGI VERI ============
@@ -3986,6 +4232,7 @@ const cantiereFoto = [];
 const cantiereDocumenti = [];
 const cantiereAppunti = [];
 let cantiereClienteCollegato = null; // { id, name } del cliente collegato, o null
+let aziendaIntestazione = null; // { nome_azienda, indirizzo, piva, telefono, email, logo_url }, o null se non ancora configurata
 
 const payments = [
   { supplier:"Edilfornitura S.p.A.", desc:"Materiali cantiere Bianchi", amount:8400, due:"05 ago 2026", status:"dapagare" },
@@ -4005,6 +4252,8 @@ const incStatusLabel = { incassato:"Incassato", attesa:"In attesa", scaduto:"Sca
 
 const invoices = [];
 const quotes = [];
+const letters = [];
+const cartelli = [];
 
 const opportunities = [
   { name:"Ristrutturazione Villa Serena", client:"Nuovo cliente — Fam. Colombo", value:32000, probability:"Alta", deadline:"15 ago 2026", stage:"Preventivo inviato" },
@@ -6136,6 +6385,124 @@ function renderIncomes(){
   document.getElementById("incLate").textContent = incomes.filter(i=>i.status==="scaduto").length;
 }
 
+/* ============ CARTA INTESTATA ============ */
+/* Marchio di ogni documento generato (Fattura, Preventivo, Lettera,
+   Cartello fine lavori): usa il logo/nome azienda configurati qui, se
+   ci sono, altrimenti il marchio EON di default — mai testo utente
+   inserito come HTML, per sicurezza. */
+const MARCHIO_EON_DEFAULT_HTML = 'E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N';
+function aggiornaMarchiDocumento(){
+  document.querySelectorAll(".doc-brand-dynamic").forEach(el => {
+    el.innerHTML = "";
+    if(aziendaIntestazione && aziendaIntestazione.logo_url){
+      const img = document.createElement("img");
+      img.src = aziendaIntestazione.logo_url;
+      img.alt = aziendaIntestazione.nome_azienda || "";
+      img.style.cssText = "height:30px; max-width:170px; object-fit:contain; display:block;";
+      el.appendChild(img);
+    } else if(aziendaIntestazione && aziendaIntestazione.nome_azienda){
+      const span = document.createElement("span");
+      span.textContent = aziendaIntestazione.nome_azienda;
+      span.style.fontSize = "15px";
+      el.appendChild(span);
+    } else {
+      el.innerHTML = MARCHIO_EON_DEFAULT_HTML;
+    }
+  });
+}
+
+function renderLogoIntestazioneAnteprima(){
+  const anteprima = document.getElementById("intestazioneLogoAnteprima");
+  anteprima.innerHTML = "";
+  if(aziendaIntestazione && aziendaIntestazione.logo_url){
+    const img = document.createElement("img");
+    img.src = aziendaIntestazione.logo_url;
+    img.alt = "Logo";
+    img.style.cssText = "max-height:60px; max-width:220px; object-fit:contain; border-radius:8px; margin-bottom:8px; display:block;";
+    anteprima.appendChild(img);
+  }
+}
+
+function renderCartaIntestata(){
+  document.getElementById("intestazioneNome").value = (aziendaIntestazione && aziendaIntestazione.nome_azienda) || "";
+  document.getElementById("intestazioneIndirizzo").value = (aziendaIntestazione && aziendaIntestazione.indirizzo) || "";
+  document.getElementById("intestazionePiva").value = (aziendaIntestazione && aziendaIntestazione.piva) || "";
+  document.getElementById("intestazioneTelefono").value = (aziendaIntestazione && aziendaIntestazione.telefono) || "";
+  document.getElementById("intestazioneEmail").value = (aziendaIntestazione && aziendaIntestazione.email) || "";
+  renderLogoIntestazioneAnteprima();
+}
+
+async function caricaLogoIntestazione(file){
+  if(!isDbReady()){
+    showAILanding("Non collegato", "Per caricare il logo serve la connessione al database.");
+    return;
+  }
+  const btn = document.getElementById("intestazioneLogoBtn");
+  btn.disabled = true;
+  try{
+    /* Percorso fisso (non nomeFileSicuro, che genera un nome casuale
+       diverso ogni volta): così un nuovo logo sovrascrive davvero il
+       precedente con upsert, invece di lasciarlo orfano nello storage
+       a ogni sostituzione. */
+    const estensione = (file.name.split(".").pop() || "png").toLowerCase().slice(0, 5);
+    const percorso = currentSession.user.id + "/intestazione/logo." + estensione;
+    const { error: upErr } = await supabaseClient.storage
+      .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:true });
+    if(upErr) throw upErr;
+    const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+    /* Il link pubblico non cambia mai (stesso percorso), quindi senza
+       un parametro diverso ogni volta il browser mostrerebbe la
+       versione del logo già in cache invece di quella appena caricata. */
+    aziendaIntestazione = aziendaIntestazione || {};
+    aziendaIntestazione.logo_url = pub.publicUrl + "?v=" + Date.now();
+    /* Non renderCartaIntestata(): sovrascriverebbe con "" i campi di
+       testo che l'utente ha già scritto ma non ancora salvato — qui
+       aggiorniamo solo l'anteprima del logo. */
+    renderLogoIntestazioneAnteprima();
+  }catch(err){
+    console.error("Caricamento logo non riuscito:", err);
+    showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare il logo: " + (err.message || "riprova."));
+  }finally{
+    btn.disabled = false;
+    document.getElementById("intestazioneLogoInput").value = "";
+  }
+}
+
+async function salvaCartaIntestata(){
+  if(!isDbReady()){
+    showAILanding("Non collegato", "Per salvare la carta intestata serve la connessione al database.");
+    return;
+  }
+  const dati = {
+    nome_azienda: document.getElementById("intestazioneNome").value.trim(),
+    indirizzo: document.getElementById("intestazioneIndirizzo").value.trim(),
+    piva: document.getElementById("intestazionePiva").value.trim(),
+    telefono: document.getElementById("intestazioneTelefono").value.trim(),
+    email: document.getElementById("intestazioneEmail").value.trim(),
+    logo_url: (aziendaIntestazione && aziendaIntestazione.logo_url) || null
+  };
+  const btn = document.getElementById("intestazioneSalvaBtn");
+  btn.disabled = true;
+  const { error } = await supabaseClient.from("azienda_intestazione")
+    .upsert({ owner_id:currentSession.user.id, ...dati, updated_at:new Date().toISOString() });
+  btn.disabled = false;
+  if(error){
+    console.error("Errore salvataggio carta intestata:", error.message);
+    showAILanding("Salvataggio non riuscito", error.message);
+    return;
+  }
+  aziendaIntestazione = dati;
+  aggiornaMarchiDocumento();
+  showAIToast("Carta intestata salvata", "Preventivo, Fattura, Lettera e Cartello fine lavori la useranno da ora in poi.");
+}
+
+document.getElementById("intestazioneLogoBtn").addEventListener("click", () => document.getElementById("intestazioneLogoInput").click());
+document.getElementById("intestazioneLogoInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) caricaLogoIntestazione(f);
+});
+document.getElementById("intestazioneSalvaBtn").addEventListener("click", salvaCartaIntestata);
+
 /* ============ CREA FATTURA ============ */
 const invoiceClientSel = document.getElementById("invoiceClient");
 function populateClientDropdowns(){
@@ -6272,6 +6639,88 @@ function setupDocActions(prefix, getLast, label){
 }
 setupDocActions("invoice", () => invoices[invoices.length - 1], "Fattura");
 setupDocActions("quote", () => quotes[quotes.length - 1], "Preventivo");
+
+/* ============ LETTERA ============ */
+function renderLetters(){
+  const wrap = document.getElementById("letterList");
+  wrap.innerHTML = "";
+  letters.slice().reverse().forEach((l, idx) => {
+    const card = document.createElement("div");
+    card.className = "doc-list-card";
+    card.innerHTML = `
+      <div class="doc-num" style="color:var(--indigo);background:var(--indigo-soft);">LT-${String(letters.length - idx).padStart(3,'0')}</div>
+      <div class="row-body">
+        <div class="row-name">${l.client}</div>
+        <div class="row-meta"><span>${l.oggetto || "—"}</span></div>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+  document.getElementById("letterCount").textContent = letters.length;
+  saveState("eon-letters", letters);
+}
+document.getElementById("letterGenBtn").addEventListener("click", () => {
+  const client = document.getElementById("letterClient").value.trim();
+  const oggetto = document.getElementById("letterOggetto").value.trim();
+  const corpo = document.getElementById("letterCorpo").value.trim();
+  if(!client || !corpo) return;
+  letters.push({ client, oggetto, corpo, date:new Date().toLocaleDateString("it-IT") });
+  renderLetters();
+
+  document.getElementById("prevLetterDate").textContent = letters[letters.length - 1].date;
+  document.getElementById("prevLetterClient").textContent = client;
+  document.getElementById("prevLetterOggetto").textContent = oggetto || "—";
+  document.getElementById("prevLetterCorpo").textContent = corpo;
+  document.getElementById("letterPreview").style.display = "block";
+  document.getElementById("letterPreview").scrollIntoView({ behavior:"smooth", block:"start" });
+
+  document.getElementById("letterClient").value = "";
+  document.getElementById("letterOggetto").value = "";
+  document.getElementById("letterCorpo").value = "";
+});
+setupDocActions("letter", () => letters[letters.length - 1], "Lettera");
+
+/* ============ CARTELLO FINE LAVORI ============ */
+function renderCartelli(){
+  const wrap = document.getElementById("cartelloList");
+  wrap.innerHTML = "";
+  cartelli.slice().reverse().forEach((c, idx) => {
+    const card = document.createElement("div");
+    card.className = "doc-list-card";
+    card.innerHTML = `
+      <div class="doc-num" style="color:var(--coral);background:var(--coral-soft);">CN-${String(cartelli.length - idx).padStart(3,'0')}</div>
+      <div class="row-body">
+        <div class="row-name">${c.client}</div>
+        <div class="row-meta"><span>${c.indirizzo || "—"}</span><span>· fine lavori ${c.data || "—"}</span></div>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+  document.getElementById("cartelloCount").textContent = cartelli.length;
+  saveState("eon-cartelli", cartelli);
+}
+document.getElementById("cartelloGenBtn").addEventListener("click", () => {
+  const client = document.getElementById("cartelloClient").value.trim();
+  const indirizzo = document.getElementById("cartelloIndirizzo").value.trim();
+  const desc = document.getElementById("cartelloDesc").value.trim();
+  const data = document.getElementById("cartelloData").value;
+  if(!client || !indirizzo) return;
+  cartelli.push({ client, indirizzo, desc, data });
+  renderCartelli();
+
+  document.getElementById("prevCartelloData").textContent = data || "—";
+  document.getElementById("prevCartelloClient").textContent = client;
+  document.getElementById("prevCartelloIndirizzo").textContent = indirizzo;
+  document.getElementById("prevCartelloDesc").textContent = desc || "—";
+  document.getElementById("cartelloPreview").style.display = "block";
+  document.getElementById("cartelloPreview").scrollIntoView({ behavior:"smooth", block:"start" });
+
+  document.getElementById("cartelloClient").value = "";
+  document.getElementById("cartelloIndirizzo").value = "";
+  document.getElementById("cartelloDesc").value = "";
+  document.getElementById("cartelloData").value = "";
+});
+setupDocActions("cartello", () => cartelli[cartelli.length - 1], "Cartello fine lavori");
 
 /* ============ REGALO ============ */
 const gifts = [];
@@ -7109,7 +7558,7 @@ function renderCantiereDocumenti(){
   document.getElementById("cantiereDocumentiCount").textContent = cantiereDocumenti.length;
   wrap.innerHTML = "";
   if(cantiereDocumenti.length === 0){
-    wrap.innerHTML = '<div class="empty-hint">Ancora nessun documento per questo cantiere.</div>';
+    wrap.innerHTML = '<div class="empty-hint">Ancora nessun documento caricato.</div>';
     return;
   }
   cantiereDocumenti.slice().reverse().forEach(d => {
@@ -8354,6 +8803,10 @@ const pageMeta = {
   "cantiere-appunti": { title:"Appunti", sub:null },
   "cantiere-documenti": { title:"Documenti", sub:null },
   "cantiere-foto": { title:"Foto cantiere", sub:null },
+  "documenti-impresa": { title:"Documenti impresa", sub:null },
+  "crea-cartello": { title:"Cartello fine lavori", sub:null },
+  "crea-lettera": { title:"Lettera", sub:null },
+  "carta-intestata": { title:"Carta intestata", sub:null },
 };
 
 const tabForPage = {
@@ -8367,7 +8820,8 @@ const tabForPage = {
   opportunita:"opportunita",
   calendario:"home", chiamate:"home",
   cestino:"azienda",
-  "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home"
+  "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home",
+  "documenti-impresa":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
 };
 
 function navigateTo(page){
@@ -8413,8 +8867,11 @@ function navigateTo(page){
   if(page === "cestino") renderCestino();
   if(page === "cantiere-cliente") renderCantiereCliente();
   if(page === "cantiere-appunti") renderCantiereAppunti();
-  if(page === "cantiere-documenti") renderCantiereDocumenti();
+  if(page === "documenti-impresa") renderCantiereDocumenti();
   if(page === "cantiere-foto") renderCantiereFoto();
+  if(page === "carta-intestata") renderCartaIntestata();
+  if(page === "crea-lettera") renderLetters();
+  if(page === "crea-cartello") renderCartelli();
 
   window.scrollTo({ top:0, behavior:"instant" in window ? "instant" : "auto" });
 }
@@ -8733,6 +9190,8 @@ async function initApp(){
     loadState("eon-assigned-tasks", assignedTasks),
     loadState("eon-invoices", invoices),
     loadState("eon-quotes", quotes),
+    loadState("eon-letters", letters),
+    loadState("eon-cartelli", cartelli),
     loadState("eon-gifts", gifts),
     loadState("eon-chats", chats)
   ]);
