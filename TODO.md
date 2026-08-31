@@ -46,9 +46,37 @@ Resta da estendere, se si vuole più avanti:
 - **Il toast di conferma per le azioni delicate** (es. "Confermi
   l'appuntamento?") non legge la domanda ad alta voce, anche quando si è
   arrivati lì parlando.
-- **Voce più naturale**: il servizio di sintesi vocale di OpenAI (a
-  pagamento) al posto della voce di sistema — la chiave OpenAI è già
-  configurata sul server (oggi usata per Whisper), servirebbe solo una
-  piccola aggiunta lato server per il testo-in-voce.
+- Voce più naturale (OpenAI): vedi la sezione qui sotto, che ora raccoglie
+  tutto il "programma OpenAI" insieme.
+
+Richiesto da Gianardi il 31/08/2026.
+
+## Programma OpenAI: voce umana + trascrizione di registrazioni e telefonate
+
+Per ora la voce di EON è quella di sistema del telefono (gratis, vedi sopra).
+L'idea è passare ai servizi OpenAI per tre cose insieme, quando si deciderà
+di investirci:
+
+1. **Voce umana, non robotica.** Il servizio di sintesi vocale di OpenAI al
+   posto della voce di sistema — molto più naturale. A pagamento (costo per
+   ogni risposta parlata), ma la chiave OpenAI è già configurata sul server
+   (oggi usata per Whisper): serve solo una piccola aggiunta lato server, non
+   un nuovo servizio da collegare da zero.
+
+2. **Ascoltare registrazioni e telefonate.** Poter caricare (o registrare
+   sul momento) l'audio di una chiamata o di un promemoria vocale, e farlo
+   trascrivere da EON — usa lo stesso Whisper (OpenAI) già integrato oggi per
+   trascrivere i vocali in chat, solo esteso a file audio più lunghi/esterni.
+
+3. **Trasformare la trascrizione in impegni veri.** Una volta trascritta la
+   telefonata/registrazione, farla leggere all'assistente AI (lo stesso
+   motore che oggi capisce "chiamare Guidi alle 17" dal microfono) e fargli
+   estrarre in automatico gli impegni menzionati — appuntamenti, promesse
+   fatte, cose da richiamare — invece di doverli riscrivere a mano dopo aver
+   riascoltato la chiamata.
+
+Da decidere quando ci si mette mano: dove si carica/registra l'audio nell'app
+(una nuova pagina? dentro la scheda del cliente?), e se la trascrizione va
+salvata da qualche parte o serve solo a estrarre gli impegni al volo.
 
 Richiesto da Gianardi il 31/08/2026.
