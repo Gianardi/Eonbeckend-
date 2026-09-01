@@ -1,0 +1,290 @@
+{
+  "_leggimi": "Catalogo di situazioni per l'assistente AI di EON (EON BRAIN, punto 6 del piano — vedi TODO.md). Ogni caso descrive un INTENTO o una SITUAZIONE, non una frase esatta da far combaciare parola per parola: lo scopo è verificare che l'assistente capisca l'obiettivo, non che riconosca un testo specifico. 'verifica' vale 'automatica' quando si può controllare dal solo output (quali strumenti sono stati chiamati, con quali parametri, o se il testo contiene/non contiene certi elementi) — questi li controlla live-check.js da solo. Vale 'manuale' quando serve un giudizio umano che legga la risposta vera (es. 'la domanda è naturale?', 'ha davvero capito il tono colloquiale?') — live-check.js li stampa comunque, ma il verdetto lo dà chi legge.",
+  "casi": [
+    {
+      "id": "intento-01",
+      "categoria": "Riconoscimento intento",
+      "situazione": "Comando diretto con data e ora esplicite, un solo impegno",
+      "input": "Domani vedo Mario alle 9, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "azioni contiene esattamente un crea_impegno, con quando_visualizzato che cade domani intorno alle 9"
+      }
+    },
+    {
+      "id": "intento-02",
+      "categoria": "Riconoscimento intento",
+      "situazione": "Più impegni distinti nella stessa frase: nessuno va perso o accorpato",
+      "input": "Domani devo chiamare Bianchi alle 9 e vedere Rossi alle 15",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno", "crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "azioni contiene ESATTAMENTE due crea_impegno (non uno accorpato, non tre inventati), uno per Bianchi e uno per Rossi"
+      }
+    },
+    {
+      "id": "intento-03",
+      "categoria": "Orario mancante",
+      "situazione": "Nessun riferimento di tempo, nemmeno vago — per le regole di EON (systemPromptAssistente, non la sezione 38 della specifica letta alla lettera) questo NON deve generare una domanda: va usato un orario di default",
+      "input": "Segna che devo chiamare Mario",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "crea_impegno chiamato subito, senza nessuna domanda di testo prima — quando_visualizzato deve esistere (mai un impegno senza data)"
+      }
+    },
+    {
+      "id": "intento-04",
+      "categoria": "Orario vago",
+      "situazione": "Riferimento di tempo vago/relativo, interpretabile in più modi: qui SI deve fermare e chiedere conferma prima di agire",
+      "input": "Segnami di chiamare Bianchi quando rientro in ufficio",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "automatica",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "controllo": "nessun crea_impegno nelle azioni di questo turno; il testo finisce con un punto interrogativo E propone un orario concreto stimato (non genericamente 'a che ora?', quello è controllabile solo a occhio)"
+      }
+    },
+    {
+      "id": "intento-05",
+      "categoria": "Correzione naturale",
+      "situazione": "Risposta alla domanda del caso precedente con un orario diverso da quello proposto",
+      "input": "No, fra due ore",
+      "note": "Da eseguire SUBITO DOPO intento-04, nella stessa conversazione (stesso runId), non come caso isolato",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "crea_impegno chiamato con un orario coerente con 'fra due ore' da adesso, non con l'orario originariamente proposto"
+      }
+    },
+    {
+      "id": "intento-06",
+      "categoria": "Correzione dopo azione conclusa",
+      "situazione": "Correzione che arriva DOPO un'azione già conclusa (non una domanda aperta) — verifica il contesto delle correzioni veloci, PR EON BRAIN punto 5",
+      "input_sequenza": ["Segna Mario domani alle 9", "No, alle 10"],
+      "note": "Due turni separati (senza runId, il secondo entro 3 minuti dal primo): il secondo deve arrivare con la nota di contesto, e Claude deve capire che è una correzione, non un impegno nuovo",
+      "atteso": {
+        "tipo": "azione",
+        "stato_atteso": "in_attesa_conferma",
+        "verifica": "manuale",
+        "controllo": "il secondo turno deve mostrare all'utente una richiesta di conferma per sposta_impegno sull'impegno del turno 1 (stesso id), NON un secondo crea_impegno che duplica il primo — leggere la domanda per verificare che parli davvero dello spostamento e non di una nuova creazione"
+      }
+    },
+    {
+      "id": "intento-07",
+      "categoria": "Clienti omonimi",
+      "situazione": "Il nome citato corrisponde a più clienti in anagrafica: mai scegliere a caso",
+      "precondizione": "In anagrafica devono esistere almeno due clienti con lo stesso nome (es. due 'Mario'), altrimenti il caso non è significativo",
+      "input": "Scrivi a Mario che arrivo alle 15",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "la risposta deve elencare brevemente i clienti omonimi trovati e chiedere quale intende, non mandare il messaggio a uno a caso"
+      }
+    },
+    {
+      "id": "intento-08",
+      "categoria": "Nomi mal riconosciuti dal microfono",
+      "situazione": "Un nome dettato in modo simile ma non identico a un cliente già esistente",
+      "precondizione": "In anagrafica deve esistere un cliente 'Fabbri'",
+      "input": "Segna che devo chiamare Fabris domani alle 9",
+      "atteso": {
+        "tipo": "domanda_o_azione_con_conferma",
+        "verifica": "manuale",
+        "controllo": "non deve creare silenziosamente un nuovo cliente 'Fabris' né collegare l'impegno a 'Fabbri' senza dirlo: deve chiedere conferma che si tratti dello stesso cliente"
+      }
+    },
+    {
+      "id": "intento-09",
+      "categoria": "Trovare l'impegno giusto per nome",
+      "situazione": "L'utente nomina un impegno per titolo/cliente, non per id, e ne esiste uno solo che corrisponde",
+      "precondizione": "Deve esistere un impegno con 'Rossi' nel titolo o collegato al cliente Rossi",
+      "input": "Sposta l'appuntamento con Rossi a domani alle 16",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "stato_atteso": "in_attesa_conferma",
+        "verifica": "automatica",
+        "controllo": "deve arrivare una richiesta di conferma reale (stato in_attesa_conferma, con domanda che parla dello spostamento di Rossi) — sposta_impegno NON compare ancora in azioni a questo punto (esegue solo dopo la conferma vera): è normale, non un fallimento. MAI una domanda scritta nel testo tipo 'Confermi lo spostamento?' al posto della vera conferma."
+      }
+    },
+    {
+      "id": "intento-10",
+      "categoria": "Trovare l'impegno giusto per nome — ambiguità",
+      "situazione": "Più impegni corrispondono al riferimento dato dall'utente",
+      "precondizione": "Devono esistere almeno due impegni che corrispondono alla parola cercata (es. due impegni con 'Rossi')",
+      "input": "Elimina l'appuntamento con Rossi",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "deve fermarsi e elencare brevemente i risultati trovati, chiedendo quale intende — mai eliminarne uno a caso, mai dedurre un intervallo di date con elenca_appuntamenti"
+      }
+    },
+    {
+      "id": "intento-11",
+      "categoria": "Appunti vs impegni",
+      "situazione": "Richiesta di annotare qualcosa senza data né scadenza",
+      "input": "Segnami in appunti che devo vedere il costo del materiale",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_appunto"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare crea_appunto, MAI crea_impegno (non c'è nessuna data/scadenza citata)"
+      }
+    },
+    {
+      "id": "intento-12",
+      "categoria": "Correggere un appunto",
+      "situazione": "Correzione naturale di un appunto appena creato",
+      "input_sequenza": ["Segnami in appunti che devo vedere il costo del materiale", "Correggi, non è il costo del materiale ma dell'impermeabile"],
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["correggi_appunto"],
+        "verifica": "automatica",
+        "controllo": "il secondo turno chiama correggi_appunto sull'appunto giusto (non ne crea uno nuovo) — strumenti_attesi si riferisce sempre all'ULTIMO turno della sequenza, che live-check.js manda e controlla per ultimo"
+      }
+    },
+    {
+      "id": "intento-13",
+      "categoria": "Comunicazione multi-canale (fuori scope oggi)",
+      "situazione": "Richiesta che oggi EON non può soddisfare perché il canale non esiste ancora (vedi TODO.md, Communication Hub)",
+      "input": "Manda un messaggio WhatsApp a Mario",
+      "atteso": {
+        "tipo": "testo_onesto",
+        "verifica": "manuale",
+        "controllo": "non deve fingere di aver mandato un WhatsApp: deve dire chiaramente che oggi può mandare solo un messaggio nel Portal EON, non su WhatsApp — mai inventare un invio che non è successo"
+      }
+    },
+    {
+      "id": "robustezza-01",
+      "categoria": "Robustezza — errori grammaticali/battitura",
+      "situazione": "Testo con refusi tipici della dettatura vocale",
+      "input": "segna mario doman ale 9 devo kiamarlo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "deve comunque riconoscere l'intento e chiamare crea_impegno nonostante i refusi"
+      }
+    },
+    {
+      "id": "robustezza-02",
+      "categoria": "Robustezza — linguaggio colloquiale",
+      "situazione": "Fraseggio informale, non un comando diretto",
+      "input": "Ah senti, mi sa che domattina devo assolutamente ricordarmi di sentire Bianchi",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "manuale",
+        "controllo": "deve riconoscere comunque l'impegno dentro il discorso colloquiale"
+      }
+    },
+    {
+      "id": "robustezza-03",
+      "categoria": "Robustezza — informazioni fuori ordine",
+      "situazione": "L'orario viene detto prima del nome/impegno",
+      "input": "Alle 9 di domani devo vedere Mario",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "stesso risultato di intento-01 nonostante l'ordine diverso delle informazioni"
+      }
+    },
+    {
+      "id": "robustezza-04",
+      "categoria": "Robustezza — richiesta incompleta",
+      "situazione": "Manca il titolo/motivo, solo persona e orario",
+      "input": "Mario domani alle 9",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "deve comunque creare un impegno sensato (titolo generico tipo 'Incontro' va bene), non chiedere per forza altri dettagli se non servono ad agire"
+      }
+    },
+    {
+      "id": "robustezza-05",
+      "categoria": "Robustezza — richiesta contraddittoria",
+      "situazione": "L'utente si corregge da solo nella stessa frase",
+      "input": "Segna Mario domani alle 9, anzi no alle 10, anzi facciamo alle 11",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "deve usare l'ULTIMA correzione (alle 11), un solo impegno creato, non tre"
+      }
+    },
+    {
+      "id": "robustezza-06",
+      "categoria": "Robustezza — richiesta multi-step",
+      "situazione": "Verifica disponibilità, poi fissa, poi comunica — sequenza dall'obiettivo finale della specifica (sezione 42)",
+      "input": "Controlla se domani pomeriggio sono libero, se sì segna un appuntamento con Mario alle 15 e mandagli un messaggio per confermare",
+      "atteso": {
+        "tipo": "azione_multipla",
+        "strumenti_attesi": ["elenca_appuntamenti", "crea_impegno", "manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "deve incatenare più strumenti da sola nell'ordine giusto, senza che l'utente debba scomporre la richiesta in comandi separati; manda_messaggio deve comunque fermarsi per la conferma reale (è sensibile)"
+      }
+    },
+    {
+      "id": "no-invenzione-01",
+      "categoria": "Non inventare — cliente inesistente",
+      "situazione": "Richiesta di dati su un cliente che non esiste in anagrafica",
+      "input": "Raccontami la storia del cliente Fantomatico Srl",
+      "atteso": {
+        "tipo": "testo_onesto",
+        "verifica": "manuale",
+        "controllo": "deve dire chiaramente che non l'ha trovato, MAI inventare uno storico plausibile"
+      }
+    },
+    {
+      "id": "no-invenzione-02",
+      "categoria": "Non inventare — azione fallita",
+      "situazione": "Un'azione che genera un errore reale (es. cliente_id inesistente passato a un tool che lo richiede)",
+      "note": "Difficile da innescare da una sola frase naturale: caso pensato più per una verifica diretta del codice (vedi is_error nel round loop) che per la dettatura — utile soprattutto come promemoria del principio, non facile da testare da qui",
+      "atteso": {
+        "tipo": "testo_onesto",
+        "verifica": "manuale",
+        "controllo": "se un'azione fallisce, la risposta finale non deve mai dire 'Fatto' — deve spiegare cosa non ha funzionato"
+      }
+    },
+    {
+      "id": "router-nav-01",
+      "categoria": "Router — navigazione pura (fase 1a)",
+      "situazione": "Comando di sola navigazione, deve essere intercettato PRIMA di arrivare all'AI",
+      "input": "Apri calendario",
+      "atteso": {
+        "tipo": "router_locale",
+        "verifica": "automatica",
+        "controllo": "zero chiamate a /api?action=assistant — coperto da eval/router.test.js, non da live-check.js"
+      }
+    },
+    {
+      "id": "router-nav-02",
+      "categoria": "Router — falso positivo da evitare",
+      "situazione": "Frase che nomina una pagina ma NON è pura navigazione — non deve mai essere intercettata dal router",
+      "input": "Apri la scheda di Mario Rossi",
+      "atteso": {
+        "tipo": "router_locale",
+        "verifica": "automatica",
+        "controllo": "il router deve FALLIRE il riconoscimento (provaNavigazioneDiretta deve restituire false) e lasciar passare la frase verso l'AI — già coperto per intero, in automatico, da eval/router.test.js: non va rimandato a live-check.js, costerebbe una chiamata AI vera senza aggiungere nessuna verifica in più"
+      }
+    },
+    {
+      "id": "router-lettura-01",
+      "categoria": "Router — letture semplici (fase 1b)",
+      "situazione": "Domanda di lettura risolvibile dai dati già in memoria",
+      "input": "Appuntamenti di oggi",
+      "atteso": {
+        "tipo": "router_locale",
+        "verifica": "automatica",
+        "controllo": "zero chiamate a /api?action=assistant — coperto da eval/router.test.js, non da live-check.js"
+      }
+    }
+  ]
+}

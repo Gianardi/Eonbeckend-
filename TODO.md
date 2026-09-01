@@ -310,10 +310,44 @@ era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
    Claude per essere riconosciuto come tale — coerente con il principio
    della specifica di non insegnare regole rigide, ma un limite reale.
 
-6. **Evaluation Suite — non ancora fatto.** Una suite di test sistematica
-   per intenti e situazioni (correzioni, clienti omonimi, richieste
-   incomplete...), non frasi specifiche — da fare dopo che i punti sopra
-   sono stabili, così c'è più da testare.
+6. **Evaluation Suite — FATTO il 01/09/2026.** Nuova cartella `eval/`,
+   in due parti:
+   - `eval/casi.json`: catalogo di 23 situazioni (non frasi esatte) —
+     riconoscimento dell'intento, orario mancante/vago, correzioni
+     naturali (anche dopo un'azione già conclusa), clienti omonimi, nomi
+     mal riconosciuti dal microfono, trovare l'impegno giusto per nome
+     (e gestirne l'ambiguità), appunti vs impegni, robustezza a
+     refusi/informalità/ordine delle informazioni/richieste
+     contraddittorie o incomplete, richieste multi-step, non inventare
+     mai nulla, e il router (navigazione/letture locali).
+   - `eval/router.test.js`: parte automatica, **eseguita con successo
+     (28/28)**, copre lo strato deterministico (router, contesto delle
+     correzioni) che non ha bisogno dell'AI vera — da rilanciare ad ogni
+     modifica al router o al contesto, prima di aprire una PR.
+   - `eval/live-check.js`: parte che manda i casi restanti al vero
+     endpoint AI e confronta strumenti chiamati/stato/domande attese,
+     stampando il resto per un giudizio umano — **mai eseguita in questa
+     sessione** (l'ambiente di sviluppo non ha accesso a un vero deploy
+     Vercel/Supabase né a una chiave Anthropic live): richiede un
+     account Supabase di PROVA (mai quello con i dati veri) e le
+     variabili `EVAL_API_URL`/`EVAL_ACCESS_TOKEN` — vedi `eval/README.md`.
+
+   Il code review (tre giri, alto poi medio) ha trovato e fatto
+   correggere quattro problemi nel controllo automatico: un caso con
+   uno strumento delicato (sposta_impegno) segnato come verificabile in
+   automatico avrebbe bocciato una richiesta di conferma corretta (gli
+   strumenti delicati non eseguono finché non confermati, quindi non
+   compaiono ancora nelle azioni); un caso di orario vago dichiarava la
+   verifica automatica senza dare nulla da controllare; due casi
+   usavano un nome di campo (`_turno_2`) mai letto dal controllo,
+   cadendo sempre nel percorso "non verificabile" senza che si notasse;
+   un confronto con valore "vero/falso" (se il testo finisce con un
+   punto interrogativo) trattava un eventuale `false` esplicito come se
+   il campo non fosse stato dichiarato affatto.
+
+   Con questo, tutti e 6 i punti "core" del piano EON BRAIN sono
+   completi. Resta il punto 7 (Communication Hub multi-canale), tenuto
+   volutamente separato per la sua dimensione.
 
 7. **Communication Hub multi-canale (email, WhatsApp) — progetto a sé.**
    Già in parte annotato sopra in "Programma OpenAI": nessun adapter
