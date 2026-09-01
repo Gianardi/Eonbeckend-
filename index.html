@@ -7300,6 +7300,7 @@ function collegaHubRacconta(){
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
     renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino(); renderCantiereClienteCruscotto();
+    renderCantiereAppunti(); aggiornaCantiereSottotitoli();
     chiudiHubAI();
 
     /* Qualsiasi azione sul calendario porta lì a vedere il risultato,
@@ -7336,6 +7337,10 @@ function collegaHubRacconta(){
         showAIToast("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
         showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
+      } else if(a.tool === "crea_appunto"){
+        showAIToast("Appunto aggiunto", a.esito.testo);
+      } else if(a.tool === "correggi_appunto"){
+        showAIToast("Appunto corretto", a.esito.testo);
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
@@ -8048,6 +8053,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
     renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino(); renderCantiereClienteCruscotto();
+    renderCantiereAppunti(); aggiornaCantiereSottotitoli();
 
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
@@ -8076,6 +8082,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         mostra("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
         mostra("Messaggio inviato", "A " + a.esito.inviato_a);
+      } else if(a.tool === "crea_appunto"){
+        mostra("Appunto aggiunto", a.esito.testo);
+      } else if(a.tool === "correggi_appunto"){
+        mostra("Appunto corretto", a.esito.testo);
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
