@@ -4992,8 +4992,11 @@ function interpretaQuando(testo){
   if(t.startsWith("domani")){ const d = new Date(oggi); d.setDate(d.getDate()+1); return d; }
   if(t.startsWith("dopodomani")){ const d = new Date(oggi); d.setDate(d.getDate()+2); return d; }
 
-  /* forma "8 ago" o "gio 8 ago" */
-  const m = t.match(/(\d{1,2})\s+([a-z]{3})/);
+  /* forma "8 ago" o "gio 8 ago". \b dopo le 3 lettere evita di leggere
+     per sbaglio l'inizio di una parola più lunga come un mese — es.
+     "8 settimane" altrimenti leggerebbe "set" (settembre) invece di
+     scartare la frase come non una data. */
+  const m = t.match(/\b(\d{1,2})\s+([a-z]{3})\b/);
   if(m){
     const giorno = parseInt(m[1], 10);
     const mese = MESI_IT[m[2]];
@@ -8135,6 +8138,61 @@ function provaNavigazioneDiretta(testo){
   return false;
 }
 
+/* Fase 1b del Router (vedi TODO.md, sezione "EON BRAIN"): piccole
+   richieste di LETTURA rispondibili filtrando i dati già caricati nel
+   browser (tasks/clients/chats), senza nessuna chiamata di rete. Stesso
+   principio di sicurezza della navigazione: confronto stretto per frase
+   esatta, un mancato riconoscimento è innocuo e la frase prosegue verso
+   l'AI come sempre. Nessuna scrittura passa mai da qui.
+   Restituisce {titolo, testo} se riconosciuta, altrimenti null. */
+function provaLetturaLocale(testo){
+  const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  if(!t) return null;
+
+  if(["appuntamenti di oggi", "gli appuntamenti di oggi", "cosa ho oggi", "cosa devo fare oggi", "impegni di oggi", "i miei impegni di oggi"].includes(t)){
+    /* Stessa interpretazione della data usata dal calendario
+       (interpretaQuando, più sopra nel file): un impegno risulta "di
+       oggi" identicamente a come lo mostra già la pagina Calendario. */
+    const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+    const impegniOggi = tasks.filter(task => task.status !== "done" && task.time).filter(task => {
+      const d = interpretaQuando(task.time);
+      return d && d.getTime() === oggi.getTime();
+    });
+    navigateTo("calendario");
+    if(!impegniOggi.length) return { titolo: "Oggi", testo: "Nessun impegno per oggi." };
+    return {
+      titolo: impegniOggi.length === 1 ? "1 impegno oggi" : impegniOggi.length + " impegni oggi",
+      testo: impegniOggi.map(task => task.title + (task.time ? " — " + task.time : "")).join("\n"),
+    };
+  }
+
+  if(["quanti clienti ho", "quanti clienti", "quanti sono i miei clienti", "quanti clienti ho in anagrafica"].includes(t)){
+    const attivi = clients.filter(c => !c.archived).length;
+    navigateTo("clienti");
+    return { titolo: "Clienti", testo: attivi === 1 ? "Hai 1 cliente in anagrafica." : `Hai ${attivi} clienti in anagrafica.` };
+  }
+
+  if(["chi mi ha scritto", "chi mi ha scritto oggi", "messaggi non letti", "ho messaggi non letti", "quanti messaggi non letti", "quanti messaggi non letti ho"].includes(t)){
+    /* "Chi" e "quanti" sono in realtà due domande diverse (una persona
+       può avere più di un messaggio non letto): rispondiamo a entrambe
+       insieme invece di indovinare quale delle due si intendeva.
+       Il totale dei messaggi è lo stesso conteggio di renderSummary()
+       per il riquadro "messaggi da leggere" (chats.reduce(...unread)),
+       qui limitato alle chat non archiviate — coerente con la pagina
+       Chat, che di default le nasconde (renderChatList). */
+    const conNonLetti = chats.filter(c => !c.archived && c.unread > 0);
+    const totaleNonLetti = conNonLetti.reduce((s, c) => s + c.unread, 0);
+    navigateTo("chat");
+    if(!conNonLetti.length) return { titolo: "Messaggi", testo: "Nessuno, hai letto tutto." };
+    return {
+      titolo: totaleNonLetti === 1 ? "1 messaggio da leggere" : totaleNonLetti + " messaggi da leggere",
+      testo: "Da " + conNonLetti.map(c => c.name).join(", ") + ".",
+    };
+  }
+
+  return null;
+}
+
 /* Microfono grande + campo di testo libero che parlano con l'assistente
    vero (stesso motore di "Raccontami la giornata"): usato dalla Home
    (qualsiasi cosa) e dalla pagina Clienti (aggiungere un cliente). Un
@@ -8175,6 +8233,21 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
       return;
+    }
+
+    /* Stesso principio, per le piccole domande di lettura rispondibili
+       dai dati già in memoria (es. "appuntamenti di oggi"): anche qui
+       zero chiamata all'AI, e per lo stesso motivo non serve backend né
+       sessione — i dati sono già quelli caricati nell'app. */
+    if(!inContinuazione){
+      const lettura = provaLetturaLocale(testo);
+      if(lettura){
+        campo.value = "";
+        hint.textContent = TESTO_HINT_BASE;
+        showAIToast(lettura.titolo, lettura.testo);
+        if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\n+/g, ". ") : ""));
+        return;
+      }
     }
 
     if(!BACKEND_CONFIGURED || !currentSession){
