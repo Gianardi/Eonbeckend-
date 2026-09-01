@@ -3489,6 +3489,17 @@ async function dbSelect(table){
   return data || [];
 }
 
+/* Legge una singola riga per id: usata per aggiornare solo il record
+   toccato da un'azione dell'AI, invece di ricaricare l'intera tabella
+   (vedi aggiornaDatiToccati). */
+async function dbSelectById(table, id){
+  let query = supabaseClient.from(table).select("*").eq("id", id);
+  if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
+  const { data, error } = await query.maybeSingle();
+  if(error){ console.error("Errore lettura " + table + " (" + id + "):", error.message); return null; }
+  return data;
+}
+
 /* Solo per la schermata Cestino: le righe eliminate, non quelle vive. */
 async function dbSelectCestino(table){
   if(!TABELLE_CON_CESTINO.has(table)) return [];
@@ -3569,6 +3580,20 @@ async function seedUserData(profession){
   })));
 }
 
+/* Trasformano una riga grezza del database nella forma usata dagli
+   array in memoria: condivise tra loadUserDataFromDB() (ricarica tutta
+   la tabella) e aggiornaDatiToccati() (aggiorna solo il record giusto),
+   così le due strade non rischiano di andare fuori sincrono tra loro. */
+function mappaCliente(c){
+  return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description, last:c.last_contact, phone:c.phone || "", color:c.color, archived:!!c.is_archived };
+}
+function mappaImpegno(t){
+  return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
+}
+function mappaAppunto(a){
+  return { id:a.id, testo:a.testo, created:a.created_at };
+}
+
 /* Carica i dati veri di un utente già registrato, sostituendo il contenuto
    degli array in memoria (clients, opportunities, ecc.) con le sue righe
    vere dal database, invece dei dati demo di professionData. */
@@ -3581,9 +3606,7 @@ async function loadUserDataFromDB(){
     dbSelect("azienda_intestazione")
   ]);
 
-  clients.length = 0; dbClients.forEach(c => clients.push({
-    id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description, last:c.last_contact, phone:c.phone || "", color:c.color, archived:!!c.is_archived
-  }));
+  clients.length = 0; dbClients.forEach(c => clients.push(mappaCliente(c)));
   opportunities.length = 0; dbOpps.forEach(o => opportunities.push({
     id:o.id, name:o.name, client:o.client_name, value:Number(o.value)||0, probability:o.probability, deadline:o.deadline, stage:o.stage
   }));
@@ -3594,9 +3617,7 @@ async function loadUserDataFromDB(){
   incomes.length = 0; dbIncomes.forEach(x => incomes.push({
     id:x.id, client:x.client_name, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status
   }));
-  tasks.length = 0; dbTasks.forEach(t => tasks.push({
-    id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || ""
-  }));
+  tasks.length = 0; dbTasks.forEach(t => tasks.push(mappaImpegno(t)));
   goals.length = 0; dbGoals.forEach(g => goals.push({
     id:g.id, text:g.text, cat:g.category, done:g.done
   }));
@@ -3606,7 +3627,7 @@ async function loadUserDataFromDB(){
 
   cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null }));
   cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
-  cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push({ id:a.id, testo:a.testo, created:a.created_at }));
+  cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push(mappaAppunto(a)));
   aggiornaCantiereSottotitoli();
 
   const rigaIntestazione = dbIntestazione[0];
@@ -3616,6 +3637,71 @@ async function loadUserDataFromDB(){
     email:rigaIntestazione.email || "", logo_url:rigaIntestazione.logo_url || null
   } : null;
   aggiornaMarchiDocumento();
+}
+
+/* Dopo un'azione dell'AI, invece di ricaricare tutte le tabelle
+   (loadUserDataFromDB fa una dozzina di richieste in parallelo, anche
+   quando è cambiato un solo cliente), aggiorniamo solo quello che è
+   davvero cambiato: molto più veloce, e si sente soprattutto sulle
+   azioni più comuni (un cliente, un impegno, un appunto). Per tutto
+   il resto — spostamenti, eliminazioni, cestino, messaggi in chat —
+   restiamo sulla ricarica completa: sono azioni meno frequenti, con
+   più stati collegati da tenere sincronizzati, dove il rischio di un
+   aggiornamento mirato sbagliato pesa più del tempo risparmiato. */
+async function aggiornaDatiToccati(azioni){
+  if(!isDbReady()){ await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]); return; }
+
+  const idClientiDaAggiornare = new Set();
+  let toccaChat = false;
+  let servePienoReload = false;
+
+  (azioni || []).forEach(a => {
+    if(a.tool === "crea_impegno"){
+      if(a.esito.gia_esistente){
+        /* Impegno già esistente: non sappiamo il suo stato vero (fatto?
+           in corso?) senza rileggerlo, quindi ricarichiamo per sicurezza
+           invece di rischiare di mostrarlo "da fare" per sbaglio. */
+        servePienoReload = true;
+      } else if(a.esito.tipo === "incontro" && a.esito.cliente){
+        toccaChat = true; // finito nella conversazione del cliente, non in tasks
+      } else {
+        tasks.push({ id:a.esito.id, title:a.esito.titolo, owner:"user", status:"todo", time:a.esito.quando_visualizzato });
+      }
+    } else if(a.tool === "crea_cliente" || a.tool === "aggiorna_cliente" || (a.tool === "trova_o_crea_cliente" && a.esito.creato)){
+      idClientiDaAggiornare.add(a.esito.id);
+    } else if(a.tool === "trova_o_crea_cliente" && !a.esito.creato){
+      /* Ha solo trovato un cliente già esistente (es. per collegarci una
+         foto): non ha scritto nulla, non c'è niente da riallineare. */
+    } else if(a.tool === "crea_appunto"){
+      cantiereAppunti.push({ id:a.esito.id, testo:a.esito.testo, created:new Date().toISOString() });
+    } else if(a.tool === "correggi_appunto"){
+      const appunto = cantiereAppunti.find(x => x.id === a.esito.id);
+      if(appunto) appunto.testo = a.esito.testo;
+      else servePienoReload = true; // non lo troviamo in locale: meglio riallinearsi del tutto
+    } else {
+      servePienoReload = true; // sposta_impegno, annulla_impegno, elimina_*, svuota_cestino, manda_messaggio...
+    }
+  });
+
+  if(servePienoReload){
+    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
+    return;
+  }
+
+  const richieste = [];
+  if(idClientiDaAggiornare.size){
+    richieste.push(Promise.all([...idClientiDaAggiornare].map(id => dbSelectById("clients", id))).then(righe => {
+      righe.filter(Boolean).forEach(c => {
+        const mappato = mappaCliente(c);
+        const idx = clients.findIndex(x => x.id === c.id);
+        if(idx === -1) clients.push(mappato); else clients[idx] = mappato;
+      });
+    }));
+  }
+  if(toccaChat) richieste.push(loadChatsFromDB());
+  if(richieste.length) await Promise.all(richieste);
+
+  aggiornaCantiereSottotitoli();
 }
 
 /* ============ CONVERSAZIONI E MESSAGGI VERI ============
@@ -7299,10 +7385,11 @@ function collegaHubRacconta(){
     }
 
     /* Le azioni hanno scritto direttamente su Supabase: gli array locali
-       (clients, tasks, chats...) non lo sanno ancora, vanno ricaricati
+       (clients, tasks, chats...) non lo sanno ancora, vanno aggiornati
        prima di disegnare, altrimenti il risultato non comparirebbe
-       finché non si ricarica l'app da zero. */
-    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
+       finché non si ricarica l'app da zero. Mirato quando possibile
+       (vedi aggiornaDatiToccati), invece di ricaricare sempre tutto. */
+    await aggiornaDatiToccati(risultatiVisibili);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
     renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino(); renderCantiereClienteCruscotto();
     renderCantiereAppunti(); aggiornaCantiereSottotitoli();
@@ -8087,7 +8174,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
-    await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
+    await aggiornaDatiToccati(risultatiVisibili);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();
     renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino(); renderCantiereClienteCruscotto();
     renderCantiereAppunti(); aggiornaCantiereSottotitoli();
