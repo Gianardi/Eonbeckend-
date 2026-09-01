@@ -153,6 +153,33 @@ sulla chiave "Eonbeckend" nella Console Anthropic.
 
 Richiesto da Gianardi il 31/08/2026.
 
+## EON intelligente: promemoria e avvisi veri, all'ora giusta
+
+**Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
+(appunti a voce, riconoscimento nomi con errori, vera conversazione — vedi i
+commit del giorno). Resta questa, la più grande delle quattro dal punto di
+vista tecnico, volutamente lasciata per dopo.
+
+Oggi un impegno segnato in calendario resta lì finché non apri l'app e lo
+guardi — non arriva NULLA da solo all'ora giusta. Serve un vero avviso che
+squilli da solo (anche ad app chiusa) quando arriva il momento, con il
+pulsante pronto per chiamare quando è una telefonata. Esempi concreti
+richiesti:
+1. "Ricordami oggi di chiamare Fabbri alle 15:00" → un avviso vero alle 15:00.
+2. "Ricordami che devo chiamare Dosi alle 17" → un avviso alle 17, con il
+   tasto già pronto per avviare la chiamata.
+
+Tecnicamente serve:
+- **Notifiche push vere**, non solo un toast quando l'app è aperta: un
+  service worker, il permesso di notifica del browser, e la registrazione
+  dell'abbonamento (subscription) alle notifiche per ogni utente.
+- **Un "orologio" lato server**: Vercel da solo non tiene nulla sveglio in
+  background — serve un cron/scheduler (es. Vercel Cron) che controlli
+  periodicamente gli impegni imminenti e mandi la notifica al momento giusto.
+- Il pulsante "chiama" dentro la notifica stessa, per le telefonate.
+
+Richiesto da Gianardi il 31/08/2026.
+
 ## Pulizia e precisazioni
 
 Voce generica per una passata di rifinitura sull'app: perfezionare alcune
