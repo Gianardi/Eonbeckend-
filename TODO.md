@@ -230,11 +230,25 @@ era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
    "gli appuntamenti"); corretto provando prima la frase così com'è e solo
    come ripiego senza un eventuale articolo iniziale.
 
-2. **Letture semplici da dati già in memoria — non ancora fatto (fase
-   1b).** Stesso principio, esteso a piccole richieste di lettura
-   rispondibili filtrando i dati già caricati nel browser (appuntamenti di
-   oggi, quanti clienti, messaggi non letti), senza nessuna chiamata di
-   rete. Solo letture: nessuna scrittura passa mai dal router.
+2. **Letture semplici da dati già in memoria — FATTO il 01/09/2026 (fase
+   1b).** Nuova funzione `provaLetturaLocale()`, stesso principio del
+   router di navigazione: "appuntamenti di oggi" (filtra `tasks` con la
+   stessa interpretazione delle date già usata dal Calendario), "quanti
+   clienti ho" (conta `clients` non archiviati), "chi mi ha scritto"/
+   "quanti messaggi non letti" (risponde a entrambe insieme: totale
+   messaggi non letti + da chi, chat archiviate escluse) — tutto filtrando
+   dati già caricati nel browser, zero chiamata di rete. Solo letture:
+   nessuna scrittura passa mai dal router. Il code review (effort alto poi
+   medio) ha trovato e fatto correggere tre problemi: (1) la domanda
+   "quanti messaggi non letti" veniva risposta con un conteggio di persone
+   invece che di messaggi — ora risponde a entrambe le domande insieme;
+   (2) mancava il filtro sulle chat archiviate, incoerente con la pagina
+   Chat stessa; (3) più importante, un bug latente nella funzione condivisa
+   `interpretaQuando()` (già usata dal Calendario): il suo riconoscimento
+   di date poteva leggere per sbaglio l'inizio di una parola più lunga come
+   un mese (es. "8 settimane" letto come giorno 8 di settembre) — corretto
+   alla radice con un confine di parola nell'espressione regolare, a
+   beneficio anche del Calendario che la usava già.
 
 3. **Livelli di rischio a 4 valori — non ancora fatto.** Sostituire
    `sensitive: true/false` (oggi nei 17 strumenti di `api/index.js`) con
