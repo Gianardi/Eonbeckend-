@@ -133,12 +133,18 @@ pesante del costo, ripetuta identica ogni volta. Obiettivo: avvicinarsi a
 
 Interventi, in ordine di rapporto costo/beneficio:
 
-1. **Prompt caching (Anthropic).** Le istruzioni di sistema e l'elenco degli
-   strumenti sono identici ad ogni chiamata: la cache di Anthropic li tiene
-   "pronti" e li fa pagare circa 1/10 del prezzo normale dalle chiamate
-   successive in poi. Nessuna perdita di qualità, l'AI risponde uguale a
-   oggi — cambia solo come viene fatturata la parte ripetuta. Il singolo
-   intervento a più alto impatto e meno rischio.
+1. **Prompt caching (Anthropic) — FATTO il 01/09/2026.** Le istruzioni di
+   sistema e l'elenco degli strumenti sono identici ad ogni chiamata: ora
+   il "system" mandato ad Anthropic è diviso in due pezzi — le istruzioni
+   fisse (segnate con `cache_control`, così Anthropic le tiene "pronte" e
+   le fa pagare circa 1/10 del prezzo normale dalle chiamate successive in
+   poi) e la sola data/ora corrente, che cambia sempre e per questo sta
+   fuori dalla parte in cache, altrimenti l'avrebbe invalidata ad ogni
+   singola richiesta. Nessuna perdita di qualità, l'AI risponde uguale a
+   prima — cambia solo come viene fatturata la parte ripetuta. Da
+   verificare nel tempo guardando il costo per azione sulla chiave
+   "Eonbeckend" nella Console Anthropic (campo `cache_read_input_tokens`
+   nella risposta: se cresce, la cache sta funzionando).
 
 2. **Modello più economico per le richieste semplici.** Claude Haiku (molto
    più economico di Sonnet) per i comandi diretti tipo "chiamare Guidi
