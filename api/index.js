@@ -1387,10 +1387,12 @@ async function reclamaRun(runId, user, statoAtteso) {
   return Array.isArray(rows) && rows[0] ? rows[0] : null;
 }
 
+/* Testo statico, identico ad ogni chiamata: è la parte che va in cache
+   (vedi il blocco cache_control in proseguiAssistente). Non deve MAI
+   contenere nulla che cambi da una richiesta all'altra — data/ora vanno
+   in dataOraCorrente(), un blocco separato fuori dalla cache. */
 function systemPromptAssistente() {
-  const oggi = new Date();
   return `Sei l'assistente operativo dentro EON, un'app per professionisti italiani.
-Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ora ${oggi.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}.
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
@@ -1413,6 +1415,14 @@ IMPORTANTE su manda_messaggio, sposta_impegno, annulla_impegno, elimina_impegno,
 Se l'utente chiede di eliminare o svuotare il cestino definitivamente (o dice cose come "elimina tutto quello che ho cestinato", "svuota il cestino per sempre"), chiama subito svuota_cestino — è un unico comando che elimina per sempre tutto ciò che si trova già nel cestino, in ogni categoria. Non usarlo per eliminare un singolo cliente o impegno (per quello ci sono elimina_cliente/elimina_impegno), e non usarlo se l'utente vuole solo spostare qualcosa nel cestino, non svuotarlo.
 
 Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
+}
+
+/* Unico pezzo che cambia ad ogni chiamata: va DOPO il blocco in cache,
+   mai dentro systemPromptAssistente() sopra, altrimenti invaliderebbe la
+   cache ad ogni singola richiesta (data e ora sono diverse ogni volta). */
+function dataOraCorrente() {
+  const oggi = new Date();
+  return `Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ora ${oggi.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}.`;
 }
 
 /* Prepara la domanda di conferma per la prossima azione delicata in coda. */
@@ -1540,6 +1550,7 @@ async function handleAssistant(req, res, user, accessToken) {
   }
 
   const schemi = Object.values(TOOLS).map((t) => t.schema);
+  const promptStatico = systemPromptAssistente(); // uguale ad ogni giro: costruito una sola volta fuori dal loop
 
   for (let round = 0; round < TOOL_MAX_ROUNDS; round++) {
     let r;
@@ -1550,7 +1561,16 @@ async function handleAssistant(req, res, user, accessToken) {
         body: JSON.stringify({
           model: "claude-sonnet-4-5",
           max_tokens: 1200,
-          system: systemPromptAssistente(),
+          /* Istruzioni + elenco strumenti sono identici ad ogni chiamata:
+             il blocco cache_control sull'ultimo (e unico) testo statico
+             mette in cache anche gli strumenti, che nell'ordine con cui
+             Anthropic li elabora vengono prima del system prompt. La
+             data/ora, che cambia sempre, resta in un blocco a parte
+             DOPO quello in cache, così non lo invalida mai. */
+          system: [
+            { type: "text", text: promptStatico, cache_control: { type: "ephemeral" } },
+            { type: "text", text: dataOraCorrente() },
+          ],
           tools: schemi,
           messages,
         }),
