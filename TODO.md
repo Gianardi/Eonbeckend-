@@ -8,19 +8,26 @@ Oggi quando l'AI esegue un'azione (es. "segna il cliente Mario Rossi"), l'utente
 aspetta la risposta del modello AI e poi vede l'interfaccia aggiornarsi solo dopo
 un ricaricamento completo di tutti i dati. Percepito come lento.
 
-Due interventi, da fare insieme per il massimo effetto:
+1. **Aggiornamento mirato invece di reload completo — FATTO il 31/08/2026.**
+   Nuova funzione `aggiornaDatiToccati()`: per le azioni più comuni (creare/
+   modificare un cliente, creare un impegno, un appunto) aggiorna solo il
+   record toccato — spesso senza nessuna chiamata di rete in più (il caso di
+   un impegno o un appunto, i cui dati arrivano già completi dalla risposta
+   dell'AI), o con una sola lettura mirata (il caso di un cliente). Per tutto
+   il resto (spostamenti, eliminazioni, cestino, messaggi in chat) resta il
+   ricaricamento completo di sicurezza, invariato. Collegata ai due punti
+   dove l'app reagisce alle azioni dell'AI (microfono/testo condiviso e hub
+   AI a schermo intero) — non agli altri punti dell'app che ricaricano tutto
+   per motivi diversi (es. dopo un ripristino dal Cestino).
 
-1. **Aggiornamento mirato invece di reload completo.** Dopo un'azione dell'AI,
-   `loadUserDataFromDB()` ricarica *tutto* (clienti, cantiere, chat, appuntamenti,
-   documenti...) invece di aggiornare solo il record toccato. Sostituire con un
-   aggiornamento mirato (solo il cliente/impegno creato o modificato) taglierebbe
-   gran parte del tempo percepito.
-
-2. **Aggiornamento ottimistico dell'interfaccia.** Appena l'utente finisce di
-   parlare o scrivere, mostrare subito il risultato atteso (es. il cliente nella
-   lista) *prima* che l'AI abbia confermato, e sistemare in silenzio se qualcosa
-   va storto. L'utente vede la reazione a schermo in millisecondi, mentre il
-   salvataggio vero avviene comunque dietro le quinte.
+2. **Aggiornamento ottimistico dell'interfaccia — non ancora fatto.** L'idea
+   originale era mostrare subito il risultato atteso *prima* che l'AI avesse
+   confermato. In pratica non è ben definibile finché non si sa cosa farà
+   l'AI (potrebbe creare un cliente, un impegno, niente): il punto 1 sopra
+   ottiene comunque gran parte dell'effetto "istantaneo" voluto, perché
+   toglie il ricaricamento completo che rallentava l'aggiornamento *dopo*
+   la risposta dell'AI. Da valutare se ha ancora senso perseguirlo a parte,
+   o se il punto 1 basta.
 
 Nota: il tempo della vera e propria chiamata al modello AI (capire cosa è stato
 detto/scritto) non si può azzerare — resta un vero giro di rete di ~1-2 secondi.
