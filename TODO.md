@@ -261,11 +261,23 @@ era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
    riclassificazione è scivolata dentro per errore), solo metadati più
    precisi, base per policy di conferma più fini in futuro.
 
-4. **`request_id` per turno — non ancora fatto.** La tabella
-   `ai_audit_log` registra già ogni singola chiamata a uno strumento, ma
-   non collega intent, entità, tutti gli strumenti chiamati e la latenza
-   di un intero turno in una riga consultabile insieme — utile per capire
-   "perché EON ha fatto questa cosa".
+4. **`request_id` per turno — FATTO il 01/09/2026.** Nuova tabella
+   `ai_request_log` (migrazione in `supabase/ai_request_log_schema.sql`,
+   da eseguire una volta nell'SQL Editor di Supabase): una riga per OGNI
+   turno completo dell'assistente (non uno strumento alla volta come
+   `ai_audit_log`) con tipo (nuovo/conferma/continuazione), messaggio,
+   modello usato (Haiku o Sonnet), quanti giri, quali strumenti sono
+   stati eseguiti, come è finito e quanto ci ha messo — per rispondere a
+   "perché EON ha fatto questa cosa" leggendo una riga sola. Leggibile
+   anche da `GET /api?resource=ai_request_log`, come il registro
+   esistente. Il code review (due giri, effort alto poi medio) ha
+   trovato e fatto correggere un problema reale: la scrittura del
+   registro, in attesa prima di rispondere (necessario su un ambiente
+   serverless come Vercel, altrimenti rischia di non arrivare mai),
+   poteva restare bloccata su un Supabase lento e trasformarsi in un
+   timeout per l'utente che aspettava la vera risposta di EON — corretto
+   con un limite di 2 secondi, oltre i quali si rinuncia a scrivere quella
+   singola riga di log piuttosto che bloccare la conversazione.
 
 5. **Oggetto di contesto esplicito — da valutare se serve davvero.** Oggi
    il "contesto" è la cronologia grezza dei messaggi mandata a Claude,

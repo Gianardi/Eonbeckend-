@@ -33,7 +33,7 @@
  *
  *   resource ammessi: profiles, clients, opportunities, employees, tasks,
  *   assigned_tasks, payments, incomes, goals, conversations, messages, documents,
- *   ai_audit_log (quest'ultimo di sola lettura: GET soltanto)
+ *   ai_audit_log, ai_request_log (questi ultimi due di sola lettura: GET soltanto)
  *
  * Tutte le chiamate (tranne GET /api) richiedono l'header:
  *   Authorization: Bearer <access_token dell'utente loggato>
@@ -73,6 +73,7 @@ const ALLOWED_RESOURCES = new Set([
   "messages",
   "documents",
   "ai_audit_log",
+  "ai_request_log",
 ]);
 
 /* Tabelle che hanno la colonna owner_id: compilata dal server, mai dal client,
@@ -89,16 +90,19 @@ const OWNED_RESOURCES = new Set([
   "conversations",
   "documents",
   "ai_audit_log",
+  "ai_request_log",
 ]);
 
 /* Tabelle leggibili ma non scrivibili dal client: il registro delle
-   operazioni dell'AI lo scrive solo il backend, mai una richiesta esterna. */
-const READ_ONLY_RESOURCES = new Set(["ai_audit_log"]);
+   operazioni dell'AI (e il registro per turno) li scrive solo il
+   backend, mai una richiesta esterna. */
+const READ_ONLY_RESOURCES = new Set(["ai_audit_log", "ai_request_log"]);
 
 /* Tabelle con il cestino: "eliminare" non cancella subito la riga, la
    marca con deleted_at. Da lì si può ripristinare o eliminare per
-   sempre. profiles, documents (non usata) e ai_audit_log restano fuori:
-   non sono liste di cose che un utente "cestina". */
+   sempre. profiles, documents (non usata), ai_audit_log e
+   ai_request_log restano fuori: non sono liste di cose che un utente
+   "cestina". */
 const TRASHABLE_RESOURCES = new Set([
   "clients",
   "opportunities",
@@ -127,6 +131,7 @@ function send(res, status, payload) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(payload));
+  return payload; // ogni "return send(...)" propaga così la risposta finale a chi ha chiamato, senza doverla ricostruire
 }
 
 function fail(message, status) {
@@ -1359,17 +1364,61 @@ async function verificaLimiteRichieste(user) {
   if (ok === false) throw fail("Hai fatto troppe richieste all'assistente: riprova tra qualche minuto", 429);
 }
 
-async function registraOperazione(user, tool, input, esito, stato) {
+/* Scrive una riga in una tabella di registro, come service role.
+   "Best effort" sempre: se fallisce non deve mai far cadere la
+   richiesta vera, solo finire nei log del server. timeoutMs, se
+   passato, evita che un Supabase lento tenga in sospeso la risposta
+   all'utente più del necessario — utile per le scritture fatte PRIMA
+   di rispondere (vedi registraRichiesta); non serve dove non c'è
+   fretta di rispondere, quindi resta opzionale. */
+async function scriviRegistro(tabella, riga, timeoutMs) {
   if (!SERVICE_ROLE_KEY) return;
+  let controller, timer;
+  if (timeoutMs) {
+    controller = new AbortController();
+    timer = setTimeout(() => controller.abort(), timeoutMs);
+  }
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/ai_audit_log`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/${tabella}`, {
       method: "POST",
       headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-      body: JSON.stringify({ owner_id: user.id, tool, input, esito, stato }),
+      body: JSON.stringify(riga),
+      signal: controller && controller.signal,
     });
   } catch (netErr) {
-    console.error("Scrittura registro operazioni non riuscita:", netErr);
+    console.error(`Scrittura su ${tabella} non riuscita:`, netErr);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
+}
+
+async function registraOperazione(user, tool, input, esito, stato) {
+  await scriviRegistro("ai_audit_log", { owner_id: user.id, tool, input, esito, stato });
+}
+
+/* Una riga per OGNI turno completo dell'assistente (handleAssistant da
+   cima a fondo), a differenza di ai_audit_log/registraOperazione che ne
+   scrive una per ogni singolo strumento chiamato. Qui dentro c'è tutto
+   il turno insieme — messaggio, modello usato, quanti giri, quali
+   strumenti, come è finito, quanto ci ha messo — per poter rispondere a
+   "perché EON ha fatto questa cosa" senza dover ricostruire il turno
+   da più righe sparse. Ha un timeout breve (2 secondi): scritta prima
+   di rispondere (vedi handleAssistant), non deve MAI trasformare un
+   Supabase lento in un timeout per l'utente che aspetta la vera
+   risposta di EON — meglio perdere questa singola riga di log che
+   bloccare la conversazione. */
+async function registraRichiesta(dati) {
+  await scriviRegistro("ai_request_log", {
+    owner_id: dati.user.id,
+    tipo: dati.tipo,
+    messaggio: dati.messaggio || null,
+    modello: dati.modello || null,
+    giri: dati.giri,
+    strumenti: dati.strumenti,
+    stato: dati.stato || null,
+    errore: dati.errore || null,
+    durata_ms: dati.durataMs,
+  }, 2000);
 }
 
 async function salvaRun(runId, user, patch) {
@@ -1494,9 +1543,24 @@ async function handleAssistant(req, res, user, accessToken) {
   let messages;
   let azioniEseguite = [];
   let runReclamato = false; // true dal momento in cui il run passa a "in_corso": da qui in poi va sempre richiuso, mai lasciato a metà
+  let modelloUsato = null; // impostato dentro proseguiAssistente() appena si sceglie/ripiega su un modello — resta null se il turno non ha chiamato nessun modello (es. conferma con salto del giro finale)
+  let giriUsati = 0;
+
+  const inizioTurno = Date.now();
+  const tipoTurno = runId ? (typeof body.conferma === "boolean" ? "conferma" : "continuazione") : "nuovo";
 
   try {
-    return await proseguiAssistente();
+    const risposta = await proseguiAssistente();
+    /* Scritta prima di rispondere, non "in background": su un ambiente
+       serverless come Vercel l'esecuzione può fermarsi appena la risposta
+       parte, e una scrittura non attesa rischierebbe di non arrivare mai
+       (stesso motivo per cui registraOperazione, sopra, è sempre awaited). */
+    await registraRichiesta({
+      user, tipo: tipoTurno, messaggio: body.messaggio, modello: modelloUsato, giri: giriUsati,
+      strumenti: azioniEseguite.map((a) => a.tool), stato: risposta && risposta.stato,
+      durataMs: Date.now() - inizioTurno,
+    });
+    return risposta;
   } catch (err) {
     if (runReclamato) {
       /* Il run era già stato reclamato (stato passato a "in_corso"): se non
@@ -1511,6 +1575,11 @@ async function handleAssistant(req, res, user, accessToken) {
         console.error("Impossibile chiudere il run dopo un errore:", eSalvataggio);
       }
     }
+    await registraRichiesta({
+      user, tipo: tipoTurno, messaggio: body.messaggio, modello: modelloUsato, giri: giriUsati,
+      strumenti: azioniEseguite.map((a) => a.tool), errore: err.message || String(err),
+      durataMs: Date.now() - inizioTurno,
+    });
     throw err;
   }
 
@@ -1631,9 +1700,10 @@ async function handleAssistant(req, res, user, accessToken) {
      coerenza col resto della conversazione che il risparmio. */
   const MODEL_HAIKU = "claude-haiku-4-5";
   const MODEL_SONNET = "claude-sonnet-4-5";
-  let modelloCorrente = runId ? MODEL_SONNET : MODEL_HAIKU;
+  modelloUsato = runId ? MODEL_SONNET : MODEL_HAIKU; // variabile del turno (handleAssistant), per il registro richieste
 
   for (let round = 0; round < TOOL_MAX_ROUNDS; round++) {
+    giriUsati = round + 1; // idem: per il registro richieste, tiene l'ultimo giro effettivamente iniziato
     let data;
 
     /* Al massimo due tentativi in questo giro: solo al primo giro
@@ -1651,7 +1721,7 @@ async function handleAssistant(req, res, user, accessToken) {
          messaggio nuovo che con Sonnet sarebbe comunque andato a buon
          fine. Dal secondo tentativo (già su Sonnet) un errore resta
          un errore vero, come prima di questa modifica. */
-      const puoRipiegareSuSonnet = round === 0 && modelloCorrente === MODEL_HAIKU && tentativo === 0;
+      const puoRipiegareSuSonnet = round === 0 && modelloUsato === MODEL_HAIKU && tentativo === 0;
 
       let r;
       let erroreRete = null;
@@ -1660,7 +1730,7 @@ async function handleAssistant(req, res, user, accessToken) {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
           body: JSON.stringify({
-            model: modelloCorrente,
+            model: modelloUsato,
             max_tokens: 1200,
             /* Istruzioni + elenco strumenti sono identici ad ogni chiamata:
                il blocco cache_control sull'ultimo (e unico) testo statico
@@ -1683,11 +1753,11 @@ async function handleAssistant(req, res, user, accessToken) {
       }
 
       if (erroreRete) {
-        if (puoRipiegareSuSonnet) { modelloCorrente = MODEL_SONNET; continue; }
+        if (puoRipiegareSuSonnet) { modelloUsato = MODEL_SONNET; continue; }
         throw fail("Non riesco a contattare l'AI: " + erroreRete.message, 502);
       }
       if (!r.ok) {
-        if (puoRipiegareSuSonnet) { modelloCorrente = MODEL_SONNET; continue; }
+        if (puoRipiegareSuSonnet) { modelloUsato = MODEL_SONNET; continue; }
         let motivo = "";
         try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
         throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
@@ -1706,7 +1776,7 @@ async function handleAssistant(req, res, user, accessToken) {
          caso che il prompt è pensato per gestire bene. */
       const nonSicuro = puoRipiegareSuSonnet && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data));
       if (nonSicuro) {
-        modelloCorrente = MODEL_SONNET;
+        modelloUsato = MODEL_SONNET;
         continue;
       }
       break;
