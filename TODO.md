@@ -196,6 +196,81 @@ sulla chiave "Eonbeckend" nella Console Anthropic.
 
 Richiesto da Gianardi il 31/08/2026.
 
+## EON BRAIN: il motore centrale di orchestrazione
+
+Gianardi ha consegnato una specifica tecnica completa (45 sezioni) per "EON
+BRAIN": un livello che riceve una richiesta, capisce l'obiettivo, recupera
+il contesto, sceglie gli strumenti giusti, li esegue, verifica i risultati
+e risponde in linguaggio naturale — mai frasi predefinite o if/else.
+
+Analizzando il codice attuale (`api/index.js`, l'assistente con i suoi 17
+strumenti, lo stato di conversazione `ai_runs`, le conferme per le azioni
+delicate) è emerso che gran parte della specifica è già implementata: il
+sistema sceglie già gli strumenti in base allo scopo (non alla frase
+esatta), incatena più strumenti in un turno, verifica sempre il successo
+prima di dire "Fatto", non inventa mai dati, mantiene lo stato della
+conversazione, si corregge con frasi naturali. Il gap più vero e concreto
+era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
+
+1. **Router di navigazione pura — FATTO il 01/09/2026 (fase 1a).** Nuova
+   funzione `provaNavigazioneDiretta()` in `index.html`, usata dai tre
+   ingressi microfono/testo (Home, Clienti, Cliente cantiere): riconosce un
+   piccolo elenco chiuso di comandi di navigazione pura ("apri calendario",
+   "vai ai clienti", "mostrami le conversazioni"...) verso le pagine che
+   non richiedono un cliente/record già selezionato (home, oggi, clienti,
+   calendario, chat, cestino, documenti impresa, pagamenti, entrate) e apre
+   la pagina direttamente — zero chiamata di rete, zero costo, risposta
+   istantanea. Match volutamente stretto: qualunque parola in più oltre al
+   riferimento alla pagina (un nome, un orario) fa fallire il
+   riconoscimento e la frase prosegue verso l'AI come sempre — un mancato
+   riconoscimento è innocuo, un riconoscimento sbagliato no. Il code review
+   (due giri, effort alto) ha trovato e corretto un bug reale: l'apertura
+   "apri/mostra" assorbiva un articolo insieme al verbo, rendendo
+   irraggiungibili i sinonimi che iniziano con un articolo ("la giornata",
+   "gli appuntamenti"); corretto provando prima la frase così com'è e solo
+   come ripiego senza un eventuale articolo iniziale.
+
+2. **Letture semplici da dati già in memoria — non ancora fatto (fase
+   1b).** Stesso principio, esteso a piccole richieste di lettura
+   rispondibili filtrando i dati già caricati nel browser (appuntamenti di
+   oggi, quanti clienti, messaggi non letti), senza nessuna chiamata di
+   rete. Solo letture: nessuna scrittura passa mai dal router.
+
+3. **Livelli di rischio a 4 valori — non ancora fatto.** Sostituire
+   `sensitive: true/false` (oggi nei 17 strumenti di `api/index.js`) con
+   `risk: "read"|"low_write"|"high_impact"|"external"` — stesso
+   comportamento di conferma di oggi, ma metadati più precisi, base per
+   policy più fini in futuro.
+
+4. **`request_id` per turno — non ancora fatto.** La tabella
+   `ai_audit_log` registra già ogni singola chiamata a uno strumento, ma
+   non collega intent, entità, tutti gli strumenti chiamati e la latenza
+   di un intero turno in una riga consultabile insieme — utile per capire
+   "perché EON ha fatto questa cosa".
+
+5. **Oggetto di contesto esplicito — da valutare se serve davvero.** Oggi
+   il "contesto" è la cronologia grezza dei messaggi mandata a Claude,
+   più i 90 secondi di continuazione per rispondere a una domanda aperta.
+   Un oggetto strutturato (cliente corrente, lavoro corrente...) avrebbe
+   senso solo se serve più memoria a breve termine di quella già coperta.
+
+6. **Evaluation Suite — non ancora fatto.** Una suite di test sistematica
+   per intenti e situazioni (correzioni, clienti omonimi, richieste
+   incomplete...), non frasi specifiche — da fare dopo che i punti sopra
+   sono stabili, così c'è più da testare.
+
+7. **Communication Hub multi-canale (email, WhatsApp) — progetto a sé.**
+   Già in parte annotato sopra in "Programma OpenAI": nessun adapter
+   esterno oggi, `manda_messaggio` scrive solo nel Portal interno. Da
+   pianificare separatamente quando si deciderà di investirci, per la sua
+   dimensione (webhook in ingresso, risoluzione identità, prevenzione
+   duplicati, conversazione unica multi-canale).
+
+Piano completo (analisi, mappa dei gap, fasi) discusso e approvato con
+Gianardi il 01/09/2026.
+
+Richiesto da Gianardi il 01/09/2026.
+
 ## EON intelligente: promemoria e avvisi veri, all'ora giusta
 
 **Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
