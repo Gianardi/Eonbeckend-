@@ -585,14 +585,29 @@ const STRUMENTI_SEMPRE_CONCLUSIVI = new Set(["crea_impegno", "crea_appunto", "co
 /* ------------------------------------------------------------
    Elenco dei tool. Ognuno ha:
    - schema: la definizione che vede Claude (nome, descrizione, parametri)
-   - sensitive: true se serve conferma dell'utente prima di eseguirlo
-   - describe: (solo per i sensitive) genera la domanda da mostrare
+   - risk: quanto è delicato lo strumento —
+       "read"         legge soltanto, nessuna scrittura
+       "low_write"    scrive, ma è un'azione ordinaria e reversibile
+                       (creare/correggere un appunto, un impegno, un
+                       cliente, aggiornarne i dati)
+       "high_impact"  scrive qualcosa di difficile da annullare per
+                       l'utente (eliminare, spostare, annullare, svuotare)
+       "external"     l'effetto è visibile a qualcuno fuori dall'app
+                       (mandare un messaggio a un cliente)
+     Solo "high_impact" ed "external" richiedono la conferma
+     dell'utente prima di eseguire — vedi richiedeConferma() più sotto.
+   - describe: (solo per high_impact/external) genera la domanda da
+     mostrare per la conferma
    - run: la funzione vera, eseguita solo lato server
    ------------------------------------------------------------ */
+function richiedeConferma(tool) {
+  return tool.risk === "high_impact" || tool.risk === "external";
+}
+
 const TOOLS = {
 
   cerca_cliente: {
-    sensitive: false,
+    risk: "read",
     schema: {
       name: "cerca_cliente",
       description: "Trova clienti in anagrafica per nome, anche parziale. Usalo per ottenere l'id di un cliente prima di collegargli un impegno o un messaggio.",
@@ -633,7 +648,7 @@ const TOOLS = {
   },
 
   elenca_appuntamenti: {
-    sensitive: false,
+    risk: "read",
     schema: {
       name: "elenca_appuntamenti",
       description: "Elenca gli impegni già segnati in un intervallo di date (appuntamenti e task), utile per sapere cosa c'è già prima di aggiungerne altri.",
@@ -663,7 +678,7 @@ const TOOLS = {
   },
 
   cerca_impegno: {
-    sensitive: false,
+    risk: "read",
     schema: {
       name: "cerca_impegno",
       description: "Trova appuntamenti e impegni già segnati cercando nel titolo, anche solo con una parola (es. 'Rossi', 'sopralluogo'). Usalo per ottenere l'id di un impegno quando l'utente lo nomina invece di darti direttamente l'id o un intervallo di date — es. prima di sposta_impegno, annulla_impegno o elimina_impegno.",
@@ -694,7 +709,7 @@ const TOOLS = {
   },
 
   storico_cliente: {
-    sensitive: false,
+    risk: "read",
     schema: {
       name: "storico_cliente",
       description: "Riassunto di un cliente: dati anagrafici, ultimi messaggi e documenti.",
@@ -732,7 +747,7 @@ const TOOLS = {
   },
 
   leggi_conversazione: {
-    sensitive: false,
+    risk: "read",
     schema: {
       name: "leggi_conversazione",
       description: "Legge gli ultimi messaggi scambiati con un cliente.",
@@ -770,7 +785,7 @@ const TOOLS = {
   },
 
   trova_o_crea_cliente: {
-    sensitive: false,
+    risk: "low_write",
     schema: {
       name: "trova_o_crea_cliente",
       description: "Trova il cliente che corrisponde al nome dato, o lo crea se non esiste ancora. A differenza di cerca_cliente (che restituisce un elenco di possibili corrispondenze tra cui scegliere), questo restituisce SEMPRE un solo cliente con un id preciso: usalo quando serve collegare qualcosa (es. una foto appena scattata) a un cliente e ti serve un id certo, non un elenco. Passa il nome nell'ordine naturale italiano se lo conosci (es. \"Mario Rossi\", non \"Rossi Mario\") — funziona comunque anche nell'altro ordine. Se il nome è ambiguo (più clienti simili) lo strumento fallisce con un errore invece di indovinare: in quel caso chiedi tu all'utente il nome e cognome completi. Se cerca_impegno o cerca_cliente hanno già trovato più corrispondenze ambigue per lo stesso nome, chiedi prima all'utente quale intende invece di chiamare questo strumento a caso.",
@@ -846,7 +861,7 @@ const TOOLS = {
   },
 
   crea_appunto: {
-    sensitive: false,
+    risk: "low_write",
     schema: {
       name: "crea_appunto",
       description: "Aggiunge un appunto libero del cantiere: una nota rapida senza data né scadenza. Usalo quando l'utente dice esplicitamente di segnargli/annotargli qualcosa negli appunti (es. \"segnami in appunti che devo vedere il costo del materiale\"). Non usarlo per cose con un orario o una scadenza: quelle sono impegni, usa crea_impegno.",
@@ -870,7 +885,7 @@ const TOOLS = {
   },
 
   correggi_appunto: {
-    sensitive: false,
+    risk: "low_write",
     schema: {
       name: "correggi_appunto",
       description: "Corregge il testo di un appunto già esistente, senza crearne uno nuovo. Usalo quando l'utente dice \"correggi\", \"non è X ma Y\", \"ho sbagliato a dirti...\" riferendosi a un appunto. Se non specifica quale, correggi il più recente creato.",
@@ -919,7 +934,7 @@ const TOOLS = {
   },
 
   crea_cliente: {
-    sensitive: false,
+    risk: "low_write",
     schema: {
       name: "crea_cliente",
       description: "Aggiunge un nuovo cliente in anagrafica. Usalo solo quando l'utente chiede esplicitamente di aggiungere un cliente, non per un normale impegno che nomina una persona.",
@@ -948,7 +963,7 @@ const TOOLS = {
   },
 
   aggiorna_cliente: {
-    sensitive: false,
+    risk: "low_write",
     schema: {
       name: "aggiorna_cliente",
       description: "Modifica i dati di un cliente già esistente. Passa solo i campi che vuoi cambiare. Usalo solo quando l'utente chiede esplicitamente di modificare un cliente, non per un normale impegno.",
@@ -987,7 +1002,7 @@ const TOOLS = {
   },
 
   elimina_cliente: {
-    sensitive: true,
+    risk: "high_impact",
     schema: {
       name: "elimina_cliente",
       description: "Sposta un cliente nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Richiede conferma dell'utente.",
@@ -1035,7 +1050,7 @@ const TOOLS = {
   },
 
   crea_impegno: {
-    sensitive: false,
+    risk: "low_write",
     schema: {
       name: "crea_impegno",
       description: "Segna un impegno nel calendario: un incontro, una telefonata o una commissione (qualsiasi altra cosa da fare: pratiche, acquisti, documenti). Chiamalo una volta per ogni impegno distinto nominato dall'utente, anche se ne ha nominati molti nella stessa frase.",
@@ -1125,7 +1140,7 @@ const TOOLS = {
   },
 
   sposta_impegno: {
-    sensitive: true,
+    risk: "high_impact",
     schema: {
       name: "sposta_impegno",
       description: "Sposta un appuntamento o un impegno già esistente a una nuova data/ora. Richiede conferma dell'utente.",
@@ -1161,7 +1176,7 @@ const TOOLS = {
   },
 
   annulla_impegno: {
-    sensitive: true,
+    risk: "high_impact",
     schema: {
       name: "annulla_impegno",
       description: "Annulla un appuntamento o un impegno già esistente. Richiede conferma dell'utente.",
@@ -1194,7 +1209,7 @@ const TOOLS = {
   },
 
   elimina_impegno: {
-    sensitive: true,
+    risk: "high_impact",
     schema: {
       name: "elimina_impegno",
       description: "Sposta un appuntamento o un impegno nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Diverso da annulla_impegno, che invece lo segna come annullato mantenendolo visibile nello storico. Richiede conferma dell'utente.",
@@ -1219,7 +1234,7 @@ const TOOLS = {
   },
 
   manda_messaggio: {
-    sensitive: true,
+    risk: "external",
     schema: {
       name: "manda_messaggio",
       description: "Invia un messaggio a un cliente nella chat interna. Richiede conferma dell'utente prima di essere inviato davvero.",
@@ -1253,7 +1268,7 @@ const TOOLS = {
   },
 
   svuota_cestino: {
-    sensitive: true,
+    risk: "high_impact",
     schema: {
       name: "svuota_cestino",
       description: "Elimina per sempre TUTTO ciò che si trova già nel cestino, in ogni categoria (clienti, conversazioni, messaggi, appuntamenti/impegni, pagamenti, incassi, obiettivi, dipendenti, opportunità, compiti assegnati): un unico comando che svuota tutto il cestino in una volta, non recuperabile dopo. Non tocca nulla che non sia già nel cestino. Usalo quando l'utente chiede di eliminare o svuotare il cestino definitivamente, non per eliminare un singolo elemento (per quello ci sono elimina_cliente/elimina_impegno, e il resto si elimina dalla schermata Cestino). Richiede conferma dell'utente.",
@@ -1740,7 +1755,7 @@ async function handleAssistant(req, res, user, accessToken) {
         risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify({ errore: "strumento sconosciuto" }), is_error: true });
         continue;
       }
-      if (tool.sensitive) {
+      if (richiedeConferma(tool)) {
         /* Non eseguiamo subito: la mettiamo in coda e continuiamo a
            esaminare le altre richieste dello stesso turno, così le
            azioni sicure partono comunque senza aspettare. */
