@@ -8193,6 +8193,29 @@ function provaLetturaLocale(testo){
   return null;
 }
 
+/* Fase 2 del contesto (vedi TODO.md, "EON BRAIN"): una correzione veloce
+   ("no, alle 10") deve funzionare anche quando EON non ha fatto nessuna
+   domanda esplicita — es. dopo "Segna Mario domani alle 9" → "Fatto.",
+   che oggi non lascia nessuna conversazione aperta (solo le risposte che
+   finiscono con "?" lo fanno, vedi runIdAperto in collegaMicTesto). Senza
+   contesto, "no, alle 10" ripartirebbe da zero e Claude non saprebbe a
+   cosa si riferisce "alle 10" — costringendo a ripetere tutto.
+   Questa nota va aggiunta SOLO ai messaggi nuovi (mai a una vera
+   continuazione di domanda, che ha già il suo runId), e la decisione se
+   si tratti davvero di una correzione resta sempre a Claude: la nota
+   dice esplicitamente di ignorarla se il messaggio nomina qualcun altro
+   o sembra un discorso nuovo — niente qui sceglie al posto suo, solo gli
+   ricorda cosa è appena successo. Elenca TUTTE le azioni del turno
+   precedente (non solo l'ultima): un turno con più azioni insieme
+   ("segna Mario alle 9 e Luca alle 10") deve lasciare a Claude la
+   possibilità di capire quale delle due si sta correggendo, invece di
+   vederne solo una e rischiare di correggere quella sbagliata. */
+function notaContestoRecente(azioni){
+  if(!azioni || !azioni.length) return "";
+  const elenco = azioni.map((a) => `- ${a.tool}: ${JSON.stringify(a.esito)}`).join("\n");
+  return `\n\n[Contesto: pochi istanti fa hai usato questi strumenti:\n${elenco}\nSe il messaggio sopra sembra una correzione o un seguito di UNA di queste azioni specifiche (es. cambiare solo l'orario o un dettaglio, senza nominare una persona o un cliente diverso da quelli qui sopra), usa gli strumenti giusti per correggerla — capendo da solo, se ce n'è più di una, a quale si riferisce. Se invece nomina qualcun altro, o sembra comunque una richiesta nuova e diversa, ignora completamente questo contesto e trattala come tale.]`;
+}
+
 /* Microfono grande + campo di testo libero che parlano con l'assistente
    vero (stesso motore di "Raccontami la giornata"): usato dalla Home
    (qualsiasi cosa) e dalla pagina Clienti (aggiungere un cliente). Un
@@ -8216,6 +8239,17 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
      scambiato per una risposta a una domanda ormai dimenticata. */
   let runIdAperto = null;
   let runIdApertoScadenza = 0;
+
+  /* Azioni scrivibili eseguite da EON nell'ultimo turno in questo
+     microfono, tenute per una breve finestra così una correzione veloce
+     ("no, alle 10") funziona anche quando EON non aveva fatto nessuna
+     domanda esplicita (vedi notaContestoRecente più sopra). Più lunga
+     dei 90 secondi della domanda aperta apposta: lì l'utente sta
+     rispondendo a EON e in genere lo fa subito, qui potrebbe essersene
+     accorto un po' dopo (es. guardando il calendario). */
+  let ultimeAzioniVisibili = null;
+  let ultimeAzioniScadenza = 0;
+  const FINESTRA_CONTESTO_MS = 3 * 60 * 1000;
 
   async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
@@ -8272,10 +8306,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
 
     const runIdDaContinuare = inContinuazione ? runIdAperto : null;
+    const contestoRecente = (!inContinuazione && ultimeAzioniVisibili && Date.now() < ultimeAzioniScadenza) ? ultimeAzioniVisibili : null;
 
     let risposta;
     try{
-      risposta = await chiediAssistente(inContinuazione ? testo : costruisciPrompt(testo), runIdDaContinuare || undefined);
+      risposta = await chiediAssistente(
+        inContinuazione ? testo : costruisciPrompt(testo) + notaContestoRecente(contestoRecente),
+        runIdDaContinuare || undefined
+      );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
@@ -8332,6 +8370,15 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
     }
+
+    /* Ricordiamo TUTTE le azioni scrivibili di questo turno (non solo
+       l'ultima: un turno con più azioni insieme deve poterle correggere
+       tutte), per la finestra di "correzione veloce" (vedi
+       ultimeAzioniVisibili più sopra e notaContestoRecente). Non
+       tocchiamo questo stato quando risultatiVisibili è vuoto (sopra):
+       un turno di sola lettura non cambia cosa c'è da correggere. */
+    ultimeAzioniVisibili = risultatiVisibili.map((a) => ({ tool: a.tool, esito: a.esito }));
+    ultimeAzioniScadenza = Date.now() + FINESTRA_CONTESTO_MS;
 
     await aggiornaDatiToccati(risultatiVisibili);
     renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); renderSummary();

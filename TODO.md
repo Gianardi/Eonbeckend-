@@ -279,11 +279,36 @@ era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
    con un limite di 2 secondi, oltre i quali si rinuncia a scrivere quella
    singola riga di log piuttosto che bloccare la conversazione.
 
-5. **Oggetto di contesto esplicito — da valutare se serve davvero.** Oggi
-   il "contesto" è la cronologia grezza dei messaggi mandata a Claude,
-   più i 90 secondi di continuazione per rispondere a una domanda aperta.
-   Un oggetto strutturato (cliente corrente, lavoro corrente...) avrebbe
-   senso solo se serve più memoria a breve termine di quella già coperta.
+5. **Contesto delle correzioni veloci — FATTO il 01/09/2026.** Confermato
+   da Gianardi: gli era già capitato di dover ripetere un dettaglio perché
+   EON aveva "dimenticato" cosa avevano appena fatto. Causa: i 90 secondi
+   di continuazione (`runIdAperto`) scattano SOLO quando EON fa una vera
+   domanda ("te lo segno fra un'ora?") — un'azione già conclusa ("Segna
+   Mario domani alle 9" → "Fatto.") non lasciava nessuna traccia, quindi
+   "No, alle 10" subito dopo ripartiva da zero senza sapere a cosa si
+   riferisse "alle 10".
+   Corretto senza un nuovo "oggetto di contesto" complesso: una finestra
+   di 3 minuti (`ultimeAzioniVisibili` in `collegaMicTesto()`) tiene a
+   mente TUTTE le azioni scrivibili dell'ultimo turno (non solo l'ultima:
+   un turno con più azioni insieme deve poterle correggere entrambe); un
+   messaggio nuovo entro quella finestra porta con sé una nota di
+   contesto che ricorda a Claude cosa è appena successo, lasciandogli
+   comunque la decisione finale se si tratti davvero di una correzione o
+   di una richiesta nuova — mai una regola rigida, solo un promemoria.
+   Non tocca in nessun modo la vera continuazione di una domanda aperta
+   (resta il meccanismo esistente, priorità sua). Il code review (due
+   giri, effort alto poi medio) ha trovato e fatto correggere tre rischi
+   concreti: (1) veniva ricordata solo l'ultima azione di un turno con
+   più azioni insieme, rendendo impossibile correggere le altre; (2)
+   niente impediva a Claude di applicare una correzione all'azione
+   sbagliata se il nuovo messaggio nominava una persona diversa; (3) la
+   nota dava per scontato il successo anche quando un'azione era fallita
+   solo in parte (es. svuota_cestino con alcune categorie non svuotate).
+   Resta un limite intrinseco (segnalato dal review, accettato): essendo
+   un promemoria e non una regola imposta, un messaggio nuovo davvero
+   scollegato ma senza un nome esplicito diverso dipende dal giudizio di
+   Claude per essere riconosciuto come tale — coerente con il principio
+   della specifica di non insegnare regole rigide, ma un limite reale.
 
 6. **Evaluation Suite — non ancora fatto.** Una suite di test sistematica
    per intenti e situazioni (correzioni, clienti omonimi, richieste
