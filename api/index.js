@@ -565,6 +565,23 @@ async function trovaOCreaConversazione(cliente, ctx) {
   return Array.isArray(creata) ? creata[0] : creata;
 }
 
+/* Whitelist DELIBERATAMENTE STRETTA di strumenti "conclusivi": quelli
+   il cui risultato non serve MAI a un altro strumento chiamato più
+   avanti nello stesso turno (nessun id che qualcos'altro potrebbe
+   aspettarsi). Usata solo per decidere se si può evitare un giro in
+   più con Claude a fine turno (vedi il controllo più sotto). Una
+   blacklist ("quali escludere") si è dimostrata fragile in fase di
+   revisione — trova_o_crea_cliente e crea_cliente producono un id
+   quasi sempre destinato a un tool successivo (es. manda_messaggio,
+   crea_impegno con cliente_id) e sono stati scoperti solo dopo due
+   giri di controllo mirato. Con una whitelist invece uno strumento
+   nuovo o non ancora verificato resta escluso per prudenza di default,
+   invece di rischiare di essere incluso per errore: se in futuro se ne
+   aggiunge uno, va confermato con cura che il suo risultato non sia
+   mai il parametro obbligatorio di un altro tool prima di metterlo
+   qui. */
+const STRUMENTI_SEMPRE_CONCLUSIVI = new Set(["crea_impegno", "crea_appunto", "correggi_appunto", "aggiorna_cliente"]);
+
 /* ------------------------------------------------------------
    Elenco dei tool. Ognuno ha:
    - schema: la definizione che vede Claude (nome, descrizione, parametri)
@@ -1514,7 +1531,15 @@ async function handleAssistant(req, res, user, accessToken) {
       await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "negato");
     }
 
-    const nuoviPronti = pronti.concat([{ type: "tool_result", tool_use_id: pendente.tool_use_id, content: JSON.stringify(risultatoTool) }]);
+    /* is_error segnala a Claude (e al controllo qui sotto) che questa
+       specifica azione NON è stata eseguita come chiesto — o perché è
+       fallita davvero (risultatoTool.errore), o perché l'utente ha
+       detto "No" (risultatoTool.annullato_dall_utente): in entrambi i
+       casi il turno non può considerarsi "fatto" in silenzio, serve
+       che Claude lo racconti. Stesso trattamento che il giro normale
+       del ciclo già dà agli strumenti non delicati falliti (vedi
+       risultati.push(..., is_error:true) più sotto). */
+    const nuoviPronti = pronti.concat([{ type: "tool_result", tool_use_id: pendente.tool_use_id, content: JSON.stringify(risultatoTool), is_error: !!(risultatoTool.errore || risultatoTool.annullato_dall_utente) }]);
 
     if (restoCoda.length) {
       /* C'erano altre azioni delicate richieste nello stesso turno di
@@ -1534,6 +1559,29 @@ async function handleAssistant(req, res, user, accessToken) {
     }
 
     messages = run.messaggi.concat([{ role: "user", content: nuoviPronti }]);
+
+    /* Se l'utente ha confermato e l'azione è andata a buon fine, non
+       serve richiamare Claude solo per farsi scrivere una frase di
+       commento: il testo che tornerebbe non viene nemmeno letto dal
+       frontend quando c'è un'azione visibile da mostrare (costruisce
+       da solo il messaggio in italiano da azioni[].esito — vedi
+       risultatiVisibili/mostra() in index.html). Risparmiamo un giro
+       intero verso l'AI. Controlliamo TUTTI i risultati già pronti
+       (nuoviPronti), non solo quello appena confermato: potevano
+       essercene altri falliti in questo stesso turno (un'altra azione
+       delicata confermata prima, o una lettura come storico_cliente
+       fallita prima di arrivare in coda) — nessuno di quei fallimenti
+       verrebbe mai raccontato all'utente se saltassimo la risposta
+       solo perché l'ULTIMA conferma è andata bene. Se l'azione appena
+       confermata è FALLITA, o l'utente ha detto "No", o qualcos'altro
+       nel turno è fallito, il frontend NON ha altro modo di spiegare
+       cosa è successo: lì serve davvero la risposta di Claude, non
+       saltiamo nulla. */
+    const nienteErroriNelTurno = nuoviPronti.every((p) => !p.is_error);
+    if (body.conferma === true && nienteErroriNelTurno) {
+      await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+      return send(res, 200, { stato: "concluso", testo: "Fatto.", azioni: azioniEseguite });
+    }
   } else if (runId) {
     /* Continuazione a testo libero di una domanda ancora aperta: EON
        aveva chiesto qualcosa (es. "te lo segno fra un'ora?") e questa è
@@ -1729,6 +1777,24 @@ async function handleAssistant(req, res, user, accessToken) {
     }
 
     messages.push({ role: "user", content: risultati });
+
+    /* Se in questo giro Claude ha chiamato solo strumenti della
+       whitelist "sempre conclusivi" (vedi sopra) e tutti sono andati a
+       buon fine, non serve un altro giro solo per farsi scrivere un
+       commento finale: il frontend costruisce già da solo il messaggio
+       da mostrare partendo da azioni[].esito quando c'è un'azione
+       visibile (vedi risultatiVisibili/mostra() in index.html), il
+       "testo" tornerebbe e basta. Per qualunque altro strumento (letture,
+       o scritture non ancora verificate come sicure) serve davvero un
+       altro giro: Claude potrebbe doverne usare il risultato per il
+       passo successivo, o deve raccontare cosa è andato storto — l'unico
+       modo che l'utente ha per saperlo. */
+    const soloConclusivi = richieste.every((r) => STRUMENTI_SEMPRE_CONCLUSIVI.has(r.name));
+    const tuttoRiuscito = risultati.every((r) => !r.is_error);
+    if (soloConclusivi && tuttoRiuscito) {
+      if (runId) await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+      return send(res, 200, { stato: "concluso", testo: "Fatto.", azioni: azioniEseguite });
+    }
   }
 
   /* Tetto di round raggiunto. Le azioni non delicate già eseguite in
