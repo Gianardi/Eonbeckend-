@@ -414,6 +414,35 @@ function eNumero(v) { return typeof v === "number" && isFinite(v); }
 function eUuid(v) { return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); }
 function eIso(v) { return typeof v === "string" && !isNaN(new Date(v).getTime()); }
 
+/* Distanza di Levenshtein tra due parole: quante lettere bisogna
+   cambiare/aggiungere/togliere per passare dall'una all'altra. */
+function distanzaLevenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const curr = [i];
+    for (let j = 1; j <= n; j++) {
+      const costo = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + costo);
+    }
+    prev = curr;
+  }
+  return prev[n];
+}
+
+/* Due parole si considerano "quasi uguali" se la distanza tra loro è
+   piccola rispetto alla lunghezza: tollera un paio di lettere diverse
+   o mancanti (dettatura imprecisa: "Fabri"/"Fabris"/"Tabri" per
+   "Fabbri"), ma non confonde parole davvero diverse tra loro. */
+function paroleSimili(a, b) {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 2) return false;
+  const soglia = a.length <= 4 ? 1 : 2;
+  return distanzaLevenshtein(a, b) <= soglia;
+}
+
 /* "2026-09-01T08:00:00" -> "mar 1 set, 08:00": lo stesso formato che
    l'app già usa per mostrare gli impegni. Lo decide sempre il server,
    mai il modello, così il formato resta coerente in tutta l'app. */
@@ -558,10 +587,28 @@ const TOOLS = {
     },
     async run(input, ctx) {
       if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
-      const q = encodeURIComponent(input.nome.trim());
-      const righe = await db(`clients?select=id,name,phone,value,status&name=ilike.*${q}*&deleted_at=is.null&limit=5`, { method: "GET" }, ctx.accessToken);
+      const nome = input.nome.trim();
+      const q = encodeURIComponent(nome);
+      let righe = await db(`clients?select=id,name,phone,value,status&name=ilike.*${q}*&deleted_at=is.null&limit=5`, { method: "GET" }, ctx.accessToken);
+      righe = Array.isArray(righe) ? righe : [];
+
+      /* Se la ricerca esatta non trova nulla, proviamo a tollerare
+         piccoli errori di dettatura (es. "Fabri" per "Fabbri") prima
+         di dire che il cliente non esiste — altrimenti l'assistente
+         rischia di crearne uno nuovo per un cliente che c'è già. */
+      if (righe.length === 0) {
+        const parole = nome.toLowerCase().split(/\s+/).filter(Boolean);
+        const tutti = await db(`clients?select=id,name,phone,value,status&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+        righe = (Array.isArray(tutti) ? tutti : [])
+          .filter((c) => {
+            const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
+            return parole.every((p) => paroleCliente.some((pc) => paroleSimili(p, pc)));
+          })
+          .slice(0, 5);
+      }
+
       return {
-        risultati: (righe || []).map((r) => ({
+        risultati: righe.map((r) => ({
           id: r.id, nome: r.name, telefono: r.phone || null, valore: r.value || null, stato: r.status || null,
         })),
       };
@@ -740,6 +787,29 @@ const TOOLS = {
         });
       }
 
+      /* Terzo tentativo: tollera piccoli errori di dettatura (es.
+         "Fabri" o "Tabri" detto per "Fabbri") prima di arrenderci e
+         creare un cliente nuovo — è il caso più costoso da sbagliare,
+         perché crea un doppione invece di riusare quello giusto. A
+         differenza dei primi due tentativi, però, una somiglianza non
+         è mai certezza (cognomi brevi come "Conti"/"Conte" sono vicini
+         quanto "Fabbri"/"Fabri"): non restituiamo mai una corrispondenza
+         trovata solo per somiglianza come se fosse sicura, la segnaliamo
+         con un errore così l'assistente può chiedere conferma invece di
+         mischiare per sbaglio due clienti diversi. */
+      if (candidati.length === 0) {
+        const simili = lista.filter((c) => {
+          const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
+          return parole.every((p) => paroleCliente.some((pc) => paroleSimili(p, pc)));
+        });
+        if (simili.length === 1) {
+          throw fail(`Non ho trovato "${nome}" esatto, ma c'è un cliente simile già in anagrafica: "${simili[0].name}". Potrebbe essere una dettatura imprecisa dello stesso nome, oppure un cliente diverso: chiedi all'utente di confermare prima di procedere.`);
+        }
+        if (simili.length > 1) {
+          throw fail(`Ci sono più clienti che assomigliano a "${nome}": chiedi all'utente il nome e cognome completi per essere sicuri di quale sia.`);
+        }
+      }
+
       if (candidati.length === 1) {
         return { id: candidati[0].id, nome: candidati[0].name, creato: false };
       }
@@ -755,6 +825,79 @@ const TOOLS = {
       const creati = await db("clients", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
       const c = Array.isArray(creati) ? creati[0] : creati;
       return { id: c.id, nome: c.name, creato: true };
+    },
+  },
+
+  crea_appunto: {
+    sensitive: false,
+    schema: {
+      name: "crea_appunto",
+      description: "Aggiunge un appunto libero del cantiere: una nota rapida senza data né scadenza. Usalo quando l'utente dice esplicitamente di segnargli/annotargli qualcosa negli appunti (es. \"segnami in appunti che devo vedere il costo del materiale\"). Non usarlo per cose con un orario o una scadenza: quelle sono impegni, usa crea_impegno.",
+      input_schema: {
+        type: "object",
+        properties: { testo: { type: "string", description: "Il testo dell'appunto, come lo direbbe l'utente" } },
+        required: ["testo"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.testo)) throw fail("Parametro 'testo' mancante o vuoto");
+      const testo = input.testo.trim();
+      const creati = await db(
+        "cantiere_appunti",
+        { method: "POST", body: JSON.stringify({ owner_id: ctx.user.id, testo }), headers: { Prefer: "return=representation" } },
+        ctx.accessToken
+      );
+      const a = Array.isArray(creati) ? creati[0] : creati;
+      return { id: a.id, testo: a.testo };
+    },
+  },
+
+  correggi_appunto: {
+    sensitive: false,
+    schema: {
+      name: "correggi_appunto",
+      description: "Corregge il testo di un appunto già esistente, senza crearne uno nuovo. Usalo quando l'utente dice \"correggi\", \"non è X ma Y\", \"ho sbagliato a dirti...\" riferendosi a un appunto. Se non specifica quale, correggi il più recente creato.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cerca: { type: "string", description: "Una parola o frase per riconoscere quale appunto correggere tra quelli esistenti (es. una parola del testo sbagliato). Lascia vuoto per correggere semplicemente l'ultimo appunto creato." },
+          testo_nuovo: { type: "string", description: "Il testo corretto e completo dell'appunto (non solo la parte cambiata)" },
+        },
+        required: ["testo_nuovo"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.testo_nuovo)) throw fail("Parametro 'testo_nuovo' mancante o vuoto");
+
+      const recenti = await db(
+        `cantiere_appunti?select=id,testo,created_at&deleted_at=is.null&order=created_at.desc&limit=20`,
+        { method: "GET" },
+        ctx.accessToken
+      );
+      const lista = Array.isArray(recenti) ? recenti : [];
+      if (!lista.length) throw fail("Non ci sono ancora appunti da correggere");
+
+      let bersaglio;
+      if (eStringaNonVuota(input.cerca)) {
+        /* Se l'utente ha indicato una parola per riconoscere l'appunto,
+           deve trovarla davvero: altrimenti, invece di correggere in
+           silenzio quello sbagliato (l'ultimo creato, magari su tutt'altro
+           argomento), meglio fermarsi con un errore chiaro. */
+        const q = input.cerca.trim().toLowerCase();
+        const trovato = lista.find((a) => a.testo.toLowerCase().includes(q));
+        if (!trovato) throw fail(`Non ho trovato nessun appunto recente che parli di "${input.cerca.trim()}": chiedi all'utente a quale appunto si riferisce.`);
+        bersaglio = trovato;
+      } else {
+        bersaglio = lista[0];
+      }
+
+      const testoNuovo = input.testo_nuovo.trim();
+      await db(
+        `cantiere_appunti?id=eq.${bersaglio.id}`,
+        { method: "PATCH", body: JSON.stringify({ testo: testoNuovo }), headers: { Prefer: "return=representation" } },
+        ctx.accessToken
+      );
+      return { id: bersaglio.id, testo_precedente: bersaglio.testo, testo: testoNuovo };
     },
   },
 
@@ -1250,6 +1393,8 @@ Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", mo
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
 REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno. Se manca la data o l'ora, decidi tu: primo giorno utile, alle 08:00. Non lasciare mai un impegno senza data.
+
+Se invece l'utente dice esplicitamente di segnargli/annotargli qualcosa "negli appunti", o semplicemente "segnami che..." senza nominare un orario o una scadenza (es. "segnami in appunti che devo vedere il costo del materiale"), usa crea_appunto — NON crea_impegno, che è solo per cose con una data. Se poi dice di correggere, cambiare o sistemare un appunto appena detto (es. "correggi, non è il costo del materiale ma dell'impermeabile"), usa correggi_appunto: prova a riconoscere quale appunto intende dalla parola che ha usato, e se non specifica nulla aggiorna semplicemente l'ultimo appunto creato.
 
 Chiama crea_cliente o aggiorna_cliente SOLO quando l'utente chiede esplicitamente di aggiungere o modificare un cliente in anagrafica — non per un normale impegno che nomina soltanto una persona.
 
