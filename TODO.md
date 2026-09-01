@@ -161,13 +161,34 @@ Interventi, in ordine di rapporto costo/beneficio:
    ripiego su Sonnet (tanti ripieghi = pochi comandi davvero "semplici" 
    nell'uso reale, e quindi risparmio minore del previsto).
 
-3. **Alleggerire l'elenco degli strumenti.** Se alcuni strumenti si usano
-   raramente, valutare se mandarli sempre o solo quando serve — riduce i
-   token di ogni chiamata.
+3. **Alleggerire l'elenco degli strumenti — valutato e accantonato il
+   01/09/2026.** Rischio concreto: Claude Haiku (vedi punto 2) attiva la
+   cache solo sopra 4096 token, e oggi istruzioni+strumenti insieme sono
+   già vicini a quella soglia (stima ~3.750-4.500 token). Alleggerire
+   l'elenco proprio ora rischierebbe di far scendere il totale sotto la
+   soglia e spegnere in silenzio la cache di Haiku appena attivata — e il
+   risparmio che il caching (punto 1) ha già ottenuto rende il guadagno
+   rimasto comunque piccolo. Da riconsiderare solo se in futuro si
+   aggiungono molti nuovi strumenti e la soglia torna un problema.
 
-4. **Meno andirivieni per le conferme.** Le azioni delicate oggi a volte
-   richiedono 2 chiamate (descrivi + esegui) invece di una sola: capire dove
-   si può accorciare senza perdere la sicurezza della conferma.
+4. **Meno andirivieni per le conferme — FATTO il 01/09/2026.** Scoperto
+   analizzando il flusso: quando un'azione va a buon fine (una conferma
+   confermata, o un comando diretto tipo "chiama Guidi alle 17"), il
+   frontend NON legge affatto la frase di commento finale che Claude
+   scrive — costruisce da solo il messaggio da mostrare (toast/voce)
+   partendo dai dati dell'azione stessa. Quel giro in più verso l'AI,
+   quindi, andava sprecato ogni volta. Ora, quando l'azione appena fatta
+   è di un tipo sicuramente "conclusivo" (segnare un impegno, aggiungere
+   o correggere un appunto, aggiornare un cliente — mai un'azione che
+   serve solo a trovare/creare un id per un passo successivo, es.
+   trova_o_crea_cliente prima di mandare un messaggio) ed è andata a buon
+   fine, si salta il giro finale e si risponde subito. Se invece qualcosa
+   è fallito, o l'utente ha detto "No" a una conferma, si continua a
+   chiamare Claude come prima: è l'unico modo che il professionista ha di
+   sapere cosa è andato storto. Whitelist scelta deliberatamente stretta
+   (solo 4 strumenti su 17) dopo che la revisione del codice ha trovato
+   due volte un rischio concreto in un approccio più aggressivo — vedi il
+   commit per i dettagli.
 
 Da fare per prima: il punto 1 (prompt caching), perché è il più sicuro e
 il più semplice da misurare — confrontando il costo per azione prima e dopo
