@@ -1420,6 +1420,14 @@ Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello
 /* Unico pezzo che cambia ad ogni chiamata: va DOPO il blocco in cache,
    mai dentro systemPromptAssistente() sopra, altrimenti invaliderebbe la
    cache ad ogni singola richiesta (data e ora sono diverse ogni volta). */
+/* Unisce i blocchi di solo testo di una risposta Claude in un'unica
+   stringa — usata sia per decidere se una risposta senza strumenti è
+   una domanda di chiarimento voluta (finisce con "?"), sia per capire
+   se il run può restare aperto in attesa di risposta. */
+function testoDiRisposta(data) {
+  return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+}
+
 function dataOraCorrente() {
   const oggi = new Date();
   return `Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ora ${oggi.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}.`;
@@ -1552,43 +1560,99 @@ async function handleAssistant(req, res, user, accessToken) {
   const schemi = Object.values(TOOLS).map((t) => t.schema);
   const promptStatico = systemPromptAssistente(); // uguale ad ogni giro: costruito una sola volta fuori dal loop
 
+  /* Un messaggio nuovo (nessun runId: non è né una conferma né la
+     continuazione di una domanda aperta) parte sul modello economico
+     Haiku — comandi diretti come "chiama Guidi domani alle 17" non
+     hanno bisogno di Sonnet. Le conferme/continuazioni restano su
+     Sonnet fin da subito: sono scambi brevi dove conta di più la
+     coerenza col resto della conversazione che il risparmio. */
+  const MODEL_HAIKU = "claude-haiku-4-5";
+  const MODEL_SONNET = "claude-sonnet-4-5";
+  let modelloCorrente = runId ? MODEL_SONNET : MODEL_HAIKU;
+
   for (let round = 0; round < TOOL_MAX_ROUNDS; round++) {
-    let r;
-    try {
-      r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-5",
-          max_tokens: 1200,
-          /* Istruzioni + elenco strumenti sono identici ad ogni chiamata:
-             il blocco cache_control sull'ultimo (e unico) testo statico
-             mette in cache anche gli strumenti, che nell'ordine con cui
-             Anthropic li elabora vengono prima del system prompt. La
-             data/ora, che cambia sempre, resta in un blocco a parte
-             DOPO quello in cache, così non lo invalida mai. */
-          system: [
-            { type: "text", text: promptStatico, cache_control: { type: "ephemeral" } },
-            { type: "text", text: dataOraCorrente() },
-          ],
-          tools: schemi,
-          messages,
-        }),
-      });
-    } catch (netErr) {
-      throw fail("Non riesco a contattare l'AI: " + netErr.message, 502);
-    }
-    if (!r.ok) {
-      let motivo = "";
-      try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
-      throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+    let data;
+
+    /* Al massimo due tentativi in questo giro: solo al primo giro
+       (round 0) e solo se Haiku non ha chiamato nessuno strumento —
+       segno che non ha riconosciuto un'azione concreta da fare, non
+       ci fidiamo e ripetiamo la STESSA richiesta con Sonnet. Dal
+       secondo giro in poi un turno senza strumenti è la normale fine
+       della conversazione (risposta finale), non un'incertezza da
+       correggere. */
+    for (let tentativo = 0; tentativo < 2; tentativo++) {
+      /* Finché siamo al primo tentativo del primo giro su Haiku, un
+         intoppo (rete, errore HTTP, o risposta poco sicura) fa
+         ripiegare su Sonnet invece di far fallire subito la richiesta
+         — un fastidio temporaneo di Haiku non deve mai bloccare un
+         messaggio nuovo che con Sonnet sarebbe comunque andato a buon
+         fine. Dal secondo tentativo (già su Sonnet) un errore resta
+         un errore vero, come prima di questa modifica. */
+      const puoRipiegareSuSonnet = round === 0 && modelloCorrente === MODEL_HAIKU && tentativo === 0;
+
+      let r;
+      let erroreRete = null;
+      try {
+        r = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+          body: JSON.stringify({
+            model: modelloCorrente,
+            max_tokens: 1200,
+            /* Istruzioni + elenco strumenti sono identici ad ogni chiamata:
+               il blocco cache_control sull'ultimo (e unico) testo statico
+               mette in cache anche gli strumenti, che nell'ordine con cui
+               Anthropic li elabora vengono prima del system prompt. La
+               data/ora, che cambia sempre, resta in un blocco a parte
+               DOPO quello in cache, così non lo invalida mai. Haiku e
+               Sonnet hanno ciascuno la propria cache separata (la cache
+               è legata al modello): è normale e non richiede altro. */
+            system: [
+              { type: "text", text: promptStatico, cache_control: { type: "ephemeral" } },
+              { type: "text", text: dataOraCorrente() },
+            ],
+            tools: schemi,
+            messages,
+          }),
+        });
+      } catch (netErr) {
+        erroreRete = netErr;
+      }
+
+      if (erroreRete) {
+        if (puoRipiegareSuSonnet) { modelloCorrente = MODEL_SONNET; continue; }
+        throw fail("Non riesco a contattare l'AI: " + erroreRete.message, 502);
+      }
+      if (!r.ok) {
+        if (puoRipiegareSuSonnet) { modelloCorrente = MODEL_SONNET; continue; }
+        let motivo = "";
+        try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
+        throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+      }
+
+      data = await r.json();
+
+      /* "Non sicuro" vuol dire che Haiku non ha chiamato nessuno
+         strumento E la risposta non è nemmeno una domanda di
+         chiarimento voluta (quelle finiscono sempre con "?", vedi la
+         regola sull'orario vago in systemPromptAssistente — è lo
+         stesso segnale già usato più sotto per riaprire la
+         conversazione). Senza questo controllo, ogni volta che Haiku
+         chiede giustamente "te lo segno fra un'ora?" verrebbe scartato
+         e rifatto due volte, vanificando il risparmio proprio sul
+         caso che il prompt è pensato per gestire bene. */
+      const nonSicuro = puoRipiegareSuSonnet && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data));
+      if (nonSicuro) {
+        modelloCorrente = MODEL_SONNET;
+        continue;
+      }
+      break;
     }
 
-    const data = await r.json();
     messages.push({ role: "assistant", content: data.content });
 
     if (data.stop_reason !== "tool_use") {
-      const testo = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+      const testo = testoDiRisposta(data);
       const continuabile = /\?\s*$/.test(testo);
 
       if (continuabile) {
