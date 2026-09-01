@@ -1360,17 +1360,19 @@ async function salvaRun(runId, user, patch) {
   return row;
 }
 
-/* Reclama in modo atomico un run in attesa di conferma: la condizione
-   stato=eq.in_attesa_conferma nell'URL fa sì che, se due richieste con lo
-   stesso runId arrivano insieme (un doppio tap, un retry di rete), solo
-   una delle due trovi la riga e la faccia passare a "in_corso" — l'altra
-   non trova nulla e si ferma, invece di eseguire due volte la stessa
-   azione delicata (mandare due volte lo stesso messaggio, per esempio). */
-async function reclamaRun(runId, user) {
+/* Reclama in modo atomico un run in un determinato stato (di solito
+   "in_attesa_conferma", per il Sì/No di un'azione delicata, oppure
+   "concluso", per continuare con una risposta libera una conversazione
+   in cui EON aveva appena fatto una domanda). La condizione stato=eq.*
+   nell'URL fa sì che, se due richieste con lo stesso runId arrivano
+   insieme (un doppio tap, un retry di rete), solo una delle due trovi
+   la riga e la faccia passare a "in_corso" — l'altra non trova nulla e
+   si ferma, invece di eseguire due volte la stessa cosa. */
+async function reclamaRun(runId, user, statoAtteso) {
   let r;
   try {
     r = await fetch(
-      `${SUPABASE_URL}/rest/v1/ai_runs?id=eq.${runId}&owner_id=eq.${user.id}&stato=eq.in_attesa_conferma`,
+      `${SUPABASE_URL}/rest/v1/ai_runs?id=eq.${runId}&owner_id=eq.${user.id}&stato=eq.${statoAtteso}`,
       {
         method: "PATCH",
         headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=representation" },
@@ -1392,7 +1394,9 @@ Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", mo
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
-REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno. Se manca la data o l'ora, decidi tu: primo giorno utile, alle 08:00. Non lasciare mai un impegno senza data.
+REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno.
+
+Sull'orario: se l'utente non dice affatto quando (nessun riferimento di tempo, nemmeno vago), decidi tu senza chiedere nulla: primo giorno utile, alle 08:00 — non lasciare mai un impegno senza data. Ma se usa un riferimento VAGO o relativo che potresti interpretare in più modi (es. "quando rientro in ufficio", "più tardi", "appena posso", "stasera" senza un'ora precisa), NON chiamare subito crea_impegno con un orario indovinato alla cieca: calcola tu una stima concreta e ragionevole partendo dall'ora di adesso (es. "quando rientro in ufficio" ≈ tra un'ora), e chiedi conferma in una risposta di testo — non uno strumento — tipo "Va bene se te lo segno fra un'ora, alle 15:40?". Poi fermati e aspetta: la risposta dell'utente arriverà nello stesso filo di conversazione, come conferma ("sì", "va bene") o come correzione ("no, fai fra due ore", "alle 16 piuttosto") — solo a quel punto chiama crea_impegno con l'orario giusto.
 
 Se invece l'utente dice esplicitamente di segnargli/annotargli qualcosa "negli appunti", o semplicemente "segnami che..." senza nominare un orario o una scadenza (es. "segnami in appunti che devo vedere il costo del materiale"), usa crea_appunto — NON crea_impegno, che è solo per cose con una data. Se poi dice di correggere, cambiare o sistemare un appunto appena detto (es. "correggi, non è il costo del materiale ma dell'impermeabile"), usa correggi_appunto: prova a riconoscere quale appunto intende dalla parola che ha usato, e se non specifica nulla aggiorna semplicemente l'ultimo appunto creato.
 
@@ -1461,14 +1465,14 @@ async function handleAssistant(req, res, user, accessToken) {
   }
 
   async function proseguiAssistente() {
-  if (runId) {
+  if (runId && typeof body.conferma === "boolean") {
     /* runId arriva dal client: prima di infilarlo in un URL verso il
        database (con la chiave di servizio, che scavalca RLS) lo
        validiamo come uuid, esattamente come si fa altrove nel file. */
     if (!eUuid(runId)) throw fail("runId non valido", 400);
 
     /* Riprendiamo una conversazione che era in attesa di conferma. */
-    const run = await reclamaRun(runId, user);
+    const run = await reclamaRun(runId, user, "in_attesa_conferma");
     if (!run || !run.in_sospeso) throw fail("Questa richiesta è già stata gestita o non è più valida", 409);
     runReclamato = true;
     messages = run.messaggi; // base di sicurezza: sempre valorizzata da qui in poi
@@ -1512,6 +1516,24 @@ async function handleAssistant(req, res, user, accessToken) {
     }
 
     messages = run.messaggi.concat([{ role: "user", content: nuoviPronti }]);
+  } else if (runId) {
+    /* Continuazione a testo libero di una domanda ancora aperta: EON
+       aveva chiesto qualcosa (es. "te lo segno fra un'ora?") e questa è
+       la risposta dell'utente ("sì", "fai fra due ore"...). Diverso dal
+       ramo sopra: lì si conferma/nega un'azione delicata con un
+       pulsante, qui si risponde liberamente con una frase. Reclamiamo
+       solo lo stato "in_attesa_risposta" (non "concluso": quello è
+       riservato alle conversazioni davvero finite, per non rischiare
+       di rieseguire un'azione se una risposta va persa in rete e
+       l'utente riprova con lo stesso runId). */
+    if (!eUuid(runId)) throw fail("runId non valido", 400);
+    if (!eStringaNonVuota(body.messaggio)) throw fail("Campo 'messaggio' mancante o vuoto");
+
+    const run = await reclamaRun(runId, user, "in_attesa_risposta");
+    if (!run) throw fail("Questa conversazione non è più disponibile: ricomincia da capo", 409);
+    runReclamato = true;
+    azioniEseguite = Array.isArray(run.azioni) ? run.azioni.slice() : [];
+    messages = run.messaggi.concat([{ role: "user", content: body.messaggio }]);
   } else {
     if (!eStringaNonVuota(body.messaggio)) throw fail("Campo 'messaggio' mancante o vuoto");
     messages = [{ role: "user", content: body.messaggio }];
@@ -1547,7 +1569,32 @@ async function handleAssistant(req, res, user, accessToken) {
 
     if (data.stop_reason !== "tool_use") {
       const testo = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-      if (runId) await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+      const continuabile = /\?\s*$/.test(testo);
+
+      if (continuabile) {
+        /* Una vera domanda in sospeso (es. "te lo segno fra un'ora?"):
+           stato dedicato, DIVERSO da "concluso", apposta — se la userà
+           solo il ramo di continuazione a testo libero qui sopra
+           (reclamaRun con statoAtteso="in_attesa_risposta"). Se questa
+           stessa risposta arrivasse smarrita al client e l'utente
+           riprovasse con lo stesso runId, il vero "concluso" (sotto)
+           non sarebbe più reclamabile: niente rischio di rieseguire due
+           volte un'azione che, in un turno successivo, ha già scritto
+           qualcosa di vero nel database. */
+        const salvato = await salvaRun(runId, user, { stato: "in_attesa_risposta", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+        return send(res, 200, { stato: "concluso", runId: salvato.id, testo: testo || "Fatto.", azioni: azioniEseguite });
+      }
+
+      /* Risposta finale, non una domanda: se c'era un runId, il run era
+         stato reclamato (portato a "in_corso") e va richiuso comunque,
+         altrimenti resterebbe bloccato per sempre — ma con lo stato
+         "concluso" vero e proprio, che il ramo di continuazione non
+         reclama più: un secondo tentativo con lo stesso runId (es.
+         dopo una risposta persa in rete) non trova più nulla e si
+         ferma con un errore chiaro, invece di rieseguire l'azione. */
+      if (runId) {
+        await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+      }
       return send(res, 200, { stato: "concluso", testo: testo || "Fatto.", azioni: azioniEseguite });
     }
 

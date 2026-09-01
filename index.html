@@ -4141,7 +4141,12 @@ async function callAI(prompt, maxTokens){
    un impegno) il backend si ferma e restituisce una domanda: la mostriamo
    con lo stesso toast di conferma già usato altrove nell'app, e riprendiamo
    solo dopo la risposta dell'utente. */
-async function chiediAssistente(messaggio){
+/* Il secondo parametro (runId) è opzionale: passalo solo per rispondere
+   a una domanda che EON ha appena fatto nella stessa conversazione (es.
+   confermare o correggere un orario proposto) — il messaggio viene
+   mandato così com'è, senza il prompt di partenza, perché è una
+   risposta a lei, non un comando nuovo da interpretare da zero. */
+async function chiediAssistente(messaggio, runId){
   if(!BACKEND_CONFIGURED || !currentSession){
     throw new Error("l'assistente richiede un backend configurato e una sessione attiva");
   }
@@ -4169,10 +4174,10 @@ async function chiediAssistente(messaggio){
         );
       });
     }
-    return risposta; // { stato:"concluso", testo, azioni:[{tool, esito}] }
+    return risposta; // { stato:"concluso", runId, testo, azioni:[{tool, esito}] }
   }
 
-  return gestisci({ messaggio });
+  return gestisci(runId ? { runId, messaggio } : { messaggio });
 }
 
 /* ============ PERSISTENZA (salvataggio automatico) ============
@@ -7984,6 +7989,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
   const TESTO_HINT_BASE = hintBase;
   let inCorso = false;
+  /* Se EON ha appena fatto una domanda (es. "te lo segno fra un'ora?")
+     e sta aspettando la risposta, l'id della conversazione resta qui:
+     la prossima frase detta o scritta in QUESTO stesso microfono viene
+     mandata come risposta diretta a quella domanda, non come comando
+     nuovo — è quello che serve per poter dire "sì" o "fai fra due ore"
+     invece di dover ripetere tutto da capo. Scade da sola dopo poco
+     (90 secondi): se nel frattempo l'utente dice tutt'altro, non deve essere
+     scambiato per una risposta a una domanda ormai dimenticata. */
+  let runIdAperto = null;
+  let runIdApertoScadenza = 0;
 
   async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
@@ -8009,9 +8024,12 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       daDire.push(title + (text ? ": " + text.replace(/\n+/g, ". ") : ""));
     }
 
+    const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+    const runIdDaContinuare = inContinuazione ? runIdAperto : null;
+
     let risposta;
     try{
-      risposta = await chiediAssistente(costruisciPrompt(testo));
+      risposta = await chiediAssistente(inContinuazione ? testo : costruisciPrompt(testo), runIdDaContinuare || undefined);
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
@@ -8019,8 +8037,17 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       send.disabled = false;
       mic.disabled = false;
       inCorso = false;
+      /* La conversazione aperta (se c'era) resta intatta: non l'abbiamo
+         ancora "consumata" davvero, il tentativo è fallito prima che il
+         server la vedesse — così un nuovo tentativo di rispondere ("sì")
+         funziona ancora, invece di far ripartire tutto da capo. */
       return;
     }
+
+    /* Da qui la richiesta è andata a buon fine: la conversazione aperta,
+       se c'era, è stata davvero consumata dal server. La riapriamo più
+       sotto solo se la nuova risposta lo richiede. */
+    runIdAperto = null;
 
     /* Il testo si svuota solo ora, a richiesta riuscita: se la chiamata
        fallisce l'utente non deve riscrivere tutto da capo. */
@@ -8041,6 +8068,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(risposta.stato !== "incompleto"){
         let testoRisp = risposta.testo || fallbackHint;
         daDire.push(testoRisp);
+        /* Una risposta che finisce con un punto di domanda vera è EON
+           che chiede qualcosa a te (es. un orario da confermare):
+           teniamo la conversazione aperta invece di richiudere tutto,
+           così la prossima frase arriva a lei come risposta, non come
+           comando scollegato. */
+        if(/\?\s*$/.test(testoRisp.trim()) && risposta.runId){
+          runIdAperto = risposta.runId;
+          runIdApertoScadenza = Date.now() + 90 * 1000;
+          hint.textContent = "Ti ho chiesto una cosa — rispondimi pure";
+        }
         if(/\?\s*$/.test(testoRisp.trim()) && /conferm/i.test(testoRisp) && !/quale/i.test(testoRisp)){
           testoRisp += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
         }
