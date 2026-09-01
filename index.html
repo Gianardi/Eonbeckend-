@@ -8063,6 +8063,78 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
    po' di codice invece di condividerlo con collegaHubRacconta(): è
    voluto, per non rischiare di rompere quel widget già testato mentre
    se ne aggiunge uno nuovo. */
+/* ============ ROUTER: navigazione pura senza AI ============
+   Prima fase di "EON BRAIN" (vedi TODO.md). Per un piccolo insieme di
+   pagine sicure — raggiungibili senza che sia già selezionato un
+   cliente/record — un comando di navigazione pura ("apri calendario",
+   "vai ai clienti") non ha bisogno dell'AI: non c'è nulla da capire né
+   da recuperare, la pagina la conosciamo già (pageMeta/navigateTo, più
+   sotto nel file). Zero chiamata di rete, risposta istantanea.
+
+   Principio di sicurezza: un mancato riconoscimento (falso negativo) è
+   innocuo — la frase scorre normalmente verso l'assistente AI, esattamente
+   come se questo router non esistesse; un riconoscimento sbagliato (falso
+   positivo, navigare mentre l'utente voleva altro) non lo è. Per questo il
+   confronto è volutamente stretto: solo frasi che sono ESCLUSIVAMENTE un
+   riferimento di navigazione — un'apertura ("apri", "vai a...") seguita
+   da nient'altro che il nome della pagina — vengono intercettate. Qualsiasi
+   parola in più (un nome, un orario, un dettaglio) fa fallire il
+   riconoscimento e la frase prosegue verso l'AI come sempre. */
+/* Ogni pagina ha sempre almeno una forma SENZA articolo: con "vai
+   a.../portami a..." la preposizione italiana include già l'articolo
+   fuso ("alla", "agli", "ai"...), quindi il resto della frase non ha
+   più un articolo separato da togliere — un sinonimo che esistesse
+   SOLO in forma con articolo (es. solo "la giornata", mai "giornata")
+   non sarebbe mai raggiungibile dicendo "vai alla giornata". Le forme
+   con l'articolo restano comunque in elenco per chi dice "apri la
+   giornata": lì l'articolo non viene toccato dall'apertura (vedi
+   APERTURA_NAVIGAZIONE) e serve il confronto diretto. */
+const PAGINE_NAVIGABILI_A_VOCE = {
+  "home": ["home", "inizio"],
+  "oggi": ["oggi", "giornata", "la giornata"],
+  "clienti": ["clienti", "anagrafica", "miei clienti", "i miei clienti"],
+  "calendario": ["calendario", "agenda", "appuntamenti", "gli appuntamenti"],
+  "chat": ["chat", "conversazioni", "messaggi", "la chat", "le chat"],
+  "cestino": ["cestino"],
+  "documenti-impresa": ["documenti impresa", "documenti dell'impresa", "documenti azienda"],
+  "pagamenti": ["pagamenti"],
+  "entrate": ["entrate"],
+};
+
+/* Apertura riconosciuta: solo il verbo di navigazione (con la sua
+   preposizione per "vai"/"portami", che nell'italiano corretto include
+   già l'eventuale articolo: "al", "ai", "alla"...) — senza assorbire
+   separatamente un articolo dopo "apri"/"mostra"/"mostrami", altrimenti
+   un sinonimo che inizia con un articolo (es. "la giornata", "gli
+   appuntamenti") non sarebbe mai raggiungibile: l'articolo verrebbe
+   consumato qui E si aspetterebbe di trovarlo anche nel confronto.
+   L'eventuale articolo resta nel resto della frase, e viene provato
+   prima così com'è (per i sinonimi che lo includono per intero) e solo
+   come ripiego senza — vedi provaNavigazioneDiretta. */
+const APERTURA_NAVIGAZIONE = /^(?:apri|mostrami|mostra)\s+|^(?:vai|portami)\s+(?:a|al|ai|alla|allo|agli|alle|in)\s+/;
+
+function provaNavigazioneDiretta(testo){
+  const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  if(!t) return false;
+  const apertura = t.match(APERTURA_NAVIGAZIONE);
+  if(!apertura) return false;
+  const resto = t.slice(apertura[0].length).trim();
+  if(!resto) return false;
+  /* Prima si prova il resto così com'è (copre i sinonimi che includono
+     per intero un articolo, es. "la giornata"), poi solo come ripiego
+     senza un eventuale articolo iniziale (copre "apri il calendario"
+     quando in elenco c'è solo "calendario"). */
+  const restoSenzaArticolo = resto.replace(/^(?:il|lo|la|i|gli|le)\s+/, "");
+  for(const pagina in PAGINE_NAVIGABILI_A_VOCE){
+    const sinonimi = PAGINE_NAVIGABILI_A_VOCE[pagina];
+    if(sinonimi.includes(resto) || sinonimi.includes(restoSenzaArticolo)){
+      navigateTo(pagina);
+      return true;
+    }
+  }
+  return false;
+}
+
 /* Microfono grande + campo di testo libero che parlano con l'assistente
    vero (stesso motore di "Raccontami la giornata"): usato dalla Home
    (qualsiasi cosa) e dalla pagina Clienti (aggiungere un cliente). Un
@@ -8090,6 +8162,21 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
   async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
     if(testo.length < 3 || inCorso) return;
+
+    const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+
+    /* Router: se non stiamo rispondendo a una domanda aperta di EON (in
+       quel caso la frase è una risposta a lei, non un comando nuovo — non
+       deve mai essere intercettata come navigazione), proviamo prima un
+       comando di pura navigazione. Non serve backend né sessione: è solo
+       cambiare pagina nell'app già caricata. Se riconosciuto, ci fermiamo
+       qui — zero chiamata all'AI. */
+    if(!inContinuazione && provaNavigazioneDiretta(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
+    }
+
     if(!BACKEND_CONFIGURED || !currentSession){
       hint.textContent = "L'assistente scrive nei dati veri: accedi per usarlo";
       return;
@@ -8111,7 +8198,6 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       daDire.push(title + (text ? ": " + text.replace(/\n+/g, ". ") : ""));
     }
 
-    const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
     const runIdDaContinuare = inContinuazione ? runIdAperto : null;
 
     let risposta;
