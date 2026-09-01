@@ -146,11 +146,20 @@ Interventi, in ordine di rapporto costo/beneficio:
    "Eonbeckend" nella Console Anthropic (campo `cache_read_input_tokens`
    nella risposta: se cresce, la cache sta funzionando).
 
-2. **Modello più economico per le richieste semplici.** Claude Haiku (molto
-   più economico di Sonnet) per i comandi diretti tipo "chiamare Guidi
-   domani alle 17"; da testare con cura che capisca ugualmente bene i
-   comandi vocali/testuali prima di usarlo di default, altrimenti si
-   rischia di perdere precisione.
+2. **Modello più economico per le richieste semplici — FATTO il
+   01/09/2026.** Un messaggio nuovo (non una conferma, non la continuazione
+   di una domanda aperta) parte ora su Claude Haiku, molto più economico di
+   Sonnet (circa 1/3 del costo). Per non perdere precisione, "prova e
+   correggi da solo": se Haiku non riconosce un'azione concreta da fare
+   (nessuno strumento chiamato, e non è nemmeno una domanda di chiarimento
+   voluta tipo "te lo segno fra un'ora?"), la STESSA richiesta viene
+   rifatta subito con Sonnet, in automatico e senza che il professionista
+   se ne accorga — così il risparmio c'è solo sui casi in cui Haiku ha
+   davvero capito bene, mai a scapito della precisione. Lo stesso ripiego
+   scatta anche se Haiku ha un intoppo di rete o risponde con un errore.
+   Da tenere d'occhio nella Console Anthropic quanto spesso scatta il
+   ripiego su Sonnet (tanti ripieghi = pochi comandi davvero "semplici" 
+   nell'uso reale, e quindi risparmio minore del previsto).
 
 3. **Alleggerire l'elenco degli strumenti.** Se alcuni strumenti si usano
    raramente, valutare se mandarli sempre o solo quando serve — riduce i
