@@ -250,11 +250,16 @@ era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
    alla radice con un confine di parola nell'espressione regolare, a
    beneficio anche del Calendario che la usava già.
 
-3. **Livelli di rischio a 4 valori — non ancora fatto.** Sostituire
-   `sensitive: true/false` (oggi nei 17 strumenti di `api/index.js`) con
-   `risk: "read"|"low_write"|"high_impact"|"external"` — stesso
-   comportamento di conferma di oggi, ma metadati più precisi, base per
-   policy più fini in futuro.
+3. **Livelli di rischio a 4 valori — FATTO il 01/09/2026.** Sostituito
+   `sensitive: true/false` nei 17 strumenti di `api/index.js` con
+   `risk: "read"|"low_write"|"high_impact"|"external"` (5 read, 6
+   low_write, 5 high_impact, 1 external — `manda_messaggio`, l'unico i
+   cui effetti si vedono fuori dall'app). Nuova funzione
+   `richiedeConferma(tool)` (vero solo per high_impact/external) al posto
+   del controllo diretto su `sensitive` — stesso comportamento di conferma
+   di prima (verificato dal code review, effort alto: nessuna
+   riclassificazione è scivolata dentro per errore), solo metadati più
+   precisi, base per policy di conferma più fini in futuro.
 
 4. **`request_id` per turno — non ancora fatto.** La tabella
    `ai_audit_log` registra già ogni singola chiamata a uno strumento, ma
