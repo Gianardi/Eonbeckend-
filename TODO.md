@@ -511,6 +511,43 @@ regression test dopo ogni fase.
    un riferimento implicito); descrizione obsoleta su `crea_impegno`.
    Regressione: `eval/router.test.js` 28/28.
 
+4. **Supporto alla visualizzazione delle risorse — FATTO il
+   02/09/2026.** Fino ad ora un tool "azione" poteva bloccarsi come
+   ripiego quando l'intento era "risorsa" (punto 1), ma senza un vero
+   tool RISORSA la strada era comunque `capacita_non_disponibile` per
+   ogni caso. Aggiunti i primi due tool RISORSA reali, verificati
+   contro lo schema effettivo del database (non inventati):
+   `recupera_foto_cantiere` (legge `cantiere_foto`, immagini su
+   Supabase Storage taggabili a un cliente — copre "manda le foto del
+   cantiere X a Y", che proponeva l'invio senza aver mai visto le
+   foto) e `recupera_documenti_cliente` (legge cosa c'è davvero nella
+   conversazione di un cliente, distinguendo "allegato" — file vero,
+   sempre con url — da "preventivo_o_fattura" — generato in app,
+   titolo/importo/riepilogo ma MAI un url esterno, il PDF si
+   ricompone solo dentro l'app — copre "ho bisogno del documento di
+   Rossi", che diventava un impegno invece di mostrarlo).
+   Deliberatamente non incluso: un tool per CREARE un preventivo
+   nuovo — la creazione vera passa da una pagina intera lato
+   frontend (intestazione, voci, condizioni), riprodurla server-side
+   sarebbe una modifica troppo grande per una fase progressiva. Resta
+   onestamente `capacita_non_disponibile`.
+   System prompt aggiornato di conseguenza (provare prima i tool
+   risorsa, recuperare prima di inviare, mai inventare un link per un
+   preventivo/fattura). In `index.html`, i due tool aggiunti a
+   `STRUMENTI_DI_SOLA_LETTURA` (stesso trattamento degli altri tool di
+   lettura — nessuna galleria visiva in questa fase, rimandata a un
+   eventuale affinamento futuro dell'interfaccia).
+   Due giri di code-review (alto poi medio), verificati contro gli
+   schema SQL reali, hanno trovato e fatto correggere: mancava il
+   filtro `deleted_at` su `cantiere_foto` (avrebbe potuto restituire
+   foto cestinate); `cliente_id` non validato come uuid;
+   `recupera_documenti_cliente` cercava solo `event_type=doc`
+   descrivendolo genericamente come "contratti, moduli" quando quel
+   tipo copre SOLO preventivi/fatture senza url — corretto per
+   includere anche i veri allegati e distinguerli esplicitamente,
+   evitando che il prompt spingesse a inventare un link inesistente.
+   Regressione: `eval/router.test.js` 28/28.
+
 ## EON intelligente: promemoria e avvisi veri, all'ora giusta
 
 **Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
