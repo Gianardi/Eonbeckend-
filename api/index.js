@@ -1421,6 +1421,90 @@ const TOOLS = {
     },
   },
 
+  /* EON BRAIN, punto 4 (supporto alla visualizzazione delle risorse):
+     recupera le foto del cantiere già caricate (tabella cantiere_foto,
+     immagini su Supabase Storage) — non un impegno da segnare, una
+     risorsa vera da mostrare. Se le foto sono taggate a un cliente
+     preciso (client_id, opzionale su questa tabella) e quel cliente è
+     già stato risolto da interpreta_richiesta, passa il suo id per
+     filtrare solo le sue; altrimenti restituisce le più recenti. */
+  recupera_foto_cantiere: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "recupera_foto_cantiere",
+      description: "Recupera le foto del cantiere già caricate nell'app, le più recenti per prime. Usalo quando l'utente chiede di vedere/mandare foto di un cantiere o di un lavoro — non crea_impegno/crea_appunto, che non le mostrerebbero mai davvero.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente a cui sono taggate le foto cercate, se noto (di solito da cliente_risolto in interpreta_richiesta). Lascia vuoto per le foto più recenti in generale." },
+          limite: { type: "integer", description: "Quante foto restituire, default 10" },
+        },
+      },
+    },
+    async run(input, ctx) {
+      if (eStringaNonVuota(input.cliente_id) && !eUuid(input.cliente_id)) throw fail("Id cliente non valido");
+      const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
+      let query = `cantiere_foto?select=id,url,client_id,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
+      if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
+      const righe = await db(query, { method: "GET" }, ctx.accessToken);
+      const lista = Array.isArray(righe) ? righe : [];
+      return { foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at })) };
+    },
+  },
+
+  /* EON BRAIN, punto 4: recupera ciò che è davvero nella conversazione
+     di un cliente, di due nature diverse (mai confuse tra loro, il
+     campo "tipo" nel risultato le distingue):
+     - "allegato": un file vero caricato in chat (contratto, modulo,
+       foto...) — ha sempre un url reale, condivisibile.
+     - "preventivo_o_fattura": generato dalla app (pagine Crea
+       Preventivo/Fattura) — titolo, importo e riepilogo sì, ma MAI un
+       url esterno: il PDF si ricompone solo dentro l'app dai suoi
+       dati (vedi leggiDatiDocumento in index.html), non esiste un
+       link da condividere. Non inventarne uno.
+     Stessa ricerca della conversazione già usata da storico_cliente/
+     leggi_conversazione. */
+  recupera_documenti_cliente: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "recupera_documenti_cliente",
+      description: "Recupera cosa c'è davvero nella conversazione di un cliente: allegati veri (con un link) e preventivi/fatture già creati in app (titolo e importo, MAI un link — si vedono solo dentro l'app). Usalo quando l'utente chiede di vedere/recuperare un documento o un preventivo di un cliente già esistente — non crea_impegno/crea_appunto, che non lo mostrerebbero mai davvero. Per un preventivo/documento MAI creato prima non c'è ancora nulla da recuperare: in quel caso usa capacita_non_disponibile.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente (uuid), di solito già noto da cliente_risolto in interpreta_richiesta" },
+          limite: { type: "integer", description: "Quanti documenti restituire, default 10" },
+        },
+        required: ["cliente_id"],
+      },
+    },
+    async run(input, ctx) {
+      const cliente = await trovaProprio("clients", input.cliente_id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+      const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
+
+      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conversazione = Array.isArray(conv) && conv[0];
+      if (!conversazione) return { documenti: [] };
+
+      const righe = await db(
+        `messages?select=id,title,body,amount,event_type,file_url,file_name,created_at&conversation_id=eq.${conversazione.id}&deleted_at=is.null&or=(event_type.eq.doc,file_url.not.is.null)&order=created_at.desc&limit=${limite}`,
+        { method: "GET" },
+        ctx.accessToken
+      );
+      return {
+        documenti: (Array.isArray(righe) ? righe : []).map((m) => {
+          const ePreventivoOFattura = m.event_type === "doc";
+          return ePreventivoOFattura
+            ? { id: m.id, tipo: "preventivo_o_fattura", titolo: m.title, riepilogo: m.body || null, importo: m.amount ?? null, url: null, quando: m.created_at }
+            : { id: m.id, tipo: "allegato", titolo: m.file_name || "(senza nome)", url: m.file_url, quando: m.created_at };
+        }),
+      };
+    },
+  },
+
   /* Non tocca mai il database: è il passo con cui Claude dichiara,
      in una forma strutturata, cosa vuole ottenere l'utente PRIMA di
      scegliere il tool vero — vedi il commento su "categoria" più
@@ -1663,9 +1747,11 @@ function systemPromptAssistente() {
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
-Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato) e nessuno strumento tra quelli disponibili sa davvero recuperare quella cosa, NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra, invece di lasciare attivo solo il primo oggetto dichiarato per l'intero messaggio.
+Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato), prova prima recupera_foto_cantiere (foto del cantiere/lavoro) o recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Solo se nessuno dei due è adatto (es. un preventivo mai creato prima, o qualcosa che non è né una foto né un documento in una conversazione cliente) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra, invece di lasciare attivo solo il primo oggetto dichiarato per l'intero messaggio.
 
 Quando dichiari un'entità di tipo "cliente" in interpreta_richiesta CON un riferimento_esplicito (un nome), il risultato include già cliente_risolto — non richiamare cerca_cliente per lo stesso nome, è già stato cercato. (Se invece usi usa_focus_corrente senza un nome esplicito, cliente_risolto non c'è: usa cerca_cliente tu stesso se ti serve un id.) Reagisci in base al suo stato: "trovato" → usa direttamente il suo id, nessuna domanda necessaria per l'identità (ma se stai per crearlo di nuovo come cliente nuovo, avvisa che esiste già e chiedi conferma prima di creare un doppione). "simile" → il nome assomiglia a un cliente esistente ma non è uguale (possibile dettatura imprecisa, o un cliente diverso): chiedi conferma prima di usarlo, non trattarlo come certo. "ambiguo" → più clienti corrispondono: elencali brevemente (nome, e telefono o zona se utili a distinguerli) e chiedi quale intende. "non_trovato" → nessun cliente con questo nome: se l'azione non richiede necessariamente un cliente collegato (es. un impegno che nomina solo una persona di passaggio) procedi comunque senza collegarlo; se invece richiede un destinatario reale (mandare un messaggio, un contatto), chiedi se vuoi aggiungerlo come nuovo cliente prima di procedere. Se l'operazione è "contatta" e non hai un vero strumento per avviare un contatto diretto (una chiamata), dillo onestamente con capacita_non_disponibile — e se in più cliente_risolto.manca_telefono è vero, approfittane per chiedere il numero e offrire di salvarlo con aggiorna_cliente, così la prossima volta sarà già pronto. Ma se la richiesta si può comunque soddisfare con uno strumento reale che non ha bisogno del telefono (es. mandare un messaggio interno), usalo normalmente: manca_telefono da solo non deve mai bloccare un'azione che non lo richiede davvero.
+
+Se l'utente chiede di mandare/inviare qualcosa che è a sua volta una risorsa (es. "manda le foto del cantiere a Fabbri", "invia il documento a Rossi"), recupera prima quella risorsa (recupera_foto_cantiere/recupera_documenti_cliente) e SOLO DOPO chiama manda_messaggio — mai proporre l'invio di qualcosa che non hai mai recuperato davvero. manda_messaggio non allega file, solo testo: per foto e allegati (che hanno sempre un url reale) includi i link veri nel testo del messaggio, mai una frase generica come "ti mando le foto". Un preventivo o una fattura generati in app (tipo "preventivo_o_fattura" in recupera_documenti_cliente) invece NON hanno mai un url: non inventarne uno né promettere di inviarlo come link — di' che si vede solo dentro l'app, o riporta titolo/importo/riepilogo nel testo.
 
 REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno.
 
