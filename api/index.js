@@ -601,6 +601,21 @@ const STRUMENTI_SEMPRE_CONCLUSIVI = new Set(["crea_impegno", "crea_appunto", "co
                        (mandare un messaggio a un cliente)
      Solo "high_impact" ed "external" richiedono la conferma
      dell'utente prima di eseguire — vedi richiedeConferma() più sotto.
+   - categoria: la NATURA di ciò su cui il tool opera, non quanto è
+     delicato (quello è "risk", sopra: i due campi sono ortogonali) —
+       "risorsa"       mostra/recupera qualcosa che esiste o va
+                       prodotto (un dato, un elenco, un documento)
+       "azione"        crea/modifica/cancella qualcosa nel sistema
+                       operativo (impegni, appunti, anagrafica)
+       "comunicazione" manda qualcosa a un destinatario
+       "supporto"      strumento interno che aiuta a risolvere
+                       un'entità o l'intento, non è mai la risposta
+                       finale a una richiesta dell'utente
+     Usata dall'orchestratore in proseguiAssistente() per impedire che
+     un tool "azione" (es. crea_impegno) venga usato come ripiego per
+     soddisfare una richiesta che l'IntentFrame ha classificato come
+     "risorsa" — vedi interpreta_richiesta più sotto e il controllo
+     subito prima dell'esecuzione dei tool nel loop principale.
    - describe: (solo per high_impact/external) genera la domanda da
      mostrare per la conferma
    - run: la funzione vera, eseguita solo lato server
@@ -609,10 +624,17 @@ function richiedeConferma(tool) {
   return tool.risk === "high_impact" || tool.risk === "external";
 }
 
+/* Tool interni (mai il vero risultato finale per l'utente): non
+   finiscono in azioniEseguite/risposta.azioni, per non far credere al
+   frontend che sia stata fatta un'azione visibile. Restano comunque
+   loggati in ai_audit_log come ogni altro tool, tramite registraOperazione. */
+const STRUMENTI_INTERNI = new Set(["interpreta_richiesta", "capacita_non_disponibile"]);
+
 const TOOLS = {
 
   cerca_cliente: {
     risk: "read",
+    categoria: "risorsa",
     schema: {
       name: "cerca_cliente",
       description: "Trova clienti in anagrafica per nome, anche parziale. Usalo per ottenere l'id di un cliente prima di collegargli un impegno o un messaggio.",
@@ -654,6 +676,7 @@ const TOOLS = {
 
   elenca_appuntamenti: {
     risk: "read",
+    categoria: "risorsa",
     schema: {
       name: "elenca_appuntamenti",
       description: "Elenca gli impegni già segnati in un intervallo di date (appuntamenti e task), utile per sapere cosa c'è già prima di aggiungerne altri.",
@@ -684,6 +707,7 @@ const TOOLS = {
 
   cerca_impegno: {
     risk: "read",
+    categoria: "risorsa",
     schema: {
       name: "cerca_impegno",
       description: "Trova appuntamenti e impegni già segnati cercando nel titolo, anche solo con una parola (es. 'Rossi', 'sopralluogo'). Usalo per ottenere l'id di un impegno quando l'utente lo nomina invece di darti direttamente l'id o un intervallo di date — es. prima di sposta_impegno, annulla_impegno o elimina_impegno.",
@@ -715,6 +739,7 @@ const TOOLS = {
 
   storico_cliente: {
     risk: "read",
+    categoria: "risorsa",
     schema: {
       name: "storico_cliente",
       description: "Riassunto di un cliente: dati anagrafici, ultimi messaggi e documenti.",
@@ -753,6 +778,7 @@ const TOOLS = {
 
   leggi_conversazione: {
     risk: "read",
+    categoria: "risorsa",
     schema: {
       name: "leggi_conversazione",
       description: "Legge gli ultimi messaggi scambiati con un cliente.",
@@ -791,6 +817,7 @@ const TOOLS = {
 
   trova_o_crea_cliente: {
     risk: "low_write",
+    categoria: "supporto",
     schema: {
       name: "trova_o_crea_cliente",
       description: "Trova il cliente che corrisponde al nome dato, o lo crea se non esiste ancora. A differenza di cerca_cliente (che restituisce un elenco di possibili corrispondenze tra cui scegliere), questo restituisce SEMPRE un solo cliente con un id preciso: usalo quando serve collegare qualcosa (es. una foto appena scattata) a un cliente e ti serve un id certo, non un elenco. Passa il nome nell'ordine naturale italiano se lo conosci (es. \"Mario Rossi\", non \"Rossi Mario\") — funziona comunque anche nell'altro ordine. Se il nome è ambiguo (più clienti simili) lo strumento fallisce con un errore invece di indovinare: in quel caso chiedi tu all'utente il nome e cognome completi. Se cerca_impegno o cerca_cliente hanno già trovato più corrispondenze ambigue per lo stesso nome, chiedi prima all'utente quale intende invece di chiamare questo strumento a caso.",
@@ -867,6 +894,7 @@ const TOOLS = {
 
   crea_appunto: {
     risk: "low_write",
+    categoria: "azione",
     schema: {
       name: "crea_appunto",
       description: "Aggiunge un appunto libero del cantiere: una nota rapida senza data né scadenza. Usalo quando l'utente dice esplicitamente di segnargli/annotargli qualcosa negli appunti (es. \"segnami in appunti che devo vedere il costo del materiale\"). Non usarlo per cose con un orario o una scadenza: quelle sono impegni, usa crea_impegno.",
@@ -891,6 +919,7 @@ const TOOLS = {
 
   correggi_appunto: {
     risk: "low_write",
+    categoria: "azione",
     schema: {
       name: "correggi_appunto",
       description: "Corregge il testo di un appunto già esistente, senza crearne uno nuovo. Usalo quando l'utente dice \"correggi\", \"non è X ma Y\", \"ho sbagliato a dirti...\" riferendosi a un appunto. Se non specifica quale, correggi il più recente creato.",
@@ -940,6 +969,7 @@ const TOOLS = {
 
   crea_cliente: {
     risk: "low_write",
+    categoria: "azione",
     schema: {
       name: "crea_cliente",
       description: "Aggiunge un nuovo cliente in anagrafica. Usalo solo quando l'utente chiede esplicitamente di aggiungere un cliente, non per un normale impegno che nomina una persona.",
@@ -969,6 +999,7 @@ const TOOLS = {
 
   aggiorna_cliente: {
     risk: "low_write",
+    categoria: "azione",
     schema: {
       name: "aggiorna_cliente",
       description: "Modifica i dati di un cliente già esistente. Passa solo i campi che vuoi cambiare. Usalo solo quando l'utente chiede esplicitamente di modificare un cliente, non per un normale impegno.",
@@ -1008,6 +1039,7 @@ const TOOLS = {
 
   elimina_cliente: {
     risk: "high_impact",
+    categoria: "azione",
     schema: {
       name: "elimina_cliente",
       description: "Sposta un cliente nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Richiede conferma dell'utente.",
@@ -1056,6 +1088,7 @@ const TOOLS = {
 
   crea_impegno: {
     risk: "low_write",
+    categoria: "azione",
     schema: {
       name: "crea_impegno",
       description: "Segna un impegno nel calendario: un incontro, una telefonata o una commissione (qualsiasi altra cosa da fare: pratiche, acquisti, documenti). Chiamalo una volta per ogni impegno distinto nominato dall'utente, anche se ne ha nominati molti nella stessa frase.",
@@ -1146,6 +1179,7 @@ const TOOLS = {
 
   sposta_impegno: {
     risk: "high_impact",
+    categoria: "azione",
     schema: {
       name: "sposta_impegno",
       description: "Sposta un appuntamento o un impegno già esistente a una nuova data/ora. Richiede conferma dell'utente.",
@@ -1182,6 +1216,7 @@ const TOOLS = {
 
   annulla_impegno: {
     risk: "high_impact",
+    categoria: "azione",
     schema: {
       name: "annulla_impegno",
       description: "Annulla un appuntamento o un impegno già esistente. Richiede conferma dell'utente.",
@@ -1215,6 +1250,7 @@ const TOOLS = {
 
   elimina_impegno: {
     risk: "high_impact",
+    categoria: "azione",
     schema: {
       name: "elimina_impegno",
       description: "Sposta un appuntamento o un impegno nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Diverso da annulla_impegno, che invece lo segna come annullato mantenendolo visibile nello storico. Richiede conferma dell'utente.",
@@ -1240,6 +1276,7 @@ const TOOLS = {
 
   manda_messaggio: {
     risk: "external",
+    categoria: "comunicazione",
     schema: {
       name: "manda_messaggio",
       description: "Invia un messaggio a un cliente nella chat interna. Richiede conferma dell'utente prima di essere inviato davvero.",
@@ -1274,6 +1311,7 @@ const TOOLS = {
 
   svuota_cestino: {
     risk: "high_impact",
+    categoria: "azione",
     schema: {
       name: "svuota_cestino",
       description: "Elimina per sempre TUTTO ciò che si trova già nel cestino, in ogni categoria (clienti, conversazioni, messaggi, appuntamenti/impegni, pagamenti, incassi, obiettivi, dipendenti, opportunità, compiti assegnati): un unico comando che svuota tutto il cestino in una volta, non recuperabile dopo. Non tocca nulla che non sia già nel cestino. Usalo quando l'utente chiede di eliminare o svuotare il cestino definitivamente, non per eliminare un singolo elemento (per quello ci sono elimina_cliente/elimina_impegno, e il resto si elimina dalla schermata Cestino). Richiede conferma dell'utente.",
@@ -1336,6 +1374,93 @@ const TOOLS = {
       const totaleEliminati = risultati.reduce((s, r) => s + r.eliminati, 0);
       const fallite = risultati.filter((r) => r.errore).map((r) => r.tabella);
       return { totale_eliminati: totaleEliminati, fallite };
+    },
+  },
+
+  /* Non tocca mai il database: è il passo con cui Claude dichiara,
+     in una forma strutturata, cosa vuole ottenere l'utente PRIMA di
+     scegliere il tool vero — vedi il commento su "categoria" più
+     sopra e il forzo di tool_choice in proseguiAssistente(). Non
+     sostituisce la comprensione del linguaggio (che resta di Claude):
+     la costringe solo a uscire in una forma che il codice può
+     controllare, così un tool "azione" non può fare da ripiego per
+     una richiesta che in realtà voleva vedere/recuperare qualcosa
+     (categoria "risorsa") — vedi capacita_non_disponibile subito
+     sotto per il caso in cui non esiste ancora un tool adatto. */
+  interpreta_richiesta: {
+    risk: "read",
+    categoria: "supporto",
+    schema: {
+      name: "interpreta_richiesta",
+      description: "OBBLIGATORIO come primo strumento di ogni richiesta nuova, prima di qualsiasi altro: dichiara qui la tua comprensione di cosa vuole ottenere l'utente. Non esegue nulla sui dati, serve solo a strutturare la tua comprensione prima di agire.",
+      input_schema: {
+        type: "object",
+        properties: {
+          operazione: {
+            type: "string",
+            enum: ["mostra", "crea", "modifica", "cancella", "invia", "contatta", "consulta"],
+            description: "Il verbo, cosa vuole ottenere l'utente. mostra = vedere/recuperare qualcosa che esiste o va prodotto. crea = registrare qualcosa di nuovo. modifica = cambiare qualcosa che esiste già. cancella = rimuovere una o più cose esistenti. invia = far arrivare qualcosa a un destinatario. contatta = avviare un contatto diretto e immediato (non un promemoria per farlo dopo). consulta = domanda aperta, parere, confronto — nessuna azione sui dati.",
+          },
+          oggetto: {
+            type: "string",
+            enum: ["risorsa", "azione", "comunicazione", "nessuno"],
+            description: "La natura di ciò su cui si opera. risorsa = un documento, una foto, un preventivo, un dato che l'utente vuole vedere o ottenere come risultato. azione = un impegno, un appunto, un dato anagrafico che cambia stato nel sistema operativo. comunicazione = un messaggio diretto a un destinatario. nessuno = solo con operazione consulta.",
+          },
+          entita: {
+            type: "object",
+            description: "Su cosa/chi verte la richiesta, se applicabile.",
+            properties: {
+              tipo: { type: "string", description: "Es. cliente, impegno, documento, foto, preventivo, conversazione, dato_aggregato, altro" },
+              riferimento_esplicito: { type: "string", description: "Il riferimento così come detto dall'utente (es. 'Rossi', 'il preventivo del tetto'). Lascia vuoto se l'utente usa un riferimento implicito come 'lo'/'quello'/'quello di prima'." },
+              usa_focus_corrente: { type: "boolean", description: "true se l'utente si riferisce con un pronome o un riferimento implicito a qualcosa già mostrato/creato in questa conversazione, invece di nominarlo esplicitamente." },
+            },
+          },
+          cardinalita: {
+            type: "string",
+            enum: ["singolare", "insieme"],
+            description: "singolare = un solo elemento coinvolto. insieme = la richiesta riguarda più elementi insieme (es. 'tutti gli impegni di domani').",
+          },
+        },
+        required: ["operazione", "oggetto"],
+      },
+    },
+    async run(input) {
+      return {
+        intento_registrato: {
+          operazione: input.operazione,
+          oggetto: input.oggetto,
+          entita: input.entita || null,
+          cardinalita: input.cardinalita || "singolare",
+        },
+      };
+    },
+  },
+
+  /* Valvola di sicurezza generale: quando l'IntentFrame dichiara
+     oggetto "risorsa" e nessun tool esistente sa davvero recuperare
+     quella cosa, Claude deve chiamare questo invece di usare
+     crea_impegno/crea_appunto come ripiego (vedi il controllo in
+     proseguiAssistente() che blocca proprio questo ripiego). Non
+     inventa nulla, non finge un risultato: dichiara onestamente il
+     limite, e resta comunque loggato come ogni altro tool
+     (registraOperazione) — è la base per capire in futuro quali
+     RISORSE mancano davvero nel registro. */
+  capacita_non_disponibile: {
+    risk: "read",
+    categoria: "supporto",
+    schema: {
+      name: "capacita_non_disponibile",
+      description: "Usalo quando l'utente chiede di vedere/recuperare qualcosa (documento, foto, dato) che EON non ha ancora modo di recuperare davvero. Non inventare un risultato e non usare crea_impegno/crea_appunto come ripiego per far finta di aver fatto qualcosa: dichiara onestamente il limite, così l'utente può decidere cosa fare (es. se preferisce che tu lo segni comunque come promemoria da controllare a mano).",
+      input_schema: {
+        type: "object",
+        properties: {
+          cosa_manca: { type: "string", description: "Breve descrizione di cosa l'utente ha chiesto e che non si può ancora recuperare/fare" },
+        },
+        required: ["cosa_manca"],
+      },
+    },
+    async run(input) {
+      return { segnalato: true, cosa_manca: input.cosa_manca };
     },
   },
 };
@@ -1477,6 +1602,8 @@ function systemPromptAssistente() {
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
+Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato) e nessuno strumento tra quelli disponibili sa davvero recuperare quella cosa, NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra, invece di lasciare attivo solo il primo oggetto dichiarato per l'intero messaggio.
+
 REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno.
 
 Sull'orario: se l'utente non dice affatto quando (nessun riferimento di tempo, nemmeno vago), decidi tu senza chiedere nulla: primo giorno utile, alle 08:00 — non lasciare mai un impegno senza data. Ma se usa un riferimento VAGO o relativo che potresti interpretare in più modi (es. "quando rientro in ufficio", "più tardi", "appena posso", "stasera" senza un'ora precisa), NON chiamare subito crea_impegno con un orario indovinato alla cieca: calcola tu una stima concreta e ragionevole partendo dall'ora di adesso (es. "quando rientro in ufficio" ≈ tra un'ora), e chiedi conferma in una risposta di testo — non uno strumento — tipo "Va bene se te lo segno fra un'ora, alle 15:40?". Poi fermati e aspetta: la risposta dell'utente arriverà nello stesso filo di conversazione, come conferma ("sì", "va bene") o come correzione ("no, fai fra due ore", "alle 16 piuttosto") — solo a quel punto chiama crea_impegno con l'orario giusto.
@@ -1512,6 +1639,35 @@ function testoDiRisposta(data) {
 function dataOraCorrente() {
   const oggi = new Date();
   return `Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ora ${oggi.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}.`;
+}
+
+/* L'IntentFrame (cosa Claude ha capito che l'utente vuole ottenere,
+   dichiarato con interpreta_richiesta — vedi TOOLS) non ha una colonna
+   propria: vive dentro "messages", la cronologia già persistita in
+   ai_runs.messaggi. Lo ricostruiamo cercando all'indietro l'ultima
+   dichiarazione — funziona identicamente per un turno nuovo (appena
+   dichiarato in questo stesso giro), una conferma o una continuazione
+   (dichiarato in un giro precedente della stessa conversazione), senza
+   bisogno di trasportarlo a parte tra un giro e l'altro. */
+function estraiIntentoDaMessaggi(elencoMessaggi) {
+  for (let i = elencoMessaggi.length - 1; i >= 0; i--) {
+    const msg = elencoMessaggi[i];
+    if (msg.role !== "assistant" || !Array.isArray(msg.content)) continue;
+    for (let j = msg.content.length - 1; j >= 0; j--) {
+      const b = msg.content[j];
+      if (b.type !== "tool_use") continue;
+      /* Se la dichiarazione più recente è "questa risorsa non si può
+         recuperare" (capacita_non_disponibile), il limite è già stato
+         segnalato onestamente: l'intento "risorsa" che lo precedeva è
+         scaricato, non deve continuare a bloccare un'azione (es. un
+         promemoria) che l'utente accetta come alternativa esplicita
+         subito dopo — altrimenti il turno rifiuterebbe per sempre
+         proprio il ripiego che ha appena proposto lui stesso. */
+      if (b.name === "capacita_non_disponibile") return null;
+      if (b.name === "interpreta_richiesta") return b.input || null;
+    }
+  }
+  return null;
 }
 
 /* Prepara la domanda di conferma per la prossima azione delicata in coda. */
@@ -1702,26 +1858,50 @@ async function handleAssistant(req, res, user, accessToken) {
   const MODEL_SONNET = "claude-sonnet-4-5";
   modelloUsato = runId ? MODEL_SONNET : MODEL_HAIKU; // variabile del turno (handleAssistant), per il registro richieste
 
-  for (let round = 0; round < TOOL_MAX_ROUNDS; round++) {
+  /* Un messaggio nuovo (nessun runId) riserva il giro 0 alla sola
+     dichiarazione dell'IntentFrame (interpreta_richiesta, forzato
+     sotto con tool_choice): il giro in cui il modello sceglie
+     davvero cosa fare è quindi il giro 1, non lo 0. Una conferma o
+     una continuazione invece non forza nulla (l'intento è già stato
+     dichiarato in un giro precedente della stessa conversazione, lo
+     recuperiamo con estraiIntentoDaMessaggi): lì il giro decisionale
+     resta lo 0, come prima di questa modifica. Questo sposta soltanto
+     A QUALE giro si applica il ripiego "Haiku non sicuro → Sonnet":
+     il meccanismo in sé resta identico. */
+  const primoGiroSostanziale = runId ? 0 : 1;
+  let intentoAttivo = null; // ricalcolato da capo a ogni giro, subito dopo la risposta di Claude — vedi dentro il for
+
+  /* Un messaggio nuovo ha diritto a un giro in più (TOOL_MAX_ROUNDS + 1):
+     il giro 0 è sempre speso per il forzato interpreta_richiesta, quindi
+     senza questo "+1" il budget di giri utili per la scelta e
+     l'esecuzione vera dei tool si ridurrebbe di uno rispetto a prima di
+     questa modifica. Le conferme/continuazioni (runId presente) non
+     forzano nessun giro in più: restano al tetto originale. */
+  const tettoGiri = TOOL_MAX_ROUNDS + (runId ? 0 : 1);
+  for (let round = 0; round < tettoGiri; round++) {
     giriUsati = round + 1; // idem: per il registro richieste, tiene l'ultimo giro effettivamente iniziato
     let data;
+    const forzaInterpretazione = !runId && round === 0;
 
-    /* Al massimo due tentativi in questo giro: solo al primo giro
-       (round 0) e solo se Haiku non ha chiamato nessuno strumento —
-       segno che non ha riconosciuto un'azione concreta da fare, non
-       ci fidiamo e ripetiamo la STESSA richiesta con Sonnet. Dal
-       secondo giro in poi un turno senza strumenti è la normale fine
-       della conversazione (risposta finale), non un'incertezza da
-       correggere. */
+    /* Al massimo due tentativi in questo giro: solo al giro
+       decisionale (round 0 per conferme/continuazioni, round 1 per un
+       messaggio nuovo — vedi primoGiroSostanziale sopra) e solo se
+       Haiku non ha chiamato nessuno strumento — segno che non ha
+       riconosciuto un'azione concreta da fare, non ci fidiamo e
+       ripetiamo la STESSA richiesta con Sonnet. Negli altri giri un
+       turno senza strumenti è la normale fine della conversazione
+       (risposta finale), non un'incertezza da correggere. */
     for (let tentativo = 0; tentativo < 2; tentativo++) {
-      /* Finché siamo al primo tentativo del primo giro su Haiku, un
-         intoppo (rete, errore HTTP, o risposta poco sicura) fa
-         ripiegare su Sonnet invece di far fallire subito la richiesta
-         — un fastidio temporaneo di Haiku non deve mai bloccare un
-         messaggio nuovo che con Sonnet sarebbe comunque andato a buon
-         fine. Dal secondo tentativo (già su Sonnet) un errore resta
-         un errore vero, come prima di questa modifica. */
-      const puoRipiegareSuSonnet = round === 0 && modelloUsato === MODEL_HAIKU && tentativo === 0;
+      /* Il ripiego su Sonnet per un intoppo di rete/HTTP copre sia il
+         giro 0 sia il giro decisionale (round === primoGiroSostanziale):
+         per una conferma/continuazione sono lo stesso giro (0), ma per
+         un messaggio nuovo sono due giri distinti (0 = interpreta_richiesta
+         forzato, 1 = la vera scelta) ed entrambi devono poter ripiegare
+         su Sonnet — altrimenti un fastidio di rete proprio al giro
+         decisionale bloccherebbe la conversazione senza che il ripiego
+         "non sicuro" (sotto, che copre un altro problema: nessuno
+         strumento chiamato) possa mai intervenire. */
+      const puoRipiegarePerRete = (round === 0 || round === primoGiroSostanziale) && modelloUsato === MODEL_HAIKU && tentativo === 0;
 
       let r;
       let erroreRete = null;
@@ -1745,6 +1925,7 @@ async function handleAssistant(req, res, user, accessToken) {
               { type: "text", text: dataOraCorrente() },
             ],
             tools: schemi,
+            tool_choice: forzaInterpretazione ? { type: "tool", name: "interpreta_richiesta" } : undefined,
             messages,
           }),
         });
@@ -1753,11 +1934,11 @@ async function handleAssistant(req, res, user, accessToken) {
       }
 
       if (erroreRete) {
-        if (puoRipiegareSuSonnet) { modelloUsato = MODEL_SONNET; continue; }
+        if (puoRipiegarePerRete) { modelloUsato = MODEL_SONNET; continue; }
         throw fail("Non riesco a contattare l'AI: " + erroreRete.message, 502);
       }
       if (!r.ok) {
-        if (puoRipiegareSuSonnet) { modelloUsato = MODEL_SONNET; continue; }
+        if (puoRipiegarePerRete) { modelloUsato = MODEL_SONNET; continue; }
         let motivo = "";
         try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
         throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
@@ -1765,16 +1946,19 @@ async function handleAssistant(req, res, user, accessToken) {
 
       data = await r.json();
 
-      /* "Non sicuro" vuol dire che Haiku non ha chiamato nessuno
-         strumento E la risposta non è nemmeno una domanda di
-         chiarimento voluta (quelle finiscono sempre con "?", vedi la
-         regola sull'orario vago in systemPromptAssistente — è lo
-         stesso segnale già usato più sotto per riaprire la
+      /* "Non sicuro" vuol dire che Haiku, al giro decisionale, non ha
+         chiamato nessuno strumento E la risposta non è nemmeno una
+         domanda di chiarimento voluta (quelle finiscono sempre con
+         "?", vedi la regola sull'orario vago in systemPromptAssistente
+         — è lo stesso segnale già usato più sotto per riaprire la
          conversazione). Senza questo controllo, ogni volta che Haiku
          chiede giustamente "te lo segno fra un'ora?" verrebbe scartato
          e rifatto due volte, vanificando il risparmio proprio sul
-         caso che il prompt è pensato per gestire bene. */
-      const nonSicuro = puoRipiegareSuSonnet && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data));
+         caso che il prompt è pensato per gestire bene. Non si applica
+         al giro forzato di interpreta_richiesta: lì tool_choice
+         garantisce già stop_reason "tool_use". */
+      const nonSicuro = round === primoGiroSostanziale && modelloUsato === MODEL_HAIKU && tentativo === 0
+        && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data));
       if (nonSicuro) {
         modelloUsato = MODEL_SONNET;
         continue;
@@ -1783,6 +1967,14 @@ async function handleAssistant(req, res, user, accessToken) {
     }
 
     messages.push({ role: "assistant", content: data.content });
+    /* Niente "|| intentoAttivo" qui: la funzione rilegge SEMPRE l'intera
+       cronologia da capo, quindi il suo risultato è già lo stato
+       corretto e completo (incluso il caso "null" voluto, quando
+       capacita_non_disponibile ha appena scaricato un intento
+       "risorsa" — vedi il commento dentro estraiIntentoDaMessaggi). Un
+       "||" qui resusciterebbe il valore vecchio proprio nel momento in
+       cui deve sparire. */
+    intentoAttivo = estraiIntentoDaMessaggi(messages);
 
     if (data.stop_reason !== "tool_use") {
       const testo = testoDiRisposta(data);
@@ -1825,6 +2017,29 @@ async function handleAssistant(req, res, user, accessToken) {
         risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify({ errore: "strumento sconosciuto" }), is_error: true });
         continue;
       }
+
+      /* Guardrail generale (non specifico per crea_impegno o per un
+         singolo caso): se l'IntentFrame dichiarato con
+         interpreta_richiesta ha oggetto "risorsa" — l'utente vuole
+         vedere/recuperare qualcosa, non far registrare un'azione — un
+         tool di categoria "azione" non può essere il modo con cui il
+         turno si considera soddisfatto. Blocchiamo l'esecuzione e
+         spieghiamo perché nel tool_result: il giro successivo del loop
+         dà a Claude la possibilità di scegliere capacita_non_disponibile
+         (o un vero tool "risorsa", quando ne esisterà uno) invece di
+         insistere sullo stesso ripiego. Si applica solo qui, non alla
+         coda di conferma sotto: le azioni ad alto rischio passano comunque
+         da una domanda esplicita all'utente, un secondo controllo naturale. */
+      if (intentoAttivo && intentoAttivo.oggetto === "risorsa" && tool.categoria === "azione") {
+        risultati.push({
+          type: "tool_result",
+          tool_use_id: richiesta.id,
+          content: JSON.stringify({ errore: `Questa richiesta è stata classificata come "mostra/recupera una risorsa", non come un'azione da registrare: ${richiesta.name} non è lo strumento giusto. Se non hai un tool che recuperi davvero questa risorsa, chiama capacita_non_disponibile invece di creare un impegno o un appunto.` }),
+          is_error: true,
+        });
+        continue;
+      }
+
       if (richiedeConferma(tool)) {
         /* Non eseguiamo subito: la mettiamo in coda e continuiamo a
            esaminare le altre richieste dello stesso turno, così le
@@ -1835,7 +2050,7 @@ async function handleAssistant(req, res, user, accessToken) {
       try {
         const esito = await tool.run(richiesta.input, ctx);
         await registraOperazione(user, richiesta.name, richiesta.input, esito, "auto");
-        azioniEseguite.push({ tool: richiesta.name, esito });
+        if (!STRUMENTI_INTERNI.has(richiesta.name)) azioniEseguite.push({ tool: richiesta.name, esito });
         risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify(esito) });
       } catch (err) {
         const erroreEsito = { errore: err.message || "operazione non riuscita" };
