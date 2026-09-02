@@ -285,6 +285,94 @@
         "verifica": "automatica",
         "controllo": "zero chiamate a /api?action=assistant — coperto da eval/router.test.js, non da live-check.js"
       }
+    },
+    {
+      "id": "brain-risorsa-01",
+      "categoria": "IntentFrame — vocabolario mai visto, nessun tool adatto",
+      "situazione": "Richiesta di tipo 'risorsa' per qualcosa che non esiste in nessun tool del registro (né foto né documenti né altro) — verifica la capacità generale (Gap 1/punto 1), non una frase specifica: la parola 'planimetria' non compare in nessun test precedente né nel prompt",
+      "input": "Fammi vedere la planimetria del cantiere di Bianchi",
+      "atteso": {
+        "tipo": "testo_onesto",
+        "verifica": "automatica",
+        "strumenti_attesi": [],
+        "controllo": "NON deve chiamare crea_impegno né crea_appunto (sarebbe il vecchio comportamento sbagliato): deve dichiarare onestamente il limite con capacita_non_disponibile e dirlo a parole, mai fingere di aver 'segnato' qualcosa"
+      }
+    },
+    {
+      "id": "brain-risorsa-02",
+      "categoria": "IntentFrame — risorsa con un vero tool disponibile",
+      "situazione": "Richiesta di tipo 'risorsa' per qualcosa che invece HA un tool reale (punto 4) — deve usarlo, non descriverlo soltanto",
+      "input": "Fammi vedere le ultime foto del cantiere",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["recupera_foto_cantiere"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare recupera_foto_cantiere, non crea_impegno/crea_appunto e non capacita_non_disponibile (il tool esiste davvero)"
+      }
+    },
+    {
+      "id": "brain-risorsa-03",
+      "categoria": "IntentFrame — comunicazione che referenzia una risorsa (combinazione mai testata)",
+      "situazione": "Mandare qualcosa che è a sua volta una risorsa: deve prima recuperarla, mai proporre l'invio a vuoto",
+      "precondizione": "Deve esistere almeno una foto cantiere caricata e un cliente 'Conti' in anagrafica",
+      "input": "Manda le ultime foto del cantiere a Conti",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "stato_atteso": "in_attesa_conferma",
+        "verifica": "manuale",
+        "controllo": "recupera_foto_cantiere deve comparire in azioni PRIMA che arrivi la richiesta di conferma per manda_messaggio; la domanda di conferma (o il testo del messaggio proposto) deve contenere un link vero a una foto, mai una frase generica tipo 'ti mando le foto' senza nulla di concreto"
+      }
+    },
+    {
+      "id": "brain-focus-01",
+      "categoria": "Current Focus — persiste oltre un turno di mezzo, nessuna scadenza a tempo",
+      "situazione": "Il focus deve restare valido anche dopo un turno completamente scollegato di mezzo (non solo subito dopo, come i test già coperti altrove) — verifica la correzione esplicita di Gianardi: niente timer fisso",
+      "input_sequenza": ["Fammi vedere il documento di Rossi per la pratica", "Quanti clienti ho in totale", "Mandalo a Rossi"],
+      "note": "Tre turni separati nella stessa conversazione (senza runId tra un turno e l'altro): il turno di mezzo è deliberatamente estraneo (una domanda generica), per verificare che non cancelli il focus. 'Mandalo' nell'ultimo turno deve risolvere sul documento del primo turno. IMPORTANTE: il Current Focus si inietta nel messaggio lato FRONTEND (notaFocusCorrente in index.html), non nel backend — live-check.js manda le frasi direttamente a /api?action=assistant, bypassando il frontend, quindi questo caso va provato nell'app vera (o in una pagina di test che passi da collegaMicTesto), non con live-check.js da solo.",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "stato_atteso": "in_attesa_conferma",
+        "verifica": "manuale",
+        "controllo": "l'ultimo turno deve proporre l'invio del documento di Rossi (stesso cliente/documento del primo turno), non chiedere 'a cosa ti riferisci?' né confondersi con la domanda generica di mezzo"
+      }
+    },
+    {
+      "id": "brain-focus-02",
+      "categoria": "Current Focus — sostituito da un nuovo riferimento esplicito incompatibile",
+      "situazione": "Un secondo riferimento esplicito e diverso deve sostituire il focus precedente, non affiancarlo",
+      "precondizione": "Devono esistere foto cantiere taggate a un cliente diverso da quello del documento cercato",
+      "input_sequenza": ["Fammi vedere il documento di Rossi", "Fammi vedere le foto del cantiere di Bianchi", "Mandale a Conti"],
+      "note": "Stessa avvertenza di brain-focus-01: il Current Focus è iniettato lato frontend, va provato nell'app vera, non con live-check.js da solo.",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "stato_atteso": "in_attesa_conferma",
+        "verifica": "manuale",
+        "controllo": "l'ultimo turno deve riferirsi alle foto di Bianchi (il focus più recente), MAI al documento di Rossi del primo turno — 'mandale' (plurale, foto) è anche un indizio semantico che aiuta a distinguere i due riferimenti"
+      }
+    },
+    {
+      "id": "brain-entity-01",
+      "categoria": "Entity Resolution uniforme — cliente nuovo mai visto, offerta di aggiungerlo",
+      "situazione": "Verifica la capacità generale (non il caso specifico già corretto in precedenza): un nome mai esistito in anagrafica, in un dominio/nome completamente diverso da qualunque test precedente",
+      "input": "Ricordami di richiamare Edilverde Costruzioni domani mattina",
+      "atteso": {
+        "tipo": "domanda_o_azione_con_conferma",
+        "verifica": "manuale",
+        "controllo": "deve segnalare che 'Edilverde Costruzioni' non è tra i clienti e chiedere se aggiungerlo, non lasciarlo scollegato in silenzio e non crearlo automaticamente senza chiedere — indipendentemente dal fatto che l'impegno possa comunque essere creato anche senza collegarlo"
+      }
+    },
+    {
+      "id": "brain-entity-02",
+      "categoria": "Entity Resolution uniforme — manca_telefono non deve bloccare un'azione che non lo richiede",
+      "situazione": "Un cliente esistente ma senza telefono salvato, in una richiesta che combina un tentativo di contatto con un'azione indipendente che NON ha bisogno del telefono — combinazione mai testata prima",
+      "precondizione": "Deve esistere un cliente senza numero di telefono salvato",
+      "input": "Contatta Bianchi e nel frattempo segnami di preparare i documenti per lui",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "manuale",
+        "controllo": "crea_impegno per 'preparare i documenti' deve comunque essere chiamato ed eseguito, anche se manca il telefono di Bianchi — al più il testo finale chiede il numero per il contatto diretto, ma questo non deve impedire l'esecuzione della seconda richiesta indipendente"
+      }
     }
   ]
 }

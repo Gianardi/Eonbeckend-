@@ -2813,6 +2813,13 @@ async function handleTranscribe(req, res) {
   return send(res, 200, { text: (out.text || "").trim() });
 }
 
+/* Named export solo per i test automatici (eval/backend.test.js): sono
+   funzioni pure (nessuna chiamata di rete/database), utili da
+   verificare in isolamento senza un account Supabase né una chiave
+   Anthropic. Non cambia in nessun modo il comportamento del vero
+   endpoint, che resta unicamente l'export default sotto. */
+export { estraiIntentoDaMessaggi, costruisciFocus };
+
 /* ============================================================
    Punto di ingresso unico
    ============================================================ */

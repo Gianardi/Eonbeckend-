@@ -6,7 +6,7 @@ sezioni 38-39). L'idea: non testare "l'assistente capisce la frase X",
 ma "l'assistente si comporta bene nella situazione Y", con più modi
 diversi di dire la stessa cosa.
 
-## Tre pezzi
+## Quattro pezzi
 
 ### `casi.json` — il catalogo
 
@@ -15,14 +15,20 @@ descrizione, frase o sequenza di frasi, cosa ci si aspetta). È dati,
 non codice — leggibile anche senza eseguire nulla, come promemoria di
 cosa EON dovrebbe saper fare. Aggiungere un caso nuovo, quando si nota
 un comportamento da verificare, è semplice: una voce in più nell'array
-`casi`.
+`casi`. I casi con id `brain-*` coprono in particolare il nuovo
+contratto centrale del BRAIN (IntentFrame, Current Focus, Entity
+Resolution uniforme, risorse — vedi `TODO.md`): situazioni scelte
+apposta con vocabolario/domini mai usati altrove nel catalogo, per
+verificare la capacità generale e non una frase specifica già corretta.
 
-### `router.test.js` — parte automatica, gira subito
+### `router.test.js` — parte automatica lato frontend, gira subito
 
-Copre solo lo strato **deterministico**: router di navigazione, router
-di letture locali, nota di contesto per le correzioni veloci. Nessuna
-di queste funzioni chiama l'AI — sono JavaScript puro nel frontend, si
-possono verificare al 100% senza un account o una chiave Anthropic.
+Copre lo strato **deterministico** del frontend: router di
+navigazione, router di letture locali, nota di contesto per le
+correzioni veloci, e il Current Focus (nessuna scadenza a tempo).
+Nessuna di queste funzioni chiama l'AI — sono JavaScript puro nel
+frontend, si possono verificare al 100% senza un account o una chiave
+Anthropic.
 
 ```
 NODE_PATH=/opt/node22/lib/node_modules node eval/router.test.js
@@ -32,9 +38,28 @@ NODE_PATH=/opt/node22/lib/node_modules node eval/router.test.js
 Playwright è preinstallato lì. Su una macchina normale: `npm install
 playwright` una volta, poi semplicemente `node eval/router.test.js`.)
 
-Fa già parte del flusso di lavoro normale: da eseguire dopo ogni
-modifica al router o al contesto delle correzioni, prima di aprire una
-PR — esattamente come `node --check` per la sintassi.
+### `backend.test.js` — parte automatica lato backend, gira subito
+
+Stesso principio di `router.test.js` ma per le funzioni pure del
+backend (`api/index.js`): `estraiIntentoDaMessaggi` (come si ricostruisce
+l'IntentFrame dalla cronologia dei messaggi, incluso lo "scarico"
+dell'intento dopo `capacita_non_disponibile`) e `costruisciFocus` (quando
+un'entità dichiarata diventa davvero il nuovo Current Focus). Nessuna
+chiamata di rete, nessun database, nessuna AI vera: solo la logica di
+interpretazione, verificata su cronologie di messaggi costruite a mano
+nello stesso formato che userebbe davvero Anthropic. Le due funzioni
+sono esportate da `api/index.js` solo per questo (`export {
+estraiIntentoDaMessaggi, costruisciFocus }`, in coda al file): non
+cambia in nessun modo il comportamento del vero endpoint.
+
+```
+node eval/backend.test.js
+```
+
+Entrambi `router.test.js` e `backend.test.js` fanno già parte del
+flusso di lavoro normale: da eseguire dopo ogni modifica al router, al
+contesto delle correzioni, all'IntentFrame o al Current Focus, prima di
+aprire una PR — esattamente come `node --check` per la sintassi.
 
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 

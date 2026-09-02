@@ -172,6 +172,50 @@ async function main() {
       JSON.stringify(contestoMultiAzione)
     );
 
+    console.log("\n--- Current Focus senza scadenza a tempo (EON BRAIN punto 2) ---");
+    const focus = await page.evaluate(async () => {
+      currentSession = { user: { id: "test-user" } };
+      const payloads = [];
+      let prossimaRisposta = null;
+      window.chiediAssistente = async (msg, runId) => {
+        payloads.push({ msg, runId: runId || null });
+        const r = prossimaRisposta || { stato: "concluso", testo: "Fatto.", azioni: [] };
+        prossimaRisposta = null;
+        return r;
+      };
+      async function invia(testo, rispostaSuccessiva) {
+        prossimaRisposta = rispostaSuccessiva;
+        document.getElementById("homeHeroCampo").value = testo;
+        document.getElementById("homeHeroSend").click();
+        await new Promise((r) => setTimeout(r, 300));
+      }
+
+      /* Turno 1: nessun focus dichiarato dal server -> nessuna nota
+         nel messaggio successivo. */
+      await invia("che tempo fa domani", { stato: "concluso", testo: "Non lo so.", azioni: [] });
+      // Turno 2: il server dichiara un focus esplicito (foto del cantiere Trani).
+      await invia("fammi vedere le foto del cantiere Trani", {
+        stato: "concluso", testo: "Ecco le foto.", azioni: [],
+        focus: { tipo: "foto", riferimento: "cantiere Trani" },
+      });
+      // Turno 3: nessun focus nella risposta -> deve restare quello del turno 2 (niente scadenza a tempo).
+      await invia("grazie", { stato: "concluso", testo: "Prego.", azioni: [] });
+      // Turno 4: un NUOVO focus esplicito e incompatibile -> sostituisce quello precedente.
+      await invia("fammi vedere il documento di Rossi", {
+        stato: "concluso", testo: "Ecco il documento.", azioni: [],
+        focus: { tipo: "documento", riferimento: "Rossi" },
+      });
+      // Turno 5: di nuovo nessun focus -> resta quello del turno 4, non quello del turno 2.
+      await invia("mandalo", { stato: "concluso", testo: "Inviato.", azioni: [] });
+
+      return payloads.map((p) => p.msg);
+    });
+    verifica("turno 1 (nessun focus dal server) non ha nota di focus", !focus[0].includes("Focus attuale"), focus[0]);
+    verifica("turno 2 (primo focus) non ha ancora nota (il focus arriva CON la risposta di questo turno, si vede dal turno dopo)", !focus[1].includes("Focus attuale"), focus[1]);
+    verifica("turno 3 mantiene il focus del turno 2 anche senza scadenza a tempo", focus[2].includes("Focus attuale") && focus[2].includes("cantiere Trani"), focus[2]);
+    verifica("turno 4 non ha ancora la nota del NUOVO focus (arriva con la risposta di questo turno)", focus[3].includes("cantiere Trani"), focus[3]);
+    verifica("turno 5 usa il focus sostituito (Rossi), non più quello vecchio (cantiere Trani)", focus[4].includes("Focus attuale") && focus[4].includes("Rossi") && !focus[4].includes("cantiere Trani"), focus[4]);
+
     console.log(`\n${totali - fallimenti}/${totali} verifiche passate.`);
     if (fallimenti > 0) process.exitCode = 1;
   } finally {
