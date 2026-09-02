@@ -96,6 +96,31 @@ che lo script trovi certi dati già in anagrafica, e molti altri casi
 scrivono davvero (creano impegni, appunti, a volte chiedono conferma
 per azioni delicate) — non è un ambiente "a vuoto" che non tocca nulla.
 
+### `check-schema.js` — gate di verifica schema, prima del deploy
+
+Non è un test sul comportamento del Brain: verifica che lo schema
+Supabase reale contenga davvero le tabelle/colonne che il codice
+presuppone. Nato da un fatto concreto, non un'ipotesi: due volte in
+questo progetto uno script in `supabase/*.sql` è stato scritto ma mai
+eseguito sul database vero, ed è stato scoperto solo da un utente
+reale, molto dopo che il codice che ci contava era già in produzione
+(`cantiere_foto.client_id`, l'intera tabella `ai_request_log`).
+
+```
+SUPABASE_URL=https://tuo-progetto.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=<service_role> \
+node eval/check-schema.js
+```
+
+Interroga PostgREST (`GET /rest/v1/<tabella>?select=<colonne>&limit=0`)
+per ogni tabella nel contratto scritto in cima al file — nessuna
+dipendenza nuova, stesso meccanismo già usato da `db()` in
+`api/index.js`. Esce con codice 1 se qualcosa manca, elencando
+esattamente cosa. **Quando si aggiunge un tool o una query che
+presuppone una tabella/colonna nuova, va aggiornato questo file prima
+di aprire la PR** — è la metà "schema" della checklist di composizione
+descritta in `TODO.md`.
+
 ## Quando aggiungere un caso nuovo
 
 Quando si nota — usando l'app davvero, o durante lo sviluppo — che

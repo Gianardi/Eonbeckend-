@@ -665,6 +665,64 @@ Tecnicamente serve:
 
 Richiesto da Gianardi il 31/08/2026.
 
+## EON BRAIN, roadmap operativa verso la beta
+
+Esecuzione della roadmap concordata con Gianardi il 02/09/2026 (diagnosi
+dei 3 test reali su iPhone → revisione critica indipendente → rischi
+architetturali → decisioni strategiche a 12 mesi → roadmap operativa),
+un punto alla volta, in ordine.
+
+**1.1 — Migrazioni mancanti applicate (02/09/2026).** Le due migrazioni
+scritte in `supabase/*.sql` ma mai eseguite in produzione sono state
+applicate: `cantiere_foto.client_id` (colonna + indice) e l'intera
+tabella `ai_request_log` (con RLS, `select` solo del proprio owner).
+Verificate contro lo schema reale via `information_schema.columns`
+dopo l'esecuzione — non solo l'esito `{"success":true}` della
+migrazione stessa. Chiude la causa infrastrutturale del Test 3 (foto
+del cantiere Fabbri) e sblocca l'osservabilità per-turno mai avuta
+finora (punto 2.4 del roadmap, ancora da completare: query/dashboard
+sopra questa tabella).
+
+**1.3 — Gate di verifica schema (02/09/2026).** `eval/check-schema.js`
+(vedi `eval/README.md`): confronta lo schema Supabase reale con il
+contratto tabelle/colonne che il codice presuppone, usando lo stesso
+meccanismo REST già usato da `db()` in `api/index.js` — nessuna
+dipendenza nuova. Nato dal fatto, non dall'ipotesi, che due migrazioni
+scritte non fossero mai state applicate senza che nulla lo segnalasse.
+**Non eseguibile in questo ambiente di sviluppo** (stesso blocco di
+rete del sandbox già noto per `eval/live-check.js` — verificato con un
+tentativo diretto, CONNECT respinto con 403): da eseguire da un
+ambiente con accesso di rete reale, o integrato in CI (punto 3.1 del
+roadmap, ancora da fare).
+
+**1.4 — Checklist di composizione.** Per ogni PR che tocca uno dei
+meccanismi trasversali elencati sotto, prima del merge rispondere
+esplicitamente (nella descrizione della PR o nel commento di
+revisione): *quali altri meccanismi trasversali già esistenti
+potrebbero interagire con questa modifica, e l'interazione è stata
+verificata — non solo la fase da sola?*
+
+Meccanismi trasversali attuali (aggiornare questa lista quando se ne
+aggiunge uno nuovo):
+- IntentFrame (`interpreta_richiesta`: operazione/oggetto/entità)
+- Entity Resolution (`risolviClienteDaNome`, `cliente_risolto`)
+- Current Focus (`costruisciFocus`, `usa_focus_corrente`)
+- Guardrail categoria risorsa/azione (in `proseguiAssistente`, blocca
+  un tool "azione" quando l'intento dichiarato è "risorsa")
+- Routing modello (Haiku/Sonnet: `puoRipiegarePerRete`, `nonSicuro`)
+- Tool "risorsa" e fallback onesto (`recupera_foto_cantiere`,
+  `recupera_documenti_cliente`, `capacita_non_disponibile`)
+
+Nata dalla causa comune ai 3 bug reali di settembre 2026: ciascuno dei
+6 punti precedenti era stato validato in isolamento (code-review, test
+automatici, regressione) ma mai incrociato sistematicamente con quanto
+già esisteva — questa checklist è il correttivo di processo, non di
+codice.
+
+Prossimo punto del roadmap: **2.1**, ambiente di staging (Supabase
+branching) per la prima esecuzione mai riuscita di `eval/live-check.js`
+e di `eval/check-schema.js` contro un ambiente reale.
+
 ## Pulizia e precisazioni
 
 Voce generica per una passata di rifinitura sull'app: perfezionare alcune
