@@ -8216,6 +8216,26 @@ function notaContestoRecente(azioni){
   return `\n\n[Contesto: pochi istanti fa hai usato questi strumenti:\n${elenco}\nSe il messaggio sopra sembra una correzione o un seguito di UNA di queste azioni specifiche (es. cambiare solo l'orario o un dettaglio, senza nominare una persona o un cliente diverso da quelli qui sopra), usa gli strumenti giusti per correggerla — capendo da solo, se ce n'è più di una, a quale si riferisce. Se invece nomina qualcun altro, o sembra comunque una richiesta nuova e diversa, ignora completamente questo contesto e trattala come tale.]`;
 }
 
+/* Current Focus (EON BRAIN, punto 2) — diverso dal contesto delle
+   correzioni sopra (che scade dopo 3 minuti, pensato per "no, alle 10"
+   subito dopo un'azione): questo ricorda l'ultima entità esplicita di
+   cui si è parlato ("il preventivo di Rossi", "il cantiere Fini") per
+   risolvere un riferimento implicito successivo ("mandalo", "quello di
+   prima") anche a distanza di tempo nella stessa conversazione. Niente
+   scadenza a tempo: il valore arriva già filtrato dal server (vedi
+   costruisciFocus in api/index.js), che lo manda SOLO quando l'utente
+   ha appena nominato qualcosa di esplicito — mai quando ha usato un
+   riferimento implicito riferito a questo stesso focus — quindi qui
+   basta sovrascrivere quando arriva un valore nuovo e non toccare
+   nulla quando non arriva: un turno di mezzo che non nomina nulla di
+   nuovo lascia il focus precedente intatto, un nuovo riferimento
+   esplicito lo sostituisce sempre (è di per sé "incompatibile" col
+   precedente, altrimenti l'utente non l'avrebbe ripetuto). */
+function notaFocusCorrente(focus){
+  if(!focus) return "";
+  return `\n\n[Focus attuale della conversazione: si stava parlando di "${focus.riferimento}" (${focus.tipo}). Se il messaggio sopra usa un riferimento implicito ("lo", "la", "quello", "quello di prima", ecc.) invece di nominare di nuovo qualcosa, riferiscilo a questo — ma ri-cercalo tu stesso con gli strumenti giusti (es. cerca_cliente), non fidarti di un id vecchio che potresti già avere in questa conversazione: nel frattempo potrebbe essere cambiato qualcosa. Se invece il messaggio nomina esplicitamente qualcos'altro, ignora questo focus.]`;
+}
+
 /* Microfono grande + campo di testo libero che parlano con l'assistente
    vero (stesso motore di "Raccontami la giornata"): usato dalla Home
    (qualsiasi cosa) e dalla pagina Clienti (aggiungere un cliente). Un
@@ -8250,6 +8270,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
   let ultimeAzioniVisibili = null;
   let ultimeAzioniScadenza = 0;
   const FINESTRA_CONTESTO_MS = 3 * 60 * 1000;
+
+  /* Current Focus di questo microfono/campo di testo (vedi
+     notaFocusCorrente più sopra) — niente scadenza a tempo qui: si
+     aggiorna solo quando il server manda un nuovo focus esplicito. */
+  let focusCorrente = null;
 
   async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
@@ -8311,7 +8336,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     let risposta;
     try{
       risposta = await chiediAssistente(
-        inContinuazione ? testo : costruisciPrompt(testo) + notaContestoRecente(contestoRecente),
+        inContinuazione ? testo : costruisciPrompt(testo) + notaContestoRecente(contestoRecente) + notaFocusCorrente(focusCorrente),
         runIdDaContinuare || undefined
       );
     }catch(err){
@@ -8332,6 +8357,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        se c'era, è stata davvero consumata dal server. La riapriamo più
        sotto solo se la nuova risposta lo richiede. */
     runIdAperto = null;
+
+    /* Aggiorna il Current Focus SOLO se il server ne ha mandato uno
+       nuovo (vedi notaFocusCorrente più sopra): se non arriva nulla —
+       perché il turno non nominava un'entità esplicita, o perché
+       riusava quella già in focus — quello attuale resta intatto,
+       nessuna scadenza a tempo lo cancella da sola. */
+    if(risposta.focus) focusCorrente = risposta.focus;
 
     /* Il testo si svuota solo ora, a richiesta riuscita: se la chiamata
        fallisce l'utente non deve riscrivere tutto da capo. */
