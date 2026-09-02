@@ -448,6 +448,50 @@ function paroleSimili(a, b) {
   return distanzaLevenshtein(a, b) <= soglia;
 }
 
+/* EON BRAIN, Entity Resolution uniforme (punto 3): stessa logica a tre
+   livelli già usata da trova_o_crea_cliente (esatto -> substring per
+   parola -> fuzzy, mai una corrispondenza fuzzy trattata come certa),
+   ma qui è un puro lookup, mai una creazione. La chiama SEMPRE
+   interpreta_richiesta quando l'entità dichiarata è di tipo "cliente"
+   — non è mai il modello a decidere se cercarla o con quale tool: così
+   un cliente ambiguo, inesistente o solo "simile" viene segnalato allo
+   stesso modo qualunque sia il tool che il turno userà poi
+   (crea_impegno, manda_messaggio, aggiorna_cliente, ...), invece di
+   dipendere dal fatto che il modello si ricordi di chiamare
+   cerca_cliente prima. Duplica volutamente parte della ricerca già
+   presente in cerca_cliente/trova_o_crea_cliente invece di
+   condividerla, per non rischiare di alterare il comportamento di due
+   tool già in uso solo per introdurne uno nuovo. */
+async function risolviClienteDaNome(nomeCercato, ctx) {
+  const nome = nomeCercato.trim();
+  const parole = nome.toLowerCase().split(/\s+/).filter(Boolean);
+  const tutti = await db(`clients?select=id,name,phone&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+  const lista = Array.isArray(tutti) ? tutti : [];
+
+  let candidati = lista.filter((c) => c.name.trim().toLowerCase() === nome.toLowerCase());
+  if (candidati.length === 0) {
+    candidati = lista.filter((c) => {
+      const basso = c.name.toLowerCase();
+      return parole.every((p) => basso.includes(p));
+    });
+  }
+  if (candidati.length === 1) return { stato: "trovato", id: candidati[0].id, nome: candidati[0].name, telefono: candidati[0].phone || null };
+  if (candidati.length > 1) return { stato: "ambiguo", candidati: candidati.map((c) => ({ id: c.id, nome: c.name, telefono: c.phone || null })) };
+
+  /* Nessuna corrispondenza esatta/per parola: un'unica corrispondenza
+     "simile" (dettatura imprecisa) non è mai trattata come certa —
+     stato distinto da "trovato", perché chi la riceve deve chiedere
+     conferma invece di usarla direttamente. */
+  const simili = lista.filter((c) => {
+    const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
+    return parole.every((p) => paroleCliente.some((pc) => paroleSimili(p, pc)));
+  });
+  if (simili.length === 1) return { stato: "simile", id: simili[0].id, nome: simili[0].name, telefono: simili[0].phone || null };
+  if (simili.length > 1) return { stato: "ambiguo", candidati: simili.map((c) => ({ id: c.id, nome: c.name, telefono: c.phone || null })) };
+
+  return { stato: "non_trovato", nome_cercato: nome };
+}
+
 /* "2026-09-01T08:00:00" -> "mar 1 set, 08:00": lo stesso formato che
    l'app già usa per mostrare gli impegni. Lo decide sempre il server,
    mai il modello, così il formato resta coerente in tutta l'app. */
@@ -1098,7 +1142,7 @@ const TOOLS = {
           titolo: { type: "string", description: "Titolo breve e concreto, come lo direbbe l'utente" },
           quando_iso: { type: "string", description: "Data e ora in formato ISO 8601. Se l'utente non dice quando, usa le 08:00 del primo giorno utile: non lasciare mai un impegno senza data." },
           tipo: { type: "string", enum: ["incontro", "chiamata", "commissione"] },
-          cliente_id: { type: "string", description: "Id del cliente collegato, se l'impegno riguarda una persona già in anagrafica (cercala prima con cerca_cliente)" },
+          cliente_id: { type: "string", description: "Id del cliente collegato, se l'impegno riguarda una persona già in anagrafica (di solito già noto da cliente_risolto in interpreta_richiesta; altrimenti cercala prima con cerca_cliente)" },
         },
         required: ["titolo", "quando_iso", "tipo"],
       },
@@ -1392,7 +1436,7 @@ const TOOLS = {
     categoria: "supporto",
     schema: {
       name: "interpreta_richiesta",
-      description: "OBBLIGATORIO come primo strumento di ogni richiesta nuova, prima di qualsiasi altro: dichiara qui la tua comprensione di cosa vuole ottenere l'utente. Non esegue nulla sui dati, serve solo a strutturare la tua comprensione prima di agire.",
+      description: "OBBLIGATORIO come primo strumento di ogni richiesta nuova, prima di qualsiasi altro: dichiara qui la tua comprensione di cosa vuole ottenere l'utente. Non esegue scritture: se l'entità è di tipo \"cliente\" cerca però subito quel nome in anagrafica e restituisce cliente_risolto (stato trovato/simile/ambiguo/non_trovato) — non serve chiamare cerca_cliente separatamente per lo stesso nome.",
       input_schema: {
         type: "object",
         properties: {
@@ -1424,8 +1468,8 @@ const TOOLS = {
         required: ["operazione", "oggetto"],
       },
     },
-    async run(input) {
-      return {
+    async run(input, ctx) {
+      const esito = {
         intento_registrato: {
           operazione: input.operazione,
           oggetto: input.oggetto,
@@ -1433,6 +1477,23 @@ const TOOLS = {
           cardinalita: input.cardinalita || "singolare",
         },
       };
+
+      /* "tipo" è testo libero, non un enum (vedi lo schema): un
+         confronto rigido === "cliente" salterebbe la risoluzione senza
+         nessun segnale se il modello scrive "Cliente" o "cliente " —
+         qui normalizziamo, esattamente come già si fa per
+         riferimento_esplicito con eStringaNonVuota+trim. */
+      const entita = input.entita;
+      const tipoEntita = eStringaNonVuota(entita && entita.tipo) ? entita.tipo.trim().toLowerCase() : null;
+      if (tipoEntita === "cliente" && eStringaNonVuota(entita.riferimento_esplicito)) {
+        esito.cliente_risolto = await risolviClienteDaNome(entita.riferimento_esplicito, ctx);
+        const statoConTelefono = esito.cliente_risolto.stato === "trovato" || esito.cliente_risolto.stato === "simile";
+        if (statoConTelefono && input.operazione === "contatta" && !esito.cliente_risolto.telefono) {
+          esito.cliente_risolto.manca_telefono = true;
+        }
+      }
+
+      return esito;
     },
   },
 
@@ -1603,6 +1664,8 @@ function systemPromptAssistente() {
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
 Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato) e nessuno strumento tra quelli disponibili sa davvero recuperare quella cosa, NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra, invece di lasciare attivo solo il primo oggetto dichiarato per l'intero messaggio.
+
+Quando dichiari un'entità di tipo "cliente" in interpreta_richiesta CON un riferimento_esplicito (un nome), il risultato include già cliente_risolto — non richiamare cerca_cliente per lo stesso nome, è già stato cercato. (Se invece usi usa_focus_corrente senza un nome esplicito, cliente_risolto non c'è: usa cerca_cliente tu stesso se ti serve un id.) Reagisci in base al suo stato: "trovato" → usa direttamente il suo id, nessuna domanda necessaria per l'identità (ma se stai per crearlo di nuovo come cliente nuovo, avvisa che esiste già e chiedi conferma prima di creare un doppione). "simile" → il nome assomiglia a un cliente esistente ma non è uguale (possibile dettatura imprecisa, o un cliente diverso): chiedi conferma prima di usarlo, non trattarlo come certo. "ambiguo" → più clienti corrispondono: elencali brevemente (nome, e telefono o zona se utili a distinguerli) e chiedi quale intende. "non_trovato" → nessun cliente con questo nome: se l'azione non richiede necessariamente un cliente collegato (es. un impegno che nomina solo una persona di passaggio) procedi comunque senza collegarlo; se invece richiede un destinatario reale (mandare un messaggio, un contatto), chiedi se vuoi aggiungerlo come nuovo cliente prima di procedere. Se l'operazione è "contatta" e non hai un vero strumento per avviare un contatto diretto (una chiamata), dillo onestamente con capacita_non_disponibile — e se in più cliente_risolto.manca_telefono è vero, approfittane per chiedere il numero e offrire di salvarlo con aggiorna_cliente, così la prossima volta sarà già pronto. Ma se la richiesta si può comunque soddisfare con uno strumento reale che non ha bisogno del telefono (es. mandare un messaggio interno), usalo normalmente: manca_telefono da solo non deve mai bloccare un'azione che non lo richiede davvero.
 
 REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno.
 
