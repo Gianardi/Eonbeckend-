@@ -580,6 +580,64 @@ regression test dopo ogni fase.
    Regressione: `eval/router.test.js` 33/33 (28 esistenti + 5 nuovi),
    `eval/backend.test.js` 15/15 (tutto nuovo).
 
+6. **Bulk/batch e ragionamento temporale — FATTO il 02/09/2026 (ultimo
+   punto del piano).** Due capacità distinte, lasciate volutamente per
+   ultime perché le più grandi tra le sei.
+   Bulk/batch: quando l'utente chiede un'azione delicata su più
+   elementi insieme (es. "cancella tutti gli impegni di domani"),
+   Claude chiama comunque lo strumento una volta per elemento (come
+   già fa per `crea_impegno` con più impegni distinti) — il cambiamento
+   è tutto nell'orchestratore, non nei singoli tool. In
+   `proseguiAssistente()`, le richieste allo STESSO strumento nello
+   stesso giro vengono raggruppate (nuova `Map codaPerNome`) in
+   un'unica voce `{nome, elementi}`, con `descriviProssimaAzione` che
+   costruisce UNA sola domanda quando il gruppo ha più di un elemento,
+   elencandoli tutti. Il ramo di conferma esegue tutti gli elementi con
+   lo stesso Sì/No, ciascuno con il proprio `tool_result`.
+   Ragionamento temporale: due correzioni al system prompt, con un
+   limite dichiarato onestamente — (1) il criterio per chiedere
+   conferma sull'orario è ora "calcolare un orario richiederebbe
+   supporre qualcosa che potrei sbagliare" invece di "la frase suona
+   vaga": più preciso, ma resta un giudizio del modello, riduce
+   l'incoerenza osservata nel Documento 3 (stesso messaggio, risposte
+   diverse in run diversi) senza eliminarla per costruzione — non è
+   possibile garantirlo con un prompt, solo con un vincolo strutturale
+   che qui non c'è ancora; (2) più impegni SENZA alcun riferimento di
+   tempo, in sequenza nello stesso messaggio, vanno distanziati di
+   un'ora invece di ricevere tutti lo stesso default — questa invece è
+   una regola meccanica e verificabile.
+   Due giri di code-review (alto poi medio) hanno trovato e fatto
+   correggere: la domanda di conferma per un gruppo usava `Promise.all`,
+   quindi un solo elemento non descrivibile faceva sparire la domanda
+   anche per gli altri, perfettamente validi — corretto con
+   `Promise.allSettled`, stesso principio già usato da `svuota_cestino`
+   per la raccolta degli id; la regola di distanziamento, come scritta
+   la prima volta, si disattivava per l'intero gruppo se anche un solo
+   impegno aveva un riferimento vago — corretta per trattare i vaghi a
+   parte senza perdere la distanziazione tra i restanti.
+   `eval/casi.json`: 5 nuovi casi, inclusa una combinazione mai testata
+   (bulk + cliente ambiguo insieme) e un gruppo misto che verifica
+   esattamente il bug corretto dal secondo giro di review.
+   Regressione: `eval/router.test.js` 33/33, `eval/backend.test.js`
+   15/15 (nessuna delle due toccata da questo punto).
+
+   **Con questo si chiudono tutti e 6 i punti del design concordato per
+   il nuovo contratto centrale del BRAIN** (IntentFrame, Resource/
+   Action/Communication, Current Focus, Entity Resolution uniforme,
+   supporto risorse, test automatici, bulk e ragionamento temporale) —
+   nato dall'audit indipendente e dalla gap analysis sui 4 documenti di
+   Gianardi. Limiti noti e dichiarati onestamente, non chiusi da questo
+   piano: nessuna memoria/preferenza a lungo termine; il determinismo
+   sull'orario vago resta un giudizio del modello, non una garanzia
+   strutturale; nessun generatore di preventivi nuovi lato AI (resta
+   `capacita_non_disponibile`, la creazione vera passa dalla pagina
+   frontend dedicata); `eval/live-check.js` non è mai stato eseguito in
+   questa sessione (serve un account Supabase di prova e una chiave
+   Anthropic live). Prossimi passi possibili, da valutare con Gianardi
+   quando servirà: eseguire `eval/live-check.js` contro un vero deploy,
+   il Communication Hub multi-canale (già annotato sopra, progetto a
+   sé), o tornare su uno dei limiti appena elencati.
+
 ## EON intelligente: promemoria e avvisi veri, all'ora giusta
 
 **Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
