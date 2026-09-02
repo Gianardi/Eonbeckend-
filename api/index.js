@@ -1670,6 +1670,31 @@ function estraiIntentoDaMessaggi(elencoMessaggi) {
   return null;
 }
 
+/* EON BRAIN, Current Focus (punto 2): deriva da esporre al client
+   l'entità esplicita dichiarata nell'ultimo IntentFrame di questo
+   turno — MAI un id "in cache": solo tipo e riferimento testuale così
+   come detto dall'utente, che verrà ri-risolto normalmente (es. con
+   cerca_cliente) quando servirà davvero in un turno successivo, invece
+   di fidarsi ciecamente di un dato potenzialmente vecchio (un cliente
+   nel frattempo rinominato o cestinato). Non restituisce nulla:
+   - quando l'utente ha usato un riferimento implicito
+     (usa_focus_corrente) — il focus da mantenere è quello che il
+     frontend ha già, il turno non ne introduce uno nuovo;
+   - quando l'operazione è "consulta" — una domanda generica/di parere
+     può nominare un'entità solo come esempio ("se un cliente come
+     Rossi paga sempre in ritardo..."), senza che l'utente la stia
+     davvero mettendo a fuoco per un'azione successiva.
+   Niente scadenza a tempo qui: la validità del focus è decisa lato
+   frontend (index.html), in base a se viene sostituito da un
+   riferimento incompatibile — non da quanto tempo è passato. */
+function costruisciFocus(elencoMessaggi) {
+  const intento = estraiIntentoDaMessaggi(elencoMessaggi);
+  if (!intento || !intento.entita || intento.operazione === "consulta") return {};
+  const { tipo, riferimento_esplicito, usa_focus_corrente } = intento.entita;
+  if (usa_focus_corrente || !eStringaNonVuota(tipo) || !eStringaNonVuota(riferimento_esplicito)) return {};
+  return { focus: { tipo: tipo.trim(), riferimento: riferimento_esplicito.trim() } };
+}
+
 /* Prepara la domanda di conferma per la prossima azione delicata in coda. */
 async function descriviProssimaAzione(pendente, ctx) {
   const tool = TOOLS[pendente.nome];
@@ -1740,6 +1765,20 @@ async function handleAssistant(req, res, user, accessToken) {
   }
 
   async function proseguiAssistente() {
+  /* Chiude il turno aggiungendo, quando c'è, il Current Focus (vedi
+     costruisciFocus) alla risposta — un'unica via d'uscita invece di
+     ripetere la stessa logica ad ogni "return send(res, 200, ...)" del
+     turno. Chiude su "messages" per riferimento: al momento in cui
+     verrà davvero chiamata, più sotto, la variabile è già stata
+     valorizzata dal ramo giusto (conferma/continuazione/nuovo).
+     Il focus viene esposto SOLO su una risposta "concluso": mai su
+     "in_attesa_conferma" (chiede conferma per UNA specifica azione in
+     coda, che in un turno con più entità diverse potrebbe non essere
+     quella dell'ultimo IntentFrame dichiarato — esporla lì rischia di
+     far risolvere un riferimento implicito successivo sull'entità
+     sbagliata prima ancora che quella conferma sia stata data). */
+  const finisciTurno = (payload) => send(res, 200, payload.stato === "concluso" ? { ...payload, ...costruisciFocus(messages) } : payload);
+
   if (runId && typeof body.conferma === "boolean") {
     /* runId arriva dal client: prima di infilarlo in un URL verso il
        database (con la chiave di servizio, che scavalca RLS) lo
@@ -1795,7 +1834,7 @@ async function handleAssistant(req, res, user, accessToken) {
         in_sospeso: { coda: restoCoda, pronti: nuoviPronti },
         azioni: azioniEseguite,
       });
-      return send(res, 200, { stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
+      return finisciTurno({ stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
     }
 
     messages = run.messaggi.concat([{ role: "user", content: nuoviPronti }]);
@@ -1820,7 +1859,7 @@ async function handleAssistant(req, res, user, accessToken) {
     const nienteErroriNelTurno = nuoviPronti.every((p) => !p.is_error);
     if (body.conferma === true && nienteErroriNelTurno) {
       await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
-      return send(res, 200, { stato: "concluso", testo: "Fatto.", azioni: azioniEseguite });
+      return finisciTurno({ stato: "concluso", testo: "Fatto.", azioni: azioniEseguite });
     }
   } else if (runId) {
     /* Continuazione a testo libero di una domanda ancora aperta: EON
@@ -1991,7 +2030,7 @@ async function handleAssistant(req, res, user, accessToken) {
            volte un'azione che, in un turno successivo, ha già scritto
            qualcosa di vero nel database. */
         const salvato = await salvaRun(runId, user, { stato: "in_attesa_risposta", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
-        return send(res, 200, { stato: "concluso", runId: salvato.id, testo: testo || "Fatto.", azioni: azioniEseguite });
+        return finisciTurno({ stato: "concluso", runId: salvato.id, testo: testo || "Fatto.", azioni: azioniEseguite });
       }
 
       /* Risposta finale, non una domanda: se c'era un runId, il run era
@@ -2004,7 +2043,7 @@ async function handleAssistant(req, res, user, accessToken) {
       if (runId) {
         await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
       }
-      return send(res, 200, { stato: "concluso", testo: testo || "Fatto.", azioni: azioniEseguite });
+      return finisciTurno({ stato: "concluso", testo: testo || "Fatto.", azioni: azioniEseguite });
     }
 
     const richieste = data.content.filter((b) => b.type === "tool_use");
@@ -2073,7 +2112,7 @@ async function handleAssistant(req, res, user, accessToken) {
         in_sospeso: { coda, pronti: risultati },
         azioni: azioniEseguite,
       });
-      return send(res, 200, { stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
+      return finisciTurno({ stato: "in_attesa_conferma", runId: salvato.id, domanda, azioni: azioniEseguite });
     }
 
     messages.push({ role: "user", content: risultati });
@@ -2093,7 +2132,7 @@ async function handleAssistant(req, res, user, accessToken) {
     const tuttoRiuscito = risultati.every((r) => !r.is_error);
     if (soloConclusivi && tuttoRiuscito) {
       if (runId) await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
-      return send(res, 200, { stato: "concluso", testo: "Fatto.", azioni: azioniEseguite });
+      return finisciTurno({ stato: "concluso", testo: "Fatto.", azioni: azioniEseguite });
     }
   }
 
@@ -2103,7 +2142,7 @@ async function handleAssistant(req, res, user, accessToken) {
      invece di un errore secco, così l'utente sa cosa è andato a buon
      fine e cosa no, invece di scoprirlo dal calendario. */
   if (runId) await salvaRun(runId, user, { stato: "incompleto", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
-  return send(res, 200, {
+  return finisciTurno({
     stato: "incompleto",
     testo: "Non ho fatto in tempo a completare tutto: ho segnato quello che sono riuscita a fare. Riprova con una frase più semplice per il resto.",
     azioni: azioniEseguite,
