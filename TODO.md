@@ -477,6 +477,40 @@ regression test dopo ogni fase.
    una domanda "consulta" poteva diventare il focus per errore.
    Regressione: `eval/router.test.js` 28/28.
 
+3. **Entity Resolution uniforme — FATTO il 02/09/2026.** Prima la
+   risoluzione di un cliente ambiguo/inesistente viveva dentro i
+   singoli tool (`cerca_cliente`, `trova_o_crea_cliente`): se il
+   modello sceglieva un altro tool per eseguire l'azione, il
+   meccanismo veniva bypassato — non incoerenza del modello, il
+   sistema permetteva di aggirarlo. Visto due volte nei test reali: un
+   cliente nuovo mai proposto come tale, un "chiama X" senza telefono
+   mai richiesto.
+   Nuova `risolviClienteDaNome(nomeCercato, ctx)`: stessa logica a tre
+   livelli già usata da `trova_o_crea_cliente` (esatto → substring per
+   parola → fuzzy), ma come puro lookup, mai una creazione, con uno
+   stato distinto "simile" per una singola corrispondenza fuzzy — mai
+   trattata come certa. Duplica volutamente parte della ricerca già
+   presente negli altri due tool, per non alterarne il comportamento.
+   `interpreta_richiesta.run()` la chiama automaticamente ogni volta
+   che l'entità dichiarata è di tipo "cliente" con un riferimento
+   esplicito — non più il modello a decidere se/quando cercare. Il
+   risultato include `cliente_risolto` (trovato/simile/ambiguo/
+   non_trovato) e, quando l'operazione è "contatta" e manca un
+   telefono, `manca_telefono`. System prompt aggiornato con le
+   istruzioni sui 4 stati, generali per qualunque tool verrà scelto
+   dopo.
+   Due giri di code-review (alto poi medio) hanno trovato e fatto
+   correggere: il confronto sul tipo di entità era rigido invece di
+   tollerare maiuscole/spazi; la richiesta del telefono per "contatta"
+   rischiava di bloccare un'azione che non lo richiede affatto (es. un
+   messaggio interno) — ora legata esplicitamente a
+   `capacita_non_disponibile` quando manca davvero un modo di
+   contattare direttamente, mai un blocco a sé; lo stesso segnale
+   mancava per lo stato "simile"; una frase del prompt affermava senza
+   condizioni che `cliente_risolto` fosse sempre presente (falso con
+   un riferimento implicito); descrizione obsoleta su `crea_impegno`.
+   Regressione: `eval/router.test.js` 28/28.
+
 ## EON intelligente: promemoria e avvisi veri, all'ora giusta
 
 **Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
