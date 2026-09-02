@@ -1753,9 +1753,13 @@ Quando dichiari un'entità di tipo "cliente" in interpreta_richiesta CON un rife
 
 Se l'utente chiede di mandare/inviare qualcosa che è a sua volta una risorsa (es. "manda le foto del cantiere a Fabbri", "invia il documento a Rossi"), recupera prima quella risorsa (recupera_foto_cantiere/recupera_documenti_cliente) e SOLO DOPO chiama manda_messaggio — mai proporre l'invio di qualcosa che non hai mai recuperato davvero. manda_messaggio non allega file, solo testo: per foto e allegati (che hanno sempre un url reale) includi i link veri nel testo del messaggio, mai una frase generica come "ti mando le foto". Un preventivo o una fattura generati in app (tipo "preventivo_o_fattura" in recupera_documenti_cliente) invece NON hanno mai un url: non inventarne uno né promettere di inviarlo come link — di' che si vede solo dentro l'app, o riporta titolo/importo/riepilogo nel testo.
 
+Quando la richiesta riguarda più elementi insieme (cardinalita "insieme" in interpreta_richiesta, es. "cancella tutti gli impegni di domani", "elimina tutti i clienti inattivi"), chiama lo strumento delicato corrispondente una volta per ciascun elemento (dopo averli trovati, es. con elenca_appuntamenti/cerca_impegno) esattamente come già fai per crea_impegno con più impegni distinti — il sistema le raggruppa da solo in un'unica richiesta di conferma quando sono chiamate ripetute dello stesso strumento nello stesso turno: non devi (e non puoi) chiedere tu la conferma una alla volta.
+
 REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno.
 
-Sull'orario: se l'utente non dice affatto quando (nessun riferimento di tempo, nemmeno vago), decidi tu senza chiedere nulla: primo giorno utile, alle 08:00 — non lasciare mai un impegno senza data. Ma se usa un riferimento VAGO o relativo che potresti interpretare in più modi (es. "quando rientro in ufficio", "più tardi", "appena posso", "stasera" senza un'ora precisa), NON chiamare subito crea_impegno con un orario indovinato alla cieca: calcola tu una stima concreta e ragionevole partendo dall'ora di adesso (es. "quando rientro in ufficio" ≈ tra un'ora), e chiedi conferma in una risposta di testo — non uno strumento — tipo "Va bene se te lo segno fra un'ora, alle 15:40?". Poi fermati e aspetta: la risposta dell'utente arriverà nello stesso filo di conversazione, come conferma ("sì", "va bene") o come correzione ("no, fai fra due ore", "alle 16 piuttosto") — solo a quel punto chiama crea_impegno con l'orario giusto.
+Sull'orario: se l'utente non dice affatto quando (nessun riferimento di tempo, nemmeno vago), decidi tu senza chiedere nulla: primo giorno utile, alle 08:00 — non lasciare mai un impegno senza data. Il criterio per capire se serve chiedere non è "la frase suona vaga": è se calcolare un orario concreto richiederebbe SUPPORRE qualcosa sull'intenzione dell'utente che potresti sbagliare (quanto tempo impiegherà, quando esattamente tornerà, cosa intende con "più tardi") — in quel caso NON chiamare subito crea_impegno con un orario indovinato alla cieca: calcola tu una stima concreta e ragionevole partendo dall'ora di adesso (es. "quando rientro in ufficio" ≈ tra un'ora), e chiedi conferma in una risposta di testo — non uno strumento — tipo "Va bene se te lo segno fra un'ora, alle 15:40?". Poi fermati e aspetta: la risposta dell'utente arriverà nello stesso filo di conversazione, come conferma ("sì", "va bene") o come correzione ("no, fai fra due ore", "alle 16 piuttosto") — solo a quel punto chiama crea_impegno con l'orario giusto. Nel dubbio tra chiedere o decidere da solo, chiedi: costa meno una conferma breve che un impegno con l'orario sbagliato.
+
+Se nello stesso messaggio ci sono PIÙ impegni descritti in sequenza (con "poi", "e poi", o semplicemente elencati uno dopo l'altro), tratta separatamente quelli con un riferimento vago/relativo (per ognuno vale sempre la regola sopra: stima e chiedi conferma, uno per uno) da quelli senza NESSUN riferimento di tempo. Per questi ultimi — anche quando nello stesso gruppo ce ne sono altri vaghi trattati a parte — NON dare loro tutti lo stesso orario di default: distanziali di un'ora l'uno dall'altro fra loro, nell'ordine in cui l'utente li ha nominati, a partire dal primo orario disponibile — riflette meglio l'idea che sono cose da fare in sequenza, non tutte insieme allo stesso minuto.
 
 Se invece l'utente dice esplicitamente di segnargli/annotargli qualcosa "negli appunti", o semplicemente "segnami che..." senza nominare un orario o una scadenza (es. "segnami in appunti che devo vedere il costo del materiale"), usa crea_appunto — NON crea_impegno, che è solo per cose con una data. Se poi dice di correggere, cambiare o sistemare un appunto appena detto (es. "correggi, non è il costo del materiale ma dell'impermeabile"), usa correggi_appunto: prova a riconoscere quale appunto intende dalla parola che ha usato, e se non specifica nulla aggiorna semplicemente l'ultimo appunto creato.
 
@@ -1844,21 +1848,42 @@ function costruisciFocus(elencoMessaggi) {
   return { focus: { tipo: tipo.trim(), riferimento: riferimento_esplicito.trim() } };
 }
 
-/* Prepara la domanda di conferma per la prossima azione delicata in coda. */
+/* Prepara la domanda di conferma per la prossima azione delicata in
+   coda. "pendente" è sempre { nome, elementi: [{input, tool_use_id}, ...] }
+   — anche per una singola azione (elementi.length === 1), così il
+   resto del codice ha una sola forma da gestire (vedi EON BRAIN, punto
+   6: bulk/batch, raggruppamento in coda). Con un solo elemento il
+   comportamento è identico a prima di questa modifica: la domanda è
+   esattamente quella di tool.describe(). Con più elementi (stesso
+   strumento chiamato più volte nello stesso giro, es. elimina_impegno
+   ripetuto per 5 impegni) costruisce UNA sola domanda che li elenca
+   tutti, invece di chiederli uno alla volta: un solo Sì/No dell'utente
+   vale per l'intero gruppo. */
 async function descriviProssimaAzione(pendente, ctx) {
   const tool = TOOLS[pendente.nome];
-  if (!tool.describe) return `Confermi l'operazione "${pendente.nome}"?`;
-  try {
-    return await tool.describe(pendente.input, ctx);
-  } catch (err) {
-    /* Non deve mai far cadere l'intera richiesta: qui prepariamo solo
-       la domanda da mostrare, non eseguiamo ancora nulla. Se qualcosa
-       va storto (es. un titolo ambiguo trovato da trovaImpegno), lo
-       raccontiamo nella domanda stessa — l'esecuzione vera, quando
-       l'utente risponderà, ha già il suo try/catch e non perderà le
-       azioni già fatte in questo stesso turno. */
-    return `Non riesco a preparare la conferma per "${pendente.nome}": ${err.message || "errore sconosciuto"}. Rispondi comunque per continuare, o annulla e riprova specificando meglio.`;
+  if (pendente.elementi.length === 1) {
+    if (!tool.describe) return `Confermi l'operazione "${pendente.nome}"?`;
+    try {
+      return await tool.describe(pendente.elementi[0].input, ctx);
+    } catch (err) {
+      return `Non riesco a preparare la conferma per "${pendente.nome}": ${err.message || "errore sconosciuto"}. Rispondi comunque per continuare, o annulla e riprova specificando meglio.`;
+    }
   }
+
+  /* allSettled, non all: un elemento del gruppo che non si riesce a
+     descrivere (es. trovaImpegno trova un titolo ambiguo per QUEL
+     elemento) non deve far sparire la domanda per gli altri N-1, che
+     restano perfettamente validi — stesso principio già usato da
+     svuota_cestino per la raccolta degli id (vedi commento lì). */
+  const risultati = await Promise.allSettled(
+    pendente.elementi.map((el) => (tool.describe ? tool.describe(el.input, ctx) : Promise.resolve(`l'operazione "${pendente.nome}"`)))
+  );
+  const singole = risultati.map((r) =>
+    r.status === "fulfilled"
+      ? r.value.trim().replace(/\?+$/, "")
+      : `(non riesco a descrivere questo elemento: ${(r.reason && r.reason.message) || "errore sconosciuto"})`
+  );
+  return `Confermi queste ${pendente.elementi.length} operazioni?\n` + singole.map((s) => "- " + s).join("\n");
 }
 
 async function handleAssistant(req, res, user, accessToken) {
@@ -1944,30 +1969,46 @@ async function handleAssistant(req, res, user, accessToken) {
     const { coda, pronti } = run.in_sospeso;
     const [pendente, ...restoCoda] = coda;
 
-    let risultatoTool;
-    if (body.conferma === true) {
-      try {
-        risultatoTool = await TOOLS[pendente.nome].run(pendente.input, ctx);
-        await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "confermato");
-        azioniEseguite.push({ tool: pendente.nome, esito: risultatoTool });
-      } catch (err) {
-        risultatoTool = { errore: err.message || "operazione non riuscita" };
-        await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "errore");
+    /* Un solo Sì/No dell'utente vale per TUTTI gli elementi del gruppo
+       (vedi descriviProssimaAzione): li eseguiamo tutti allo stesso
+       modo, ognuno con il proprio tool_result (il formato dei messaggi
+       Anthropic richiede una risposta per ogni tool_use richiesto,
+       anche quando erano stati raggruppati in una sola domanda). Un
+       elemento che fallisce non blocca gli altri: ognuno per conto
+       suo, come già faceva il resto del ciclo con gli strumenti non
+       delicati (vedi risultati.push(..., is_error:true) più sotto). */
+    const risultatiElementi = [];
+    for (const el of pendente.elementi) {
+      let risultatoTool;
+      if (body.conferma === true) {
+        try {
+          risultatoTool = await TOOLS[pendente.nome].run(el.input, ctx);
+          await registraOperazione(user, pendente.nome, el.input, risultatoTool, "confermato");
+          azioniEseguite.push({ tool: pendente.nome, esito: risultatoTool });
+        } catch (err) {
+          risultatoTool = { errore: err.message || "operazione non riuscita" };
+          await registraOperazione(user, pendente.nome, el.input, risultatoTool, "errore");
+        }
+      } else {
+        risultatoTool = { annullato_dall_utente: true };
+        await registraOperazione(user, pendente.nome, el.input, risultatoTool, "negato");
       }
-    } else {
-      risultatoTool = { annullato_dall_utente: true };
-      await registraOperazione(user, pendente.nome, pendente.input, risultatoTool, "negato");
+      risultatiElementi.push({ tool_use_id: el.tool_use_id, risultatoTool });
     }
 
-    /* is_error segnala a Claude (e al controllo qui sotto) che questa
-       specifica azione NON è stata eseguita come chiesto — o perché è
-       fallita davvero (risultatoTool.errore), o perché l'utente ha
-       detto "No" (risultatoTool.annullato_dall_utente): in entrambi i
-       casi il turno non può considerarsi "fatto" in silenzio, serve
-       che Claude lo racconti. Stesso trattamento che il giro normale
-       del ciclo già dà agli strumenti non delicati falliti (vedi
-       risultati.push(..., is_error:true) più sotto). */
-    const nuoviPronti = pronti.concat([{ type: "tool_result", tool_use_id: pendente.tool_use_id, content: JSON.stringify(risultatoTool), is_error: !!(risultatoTool.errore || risultatoTool.annullato_dall_utente) }]);
+    /* is_error segnala a Claude (e al controllo qui sotto) che una
+       specifica azione del gruppo NON è stata eseguita come chiesto —
+       o perché è fallita davvero, o perché l'utente ha detto "No": in
+       entrambi i casi il turno non può considerarsi "fatto" in
+       silenzio, serve che Claude lo racconti. */
+    const nuoviPronti = pronti.concat(
+      risultatiElementi.map((r) => ({
+        type: "tool_result",
+        tool_use_id: r.tool_use_id,
+        content: JSON.stringify(r.risultatoTool),
+        is_error: !!(r.risultatoTool.errore || r.risultatoTool.annullato_dall_utente),
+      }))
+    );
 
     if (restoCoda.length) {
       /* C'erano altre azioni delicate richieste nello stesso turno di
@@ -2197,7 +2238,16 @@ async function handleAssistant(req, res, user, accessToken) {
 
     const richieste = data.content.filter((b) => b.type === "tool_use");
     const risultati = [];
-    const coda = [];
+    /* EON BRAIN, punto 6 (bulk/batch): raggruppa per nome di strumento,
+       non un elemento in coda per ogni richiesta — così N chiamate allo
+       STESSO strumento delicato nello stesso giro (es. elimina_impegno
+       ripetuto per 5 impegni, quando l'utente chiede di cancellarli
+       tutti) diventano UNA sola voce con più elementi, e quindi una
+       sola domanda di conferma (vedi descriviProssimaAzione) invece di
+       N domande in sequenza. Una Map mantiene l'ordine di prima
+       comparsa di ogni nome, esattamente come un array vi manterrebbe
+       l'ordine delle richieste originali. */
+    const codaPerNome = new Map();
 
     for (const richiesta of richieste) {
       const tool = TOOLS[richiesta.name];
@@ -2229,10 +2279,12 @@ async function handleAssistant(req, res, user, accessToken) {
       }
 
       if (richiedeConferma(tool)) {
-        /* Non eseguiamo subito: la mettiamo in coda e continuiamo a
-           esaminare le altre richieste dello stesso turno, così le
-           azioni sicure partono comunque senza aspettare. */
-        coda.push({ nome: richiesta.name, input: richiesta.input, tool_use_id: richiesta.id });
+        /* Non eseguiamo subito: la mettiamo in coda (raggruppata per
+           nome, vedi codaPerNome sopra) e continuiamo a esaminare le
+           altre richieste dello stesso turno, così le azioni sicure
+           partono comunque senza aspettare. */
+        if (!codaPerNome.has(richiesta.name)) codaPerNome.set(richiesta.name, { nome: richiesta.name, elementi: [] });
+        codaPerNome.get(richiesta.name).elementi.push({ input: richiesta.input, tool_use_id: richiesta.id });
         continue;
       }
       try {
@@ -2247,6 +2299,7 @@ async function handleAssistant(req, res, user, accessToken) {
       }
     }
 
+    const coda = [...codaPerNome.values()];
     if (coda.length) {
       /* Una o più azioni di questo turno richiedono conferma: le
          risposte già pronte (risultati) restano in sospeso insieme a

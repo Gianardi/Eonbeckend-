@@ -373,6 +373,54 @@
         "verifica": "manuale",
         "controllo": "crea_impegno per 'preparare i documenti' deve comunque essere chiamato ed eseguito, anche se manca il telefono di Bianchi — al più il testo finale chiede il numero per il contatto diretto, ma questo non deve impedire l'esecuzione della seconda richiesta indipendente"
       }
+    },
+    {
+      "id": "brain-bulk-01",
+      "categoria": "Bulk/batch — una sola conferma per un gruppo, non una per elemento",
+      "situazione": "Cancellazione di più impegni con un solo comando — verifica la capacità generale (punto 6), con un dominio diverso dal 'cancella tutto il calendario' del Documento 3: qui solo gli impegni di un giorno preciso, non l'intero calendario",
+      "precondizione": "Devono esistere almeno 3 impegni segnati per domani",
+      "input": "Cancella tutti gli impegni di domani",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "stato_atteso": "in_attesa_conferma",
+        "verifica": "automatica",
+        "controllo": "deve arrivare UNA sola richiesta di conferma che elenca tutti gli impegni trovati (non tre richieste in sequenza) — elimina_impegno/annulla_impegno NON compaiono ancora in azioni a questo punto (normale, eseguono solo dopo la conferma); il testo della domanda deve contenere un elenco con più di una voce"
+      }
+    },
+    {
+      "id": "brain-bulk-02",
+      "categoria": "Bulk/batch — combinato con ambiguità (combinazione mai testata)",
+      "situazione": "Un'azione bulk che coinvolge anche un'entità ambigua: deve prima risolvere l'ambiguità, poi chiedere una sola conferma per il gruppo — mai una combinazione delle due cose scritta a mano per questo caso specifico, deve emergere dalle due capacità generali già costruite",
+      "precondizione": "Devono esistere almeno due clienti omonimi (es. due 'Mario'), ed entrambi con almeno un impegno segnato",
+      "input": "Cancella tutti gli impegni di Mario",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "deve prima chiedere quale Mario (l'ambiguità del cliente viene prima), non chiedere conferma bulk su un cliente sbagliato o su entrambi mescolati insieme; solo dopo aver saputo quale Mario, la cancellazione dei suoi impegni deve arrivare come UNA sola conferma raggruppata, non una per impegno"
+      }
+    },
+    {
+      "id": "brain-temporale-01",
+      "categoria": "Ragionamento temporale — impegni in sequenza distanziati, non tutti allo stesso orario",
+      "situazione": "Più impegni senza alcun riferimento di tempo, descritti in sequenza nello stesso messaggio — verifica che NON ricevano tutti lo stesso orario di default (il problema osservato nel Documento 3, qui con attività diverse per non ripetere lo stesso caso)",
+      "input": "Domani devo passare in banca, poi ritirare il materiale dal fornitore, poi fare il sopralluogo da Neri",
+      "atteso": {
+        "tipo": "azione_multipla",
+        "strumenti_attesi": ["crea_impegno", "crea_impegno", "crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "tre crea_impegno, con TRE orari diversi (distanziati, non tutti alle 08:00) nell'ordine in cui sono stati nominati — controllare i tre quando_visualizzato in azioni: devono essere diversi tra loro"
+      }
+    },
+    {
+      "id": "brain-temporale-02",
+      "categoria": "Ragionamento temporale — gruppo misto: vago trattato a parte, gli altri comunque distanziati",
+      "situazione": "Combinazione mai testata: nello stesso messaggio, alcuni impegni senza alcun riferimento di tempo e uno con un riferimento vago/relativo — verifica che il vago venga gestito con la domanda di stima (come da regola generale) SENZA che questo faccia perdere la distanziazione tra gli altri due",
+      "input": "Domani devo passare in banca, poi ritirare il materiale dal fornitore, poi chiamare Neri quando ho un attimo libero",
+      "atteso": {
+        "tipo": "azione_multipla_con_domanda",
+        "verifica": "manuale",
+        "controllo": "i primi due impegni (banca, materiale) devono avere orari diversi tra loro (non entrambi alle 08:00); per il terzo (chiamare Neri) deve fermarsi e proporre una stima in testo invece di indovinare un orario — non deve NÉ dare lo stesso orario ai primi due NÉ saltare la domanda per il terzo"
+      }
     }
   ]
 }
