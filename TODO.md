@@ -445,6 +445,38 @@ regression test dopo ogni fase.
    Regressione: `eval/router.test.js` 28/28 (router, contesto delle
    correzioni — nessuno tocca il codice modificato in questa fase).
 
+2. **Current Focus senza scadenza a tempo — FATTO il 02/09/2026.**
+   Correzione esplicita di Gianardi sul design: a differenza della
+   finestra delle correzioni veloci (punto 5 sopra, 3 minuti), il
+   Current Focus non deve scadere dopo un tempo fisso — deve restare
+   valido finché la conversazione mantiene quel riferimento, sostituito
+   solo da un nuovo riferimento esplicito incompatibile.
+   In `api/index.js`, nuova `costruisciFocus(elencoMessaggi)`: deriva
+   dall'ultimo IntentFrame dichiarato (punto 1) l'entità esplicita di
+   cui si è appena parlato — mai un id "in cache", solo tipo e
+   riferimento testuale così come detto dall'utente, che verrà
+   ri-risolto normalmente (es. con `cerca_cliente`) quando servirà
+   davvero, invece di fidarsi di un dato potenzialmente vecchio (un
+   cliente nel frattempo rinominato o cestinato). Non lo espone quando
+   l'utente ha usato un riferimento implicito (il focus da mantenere è
+   già quello del frontend) né quando l'operazione è "consulta" (un'entità
+   nominata solo come esempio in una domanda generica non deve rubare
+   il focus a quella davvero in lavorazione). Nuovo helper `finisciTurno`
+   che aggiunge il focus SOLO alle risposte davvero "concluso", mai a
+   una richiesta di conferma in sospeso (potrebbe riguardare un'entità
+   diversa da quella più di recente dichiarata, in un turno con più
+   intenti distinti).
+   In `index.html`, nuova `focusCorrente` in `collegaMicTesto` (nessuna
+   scadenza, a differenza di `ultimeAzioniVisibili`) e `notaFocusCorrente`
+   iniettata nel messaggio nuovo, per far sapere a Claude a cosa si
+   riferisce un eventuale "lo"/"quello"/"quello di prima".
+   Due giri di code-review (alto poi medio) hanno trovato e fatto
+   correggere: il focus poteva finire attaccato alla conferma di
+   un'azione riguardante un'entità diversa da quella più recente in un
+   messaggio con più intenti; un'entità nominata solo come esempio in
+   una domanda "consulta" poteva diventare il focus per errore.
+   Regressione: `eval/router.test.js` 28/28.
+
 ## EON intelligente: promemoria e avvisi veri, all'ora giusta
 
 **Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
