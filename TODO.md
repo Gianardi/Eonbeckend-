@@ -361,6 +361,90 @@ Gianardi il 01/09/2026.
 
 Richiesto da Gianardi il 01/09/2026.
 
+## EON BRAIN, seconda fase: da "esegue comandi" a "capisce l'obiettivo"
+
+Con i 6 punti "core" sopra completati, Gianardi ha chiesto un audit
+indipendente del BRAIN reale (report tecnico completo, punto per punto,
+verificato riga per riga contro il codice e il database live — nessuna
+modifica, solo fotografia fedele) e poi una gap analysis basata su 4
+documenti: la specifica originale, quel report, 11 casi di test reali sul
+campo (comportamento atteso vs ottenuto), e la filosofia di prodotto
+("conversazione naturale" + "se lo chiedo, deve apparire — search is
+secondary, intent is primary").
+
+Dall'analisi: il motore di orchestrazione (loop tool-use, verifica dei
+risultati, niente invenzioni, stato di conversazione, entity resolution di
+base) è solido e non va rifatto. Il problema reale è più stretto e
+specifico — il sistema ha un solo "contenitore" universale
+(l'impegno/nota) e ogni richiesta che non è esattamente "crea un impegno"
+viene deformata per entrarci comunque: un documento richiesto diventa un
+impegno "vai a prendere il documento", un preventivo richiesto diventa un
+impegno "fai il preventivo", invece di essere davvero recuperato/prodotto
+e mostrato. Individuate 4 capacità architetturali mancanti (non 11 bug
+separati): la distinzione tra Risorsa/Azione/Comunicazione ("Intent →
+Experience"), un Current Focus per risolvere riferimenti impliciti
+("mandalo", "quello di prima"), un'entity resolution applicata in modo
+uniforme (oggi bypassabile a seconda del tool scelto dal modello) e la
+gestione di azioni bulk/batch. Design del contratto centrale (IntentFrame)
+discusso e approvato con Gianardi, con due correzioni sue: il Current
+Focus non deve scadere a tempo fisso ma restare valido finché non viene
+sostituito da un riferimento incompatibile; l'IntentFrame deve essere un
+vero passo di comprensione prima dell'esecuzione, non solo parametri
+aggiunti ai tool esistenti.
+
+Ordine di implementazione concordato: (1) IntentFrame + Risorsa/Azione/
+Comunicazione, (2) Current Focus, (3) Entity Resolution uniforme, (4)
+supporto alla visualizzazione/preparazione delle risorse, (5) test
+automatici sulle nuove capacità, (6) solo dopo bulk e ragionamento
+temporale. Regole ferme per tutta l'implementazione: nessuna regola
+basata su frasi specifiche, nessun if/else per far passare i singoli
+casi di test, non rompere i tool esistenti, modifica progressiva con
+regression test dopo ogni fase.
+
+1. **IntentFrame + distinzione Risorsa/Azione/Comunicazione — FATTO il
+   02/09/2026.** Aggiunto un campo `categoria` (`risorsa`/`azione`/
+   `comunicazione`/`supporto`) ai 17 tool esistenti in `api/index.js`,
+   ortogonale al campo `risk` già presente (`risk` = quanto è delicata
+   un'azione, `categoria` = su cosa opera — nessun tool esistente cambia
+   comportamento). Nuovo tool `interpreta_richiesta`, che non tocca il
+   database ed è obbligato come primo passo di ogni messaggio nuovo
+   (tramite `tool_choice` forzato al primo giro): Claude dichiara lì, in
+   forma strutturata, operazione (mostra/crea/modifica/cancella/invia/
+   contatta/consulta), oggetto (risorsa/azione/comunicazione/nessuno) ed
+   entità coinvolta — anche quando è un riferimento implicito ("lo",
+   "quello"). Non è un nuovo layer di comprensione del linguaggio: è la
+   comprensione che Claude ha già, costretta a uscire in una forma che il
+   codice può controllare prima di eseguire qualunque tool vero.
+   L'IntentFrame non ha una colonna propria nel database: viene
+   ricostruito rileggendo la cronologia già persistita in
+   `ai_runs.messaggi`, identica per un turno nuovo, una conferma o una
+   continuazione — nessuna migrazione per questa fase.
+   Nuovo tool `capacita_non_disponibile`: quando l'intento dichiarato è
+   "risorsa" ma nessuno strumento sa davvero recuperare quella cosa,
+   Claude lo dichiara onestamente invece di far finta di aver fatto
+   qualcosa con `crea_impegno`/`crea_appunto` — resta comunque loggato
+   come ogni altro tool, base per capire in futuro quali risorse mancano
+   davvero nel registro.
+   In `proseguiAssistente()`, un controllo generale (non specifico per
+   `crea_impegno` né per nessuna frase): quando l'intento attivo è
+   "risorsa", un tool di categoria "azione" viene rifiutato invece di
+   essere eseguito come se soddisfacesse la richiesta — il controllo si
+   scarica da solo non appena `capacita_non_disponibile` viene chiamato,
+   per non bloccare per sempre l'azione alternativa che l'assistente
+   stesso propone subito dopo.
+   Tre giri di code-review (alto poi medio) hanno trovato e fatto
+   correggere: il blocco che impediva di eseguire proprio il ripiego
+   appena proposto da `capacita_non_disponibile` (un fallback "||" che
+   resuscitava l'intento appena scaricato); il ripiego di rete
+   Haiku→Sonnet perso sul giro in cui Claude sceglie davvero cosa fare
+   (il giro forzato di `interpreta_richiesta` aveva spostato quel giro
+   senza spostare anche la protezione di rete); il tetto di giri per
+   messaggio, aumentato di uno solo per i messaggi nuovi per compensare
+   il giro riservato all'interpretazione senza toccare il budget di
+   conferme/continuazioni.
+   Regressione: `eval/router.test.js` 28/28 (router, contesto delle
+   correzioni — nessuno tocca il codice modificato in questa fase).
+
 ## EON intelligente: promemoria e avvisi veri, all'ora giusta
 
 **Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
