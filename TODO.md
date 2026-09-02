@@ -548,6 +548,38 @@ regression test dopo ogni fase.
    evitando che il prompt spingesse a inventare un link inesistente.
    Regressione: `eval/router.test.js` 28/28.
 
+5. **Test automatici sulle nuove capacità — FATTO il 02/09/2026.** Con
+   i 4 punti core del contratto centrale completi, copertura di test
+   reale — situazioni nuove, mai viste nel Documento 3, per verificare
+   la capacità generale invece di far ripassare i casi già corretti.
+   Nuovo `eval/backend.test.js`: test puri (nessuna rete/database/AI)
+   su `estraiIntentoDaMessaggi` (ricostruzione dell'IntentFrame dalla
+   cronologia, "scarico" dopo `capacita_non_disponibile`, vince sempre
+   l'ultima dichiarazione, più blocchi tool_use nello stesso messaggio)
+   e `costruisciFocus` (quando un'entità dichiarata diventa davvero il
+   nuovo Current Focus, e i tre casi in cui non deve). `api/index.js`
+   ora le esporta anche (`export { estraiIntentoDaMessaggi,
+   costruisciFocus }`, oltre all'export default) solo per questo —
+   puramente additivo, nessun altro file le importa.
+   `eval/router.test.js` esteso con 5 verifiche sul Current Focus lato
+   frontend: sopravvive a un turno di mezzo che non lo tocca (nessuna
+   scadenza a tempo), sostituito solo da un nuovo focus esplicito
+   incompatibile.
+   `eval/casi.json`: 7 nuovi casi `brain-*` con vocabolario/domini mai
+   usati altrove nel catalogo — tool risorsa inesistente/esistente,
+   comunicazione che referenzia una risorsa, focus che sopravvive a un
+   turno estraneo o viene sostituito, cliente nuovo in un dominio mai
+   testato, `manca_telefono` che non deve mai bloccare un'azione
+   indipendente. I due casi sul Current Focus sono annotati
+   esplicitamente: l'iniezione della nota è lato frontend, vanno
+   provati nell'app vera, non con `live-check.js` da solo (che parla
+   direttamente al backend).
+   Code-review (effort alto): nessun problema trovato — verificato
+   empiricamente eseguendo entrambe le suite e tracciando ogni
+   asserzione contro il comportamento reale del codice.
+   Regressione: `eval/router.test.js` 33/33 (28 esistenti + 5 nuovi),
+   `eval/backend.test.js` 15/15 (tutto nuovo).
+
 ## EON intelligente: promemoria e avvisi veri, all'ora giusta
 
 **Fatte le prime tre parti di "rendere EON intelligente", il 31/08/2026**
