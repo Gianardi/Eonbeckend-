@@ -885,10 +885,17 @@ Non ancora rieseguita la suite completa dopo queste correzioni (verifica
 puntuale sì, con la frase esatta di `robustezza-03`: confermato che ora
 procede subito senza fermarsi).
 
+**3.1 — `check-schema.js` eseguito contro un ambiente reale, prima
+volta in assoluto (03/09/2026).** `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`
+puntati sullo staging: **11/11 tabelle verificate, schema conforme al
+contratto**. Conferma che lo schema di staging (ricostruito a mano al
+punto 2.1) corrisponde esattamente a quanto il codice presuppone —
+buon segnale anche per la produzione, che condivide lo stesso schema.
+Non ancora collegato al processo di deploy (resta da fare: farlo
+girare in automatico prima di ogni pubblicazione, non solo a mano).
+
 Prossimo punto del roadmap: **2.4**, una vista/cruscotto sul registro
-`ai_request_log` per l'osservabilità per-turno; poi **3.1**,
-`eval/check-schema.js` contro questo stesso ambiente (scritto, mai
-ancora eseguito) e collegato al processo prima di un deploy.
+`ai_request_log` per l'osservabilità per-turno.
 
 ## Pulizia e precisazioni
 
