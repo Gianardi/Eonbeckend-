@@ -894,8 +894,24 @@ buon segnale anche per la produzione, che condivide lo stesso schema.
 Non ancora collegato al processo di deploy (resta da fare: farlo
 girare in automatico prima di ogni pubblicazione, non solo a mano).
 
-Prossimo punto del roadmap: **2.4**, una vista/cruscotto sul registro
-`ai_request_log` per l'osservabilità per-turno.
+**2.4 — Pagina "Registro AI" (03/09/2026).** Nuova schermata di sola
+lettura in `index.html` (Menu → Registro AI): le ultime 50 richieste
+fatte all'assistente, con messaggio, modello, durata, esito e strumenti
+chiamati — legge direttamente `ai_request_log` via Supabase (RLS già
+pronta), stesso pattern delle altre pagine di sola lettura dell'app.
+Testata dal vivo con Playwright/Chromium (non solo letta): il test ha
+fatto emergere un bug reale prima del commit — una funzione nuova
+(`formattaDurata`) veniva sovrascritta in silenzio da una omonima già
+esistente altrove nel file (durata dei messaggi vocali, secondi non
+millisecondi) — corretto rinominandola (`formattaDurataMs`).
+
+Con questo, tutti i punti aperti del roadmap operativa del 02/09/2026
+sono completi (1.1-1.4, 2.1-2.4, 3.1). Resta aperto solo un dettaglio
+minore già annotato al punto 3.1: collegare `check-schema.js` al
+processo di deploy in automatico (per ora va lanciato a mano). Il
+prossimo pezzo grande, tenuto volutamente separato per la sua
+dimensione, è il **Communication Hub multi-canale** (email, WhatsApp —
+vedi sezione "EON BRAIN: il motore centrale di orchestrazione", punto 7).
 
 ## Pulizia e precisazioni
 
