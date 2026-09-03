@@ -421,6 +421,41 @@
         "verifica": "manuale",
         "controllo": "i primi due impegni (banca, materiale) devono avere orari diversi tra loro (non entrambi alle 08:00); per il terzo (chiamare Neri) deve fermarsi e proporre una stima in testo invece di indovinare un orario — non deve NÉ dare lo stesso orario ai primi due NÉ saltare la domanda per il terzo"
       }
+    },
+    {
+      "id": "brain-fix-01",
+      "categoria": "Correzione roadmap 1.2 — domanda di parere non diventa mai un impegno da sola",
+      "situazione": "Domanda di parere che nomina di sfuggita impegni/clienti reali, dominio e frase diversi dal caso originale che ha rivelato il problema (REGOLA PRINCIPALE non escludeva operazione 'consulta')",
+      "input": "Ho due preventivi da preparare oggi, uno per Neri e uno per Colombi: tu quale faresti prima?",
+      "atteso": {
+        "tipo": "domanda_o_parere",
+        "verifica": "manuale",
+        "controllo": "interpreta_richiesta deve dichiarare operazione:'consulta'; la risposta deve essere un parere reale e motivato (non un elenco di opzioni senza scelta); NON deve chiamare crea_impegno/crea_appunto di iniziativa né proporre di segnare entrambi come promemoria — il guardrail di codice blocca comunque un tool 'azione' quando operazione è 'consulta'"
+      }
+    },
+    {
+      "id": "brain-fix-02",
+      "categoria": "Correzione roadmap 1.2 — cliente risolto anche quando l'entità dichiarata è la risorsa, non il cliente",
+      "situazione": "Richiesta di una risorsa dove il cliente compare solo come complemento ('i documenti DI X'), dominio e nome diversi dal caso originale ('il preventivo di Rossi') — verifica la capacità generale via il nuovo campo cliente_di_riferimento, non il caso specifico già corretto",
+      "input": "Mandami i documenti del cliente Colombi",
+      "atteso": {
+        "tipo": "risorsa",
+        "verifica": "manuale",
+        "controllo": "interpreta_richiesta deve valorizzare entita.cliente_di_riferimento (anche se entita.tipo è 'documento', non 'cliente') e restituire cliente_risolto; se il cliente è risolto senza ambiguità, deve arrivare direttamente a recupera_documenti_cliente nello stesso turno, senza fermarsi a chiamare cerca_cliente separatamente né a chiedere l'identità quando non serve"
+      }
+    },
+    {
+      "id": "brain-fix-03",
+      "categoria": "Correzione roadmap 1.1 — recupero foto cantiere davvero funzionante dopo la migrazione",
+      "situazione": "Richiesta di foto di un cantiere/cliente esistente con foto reali caricate — verifica che la colonna cantiere_foto.client_id (applicata in produzione il 02/09/2026) renda il recupero davvero funzionante, non più un errore SQL mascherato da 'non trovato'",
+      "precondizione": "Deve esistere un cliente con almeno una foto reale caricata in cantiere_foto",
+      "input": "Fammi vedere le foto del cantiere di Bianchi",
+      "atteso": {
+        "tipo": "risorsa",
+        "strumenti_attesi": ["recupera_foto_cantiere"],
+        "verifica": "automatica",
+        "controllo": "recupera_foto_cantiere deve tornare le foto reali (esito senza 'errore'), non un fallback a capacita_non_disponibile — se torna comunque errore, la migrazione 1.1 non è stata applicata correttamente sull'ambiente in cui gira il test"
+      }
     }
   ]
 }

@@ -166,6 +166,27 @@ async function main() {
     Object.keys(costruisciFocus(frame("mostra", "risorsa", { tipo: "documento", riferimento_esplicito: "   " }))).length === 0
   );
 
+  verifica(
+    "cliente_di_riferimento senza riferimento_esplicito (correzione roadmap 1.2, es. 'i documenti del cliente Colombi') -> diventa focus di tipo 'cliente', non nessun focus",
+    (() => {
+      const r = costruisciFocus(frame("mostra", "risorsa", { tipo: "documento", cliente_di_riferimento: "Colombi" }));
+      return r.focus && r.focus.tipo === "cliente" && r.focus.riferimento === "Colombi";
+    })()
+  );
+
+  verifica(
+    "riferimento_esplicito E cliente_di_riferimento insieme -> vince riferimento_esplicito (comportamento originale invariato, il cliente resta solo per la risoluzione)",
+    (() => {
+      const r = costruisciFocus(frame("mostra", "risorsa", { tipo: "preventivo", riferimento_esplicito: "il preventivo del tetto", cliente_di_riferimento: "Colombi" }));
+      return r.focus && r.focus.tipo === "preventivo" && r.focus.riferimento === "il preventivo del tetto";
+    })()
+  );
+
+  verifica(
+    "cliente_di_riferimento fatto solo di spazi -> trattato come assente, nessun focus",
+    Object.keys(costruisciFocus(frame("mostra", "risorsa", { tipo: "documento", cliente_di_riferimento: "   " }))).length === 0
+  );
+
   console.log(`\n${totali - fallimenti}/${totali} verifiche passate.`);
   if (fallimenti > 0) process.exitCode = 1;
 }

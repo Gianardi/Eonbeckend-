@@ -719,6 +719,53 @@ automatici, regressione) ma mai incrociato sistematicamente con quanto
 già esisteva — questa checklist è il correttivo di processo, non di
 codice.
 
+**1.2 — Le 3 cause diagnosticate corrette (02/09/2026).** Applicata la
+checklist appena scritta a sé stessa, sul serio: la prima stesura di
+questo punto (2 giri di code-review) aveva già introdotto un secondo
+gap di composizione, trovato dalla checklist stessa prima del merge,
+non dopo. Correzioni finali:
+- **Test 1** (domanda di parere che diventa promemoria): REGOLA
+  PRINCIPALE nel system prompt ora esclude esplicitamente
+  `operazione:"consulta"`. Aggiunto anche un secondo argine a livello
+  di codice (`REGOLE_GUARDRAIL_AZIONE`, vedi sotto) — prima non ce
+  n'era nessuno per questo caso, solo il testo del prompt, già
+  dimostratosi insufficiente da solo. Guardia `!runId` sul nuovo
+  argine: senza, avrebbe bloccato il turno di conferma in cui l'utente
+  accetta l'offerta del parere ("ok, segnamelo") — trovato dal secondo
+  giro di code-review, non da un test.
+- **Test 2** (Entity Resolution non scatta quando l'entità dichiarata
+  è la risorsa, es. "il preventivo di Rossi"): nuovo campo
+  `entita.cliente_di_riferimento` in `interpreta_richiesta`, separato
+  da `tipo`/`riferimento_esplicito` — cattura il cliente anche quando
+  non è lui l'entità principale dichiarata. `costruisciFocus()` esteso
+  di conseguenza (ramo di fallback quando manca un riferimento
+  specifico alla risorsa ma c'è un cliente) — un gap trovato dal
+  secondo giro di revisione: spostare il nome del cliente fuori da
+  `riferimento_esplicito` lo toglieva anche dal Focus, che non
+  conosceva ancora il nuovo campo.
+- **Test 3** (`capacita_non_disponibile` non chiamato in modo coerente
+  su un errore tecnico reale): l'errore che torna a Claude per un tool
+  "risorsa" ora porta con sé l'istruzione di dichiarare il limite
+  onestamente, invece di lasciarla solo nel prompt — ma **solo** per
+  guasti REALI della query (nuovo campo `db_error`, impostato solo
+  dentro `db()`), mai per errori di validazione applicativa o un "non
+  trovato" legittimo: il primo giro di revisione aveva trovato che la
+  versione iniziale applicava la nota a QUALSIASI errore di un tool
+  risorsa, spingendo il modello a dichiarare un limite permanente
+  anche per un id malformato o un cliente davvero inesistente.
+
+Estratto anche `REGOLE_GUARDRAIL_AZIONE` (tabella condivisa per i
+guardrail "risorsa" e "consulta", invece di due blocchi quasi
+identici) e `dbFail()` (un solo punto che marca `db_error`, invece di
+due copie) — entrambi trovati come duplicazione dal terzo giro di
+revisione, prima che diventasse tre o quattro copie con la prossima
+correzione.
+
+3 nuovi casi in `eval/casi.json` (`brain-fix-01/02/03`, uno per test,
+frasi diverse dagli originali) e 3 nuovi test puri in
+`eval/backend.test.js` per il nuovo ramo di `costruisciFocus` — 18/18
+verifiche automatiche passate, nessuna regressione.
+
 Prossimo punto del roadmap: **2.1**, ambiente di staging (Supabase
 branching) per la prima esecuzione mai riuscita di `eval/live-check.js`
 e di `eval/check-schema.js` contro un ambiente reale.
