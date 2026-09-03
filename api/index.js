@@ -138,6 +138,16 @@ function fail(message, status) {
   return Object.assign(new Error(message), { status: status || 400 });
 }
 
+/* Come fail(), ma marcata come guasto REALE della query (colonna/
+   tabella mancante, database irraggiungibile) — mai un errore di
+   validazione applicativa lanciato prima di arrivare a db(), né un
+   "non trovato" legittimo lanciato dopo un risultato vuoto ma valido.
+   Usata solo dentro db(): un unico punto, così la distinzione non può
+   scollegarsi silenziosamente fra i due punti in cui serve. */
+function dbFail(message, status) {
+  return Object.assign(fail(message, status), { db_error: true });
+}
+
 async function readBody(req) {
   if (req.body && typeof req.body === "object") return req.body;
   if (typeof req.body === "string" && req.body.length) {
@@ -222,7 +232,7 @@ async function db(path, options, accessToken) {
     });
   } catch (netErr) {
     console.error("Database irraggiungibile:", netErr);
-    throw fail("Impossibile contattare il database, riprova tra poco", 503);
+    throw dbFail("Impossibile contattare il database, riprova tra poco", 503);
   }
 
   const text = await r.text();
@@ -231,7 +241,7 @@ async function db(path, options, accessToken) {
 
   if (!r.ok) {
     const msg = parsed && parsed.message ? parsed.message : "Errore database";
-    throw fail(msg, r.status);
+    throw dbFail(msg, r.status);
   }
   return parsed;
 }
@@ -673,6 +683,47 @@ function richiedeConferma(tool) {
    frontend che sia stata fatta un'azione visibile. Restano comunque
    loggati in ai_audit_log come ogni altro tool, tramite registraOperazione. */
 const STRUMENTI_INTERNI = new Set(["interpreta_richiesta", "capacita_non_disponibile"]);
+
+/* Regole che bloccano un tool di categoria "azione" quando l'IntentFrame
+   dichiarato con interpreta_richiesta dice che l'utente voleva altro —
+   un tool "azione" non può fare da ripiego silenzioso. Tabella invece
+   di un if per regola perché la checklist di composizione (TODO.md,
+   "EON BRAIN, roadmap operativa verso la beta") prevede esplicitamente
+   che se ne aggiungano altre nel tempo: aggiungere una voce qui, non
+   duplicare il blocco che la applica (vedi il ciclo in
+   proseguiAssistente() che itera questa tabella).
+
+   - "risorsa": l'utente voleva vedere/recuperare qualcosa che esiste o
+     dovrebbe esistere, non far registrare un'azione. Ha uno scarico
+     esplicito in estraiIntentoDaMessaggi (torna null quando l'ultima
+     dichiarazione è capacita_non_disponibile), quindi si applica anche
+     alle continuazioni: il limite dichiarato onestamente sblocca da
+     solo l'azione di ripiego che l'utente accetta subito dopo.
+   - "consulta": una domanda di parere non è mai, di per sé, un impegno
+     (EON BRAIN, roadmap 1.2, correzione Test 1 — prima di questa
+     regola il codice non aveva NESSUN argine per questo scenario,
+     solo il testo del prompt, dimostratosi insufficiente da solo in
+     produzione). A differenza di "risorsa", un parere dato in puro
+     testo NON lascia traccia in estraiIntentoDaMessaggi (che scarta i
+     messaggi senza tool_use e continua a risalire) — quindi qui serve
+     !runId: senza, il turno in cui l'utente accetta l'offerta del
+     parere ("ok, segnamelo", una continuazione) troverebbe ancora
+     l'intento "consulta" originale e bloccherebbe esattamente il
+     crea_impegno che il prompt chiede di eseguire in quel caso. Il
+     rischio che questa regola previene (saltare il parere e chiamare
+     subito un'azione) può avvenire solo nel giro deciso del messaggio
+     nuovo comunque — una continuazione non passa mai da qui senza che
+     l'utente abbia già risposto nel frattempo. */
+const REGOLE_GUARDRAIL_AZIONE = [
+  {
+    condizione: (intento) => intento && intento.oggetto === "risorsa",
+    messaggio: (nomeTool) => `Questa richiesta è stata classificata come "mostra/recupera una risorsa", non come un'azione da registrare: ${nomeTool} non è lo strumento giusto. Se non hai un tool che recuperi davvero questa risorsa, chiama capacita_non_disponibile invece di creare un impegno o un appunto.`,
+  },
+  {
+    condizione: (intento, runId) => !runId && intento && intento.operazione === "consulta",
+    messaggio: (nomeTool) => `Questa richiesta è stata classificata come "consulta" (una domanda di parere/confronto, nessuna azione sui dati): ${nomeTool} non è lo strumento giusto per rispondere. Rispondi con un parere reale in testo — chiama crea_impegno/crea_appunto solo se l'utente, DOPO aver sentito il tuo parere, te lo chiede esplicitamente.`,
+  },
+];
 
 const TOOLS = {
 
@@ -1520,7 +1571,7 @@ const TOOLS = {
     categoria: "supporto",
     schema: {
       name: "interpreta_richiesta",
-      description: "OBBLIGATORIO come primo strumento di ogni richiesta nuova, prima di qualsiasi altro: dichiara qui la tua comprensione di cosa vuole ottenere l'utente. Non esegue scritture: se l'entità è di tipo \"cliente\" cerca però subito quel nome in anagrafica e restituisce cliente_risolto (stato trovato/simile/ambiguo/non_trovato) — non serve chiamare cerca_cliente separatamente per lo stesso nome.",
+      description: "OBBLIGATORIO come primo strumento di ogni richiesta nuova, prima di qualsiasi altro: dichiara qui la tua comprensione di cosa vuole ottenere l'utente. Non esegue scritture: se l'entità è di tipo \"cliente\" OPPURE hai valorizzato cliente_di_riferimento, cerca però subito quel nome in anagrafica e restituisce cliente_risolto (stato trovato/simile/ambiguo/non_trovato) — non serve chiamare cerca_cliente separatamente per lo stesso nome.",
       input_schema: {
         type: "object",
         properties: {
@@ -1541,6 +1592,7 @@ const TOOLS = {
               tipo: { type: "string", description: "Es. cliente, impegno, documento, foto, preventivo, conversazione, dato_aggregato, altro" },
               riferimento_esplicito: { type: "string", description: "Il riferimento così come detto dall'utente (es. 'Rossi', 'il preventivo del tetto'). Lascia vuoto se l'utente usa un riferimento implicito come 'lo'/'quello'/'quello di prima'." },
               usa_focus_corrente: { type: "boolean", description: "true se l'utente si riferisce con un pronome o un riferimento implicito a qualcosa già mostrato/creato in questa conversazione, invece di nominarlo esplicitamente." },
+              cliente_di_riferimento: { type: "string", description: "Se la richiesta riguarda un cliente specifico, il suo nome così come detto dall'utente — ANCHE quando tipo non è 'cliente' (es. 'il preventivo DI Rossi' -> tipo:'preventivo', cliente_di_riferimento:'Rossi'; 'le foto del cantiere DI Fabbri' -> tipo:'foto', cliente_di_riferimento:'Fabbri'). Lascia vuoto se la richiesta non riguarda nessun cliente in particolare." },
             },
           },
           cardinalita: {
@@ -1566,11 +1618,24 @@ const TOOLS = {
          confronto rigido === "cliente" salterebbe la risoluzione senza
          nessun segnale se il modello scrive "Cliente" o "cliente " —
          qui normalizziamo, esattamente come già si fa per
-         riferimento_esplicito con eStringaNonVuota+trim. */
+         riferimento_esplicito con eStringaNonVuota+trim.
+
+         EON BRAIN, roadmap 1.2 (correzione Test 2): l'auto-risoluzione
+         era agganciata SOLO a tipo==="cliente", quindi una richiesta
+         formulata come "la risorsa DI un cliente" (es. "il preventivo
+         di Rossi") — dove tipo è "preventivo" e il cliente compare
+         solo come complemento — non la faceva mai scattare. Il nuovo
+         campo cliente_di_riferimento è un canale SEPARATO, sempre
+         disponibile qualunque sia tipo, proprio per questo caso: usa
+         quello quando c'è, altrimenti ripiega sul comportamento
+         originale (tipo==="cliente" + riferimento_esplicito). */
       const entita = input.entita;
       const tipoEntita = eStringaNonVuota(entita && entita.tipo) ? entita.tipo.trim().toLowerCase() : null;
-      if (tipoEntita === "cliente" && eStringaNonVuota(entita.riferimento_esplicito)) {
-        esito.cliente_risolto = await risolviClienteDaNome(entita.riferimento_esplicito, ctx);
+      const nomeClienteDaRisolvere = eStringaNonVuota(entita && entita.cliente_di_riferimento)
+        ? entita.cliente_di_riferimento
+        : (tipoEntita === "cliente" && eStringaNonVuota(entita.riferimento_esplicito) ? entita.riferimento_esplicito : null);
+      if (nomeClienteDaRisolvere) {
+        esito.cliente_risolto = await risolviClienteDaNome(nomeClienteDaRisolvere, ctx);
         const statoConTelefono = esito.cliente_risolto.stato === "trovato" || esito.cliente_risolto.stato === "simile";
         if (statoConTelefono && input.operazione === "contatta" && !esito.cliente_risolto.telefono) {
           esito.cliente_risolto.manca_telefono = true;
@@ -1747,15 +1812,15 @@ function systemPromptAssistente() {
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
-Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato), prova prima recupera_foto_cantiere (foto del cantiere/lavoro) o recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Solo se nessuno dei due è adatto (es. un preventivo mai creato prima, o qualcosa che non è né una foto né un documento in una conversazione cliente) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra, invece di lasciare attivo solo il primo oggetto dichiarato per l'intero messaggio.
+Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato), prova prima recupera_foto_cantiere (foto del cantiere/lavoro) o recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Solo se nessuno dei due è adatto (es. un preventivo mai creato prima, o qualcosa che non è né una foto né un documento in una conversazione cliente) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
 
-Quando dichiari un'entità di tipo "cliente" in interpreta_richiesta CON un riferimento_esplicito (un nome), il risultato include già cliente_risolto — non richiamare cerca_cliente per lo stesso nome, è già stato cercato. (Se invece usi usa_focus_corrente senza un nome esplicito, cliente_risolto non c'è: usa cerca_cliente tu stesso se ti serve un id.) Reagisci in base al suo stato: "trovato" → usa direttamente il suo id, nessuna domanda necessaria per l'identità (ma se stai per crearlo di nuovo come cliente nuovo, avvisa che esiste già e chiedi conferma prima di creare un doppione). "simile" → il nome assomiglia a un cliente esistente ma non è uguale (possibile dettatura imprecisa, o un cliente diverso): chiedi conferma prima di usarlo, non trattarlo come certo. "ambiguo" → più clienti corrispondono: elencali brevemente (nome, e telefono o zona se utili a distinguerli) e chiedi quale intende. "non_trovato" → nessun cliente con questo nome: se l'azione non richiede necessariamente un cliente collegato (es. un impegno che nomina solo una persona di passaggio) procedi comunque senza collegarlo; se invece richiede un destinatario reale (mandare un messaggio, un contatto), chiedi se vuoi aggiungerlo come nuovo cliente prima di procedere. Se l'operazione è "contatta" e non hai un vero strumento per avviare un contatto diretto (una chiamata), dillo onestamente con capacita_non_disponibile — e se in più cliente_risolto.manca_telefono è vero, approfittane per chiedere il numero e offrire di salvarlo con aggiorna_cliente, così la prossima volta sarà già pronto. Ma se la richiesta si può comunque soddisfare con uno strumento reale che non ha bisogno del telefono (es. mandare un messaggio interno), usalo normalmente: manca_telefono da solo non deve mai bloccare un'azione che non lo richiede davvero.
+Quando dichiari un'entità di tipo "cliente" in interpreta_richiesta CON un riferimento_esplicito (un nome), OPPURE valorizzi cliente_di_riferimento (la richiesta riguarda un cliente anche se tipo è la risorsa stessa, es. "il preventivo DI Rossi", "le foto del cantiere DI Fabbri" — usa sempre cliente_di_riferimento in questi casi, non lasciare che il nome resti solo dentro riferimento_esplicito), il risultato include già cliente_risolto — non richiamare cerca_cliente per lo stesso nome, è già stato cercato. (Se invece usi usa_focus_corrente senza un nome esplicito, cliente_risolto non c'è: usa cerca_cliente tu stesso se ti serve un id.) Reagisci in base al suo stato: "trovato" → usa direttamente il suo id, nessuna domanda necessaria per l'identità (ma se stai per crearlo di nuovo come cliente nuovo, avvisa che esiste già e chiedi conferma prima di creare un doppione). "simile" → il nome assomiglia a un cliente esistente ma non è uguale (possibile dettatura imprecisa, o un cliente diverso): chiedi conferma prima di usarlo, non trattarlo come certo. "ambiguo" → più clienti corrispondono: elencali brevemente (nome, e telefono o zona se utili a distinguerli) e chiedi quale intende. "non_trovato" → nessun cliente con questo nome: se l'azione non richiede necessariamente un cliente collegato (es. un impegno che nomina solo una persona di passaggio) procedi comunque senza collegarlo; se invece richiede un destinatario reale (mandare un messaggio, un contatto), chiedi se vuoi aggiungerlo come nuovo cliente prima di procedere. Se l'operazione è "contatta" e non hai un vero strumento per avviare un contatto diretto (una chiamata), dillo onestamente con capacita_non_disponibile — e se in più cliente_risolto.manca_telefono è vero, approfittane per chiedere il numero e offrire di salvarlo con aggiorna_cliente, così la prossima volta sarà già pronto. Ma se la richiesta si può comunque soddisfare con uno strumento reale che non ha bisogno del telefono (es. mandare un messaggio interno), usalo normalmente: manca_telefono da solo non deve mai bloccare un'azione che non lo richiede davvero.
 
 Se l'utente chiede di mandare/inviare qualcosa che è a sua volta una risorsa (es. "manda le foto del cantiere a Fabbri", "invia il documento a Rossi"), recupera prima quella risorsa (recupera_foto_cantiere/recupera_documenti_cliente) e SOLO DOPO chiama manda_messaggio — mai proporre l'invio di qualcosa che non hai mai recuperato davvero. manda_messaggio non allega file, solo testo: per foto e allegati (che hanno sempre un url reale) includi i link veri nel testo del messaggio, mai una frase generica come "ti mando le foto". Un preventivo o una fattura generati in app (tipo "preventivo_o_fattura" in recupera_documenti_cliente) invece NON hanno mai un url: non inventarne uno né promettere di inviarlo come link — di' che si vede solo dentro l'app, o riporta titolo/importo/riepilogo nel testo.
 
 Quando la richiesta riguarda più elementi insieme (cardinalita "insieme" in interpreta_richiesta, es. "cancella tutti gli impegni di domani", "elimina tutti i clienti inattivi"), chiama lo strumento delicato corrispondente una volta per ciascun elemento (dopo averli trovati, es. con elenca_appuntamenti/cerca_impegno) esattamente come già fai per crea_impegno con più impegni distinti — il sistema le raggruppa da solo in un'unica richiesta di conferma quando sono chiamate ripetute dello stesso strumento nello stesso turno: non devi (e non puoi) chiedere tu la conferma una alla volta.
 
-REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno.
+REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno. Questa regola vale SOLO quando l'utente sta davvero chiedendo di registrare qualcosa (operazione "crea", o un impegno nominato dentro un'altra richiesta). NON si applica quando operazione è "consulta" — una domanda aperta, una richiesta di parere o di confronto ("cosa faresti tu?", "conviene prima X o Y?") non diventa MAI un impegno da solo: rispondi con un parere reale e motivato, usando quello che sai (impegni esistenti, clienti, urgenze), esattamente come farebbe un collega esperto a cui viene chiesto un consiglio. Solo se l'utente, DOPO aver sentito il tuo parere, accetta esplicitamente di trasformarlo in un'azione ("ok, allora segnamelo") chiama crea_impegno — mai come iniziativa tua per "coprire" comunque la domanda.
 
 Sull'orario: se l'utente non dice affatto quando (nessun riferimento di tempo, nemmeno vago), decidi tu senza chiedere nulla: primo giorno utile, alle 08:00 — non lasciare mai un impegno senza data. Il criterio per capire se serve chiedere non è "la frase suona vaga": è se calcolare un orario concreto richiederebbe SUPPORRE qualcosa sull'intenzione dell'utente che potresti sbagliare (quanto tempo impiegherà, quando esattamente tornerà, cosa intende con "più tardi") — in quel caso NON chiamare subito crea_impegno con un orario indovinato alla cieca: calcola tu una stima concreta e ragionevole partendo dall'ora di adesso (es. "quando rientro in ufficio" ≈ tra un'ora), e chiedi conferma in una risposta di testo — non uno strumento — tipo "Va bene se te lo segno fra un'ora, alle 15:40?". Poi fermati e aspetta: la risposta dell'utente arriverà nello stesso filo di conversazione, come conferma ("sì", "va bene") o come correzione ("no, fai fra due ore", "alle 16 piuttosto") — solo a quel punto chiama crea_impegno con l'orario giusto. Nel dubbio tra chiedere o decidere da solo, chiedi: costa meno una conferma breve che un impegno con l'orario sbagliato.
 
@@ -1839,13 +1904,31 @@ function estraiIntentoDaMessaggi(elencoMessaggi) {
      davvero mettendo a fuoco per un'azione successiva.
    Niente scadenza a tempo qui: la validità del focus è decisa lato
    frontend (index.html), in base a se viene sostituito da un
-   riferimento incompatibile — non da quanto tempo è passato. */
+   riferimento incompatibile — non da quanto tempo è passato.
+
+   EON BRAIN, roadmap 1.2 (correzione di composizione, trovata in
+   revisione dopo il fix del Test 2): il nuovo campo
+   entita.cliente_di_riferimento sposta il nome del cliente FUORI da
+   riferimento_esplicito per le richieste tipo "i documenti del
+   cliente Colombi" (dove non c'è un riferimento specifico alla
+   singola risorsa, solo al cliente) — senza questo ramo, quel nome
+   non arriverebbe mai al Focus, e un "digli che glieli mando domani"
+   subito dopo non avrebbe nessun cliente implicito da risolvere. tipo
+   diventa "cliente" in questo ramo, la stessa forma già usata quando
+   l'utente nomina il cliente direttamente (es. "manda un messaggio a
+   Rossi") — nessun nuovo concetto per il frontend che consuma focus. */
 function costruisciFocus(elencoMessaggi) {
   const intento = estraiIntentoDaMessaggi(elencoMessaggi);
   if (!intento || !intento.entita || intento.operazione === "consulta") return {};
-  const { tipo, riferimento_esplicito, usa_focus_corrente } = intento.entita;
-  if (usa_focus_corrente || !eStringaNonVuota(tipo) || !eStringaNonVuota(riferimento_esplicito)) return {};
-  return { focus: { tipo: tipo.trim(), riferimento: riferimento_esplicito.trim() } };
+  const { tipo, riferimento_esplicito, usa_focus_corrente, cliente_di_riferimento } = intento.entita;
+  if (usa_focus_corrente) return {};
+  if (eStringaNonVuota(tipo) && eStringaNonVuota(riferimento_esplicito)) {
+    return { focus: { tipo: tipo.trim(), riferimento: riferimento_esplicito.trim() } };
+  }
+  if (eStringaNonVuota(cliente_di_riferimento)) {
+    return { focus: { tipo: "cliente", riferimento: cliente_di_riferimento.trim() } };
+  }
+  return {};
 }
 
 /* Prepara la domanda di conferma per la prossima azione delicata in
@@ -2257,25 +2340,27 @@ async function handleAssistant(req, res, user, accessToken) {
       }
 
       /* Guardrail generale (non specifico per crea_impegno o per un
-         singolo caso): se l'IntentFrame dichiarato con
-         interpreta_richiesta ha oggetto "risorsa" — l'utente vuole
-         vedere/recuperare qualcosa, non far registrare un'azione — un
-         tool di categoria "azione" non può essere il modo con cui il
-         turno si considera soddisfatto. Blocchiamo l'esecuzione e
-         spieghiamo perché nel tool_result: il giro successivo del loop
-         dà a Claude la possibilità di scegliere capacita_non_disponibile
-         (o un vero tool "risorsa", quando ne esisterà uno) invece di
-         insistere sullo stesso ripiego. Si applica solo qui, non alla
-         coda di conferma sotto: le azioni ad alto rischio passano comunque
-         da una domanda esplicita all'utente, un secondo controllo naturale. */
-      if (intentoAttivo && intentoAttivo.oggetto === "risorsa" && tool.categoria === "azione") {
-        risultati.push({
-          type: "tool_result",
-          tool_use_id: richiesta.id,
-          content: JSON.stringify({ errore: `Questa richiesta è stata classificata come "mostra/recupera una risorsa", non come un'azione da registrare: ${richiesta.name} non è lo strumento giusto. Se non hai un tool che recuperi davvero questa risorsa, chiama capacita_non_disponibile invece di creare un impegno o un appunto.` }),
-          is_error: true,
-        });
-        continue;
+         singolo caso, vedi REGOLE_GUARDRAIL_AZIONE sopra per il perché
+         di ciascuna regola): un tool "azione" non può fare da ripiego
+         silenzioso quando l'IntentFrame dice che l'utente voleva
+         altro. Blocchiamo l'esecuzione e spieghiamo perché nel
+         tool_result: il giro successivo del loop dà a Claude la
+         possibilità di scegliere lo strumento giusto (o
+         capacita_non_disponibile) invece di insistere sullo stesso
+         ripiego. Si applica solo qui, non alla coda di conferma sotto:
+         le azioni ad alto rischio passano comunque da una domanda
+         esplicita all'utente, un secondo controllo naturale. */
+      if (tool.categoria === "azione") {
+        const regolaViolata = REGOLE_GUARDRAIL_AZIONE.find((r) => r.condizione(intentoAttivo, runId));
+        if (regolaViolata) {
+          risultati.push({
+            type: "tool_result",
+            tool_use_id: richiesta.id,
+            content: JSON.stringify({ errore: regolaViolata.messaggio(richiesta.name) }),
+            is_error: true,
+          });
+          continue;
+        }
       }
 
       if (richiedeConferma(tool)) {
@@ -2293,9 +2378,37 @@ async function handleAssistant(req, res, user, accessToken) {
         if (!STRUMENTI_INTERNI.has(richiesta.name)) azioniEseguite.push({ tool: richiesta.name, esito });
         risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify(esito) });
       } catch (err) {
-        const erroreEsito = { errore: err.message || "operazione non riuscita" };
-        await registraOperazione(user, richiesta.name, richiesta.input, erroreEsito, "errore");
-        risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify(erroreEsito), is_error: true });
+        const messaggioBase = err.message || "operazione non riuscita";
+        await registraOperazione(user, richiesta.name, richiesta.input, { errore: messaggioBase }, "errore");
+        /* EON BRAIN, roadmap 1.2 (correzione Test 3): un tool "risorsa"
+           che fallisce con un errore tecnico REALE (query fallita:
+           colonna/tabella mancante, database irraggiungibile — vedi
+           db_error in db()) è andato incontro a un'inconsistenza
+           osservata in produzione — a volte Claude dichiarava
+           onestamente il limite con capacita_non_disponibile, altre
+           volte riformulava lo stesso errore in testo libero come
+           "non trovato", indistinguibile da un risultato
+           legittimamente vuoto. L'istruzione correttiva viaggia con
+           l'errore stesso (stesso principio del guardrail sopra), non
+           solo in una frase del system prompt lontana dal punto in
+           cui la decisione viene presa davvero.
+
+           Il controllo su err.db_error (non solo tool.categoria) è
+           voluto: senza di esso questa nota finirebbe anche su errori
+           di validazione applicativa ("Id cliente non valido", "nome
+           mancante") o su un "non trovato" legittimo (fail(...,404)
+           dopo una ricerca andata a buon fine ma senza risultati) —
+           casi in cui spingere verso capacita_non_disponibile sarebbe
+           sbagliato quanto l'inconsistenza che si vuole correggere: il
+           modello dichiarerebbe un limite permanente che non esiste,
+           invece di correggere l'input o dire onestamente "non
+           trovato". Il messaggio registrato in ai_audit_log resta
+           quello originale, pulito: questa nota è solo per il
+           tool_result che torna a Claude. */
+        const nota = tool.categoria === "risorsa" && err.db_error
+          ? " — questo è un errore tecnico reale (query fallita), non un risultato vuoto: se non hai un altro modo di recuperare questa risorsa, dichiaralo con capacita_non_disponibile, non descriverlo all'utente come \"non trovato\"."
+          : "";
+        risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify({ errore: messaggioBase + nota }), is_error: true });
       }
     }
 
