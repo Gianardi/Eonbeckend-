@@ -972,6 +972,16 @@ il professionista, ma come BRAIN deve ragionare/cercare/chiedere/agire
 divieti, casi di valutazione. `libro/edile.md` riscritto secondo questa
 struttura lo stesso giorno.
 
+**Ulteriore aggiornamento stesso giorno**: capitolo Edile ampliato
+ancora, usando bozza originale + metodo + conoscenza generale di Claude
++ discussione qui. Aggiunti: modello cognitivo dell'edile, ontologia a
+25 entità, grafo delle relazioni, modulo WhatsApp, modello di priorità,
+catalogo errori critici, sezione L espansa a 35 casi. Gianardi ha
+mostrato due prompt di Copilot che chiedevano numeri fissi enormi
+(1100+ casi, 300 intenti) — deliberatamente NON seguiti (contraddicono
+il principio "qualità prima di quantità" dello stesso metodo
+ChatGPT); adottate solo le idee strutturali buone di quei documenti.
+
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
 Prima di procedere col Communication Hub: **inserire dati veri nell'app
