@@ -940,6 +940,17 @@ emergono dai test (poche righe mirate, come le 3 di oggi) finiscono
 nel prompt — lo stesso metodo di oggi, applicato su scala grande
 invece che su 3 correzioni isolate.
 
+**Divisione del lavoro concordata**:
+1. Gianardi scrive una breve lista di partenza — esperienza vera sua
+   come professionista, cosa chiede/vuole/come parla lui e i colleghi
+   del settore.
+2. Claude la espande in un catalogo più ampio, usando la conoscenza
+   generale su questi mestieri (non dati specifici, vedi sopra — un
+   buon punto di partenza, da verificare poi con l'uso reale).
+3. Insieme si trasforma in casi per la Evaluation Suite (formato
+   `eval/casi.json`), si testano, e le correzioni vere finiscono nel
+   prompt di EON in poche righe mirate — mai il libro intero.
+
 Non ancora iniziato — da programmare dopo il prossimo passo qui sotto.
 
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
