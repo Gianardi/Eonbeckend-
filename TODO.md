@@ -913,6 +913,35 @@ prossimo pezzo grande, tenuto volutamente separato per la sua
 dimensione, è il **Communication Hub multi-canale** (email, WhatsApp —
 vedi sezione "EON BRAIN: il motore centrale di orchestrazione", punto 7).
 
+## Il "libro" dei professionisti — grande catalogo per la Evaluation Suite
+
+Idea di Gianardi (03/09/2026), discussa insieme: invece di scoprire i
+problemi di EON un po' alla volta durante l'uso reale (settimane/mesi),
+fare uno sforzo sistematico e grande in un colpo solo, PRIMA di
+esporre EON a clienti veri. In due pezzi:
+
+1. **Creare il libro**: una raccolta ampia di comportamenti e richieste
+   realistiche, un capitolo per tipo di professionista (edile,
+   idraulico, elettricista, amministratore di condominio — gli stessi
+   dell'onboarding dell'app): cosa chiedono, cosa vogliono, come lo
+   dicono. Non frasi esatte da riconoscere: situazioni, come già fa
+   `eval/casi.json` ma su scala molto più ampia.
+2. **Creare il libro di istruzioni per i test**: dal libro sopra,
+   derivare tanti nuovi casi per la Evaluation Suite (stesso formato di
+   `eval/casi.json`), poi farli girare tutti su `eval/live-check.js`
+   contro l'ambiente di staging, come fatto oggi per il punto 2.3 — e
+   correggere ogni pattern reale trovato.
+
+**Importante, chiarito insieme**: il libro NON entra nel prompt di EON
+per intero (lo rallenterebbe e rischierebbe di introdurre regole in
+conflitto tra loro, visto oggi con una singola frase ambigua) — resta
+uno strumento nostro, dietro le quinte. Solo le correzioni vere che
+emergono dai test (poche righe mirate, come le 3 di oggi) finiscono
+nel prompt — lo stesso metodo di oggi, applicato su scala grande
+invece che su 3 correzioni isolate.
+
+Non ancora iniziato — da programmare dopo il prossimo passo qui sotto.
+
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
 Prima di procedere col Communication Hub: **inserire dati veri nell'app
