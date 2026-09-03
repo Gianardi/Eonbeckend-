@@ -802,10 +802,53 @@ sicurezza): ne è stata creata una nuova, dedicata solo alla staging.
 
 Non ancora eseguita in questa sessione la suite automatica vera e
 propria (`eval/live-check.js`, tutti i casi di `eval/casi.json`) — solo
-una verifica manuale puntuale ("ciao" → risposta corretta). Prossimo
-punto del roadmap: **2.2**, esecuzione completa di
-`eval/live-check.js` e di `eval/check-schema.js` contro questo
-ambiente, la prima volta in assoluto in questo progetto.
+una verifica manuale puntuale ("ciao" → risposta corretta).
+
+**2.2 — Prima esecuzione completa della suite dal vivo (03/09/2026).**
+Il primo tentativo (35+ casi senza pausa) si è fermato a metà, bloccato
+dal limite anti-abuso del backend (20 richieste/10 minuti) — non un
+bug, il limite ha funzionato come previsto. Corretto con una seconda PR
+(#61): pausa tra le richieste, ritentativo su sovraccarico Anthropic
+(529), limite alzabile solo su staging con doppia conferma esplicita
+(`eval/live-check.js`, `api/index.js`), più `eval/reset-staging.js`
+(nuovo) per ripulire i dati accumulati dai run precedenti prima di ogni
+prova. Con queste correzioni la suite è arrivata in fondo a tutti i 38
+casi.
+
+Risultato: **nessun bug bloccante, ma un'incoerenza di comportamento
+reale trovata** — confrontando `intento-01` ("Domani vedo Mario alle 9,
+segnalo" → crea l'impegno subito) con `robustezza-03` ("Alle 9 di
+domani devo vedere Mario" → si ferma a chiedere se aggiungere Mario
+come nuovo cliente prima di procedere): stessa identica situazione,
+solo con le informazioni in ordine diverso, comportamento diverso. Il
+caso `robustezza-03` è scritto apposta per verificare proprio questa
+coerenza ("stesso risultato di intento-01 nonostante l'ordine diverso
+delle informazioni") e ha trovato che manca. Non ancora corretto — da
+affrontare come prossimo punto: probabilmente serve chiarire nel prompt
+che creare un impegno non richiede mai di creare prima un cliente in
+anagrafica (un impegno può esistere senza `cliente_id`).
+
+Osservato anche, una volta, del testo inglese mescolato in una risposta
+altrimenti in italiano ("Okay, so Mario non è ancora in anagrafica...")
+— non riprodotto una seconda volta nello stesso run, da tenere
+d'occhio ma non ancora abbastanza per dire se è sistematico.
+
+Altri FAIL della suite non sono bug del prodotto ma limiti della suite
+stessa, per ora non corretti:
+- `intento-05` presuppone di proseguire la stessa conversazione di
+  `intento-04` (lo dice il campo `note` del caso), ma `live-check.js`
+  tratta ogni caso come una conversazione nuova — serve un meccanismo
+  di concatenamento tra casi collegati, non ancora scritto.
+- `no-invenzione-02` non ha un campo `input` (il caso stesso lo
+  documenta: "difficile da innescare da una sola frase naturale") —
+  non eseguibile da `live-check.js` così com'è.
+- `brain-fix-03` (foto del cantiere) presupponeva foto già esistenti,
+  cancellate dallo stesso `reset-staging.js` lanciato prima del run:
+  la pulizia non semina dati di prova nuovi al posto di quelli tolti.
+
+Prossimo punto del roadmap: **2.3**, valutare se e come correggere
+l'incoerenza trovata sopra, poi proseguire con `eval/check-schema.js`
+contro questo stesso ambiente (mai ancora eseguito).
 
 ## Pulizia e precisazioni
 
