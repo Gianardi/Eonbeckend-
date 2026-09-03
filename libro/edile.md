@@ -14,10 +14,11 @@ casi per la Evaluation Suite (sezione L) o modifiche al prompt di EON.
 Non entra nel prompt così com'è: solo le correzioni vere, trovate
 testando, ci entrano, in poche righe mirate (vedi il metodo).
 
-Integrato con un lotto di 50 casi plausibili (non verificati, generati
-con un altro strumento AI) portato da Gianardi il 03/09/2026 — fonte
-completa in `libro/casi-lotto1-copilot.md`; qui sono entrate solo le
-voci genuinamente nuove rispetto a quanto già scritto.
+Integrato con due lotti di casi plausibili (non verificati, generati
+con un altro strumento AI) portati da Gianardi il 03/09/2026 — fonti
+complete in `libro/casi-lotto1-copilot.md` e `libro/casi-lotto2-copilot.md`;
+qui sono entrate solo le voci genuinamente nuove rispetto a quanto già
+scritto.
 
 ## A. Identità professionale
 
@@ -121,16 +122,30 @@ ospitare più Cantieri nel tempo.
 (in corso/fermo/concluso), immobile di riferimento. *Relazioni*: di un
 Cliente, su un Immobile, nasce spesso da un Sopralluogo. *Ciclo di
 vita*: vedi sezione F. *Ambiguità*: "il lavoro di Rossi" può indicare
-il Cantiere, il Preventivo, o la Fattura a seconda della fase.
+il Cantiere, il Preventivo, o la Fattura a seconda della fase; un
+nomignolo informale ("il cantiere nuovo") può riferirsi a cantieri
+diversi in periodi diversi — man mano che ne aprono altri, l'etichetta
+"nuovo"/"vecchio" si sposta, va risolta dal periodo della conversazione,
+non da un'associazione fissa.
 
 **Sopralluogo** — prima visita di valutazione. *Relazioni*: precede
 spesso un Preventivo. *Ciclo di vita*: singolo evento, non ricorrente
 (salvo sopralluoghi successivi per verifiche).
 
 **Preventivo** — proposta economica. *Attributi*: importo, stato
-(inviato/accettato/rifiutato/scaduto). *Relazioni*: contiene un
-Capitolato; se accettato genera una Commessa/Esecuzione. *Ambiguità*:
-più preventivi in sospeso per lo stesso cliente vanno distinti.
+(inviato/accettato/rifiutato/scaduto), livello di formalità
+(orientativo/di massima vs formale — un cliente può trattare un
+numero "di massima" come vincolante, l'ambiguità va chiarita, non
+ignorata). *Relazioni*: contiene un Capitolato; se accettato genera una
+Commessa/Esecuzione. *Ambiguità*: più preventivi in sospeso per lo
+stesso cliente vanno distinti — anche quando riguardano immobili
+diversi dello stesso cliente, o quando esistono revisioni con lo
+stesso numero base (es. "45" e "45 bis"); un preventivo rifiutato non
+è sempre chiuso per sempre — un cliente può tornare mesi dopo a
+riprenderlo, va trattato come riapertura, non come lavoro nuovo da
+zero se il contesto coincide; un preventivo rivisto più volte solo a
+voce (telefono) può differire dall'ultima versione scritta — in caso
+di riferimento ambiguo, chiarire a quale versione ci si riferisce.
 
 **Variante** — modifica a un Preventivo/Commessa già avviata (lavoro
 aggiuntivo o cambiato in corso d'opera). *Relazioni*: collegata a una
@@ -184,7 +199,10 @@ scadenze, stato. *Relazioni*: collegata a una Commessa/Immobile.
 **SAL** (Stato Avanzamento Lavori) — evento di pagamento parziale legato
 a una percentuale di lavoro completato. *Relazioni*: dentro una
 Commessa; genera spesso una Fattura. *Ambiguità*: non è la stessa cosa
-di un Pagamento a saldo finale — vedi sezione F/relazioni.
+di un Pagamento a saldo finale — vedi sezione F/relazioni; "l'acconto"
+può riferirsi a rate diverse nel tempo (primo, secondo, ecc.) per la
+stessa Commessa — se il messaggio non specifica quale, va chiarito, non
+assunto sia l'ultimo o il primo.
 
 **Fattura** — documento fiscale. *Relazioni*: collegata a un SAL o al
 saldo finale di una Commessa; genera (si spera) un Pagamento.
@@ -419,6 +437,21 @@ direttamente in cantiere, prima che il titolare lo formalizzi.
 campo", non silenziosamente equiparato a una decisione ufficiale
 dell'impresa se l'utente stesso non lo conferma.
 
+**Conferma aggregata a più richieste** — *Capire*: "fatto, tutto ok" in
+risposta a una lista di più richieste (es. 3-4 punti) conferma l'intero
+elenco solo se non c'è ambiguità. *Chiarire quando*: non è chiaro se si
+riferisce a tutti i punti o solo all'ultimo/più recente — non segnare
+tutto come completato per default.
+
+**Formula di cortesia che non risponde** — *Capire*: "grazie, a
+presto" o simili, in risposta a una richiesta che aspettava un sì/no
+esplicito (es. conferma di un preventivo), non è una risposta — resta
+in attesa, non va trattata né come accettazione né come rifiuto.
+
+**Riferimento numerico a un documento con revisioni** — *Capire*: "il
+preventivo 45" può essere ambiguo se esistono revisioni collegate
+(es. "45 bis") — verificare prima di agire su quale versione esatta.
+
 ## Modulo WhatsApp (per il futuro Communication Hub)
 
 Osservazione realistica su come un edile usa davvero WhatsApp oggi,
@@ -438,7 +471,11 @@ utile quando si progetterà l'integrazione (non ancora fatta):
   che nessuno lo segnali esplicitamente; un indirizzo email o un numero
   può essere condiviso da più persone della stessa piccola impresa
   familiare (es. padre e figlio) — non presumere un mittente/
-  destinatario unico.
+  destinatario unico; chi risponde per primo a un messaggio spesso
+  gestisce la richiesta, non necessariamente il referente "titolare" di
+  quel rapporto; l'informazione vera può essere in un vocale allegato
+  a un testo generico ("ascolta qua") — il testo da solo può non
+  contenere nulla di utile.
 - **Cosa EON NON deve fare**: non deve sostituire WhatsApp (l'edile
   continuerà a usarlo comunque) — deve invece essere pronto, quando il
   canale sarà collegato, a capire il contenuto professionale di quei
@@ -478,6 +515,9 @@ saltare una conferma dovuta:
 | Prezzo/sconto deciso da EON | Alta | Mai inventare, sempre chiedere all'utente |
 | Dati di un cliente inviati al destinatario sbagliato | Alta | Verificare sempre il destinatario prima di un invio, specie su forward/inoltri rapidi |
 | Frase di cortesia trattata come impegno formale | Media | Distinguere rassicurazione da promessa concreta (sezione I) |
+| Negazione persa nella trascrizione vocale ("non possiamo" → "possiamo") | Alta | Su un'azione con conseguenze concrete, se il senso della frase cambia con/senza una negazione, non fidarsi ciecamente della trascrizione — verificare |
+| Unità di misura ambigua in una misura dettata ("2 e 20" → 2,20 o 220 cm) | Alta | Non arrotondare né assumere l'unità: chiedere se il valore è insolito o la frase è ambigua |
+| Azione irreversibile presa da un messaggio isolato ed emotivo | Alta | Mai chiudere/annullare qualcosa di importante sulla base di un solo messaggio di sfogo |
 
 ## J. Situazioni limite
 
@@ -501,6 +541,12 @@ saltare una conferma dovuta:
 - **Vincolo negativo ricorrente** ("libero sempre tranne il mercoledì"):
   è un'esclusione ripetuta, non una singola disponibilità — va gestita
   come regola, non come una sola data
+- **"Domani" detto di sera tardi o prima del weekend**: può intendere il
+  prossimo giorno lavorativo, non il giorno solare successivo — va
+  interpretato dal contesto (es. venerdì sera → possibile lunedì)
+- **"Fine lavori" ambiguo**: può indicare la fine della fase attuale o
+  la conclusione totale del cantiere — verificare a cosa si riferisce se
+  il contesto non lo rende ovvio
 
 ## K. Cosa NON deve fare EON
 
@@ -516,6 +562,19 @@ saltare una conferma dovuta:
   che l'utente lo accetti esplicitamente
 - Non fingere di avere accesso a WhatsApp o ad altri canali non ancora
   collegati
+- Non agire in modo irreversibile (es. chiudere una pratica, annullare
+  un rapporto) sulla base di un solo messaggio scritto in un momento di
+  evidente sfogo/emotività — un tono duro isolato non è una decisione
+  definitiva
+- Non trasformare uno sconto o un prezzo dichiarato esplicitamente "solo
+  per questa volta" in un prezzo standard per le richieste future dello
+  stesso cliente
+- Non normalizzare o suggerire operativamente pratiche come pagamenti
+  non fatturati, anche se il linguaggio dell'utente le nomina — gestire
+  l'esistenza del termine, mai incoraggiarne l'uso
+- Non dare per confermato un allegato/documento solo perché il testo lo
+  dichiara ("in allegato trovi tutto") — verificare che sia
+  effettivamente presente prima di trattarlo come ricevuto
 
 ## L. Casi di valutazione — situazioni da trasformare in test
 
@@ -631,6 +690,40 @@ ancora casi JSON pronti — organizzato per intento/categoria.
 46. Accettazione verbale di un preventivo riportata dall'utente, prima
     di qualunque documento scritto → procede a creare la Commessa,
     senza pretendere una firma che arriverà dopo
+
+**Nuovi casi (dal lotto 2, vedi `libro/casi-lotto2-copilot.md`)**
+47. Conferma aggregata a una lista di più richieste ("fatto, tutto ok")
+    → chiede se si riferisce a tutti i punti se non è chiaro, non
+    segna tutto come completato per default
+48. Formula di cortesia ("grazie, a presto") in risposta a una richiesta
+    di conferma esplicita → non trattata né come sì né come no, resta
+    in attesa
+49. Riferimento a un documento con più revisioni collegate (es. "il
+    preventivo 45" quando esiste anche "45 bis") → verifica quale
+    versione prima di agire
+50. Preventivo per lo stesso cliente ma riferito a un immobile diverso
+    da quello atteso → distingue per immobile, non assume il più
+    recente
+51. Preventivo rifiutato mesi prima, il cliente torna a chiederne
+    aggiornamento → trattato come ripresa dello stesso, non come lavoro
+    nuovo scollegato
+52. "L'acconto" citato senza specificare quale rata (primo/secondo) →
+    chiede quale se il contesto non lo rende ovvio
+53. Nomignolo informale di un cantiere che nel tempo si è spostato su
+    un cantiere diverso (es. "il cantiere nuovo" dopo l'apertura di un
+    altro) → risolto in base al periodo della conversazione
+54. Messaggio che dichiara un allegato mai realmente arrivato → non
+    trattato come ricevuto finché non è verificabile
+55. Trascrizione vocale con una possibile negazione persa, su un'azione
+    con conseguenze concrete → non si fida ciecamente, verifica se il
+    senso cambia radicalmente
+56. Misura dettata con unità ambigua ("2 e 20") → non arrotonda né
+    assume l'unità, chiede se il valore sembra insolito
+57. Messaggio isolato e visibilmente emotivo/di sfogo → non genera
+    un'azione irreversibile (es. chiusura pratica) da solo
+58. Sconto dichiarato esplicitamente "solo per questa volta" → non
+    diventa prezzo di riferimento per richieste future dello stesso
+    cliente
 
 ---
 
