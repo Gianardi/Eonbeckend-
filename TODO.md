@@ -846,9 +846,49 @@ stessa, per ora non corretti:
   cancellate dallo stesso `reset-staging.js` lanciato prima del run:
   la pulizia non semina dati di prova nuovi al posto di quelli tolti.
 
-Prossimo punto del roadmap: **2.3**, valutare se e come correggere
-l'incoerenza trovata sopra, poi proseguire con `eval/check-schema.js`
-contro questo stesso ambiente (mai ancora eseguito).
+**2.3 — Lettura manuale dei casi "manuale" (03/09/2026).** Letti a mano
+tutti i 16 casi che `eval/live-check.js` non può giudicare da solo.
+6 corretti, 6 non giudicabili con certezza (precondizioni cancellate
+dallo stesso `reset-staging.js`, stesso limite già annotato sopra per
+`brain-fix-03`), e 3 pattern reali trovati e corretti (solo testo del
+system prompt in `api/index.js`, nessuna modifica di logica):
+
+- **Orario/tipo/titolo chiesti quando la regola dice di decidere da
+  solo** — confermato da 3 casi indipendenti (`intento-03`,
+  `robustezza-02`, `robustezza-04`). Causa: la frase "nel dubbio,
+  chiedi" era scritta alla fine dell'intero paragrafo sull'orario,
+  senza essere legata esplicitamente solo al caso "orario vago" —
+  probabilmente contaminava anche il caso "nessun orario detto
+  affatto". Reso esplicito il confine tra i due casi, e aggiunta la
+  stessa regola di default sensato anche per tipo e titolo (prima
+  esisteva solo per l'orario).
+- **Riferimento implicito perso attraverso un turno scollegato** —
+  confermato da 2 casi indipendenti (`brain-focus-01`,
+  `brain-focus-02`): "mandalo/mandale" dopo un turno di mezzo
+  scollegato non si ricollegava al turno precedente. La guida su
+  `usa_focus_corrente` esisteva solo nella descrizione del parametro
+  dello strumento, mai nel testo principale del prompt — aggiunto un
+  esempio concreto che rispecchia la situazione osservata.
+- **Tensione tra "procedi in silenzio" e "segnala il cliente nuovo"**
+  (`brain-entity-01`, Edilverde Costruzioni) — discussa con Gianardi,
+  non risolta scegliendo un'opzione a scapito dell'altra: un nome che
+  sembra un cliente vero (azienda, nome e cognome completo) fa
+  eseguire comunque l'azione, ma la risposta aggiunge una riga che lo
+  segnala e offre di aggiungerlo, senza bloccare l'esecuzione —
+  diverso da una persona citata di sfuggita con un nome di battesimo
+  (resta silenzioso, comportamento del punto 2.2 per "vedere Mario").
+  Un giro di code-review ha trovato e corretto un'imprecisione: la
+  frase citava solo "impegno", non copriva lo stesso caso per un
+  appunto (`crea_appunto`).
+
+Non ancora rieseguita la suite completa dopo queste correzioni (verifica
+puntuale sì, con la frase esatta di `robustezza-03`: confermato che ora
+procede subito senza fermarsi).
+
+Prossimo punto del roadmap: **2.4**, una vista/cruscotto sul registro
+`ai_request_log` per l'osservabilità per-turno; poi **3.1**,
+`eval/check-schema.js` contro questo stesso ambiente (scritto, mai
+ancora eseguito) e collegato al processo prima di un deploy.
 
 ## Pulizia e precisazioni
 
