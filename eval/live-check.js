@@ -44,15 +44,41 @@ if (!API_URL || !ACCESS_TOKEN) {
 
 const catalogo = JSON.parse(fs.readFileSync(path.join(__dirname, "casi.json"), "utf8"));
 
+/* Pausa tra una richiesta e l'altra: di default alta apposta, perché ogni
+   caso conta come una vera richiesta di un professionista contro il
+   limite anti-abuso del backend (AI_RATE_LIMIT/AI_RATE_WINDOW_SECONDS in
+   api/index.js). Senza questa pausa la suite intera sbatte contro quel
+   limite prima di arrivare a metà dei casi — successo il 03/09/2026 sulla
+   primissima esecuzione mai riuscita di questo script. Sovrascrivibile con
+   EVAL_DELAY_MS se sull'ambiente di staging quel limite è stato alzato
+   (vedi commento su AI_RATE_LIMIT in api/index.js). */
+const DELAY_MS = Number(process.env.EVAL_DELAY_MS) || 3000;
+
+function attesa(ms) { return new Promise((risolvi) => setTimeout(risolvi, ms)); }
+
+/* Un solo ritentativo, dopo una pausa più lunga, per un sovraccarico
+   momentaneo dei server di Anthropic (529) — non è un fallimento del
+   codice di EON, è il segnale esplicito che il modello era temporaneamente
+   irraggiungibile. Qualsiasi altro errore (comprese le altre risposte non
+   2xx) resta un fallimento vero, riportato subito senza ritentare. */
 async function chiediAssistente(messaggio, runId) {
-  const r = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${ACCESS_TOKEN}` },
-    body: JSON.stringify(runId ? { runId, messaggio } : { messaggio }),
-  });
-  const json = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(json.error || `errore ${r.status}`);
-  return json;
+  await attesa(DELAY_MS);
+  for (let tentativo = 1; tentativo <= 2; tentativo++) {
+    const r = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${ACCESS_TOKEN}` },
+      body: JSON.stringify(runId ? { runId, messaggio } : { messaggio }),
+    });
+    const json = await r.json().catch(() => ({}));
+    if (r.ok) return json;
+    const eSovraccarico = r.status === 502 && /Overloaded/i.test(json.error || "");
+    if (eSovraccarico && tentativo === 1) {
+      console.log(`  (Anthropic sovraccarico, riprovo tra 15s...)`);
+      await attesa(15000);
+      continue;
+    }
+    throw new Error(json.error || `errore ${r.status}`);
+  }
 }
 
 /* Restituisce un array di {descrizione, ok} — uno per ogni proprietà

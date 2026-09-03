@@ -766,9 +766,46 @@ frasi diverse dagli originali) e 3 nuovi test puri in
 `eval/backend.test.js` per il nuovo ramo di `costruisciFocus` — 18/18
 verifiche automatiche passate, nessuna regressione.
 
-Prossimo punto del roadmap: **2.1**, ambiente di staging (Supabase
-branching) per la prima esecuzione mai riuscita di `eval/live-check.js`
-e di `eval/check-schema.js` contro un ambiente reale.
+**2.1 — Ambiente di staging (03/09/2026).** Il branching Supabase
+richiede il piano Pro (~25€/mese + costo per branch); scelta invece
+l'Opzione B, costo zero: un secondo progetto Supabase separato
+(`eon-staging`, id `vdgpadukzoklkrrhrhtm`, stessa regione `eu-west-2`
+della produzione), con lo schema ricostruito a mano dalle stesse
+migrazioni `.sql` del repository (`ai_tools_schema.sql`,
+`cestino_schema.sql`, `cantiere_schema.sql`,
+`cantiere_foto_cliente_schema.sql`) più lo schema base, verificato
+tabella per tabella contro la produzione. Nessun branching automatico:
+è un ambiente ricostruito, non clonato, da tenere aggiornato a mano se
+lo schema di produzione cambia ancora.
+
+Collegato un secondo progetto Vercel separato (`eonbeckend-mx2t`, non
+una variante Preview dello stesso progetto di produzione) con le
+proprie variabili d'ambiente puntate sul progetto Supabase di staging.
+Creato un utente Supabase Auth di prova (`test-eval@eon.local`, email
+inventata, mai raggiungibile) dedicato esclusivamente alla suite di
+valutazione.
+
+Verificato end-to-end con una chiamata reale a
+`POST /api?action=assistant` (autenticata con il token dell'utente di
+prova): risposta corretta dell'assistente, a conferma che login,
+database e chiamata all'AI funzionano tutti insieme sull'ambiente di
+staging, completamente separato dalla produzione.
+
+Due bug di configurazione trovati e corretti durante la verifica (non
+del codice, dell'ambiente): `SUPABASE_SERVICE_ROLE_KEY` e
+`ANTHROPIC_API_KEY` su Vercel avevano preso un carattere indesiderato
+durante un copia-incolla da telefono, mandando in errore
+rispettivamente la verifica utente e la chiamata a Claude. La seconda
+chiave di Anthropic non è stata copiata dal progetto di produzione (i
+valori "sensitive" di Vercel non si possono copiare tra progetti per
+sicurezza): ne è stata creata una nuova, dedicata solo alla staging.
+
+Non ancora eseguita in questa sessione la suite automatica vera e
+propria (`eval/live-check.js`, tutti i casi di `eval/casi.json`) — solo
+una verifica manuale puntuale ("ciao" → risposta corretta). Prossimo
+punto del roadmap: **2.2**, esecuzione completa di
+`eval/live-check.js` e di `eval/check-schema.js` contro questo
+ambiente, la prima volta in assoluto in questo progetto.
 
 ## Pulizia e precisazioni
 
