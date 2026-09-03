@@ -913,6 +913,29 @@ prossimo pezzo grande, tenuto volutamente separato per la sua
 dimensione, è il **Communication Hub multi-canale** (email, WhatsApp —
 vedi sezione "EON BRAIN: il motore centrale di orchestrazione", punto 7).
 
+## Prossimo passo — a cura di Gianardi (03/09/2026)
+
+Prima di procedere col Communication Hub: **inserire dati veri nell'app
+di produzione** (non quella di staging, che resta apposta vuota per i
+test) — una decina di clienti realistici, cantieri collegati, qualche
+foto vera, un impegno già segnato. Poi usare EON per davvero, con
+richieste vere ("segnami un appuntamento con [cliente vero]", "fammi
+vedere le foto del cantiere di [nome]", ecc.), e annotare ogni caso in
+cui qualcosa non funziona come atteso — frase esatta usata + cosa è
+successo invece.
+
+Nato da un allarme di Gianardi il 03/09/2026 ("il sistema è lentissimo,
+non fa quello che voglio") rivelatosi in parte un equivoco: stava
+testando sull'app vera ma senza aver mai inserito clienti/cantieri
+veri — EON non inventa dati mai visti, quindi senza anagrafica non
+trova nulla, comportamento corretto (verificato oggi dalla suite,
+`no-invenzione-01`/`02`) ma facile da scambiare per un bug se non si sa
+che manca la base dati. Ordine deciso insieme: prima questo test reale
+quotidiano (con dati veri, ambiente vero), POI il Communication Hub,
+POI un test finale con tutto insieme — non l'ordine inverso, per non
+rischiare che un bug del cervello finisca per mandare un messaggio vero
+a un cliente vero durante la prima esposizione reale.
+
 ## Pulizia e precisazioni
 
 Voce generica per una passata di rifinitura sull'app: perfezionare alcune
