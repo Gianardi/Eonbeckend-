@@ -14,6 +14,11 @@ casi per la Evaluation Suite (sezione L) o modifiche al prompt di EON.
 Non entra nel prompt così com'è: solo le correzioni vere, trovate
 testando, ci entrano, in poche righe mirate (vedi il metodo).
 
+Integrato con un lotto di 50 casi plausibili (non verificati, generati
+con un altro strumento AI) portato da Gianardi il 03/09/2026 — fonte
+completa in `libro/casi-lotto1-copilot.md`; qui sono entrate solo le
+voci genuinamente nuove rispetto a quanto già scritto.
+
 ## A. Identità professionale
 
 Piccola impresa edile o artigiano (muratore, capomastro), spesso con
@@ -97,7 +102,10 @@ zona/indirizzo, telefono, tipo (privato/impresa/condominio). *Relazioni*:
 ha uno o più Cantieri; ha un Referente se non è lui il contatto diretto.
 *Ciclo di vita*: nasce al primo contatto, resta anche a lavori finiti
 (storico, futuri lavori). *Ambiguità*: omonimi frequenti in paesi
-piccoli — distinguere per zona/indirizzo.
+piccoli — distinguere per zona/indirizzo; un cliente può cambiare
+cognome nel tempo (es. matrimonio) — stessa persona, non va trattato
+come un cliente nuovo se i segnali (telefono, indirizzo, cantiere
+precedente) coincidono, meglio chiedere conferma che duplicare.
 
 **Referente** — persona di contatto quando il Cliente è un'azienda o un
 condominio (es. l'amministratore, non il condominio stesso). *Relazioni*:
@@ -258,18 +266,42 @@ ambigue: "il lavoro di Rossi" durante l'esecuzione probabilmente indica
 il Cantiere attivo, non il Preventivo ormai superato; dopo la fine
 lavori probabilmente indica la Fattura o la Garanzia.
 
+L'accettazione verbale di un preventivo ("va bene, andiamo così")
+spesso precede di giorni o settimane un impegno scritto formale, e nel
+frattempo si opera già come se fosse confermato — EON deve poter
+trattare un'accettazione verbale riportata dall'utente come valida per
+procedere (crea la Commessa), senza pretendere un documento firmato che
+nella pratica arriva dopo.
+
 ## G. Linguaggio
 
 Terminologia tipica: **SAL**, **SCIA/CILA**, **capitolato**,
 **massetto** (strato di base sotto un pavimento), **cartongesso**,
-**sopralluogo**, **subappalto**. Verbi per un impegno non solo
-"vedere/incontrare": "passo da", "faccio un salto da", "vado a dare
-un'occhiata da", "do un'occhiata a". Espressioni per la memoria/foto:
-"fammi vedere com'era prima", "a che punto eravamo rimasti" — sono
-richieste di documentazione storica, non frasi da riconoscere alla
-lettera. Un termine tecnico mal riconosciuto dal microfono (es.
-"massetto" sentito come "mai detto") non va corretto in silenzio se
-cambia il senso della frase: meglio chiedere conferma.
+**sopralluogo**, **subappalto**, **cls** (calcestruzzo), **ca**
+(cemento armato), **tondino** (ferro per armatura). Verbi per un
+impegno non solo "vedere/incontrare": "passo da", "faccio un salto
+da", "vado a dare un'occhiata da", "do un'occhiata a". Espressioni per
+la memoria/foto: "fammi vedere com'era prima", "a che punto eravamo
+rimasti" — sono richieste di documentazione storica, non frasi da
+riconoscere alla lettera. Un termine tecnico mal riconosciuto dal
+microfono (es. "massetto" sentito come "mai detto") non va corretto in
+silenzio se cambia il senso della frase: meglio chiedere conferma.
+
+Alcuni materiali hanno nomi diversi per regione (es. "tavelle"/"forati"
+per lo stesso tipo di laterizio) — non trattare una variante regionale
+come un termine sconosciuto o un errore. "Dare/avere" è spesso usato in
+senso colloquiale per crediti/debiti di cantiere, non nel senso
+contabile stretto — va interpretato dal contesto, non da una regola
+fissa. "Extra"/"lavori extra" è ambiguo: può indicare una Variante già
+concordata con il cliente o solo una richiesta informale non ancora
+accettata — le due cose vanno distinte prima di agire (vedi Variante,
+sezione D), mai equiparate automaticamente.
+
+**Autocorrezione nel parlato**: chi detta a voce spesso si corregge
+nella stessa frase ("3 sacchi, no aspetta 4, mettiamo 5" — o "abbiamo
+finito, anzi no, domani finiamo"). Vale sempre l'ultimo valore/stato
+detto nella frase, non il primo — non è un'ambiguità da chiedere, è
+una correzione già completa nel messaggio stesso.
 
 ## H. Intenzioni professionali
 
@@ -366,6 +398,27 @@ collegato con certezza alla Commessa/Cantiere giusto, spesso con foto a
 supporto — massima attenzione al collegamento corretto (vedi errori
 critici).
 
+**Conferma a un'opzione non specificata** — *Capire*: un "ok, procedi"
+o "va bene così" che risponde a un messaggio con più opzioni proposte
+(es. più preventivi, più date) è ambiguo se non è chiaro quale delle
+opzioni sta confermando. *Chiarire quando*: più di un'opzione era
+plausibilmente sul tavolo e il messaggio non la nomina — mai scegliere
+un'opzione a caso.
+
+**Frasi di cortesia/rassicurazione vs impegno formale** — *Capire*:
+espressioni come "ci pensiamo noi", "stia tranquillo" sono spesso
+linguaggio relazionale, non un impegno su tempi/costi precisi. *Mai*:
+trasformarle in una promessa formale (scadenza, prezzo) se non è stato
+detto nulla di concreto — coerente con la regola sulle persone di
+passaggio (sezione K).
+
+**Decisioni prese sul campo da un collaboratore** — *Capire*: un
+capocantiere o collaboratore può decidere/promettere qualcosa
+direttamente in cantiere, prima che il titolare lo formalizzi.
+*Trattare come*: valido operativamente ma da segnalare come deciso "sul
+campo", non silenziosamente equiparato a una decisione ufficiale
+dell'impresa se l'utente stesso non lo conferma.
+
 ## Modulo WhatsApp (per il futuro Communication Hub)
 
 Osservazione realistica su come un edile usa davvero WhatsApp oggi,
@@ -378,8 +431,14 @@ utile quando si progetterà l'integrazione (non ancora fatta):
   organizzato per cliente/cantiere, difficile recuperare "cosa avevamo
   detto due mesi fa".
 - **Comportamenti tipici**: manda una foto con due parole invece di un
-  messaggio strutturato; usa gruppi con clienti e fornitori mescolati;
-  decide misure/date direttamente in chat, senza riportarle altrove.
+  messaggio strutturato (a volte senza alcun testo); usa gruppi con
+  clienti e fornitori mescolati; decide misure/date direttamente in
+  chat, senza riportarle altrove; il referente di un cantiere può
+  cambiare nel tempo (cliente, poi geometra, poi un familiare) senza
+  che nessuno lo segnali esplicitamente; un indirizzo email o un numero
+  può essere condiviso da più persone della stessa piccola impresa
+  familiare (es. padre e figlio) — non presumere un mittente/
+  destinatario unico.
 - **Cosa EON NON deve fare**: non deve sostituire WhatsApp (l'edile
   continuerà a usarlo comunque) — deve invece essere pronto, quando il
   canale sarà collegato, a capire il contenuto professionale di quei
@@ -417,6 +476,8 @@ saltare una conferma dovuta:
 | Orario indovinato quando serviva una stima dichiarata | Media | Regola sull'orario (sezione I) |
 | Comunicazione inviata senza conferma reale | Alta | Mai bypassare la conferma per un'operazione delicata |
 | Prezzo/sconto deciso da EON | Alta | Mai inventare, sempre chiedere all'utente |
+| Dati di un cliente inviati al destinatario sbagliato | Alta | Verificare sempre il destinatario prima di un invio, specie su forward/inoltri rapidi |
+| Frase di cortesia trattata come impegno formale | Media | Distinguere rassicurazione da promessa concreta (sezione I) |
 
 ## J. Situazioni limite
 
@@ -431,6 +492,15 @@ saltare una conferma dovuta:
 - **Riferimento a WhatsApp**: l'utente può citare "quello che ho scritto
   su WhatsApp" — EON deve dire onestamente che non ha accesso a quel
   canale (oggi), non fingere di saperlo
+- **Autocorrezione nello stesso messaggio**: vale l'ultimo valore/stato
+  detto, non il primo (sezione G)
+- **Messaggio con solo una foto, senza testo**: nessun contesto
+  esplicito su a cosa si riferisce — se il cliente/cantiere non è
+  altrimenti chiaro dal contesto della conversazione, chiedere piuttosto
+  che archiviare a caso
+- **Vincolo negativo ricorrente** ("libero sempre tranne il mercoledì"):
+  è un'esclusione ripetuta, non una singola disponibilità — va gestita
+  come regola, non come una sola data
 
 ## K. Cosa NON deve fare EON
 
@@ -532,6 +602,35 @@ ancora casi JSON pronti — organizzato per intento/categoria.
     dovute
 35. Riferimento a WhatsApp ("guarda quello che ho scritto ieri sera") →
     onestà sul fatto che EON non ha accesso a quel canale oggi
+
+**Nuovi casi (dal lotto plausibile del 03/09/2026, vedi
+`libro/casi-lotto1-copilot.md`)**
+36. Autocorrezione nella stessa frase dettata a voce ("3 sacchi, no
+    aspetta 4, mettiamo 5") → registra solo l'ultimo valore
+37. Cambio di stato in tempo reale ("abbiamo finito, anzi no, domani
+    finiamo") → registra solo lo stato finale della frase
+38. Conferma vaga a un messaggio con più opzioni proposte ("ok procedi",
+    senza dire quale) → chiede quale opzione, non ne sceglie una a caso
+39. Messaggio con solo una foto, nessun testo → chiede a cosa si
+    riferisce se il contesto non è chiaro, non archivia a caso
+40. Vincolo di disponibilità negativo e ricorrente ("libero sempre
+    tranne il mercoledì") → gestito come regola ricorrente, non come
+    una singola esclusione
+41. Frase di cortesia ("ci pensiamo noi, stia tranquillo") → non
+    diventa una promessa formale su tempi o costi
+42. Decisione presa sul campo da un collaboratore, non dal titolare →
+    trattata come valida operativamente ma segnalata come decisa "sul
+    campo", non equiparata silenziosamente a una decisione ufficiale
+43. Cliente con cognome cambiato nel tempo (stesso telefono/indirizzo
+    di un cliente esistente) → non duplicato come cliente nuovo senza
+    verifica
+44. Termine con variante regionale ("tavelle" invece di "forati") →
+    riconosciuto come sinonimo, non trattato come sconosciuto
+45. Richiesta di condividere dati di un cliente in un inoltro rapido →
+    verifica il destinatario prima di inviare, non lo dà per scontato
+46. Accettazione verbale di un preventivo riportata dall'utente, prima
+    di qualunque documento scritto → procede a creare la Commessa,
+    senza pretendere una firma che arriverà dopo
 
 ---
 
