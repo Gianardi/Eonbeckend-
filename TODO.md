@@ -958,6 +958,20 @@ con l'esperienza vera di Gianardi prima di derivarne casi per la
 Evaluation Suite. Mancano ancora i capitoli Idraulico, Elettricista,
 Amministratore di Condominio (gli altri tre mestieri dell'onboarding).
 
+**Aggiornamento stesso giorno**: Gianardi ha portato una consulenza
+fatta con ChatGPT (OpenAI) che definisce una struttura più rigorosa per
+i Professional Brain Pack — salvata in
+`libro/professional-brain-pack-metodo.md`. Struttura in 12 sezioni
+(A-L): identità, giornata, mondo professionale, **oggetti del
+mestiere**, **relazioni tra oggetti**, **processi** (ciclo di vita di
+un lavoro), linguaggio, intenzioni professionali (mappate sulle
+operazioni già esistenti in `interpreta_richiesta`, non nuove
+categorie), **comportamento EON per categoria** (non solo cosa chiede
+il professionista, ma come BRAIN deve ragionare/cercare/chiedere/agire
+— la parte che mancava di più nella prima bozza), situazioni limite,
+divieti, casi di valutazione. `libro/edile.md` riscritto secondo questa
+struttura lo stesso giorno.
+
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
 Prima di procedere col Communication Hub: **inserire dati veri nell'app
