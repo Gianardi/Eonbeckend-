@@ -1001,19 +1001,41 @@ molto di quanto scritto nel capitolo Edile in realtà non è specifico
 dell'edile (omonimi, conferma prima di comunicare, autocorrezione
 vocale, cortesia vs impegno formale, privacy, stato provvisorio...) —
 corrisponde alla formula del metodo (BRAIN CORE + Pack + dati utente).
-Buona parte dello strato comune si può estrarre da quanto già scritto
-(edile.md + i 3 lotti), invece di scriverlo da zero.
+
+**Correzione importante di Gianardi (stesso giorno, da ricordare
+sempre)**: lo strato comune va scritto **da zero, senza guardare
+`libro/edile.md`** — non estratto da lì. Motivo: rischio di
+contaminazione, lo strato "comune" erediterebbe involontariamente il
+taglio/le assunzioni specifiche dell'edile spacciate per universali.
+
+**Metodo di insegnamento a EON confermato con Gianardi (stesso
+giorno)**: l'obiettivo è che EON sappia sempre come comportarsi, non
+solo poche correzioni isolate — ma non tramite copia letterale del
+libro nel prompt (rischio di regole in conflitto tra loro, come visto
+oggi nel bug orario/tipo/titolo). Metodo concordato: da ogni gruppo di
+casi simili si estrae il PRINCIPIO generale che li spiega tutti (non i
+singoli casi letterali) — sono i principi, generalizzabili anche a
+casi mai visti, a entrare nel prompt, e solo dopo essere stati testati
+per verificare che non si contraddicano tra loro. Così facendo il
+libro intero viene insegnato a EON, ma come regole generali verificate,
+non come testo grezzo.
 
 **Ordine deciso**:
-1. **Strato comune** (`libro/comune.md`, da creare) — ~150 casi
-   trasversali, valido per qualunque persona, non solo professionisti.
-2. Poi i capitoli specifici per professione, solo ciò che è davvero
+1. **Strato comune** (`libro/comune.md`, da creare da zero) — ~150
+   casi trasversali, validi per qualunque persona, non solo
+   professionisti.
+2. **Capitoli specifici per professione**, solo ciò che è davvero
    specifico (ontologia, linguaggio, scenari di mestiere) — **Edile**
    già fatto; poi **Amministratore di condominio**, **Elettricista**,
    **Avvocato** (4 professioni scelte da Gianardi il 03/09/2026; nota:
    sostituisce l'Idraulico nell'elenco delle 4 professioni
    dell'onboarding app usato finora in questo documento — da
    riconciliare quando si arriva a scriverli).
+3. **Insegnare a EON BRAIN**: estrarre i principi generali dallo strato
+   comune + capitoli professione, aggiungerli al prompt di sistema.
+4. **Testing**: verificare i principi con `eval/live-check.js` contro
+   staging, correggere conflitti trovati.
+5. Poi **Communication Hub multi-canale**.
 
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
