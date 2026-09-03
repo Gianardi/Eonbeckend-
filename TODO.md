@@ -951,7 +951,12 @@ invece che su 3 correzioni isolate.
    `eval/casi.json`), si testano, e le correzioni vere finiscono nel
    prompt di EON in poche righe mirate — mai il libro intero.
 
-Non ancora iniziato — da programmare dopo il prossimo passo qui sotto.
+**In corso**: prima bozza scritta (`libro/edile.md`, su richiesta di
+Gianardi la sera del 03/09/2026, mentre lui si riposava) — capitolo
+Edile, conoscenza generale di Claude, ancora da correggere/completare
+con l'esperienza vera di Gianardi prima di derivarne casi per la
+Evaluation Suite. Mancano ancora i capitoli Idraulico, Elettricista,
+Amministratore di Condominio (gli altri tre mestieri dell'onboarding).
 
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
