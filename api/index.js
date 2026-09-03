@@ -16,6 +16,13 @@
  *   SUPABASE_SERVICE_ROLE_KEY    chiave "service_role"  (segreta)
  *   ANTHROPIC_API_KEY            chiave da console.anthropic.com
  *
+ *   Opzionali, SOLO per l'ambiente di staging (mai da impostare in
+ *   produzione — cambiano il limite di richieste per utente). Servono
+ *   TUTTE E TRE insieme, non bastano le prime due da sole:
+ *   AI_RATE_LIMIT                    default 20 richieste
+ *   AI_RATE_WINDOW_SECONDS           default 600 (10 minuti)
+ *   AI_RATE_LIMIT_STAGING_CONFERMATO deve valere "si"
+ *
  * ------------------------------------------------------------
  * ENDPOINT DISPONIBILI
  * ------------------------------------------------------------
@@ -418,8 +425,18 @@ async function handleAI(req, res) {
    ============================================================ */
 
 const TOOL_MAX_ROUNDS = 8;
-const AI_RATE_LIMIT = 20; // richieste
-const AI_RATE_WINDOW_SECONDS = 600; // 10 minuti
+/* Valori di default pensati per un professionista vero. Sovrascrivibili da
+   variabile d'ambiente SOLO per l'ambiente di staging (mai in produzione):
+   la suite di valutazione (eval/live-check.js) manda molte più richieste
+   in pochi minuti di quante ne farebbe mai una persona, e senza questa
+   valvola sbatte sempre contro il limite prima di finire i casi.
+   Richiede ANCHE AI_RATE_LIMIT_STAGING_CONFERMATO=si, non solo il numero:
+   un progetto Vercel di produzione con una sola variabile copiata per
+   sbaglio da staging non basta a cambiare il limite, serve la coppia
+   intera — stesso principio del CONFIRM_STAGING di eval/reset-staging.js. */
+const puoSovrascrivereRateLimit = process.env.AI_RATE_LIMIT_STAGING_CONFERMATO === "si";
+const AI_RATE_LIMIT = (puoSovrascrivereRateLimit && Number(process.env.AI_RATE_LIMIT)) || 20; // richieste
+const AI_RATE_WINDOW_SECONDS = (puoSovrascrivereRateLimit && Number(process.env.AI_RATE_WINDOW_SECONDS)) || 600; // 10 minuti
 
 const TIPI_IMPEGNO = new Set(["incontro", "chiamata", "commissione"]);
 const STATI_CLIENTE = new Set(["attivo", "trattativa", "inattivo"]);

@@ -79,10 +79,11 @@ di conferma corretta scambiandola per un'azione mancata),
 chiedere). Per il resto (la maggior parte: capire se una domanda suona
 naturale, se un rifiuto è onesto) serve una persona che legga.
 
-**Non è mai stato eseguito**: questo ambiente di sviluppo non ha
-accesso a un vero deploy Vercel, a un vero progetto Supabase, né a una
-chiave Anthropic live — solo a un browser sandbox per testare il
-codice frontend. Richiede:
+**Eseguito la prima volta il 03/09/2026**, contro il primo ambiente di
+staging del progetto (vedi `TODO.md`, punto 2.1 del roadmap operativa).
+Questo ambiente di sviluppo non ha comunque accesso diretto a un vero
+deploy Vercel/Supabase/Anthropic — va lanciato da una macchina con
+accesso di rete reale:
 
 ```
 EVAL_API_URL=https://tuo-progetto.vercel.app/api?action=assistant \
@@ -95,6 +96,41 @@ dati veri dei clienti**: alcuni casi (es. i clienti omonimi) richiedono
 che lo script trovi certi dati già in anagrafica, e molti altri casi
 scrivono davvero (creano impegni, appunti, a volte chiedono conferma
 per azioni delicate) — non è un ambiente "a vuoto" che non tocca nulla.
+
+Tra una richiesta e l'altra c'è una pausa (`EVAL_DELAY_MS`, default 3
+secondi) e un ritentativo automatico su un sovraccarico momentaneo di
+Anthropic (529): senza, la prima esecuzione reale ha sbattuto contro il
+limite anti-abuso del backend (`AI_RATE_LIMIT`/`AI_RATE_WINDOW_SECONDS`
+in `api/index.js`, 20 richieste ogni 10 minuti — un valore pensato per
+un professionista vero, non per una suite di 35+ casi) prima di
+arrivare a metà dei casi. Su un ambiente di **solo staging** (mai
+produzione) quel limite può anche essere alzato impostando su Vercel
+`AI_RATE_LIMIT`, `AI_RATE_WINDOW_SECONDS` e `AI_RATE_LIMIT_STAGING_CONFERMATO=si`
+— servono tutte e tre insieme, vedi il commento sopra `AI_RATE_LIMIT`
+in `api/index.js`.
+
+### `reset-staging.js` — pulizia dei dati di test, prima di una run
+
+`live-check.js` non riparte mai da un database vuoto: ogni run lascia
+clienti/impegni/appunti creati dai casi che scrivono davvero. Trovato
+concretamente il 03/09/2026: il caso `intento-01` era segnalato FAIL
+non per un bug, ma perché il database aveva accumulato DUE clienti di
+nome "Mario" da run precedenti — EON ha correttamente chiesto quale dei
+due, il controllo automatico si aspettava invece un `crea_impegno`
+diretto. Da lanciare prima di ogni run di `live-check.js`, sullo
+**stesso utente di prova**, mai su un account con dati veri:
+
+```
+SUPABASE_URL=https://tuo-progetto-staging.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=<service_role dello STAGING> \
+EVAL_OWNER_ID=<id dell'utente di prova> \
+CONFIRM_STAGING=si \
+node eval/reset-staging.js
+```
+
+Richiede sia l'id utente sia la conferma esplicita invece di indovinare
+"l'utente corrente" da solo — cancella per davvero, non c'è un modo per
+tornare indietro.
 
 ### `check-schema.js` — gate di verifica schema, prima del deploy
 
