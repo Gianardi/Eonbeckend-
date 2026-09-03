@@ -2974,6 +2974,16 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
+        <div class="azienda-link-card" data-page="ai-request-log">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Registro AI</div>
+            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
       </div>
     </div>
 
@@ -2987,6 +2997,19 @@
         <div class="card-header"><h2>Cestino</h2></div>
         <p class="module-sub" style="padding:0 4px 12px;">Quello che elimini finisce qui prima di sparire per sempre: da qui puoi ripristinarlo o eliminarlo per davvero.</p>
         <div id="cestinoList" class="azienda-list"></div>
+      </div>
+    </div>
+
+    <!-- ===== Sotto-pagina: Registro AI ===== -->
+    <div class="page" id="page-ai-request-log">
+      <div class="back-link" data-page="gestisci-azienda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna al Menu
+      </div>
+      <div class="card-panel">
+        <div class="card-header"><h2>Registro AI</h2></div>
+        <p class="module-sub" style="padding:0 4px 12px;">Le ultime richieste fatte all'assistente: cosa hai chiesto, cosa ha fatto, quanto ci ha messo. Solo per capire come si è comportato, niente da modificare qui.</p>
+        <div id="aiRequestLogList" class="azienda-list"></div>
       </div>
     </div>
 
@@ -3841,6 +3864,95 @@ async function renderCestino(){
       await dbEliminaPerSempre(tabella, riga.id);
       renderCestino();
     });
+    wrap.appendChild(row);
+  });
+}
+
+/* Nessuna funzione di escape condivisa nel resto del file: ne serve
+   una qui perché il messaggio dell'utente (testo libero, mai passato
+   prima per innerHTML altrove nell'app) va mostrato così com'è
+   digitato, senza che possa essere interpretato come HTML. */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+}
+
+/* Etichette leggibili per lo stato di una riga del Registro AI. */
+const ETICHETTA_STATO_REGISTRO_AI = {
+  concluso: { testo:"Fatto", colore:"#2f8f5b" },
+  in_attesa_conferma: { testo:"In attesa di conferma", colore:"#b8711f" },
+  incompleto: { testo:"Incompleto", colore:"#8a8f98" },
+};
+
+function prettificaModello(modello){
+  if(!modello) return "—";
+  if(modello.includes("haiku")) return "Haiku";
+  if(modello.includes("sonnet")) return "Sonnet";
+  return modello;
+}
+
+/* Nome specifico (non "formattaDurata"): esiste già una funzione con
+   quel nome più avanti nel file, per i messaggi vocali (minuti:secondi
+   a partire da SECONDI, non millisecondi) — stesso ambito globale,
+   l'ultima dichiarazione vincerebbe silenziosamente sull'altra. */
+function formattaDurataMs(ms){
+  if(!ms && ms !== 0) return "";
+  return ms < 1000 ? ms + " ms" : (ms / 1000).toFixed(1) + " s";
+}
+
+async function renderAiRequestLog(){
+  const wrap = document.getElementById("aiRequestLogList");
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="empty-hint">Carico…</div>';
+
+  if(!isDbReady()){
+    wrap.innerHTML = '<div class="empty-hint">Il registro è disponibile solo quando sei collegato al database.</div>';
+    return;
+  }
+
+  const { data: righe, error } = await supabaseClient
+    .from("ai_request_log")
+    .select("*")
+    .order("created_at", { ascending:false })
+    .limit(50);
+
+  if(error){
+    console.error("Errore lettura ai_request_log:", error.message);
+    wrap.innerHTML = '<div class="empty-hint">Non sono riuscito a leggere il registro. Riprova tra poco.</div>';
+    return;
+  }
+
+  wrap.innerHTML = "";
+  if(!righe || righe.length === 0){
+    wrap.innerHTML = '<div class="empty-hint"><b>Nessuna richiesta ancora</b>Qui comparirà ogni volta che chiedi qualcosa all\'assistente.</div>';
+    return;
+  }
+
+  righe.forEach(riga => {
+    const quando = riga.created_at
+      ? new Date(riga.created_at).toLocaleString("it-IT", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" })
+      : "";
+    const stato = riga.errore
+      ? { testo:"Errore", colore:"#c0392b" }
+      : (ETICHETTA_STATO_REGISTRO_AI[riga.stato] || { testo: riga.stato || "—", colore:"#8a8f98" });
+    const messaggio = riga.messaggio
+      ? (riga.messaggio.length > 140 ? riga.messaggio.slice(0, 140) + "…" : riga.messaggio)
+      : "(nessun testo, es. un turno di conferma)";
+    const strumenti = Array.isArray(riga.strumenti) && riga.strumenti.length ? riga.strumenti.join(", ") : null;
+
+    const row = document.createElement("div");
+    row.className = "azienda-link-card";
+    row.style.cursor = "default";
+    row.innerHTML = `
+      <div class="azienda-link-card-body">
+        <div class="module-title">${escapeHtml(messaggio)}</div>
+        <div class="module-sub">
+          ${quando} · ${prettificaModello(riga.modello)} · ${formattaDurataMs(riga.durata_ms)}
+          · <span style="color:${stato.colore};font-weight:600;">${escapeHtml(stato.testo)}</span>
+          ${strumenti ? " · " + escapeHtml(strumenti) : ""}
+        </div>
+        ${riga.errore ? `<div class="module-sub" style="color:#c0392b;margin-top:4px;">${escapeHtml(riga.errore)}</div>` : ""}
+      </div>
+    `;
     wrap.appendChild(row);
   });
 }
@@ -9473,6 +9585,7 @@ const pageMeta = {
   "crea-cartello": { title:"Cartello fine lavori", sub:null },
   "crea-lettera": { title:"Lettera", sub:null },
   "carta-intestata": { title:"Carta intestata", sub:null },
+  "ai-request-log": { title:"Registro AI", sub:null },
 };
 
 const tabForPage = {
@@ -9484,7 +9597,7 @@ const tabForPage = {
   "crea-fattura":"azienda", "crea-preventivo":"azienda", regalo:"azienda", business:"azienda",
   "assemblee":"azienda", "udienze":"azienda", "revisioni":"azienda",
   calendario:"home", chiamate:"home",
-  cestino:"azienda",
+  cestino:"azienda", "ai-request-log":"azienda",
   "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home",
   "documenti-impresa":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
 };
@@ -9530,6 +9643,7 @@ function navigateTo(page){
   }
 
   if(page === "cestino") renderCestino();
+  if(page === "ai-request-log") renderAiRequestLog();
   if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
   if(page === "cantiere-appunti") renderCantiereAppunti();
   if(page === "documenti-impresa") renderCantiereDocumenti();
