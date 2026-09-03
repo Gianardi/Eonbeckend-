@@ -982,6 +982,39 @@ mostrato due prompt di Copilot che chiedevano numeri fissi enormi
 il principio "qualità prima di quantità" dello stesso metodo
 ChatGPT); adottate solo le idee strutturali buone di quei documenti.
 
+**Tre lotti di casi plausibili integrati (03/09/2026)**: Gianardi ha
+portato 3 lotti da 50 casi ciascuno (150 totali), costruiti con un
+altro strumento AI, esplicitamente etichettati come plausibili/non
+verificati. Da ogni lotto sono state estratte solo le voci
+genuinamente nuove (13, 14, 14 — le altre erano già coperte) e
+integrate in `libro/edile.md`; i lotti originali restano come fonte in
+`libro/casi-lotto{1,2,3}-copilot.md`. Il capitolo Edile è arrivato a
+72 casi in sezione L e mostra segnali di saturazione (il lotto 3 aveva
+più ripetizioni che novità) — considerato pronto per una prima
+validazione con esperienza reale, fermato lì su decisione di Gianardi.
+
+**Decisione di sequenza (03/09/2026, idea di Gianardi)**: prima di
+scrivere gli altri capitoli, creare uno **strato comune** — un
+Professional Brain Pack condiviso da chiunque usi EON, non solo
+artigiani/professionisti (~150 casi pratici trasversali). Motivo:
+molto di quanto scritto nel capitolo Edile in realtà non è specifico
+dell'edile (omonimi, conferma prima di comunicare, autocorrezione
+vocale, cortesia vs impegno formale, privacy, stato provvisorio...) —
+corrisponde alla formula del metodo (BRAIN CORE + Pack + dati utente).
+Buona parte dello strato comune si può estrarre da quanto già scritto
+(edile.md + i 3 lotti), invece di scriverlo da zero.
+
+**Ordine deciso**:
+1. **Strato comune** (`libro/comune.md`, da creare) — ~150 casi
+   trasversali, valido per qualunque persona, non solo professionisti.
+2. Poi i capitoli specifici per professione, solo ciò che è davvero
+   specifico (ontologia, linguaggio, scenari di mestiere) — **Edile**
+   già fatto; poi **Amministratore di condominio**, **Elettricista**,
+   **Avvocato** (4 professioni scelte da Gianardi il 03/09/2026; nota:
+   sostituisce l'Idraulico nell'elenco delle 4 professioni
+   dell'onboarding app usato finora in questo documento — da
+   riconciliare quando si arriva a scriverli).
+
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
 Prima di procedere col Communication Hub: **inserire dati veri nell'app
@@ -1004,6 +1037,27 @@ quotidiano (con dati veri, ambiente vero), POI il Communication Hub,
 POI un test finale con tutto insieme — non l'ordine inverso, per non
 rischiare che un bug del cervello finisca per mandare un messaggio vero
 a un cliente vero durante la prima esposizione reale.
+
+## Riepilogo impegni aperti (03/09/2026)
+
+Promemoria di tutto quello che resta da fare, nell'ordine concordato:
+
+1. **Dati veri in produzione + test quotidiano** (sezione sopra,
+   "Prossimo passo — a cura di Gianardi") — in corso, promemoria
+   giornaliero attivo (trigger `trig_019rYzLSmyTtDno5hzJJWJKx`, 7:00
+   UTC). Annotare ogni caso in cui EON non fa quello che ci si aspetta.
+2. **Libro dei professionisti**: strato comune (~150 casi) → poi
+   Amministratore di condominio, Elettricista, Avvocato (Edile già
+   fatto) — sezione sopra.
+3. **Communication Hub multi-canale** (email, WhatsApp) — dopo il test
+   quotidiano reale, non prima (per non rischiare un bug del cervello
+   su un messaggio vero a un cliente vero durante la prima esposizione).
+4. **Test finale con tutto insieme** (dati veri + Hub) — dopo il punto 3.
+5. **Dettaglio minore**: `check-schema.js` collegato al deploy in
+   automatico (per ora va lanciato a mano) — punto 3.1 del roadmap
+   operativa.
+6. **Pulizia e precisazioni** — voce aperta, si riempie durante l'uso
+   reale (sezione sotto).
 
 ## Pulizia e precisazioni
 
