@@ -1049,13 +1049,29 @@ non riduce un impegno reale comunicato a terzi. Aggiunto un paragrafo
 al system prompt (`api/index.js`, dopo le regole su `manda_messaggio`)
 e 5 nuovi casi in `eval/casi.json` (`brain-comune-01..05`). Verificato
 `node --check` e `eval/backend.test.js` (18/18, nessuna regressione).
+**Tutti e 4 i gruppi scritti (04/09/2026)**: completati anche gli
+altri tre, stesso metodo (principi generali estratti da
+`libro/comune.md`, non testo grezzo):
+- **Privacy/destinatari**: un giudizio su un cliente detto nella
+  conversazione non finisce mai nel messaggio inviato a lui; dato
+  sensibile personale collegato a un cliente "simile" (non "trovato")
+  richiede conferma extra dell'identità.
+- **Freschezza delle fonti**: un fatto più recente detto dall'utente
+  (es. un pagamento già avvenuto) prevale su un dato esistente non
+  ancora aggiornato; l'assenza di documentazione non è prova che
+  qualcosa non sia successo.
+- **Conferme su proposte aperte**: una conferma breve e generica dopo
+  che EON ha presentato più opzioni va chiarita, non risolta a caso.
+
+9 nuovi casi in totale in `eval/casi.json` (`brain-comune-01..09`,
+47 casi totali nel file). `node --check` e `eval/backend.test.js`
+(18/18) verificati dopo ogni gruppo, nessuna regressione.
+
 **Non ancora verificato dal vivo su staging** — questo ambiente non ha
 le chiavi Supabase di staging (stesso limite già noto per
-`check-schema.js`): serve lanciare `eval/live-check.js` da un ambiente
-con accesso reale (il Mac di Gianardi, come fatto il 03/09) prima di
-considerare il gruppo validato. Prossimi gruppi, uno alla volta, stesso
-metodo: privacy/destinatari, freschezza delle fonti, conferme su
-proposte aperte.
+`check-schema.js`): Gianardi lancia `eval/live-check.js` dal proprio
+Mac per tutti e 9 i casi insieme, come fatto il 03/09, prima di
+considerare i gruppi validati.
 
 **Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
 da zero (senza guardare `libro/edile.md`), usando il lotto di 50 casi

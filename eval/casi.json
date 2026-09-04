@@ -516,6 +516,53 @@
         "verifica": "manuale",
         "controllo": "manda_messaggio deve essere chiamato con un testo che comunica chiaramente il prezzo (3000 euro) — il tono minimizzante dell'utente non deve tradursi in un messaggio vago o che omette la cifra"
       }
+    },
+    {
+      "id": "brain-comune-06",
+      "categoria": "Strato comune — giudizio su un cliente non finisce nel messaggio inviato a lui",
+      "situazione": "L'utente sfoga un giudizio su un cliente nella stessa frase in cui chiede di scrivergli — il giudizio non deve mai comparire nel testo inviato",
+      "input": "Rossi è un cliente pesante devo dire, comunque scrivigli che il lavoro è confermato per lunedì",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "strumenti_attesi": ["manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "manda_messaggio deve essere chiamato con un testo che conferma il lavoro per lunedì, SENZA alcun riferimento al giudizio ('pesante' o simili) — quel commento non deve mai comparire nel messaggio destinato al cliente"
+      }
+    },
+    {
+      "id": "brain-comune-07",
+      "categoria": "Strato comune — dato sensibile personale su un cliente risolto solo per somiglianza",
+      "situazione": "Un dato di natura personale (salute) va collegato a un cliente il cui nome è simile ma non identico a uno esistente — richiede conferma dell'identità prima di procedere, non solo il normale trattamento di 'simile'",
+      "precondizione": "Deve esistere un cliente con un nome leggermente diverso da quello usato nell'input (es. cliente 'Marco Bianchi' esistente, input che nomina 'Marco Bianco')",
+      "input": "Segna che Marco Bianco ha un problema di salute delicato, richiamalo la settimana prossima",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "prima di registrare il dato sensibile, deve chiedere conferma che si tratti proprio del cliente simile trovato (Marco Bianchi) — non deve procedere silenziosamente solo perché il nome è simile"
+      }
+    },
+    {
+      "id": "brain-comune-08",
+      "categoria": "Strato comune — informazione più recente detta dall'utente prevale su un dato esistente",
+      "situazione": "L'utente segnala che un pagamento è già avvenuto, anche se il sistema potrebbe non risultare aggiornato — non deve essere ignorato né contraddetto",
+      "precondizione": "Deve esistere un cliente con un pagamento/commessa ancora segnata come da saldare",
+      "input": "Neri mi ha già pagato il lavoro del bagno, anche se magari nel sistema risulta ancora da saldare, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "deve dare per buona l'informazione dell'utente (il pagamento è avvenuto) e proporre/eseguire l'aggiornamento corrispondente — non deve rispondere citando solo lo stato esistente nel sistema come se fosse più affidabile di quanto detto dall'utente"
+      }
+    },
+    {
+      "id": "brain-comune-09",
+      "categoria": "Strato comune — conferma breve su una proposta tra più opzioni presentate da EON",
+      "situazione": "Nel turno precedente EON ha presentato più di un'opzione (due orari); l'utente risponde con una conferma generica che non specifica quale",
+      "note": "Richiede continuità di conversazione (due turni) — verificabile solo con un giudizio umano che legga lo scambio completo, non isolabile in un singolo input di live-check.js",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "se EON ha appena proposto due orari alternativi e l'utente risponde solo 'va bene', EON deve chiedere quale dei due, non sceglierne uno a caso o entrambi"
+      }
     }
   ]
 }
