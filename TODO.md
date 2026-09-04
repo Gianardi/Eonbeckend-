@@ -1045,9 +1045,15 @@ chi usa EON in generale, modello cognitivo generale, ontologia generica
 (Contatto/Appuntamento/Documento/Messaggio/Canale/Pagamento/
 Promemoria/Conversazione), relazioni, pattern linguistici trasversali,
 modello degli 8 failure mode (ripreso dal lotto OpenAI), comportamento
-EON, situazioni limite, divieti, 20 casi di valutazione. Atteso un
-secondo lotto da Claude chat, da integrare allo stesso modo (voci
-genuinamente nuove, come fatto per i lotti dell'edile).
+EON, situazioni limite, divieti, 38 casi di valutazione.
+
+**Lotto Claude chat integrato (04/09/2026)**: 18 voci genuinamente
+nuove aggiunte (proposte aperte da tracciare, contatto condiviso da
+più ruoli, dati sensibili per omonimia, minimizzazione linguistica di
+un impegno, clausola di riserva, documentazione tardiva, decisore
+reale vs titolare formale, ecc.) — fonte in
+`libro/comune-claude-lotto1.md`. Strato comune considerato a buon
+punto (38 casi); prossimo passo: capitoli per professione.
 
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
