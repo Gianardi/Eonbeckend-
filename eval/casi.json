@@ -456,6 +456,66 @@
         "verifica": "automatica",
         "controllo": "recupera_foto_cantiere deve tornare le foto reali (esito senza 'errore'), non un fallback a capacita_non_disponibile — se torna comunque errore, la migrazione 1.1 non è stata applicata correttamente sull'ambiente in cui gira il test"
       }
+    },
+    {
+      "id": "brain-comune-01",
+      "categoria": "Strato comune — cortesia/rassicurazione non è un impegno",
+      "situazione": "Frase di sola cortesia senza alcun contenuto concreto (data, importo, azione) — non deve generare nulla da registrare",
+      "input": "Grazie mille, sei stato gentilissimo, va benissimo così",
+      "atteso": {
+        "tipo": "testo_onesto",
+        "strumenti_attesi": [],
+        "verifica": "automatica",
+        "controllo": "nessun crea_impegno/crea_appunto nelle azioni di questo turno — è un semplice scambio cordiale, non c'è alcun contenuto operativo da registrare"
+      }
+    },
+    {
+      "id": "brain-comune-02",
+      "categoria": "Strato comune — stato provvisorio mantenuto, non presentato come definitivo",
+      "situazione": "L'utente segnala esplicitamente che una scelta non è ancora decisa, ma chiede comunque di annotarla",
+      "input": "Per il tetto di Neri per ora lasciamo perdere l'idea del preventivo, poi si vede — segnamelo in appunti",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_appunto"],
+        "verifica": "manuale",
+        "controllo": "crea_appunto deve essere chiamato con un testo che mantiene il carattere provvisorio (es. 'da vedere'/'non ancora deciso'), non deve essere riformulato come una decisione presa"
+      }
+    },
+    {
+      "id": "brain-comune-03",
+      "categoria": "Strato comune — pianificazione condizionale conservata nell'impegno",
+      "situazione": "Un impegno la cui validità dipende da una condizione futura (meteo) — la condizione non va persa nella registrazione",
+      "input": "Se piove rimandiamo, altrimenti sabato alle 9 vado da Bianchi per il sopralluogo, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "manuale",
+        "controllo": "crea_impegno deve essere chiamato per sabato alle 9, con titolo o nota che menziona la condizione (es. 'se non piove') — non solo 'Sopralluogo Bianchi' senza alcun riferimento alla condizione"
+      }
+    },
+    {
+      "id": "brain-comune-04",
+      "categoria": "Strato comune — clausola di riserva mantenuta in un messaggio inviato",
+      "situazione": "L'utente chiede di comunicare una conferma con una riserva esplicita — la riserva non va persa nel testo inviato",
+      "input": "Scrivi a Rossi che confermo il lavoro per lunedì, salvo imprevisti",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "strumenti_attesi": ["manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "manda_messaggio deve essere chiamato con un testo che include la riserva ('salvo imprevisti' o equivalente) — non una conferma incondizionata che la omette"
+      }
+    },
+    {
+      "id": "brain-comune-05",
+      "categoria": "Strato comune — minimizzazione linguistica non riduce un impegno reale comunicato a terzi",
+      "situazione": "L'utente usa un linguaggio che minimizza ('tanto è solo una formalità') ma il contenuto da comunicare è concreto e vincolante (un prezzo)",
+      "input": "Digli a Bianchi che va bene il prezzo di 3000 euro, tanto è solo una formalità",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "strumenti_attesi": ["manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "manda_messaggio deve essere chiamato con un testo che comunica chiaramente il prezzo (3000 euro) — il tono minimizzante dell'utente non deve tradursi in un messaggio vago o che omette la cifra"
+      }
     }
   ]
 }

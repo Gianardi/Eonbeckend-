@@ -1037,6 +1037,26 @@ non come testo grezzo.
    staging, correggere conflitti trovati.
 5. Poi **Communication Hub multi-canale**.
 
+**Primo gruppo insegnato a EON (04/09/2026)**: fatto l'audit di cosa
+EON copre già (Entity Resolution, Focus, conferma reale per azioni
+delicate) vs cosa manca — 4 gap reali trovati (linguaggio di impegno,
+privacy/destinatari, freschezza delle fonti, conferme su proposte
+aperte). Iniziato dal primo gruppo, il più autonomo: **linguaggio di
+impegno** — cortesia non è impegno, stato provvisorio va mantenuto
+tale, pianificazione condizionale conservata nell'impegno, clausola di
+riserva mantenuta in un messaggio inviato, minimizzazione linguistica
+non riduce un impegno reale comunicato a terzi. Aggiunto un paragrafo
+al system prompt (`api/index.js`, dopo le regole su `manda_messaggio`)
+e 5 nuovi casi in `eval/casi.json` (`brain-comune-01..05`). Verificato
+`node --check` e `eval/backend.test.js` (18/18, nessuna regressione).
+**Non ancora verificato dal vivo su staging** — questo ambiente non ha
+le chiavi Supabase di staging (stesso limite già noto per
+`check-schema.js`): serve lanciare `eval/live-check.js` da un ambiente
+con accesso reale (il Mac di Gianardi, come fatto il 03/09) prima di
+considerare il gruppo validato. Prossimi gruppi, uno alla volta, stesso
+metodo: privacy/destinatari, freschezza delle fonti, conferme su
+proposte aperte.
+
 **Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
 da zero (senza guardare `libro/edile.md`), usando il lotto di 50 casi
 generato da OpenAI (fonte in `libro/comune-openai-lotto1.md`) a partire
