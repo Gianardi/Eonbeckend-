@@ -1067,11 +1067,23 @@ altri tre, stesso metodo (principi generali estratti da
 47 casi totali nel file). `node --check` e `eval/backend.test.js`
 (18/18) verificati dopo ogni gruppo, nessuna regressione.
 
-**Non ancora verificato dal vivo su staging** — questo ambiente non ha
-le chiavi Supabase di staging (stesso limite già noto per
-`check-schema.js`): Gianardi lancia `eval/live-check.js` dal proprio
-Mac per tutti e 9 i casi insieme, come fatto il 03/09, prima di
-considerare i gruppi validati.
+**Verificato dal vivo su staging (04/09/2026)**: Gianardi ha lanciato
+`eval/live-check.js` dal proprio Mac contro un deploy Preview del
+branch (Vercel richiedeva login per le anteprime — disattivato
+temporaneamente "Vercel Authentication" sul progetto di staging, e
+aggiunto "Preview" come ambiente alle 7 variabili d'ambiente che
+c'erano solo per "Production"). **9/10 controlli automatici passati,
+1 falso allarme del test** (non un bug: `intento-02` cerca prima i
+due clienti — corretto, non trovati — poi crea comunque i due impegni
+separati; il controllo automatico non teneva conto delle ricerche
+cliente). Nessun bug reale trovato nei 4 gruppi insegnati oggi. Il
+resto dei 44 casi (verifica manuale) è salvato in
+`~/Desktop/eon-test-risultato.txt` sul Mac di Gianardi, da leggere con
+calma quando vuole — non urgente.
+
+Nota per la prossima volta: pulizia dati fatta direttamente da Claude
+via Supabase MCP (senza bisogno della service_role key sul Terminal)
+— molto più semplice, da preferire se disponibile.
 
 **Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
 da zero (senza guardare `libro/edile.md`), usando il lotto di 50 casi
