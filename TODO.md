@@ -1085,6 +1085,22 @@ Nota per la prossima volta: pulizia dati fatta direttamente da Claude
 via Supabase MCP (senza bisogno della service_role key sul Terminal)
 — molto più semplice, da preferire se disponibile.
 
+**Chiarimento importante (04/09/2026)**: lo strato comune è stato
+scritto E insegnato a EON (4 gruppi, testati oggi). Il capitolo
+**Edile ha solo il libro scritto (72 casi)**, non ancora insegnato a
+EON con lo stesso procedimento — l'edile non è avanti sull'insegnamento,
+solo sulla scrittura del libro.
+
+**Prossimi passi, in ordine (da continuare domani)**:
+1. **Insegnare l'edile a EON** — stesso metodo di oggi: audit di cosa
+   è già coperto dallo strato comune, estrarre principi genuinamente
+   specifici dell'edile, aggiungerli al prompt a piccoli gruppi
+   testati, uno alla volta.
+2. **Scrivere i libri** delle altre 3 professioni — **Amministratore
+   di condominio**, **Elettricista**, **Avvocato** — non ancora
+   iniziati.
+3. **Insegnarli a EON** una volta scritti, stesso metodo.
+
 **Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
 da zero (senza guardare `libro/edile.md`), usando il lotto di 50 casi
 generato da OpenAI (fonte in `libro/comune-openai-lotto1.md`) a partire
