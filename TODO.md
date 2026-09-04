@@ -1037,6 +1037,18 @@ non come testo grezzo.
    staging, correggere conflitti trovati.
 5. Poi **Communication Hub multi-canale**.
 
+**Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
+da zero (senza guardare `libro/edile.md`), usando il lotto di 50 casi
+generato da OpenAI (fonte in `libro/comune-openai-lotto1.md`) a partire
+dal testo di richiesta in `libro/richiesta-strato-comune.md`. Struttura:
+chi usa EON in generale, modello cognitivo generale, ontologia generica
+(Contatto/Appuntamento/Documento/Messaggio/Canale/Pagamento/
+Promemoria/Conversazione), relazioni, pattern linguistici trasversali,
+modello degli 8 failure mode (ripreso dal lotto OpenAI), comportamento
+EON, situazioni limite, divieti, 20 casi di valutazione. Atteso un
+secondo lotto da Claude chat, da integrare allo stesso modo (voci
+genuinamente nuove, come fatto per i lotti dell'edile).
+
 ## Prossimo passo — a cura di Gianardi (03/09/2026)
 
 Prima di procedere col Communication Hub: **inserire dati veri nell'app
