@@ -1895,8 +1895,8 @@ async function reclamaRun(runId, user, statoAtteso) {
    (vedi il blocco cache_control in proseguiAssistente). Non deve MAI
    contenere nulla che cambi da una richiesta all'altra — data/ora vanno
    in dataOraCorrente(), un blocco separato fuori dalla cache. */
-function systemPromptAssistente() {
-  return `Sei l'assistente operativo dentro EON, un'app per professionisti italiani.
+function systemPromptAssistente(professione) {
+  let prompt = `Sei l'assistente operativo dentro EON, un'app per professionisti italiani.
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
@@ -1930,8 +1930,6 @@ Quando l'utente risponde con una conferma breve e generica ("ok", "va bene", "pr
 
 Chiama crea_cliente o aggiorna_cliente SOLO quando l'utente chiede esplicitamente di aggiungere o modificare un cliente in anagrafica — non per un normale impegno che nomina soltanto una persona. Un fornitore di materiali o un subappaltatore (chi fornisce beni o manodopera all'utente, non chi riceve il suo lavoro) non è MAI un cliente, anche se nominato in modo simile a uno reale (es. "Rossi ferramenta" vs "Rossi cliente") — non aggiungerlo né cercarlo in anagrafica clienti quando il contesto lo rende chiaro (es. "chiama la ferramenta per il cemento", "richiama il fornitore del cartongesso").
 
-Alcuni professionisti (in particolare l'edile) usano termini tecnici di settore che potresti sentire storpiati da una dettatura vocale imprecisa (rumore di fondo, microfono): SAL (stato avanzamento lavori, un pagamento parziale legato a una percentuale di lavoro completato), capitolato (elenco dettagliato di lavori/materiali di un preventivo), massetto (strato di base sotto un pavimento), cartongesso, sopralluogo, subappalto, cls/calcestruzzo, tondino (ferro per armatura), e nomi di materiali con varianti regionali (es. "tavelle"/"forati" per lo stesso laterizio). Se una parola del genere viene trascritta in un modo che cambia il senso della frase (es. "massetto" sentito come "mai detto"), non correggerla in silenzio assumendo di aver capito: chiedi conferma piuttosto che indovinare.
-
 Se l'utente segnala che un cliente ha cambiato nome (es. per matrimonio) o che ora si chiama diversamente, e ti dà elementi sufficienti per riconoscere di chi si tratta (il vecchio nome, il telefono, il cantiere/lavoro a cui si riferisce), usa aggiorna_cliente per rinominare il cliente già esistente — mai crea_cliente, che ne creerebbe un doppione. Se non hai elementi sufficienti per essere sicuro di quale cliente esistente sia, chiedi conferma invece di indovinare o duplicare. Lo stesso principio vale per un fornitore che ha cambiato ragione sociale restando la stessa attività: trattalo come lo stesso, non come uno nuovo, quando il contesto lo rende chiaro.
 
 Quando serve collegare qualcosa (es. una foto) a un cliente preciso e ti serve un id certo, non un elenco tra cui scegliere, usa trova_o_crea_cliente invece di cerca_cliente/crea_cliente separati: restituisce sempre un solo cliente, trovato o appena creato.
@@ -1945,6 +1943,21 @@ IMPORTANTE su manda_messaggio, sposta_impegno, annulla_impegno, elimina_impegno,
 Se l'utente chiede di eliminare o svuotare il cestino definitivamente (o dice cose come "elimina tutto quello che ho cestinato", "svuota il cestino per sempre"), chiama subito svuota_cestino — è un unico comando che elimina per sempre tutto ciò che si trova già nel cestino, in ogni categoria. Non usarlo per eliminare un singolo cliente o impegno (per quello ci sono elimina_cliente/elimina_impegno), e non usarlo se l'utente vuole solo spostare qualcosa nel cestino, non svuotarlo.
 
 Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
+
+  if (professione === "edile") prompt += `\n\n${promptPackEdile()}`;
+
+  return prompt;
+}
+
+/* Professional Brain Pack — edile. Contenuto aggiuntivo, non lo strato
+   comune sopra: solo conoscenza specifica di un mestiere (qui, vocabolario
+   tecnico di cantiere), aggiunta al prompt SOLO per chi ha scelto questa
+   professione in fase di iscrizione (profiles.profession). Le regole di
+   comportamento generali (fornitore mai trattato come cliente, continuità
+   d'identità su rinomina cliente/fornitore) restano invece nello strato
+   comune sopra perché utili a qualunque professionista, non solo all'edile. */
+function promptPackEdile() {
+  return `Questo professionista è un edile: usa termini tecnici di settore che potresti sentire storpiati da una dettatura vocale imprecisa (rumore di fondo, microfono): SAL (stato avanzamento lavori, un pagamento parziale legato a una percentuale di lavoro completato), capitolato (elenco dettagliato di lavori/materiali di un preventivo), massetto (strato di base sotto un pavimento), cartongesso, sopralluogo, subappalto, cls/calcestruzzo, tondino (ferro per armatura), e nomi di materiali con varianti regionali (es. "tavelle"/"forati" per lo stesso laterizio). Se una parola del genere viene trascritta in un modo che cambia il senso della frase (es. "massetto" sentito come "mai detto"), non correggerla in silenzio assumendo di aver capito: chiedi conferma piuttosto che indovinare.`;
 }
 
 /* Unico pezzo che cambia ad ogni chiamata: va DOPO il blocco in cache,
@@ -2081,6 +2094,21 @@ async function handleAssistant(req, res, user, accessToken) {
 
   const body = await readBody(req);
   const ctx = { user, accessToken };
+  /* Professione scelta all'iscrizione (profiles.profession): decide quale
+     Professional Brain Pack aggiungere al prompt di sistema, oltre allo
+     strato comune sempre presente. "artigiano" è il valore usato per chi
+     non rientra in nessuna professione con un pack dedicato (nessuna
+     scelta esplicita, o scelta "Altro/Generico" in fase di iscrizione) —
+     in quel caso non si aggiunge nessun pack, solo lo strato comune. Un
+     fallimento qui non deve mai bloccare il turno: EON resta comunque
+     utilizzabile, solo senza il pack specifico. */
+  let professione = null;
+  try {
+    const righeProfilo = await db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, accessToken);
+    professione = Array.isArray(righeProfilo) && righeProfilo[0] ? righeProfilo[0].profession : null;
+  } catch (err) {
+    console.warn("Professione non recuperata, proseguo con solo lo strato comune:", err.message);
+  }
   const runId = body.runId || null;
   let messages;
   let azioniEseguite = [];
@@ -2262,7 +2290,7 @@ async function handleAssistant(req, res, user, accessToken) {
   }
 
   const schemi = Object.values(TOOLS).map((t) => t.schema);
-  const promptStatico = systemPromptAssistente(); // uguale ad ogni giro: costruito una sola volta fuori dal loop
+  const promptStatico = systemPromptAssistente(professione); // uguale ad ogni giro: costruito una sola volta fuori dal loop
 
   /* Un messaggio nuovo (nessun runId: non è né una conferma né la
      continuazione di una domanda aperta) parte sul modello economico

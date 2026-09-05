@@ -1136,20 +1136,52 @@ solo sulla scrittura del libro.
    (SAL, capitolato, massetto, tondino, cls, varianti regionali) da
    riconoscere senza correggere in silenzio se il microfono lo sente
    male. 2 nuovi casi in `eval/casi.json` (`edile-01`, `edile-02`, 51
-   totali). Non ancora testato dal vivo su staging.
+   totali). Testato dal vivo su staging il 05/09/2026 (vedi sotto),
+   nessun bug reale trovato. **Gruppo 2 fatto (05/09/2026)**:
+   continuità d'identità — cliente che cambia cognome (es. matrimonio)
+   o fornitore che cambia ragione sociale → `aggiorna_cliente`, mai
+   `crea_cliente` (eviterebbe un doppione), quando ci sono elementi
+   sufficienti per riconoscerlo; altrimenti chiedere conferma. Caso
+   `edile-03` aggiunto (52 totali). Gruppo 3 (collegamento certo di
+   foto/documenti/pagamenti al cantiere giusto) non ancora iniziato.
 
-   **Nota architetturale trovata oggi**: la professione scelta
-   all'iscrizione (edile/idraulico/elettricista/amministratore) oggi
-   serve SOLO per i dati demo dell'onboarding — il prompt di sistema è
-   identico per tutti, non sa quale professione ha scelto l'utente.
-   Il vocabolario edile aggiunto va quindi nel prompt condiviso
-   (innocuo per gli altri mestieri, semplicemente non lo useranno mai).
-   Da valutare in futuro (non ora): con 3-4 capitoli scritti potrebbe
-   convenire rendere il prompt specifico per professione invece di
-   accumulare tutto insieme.
+   **Architettura per professione — fatto (05/09/2026)**: risolta la
+   nota di sotto. `profiles.profession` (già esistente, già salvata/
+   letta dal frontend) viene ora letta anche dal backend
+   (`handleAssistant` in `api/index.js`, subito dopo aver risolto
+   l'utente) e passata a `systemPromptAssistente(professione)`. Il
+   glossario tecnico edile (SAL, capitolato, massetto, cartongesso,
+   subappalto, cls, tondino, varianti regionali) è stato estratto in
+   una funzione a parte, `promptPackEdile()`, aggiunta al prompt SOLO
+   quando `professione === "edile"` — il primo "Professional Brain
+   Pack" specifico di mestiere, secondo l'architettura BRAIN CORE +
+   Pack descritta più sotto. Le altre due regole del Gruppo 1/2
+   (fornitore mai cliente, continuità d'identità su rinomina) sono
+   invece rimaste nello strato comune: sono utili a qualunque
+   professionista con fornitori o clienti che cambiano nome, non solo
+   all'edile, quindi non è corretto renderle un pack a parte. Un
+   fallimento nel leggere `profession` (tabella irraggiungibile, ecc.)
+   non blocca mai il turno: EON resta utilizzabile, semplicemente senza
+   il pack specifico quel turno.
+
+   Aggiunta anche una 5ª card di iscrizione in `index.html`
+   (`data-profession="artigiano"`, etichetta "Altro / Generico"),
+   così chi non fa uno dei 4 mestieri con pack dedicato ha comunque
+   un'opzione esplicita in fase di iscrizione — usa il dataset demo
+   `professionData.artigiano` già esistente (già generico/misto),
+   nessuna nuova voce di dati serviva. Verificato con `node --check
+   api/index.js`, `node eval/backend.test.js` (18/18) e un controllo
+   di sintassi dello script inline di `index.html`. **Non ancora
+   testato dal vivo su staging**: da fare, sia con un utente
+   `profession: "artigiano"` (il glossario edile non deve influenzare
+   il comportamento) sia rilanciando `edile-01/02/03` con
+   `profession: "edile"` per confermare che il pack funzioni davvero
+   quando attivo.
 2. **Scrivere i libri** delle altre 3 professioni — **Amministratore
    di condominio**, **Elettricista**, **Avvocato** — non ancora
-   iniziati.
+   iniziati. Ora che l'architettura a Pack esiste davvero, ognuno
+   diventerà una propria `promptPackXxx()`, non altro testo nello
+   strato comune.
 3. **Insegnarli a EON** una volta scritti, stesso metodo.
 
 **Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
