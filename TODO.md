@@ -894,8 +894,593 @@ buon segnale anche per la produzione, che condivide lo stesso schema.
 Non ancora collegato al processo di deploy (resta da fare: farlo
 girare in automatico prima di ogni pubblicazione, non solo a mano).
 
-Prossimo punto del roadmap: **2.4**, una vista/cruscotto sul registro
-`ai_request_log` per l'osservabilità per-turno.
+**2.4 — Pagina "Registro AI" (03/09/2026).** Nuova schermata di sola
+lettura in `index.html` (Menu → Registro AI): le ultime 50 richieste
+fatte all'assistente, con messaggio, modello, durata, esito e strumenti
+chiamati — legge direttamente `ai_request_log` via Supabase (RLS già
+pronta), stesso pattern delle altre pagine di sola lettura dell'app.
+Testata dal vivo con Playwright/Chromium (non solo letta): il test ha
+fatto emergere un bug reale prima del commit — una funzione nuova
+(`formattaDurata`) veniva sovrascritta in silenzio da una omonima già
+esistente altrove nel file (durata dei messaggi vocali, secondi non
+millisecondi) — corretto rinominandola (`formattaDurataMs`).
+
+Con questo, tutti i punti aperti del roadmap operativa del 02/09/2026
+sono completi (1.1-1.4, 2.1-2.4, 3.1). Resta aperto solo un dettaglio
+minore già annotato al punto 3.1: collegare `check-schema.js` al
+processo di deploy in automatico (per ora va lanciato a mano). Il
+prossimo pezzo grande, tenuto volutamente separato per la sua
+dimensione, è il **Communication Hub multi-canale** (email, WhatsApp —
+vedi sezione "EON BRAIN: il motore centrale di orchestrazione", punto 7).
+
+## Il "libro" dei professionisti — grande catalogo per la Evaluation Suite
+
+Idea di Gianardi (03/09/2026), discussa insieme: invece di scoprire i
+problemi di EON un po' alla volta durante l'uso reale (settimane/mesi),
+fare uno sforzo sistematico e grande in un colpo solo, PRIMA di
+esporre EON a clienti veri. In due pezzi:
+
+1. **Creare il libro**: una raccolta ampia di comportamenti e richieste
+   realistiche, un capitolo per tipo di professionista (edile,
+   idraulico, elettricista, amministratore di condominio — gli stessi
+   dell'onboarding dell'app): cosa chiedono, cosa vogliono, come lo
+   dicono. Non frasi esatte da riconoscere: situazioni, come già fa
+   `eval/casi.json` ma su scala molto più ampia.
+2. **Creare il libro di istruzioni per i test**: dal libro sopra,
+   derivare tanti nuovi casi per la Evaluation Suite (stesso formato di
+   `eval/casi.json`), poi farli girare tutti su `eval/live-check.js`
+   contro l'ambiente di staging, come fatto oggi per il punto 2.3 — e
+   correggere ogni pattern reale trovato.
+
+**Importante, chiarito insieme**: il libro NON entra nel prompt di EON
+per intero (lo rallenterebbe e rischierebbe di introdurre regole in
+conflitto tra loro, visto oggi con una singola frase ambigua) — resta
+uno strumento nostro, dietro le quinte. Solo le correzioni vere che
+emergono dai test (poche righe mirate, come le 3 di oggi) finiscono
+nel prompt — lo stesso metodo di oggi, applicato su scala grande
+invece che su 3 correzioni isolate.
+
+**Divisione del lavoro concordata**:
+1. Gianardi scrive una breve lista di partenza — esperienza vera sua
+   come professionista, cosa chiede/vuole/come parla lui e i colleghi
+   del settore.
+2. Claude la espande in un catalogo più ampio, usando la conoscenza
+   generale su questi mestieri (non dati specifici, vedi sopra — un
+   buon punto di partenza, da verificare poi con l'uso reale).
+3. Insieme si trasforma in casi per la Evaluation Suite (formato
+   `eval/casi.json`), si testano, e le correzioni vere finiscono nel
+   prompt di EON in poche righe mirate — mai il libro intero.
+
+**In corso**: prima bozza scritta (`libro/edile.md`, su richiesta di
+Gianardi la sera del 03/09/2026, mentre lui si riposava) — capitolo
+Edile, conoscenza generale di Claude, ancora da correggere/completare
+con l'esperienza vera di Gianardi prima di derivarne casi per la
+Evaluation Suite. Mancano ancora i capitoli Idraulico, Elettricista,
+Amministratore di Condominio (gli altri tre mestieri dell'onboarding).
+
+**Aggiornamento stesso giorno**: Gianardi ha portato una consulenza
+fatta con ChatGPT (OpenAI) che definisce una struttura più rigorosa per
+i Professional Brain Pack — salvata in
+`libro/professional-brain-pack-metodo.md`. Struttura in 12 sezioni
+(A-L): identità, giornata, mondo professionale, **oggetti del
+mestiere**, **relazioni tra oggetti**, **processi** (ciclo di vita di
+un lavoro), linguaggio, intenzioni professionali (mappate sulle
+operazioni già esistenti in `interpreta_richiesta`, non nuove
+categorie), **comportamento EON per categoria** (non solo cosa chiede
+il professionista, ma come BRAIN deve ragionare/cercare/chiedere/agire
+— la parte che mancava di più nella prima bozza), situazioni limite,
+divieti, casi di valutazione. `libro/edile.md` riscritto secondo questa
+struttura lo stesso giorno.
+
+**Ulteriore aggiornamento stesso giorno**: capitolo Edile ampliato
+ancora, usando bozza originale + metodo + conoscenza generale di Claude
++ discussione qui. Aggiunti: modello cognitivo dell'edile, ontologia a
+25 entità, grafo delle relazioni, modulo WhatsApp, modello di priorità,
+catalogo errori critici, sezione L espansa a 35 casi. Gianardi ha
+mostrato due prompt di Copilot che chiedevano numeri fissi enormi
+(1100+ casi, 300 intenti) — deliberatamente NON seguiti (contraddicono
+il principio "qualità prima di quantità" dello stesso metodo
+ChatGPT); adottate solo le idee strutturali buone di quei documenti.
+
+**Tre lotti di casi plausibili integrati (03/09/2026)**: Gianardi ha
+portato 3 lotti da 50 casi ciascuno (150 totali), costruiti con un
+altro strumento AI, esplicitamente etichettati come plausibili/non
+verificati. Da ogni lotto sono state estratte solo le voci
+genuinamente nuove (13, 14, 14 — le altre erano già coperte) e
+integrate in `libro/edile.md`; i lotti originali restano come fonte in
+`libro/casi-lotto{1,2,3}-copilot.md`. Il capitolo Edile è arrivato a
+72 casi in sezione L e mostra segnali di saturazione (il lotto 3 aveva
+più ripetizioni che novità) — considerato pronto per una prima
+validazione con esperienza reale, fermato lì su decisione di Gianardi.
+
+**Decisione di sequenza (03/09/2026, idea di Gianardi)**: prima di
+scrivere gli altri capitoli, creare uno **strato comune** — un
+Professional Brain Pack condiviso da chiunque usi EON, non solo
+artigiani/professionisti (~150 casi pratici trasversali). Motivo:
+molto di quanto scritto nel capitolo Edile in realtà non è specifico
+dell'edile (omonimi, conferma prima di comunicare, autocorrezione
+vocale, cortesia vs impegno formale, privacy, stato provvisorio...) —
+corrisponde alla formula del metodo (BRAIN CORE + Pack + dati utente).
+
+**Correzione importante di Gianardi (stesso giorno, da ricordare
+sempre)**: lo strato comune va scritto **da zero, senza guardare
+`libro/edile.md`** — non estratto da lì. Motivo: rischio di
+contaminazione, lo strato "comune" erediterebbe involontariamente il
+taglio/le assunzioni specifiche dell'edile spacciate per universali.
+
+**Metodo di insegnamento a EON confermato con Gianardi (stesso
+giorno)**: l'obiettivo è che EON sappia sempre come comportarsi, non
+solo poche correzioni isolate — ma non tramite copia letterale del
+libro nel prompt (rischio di regole in conflitto tra loro, come visto
+oggi nel bug orario/tipo/titolo). Metodo concordato: da ogni gruppo di
+casi simili si estrae il PRINCIPIO generale che li spiega tutti (non i
+singoli casi letterali) — sono i principi, generalizzabili anche a
+casi mai visti, a entrare nel prompt, e solo dopo essere stati testati
+per verificare che non si contraddicano tra loro. Così facendo il
+libro intero viene insegnato a EON, ma come regole generali verificate,
+non come testo grezzo.
+
+**Ordine deciso**:
+1. **Strato comune** (`libro/comune.md`, da creare da zero) — ~150
+   casi trasversali, validi per qualunque persona, non solo
+   professionisti.
+2. **Capitoli specifici per professione**, solo ciò che è davvero
+   specifico (ontologia, linguaggio, scenari di mestiere) — **Edile**
+   già fatto. **Elenco finale delle 4 professioni di partenza,
+   confermato da Gianardi il 05/09/2026 (sostituisce ogni versione
+   precedente, incluso il cambio del 03/09/2026 sotto)**: **Edile**,
+   **Idraulico**, **Amministratore di condominio**, **Avvocato**.
+   L'Elettricista, presente nell'onboarding fino ad oggi, non è più fra
+   le prime 4 — rimosso anche dalle card di iscrizione (vedi sotto).
+3. **Insegnare a EON BRAIN**: estrarre i principi generali dallo strato
+   comune + capitoli professione, aggiungerli al prompt di sistema.
+4. **Testing**: verificare i principi con `eval/live-check.js` contro
+   staging, correggere conflitti trovati.
+5. Poi **Communication Hub multi-canale**.
+
+**Primo gruppo insegnato a EON (04/09/2026)**: fatto l'audit di cosa
+EON copre già (Entity Resolution, Focus, conferma reale per azioni
+delicate) vs cosa manca — 4 gap reali trovati (linguaggio di impegno,
+privacy/destinatari, freschezza delle fonti, conferme su proposte
+aperte). Iniziato dal primo gruppo, il più autonomo: **linguaggio di
+impegno** — cortesia non è impegno, stato provvisorio va mantenuto
+tale, pianificazione condizionale conservata nell'impegno, clausola di
+riserva mantenuta in un messaggio inviato, minimizzazione linguistica
+non riduce un impegno reale comunicato a terzi. Aggiunto un paragrafo
+al system prompt (`api/index.js`, dopo le regole su `manda_messaggio`)
+e 5 nuovi casi in `eval/casi.json` (`brain-comune-01..05`). Verificato
+`node --check` e `eval/backend.test.js` (18/18, nessuna regressione).
+**Tutti e 4 i gruppi scritti (04/09/2026)**: completati anche gli
+altri tre, stesso metodo (principi generali estratti da
+`libro/comune.md`, non testo grezzo):
+- **Privacy/destinatari**: un giudizio su un cliente detto nella
+  conversazione non finisce mai nel messaggio inviato a lui; dato
+  sensibile personale collegato a un cliente "simile" (non "trovato")
+  richiede conferma extra dell'identità.
+- **Freschezza delle fonti**: un fatto più recente detto dall'utente
+  (es. un pagamento già avvenuto) prevale su un dato esistente non
+  ancora aggiornato; l'assenza di documentazione non è prova che
+  qualcosa non sia successo.
+- **Conferme su proposte aperte**: una conferma breve e generica dopo
+  che EON ha presentato più opzioni va chiarita, non risolta a caso.
+
+9 nuovi casi in totale in `eval/casi.json` (`brain-comune-01..09`,
+47 casi totali nel file). `node --check` e `eval/backend.test.js`
+(18/18) verificati dopo ogni gruppo, nessuna regressione.
+
+**Verificato dal vivo su staging (04-05/09/2026)**: Gianardi ha
+lanciato `eval/live-check.js` dal proprio Mac contro un deploy Preview
+del branch (Vercel richiedeva login per le anteprime — disattivato
+temporaneamente "Vercel Authentication" sul progetto di staging, e
+aggiunto "Preview" come ambiente alle 7 variabili d'ambiente che
+c'erano solo per "Production"). Il run del 04/09 si è fermato a metà
+per credito Anthropic esaurito (tutti i 9 casi `brain-comune-*`, cioè
+proprio quelli che testano il lavoro nuovo, non erano stati eseguiti
+davvero) — ricaricato il credito e rieseguito il 05/09.
+
+**Risultato pulito e completo**: 8 dei 9 casi `brain-comune-01..08`
+verificati e corretti (cortesia≠impegno, stato provvisorio, condizione
+conservata, riserva "salvo imprevisti" mantenuta nel messaggio, prezzo
+comunicato senza essere minimizzato, giudizio su un cliente mai nel
+messaggio a lui, dato sensibile su cliente "simile" → chiede conferma
+citando esplicitamente "dato sensibile di natura personale"). Il 9°
+(`brain-comune-09`) non è testabile con questo strumento (richiede
+continuità di conversazione). Caso 08 (pagamento già ricevuto): EON ha
+usato crea_appunto come miglior ripiego — scoperto che **non esiste
+ancora un tool per registrare un pagamento ricevuto/aggiornare lo stato
+di un pagamento**, quindi il comportamento osservato è già il massimo
+possibile con gli strumenti attuali (eventuale gap futuro, non di oggi).
+Nessun bug reale trovato nei 4 gruppi insegnati.
+
+Aggiunta la possibilità di rilanciare solo alcuni casi
+(`EVAL_SOLO=id1,id2,...` in `eval/live-check.js`) per risparmiare
+tempo/credito nei prossimi round — usata oggi stesso per riverificare
+04-07 dopo aver riseminato via Supabase MCP i clienti di test cancellati
+dal reset.
+
+**Nuovo strumento aggiunto (05/09/2026): incassi.** Dal gap trovato con
+il caso `brain-comune-08` (EON non aveva modo di segnare un pagamento
+ricevuto) — su richiesta di Gianardi ("aggiungiamo il tool pagamenti:
+chi ha pagato e chi non ha pagato"). Non serviva una tabella nuova: la
+tabella `incomes` (già usata dalla pagina "Entrate" dell'app, stati
+`attesa`/`scaduto`/`incassato`) non aveva ancora strumenti AI dedicati.
+Aggiunti in `api/index.js`:
+- `mostra_incassi` (lettura) — chi deve ancora pagare, filtrabile per
+  cliente, `tutti:true` per includere anche i già incassati
+- `segna_incasso_ricevuto` (scrittura) — aggiorna un incasso in sospeso
+  esistente a "incassato", oppure ne crea uno nuovo già incassato se il
+  pagamento non era mai stato fatturato prima (contanti/bonifico
+  diretto) — richiede l'importo solo in questo secondo caso
+
+Aggiornato `brain-comune-08` (ora verifica automatica sul tool vero) e
+aggiunti `brain-pagamenti-01/02` in `eval/casi.json` (49 casi totali).
+`node --check` e `backend.test.js` (18/18) verificati. **Da testare dal
+vivo**: serve un nuovo deploy Preview (il codice è cambiato) e clienti
+di prova con un incasso in sospeso — non ancora fatto in questa sessione.
+
+Nota per la prossima volta: pulizia dati fatta direttamente da Claude
+via Supabase MCP (senza bisogno della service_role key sul Terminal)
+— molto più semplice, da preferire se disponibile.
+
+**Chiarimento importante (04/09/2026)**: lo strato comune è stato
+scritto E insegnato a EON (4 gruppi, testati oggi). Il capitolo
+**Edile ha solo il libro scritto (72 casi)**, non ancora insegnato a
+EON con lo stesso procedimento — l'edile non è avanti sull'insegnamento,
+solo sulla scrittura del libro.
+
+**Prossimi passi, in ordine**:
+1. **Insegnare l'edile a EON** — stesso metodo di ieri: audit di cosa
+   è già coperto dallo strato comune, estrarre principi genuinamente
+   specifici dell'edile, aggiungerli al prompt a piccoli gruppi
+   testati, uno alla volta. **Gruppo 1 fatto (05/09/2026)**: fornitore/
+   subappaltatore mai trattato come cliente + glossario di settore
+   (SAL, capitolato, massetto, tondino, cls, varianti regionali) da
+   riconoscere senza correggere in silenzio se il microfono lo sente
+   male. 2 nuovi casi in `eval/casi.json` (`edile-01`, `edile-02`, 51
+   totali). Testato dal vivo su staging il 05/09/2026 (vedi sotto),
+   nessun bug reale trovato. **Gruppo 2 fatto (05/09/2026)**:
+   continuità d'identità — cliente che cambia cognome (es. matrimonio)
+   o fornitore che cambia ragione sociale → `aggiorna_cliente`, mai
+   `crea_cliente` (eviterebbe un doppione), quando ci sono elementi
+   sufficienti per riconoscerlo; altrimenti chiedere conferma. Caso
+   `edile-03` aggiunto (52 totali). Gruppo 3 (collegamento certo di
+   foto/documenti/pagamenti al cantiere giusto) non ancora iniziato.
+
+   **Architettura per professione — fatto (05/09/2026)**: risolta la
+   nota di sotto. `profiles.profession` (già esistente, già salvata/
+   letta dal frontend) viene ora letta anche dal backend
+   (`handleAssistant` in `api/index.js`, subito dopo aver risolto
+   l'utente) e passata a `systemPromptAssistente(professione)`. Il
+   glossario tecnico edile (SAL, capitolato, massetto, cartongesso,
+   subappalto, cls, tondino, varianti regionali) è stato estratto in
+   una funzione a parte, `promptPackEdile()`, aggiunta al prompt SOLO
+   quando `professione === "edile"` — il primo "Professional Brain
+   Pack" specifico di mestiere, secondo l'architettura BRAIN CORE +
+   Pack descritta più sotto. Le altre due regole del Gruppo 1/2
+   (fornitore mai cliente, continuità d'identità su rinomina) sono
+   invece rimaste nello strato comune: sono utili a qualunque
+   professionista con fornitori o clienti che cambiano nome, non solo
+   all'edile, quindi non è corretto renderle un pack a parte. Un
+   fallimento nel leggere `profession` (tabella irraggiungibile, ecc.)
+   non blocca mai il turno: EON resta utilizzabile, semplicemente senza
+   il pack specifico quel turno.
+
+   Aggiunta anche una 5ª card di iscrizione in `index.html`
+   (`data-profession="artigiano"`, etichetta "Altro / Generico"),
+   così chi non fa uno dei 4 mestieri con pack dedicato ha comunque
+   un'opzione esplicita in fase di iscrizione — usa il dataset demo
+   `professionData.artigiano` già esistente (già generico/misto),
+   nessuna nuova voce di dati serviva. Verificato con `node --check
+   api/index.js`, `node eval/backend.test.js` (18/18) e un controllo
+   di sintassi dello script inline di `index.html`. **Testato dal vivo
+   su staging il 05/09/2026**: con `profession: "artigiano"` (pack
+   spento), `edile-02`/`edile-03` passano comunque (la conoscenza
+   generale del modello e lo strato comune bastano), `edile-01` è
+   corretto nella sostanza (il fornitore non viene mai cercato/creato
+   come cliente, `focus.tipo: "fornitore"`) ma il controllo automatico
+   segna FAIL perché "richiama" attiva la regola preesistente
+   sull'operazione "contatta" (si ferma onestamente con
+   `capacita_non_disponibile` invece di creare subito un impegno) — non
+   un bug, un test scritto in modo troppo rigido. Con `profession:
+   "edile"` (pack acceso), tutti e 3 passano, incluso `edile-01`
+   nell'automatico. Pack confermato funzionante e collegato. (Nota per
+   chi rilancia questi casi in futuro: `edile-03` modifica per davvero
+   il cliente — dopo un primo lancio riuscito "Laura Rossi" diventa
+   "Laura Verdi", quindi un secondo lancio senza reseed non ritrova più
+   "Laura Rossi" e chiede conferma invece di fallire — comportamento
+   corretto, non un bug, ma va ri-seedato il cliente prima di ogni
+   nuovo lancio pulito.)
+
+   **Bug reale trovato durante questo test, non legato al pack**: il
+   vincolo del database su `profiles.profession` accettava solo
+   `artigiano, amministratore, avvocato, consulente` — **non**
+   `edile`/`idraulico`, cioè due dei quattro mestieri offerti
+   dall'iscrizione. Chi si fosse iscritto scegliendo Edile o Idraulico
+   sarebbe silenziosamente rimasto "artigiano" (il salvataggio falliva,
+   ma `index.html` non controllava l'errore di quella chiamata). Mai
+   emerso prima perché i soli utenti reali finora (2 in produzione, 1 di
+   prova in staging) sono tutti "artigiano". **Corretto lo stesso
+   giorno**: vincolo allargato su staging (ora accetta anche
+   `edile`/`idraulico`); `index.html` ora controlla davvero l'errore di
+   quel salvataggio (lo rilancia invece di ignorarlo) e passa la
+   professione anche nei metadati di `signUp` (così il trigger
+   `handle_new_user` la imposta già correttamente al primo inserimento,
+   non solo nell'update successivo). **Stesso allargamento applicato
+   anche in produzione il 05/09/2026**, con conferma esplicita di
+   Gianardi ("facciamo quello che c'è da fare") — verificato che il
+   vincolo ora accetta anche `edile`/`idraulico` in entrambi gli
+   ambienti.
+2. **Scrivere i libri** delle altre 3 professioni di partenza —
+   **Idraulico**, **Amministratore di condominio**, **Avvocato** — non
+   ancora iniziati. Ora che l'architettura a Pack esiste davvero, ognuno
+   diventerà una propria `promptPackXxx()`, non altro testo nello
+   strato comune.
+3. **Insegnarli a EON** una volta scritti, stesso metodo.
+
+**Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
+nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
+generali, non specifici edile — vedi `systemPromptAssistente`):
+autocorrezione di un valore nella stessa frase (vale l'ultimo),
+negazione/misura ambigua in una trascrizione su un'azione con
+conseguenze concrete, messaggio isolato/emotivo che non deve produrre
+un'azione irreversibile, sconto eccezionale che non diventa standard,
+range vago preservato quando riportato a terzi, comando ampio senza
+scope dichiarato, indicazioni contrastanti da due fonti autorizzate,
+dati economici interni mai in un documento/messaggio cliente,
+posizione riservata condivisa solo se autorizzata, allegato mai dato
+per ricevuto solo perché dichiarato, formula di cortesia che non
+risponde a un sì/no, richiesta indiretta di risorse storiche, canale
+non ancora collegato (WhatsApp) dichiarato onestamente, regola di
+disponibilità ricorrente registrata come tale. 10 nuovi casi
+(`brain-comune-10..19`, 63 totali).
+
+**Verificato dal vivo su staging il 05/09/2026: 9 su 10 corretti.**
+`brain-comune-12` (comando ampio senza scope) ha un comportamento
+corretto (chiede a cosa si riferisce "tutto", non esegue nulla) ma la
+frase finale della risposta non finisce con "?" — il controllo
+automatico (che guarda solo l'ultimo carattere del testo) lo segna
+FAIL per questo motivo, non per un bug reale: pattern già visto oggi
+(`edile-01`) e nei giorni scorsi. `brain-comune-19` (formula di
+cortesia dopo una domanda sì/no) non si è potuto verificare come
+progettato: richiede un vero preventivo già esistente per il cliente,
+ma i preventivi non sono ancora gestiti da EON (stesso limite "non
+applicabile" del Gruppo 3) — non un fallimento, un limite di
+precondizione. Restano da insegnare esplicitamente solo 2 dei 19
+originali (decisione presa da un collaboratore non titolare, telefono
+riusato da una persona diversa) — scartati per ora perché difficili da
+verificare con un caso pulito data l'attuale mancanza dei concetti
+Squadra/storico-per-numero nell'app; da rivalutare se emergeranno
+nell'uso reale.
+
+**Prossimo passo, deciso con Gianardi il 05/09/2026**: il metodo da
+qui in avanti non è più "insegna quello che il prompt può fare oggi, e
+segnala i limiti strutturali per dopo" — è "insegna la conoscenza
+generale, e se durante l'insegnamento emerge la necessità di una
+funzione nuova, la si costruisce subito, poi si continua a insegnare
+sopra quella base".
+
+**Concetto di "Cantiere" — fatto (05/09/2026).** Primo limite
+strutturale reale, affrontato subito invece di essere solo segnalato.
+Scelta con Gianardi la **versione leggera** (non l'intera ontologia del
+libro Sopralluogo/Preventivo/Commessa/SAL/Garanzia — troppo lavoro e
+alcune di quelle funzioni non esistono ancora nell'app): un Cantiere è
+solo un'etichetta di lavoro collegata a un cliente.
+
+- Nuova tabella `cantieri` (`supabase/cantieri_entita_schema.sql`):
+  client_id, nome, stato aperto/chiuso. Applicata su staging.
+- `cantiere_foto.cantiere_id` (nullable, additivo — `client_id` resta
+  per il caso comune di un solo lavoro, non serve mai toccarlo).
+- Due nuovi strumenti: `cerca_cantiere` (elenca i lavori di un
+  cliente), `crea_cantiere` (ne registra uno nuovo con un nome che lo
+  distingua). `recupera_foto_cantiere` accetta ora anche `cantiere_id`.
+- Insegnato nello strato comune: verificare i cantieri solo quando è
+  plausibile che un cliente ne abbia più di uno (mai per il caso
+  comune, per non aggiungere frizione inutile).
+- **Verificato dal vivo su staging il 05/09/2026: 3 casi su 3
+  corretti** (`brain-comune-20/21/22`, 66 totali) — incluso il caso più
+  delicato: cliente con due cantieri ("Bagno"/"Tetto"), EON ha cercato
+  i cantieri, riconosciuto "tetto" dal testo dell'utente, mostrato solo
+  la foto di quel cantiere.
+- Corretta anche una piccola disciplina mancata: `eval/check-schema.js`
+  non aveva mai registrato la tabella `incomes` (aggiunta ieri) —
+  sistemato insieme al resto.
+- **Applicata anche in produzione il 05/09/2026**, con conferma di
+  Gianardi — verificato che tabella `cantieri` e colonna
+  `cantiere_foto.cantiere_id` esistono in entrambi gli ambienti.
+  Restano fuori scope per questa versione leggera: `incomes`
+  (pagamenti) e `cantiere_appunti`/`cantiere_documenti` non hanno
+  ancora un collegamento a `cantiere_id` — da valutare se servirà
+  quando/se emergerà un caso reale.
+
+**Resto del gruppo "parziale" NON legato al Cantiere — fatto
+(05/09/2026).** Insegnati: SAL/acconto distinto dal saldo finale
+(chiedere quale rata se un cliente ne ha più di una in sospeso,
+indicare il tipo nella descrizione quando se ne registra uno nuovo),
+fornitore e subappaltatore come categorie distinte tra loro, verificare
+sempre il destinatario prima di un inoltro rapido di dati cliente, una
+delega generale autorizza a procedere ma mai a inventare un dato
+mancante, una decisione presa sul campo da un collaboratore va
+segnalata come tale. Lasciato fuori "telefono riusato da una persona
+diversa": richiede uno storico per numero di telefono che oggi non
+esiste, non un insegnamento mancante ma un dato che EON non ha modo di
+controllare. 4 nuovi casi (`brain-comune-23..26`, 70 totali).
+
+**Verificato dal vivo su staging, con due giri di correzione reale
+(05/09/2026)**: `brain-comune-24` (tipo di pagamento in descrizione)
+corretto al primo colpo, confermato leggendo direttamente il valore
+salvato su database ("Secondo acconto - Lavoro bagno"). `brain-comune-
+25` (delega non inventa il prezzo) corretto nella sostanza, stesso
+falso positivo del controllo automatico sul punto finale già visto più
+volte oggi. `brain-comune-26` (decisione da collaboratore) al primo
+giro NON seguiva l'istruzione (impegno creato senza menzionare
+l'operaio) — istruzione resa più esplicita e operativa (dire di
+scrivere ESPLICITAMENTE chi ha deciso nel titolo del tool, non solo
+"segnalarlo" in modo vago) e il secondo giro ha corretto
+("Inizio lavori Bianchi — confermato dal mio operaio"). `brain-comune-
+23` (acconto ambiguo) ha rivelato un **secondo bug di codice reale**,
+dello stesso tipo di quello di ieri: `segna_incasso_ricevuto`, quando
+un cliente aveva più di un incasso in sospeso, sceglieva sempre quello
+con la scadenza più vicina ignorando l'importo detto dall'utente —
+anche quando l'importo corrispondeva chiaramente a un altro dei
+candidati. **Corretto**: ora, con più incassi in sospeso per lo stesso
+cliente, l'importo (se corrisponde a uno solo) sceglie quale
+aggiornare; altrimenti si ferma elencando le opzioni invece di
+scegliere di default la scadenza più vicina. Il testo con cui EON
+chiede l'importo resta migliorabile (non elenca subito i due acconti
+come suggerito nel prompt) ma il comportamento è ormai sicuro a
+livello di codice — rifinitura di forma rimandabile, non un rischio.
+
+**Gruppo 3 edile (05/09/2026): collegamento certo di foto/documenti/
+pagamenti al cliente/cantiere giusto.** Audit di `libro/edile.md`
+(sezioni C/I/K, "Catalogo errori critici"): la maggior parte è già
+coperta dallo strato comune esistente (`cliente_risolto` di
+`interpreta_richiesta` — trovato/simile/ambiguo/non_trovato — usato
+anche da `recupera_foto_cantiere`/`recupera_documenti_cliente`).
+**Trovato però un bug reale**, non teorico: `segna_incasso_ricevuto`
+(lo strumento pagamenti di ieri) NON passa da quella logica di
+sicurezza — cerca l'incasso per nome con un confronto approssimativo e
+`limit:1`, prendendo sempre il primo risultato anche quando altri
+clienti diversi corrispondevano allo stesso nome parziale. Rischio
+concreto: segnare come pagato il cliente sbagliato — l'errore più
+grave del catalogo del libro. **Corretto**: ora recupera più righe e,
+se corrispondono a più `client_name` diversi, si ferma con un errore
+esplicito invece di scegliere alla cieca; Claude lo riceve come
+tool_result di errore e deve chiedere conferma in testo. Nuovo caso
+`brain-pagamenti-03` (53 casi totali) — **verificato dal vivo su
+staging il 05/09/2026**: con due incassi in sospeso di "Colombo Andrea"
+e "Colombo Costruzioni", EON ha correttamente elencato entrambi e
+chiesto quale, senza registrare il pagamento su nessuno dei due.
+
+**Nota per il futuro**: il libro modella un'ontologia più ricca
+(Cliente → uno o più Cantiere → Commessa), ma lo schema reale collega
+foto/documenti/pagamenti solo a un `client_id`/`client_name`, non a un
+Cantiere distinto — in pratica oggi "collegare al cantiere giusto"
+significa "collegare al cliente giusto". Se un cliente avesse davvero
+più cantieri attivi insieme servirebbe una colonna nuova (fuori scope
+per una semplice correzione di prompt/tool) — non è un problema oggi
+perché il libro stesso nota che è raro avere più di un cantiere attivo
+per cliente, ma va tenuto a mente se emergerà nell'uso reale.
+
+**Audit completo di `libro/edile.md` contro il prompt attuale
+(05/09/2026)**, richiesto da Gianardi ("cosa abbiamo preso e non preso
+dal libro?") — confronto voce per voce dei 72 casi in sezione L più la
+tabella "Catalogo errori critici", in 4 gruppi:
+
+1. **Già coperto e verificato (~30 dei 72 casi)** — quasi tutto dallo
+   strato comune, non scritto per l'edile ma che copre per costruzione
+   già molto: omonimi (#11-15), orario mancante/vago (#6-9), appunti vs
+   impegni (#16-17), conferma reale prima di comunicare (#20-23),
+   cortesia ≠ impegno (#41), stato provvisorio (#62), pianificazione
+   condizionale (#63), fornitore mai cliente (#30, verificato oggi come
+   `edile-01`), cliente/fornitore che cambia nome (#43/#64, verificato
+   oggi come `edile-03`), prezzo mai inventato, parere mai trasformato
+   in azione (#25), conferma vaga tra più opzioni (#38/#47, `brain-
+   comune-09`), acconto senza importo (#72). Più le due cose scritte
+   apposta per l'edile: il glossario tecnico (#19/#44,
+   `promptPackEdile()`) e il collegamento certo dei pagamenti (tabella
+   errori critici, corretto oggi in `segna_incasso_ricevuto`).
+2. **Coperto solo in parte, per un limite strutturale dell'app, non di
+   insegnamento (~10 casi: #2, #10, #18, #21 tono, #27, #31, #45, #52,
+   #61)** — soprattutto perché manca un concetto di "Cantiere" distinto
+   dal "Cliente" nello schema (foto/documenti/pagamenti sono legati
+   solo al cliente): "due cantieri diversi per lo stesso cliente" oggi
+   EON non può proprio distinguerli, non è risolvibile scrivendo meglio
+   il prompt (vedi nota sopra).
+3. **Non applicabile, perché la funzione non esiste ancora nell'app
+   (~12 casi: #24, #26, #28, #29, #33, #46, #49, #50, #51, #53, #65,
+   #69)** — preventivi, varianti, commesse, squadra/attività assegnate:
+   il libro li descrive perché fanno parte del mestiere, ma EON non ha
+   ancora strumenti AI per crearli/gestirli (i preventivi si fanno da
+   un'altra pagina dell'app, manuale). Buco di funzionalità, non di
+   insegnamento.
+4. **Scritto nel libro ma MAI ancora insegnato/testato — il vero "non
+   preso" (~19 casi): #3, #35, #36, #37, #39, #40, #42, #48, #54, #55,
+   #56, #57, #58, #59, #60, #66, #67, #70, #71** (oltre alle righe
+   corrispondenti nel "Catalogo errori critici": negazione persa nella
+   trascrizione, unità di misura ambigua, azione irreversibile da
+   messaggio emotivo isolato, dati economici interni mai in un
+   documento cliente, posizione/indirizzo riservato condiviso senza
+   autorizzazione, indicazioni contrastanti da due fonti autorizzate
+   risolte a caso). Sono principi generalizzabili, candidati naturali
+   per il prossimo gruppo da insegnare — molti sono anzi generici
+   (utili a qualunque professione, non solo edile), quindi probabile
+   che finiscano nello strato comune più che in `promptPackEdile()`.
+
+**Posizionamento di EON, chiarito da Gianardi il 05/09/2026 (da
+ricordare sempre, riguarda l'intero progetto non solo l'edile)**: EON
+non è pensato solo per artigiani/professionisti con un mestiere
+specifico — è per **chiunque voglia organizzare la propria giornata e
+aumentare la produttività**, mestiere o no. Per questo esiste un
+livello generale (BRAIN CORE + strato comune, `libro/comune.md`, già
+scritto) valido per chiunque usi EON — la card di iscrizione "Altro /
+Generico" (`data-profession="artigiano"`, aggiunta oggi) è la porta
+d'ingresso a questo livello generale, non un ripiego per chi non trova
+la propria professione. Sopra a questo, per chi ha davvero un mestiere
+specifico, ci sono i Professional Brain Pack (edile fatto, altri tre in
+arrivo — vedi sopra). `libro/professional-brain-pack-metodo.md`
+aggiornato con questa distinzione esplicita.
+
+**Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
+da zero (senza guardare `libro/edile.md`), usando il lotto di 50 casi
+generato da OpenAI (fonte in `libro/comune-openai-lotto1.md`) a partire
+dal testo di richiesta in `libro/richiesta-strato-comune.md`. Struttura:
+chi usa EON in generale, modello cognitivo generale, ontologia generica
+(Contatto/Appuntamento/Documento/Messaggio/Canale/Pagamento/
+Promemoria/Conversazione), relazioni, pattern linguistici trasversali,
+modello degli 8 failure mode (ripreso dal lotto OpenAI), comportamento
+EON, situazioni limite, divieti, 38 casi di valutazione.
+
+**Lotto Claude chat integrato (04/09/2026)**: 18 voci genuinamente
+nuove aggiunte (proposte aperte da tracciare, contatto condiviso da
+più ruoli, dati sensibili per omonimia, minimizzazione linguistica di
+un impegno, clausola di riserva, documentazione tardiva, decisore
+reale vs titolare formale, ecc.) — fonte in
+`libro/comune-claude-lotto1.md`. Strato comune considerato a buon
+punto (38 casi); prossimo passo: capitoli per professione.
+
+## Prossimo passo — a cura di Gianardi (03/09/2026)
+
+Prima di procedere col Communication Hub: **inserire dati veri nell'app
+di produzione** (non quella di staging, che resta apposta vuota per i
+test) — una decina di clienti realistici, cantieri collegati, qualche
+foto vera, un impegno già segnato. Poi usare EON per davvero, con
+richieste vere ("segnami un appuntamento con [cliente vero]", "fammi
+vedere le foto del cantiere di [nome]", ecc.), e annotare ogni caso in
+cui qualcosa non funziona come atteso — frase esatta usata + cosa è
+successo invece.
+
+Nato da un allarme di Gianardi il 03/09/2026 ("il sistema è lentissimo,
+non fa quello che voglio") rivelatosi in parte un equivoco: stava
+testando sull'app vera ma senza aver mai inserito clienti/cantieri
+veri — EON non inventa dati mai visti, quindi senza anagrafica non
+trova nulla, comportamento corretto (verificato oggi dalla suite,
+`no-invenzione-01`/`02`) ma facile da scambiare per un bug se non si sa
+che manca la base dati. Ordine deciso insieme: prima questo test reale
+quotidiano (con dati veri, ambiente vero), POI il Communication Hub,
+POI un test finale con tutto insieme — non l'ordine inverso, per non
+rischiare che un bug del cervello finisca per mandare un messaggio vero
+a un cliente vero durante la prima esposizione reale.
+
+## Riepilogo impegni aperti (03/09/2026)
+
+Promemoria di tutto quello che resta da fare, nell'ordine concordato:
+
+1. **Dati veri in produzione + test quotidiano** (sezione sopra,
+   "Prossimo passo — a cura di Gianardi") — in corso, promemoria
+   giornaliero attivo (trigger `trig_019rYzLSmyTtDno5hzJJWJKx`, 7:00
+   UTC). Annotare ogni caso in cui EON non fa quello che ci si aspetta.
+2. **Libro dei professionisti**: strato comune (~150 casi) → poi
+   Amministratore di condominio, Elettricista, Avvocato (Edile già
+   fatto) — sezione sopra.
+3. **Communication Hub multi-canale** (email, WhatsApp) — dopo il test
+   quotidiano reale, non prima (per non rischiare un bug del cervello
+   su un messaggio vero a un cliente vero durante la prima esposizione).
+4. **Test finale con tutto insieme** (dati veri + Hub) — dopo il punto 3.
+5. **Dettaglio minore**: `check-schema.js` collegato al deploy in
+   automatico (per ora va lanciato a mano) — punto 3.1 del roadmap
+   operativa.
+6. **Pulizia e precisazioni** — voce aperta, si riempie durante l'uso
+   reale (sezione sotto).
 
 ## Pulizia e precisazioni
 
@@ -905,3 +1490,20 @@ pulita" — non un elenco chiuso, si riempie mano a mano che si individuano
 cose da sistemare durante l'uso reale dell'app.
 
 Richiesto da Gianardi il 31/08/2026.
+
+**05/09/2026 — pulizia e sistemazione grafica generale dell'app.**
+Gianardi vuole rivedere le tante card/cartelle nell'area con Registro
+AI, Pagamenti, ecc. ed eliminare quelle che non servono più.
+
+**05/09/2026 — interfaccia per i pagamenti (chi ha pagato/non ha
+pagato).** Idea di Gianardi: non solo lo strumento AI (mostra_incassi/
+segna_incasso_ricevuto, già fatto e testato il 05/09 — vedi sopra), ma
+anche una parte visiva:
+- I pagamenti/incassi creano sempre un impegno (come gli altri), ma
+  colorato in modo diverso per distinguerli a colpo d'occhio dagli
+  impegni generali
+- Una card dedicata nel menu, da mettere SOPRA quella di "Registro AI"
+  (nell'area con tante card, tra cui anche quella dei pagamenti)
+
+Da fare in una sessione dedicata al lavoro grafico/UI, separata da
+quella sul "cervello" di EON — sono due tipi di lavoro diversi.

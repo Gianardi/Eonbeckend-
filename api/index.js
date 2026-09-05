@@ -1198,6 +1198,103 @@ const TOOLS = {
     },
   },
 
+  mostra_incassi: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "mostra_incassi",
+      description: "Elenca gli incassi (pagamenti da clienti): chi deve ancora pagare e chi ha già pagato. Per default mostra solo quelli in sospeso (in attesa o scaduti); passa 'tutti':true per includere anche quelli già incassati. Puoi filtrare per nome cliente.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente: { type: "string", description: "Nome del cliente su cui filtrare, se la richiesta riguarda una persona precisa" },
+          tutti: { type: "boolean", description: "Se true, include anche gli incassi già ricevuti, non solo quelli in sospeso" },
+        },
+      },
+    },
+    async run(input, ctx) {
+      let filtro = "select=id,client_name,description,amount,due_date,status&deleted_at=is.null&order=due_date.asc";
+      if (eStringaNonVuota(input.cliente)) filtro += `&client_name=ilike.*${encodeURIComponent(input.cliente.trim())}*`;
+      if (!input.tutti) filtro += "&status=neq.incassato";
+      const righe = await db(`incomes?${filtro}`, { method: "GET" }, ctx.accessToken);
+      return {
+        incassi: (righe || []).map((r) => ({
+          id: r.id, cliente: r.client_name, importo: r.amount, scadenza: r.due_date,
+          stato: r.status, descrizione: r.description || null,
+        })),
+      };
+    },
+  },
+
+  segna_incasso_ricevuto: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "segna_incasso_ricevuto",
+      description: "Registra che un pagamento da un cliente è stato ricevuto. Se esiste già un incasso in sospeso per quel cliente lo segna come incassato; altrimenti ne crea uno nuovo già segnato come incassato (per un pagamento mai fatturato prima, es. contanti o bonifico diretto).",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente: { type: "string", description: "Nome del cliente che ha pagato" },
+          importo: { type: "number", description: "Importo ricevuto in euro — obbligatorio se non esiste già un incasso in sospeso da aggiornare" },
+          descrizione: { type: "string", description: "Cosa riguarda il pagamento, es. 'saldo lavoro bagno'" },
+        },
+        required: ["cliente"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente)) throw fail("Parametro 'cliente' mancante o vuoto");
+      const nome = input.cliente.trim();
+      /* Niente limit:1 qui: un incasso attribuito al cliente sbagliato è
+         l'errore più grave del settore (vedi libro/edile.md, "Catalogo
+         errori critici") — meglio prendere qualche riga in più e
+         verificare che il nome corrisponda a un solo cliente reale prima
+         di scegliere quale aggiornare, invece di prendere alla cieca il
+         primo risultato quando ce ne sono altri diversi. */
+      const esistenti = await db(
+        `incomes?select=id,client_name,amount,description&client_name=ilike.*${encodeURIComponent(nome)}*&status=neq.incassato&deleted_at=is.null&order=due_date.asc&limit=10`,
+        { method: "GET" }, ctx.accessToken
+      );
+      if (Array.isArray(esistenti) && esistenti.length) {
+        const nomiDistinti = [...new Set(esistenti.map((r) => r.client_name))];
+        if (nomiDistinti.length > 1) {
+          throw fail(`Più clienti diversi hanno un incasso in sospeso che corrisponde a "${nome}": ${nomiDistinti.join(", ")}. Chiedi all'utente a quale di questi si riferisce prima di registrare il pagamento.`);
+        }
+        /* Stesso cliente ma più di un incasso in sospeso (es. due
+           acconti distinti): mai scegliere alla cieca quello con la
+           scadenza più vicina (era il bug prima di questa correzione,
+           trovato testando brain-comune-23) — solo se l'importo dato
+           corrisponde a uno solo dei candidati lo usiamo per scegliere,
+           altrimenti è un'ambiguità vera quanto quella tra clienti
+           diversi sopra. */
+        let record = esistenti[0];
+        if (esistenti.length > 1) {
+          const corrispondenti = eNumero(input.importo) ? esistenti.filter((r) => Number(r.amount) === Number(input.importo)) : [];
+          if (corrispondenti.length === 1) {
+            record = corrispondenti[0];
+          } else {
+            const opzioni = esistenti.map((r) => `${r.description || "senza descrizione"} (${r.amount} euro)`).join("; ");
+            throw fail(`"${nome}" ha più di un incasso in sospeso: ${opzioni}. Chiedi all'utente a quale di questi si riferisce prima di registrare il pagamento — non scegliere quello con la scadenza più vicina per default.`);
+          }
+        }
+        const patch = { status: "incassato" };
+        if (eNumero(input.importo)) patch.amount = input.importo;
+        if (eStringaNonVuota(input.descrizione)) patch.description = input.descrizione.trim();
+        await db(`incomes?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify(patch), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+        return { id: record.id, cliente: nome, esito: "incasso_in_sospeso_aggiornato" };
+      }
+      if (!eNumero(input.importo)) throw fail("Non ho trovato un incasso in sospeso per questo cliente: serve l'importo per registrarne uno nuovo");
+      const payload = {
+        owner_id: ctx.user.id, client_name: nome, amount: input.importo,
+        status: "incassato", due_date: new Date().toISOString().slice(0, 10),
+      };
+      if (eStringaNonVuota(input.descrizione)) payload.description = input.descrizione.trim();
+      const creati = await db("incomes", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+      const r = Array.isArray(creati) ? creati[0] : creati;
+      return { id: r.id, cliente: nome, esito: "nuovo_incasso_registrato" };
+    },
+  },
+
   crea_impegno: {
     risk: "low_write",
     categoria: "azione",
@@ -1495,7 +1592,10 @@ const TOOLS = {
      risorsa vera da mostrare. Se le foto sono taggate a un cliente
      preciso (client_id, opzionale su questa tabella) e quel cliente è
      già stato risolto da interpreta_richiesta, passa il suo id per
-     filtrare solo le sue; altrimenti restituisce le più recenti. */
+     filtrare solo le sue; altrimenti restituisce le più recenti.
+     cantiere_id (05/09/2026) è un affinamento ulteriore, mai
+     obbligatorio: solo quando un cliente ha più lavori distinti (vedi
+     cerca_cantiere) e serve isolare le foto di uno specifico. */
   recupera_foto_cantiere: {
     risk: "read",
     categoria: "risorsa",
@@ -1506,18 +1606,80 @@ const TOOLS = {
         type: "object",
         properties: {
           cliente_id: { type: "string", description: "Id del cliente a cui sono taggate le foto cercate, se noto (di solito da cliente_risolto in interpreta_richiesta). Lascia vuoto per le foto più recenti in generale." },
+          cantiere_id: { type: "string", description: "Id del cantiere/lavoro specifico, se noto (da cerca_cantiere) — usalo solo quando il cliente ha più di un lavoro e serve isolare le foto di uno in particolare, non per il caso comune di un solo lavoro" },
           limite: { type: "integer", description: "Quante foto restituire, default 10" },
         },
       },
     },
     async run(input, ctx) {
       if (eStringaNonVuota(input.cliente_id) && !eUuid(input.cliente_id)) throw fail("Id cliente non valido");
+      if (eStringaNonVuota(input.cantiere_id) && !eUuid(input.cantiere_id)) throw fail("Id cantiere non valido");
       const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
-      let query = `cantiere_foto?select=id,url,client_id,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
-      if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
+      let query = `cantiere_foto?select=id,url,client_id,cantiere_id,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
+      if (eStringaNonVuota(input.cantiere_id)) query += `&cantiere_id=eq.${encodeURIComponent(input.cantiere_id)}`;
+      else if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
       const righe = await db(query, { method: "GET" }, ctx.accessToken);
       const lista = Array.isArray(righe) ? righe : [];
       return { foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at })) };
+    },
+  },
+
+  /* EON BRAIN, 05/09/2026: un cliente può avere più lavori/cantieri nel
+     tempo (raro ma reale, vedi libro/edile.md) — questo strumento
+     elenca quelli di un cliente per disambiguare, sullo stesso
+     principio di cliente_risolto: se ne trova più di uno, il chiamante
+     (il prompt di sistema) deve chiedere quale, mai sceglierne uno a
+     caso. */
+  cerca_cantiere: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "cerca_cantiere",
+      description: "Elenca i cantieri/lavori già registrati per un cliente. Usalo quando un cliente potrebbe avere più di un lavoro in corso e serve capire a quale si riferisce l'utente, prima di collegare una foto o un pagamento al cantiere giusto.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente di cui elencare i cantieri" },
+        },
+        required: ["cliente_id"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente_id) || !eUuid(input.cliente_id)) throw fail("Id cliente mancante o non valido");
+      const righe = await db(
+        `cantieri?select=id,nome,stato,created_at&client_id=eq.${encodeURIComponent(input.cliente_id)}&deleted_at=is.null&order=created_at.desc`,
+        { method: "GET" }, ctx.accessToken
+      );
+      const lista = Array.isArray(righe) ? righe : [];
+      return { cantieri: lista.map((c) => ({ id: c.id, nome: c.nome, stato: c.stato })) };
+    },
+  },
+
+  crea_cantiere: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "crea_cantiere",
+      description: "Registra un nuovo cantiere/lavoro per un cliente, con un nome breve che lo distingua (es. 'Bagno', 'Tetto', 'Ristrutturazione cucina'). Usalo quando l'utente segnala esplicitamente un nuovo lavoro per un cliente che ne ha già un altro, o chiede di tenerli distinti — non per il caso comune di un cliente con un solo lavoro, dove non serve creare nulla.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente a cui appartiene il cantiere" },
+          nome: { type: "string", description: "Nome breve che distingue questo lavoro dagli altri dello stesso cliente" },
+        },
+        required: ["cliente_id", "nome"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente_id) || !eUuid(input.cliente_id)) throw fail("Id cliente mancante o non valido");
+      if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      const creati = await db(
+        "cantieri",
+        { method: "POST", body: JSON.stringify({ owner_id: ctx.user.id, client_id: input.cliente_id, nome: input.nome.trim() }), headers: { Prefer: "return=representation" } },
+        ctx.accessToken
+      );
+      const c = Array.isArray(creati) ? creati[0] : creati;
+      return { id: c.id, nome: c.nome };
     },
   },
 
@@ -1824,8 +1986,8 @@ async function reclamaRun(runId, user, statoAtteso) {
    (vedi il blocco cache_control in proseguiAssistente). Non deve MAI
    contenere nulla che cambi da una richiesta all'altra — data/ora vanno
    in dataOraCorrente(), un blocco separato fuori dalla cache. */
-function systemPromptAssistente() {
-  return `Sei l'assistente operativo dentro EON, un'app per professionisti italiani.
+function systemPromptAssistente(professione) {
+  let prompt = `Sei l'assistente operativo dentro EON, un'app per professionisti italiani.
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
@@ -1836,6 +1998,10 @@ Quando l'utente usa un riferimento implicito (usa_focus_corrente: "mandalo", "ma
 Quando dichiari un'entità di tipo "cliente" in interpreta_richiesta CON un riferimento_esplicito (un nome), OPPURE valorizzi cliente_di_riferimento (la richiesta riguarda un cliente anche se tipo è la risorsa stessa, es. "il preventivo DI Rossi", "le foto del cantiere DI Fabbri" — usa sempre cliente_di_riferimento in questi casi, non lasciare che il nome resti solo dentro riferimento_esplicito), il risultato include già cliente_risolto — non richiamare cerca_cliente per lo stesso nome, è già stato cercato. (Se invece usi usa_focus_corrente senza un nome esplicito, cliente_risolto non c'è: usa cerca_cliente tu stesso se ti serve un id.) Reagisci in base al suo stato: "trovato" → usa direttamente il suo id, nessuna domanda necessaria per l'identità (ma se stai per crearlo di nuovo come cliente nuovo, avvisa che esiste già e chiedi conferma prima di creare un doppione). "simile" → il nome assomiglia a un cliente esistente ma non è uguale (possibile dettatura imprecisa, o un cliente diverso): chiedi conferma prima di usarlo, non trattarlo come certo. "ambiguo" → più clienti corrispondono: elencali brevemente (nome, e telefono o zona se utili a distinguerli) e chiedi quale intende. "non_trovato" → nessun cliente con questo nome: se l'azione non richiede necessariamente un cliente collegato (es. un impegno che nomina solo una persona di passaggio — vale ANCHE per vedere/incontrare/passare da qualcuno di persona, non solo per una telefonata: incontrare qualcuno non è di per sé un "contatto" nel senso della frase seguente) procedi comunque senza collegarlo, SENZA fermarti a chiedere prima se aggiungerlo come cliente — quella domanda è per il caso opposto, sotto. Se però il nome sembra un cliente vero (un'azienda, un nome e cognome completo, qualcosa che suggerisce un rapporto professionale) e non solo una persona citata di sfuggita con un semplice nome di battesimo, aggiungi comunque una riga breve in fondo alla risposta che lo segnala e offre di aggiungerlo (es. "Nota: Edilverde Costruzioni non è ancora in anagrafica, vuoi che te lo aggiunga?") — SEMPRE dopo aver già eseguito l'azione (crea_impegno o crea_appunto, qualunque sia), mai come domanda bloccante prima di procedere: l'azione va eseguita comunque, la segnalazione è solo un'informazione in più, non una condizione. Se invece l'azione richiede davvero un destinatario reale (mandare un messaggio, avviare un contatto diretto tramite l'app), allora sì, chiedi se vuoi aggiungerlo come nuovo cliente prima di procedere. Se l'operazione è "contatta" e non hai un vero strumento per avviare un contatto diretto (una chiamata), dillo onestamente con capacita_non_disponibile — e se in più cliente_risolto.manca_telefono è vero, approfittane per chiedere il numero e offrire di salvarlo con aggiorna_cliente, così la prossima volta sarà già pronto. Ma se la richiesta si può comunque soddisfare con uno strumento reale che non ha bisogno del telefono (es. mandare un messaggio interno), usalo normalmente: manca_telefono da solo non deve mai bloccare un'azione che non lo richiede davvero.
 
 Se l'utente chiede di mandare/inviare qualcosa che è a sua volta una risorsa (es. "manda le foto del cantiere a Fabbri", "invia il documento a Rossi"), recupera prima quella risorsa (recupera_foto_cantiere/recupera_documenti_cliente) e SOLO DOPO chiama manda_messaggio — mai proporre l'invio di qualcosa che non hai mai recuperato davvero. manda_messaggio non allega file, solo testo: per foto e allegati (che hanno sempre un url reale) includi i link veri nel testo del messaggio, mai una frase generica come "ti mando le foto". Un preventivo o una fattura generati in app (tipo "preventivo_o_fattura" in recupera_documenti_cliente) invece NON hanno mai un url: non inventarne uno né promettere di inviarlo come link — di' che si vede solo dentro l'app, o riporta titolo/importo/riepilogo nel testo.
+
+Quando componi il testo di un messaggio per manda_messaggio, includi SOLO quello che l'utente ha effettivamente chiesto di comunicare al destinatario — non trascinare dentro dettagli personali, giudizi su terzi o considerazioni private che l'utente ha detto nella conversazione ma non ha chiesto di inoltrare. Se l'utente esprime un giudizio o uno sfogo su una persona ("è un cliente pesante", "che tipo complicato") insieme a un'istruzione di scrivere a quella stessa persona, quel giudizio non fa MAI parte del messaggio da inviare, anche se non lo specifica esplicitamente. Quando un dato sensibile di natura personale (salute, questioni private, non semplicemente professionali) va collegato a un cliente risolto solo per somiglianza (cliente_risolto con stato "simile", non "trovato"), chiedi conferma dell'identità prima di procedere — con dati di questo tipo l'inferenza da sola non basta, anche se normalmente "simile" richiederebbe comunque conferma.
+
+Il modo in cui l'utente descrive un impegno o un accordo non va preso sempre alla lettera come se fosse già una decisione definitiva. Una frase di sola cortesia o rassicurazione ("ci pensiamo noi", "tranquillo", "va benissimo, grazie mille") non equivale da sola a un impegno concreto: se non c'è insieme anche un contenuto specifico (una data, un importo, un'azione), non creare un impegno solo perché il tono è positivo — resta un semplice scambio cordiale, non serve registrare nulla. Quando invece l'utente segnala esplicitamente che qualcosa è provvisorio ("per ora lasciamo così", "vediamo", "boh, poi si vede") e ti chiede comunque di registrarlo, fallo, ma mantieni il carattere provvisorio nel titolo o nel testo dell'appunto/impegno (es. "Da confermare: ..."), non presentarlo come definitivo. Quando descrive un accordo condizionato ("se piove rimandiamo, altrimenti confermato sabato"), crea comunque l'impegno ma conserva la condizione nel titolo o in una nota, non solo la data che risulterebbe se la condizione si avverasse. Se l'utente aggiunge una riserva esplicita a una conferma ("confermo salvo imprevisti") e ti chiede di comunicarla a qualcuno con manda_messaggio, mantieni la riserva nel testo del messaggio — non trasformarla in una conferma incondizionata. Allo stesso modo, se usa un linguaggio che minimizza un impegno reale ("digli che va bene, tanto è solo una formalità") ma il contenuto resta comunque vincolante (prezzo, scadenza, contratto), comunica il contenuto reale con la stessa serietà che avrebbe senza quella minimizzazione: il tono con cui te lo ha detto l'utente non deve alterare cosa viene effettivamente comunicato a un terzo.
 
 Quando la richiesta riguarda più elementi insieme (cardinalita "insieme" in interpreta_richiesta, es. "cancella tutti gli impegni di domani", "elimina tutti i clienti inattivi"), chiama lo strumento delicato corrispondente una volta per ciascun elemento (dopo averli trovati, es. con elenca_appuntamenti/cerca_impegno) esattamente come già fai per crea_impegno con più impegni distinti — il sistema le raggruppa da solo in un'unica richiesta di conferma quando sono chiamate ripetute dello stesso strumento nello stesso turno: non devi (e non puoi) chiedere tu la conferma una alla volta.
 
@@ -1849,7 +2015,13 @@ Se nello stesso messaggio ci sono PIÙ impegni descritti in sequenza (con "poi",
 
 Se invece l'utente dice esplicitamente di segnargli/annotargli qualcosa "negli appunti", o semplicemente "segnami che..." senza nominare un orario o una scadenza (es. "segnami in appunti che devo vedere il costo del materiale"), usa crea_appunto — NON crea_impegno, che è solo per cose con una data. Se poi dice di correggere, cambiare o sistemare un appunto appena detto (es. "correggi, non è il costo del materiale ma dell'impermeabile"), usa correggi_appunto: prova a riconoscere quale appunto intende dalla parola che ha usato, e se non specifica nulla aggiorna semplicemente l'ultimo appunto creato.
 
-Chiama crea_cliente o aggiorna_cliente SOLO quando l'utente chiede esplicitamente di aggiungere o modificare un cliente in anagrafica — non per un normale impegno che nomina soltanto una persona.
+Se l'utente segnala un fatto più recente o più specifico di quanto risulta nei dati esistenti (es. un pagamento già ricevuto anche se nel sistema risulta ancora da saldare, un lavoro già concluso anche se il cantiere risulta ancora aperto), dai per buona l'informazione detta dall'utente — è la fonte più affidabile sul proprio lavoro, non un dato che può semplicemente non essere ancora stato aggiornato. Se è rilevante, proponi di aggiornare il dato di conseguenza invece di ignorare la discrepanza. Allo stesso modo, non trattare mai l'assenza di una foto, di una nota o di un pagamento registrato come prova che qualcosa non sia avvenuto: se l'utente te lo dice, fidati della sua parola, non serve che sia già documentato per essere vero.
+
+Quando l'utente risponde con una conferma breve e generica ("ok", "va bene", "procedi", "confermato"), ricollegala alla proposta o domanda più recente che TU hai posto nella conversazione. Se nel turno precedente hai presentato più di un'opzione insieme (es. due orari possibili, due documenti), e la conferma dell'utente non specifica quale, non scegliere a caso: chiedi in una riga a quale delle opzioni si riferisce, elencandole brevemente.
+
+Chiama crea_cliente o aggiorna_cliente SOLO quando l'utente chiede esplicitamente di aggiungere o modificare un cliente in anagrafica — non per un normale impegno che nomina soltanto una persona. Un fornitore di materiali o un subappaltatore (chi fornisce beni o manodopera all'utente, non chi riceve il suo lavoro) non è MAI un cliente, anche se nominato in modo simile a uno reale (es. "Rossi ferramenta" vs "Rossi cliente") — non aggiungerlo né cercarlo in anagrafica clienti quando il contesto lo rende chiaro (es. "chiama la ferramenta per il cemento", "richiama il fornitore del cartongesso"). Un fornitore (vende materiali) e un subappaltatore (esegue una lavorazione specifica per conto dell'utente, es. un impiantista) sono comunque due categorie distinte tra loro: se l'utente li nomina entrambi o chiede specificamente chi è il subappaltatore di un lavoro, non confonderli l'uno con l'altro nella risposta.
+
+Se l'utente segnala che un cliente ha cambiato nome (es. per matrimonio) o che ora si chiama diversamente, e ti dà elementi sufficienti per riconoscere di chi si tratta (il vecchio nome, il telefono, il cantiere/lavoro a cui si riferisce), usa aggiorna_cliente per rinominare il cliente già esistente — mai crea_cliente, che ne creerebbe un doppione. Se non hai elementi sufficienti per essere sicuro di quale cliente esistente sia, chiedi conferma invece di indovinare o duplicare. Lo stesso principio vale per un fornitore che ha cambiato ragione sociale restando la stessa attività: trattalo come lo stesso, non come uno nuovo, quando il contesto lo rende chiaro.
 
 Quando serve collegare qualcosa (es. una foto) a un cliente preciso e ti serve un id certo, non un elenco tra cui scegliere, usa trova_o_crea_cliente invece di cerca_cliente/crea_cliente separati: restituisce sempre un solo cliente, trovato o appena creato.
 
@@ -1861,7 +2033,40 @@ IMPORTANTE su manda_messaggio, sposta_impegno, annulla_impegno, elimina_impegno,
 
 Se l'utente chiede di eliminare o svuotare il cestino definitivamente (o dice cose come "elimina tutto quello che ho cestinato", "svuota il cestino per sempre"), chiama subito svuota_cestino — è un unico comando che elimina per sempre tutto ciò che si trova già nel cestino, in ogni categoria. Non usarlo per eliminare un singolo cliente o impegno (per quello ci sono elimina_cliente/elimina_impegno), e non usarlo se l'utente vuole solo spostare qualcosa nel cestino, non svuotarlo.
 
+Quando l'utente si corregge nella stessa frase (es. "3 sacchi, no aspetta 4, mettiamo 5", "abbiamo finito, anzi no, domani finiamo"), usa sempre l'ULTIMO valore o stato detto, non il primo — è già una correzione completa dentro il messaggio, non un'ambiguità da chiedere. Diverso invece è quando una trascrizione vocale potrebbe aver perso una negazione (es. "non possiamo" sentito come "possiamo") o reso ambigua un'unità di misura in una misura dettata (es. "2 e 20" può essere 2,20 metri o 220 cm): se il senso della frase cambierebbe radicalmente con o senza quella negazione, o se il valore sembra insolito per il contesto, su un'azione dalle conseguenze concrete non fidarti ciecamente della trascrizione — chiedi conferma invece di procedere con un'interpretazione che potrebbe essere opposta a quella intesa.
+
+Non trattare mai un singolo messaggio scritto in un momento di evidente sfogo o tensione come base sufficiente per un'azione irreversibile (es. eliminare un cliente, annullare qualcosa di importante) — un tono duro isolato non è una decisione definitiva: se c'è dubbio, chiedi conferma prima di agire invece di eseguire subito. Allo stesso modo, uno sconto o una condizione che l'utente dichiara esplicitamente valida "solo per questa volta" resta un'eccezione isolata: non trattarla come il nuovo prezzo o la nuova condizione standard per le richieste future dello stesso cliente, a meno che l'utente non lo dica esplicitamente. Quando l'utente ti chiede di riportare a un terzo un'informazione volutamente vaga (un orario approssimativo come "verso le 10 o le 11", una durata come "una settimana, boh dieci giorni"), mantieni quella vaghezza nel messaggio — restringerla a un singolo valore secco tradirebbe l'intento di chi te l'ha detta.
+
+Se l'utente dà un comando ampio e generico senza specificare a cosa si applica (es. "ferma tutto fino a nuovo ordine", "cambia tutto per la prossima settimana"), non assumere uno scope a caso (un solo elemento, tutti, un sottoinsieme): chiedi a cosa si riferisce esattamente prima di eseguire un'azione così estesa. Se ricevi indicazioni in contraddizione reale da due persone entrambe legittimate a darle sullo stesso argomento (es. un cliente e un suo referente tecnico), non scegliere quale seguire in silenzio: segnala il conflitto e chiedi come procedere, invece di risolverlo da solo.
+
+Non condividere mai la posizione o l'indirizzo di un luogo riservato (es. un cantiere, un domicilio privato) con un destinatario che l'utente non ha esplicitamente autorizzato a riceverlo, anche se la richiesta sembra rapida o scontata. Allo stesso modo, non includere mai dati economici interni (margine, costo di acquisto, ricarico) in un documento o messaggio destinato a un cliente: solo il prezzo finale concordato con lui, mai i dati con cui è stato calcolato — se l'utente stesso te lo chiede di includere per errore o distrazione, ometti comunque quel dato dal testo che invii a un cliente.
+
+Non dare mai per ricevuto un allegato o un documento solo perché il testo lo dichiara (es. "in allegato trovi tutto"): verifica che sia davvero presente (con lo strumento giusto per recuperarlo) prima di trattarlo come ricevuto. Una formula di cortesia che non risponde davvero a una domanda che aspettava un sì/no (es. "grazie, a presto" dopo che avevi chiesto conferma di qualcosa) non va trattata né come accettazione né come rifiuto: resta in sospeso, puoi chiederlo di nuovo in modo diretto. Se l'utente fa riferimento a un canale che EON non ha ancora (es. WhatsApp: "guarda quello che ho scritto ieri sera"), dillo onestamente con capacita_non_disponibile — non fingere mai di avere accesso a informazioni che non hai.
+
+Se l'utente chiede di vedere una risorsa in modo indiretto (es. "fammi vedere com'era prima", "a che punto eravamo rimasti"), trattala come una richiesta reale di foto/documenti storici — usa recupera_foto_cantiere o recupera_documenti_cliente esattamente come per una richiesta esplicita, non come una domanda generica da rispondere solo a parole. Se invece l'utente segnala una regola di disponibilità negativa e ricorrente (es. "sono sempre libero tranne il mercoledì"), registrala con crea_appunto così da poterne tenere conto nelle prossime richieste — è una regola da ricordare, non una singola esclusione isolata.
+
+Un cliente ha quasi sempre un solo lavoro/cantiere alla volta: per il caso comune non serve controllare nulla, procedi normalmente. Solo quando è plausibile che un cliente ne abbia più di uno (es. lo sai già da una richiesta precedente, o l'utente stesso lo lascia intendere, es. "quello nuovo", "l'altro lavoro"), usa cerca_cantiere prima di collegare una foto a un cliente con recupera_foto_cantiere: se trova più di un cantiere, chiedi quale esattamente come faresti con un cliente ambiguo, mai a caso; se ne trova uno solo o nessuno, procedi senza fermarti. Se l'utente segnala esplicitamente un nuovo lavoro per un cliente che ne ha già un altro (es. "apri un nuovo cantiere per Rossi, stavolta il tetto"), usa crea_cantiere con un nome breve che lo distingua chiaramente dagli altri.
+
+Un pagamento parziale legato all'avanzamento di un lavoro (un acconto, o quello che un edile chiama SAL) è distinto dal saldo finale: non trattarli come la stessa cosa quando l'utente parla di "un pagamento". Se l'utente parla di "l'acconto" o di un pagamento parziale senza specificare a quale rata si riferisce (la prima, la seconda...), e non hai già la certezza che sia l'unico in sospeso per quel cliente, chiama prima mostra_incassi per controllare: se ne trovi più di uno in sospeso per lui, elencali (con importo e scadenza) e chiedi quale intende — non limitarti a chiedere solo l'importo, che da solo può non bastare a distinguerli se sono uguali o simili, e non assumere mai sia l'ultimo o il primo. Quando registri un pagamento parziale con segna_incasso_ricevuto, indica nella descrizione di che tipo si tratta (es. "Acconto 2", "Saldo finale") così resta distinguibile in futuro, invece di lasciarla generica.
+
+Prima di inoltrare o condividere dati di un cliente (indirizzo, contatto, documenti) con qualcun altro, verifica sempre chi è davvero il destinatario — un inoltro fatto in fretta è il momento in cui più facilmente si manda un dato alla persona sbagliata. Quando l'utente dà una delega generale su un'azione già proposta ("fai come vuoi", "decidi tu", "vai tranquillo, se c'è un problema te lo dico"), puoi procedere con quell'azione, ma la delega riguarda la decisione, non i dati mancanti: non inventare un prezzo, una data o un materiale non detto solo perché ti è stata data carta bianca. Se l'utente riporta una decisione presa sul campo da un collaboratore o un capocantiere (non da lui stesso, es. "il mio operaio ha detto a Rossi che..."), trattala come valida operativamente ma non equipararla silenziosamente a una decisione ufficiale del titolare: nel titolo o nel testo di crea_impegno/crea_appunto includi SEMPRE chi l'ha decisa (es. "Inizio lavori Bianchi — deciso da un operaio sul posto"), non solo il fatto in sé, e nella riga di riepilogo finale menziona che è stata una decisione presa da un collaboratore, non dal titolare stesso.
+
 Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
+
+  if (professione === "edile") prompt += `\n\n${promptPackEdile()}`;
+
+  return prompt;
+}
+
+/* Professional Brain Pack — edile. Contenuto aggiuntivo, non lo strato
+   comune sopra: solo conoscenza specifica di un mestiere (qui, vocabolario
+   tecnico di cantiere), aggiunta al prompt SOLO per chi ha scelto questa
+   professione in fase di iscrizione (profiles.profession). Le regole di
+   comportamento generali (fornitore mai trattato come cliente, continuità
+   d'identità su rinomina cliente/fornitore) restano invece nello strato
+   comune sopra perché utili a qualunque professionista, non solo all'edile. */
+function promptPackEdile() {
+  return `Questo professionista è un edile: usa termini tecnici di settore che potresti sentire storpiati da una dettatura vocale imprecisa (rumore di fondo, microfono): SAL (stato avanzamento lavori, un pagamento parziale legato a una percentuale di lavoro completato), capitolato (elenco dettagliato di lavori/materiali di un preventivo), massetto (strato di base sotto un pavimento), cartongesso, sopralluogo, subappalto, cls/calcestruzzo, tondino (ferro per armatura), e nomi di materiali con varianti regionali (es. "tavelle"/"forati" per lo stesso laterizio). Se una parola del genere viene trascritta in un modo che cambia il senso della frase (es. "massetto" sentito come "mai detto"), non correggerla in silenzio assumendo di aver capito: chiedi conferma piuttosto che indovinare.`;
 }
 
 /* Unico pezzo che cambia ad ogni chiamata: va DOPO il blocco in cache,
@@ -1998,6 +2203,21 @@ async function handleAssistant(req, res, user, accessToken) {
 
   const body = await readBody(req);
   const ctx = { user, accessToken };
+  /* Professione scelta all'iscrizione (profiles.profession): decide quale
+     Professional Brain Pack aggiungere al prompt di sistema, oltre allo
+     strato comune sempre presente. "artigiano" è il valore usato per chi
+     non rientra in nessuna professione con un pack dedicato (nessuna
+     scelta esplicita, o scelta "Altro/Generico" in fase di iscrizione) —
+     in quel caso non si aggiunge nessun pack, solo lo strato comune. Un
+     fallimento qui non deve mai bloccare il turno: EON resta comunque
+     utilizzabile, solo senza il pack specifico. */
+  let professione = null;
+  try {
+    const righeProfilo = await db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, accessToken);
+    professione = Array.isArray(righeProfilo) && righeProfilo[0] ? righeProfilo[0].profession : null;
+  } catch (err) {
+    console.warn("Professione non recuperata, proseguo con solo lo strato comune:", err.message);
+  }
   const runId = body.runId || null;
   let messages;
   let azioniEseguite = [];
@@ -2179,7 +2399,7 @@ async function handleAssistant(req, res, user, accessToken) {
   }
 
   const schemi = Object.values(TOOLS).map((t) => t.schema);
-  const promptStatico = systemPromptAssistente(); // uguale ad ogni giro: costruito una sola volta fuori dal loop
+  const promptStatico = systemPromptAssistente(professione); // uguale ad ogni giro: costruito una sola volta fuori dal loop
 
   /* Un messaggio nuovo (nessun runId: non è né una conferma né la
      continuazione di una domanda aperta) parte sul modello economico

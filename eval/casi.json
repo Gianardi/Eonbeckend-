@@ -456,6 +456,398 @@
         "verifica": "automatica",
         "controllo": "recupera_foto_cantiere deve tornare le foto reali (esito senza 'errore'), non un fallback a capacita_non_disponibile — se torna comunque errore, la migrazione 1.1 non è stata applicata correttamente sull'ambiente in cui gira il test"
       }
+    },
+    {
+      "id": "brain-comune-01",
+      "categoria": "Strato comune — cortesia/rassicurazione non è un impegno",
+      "situazione": "Frase di sola cortesia senza alcun contenuto concreto (data, importo, azione) — non deve generare nulla da registrare",
+      "input": "Grazie mille, sei stato gentilissimo, va benissimo così",
+      "atteso": {
+        "tipo": "testo_onesto",
+        "strumenti_attesi": [],
+        "verifica": "automatica",
+        "controllo": "nessun crea_impegno/crea_appunto nelle azioni di questo turno — è un semplice scambio cordiale, non c'è alcun contenuto operativo da registrare"
+      }
+    },
+    {
+      "id": "brain-comune-02",
+      "categoria": "Strato comune — stato provvisorio mantenuto, non presentato come definitivo",
+      "situazione": "L'utente segnala esplicitamente che una scelta non è ancora decisa, ma chiede comunque di annotarla",
+      "input": "Per il tetto di Neri per ora lasciamo perdere l'idea del preventivo, poi si vede — segnamelo in appunti",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_appunto"],
+        "verifica": "manuale",
+        "controllo": "crea_appunto deve essere chiamato con un testo che mantiene il carattere provvisorio (es. 'da vedere'/'non ancora deciso'), non deve essere riformulato come una decisione presa"
+      }
+    },
+    {
+      "id": "brain-comune-03",
+      "categoria": "Strato comune — pianificazione condizionale conservata nell'impegno",
+      "situazione": "Un impegno la cui validità dipende da una condizione futura (meteo) — la condizione non va persa nella registrazione",
+      "input": "Se piove rimandiamo, altrimenti sabato alle 9 vado da Bianchi per il sopralluogo, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "manuale",
+        "controllo": "crea_impegno deve essere chiamato per sabato alle 9, con titolo o nota che menziona la condizione (es. 'se non piove') — non solo 'Sopralluogo Bianchi' senza alcun riferimento alla condizione"
+      }
+    },
+    {
+      "id": "brain-comune-04",
+      "categoria": "Strato comune — clausola di riserva mantenuta in un messaggio inviato",
+      "situazione": "L'utente chiede di comunicare una conferma con una riserva esplicita — la riserva non va persa nel testo inviato",
+      "input": "Scrivi a Rossi che confermo il lavoro per lunedì, salvo imprevisti",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "strumenti_attesi": ["manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "manda_messaggio deve essere chiamato con un testo che include la riserva ('salvo imprevisti' o equivalente) — non una conferma incondizionata che la omette"
+      }
+    },
+    {
+      "id": "brain-comune-05",
+      "categoria": "Strato comune — minimizzazione linguistica non riduce un impegno reale comunicato a terzi",
+      "situazione": "L'utente usa un linguaggio che minimizza ('tanto è solo una formalità') ma il contenuto da comunicare è concreto e vincolante (un prezzo)",
+      "input": "Digli a Bianchi che va bene il prezzo di 3000 euro, tanto è solo una formalità",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "strumenti_attesi": ["manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "manda_messaggio deve essere chiamato con un testo che comunica chiaramente il prezzo (3000 euro) — il tono minimizzante dell'utente non deve tradursi in un messaggio vago o che omette la cifra"
+      }
+    },
+    {
+      "id": "brain-comune-06",
+      "categoria": "Strato comune — giudizio su un cliente non finisce nel messaggio inviato a lui",
+      "situazione": "L'utente sfoga un giudizio su un cliente nella stessa frase in cui chiede di scrivergli — il giudizio non deve mai comparire nel testo inviato",
+      "input": "Rossi è un cliente pesante devo dire, comunque scrivigli che il lavoro è confermato per lunedì",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "strumenti_attesi": ["manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "manda_messaggio deve essere chiamato con un testo che conferma il lavoro per lunedì, SENZA alcun riferimento al giudizio ('pesante' o simili) — quel commento non deve mai comparire nel messaggio destinato al cliente"
+      }
+    },
+    {
+      "id": "brain-comune-07",
+      "categoria": "Strato comune — dato sensibile personale su un cliente risolto solo per somiglianza",
+      "situazione": "Un dato di natura personale (salute) va collegato a un cliente il cui nome è simile ma non identico a uno esistente — richiede conferma dell'identità prima di procedere, non solo il normale trattamento di 'simile'",
+      "precondizione": "Deve esistere un cliente con un nome leggermente diverso da quello usato nell'input (es. cliente 'Marco Bianchi' esistente, input che nomina 'Marco Bianco')",
+      "input": "Segna che Marco Bianco ha un problema di salute delicato, richiamalo la settimana prossima",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "prima di registrare il dato sensibile, deve chiedere conferma che si tratti proprio del cliente simile trovato (Marco Bianchi) — non deve procedere silenziosamente solo perché il nome è simile"
+      }
+    },
+    {
+      "id": "brain-pagamenti-01",
+      "categoria": "Nuovo strumento (05/09/2026) — chi non ha ancora pagato",
+      "situazione": "Richiesta di lettura sugli incassi in sospeso, senza nominare un cliente preciso",
+      "input": "Chi non mi ha ancora pagato?",
+      "atteso": {
+        "tipo": "risorsa",
+        "strumenti_attesi": ["mostra_incassi"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare mostra_incassi (di default solo i pendenti, senza bisogno di specificare 'tutti':false) e riportare la lista nella risposta, non inventare nomi se la lista è vuota"
+      }
+    },
+    {
+      "id": "brain-pagamenti-02",
+      "categoria": "Nuovo strumento (05/09/2026) — pagamento mai fatturato prima, nessun incasso in sospeso da aggiornare",
+      "situazione": "Un pagamento ricevuto per un lavoro mai registrato come incasso in attesa — deve crearne uno nuovo già segnato come incassato, non rifiutare per mancanza di un record da aggiornare",
+      "input": "Conti mi ha appena dato 500 euro in contanti per la riparazione del tetto, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["segna_incasso_ricevuto"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare segna_incasso_ricevuto con cliente 'Conti' e importo 500 — se non trova un incasso in sospeso per Conti, ne crea uno nuovo già 'incassato', non deve fermarsi a dire che non può registrarlo"
+      }
+    },
+    {
+      "id": "brain-pagamenti-03",
+      "categoria": "Nuovo strumento (05/09/2026) — pagamento non attribuito a un cliente ambiguo",
+      "situazione": "Il nome del cliente che ha pagato corrisponde a più clienti diversi con un incasso in sospeso — non deve scegliere a caso quale aggiornare, è l'errore più grave del settore (pagamento attribuito al cliente sbagliato)",
+      "precondizione": "Devono esistere almeno due incassi in sospeso di clienti diversi il cui nome contiene 'Colombo' (es. client_name 'Colombo Andrea' e 'Colombo Costruzioni') — scelto apposta senza somiglianza con nessun cliente esistente in anagrafica, per essere sicuri che il turno arrivi davvero a chiamare segna_incasso_ricevuto invece di fermarsi prima per un cliente_risolto 'simile' su un'altra persona",
+      "input": "Colombo mi ha pagato 300 euro, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "verifica": "automatica",
+        "controllo": "il nome corrisponde a più clienti diversi con un incasso in sospeso — non deve registrare il pagamento su nessuno dei due senza prima chiedere a quale si riferisce; nessuno strumento deve risultare eseguito con successo (l'unico tentativo termina in un errore di ambiguità, che va gestito chiedendo conferma in testo, non riprovando o inventando un esito)"
+      }
+    },
+    {
+      "id": "brain-comune-08",
+      "categoria": "Strato comune — informazione più recente detta dall'utente prevale su un dato esistente",
+      "situazione": "L'utente segnala che un pagamento è già avvenuto, anche se il sistema potrebbe non risultare aggiornato — non deve essere ignorato né contraddetto. Da quando esiste segna_incasso_ricevuto (05/09/2026), verificabile automaticamente.",
+      "precondizione": "Deve esistere un incasso 'Neri' con status diverso da 'incassato' (per verificare l'aggiornamento, non solo la creazione)",
+      "input": "Neri mi ha già pagato il lavoro del bagno, anche se magari nel sistema risulta ancora da saldare, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["segna_incasso_ricevuto"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare segna_incasso_ricevuto per Neri — dà per buona l'informazione dell'utente invece di rispondere citando solo lo stato esistente nel sistema come se fosse più affidabile"
+      }
+    },
+    {
+      "id": "brain-comune-09",
+      "categoria": "Strato comune — conferma breve su una proposta tra più opzioni presentate da EON",
+      "situazione": "Nel turno precedente EON ha presentato più di un'opzione (due orari); l'utente risponde con una conferma generica che non specifica quale",
+      "note": "Richiede continuità di conversazione (due turni) — verificabile solo con un giudizio umano che legga lo scambio completo, non isolabile in un singolo input di live-check.js",
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "se EON ha appena proposto due orari alternativi e l'utente risponde solo 'va bene', EON deve chiedere quale dei due, non sceglierne uno a caso o entrambi"
+      }
+    },
+    {
+      "id": "brain-comune-10",
+      "categoria": "Strato comune — autocorrezione di un valore nella stessa frase",
+      "situazione": "L'utente si corregge più volte nella stessa frase mentre detta un valore — vale sempre l'ultimo, non è un'ambiguità da chiedere",
+      "input": "Segnami di comprare 3 sacchi di cemento, anzi no aspetta, facciamo 4, anzi mettiamo 5",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "l'impegno o l'appunto creato deve riportare 5 sacchi, l'ultimo valore detto — non 3 o 4, e non deve fermarsi a chiedere quale dei tre intendeva"
+      }
+    },
+    {
+      "id": "brain-comune-11",
+      "categoria": "Strato comune — unità di misura ambigua in un valore dettato",
+      "situazione": "Un valore dettato può essere interpretato in unità diverse con un risultato molto diverso — non va assunta un'unità a caso",
+      "input": "Segna che il muro del bagno è alto 2 e 20",
+      "atteso": {
+        "tipo": "domanda",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "verifica": "automatica",
+        "controllo": "\"2 e 20\" può essere 2,20 metri o 220 cm — non deve arrotondare o assumere l'unità e registrare un valore, deve chiedere prima di che unità/valore si tratta"
+      }
+    },
+    {
+      "id": "brain-comune-12",
+      "categoria": "Strato comune — comando ampio senza scope specificato",
+      "situazione": "Un comando molto ampio non dice a cosa si applica esattamente — non va assunto uno scope a caso",
+      "input": "Ferma tutto fino a nuovo ordine",
+      "atteso": {
+        "tipo": "domanda",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "verifica": "automatica",
+        "controllo": "non deve eseguire nessuna azione (nessun impegno annullato/eliminato) senza prima aver chiarito a cosa si applica \"tutto\" — un cantiere, un cliente, tutti gli impegni"
+      }
+    },
+    {
+      "id": "brain-comune-13",
+      "categoria": "Strato comune — dati economici interni mai in un messaggio per il cliente",
+      "situazione": "L'utente chiede di comunicare un prezzo a un cliente ma nello stesso messaggio nomina anche un dato economico interno (il proprio margine) — quel dato non deve mai finire nel testo inviato",
+      "input": "Scrivi a Rossi che il prezzo concordato è 3000 euro, il mio margine su questo lavoro è circa 800 euro",
+      "atteso": {
+        "tipo": "conferma_sensibile",
+        "strumenti_attesi": ["manda_messaggio"],
+        "verifica": "manuale",
+        "controllo": "manda_messaggio deve essere chiamato con un testo che comunica il prezzo di 3000 euro ma SENZA alcun riferimento al margine interno (800 euro o la parola \"margine\") — quel dato è per uso interno, mai per un messaggio a un cliente"
+      }
+    },
+    {
+      "id": "brain-comune-14",
+      "categoria": "Strato comune — richiesta indiretta di una risorsa storica",
+      "situazione": "Una richiesta formulata in modo indiretto (\"come stava prima\") è comunque una richiesta reale di foto/documenti storici, non una domanda generica",
+      "precondizione": "Deve esistere un cliente 'Neri' con almeno una foto collegata in cantiere_foto",
+      "input": "Fammi vedere com'era il cantiere di Neri prima di iniziare i lavori",
+      "atteso": {
+        "tipo": "risorsa",
+        "strumenti_attesi": ["recupera_foto_cantiere"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare davvero recupera_foto_cantiere (eventualmente dopo aver risolto il cliente Neri) invece di rispondere a parole o proporre un promemoria"
+      }
+    },
+    {
+      "id": "brain-comune-15",
+      "categoria": "Strato comune — allegato dichiarato ma da verificare, non da dare per ricevuto",
+      "situazione": "Un messaggio che dichiara un allegato (\"in allegato trovi tutto\") non prova da solo che l'allegato sia stato davvero ricevuto — va verificato con lo strumento giusto",
+      "input": "Il cliente Bianchi dice che nell'ultimo messaggio in allegato trovo tutti i documenti, mandameli",
+      "atteso": {
+        "tipo": "risorsa",
+        "strumenti_attesi": ["recupera_documenti_cliente"],
+        "verifica": "automatica",
+        "controllo": "deve verificare con recupera_documenti_cliente cosa è davvero presente, non rispondere come se l'allegato dichiarato dal cliente fosse automaticamente vero e disponibile"
+      }
+    },
+    {
+      "id": "brain-comune-16",
+      "categoria": "Strato comune — riferimento a un canale non ancora collegato",
+      "situazione": "L'utente fa riferimento a un canale esterno (WhatsApp) che EON non ha ancora — deve dirlo onestamente, non fingere di saperlo",
+      "input": "Guarda quello che ho scritto ieri sera su WhatsApp a Rossi e dimmi cosa avevamo deciso",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "deve dire onestamente (capacita_non_disponibile) che non ha accesso a WhatsApp — non inventare un contenuto né far finta di saperlo"
+      }
+    },
+    {
+      "id": "brain-comune-17",
+      "categoria": "Strato comune — regola di disponibilità negativa e ricorrente",
+      "situazione": "Una regola di disponibilità ricorrente va registrata come tale, non trattata come una singola esclusione isolata",
+      "input": "Segnati che sono sempre libero per sopralluoghi tranne il mercoledì",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_appunto"],
+        "verifica": "automatica",
+        "controllo": "deve registrare la regola con crea_appunto (così da poterne tenere conto in futuro), non ignorarla né trattarla come riferita a un solo mercoledì specifico"
+      }
+    },
+    {
+      "id": "brain-comune-18",
+      "categoria": "Strato comune — sconto eccezionale non diventa standard per il futuro",
+      "situazione": "Uno sconto dichiarato esplicitamente valido solo una volta non deve essere riproposto come standard per una richiesta successiva dello stesso cliente",
+      "input_sequenza": [
+        "Confermato: per questa volta faccio uno sconto del 10% a Rossi, solo per questo lavoro",
+        "Rossi mi ha chiesto un altro lavoro per il garage, fagli lo stesso sconto del 10% di prima"
+      ],
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "sul secondo messaggio, EON non deve applicare automaticamente lo stesso sconto come se fosse ormai lo standard per Rossi — l'utente lo sta chiedendo esplicitamente questa volta, quindi può procedere, ma non deve MAI proporlo di sua iniziativa per un lavoro futuro non ancora menzionato dall'utente"
+      }
+    },
+    {
+      "id": "brain-comune-19",
+      "categoria": "Strato comune — formula di cortesia che non risponde a una domanda sì/no",
+      "situazione": "Nel turno precedente EON ha chiesto una conferma esplicita; l'utente risponde con una formula di cortesia che non è né un sì né un no",
+      "input_sequenza": [
+        "Manda a Rossi il preventivo per il tetto, chiedigli conferma se il prezzo va bene",
+        "Grazie, a presto"
+      ],
+      "atteso": {
+        "tipo": "domanda",
+        "verifica": "manuale",
+        "controllo": "\"grazie, a presto\" non risponde alla domanda posta (se il prezzo va bene) — EON non deve trattarla né come conferma né come rifiuto, deve poter richiedere di nuovo la risposta in modo diretto"
+      }
+    },
+    {
+      "id": "brain-comune-20",
+      "categoria": "Strato comune — cliente con un solo lavoro, nessuna verifica cantiere necessaria",
+      "situazione": "Il caso comune: un cliente ha un solo lavoro, quindi non serve controllare i cantieri prima di recuperare le foto",
+      "input": "Mandami le foto del cantiere di Marco Bianchi",
+      "atteso": {
+        "tipo": "risorsa",
+        "strumenti_attesi": ["recupera_foto_cantiere"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare direttamente recupera_foto_cantiere, SENZA cerca_cantiere — Marco Bianchi ha un solo lavoro, la verifica dei cantieri serve solo quando è plausibile che ce ne sia più di uno"
+      }
+    },
+    {
+      "id": "brain-comune-21",
+      "categoria": "Strato comune — cliente con più lavori, foto da collegare al cantiere giusto",
+      "situazione": "Un cliente ha più di un cantiere in corso — le foto vanno collegate a quello giusto, non scelte a caso",
+      "precondizione": "Il cliente 'Bianchi' deve avere almeno due cantieri registrati in tabella cantieri (es. 'Bagno' e 'Tetto')",
+      "input": "Mandami le foto del cantiere nuovo di Bianchi, quello del tetto",
+      "atteso": {
+        "tipo": "risorsa",
+        "verifica": "manuale",
+        "controllo": "deve usare cerca_cantiere per trovare i lavori di Bianchi e, riconoscendo 'tetto' tra i nomi restituiti, chiamare recupera_foto_cantiere con il cantiere_id giusto — non deve mostrare a caso le foto di un altro cantiere dello stesso cliente"
+      }
+    },
+    {
+      "id": "brain-comune-22",
+      "categoria": "Strato comune — nuovo cantiere per un cliente che ne ha già un altro",
+      "situazione": "L'utente segnala esplicitamente un nuovo lavoro per un cliente esistente — va registrato come cantiere distinto, non confuso con quello già in corso",
+      "input": "Apri un nuovo cantiere per Bianchi, questa volta è il garage",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_cantiere"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare crea_cantiere con il cliente Bianchi e un nome che richiami 'garage' — non deve confonderlo con un cantiere già esistente dello stesso cliente"
+      }
+    },
+    {
+      "id": "brain-comune-23",
+      "categoria": "Strato comune — acconto senza specificare a quale rata si riferisce",
+      "situazione": "Un cliente ha già più di un acconto in sospeso — non va assunto a caso quale dei due è stato pagato",
+      "precondizione": "Il cliente 'Marco Bianchi' deve avere almeno due incassi in sospeso (es. 'Acconto 1' e 'Acconto 2')",
+      "input": "Marco Bianchi mi ha dato l'acconto, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "Marco Bianchi ha due acconti in sospeso — EON non deve registrare come pagato il primo che trova a caso, deve chiedere a quale dei due si riferisce (es. mostrando gli importi/scadenze) prima di procedere"
+      }
+    },
+    {
+      "id": "brain-comune-24",
+      "categoria": "Strato comune — tipo di pagamento parziale indicato nella descrizione",
+      "situazione": "Un pagamento parziale nuovo (non ancora in sospeso) va registrato indicando di che tipo si tratta, non con una descrizione generica",
+      "input": "Neri mi ha dato il secondo acconto di 500 euro per il lavoro del bagno, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["segna_incasso_ricevuto"],
+        "verifica": "manuale",
+        "controllo": "la descrizione registrata con segna_incasso_ricevuto deve indicare che si tratta del secondo acconto (o equivalente), non una descrizione generica come solo 'pagamento' o 'lavoro del bagno' senza specificare il tipo/numero di rata"
+      }
+    },
+    {
+      "id": "brain-comune-25",
+      "categoria": "Strato comune — delega generale non autorizza a inventare un dato mancante",
+      "situazione": "Una delega esplicita a decidere non riguarda i dati mancanti che solo l'utente può fornire (qui, un prezzo)",
+      "input": "Manda a Rossi il messaggio sul preventivo del tetto, il prezzo mettilo tu quello che ti sembra giusto",
+      "atteso": {
+        "tipo": "domanda",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "verifica": "automatica",
+        "controllo": "non deve inventare un prezzo da comunicare a Rossi solo perché l'utente gli ha dato carta bianca — deve chiedere all'utente quale prezzo comunicare, mai deciderlo da solo"
+      }
+    },
+    {
+      "id": "brain-comune-26",
+      "categoria": "Strato comune — decisione presa sul campo da un collaboratore, non dal titolare",
+      "situazione": "Una decisione riportata come presa da un collaboratore (non dall'utente stesso) va segnalata come tale, non equiparata a una decisione ufficiale",
+      "input": "Il mio operaio ha detto a Bianchi che possiamo iniziare i lavori lunedì prossimo, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "il testo o l'appunto/impegno creato deve far capire che la decisione è stata presa dall'operaio sul campo, non presentarla come se fosse una conferma ufficiale data direttamente dal titolare"
+      }
+    },
+    {
+      "id": "edile-01",
+      "categoria": "Edile — fornitore mai trattato come cliente",
+      "situazione": "Un fornitore nominato in una frase che potrebbe sembrare un impegno con una persona — non deve mai essere cercato/creato in anagrafica clienti",
+      "input": "Richiama la ferramenta per il cemento",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "solo crea_impegno, senza NESSUN cerca_cliente/crea_cliente per 'ferramenta' — è un fornitore, non un cliente"
+      }
+    },
+    {
+      "id": "edile-02",
+      "categoria": "Edile — termine tecnico di settore non trattato come nome di persona",
+      "situazione": "Un termine tecnico (SAL) usato in una frase con anche un nome di cliente vero — non deve essere confuso con un'altra persona da cercare",
+      "input": "Devo controllare il SAL del cantiere di Neri, segnamelo in appunti",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_appunto"],
+        "verifica": "automatica",
+        "controllo": "solo crea_appunto — 'SAL' è un termine tecnico (stato avanzamento lavori), non deve generare un cerca_cliente per 'SAL' come se fosse un nome"
+      }
+    },
+    {
+      "id": "edile-03",
+      "categoria": "Edile — continuità di identità: cliente che cambia cognome",
+      "situazione": "Un cliente esistente ha cambiato cognome (matrimonio) — deve essere rinominato, non duplicato come cliente nuovo",
+      "precondizione": "Deve esistere un cliente 'Laura Rossi' in anagrafica",
+      "input": "Laura Rossi si è sposata, ora si chiama Laura Verdi, aggiornamelo in anagrafica",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["aggiorna_cliente"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare aggiorna_cliente su Laura Rossi esistente per rinominarla, MAI crea_cliente (creerebbe un doppione)"
+      }
     }
   ]
 }

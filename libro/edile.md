@@ -1,0 +1,827 @@
+# Professional Brain Pack — EDILE
+
+Versione estesa (Claude, 03/09/2026), costruita da: la prima bozza,
+il documento di metodo (`libro/professional-brain-pack-metodo.md`,
+da una consulenza ChatGPT), conoscenza generale sul mestiere, e le
+idee emerse discutendo con Gianardi una seconda consulenza (Copilot) —
+tenute quelle di sostanza (modello cognitivo, ontologia con attributi,
+modulo WhatsApp, modello di priorità, catalogo errori critici), non il
+numero fisso di casi imposto da quel documento (vedi nota in fondo).
+
+**Ancora una bozza**, non verità definitiva — da correggere con
+l'esperienza reale di Gianardi e dei suoi colleghi prima di derivarne
+casi per la Evaluation Suite (sezione L) o modifiche al prompt di EON.
+Non entra nel prompt così com'è: solo le correzioni vere, trovate
+testando, ci entrano, in poche righe mirate (vedi il metodo).
+
+Integrato con tre lotti di casi plausibili (non verificati, generati
+con un altro strumento AI) portati da Gianardi il 03/09/2026 — fonti
+complete in `libro/casi-lotto1-copilot.md`, `libro/casi-lotto2-copilot.md`
+e `libro/casi-lotto3-copilot.md`; qui sono entrate solo le voci
+genuinamente nuove rispetto a quanto già scritto.
+
+## A. Identità professionale
+
+Piccola impresa edile o artigiano (muratore, capomastro), spesso con
+1-5 persone. Passa la maggior parte della giornata **fuori
+dall'ufficio**, sui cantieri — non alla scrivania. Usa il telefono più
+della tastiera: detta a voce, scrive messaggi brevi, spesso con
+errori/abbreviazioni perché ha le mani sporche o poco tempo. I clienti
+sono in gran parte privati (famiglie che ristrutturano casa), a volte
+imprese o amministratori di condominio per lavori più grossi.
+
+## B. Giornata e contesto
+
+Mattina su un cantiere (o più di uno, con spostamenti), sopralluoghi da
+nuovi clienti, telefonate per organizzare consegne di materiale,
+momenti rubati per la burocrazia (preventivi, fatture, permessi) di
+solito alla sera o in pausa pranzo. Interruzioni continue: un cliente
+che chiama, un fornitore in ritardo, un imprevisto in cantiere. Rumore
+di fondo frequente (trapano, betoniera) quando detta a voce.
+
+## Modello cognitivo dell'edile
+
+Non solo cosa dice, ma come organizza mentalmente il proprio lavoro —
+utile per capire COME interpretare le sue richieste, non solo COSA
+contengono.
+
+- **Organizza per cantiere/cliente, non per data**: la sua unità
+  mentale è "il lavoro di Rossi", non "il 15 settembre" — il calendario
+  è una conseguenza, non il punto di partenza. Un riferimento vago come
+  "il lavoro di Rossi" va quindi risolto prima per cliente/cantiere, e
+  solo dopo eventualmente per tempo.
+- **Ricorda i clienti per luogo/lavoro, non per anagrafica**: "quello
+  del bagno in via Garibaldi" è spesso più naturale di un nome e
+  cognome completi — il nome esatto può non essere la prima cosa che
+  gli viene in mente.
+- **Usa le fotografie come memoria esterna**: non solo documentazione
+  per il cliente, ma il modo con cui l'edile stesso ricorda "a che
+  punto eravamo" — una richiesta di foto è spesso una richiesta di
+  memoria, non di documentazione formale.
+- **Usa WhatsApp come strumento operativo primario**: molte decisioni e
+  informazioni (misure, richieste del cliente, foto) passano da lì
+  prima che da qualsiasi altro sistema — EON oggi non ci accede
+  (Communication Hub, ancora da fare), ma il Pack deve tenerne conto
+  quando l'utente fa riferimento a "quello che ho scritto su WhatsApp".
+- **Decide in fretta, con poche informazioni**: sul cantiere non ha
+  tempo per analisi lunghe — si aspetta che anche EON sia rapido e
+  diretto, non che faccia tante domande.
+- **Valuta l'urgenza dal contesto, non dal tono**: dice "urgente" per
+  abitudine più spesso di quanto intenda davvero un'emergenza — la
+  vera urgenza si riconosce da segnali concreti (un cliente che aspetta
+  da giorni, un lavoro fermo, materiale mancante), non dalla parola
+  usata.
+- **Distingue rumore da problema reale**: un imprevisto quotidiano
+  (piove, un operaio è in ritardo) è normale amministrazione, non
+  richiede necessariamente un'azione formale — solo se l'utente lo
+  chiede esplicitamente.
+
+## C. Mondo professionale
+
+- **Clienti**: privati (la maggioranza), imprese, amministratori di
+  condominio. Spesso più clienti con lo stesso cognome in paesi piccoli.
+- **Cantieri/lavori**: il luogo fisico e il progetto in corso — un
+  cliente può avere più cantieri nel tempo, raramente più di uno attivo
+  insieme.
+- **Luoghi**: il cantiere stesso, l'ufficio/casa (per la burocrazia), i
+  fornitori (ferramenta, rivenditore materiali).
+- **Persone**: il cliente, eventuali collaboratori/dipendenti/
+  subappaltatori, i fornitori (non sono clienti, non vanno mai confusi
+  con loro).
+- **Documenti**: preventivi, capitolati, planimetrie, permessi
+  (SCIA/CILA), fatture.
+- **Pagamenti**: acconti, SAL (pagamenti legati all'avanzamento), saldo
+  finale.
+
+## D. Ontologia del dominio
+
+Per ogni entità: definizione, attributi chiave, relazioni principali,
+ciclo di vita, ambiguità comune da tenere presente.
+
+**Cliente** — persona o azienda per cui si lavora. *Attributi*: nome,
+zona/indirizzo, telefono, tipo (privato/impresa/condominio). *Relazioni*:
+ha uno o più Cantieri; ha un Referente se non è lui il contatto diretto.
+*Ciclo di vita*: nasce al primo contatto, resta anche a lavori finiti
+(storico, futuri lavori). *Ambiguità*: omonimi frequenti in paesi
+piccoli — distinguere per zona/indirizzo; un cliente può cambiare
+cognome nel tempo (es. matrimonio) — stessa persona, non va trattato
+come un cliente nuovo se i segnali (telefono, indirizzo, cantiere
+precedente) coincidono, meglio chiedere conferma che duplicare; un
+numero di telefono può essere riusato nel tempo da una persona diversa
+(subentro, cambio responsabile) — se le richieste non tornano coerenti
+con lo storico associato a quel numero, sospettare un cambio di
+persona, non forzare la coerenza a tutti i costi.
+
+**Referente** — persona di contatto quando il Cliente è un'azienda o un
+condominio (es. l'amministratore, non il condominio stesso). *Relazioni*:
+collegato a un Cliente. *Ambiguità*: l'utente può nominare il referente
+invece del cliente formale ("l'amministratore Bianchi" per il condominio X).
+
+**Immobile** — l'edificio/unità dove si lavora, distinto dal Cliente
+(un cliente può avere più immobili) e dal Cantiere (l'immobile esiste
+anche senza lavori in corso). *Relazioni*: appartiene a un Cliente; può
+ospitare più Cantieri nel tempo.
+
+**Cantiere** — il progetto/lavoro fisico in corso. *Attributi*: stato
+(in corso/fermo/concluso), immobile di riferimento. *Relazioni*: di un
+Cliente, su un Immobile, nasce spesso da un Sopralluogo. *Ciclo di
+vita*: vedi sezione F. *Ambiguità*: "il lavoro di Rossi" può indicare
+il Cantiere, il Preventivo, o la Fattura a seconda della fase; un
+nomignolo informale ("il cantiere nuovo") può riferirsi a cantieri
+diversi in periodi diversi — man mano che ne aprono altri, l'etichetta
+"nuovo"/"vecchio" si sposta, va risolta dal periodo della conversazione,
+non da un'associazione fissa.
+
+**Sopralluogo** — prima visita di valutazione. *Relazioni*: precede
+spesso un Preventivo. *Ciclo di vita*: singolo evento, non ricorrente
+(salvo sopralluoghi successivi per verifiche).
+
+**Preventivo** — proposta economica. *Attributi*: importo, stato
+(inviato/accettato/rifiutato/scaduto), livello di formalità
+(orientativo/di massima vs formale — un cliente può trattare un
+numero "di massima" come vincolante, l'ambiguità va chiarita, non
+ignorata). *Relazioni*: contiene un Capitolato; se accettato genera una
+Commessa/Esecuzione. *Ambiguità*: più preventivi in sospeso per lo
+stesso cliente vanno distinti — anche quando riguardano immobili
+diversi dello stesso cliente, o quando esistono revisioni con lo
+stesso numero base (es. "45" e "45 bis"); un preventivo rifiutato non
+è sempre chiuso per sempre — un cliente può tornare mesi dopo a
+riprenderlo, va trattato come riapertura, non come lavoro nuovo da
+zero se il contesto coincide; un preventivo rivisto più volte solo a
+voce (telefono) può differire dall'ultima versione scritta — in caso
+di riferimento ambiguo, chiarire a quale versione ci si riferisce; due
+versioni inviate lo stesso giorno per errore/fretta (es. con e senza
+IVA) sono da distinguere esplicitamente, mai assumere quale sia quella
+valida.
+
+**Variante** — modifica a un Preventivo/Commessa già avviata (lavoro
+aggiuntivo o cambiato in corso d'opera). *Relazioni*: collegata a una
+Commessa esistente, non un lavoro nuovo indipendente.
+
+**Commessa** — il lavoro accettato e formalizzato (a volte coincide con
+"Cantiere" nel linguaggio comune, ma concettualmente è l'accordo
+commerciale, il Cantiere è la sua esecuzione fisica). *Relazioni*: nasce
+da un Preventivo accettato; genera Attività, SAL, Fatture.
+
+**Attività** — singola azione/task dentro una Commessa (es. "buttare giù
+il muro", "posare le piastrelle"). *Relazioni*: appartiene a una
+Commessa; può essere assegnata a un Operaio/Squadra.
+
+**Materiale** — beni fisici necessari (cemento, cartongesso, ecc.).
+*Relazioni*: collegato a un Fornitore per l'acquisto, a una Consegna per
+la logistica.
+
+**Consegna** — evento di arrivo materiale in cantiere. *Attributi*:
+data spesso incerta ("quando arriva il cemento"). *Relazioni*: da un
+Fornitore, per una Commessa/Cantiere.
+
+**Fornitore** — chi vende materiale/servizi. *Relazioni*: MAI un
+Cliente — categoria distinta anche se nominato in modo simile ("Rossi
+ferramenta" vs "Rossi cliente"). *Ambiguità*: può cambiare ragione
+sociale (fusione/acquisizione) restando chiamato con il vecchio nome
+dal team — stesso principio del cliente che cambia cognome (sezione D,
+Cliente): non trattare come un fornitore nuovo se i segnali coincidono.
+
+**Operaio** — dipendente diretto. *Relazioni*: appartiene a una Squadra;
+assegnato ad Attività/Cantieri.
+
+**Squadra** — gruppo di Operai che lavora insieme, spesso su un Cantiere.
+
+**Subappaltatore** — impresa esterna per una parte specifica del lavoro
+(es. impiantista). *Relazioni*: simile a un Fornitore ma per manodopera/
+lavorazione, non materiale — categoria distinta da entrambi.
+
+**Documento** — planimetrie, capitolati, permessi, certificazioni.
+*Relazioni*: sempre collegato a una Commessa/Cliente specifico.
+
+**Foto** — vedi sezione dedicata sotto. *Relazioni*: sempre collegata a
+un Cantiere e, tramite quello, a un Cliente — mai generica.
+
+**Video** — come le foto, meno frequente, stesso principio di
+collegamento obbligatorio a Cantiere/Cliente.
+
+**Messaggio** — comunicazione interna (Portal EON) o esterna
+(WhatsApp, non ancora integrata). *Relazioni*: verso un Cliente.
+
+**Pratica edilizia** (SCIA/CILA) — autorizzazione comunale. *Attributi*:
+scadenze, stato. *Relazioni*: collegata a una Commessa/Immobile.
+
+**SAL** (Stato Avanzamento Lavori) — evento di pagamento parziale legato
+a una percentuale di lavoro completato. *Relazioni*: dentro una
+Commessa; genera spesso una Fattura. *Ambiguità*: non è la stessa cosa
+di un Pagamento a saldo finale — vedi sezione F/relazioni; "l'acconto"
+può riferirsi a rate diverse nel tempo (primo, secondo, ecc.) per la
+stessa Commessa — se il messaggio non specifica quale, va chiarito, non
+assunto sia l'ultimo o il primo.
+
+**Fattura** — documento fiscale. *Relazioni*: collegata a un SAL o al
+saldo finale di una Commessa; genera (si spera) un Pagamento.
+
+**Pagamento** — denaro ricevuto. *Attributi*: importo, modalità
+(contanti/bonifico), data. *Relazioni*: collegato a una Fattura.
+
+**Contestazione** — problema/difetto segnalato dal cliente o trovato
+dall'edile stesso. *Relazioni*: collegata a una Commessa/Cantiere;
+spesso documentata con Foto.
+
+**Garanzia** — periodo di responsabilità post-lavoro. *Relazioni*:
+collegata a una Commessa conclusa.
+
+**Intervento post-vendita** — assistenza dopo la fine lavori (in
+garanzia o a pagamento). *Relazioni*: collegato a una Commessa
+conclusa, può generare un nuovo Impegno/Cantiere minore.
+
+## E. Grafo delle relazioni
+
+Percorso principale (il caso più comune):
+
+```
+Cliente ──has──> Immobile ──has──> Cantiere
+                                       │
+                                  nasce da
+                                       │
+                                  Sopralluogo
+                                       │
+                                  porta a
+                                       │
+                                  Preventivo ──contiene──> Capitolato
+                                       │
+                                  se accettato
+                                       ▼
+                                  Commessa ──genera──> Attività ──assegnata a──> Operaio/Squadra
+                                       │
+                                  durante l'esecuzione
+                                       ▼
+                                  SAL (1..N) ──genera──> Fattura ──genera──> Pagamento
+                                       │
+                                  a fine lavori
+                                       ▼
+                                  Garanzia ──può portare a──> Intervento post-vendita
+```
+
+Relazioni secondarie/indirette:
+
+- **Foto/Documento/Video** → sempre a un Cantiere → (tramite quello) a
+  un Cliente — mai un salto diretto a caso
+- **Materiale** → **Fornitore** (acquisto) e **Consegna** (logistica) →
+  collegati a una Commessa, MAI a un Cliente come se fosse un fornitore
+- **Variante** → una Commessa esistente, non un nuovo Preventivo
+  indipendente
+- **Contestazione** → una Commessa/Cantiere, spesso con Foto a supporto
+- **Subappaltatore** → un'Attività specifica dentro una Commessa, non
+  l'intero Cantiere
+- **Referente** → un Cliente (quando il cliente stesso non è la persona
+  che parla, es. condominio)
+
+## F. Processi — ciclo di vita tipico di un lavoro
+
+1. Primo contatto (telefonata/passaparola) → eventuale nuovo Cliente
+2. Sopralluogo → valutazione
+3. Preventivo (con Capitolato) → invio al cliente
+4. Attesa risposta — se resta senza risposta per giorni, è un caso da
+   poter segnalare (follow-up), non da ignorare
+5. Accettazione → Commessa → inizio esecuzione (Cantiere attivo)
+6. Esecuzione in corso: Attività quotidiane, Foto di avanzamento, ordini
+   Materiale/Consegne, gestione Squadra, eventuali Varianti
+7. SAL intermedi → Fatture parziali → Pagamenti
+8. Contestazioni, se emergono, gestite durante o a fine lavori
+9. Fine lavori → foto finali, eventuale Documento di fine lavori,
+   Fattura saldo → inizio Garanzia
+10. Eventuale Intervento post-vendita
+
+Capire IN QUALE fase è un lavoro aiuta a interpretare richieste
+ambigue: "il lavoro di Rossi" durante l'esecuzione probabilmente indica
+il Cantiere attivo, non il Preventivo ormai superato; dopo la fine
+lavori probabilmente indica la Fattura o la Garanzia.
+
+L'accettazione verbale di un preventivo ("va bene, andiamo così")
+spesso precede di giorni o settimane un impegno scritto formale, e nel
+frattempo si opera già come se fosse confermato — EON deve poter
+trattare un'accettazione verbale riportata dall'utente come valida per
+procedere (crea la Commessa), senza pretendere un documento firmato che
+nella pratica arriva dopo. Lo stesso vale per le modifiche minori in
+corso d'opera: spesso vengono eseguite prima di essere formalizzate
+come Variante — se l'utente riporta una modifica già fatta, va
+registrata come tale (Variante retroattiva), non rifiutata perché "non
+richiesta nei modi giusti".
+
+## G. Linguaggio
+
+Terminologia tipica: **SAL**, **SCIA/CILA**, **capitolato**,
+**massetto** (strato di base sotto un pavimento), **cartongesso**,
+**sopralluogo**, **subappalto**, **cls** (calcestruzzo), **ca**
+(cemento armato), **tondino** (ferro per armatura). Verbi per un
+impegno non solo "vedere/incontrare": "passo da", "faccio un salto
+da", "vado a dare un'occhiata da", "do un'occhiata a". Espressioni per
+la memoria/foto: "fammi vedere com'era prima", "a che punto eravamo
+rimasti" — sono richieste di documentazione storica, non frasi da
+riconoscere alla lettera. Un termine tecnico mal riconosciuto dal
+microfono (es. "massetto" sentito come "mai detto") non va corretto in
+silenzio se cambia il senso della frase: meglio chiedere conferma.
+
+Alcuni materiali hanno nomi diversi per regione (es. "tavelle"/"forati"
+per lo stesso tipo di laterizio) — non trattare una variante regionale
+come un termine sconosciuto o un errore. "Dare/avere" è spesso usato in
+senso colloquiale per crediti/debiti di cantiere, non nel senso
+contabile stretto — va interpretato dal contesto, non da una regola
+fissa. "Extra"/"lavori extra" è ambiguo: può indicare una Variante già
+concordata con il cliente o solo una richiesta informale non ancora
+accettata — le due cose vanno distinte prima di agire (vedi Variante,
+sezione D), mai equiparate automaticamente.
+
+**Autocorrezione nel parlato**: chi detta a voce spesso si corregge
+nella stessa frase ("3 sacchi, no aspetta 4, mettiamo 5" — o "abbiamo
+finito, anzi no, domani finiamo"). Vale sempre l'ultimo valore/stato
+detto nella frase, non il primo — non è un'ambiguità da chiedere, è
+una correzione già completa nel messaggio stesso.
+
+## H. Intenzioni professionali
+
+Mappate sulle operazioni che EON già riconosce (`interpreta_richiesta`),
+non nuove categorie da inventare nel codice — organizzate per
+famiglia, con esempi meno letterali del solito per mostrare che
+l'intento conta più della frase:
+
+- **mostra** (recupero/consultazione): foto, documenti, storico
+  cliente, un preventivo già fatto, chi deve ancora pagare, chi è su
+  quale cantiere. Include richieste indirette come "fammi vedere com'era
+  prima" (= foto storiche di un cantiere) o "a che punto eravamo" (=
+  stato/ultime attività di un cantiere).
+- **crea** (registrazione/pianificazione): impegno, appunto, cliente,
+  preventivo, pagamento ricevuto, compito assegnato.
+- **modifica** (coordinamento/controllo operativo): spostare un
+  appuntamento, correggere un appunto, aggiornare un cliente, registrare
+  una Variante su una Commessa esistente.
+- **cancella**: annullare un impegno, eliminare un cliente.
+- **invia** (comunicazione): messaggio, foto, un sollecito di pagamento.
+- **contatta**: avviare un contatto diretto e immediato (chiamare ora).
+- **consulta** (valutazione/decisione): parere/confronto ("quale
+  preventivo preparo prima?", "conviene fare prima il getto o aspettare
+  il materiale?") — MAI trasformato in automatico in un'azione.
+
+"Consigliare/pianificare/ricordare/coordinare/controllare" (linguaggio
+comune) si riconducono a queste sette — un consiglio è sempre
+**consulta**; pianificare o ricordare è sempre **crea**; coordinare la
+squadra è **crea**/**modifica** su Attività; controllare lo stato
+economico è **mostra**.
+
+## I. Comportamento EON — per intento/categoria
+
+Non solo COSA chiede l'edile, ma COME BRAIN deve ragionare: cosa capire,
+quale contesto usare, quali entità/relazioni verificare, quali
+informazioni servono, quando procedere, quando chiarire, quando
+confermare, quando fermarsi, quali errori evitare.
+
+**Foto/documenti/video del cantiere (mostra)** — *Capire*: l'utente
+vuole vedere una risorsa esistente, anche se la chiede in modo indiretto
+("com'era prima"). *Contesto*: cliente/cantiere corrente se non
+specificato. *Entità*: Cantiere → Cliente. *Procedere quando*: il
+cantiere è identificabile con certezza. *Chiarire quando*: più cantieri
+possibili per lo stesso cliente. *Mai*: sostituire con un promemoria
+solo perché il recupero non trova nulla — dirlo onestamente invece.
+*Errore da evitare*: collegare la foto giusta al cliente sbagliato.
+
+**Impegni e appuntamenti (crea)** — *Capire*: sopralluoghi, consegne,
+scadenze, promemoria vanno sempre registrati come impegno vero.
+*Procedere quando*: manca del tutto l'orario — decide da solo (primo
+giorno utile, orario plausibile), senza fermarsi. *Confermare quando*:
+l'orario è vago/relativo ("quando arriva il cemento") — stima e chiede
+conferma in testo. *Mai*: dare lo stesso orario a più impegni distinti
+nella stessa frase; saltarne uno per fretta.
+
+**Clienti e omonimi (mostra/crea)** — *Capire*: prima di creare o
+collegare, verificare per nome. *Chiarire quando*: ci sono omonimi
+(frequenti in paesi piccoli) — usare zona/indirizzo per distinguere.
+*Mai*: scegliere un cliente omonimo a caso.
+
+**Appunti in cantiere (crea/modifica)** — *Capire*: note veloci e
+informali senza data sono appunti, non impegni. *Modificare quando*:
+una correzione arriva subito dopo un appunto appena creato — applicarla
+lì, non crearne uno nuovo.
+
+**Comunicazione con i clienti (invia)** — *Fermarsi sempre*: è
+un'operazione delicata, richiede conferma reale prima di mandare,
+qualunque sia il tono della richiesta. *Procedere solo dopo aver*:
+recuperato davvero foto/documenti da allegare, mai promesso un invio di
+qualcosa mai recuperato.
+
+**Preventivi (crea/consulta)** — *Capire*: creare un preventivo è
+un'azione; decidere quale preparare prima tra più in sospeso è un
+parere. *Mai*: trasformare un parere richiesto in un'azione automatica.
+*Segnalare quando richiesto*: un preventivo senza risposta da giorni —
+solo se l'utente lo chiede, non di iniziativa propria.
+
+**Varianti (modifica)** — *Capire*: una Variante si collega a una
+Commessa esistente, non è un lavoro nuovo indipendente — verificare
+prima che la Commessa esista.
+
+**Pagamenti e SAL (crea/mostra)** — *Capire*: un SAL è un pagamento
+parziale legato all'avanzamento, distinto dal saldo finale — non
+confonderli nel capire di cosa parla l'utente. *Procedere quando*:
+l'importo e il collegamento a una Commessa sono chiari.
+
+**Squadra, attività, subappaltatori (crea/mostra)** — *Capire*:
+assegnare un compito o sapere chi è su quale cantiere sono richieste
+dirette. *Distinguere*: un subappaltatore non è né un dipendente né un
+fornitore di materiale — categoria propria.
+
+**Contestazioni (crea/mostra)** — *Capire*: un problema segnalato va
+collegato con certezza alla Commessa/Cantiere giusto, spesso con foto a
+supporto — massima attenzione al collegamento corretto (vedi errori
+critici).
+
+**Conferma a un'opzione non specificata** — *Capire*: un "ok, procedi"
+o "va bene così" che risponde a un messaggio con più opzioni proposte
+(es. più preventivi, più date) è ambiguo se non è chiaro quale delle
+opzioni sta confermando. *Chiarire quando*: più di un'opzione era
+plausibilmente sul tavolo e il messaggio non la nomina — mai scegliere
+un'opzione a caso.
+
+**Frasi di cortesia/rassicurazione vs impegno formale** — *Capire*:
+espressioni come "ci pensiamo noi", "stia tranquillo" sono spesso
+linguaggio relazionale, non un impegno su tempi/costi precisi. *Mai*:
+trasformarle in una promessa formale (scadenza, prezzo) se non è stato
+detto nulla di concreto — coerente con la regola sulle persone di
+passaggio (sezione K).
+
+**Decisioni prese sul campo da un collaboratore** — *Capire*: un
+capocantiere o collaboratore può decidere/promettere qualcosa
+direttamente in cantiere, prima che il titolare lo formalizzi.
+*Trattare come*: valido operativamente ma da segnalare come deciso "sul
+campo", non silenziosamente equiparato a una decisione ufficiale
+dell'impresa se l'utente stesso non lo conferma.
+
+**Conferma aggregata a più richieste** — *Capire*: "fatto, tutto ok" in
+risposta a una lista di più richieste (es. 3-4 punti) conferma l'intero
+elenco solo se non c'è ambiguità. *Chiarire quando*: non è chiaro se si
+riferisce a tutti i punti o solo all'ultimo/più recente — non segnare
+tutto come completato per default.
+
+**Formula di cortesia che non risponde** — *Capire*: "grazie, a
+presto" o simili, in risposta a una richiesta che aspettava un sì/no
+esplicito (es. conferma di un preventivo), non è una risposta — resta
+in attesa, non va trattata né come accettazione né come rifiuto.
+
+**Riferimento numerico a un documento con revisioni** — *Capire*: "il
+preventivo 45" può essere ambiguo se esistono revisioni collegate
+(es. "45 bis") — verificare prima di agire su quale versione esatta.
+
+**Delega generale/autorizzazione per silenzio** — *Capire*: "fai come
+vuoi", "vai tranquillo, se c'è un problema te lo dico" sono
+un'autorizzazione a procedere con giudizio, non un'azione specifica.
+*Procedere quando*: c'è già un'azione concreta proposta da confermare
+con questo tipo di risposta. *Mai*: inventare dettagli (prezzo, data,
+materiale) non detti solo perché è stata data carta bianca — la delega
+riguarda la decisione, non i dati mancanti.
+
+**Indicazioni contrastanti da due fonti autorizzate** — *Capire*: un
+cliente e un suo referente tecnico (es. geometra) possono dare
+indicazioni diverse per lo stesso cantiere, entrambi legittimati a
+parlare. *Mai*: scegliere una delle due versioni a caso o silenziosamente.
+*Chiarire quando*: le indicazioni sono in contraddizione reale, non
+solo formulate in modo diverso — segnalare il conflitto piuttosto che
+risolverlo da soli.
+
+**Dissenso tecnico non registrato** — *Capire*: se l'utente esprime un
+parere tecnico contrario a una scelta del cliente (es. materiale
+sconsigliato) che il cliente vuole comunque, e chiede di registrarlo,
+va salvato esplicitamente come nota — è una tutela per l'impresa, non
+un'informazione da tralasciare.
+
+## Modulo WhatsApp (per il futuro Communication Hub)
+
+Osservazione realistica su come un edile usa davvero WhatsApp oggi,
+utile quando si progetterà l'integrazione (non ancora fatta):
+
+- **Vantaggi per l'edile**: immediato, foto/vocali senza sforzo, tutti
+  lo sanno usare (anche i clienti anziani), gruppi per coordinare la
+  squadra.
+- **Limiti**: informazioni si perdono nello scroll, nessuno storico
+  organizzato per cliente/cantiere, difficile recuperare "cosa avevamo
+  detto due mesi fa".
+- **Comportamenti tipici**: manda una foto con due parole invece di un
+  messaggio strutturato (a volte senza alcun testo); usa gruppi con
+  clienti e fornitori mescolati; decide misure/date direttamente in
+  chat, senza riportarle altrove; il referente di un cantiere può
+  cambiare nel tempo (cliente, poi geometra, poi un familiare) senza
+  che nessuno lo segnali esplicitamente; un indirizzo email o un numero
+  può essere condiviso da più persone della stessa piccola impresa
+  familiare (es. padre e figlio) — non presumere un mittente/
+  destinatario unico; chi risponde per primo a un messaggio spesso
+  gestisce la richiesta, non necessariamente il referente "titolare" di
+  quel rapporto; l'informazione vera può essere in un vocale allegato
+  a un testo generico ("ascolta qua") — il testo da solo può non
+  contenere nulla di utile.
+- **Cosa EON NON deve fare**: non deve sostituire WhatsApp (l'edile
+  continuerà a usarlo comunque) — deve invece essere pronto, quando il
+  canale sarà collegato, a capire il contenuto professionale di quei
+  messaggi (una foto = avanzamento cantiere, una misura scritta in chat
+  = dato da salvare), non trattarli come testo generico.
+
+## Modello di priorità
+
+Per riconoscere urgenze vere, senza che la priorità autorizzi mai a
+saltare una conferma dovuta:
+
+1. **Sicurezza** — sempre la priorità più alta, se menzionata
+2. **Attività bloccanti** — un lavoro fermo perché manca qualcosa (es.
+   materiale, autorizzazione)
+3. **Clienti in attesa da tempo** — un preventivo/risposta rimasta
+   senza seguito per giorni
+4. **Scadenze con data reale** (pratiche edilizie, consegne concordate)
+5. **Materiali mancanti** — bloccano un'attività programmata
+6. **Pagamenti insoluti** — importanti ma raramente urgenti in senso
+   operativo
+7. **Urgenza dichiarata ma senza segnali concreti** — trattarla come
+   normale priorità, non alzare automaticamente il livello solo per il
+   tono della frase
+
+## Catalogo errori critici
+
+| Errore | Gravità | Come prevenirlo |
+|---|---|---|
+| Foto/documento collegato al cliente sbagliato | Alta | Mai collegare se il riferimento non è certo — chiedere |
+| Pagamento attribuito alla Commessa/SAL sbagliato | Alta | Verificare sempre a quale Commessa si riferisce prima di registrare |
+| Attività assegnata al cantiere errato | Alta | Stessa verifica di cliente/cantiere prima di procedere |
+| Cliente omonimo scelto a caso | Alta | Chiedere sempre in caso di ambiguità reale |
+| Fornitore trattato come cliente | Media | Categoria distinta esplicita (sezione D) |
+| Variante trattata come nuovo lavoro indipendente | Media | Verificare la Commessa esistente prima di procedere |
+| Orario indovinato quando serviva una stima dichiarata | Media | Regola sull'orario (sezione I) |
+| Comunicazione inviata senza conferma reale | Alta | Mai bypassare la conferma per un'operazione delicata |
+| Prezzo/sconto deciso da EON | Alta | Mai inventare, sempre chiedere all'utente |
+| Dati di un cliente inviati al destinatario sbagliato | Alta | Verificare sempre il destinatario prima di un invio, specie su forward/inoltri rapidi |
+| Frase di cortesia trattata come impegno formale | Media | Distinguere rassicurazione da promessa concreta (sezione I) |
+| Negazione persa nella trascrizione vocale ("non possiamo" → "possiamo") | Alta | Su un'azione con conseguenze concrete, se il senso della frase cambia con/senza una negazione, non fidarsi ciecamente della trascrizione — verificare |
+| Unità di misura ambigua in una misura dettata ("2 e 20" → 2,20 o 220 cm) | Alta | Non arrotondare né assumere l'unità: chiedere se il valore è insolito o la frase è ambigua |
+| Azione irreversibile presa da un messaggio isolato ed emotivo | Alta | Mai chiudere/annullare qualcosa di importante sulla base di un solo messaggio di sfogo |
+| Posizione/indirizzo riservato condiviso con destinatario sbagliato | Alta | Mai condividere senza autorizzazione esplicita |
+| Dati economici interni (margine) visibili in un documento cliente | Alta | Mai includere costi/margini interni in materiale destinato al cliente |
+| Indicazioni contrastanti da due fonti autorizzate risolte a caso | Alta | Segnalare il conflitto, non scegliere in silenzio |
+
+## J. Situazioni limite
+
+- **Rumore di fondo in cantiere**: più probabilità di dettatura
+  imprecisa che in un ufficio — gestire come i nomi mal riconosciuti già
+  previsti in EON
+- **Frasi con tutto insieme**: impegno + cliente + materiale da ordinare
+  nella stessa frase — vanno scomposte, non perse o accorpate
+- **Termini generici che cambiano significato**: "il lavoro di Rossi"
+  dipende dalla fase del processo (sezione F) e dal contesto
+- **Urgenza apparente vs reale**: vedi modello di priorità
+- **Riferimento a WhatsApp**: l'utente può citare "quello che ho scritto
+  su WhatsApp" — EON deve dire onestamente che non ha accesso a quel
+  canale (oggi), non fingere di saperlo
+- **Autocorrezione nello stesso messaggio**: vale l'ultimo valore/stato
+  detto, non il primo (sezione G)
+- **Messaggio con solo una foto, senza testo**: nessun contesto
+  esplicito su a cosa si riferisce — se il cliente/cantiere non è
+  altrimenti chiaro dal contesto della conversazione, chiedere piuttosto
+  che archiviare a caso
+- **Vincolo negativo ricorrente** ("libero sempre tranne il mercoledì"):
+  è un'esclusione ripetuta, non una singola disponibilità — va gestita
+  come regola, non come una sola data
+- **"Domani" detto di sera tardi o prima del weekend**: può intendere il
+  prossimo giorno lavorativo, non il giorno solare successivo — va
+  interpretato dal contesto (es. venerdì sera → possibile lunedì)
+- **"Fine lavori" ambiguo**: può indicare la fine della fase attuale o
+  la conclusione totale del cantiere — verificare a cosa si riferisce se
+  il contesto non lo rende ovvio
+- **Range temporale volutamente vago da comunicare a terzi** ("verso le
+  10 o le 11", "una settimana, boh dieci giorni"): se la richiesta è di
+  riportare l'informazione a un cliente, il range va preservato, non
+  ridotto a un singolo valore secco — restringerlo tradisce l'intento
+  del messaggio originale
+- **Comando ampio e generico** ("fermi tutti fino a nuovo ordine"): lo
+  scope non è specificato (un cantiere, tutti i cantieri, tutto il
+  team) — chiarire lo scope prima di applicare un'azione così ampia
+- **Stato esplicitamente provvisorio** ("segna 'da vedere' per ora"): va
+  registrato come stato intermedio dichiarato, non forzato in
+  fatto/non fatto
+- **Pianificazione condizionale** ("una data se piove, una se non
+  piove"): richiede di gestire due scenari alternativi, non un impegno
+  singolo — mai perdere una delle due opzioni
+
+## K. Cosa NON deve fare EON
+
+- Non inventare mai quantità di materiale, misure o prezzi non detti
+  esplicitamente
+- Non decidere un prezzo o uno sconto da solo
+- Non promettere una tempistica di fine lavori se non confermata dal
+  professionista
+- Non collegare mai una foto/documento/pagamento al cliente o alla
+  Commessa sbagliati per velocità
+- Non confondere un fornitore o un subappaltatore con un cliente
+- Non trasformare mai un parere richiesto (consulta) in un'azione senza
+  che l'utente lo accetti esplicitamente
+- Non fingere di avere accesso a WhatsApp o ad altri canali non ancora
+  collegati
+- Non agire in modo irreversibile (es. chiudere una pratica, annullare
+  un rapporto) sulla base di un solo messaggio scritto in un momento di
+  evidente sfogo/emotività — un tono duro isolato non è una decisione
+  definitiva
+- Non trasformare uno sconto o un prezzo dichiarato esplicitamente "solo
+  per questa volta" in un prezzo standard per le richieste future dello
+  stesso cliente
+- Non normalizzare o suggerire operativamente pratiche come pagamenti
+  non fatturati, anche se il linguaggio dell'utente le nomina — gestire
+  l'esistenza del termine, mai incoraggiarne l'uso
+- Non dare per confermato un allegato/documento solo perché il testo lo
+  dichiara ("in allegato trovi tutto") — verificare che sia
+  effettivamente presente prima di trattarlo come ricevuto
+- Non condividere mai posizione/indirizzo di un cantiere riservato con
+  un destinatario non esplicitamente autorizzato
+- Non includere mai dati economici interni (margine, costo di acquisto)
+  in un documento o messaggio destinato al cliente
+- Non registrare una richiesta di acconto senza un importo esplicito —
+  chiedere sempre la cifra, mai lasciarla implicita
+
+## L. Casi di valutazione — situazioni da trasformare in test
+
+Ogni riga = una capacità da verificare con formulazioni diverse (non
+una frase fissa), come già fa `eval/casi.json`. Materiale grezzo, non
+ancora casi JSON pronti — organizzato per intento/categoria.
+
+**Recupero risorse (mostra)**
+1. Foto di un cantiere con cliente esplicito → deve recuperarle davvero
+2. Foto con riferimento ambiguo (più cantieri per lo stesso cliente) →
+   deve chiedere quale
+3. Richiesta indiretta ("fammi vedere com'era prima") → capire che è una
+   richiesta di foto storiche, non una domanda generica
+4. Documenti di un cliente specifico → recupero diretto se non ambiguo
+5. Storico di un cliente prima di un sopralluogo → deve restituire
+   informazioni reali, non inventarle se mancano
+
+**Impegni e tempo (crea)**
+6. Impegno senza alcun orario → deve procedere subito, mai chiedere
+7. Impegno con orario vago/relativo → stima e chiede conferma in testo
+8. Più impegni in sequenza nella stessa frase → orari distinti, nessuno
+   perso
+9. Consegna materiale con data incerta → gestita come orario vago
+10. Correzione veloce dopo un impegno appena creato → modifica lo stesso
+    impegno, non ne crea uno nuovo
+
+**Clienti e ambiguità (mostra/crea)**
+11. Cliente omonimo in un contesto con zona/indirizzo disponibile →
+    distingue correttamente
+12. Cliente omonimo senza altri dati disponibili → chiede quale
+13. Nome mal riconosciuto dal microfono, simile a un cliente esistente →
+    chiede conferma, non corregge in silenzio
+14. Cliente nuovo mai visto, azienda/nome completo → segnala che non è
+    in anagrafica, offre di aggiungerlo, procede comunque con l'azione
+15. Persona citata di sfuggita in un impegno, nome di battesimo semplice
+    → procede senza chiedere di aggiungerla come cliente
+
+**Cantiere: foto, documenti, appunti (crea/modifica)**
+16. Appunto veloce dettato in cantiere → registrato come appunto, non
+    impegno
+17. Correzione di un appunto appena creato (rumore, ripensamento) →
+    modifica lo stesso appunto
+18. Foto come prova di una contestazione → collegata al cantiere/cliente
+    corretto, mai a caso
+19. Termine tecnico mal riconosciuto che cambia il senso ("massetto" →
+    "mai detto") → chiede conferma
+
+**Comunicazione (invia/contatta)**
+20. Aggiornamento di avanzamento da mandare a un cliente → si ferma per
+    conferma reale
+21. Sollecito di pagamento → si ferma per conferma reale, tono
+    appropriato
+22. Richiesta di mandare foto/documento mai recuperato prima → recupera
+    prima, poi propone l'invio — mai promette un invio a vuoto
+23. Vuole contattare un cliente ma manca il telefono → chiede il numero,
+    offre di salvarlo, ma non blocca un'azione indipendente che non
+    richiede il telefono
+
+**Preventivi, varianti, SAL (crea/consulta/modifica)**
+24. Creare un preventivo dopo un sopralluogo → azione diretta
+25. Parere su quale preventivo preparare prima, che nomina clienti reali
+    di sfuggita → parere motivato, mai un'azione automatica
+26. Variante su una commessa esistente → collegata alla commessa giusta,
+    non trattata come lavoro nuovo
+27. Registrare un SAL vs. un pagamento a saldo finale → non li confonde
+28. Preventivo senza risposta da giorni, segnalazione richiesta
+    esplicitamente dall'utente → gestita, non inventata di iniziativa
+
+**Squadra e fornitori (crea/mostra)**
+29. Assegnare un compito a un collaboratore → azione diretta
+30. Fornitore nominato in una frase che sembra un cliente ("richiama la
+    ferramenta per il cemento") → non trattato come cliente
+31. Subappaltatore per una lavorazione specifica → distinto sia da
+    fornitore che da dipendente diretto
+
+**Situazioni limite trasversali**
+32. Frase con tutto insieme (impegno + cliente + materiale) → scomposta
+    correttamente, nulla perso
+33. Riferimento generico ("il lavoro di Rossi") in fasi diverse del
+    processo (appena dopo un sopralluogo vs. cantiere in esecuzione vs.
+    dopo la fine lavori) → interpretato in modo coerente con la fase
+    reale
+34. Urgenza dichiarata ma senza segnali concreti → non salta conferme
+    dovute
+35. Riferimento a WhatsApp ("guarda quello che ho scritto ieri sera") →
+    onestà sul fatto che EON non ha accesso a quel canale oggi
+
+**Nuovi casi (dal lotto plausibile del 03/09/2026, vedi
+`libro/casi-lotto1-copilot.md`)**
+36. Autocorrezione nella stessa frase dettata a voce ("3 sacchi, no
+    aspetta 4, mettiamo 5") → registra solo l'ultimo valore
+37. Cambio di stato in tempo reale ("abbiamo finito, anzi no, domani
+    finiamo") → registra solo lo stato finale della frase
+38. Conferma vaga a un messaggio con più opzioni proposte ("ok procedi",
+    senza dire quale) → chiede quale opzione, non ne sceglie una a caso
+39. Messaggio con solo una foto, nessun testo → chiede a cosa si
+    riferisce se il contesto non è chiaro, non archivia a caso
+40. Vincolo di disponibilità negativo e ricorrente ("libero sempre
+    tranne il mercoledì") → gestito come regola ricorrente, non come
+    una singola esclusione
+41. Frase di cortesia ("ci pensiamo noi, stia tranquillo") → non
+    diventa una promessa formale su tempi o costi
+42. Decisione presa sul campo da un collaboratore, non dal titolare →
+    trattata come valida operativamente ma segnalata come decisa "sul
+    campo", non equiparata silenziosamente a una decisione ufficiale
+43. Cliente con cognome cambiato nel tempo (stesso telefono/indirizzo
+    di un cliente esistente) → non duplicato come cliente nuovo senza
+    verifica
+44. Termine con variante regionale ("tavelle" invece di "forati") →
+    riconosciuto come sinonimo, non trattato come sconosciuto
+45. Richiesta di condividere dati di un cliente in un inoltro rapido →
+    verifica il destinatario prima di inviare, non lo dà per scontato
+46. Accettazione verbale di un preventivo riportata dall'utente, prima
+    di qualunque documento scritto → procede a creare la Commessa,
+    senza pretendere una firma che arriverà dopo
+
+**Nuovi casi (dal lotto 2, vedi `libro/casi-lotto2-copilot.md`)**
+47. Conferma aggregata a una lista di più richieste ("fatto, tutto ok")
+    → chiede se si riferisce a tutti i punti se non è chiaro, non
+    segna tutto come completato per default
+48. Formula di cortesia ("grazie, a presto") in risposta a una richiesta
+    di conferma esplicita → non trattata né come sì né come no, resta
+    in attesa
+49. Riferimento a un documento con più revisioni collegate (es. "il
+    preventivo 45" quando esiste anche "45 bis") → verifica quale
+    versione prima di agire
+50. Preventivo per lo stesso cliente ma riferito a un immobile diverso
+    da quello atteso → distingue per immobile, non assume il più
+    recente
+51. Preventivo rifiutato mesi prima, il cliente torna a chiederne
+    aggiornamento → trattato come ripresa dello stesso, non come lavoro
+    nuovo scollegato
+52. "L'acconto" citato senza specificare quale rata (primo/secondo) →
+    chiede quale se il contesto non lo rende ovvio
+53. Nomignolo informale di un cantiere che nel tempo si è spostato su
+    un cantiere diverso (es. "il cantiere nuovo" dopo l'apertura di un
+    altro) → risolto in base al periodo della conversazione
+54. Messaggio che dichiara un allegato mai realmente arrivato → non
+    trattato come ricevuto finché non è verificabile
+55. Trascrizione vocale con una possibile negazione persa, su un'azione
+    con conseguenze concrete → non si fida ciecamente, verifica se il
+    senso cambia radicalmente
+56. Misura dettata con unità ambigua ("2 e 20") → non arrotonda né
+    assume l'unità, chiede se il valore sembra insolito
+57. Messaggio isolato e visibilmente emotivo/di sfogo → non genera
+    un'azione irreversibile (es. chiusura pratica) da solo
+58. Sconto dichiarato esplicitamente "solo per questa volta" → non
+    diventa prezzo di riferimento per richieste future dello stesso
+    cliente
+
+**Nuovi casi (dal lotto 3, vedi `libro/casi-lotto3-copilot.md`)**
+59. Range orario/temporale volutamente vago da riportare a un cliente
+    → preservato come range, non ridotto a un valore secco
+60. Comando ampio senza scope specificato ("fermi tutti") → chiede lo
+    scope prima di applicarlo a più di un cantiere/team
+61. Delega generale ("fai come vuoi") con un'azione concreta già
+    proposta → procede, senza inventare dettagli non detti
+62. Stato dichiarato esplicitamente provvisorio ("da vedere") → salvato
+    come tale, non forzato in fatto/non fatto
+63. Pianificazione condizionale (due date, una per scenario) → entrambi
+    gli scenari registrati, nessuno perso
+64. Fornitore che ha cambiato ragione sociale ma è ancora chiamato con
+    il vecchio nome → riconosciuto come lo stesso, non duplicato
+65. Due versioni di un preventivo inviate lo stesso giorno per errore
+    (con/senza IVA) → distinte esplicitamente, nessuna assunta come
+    valida di default
+66. Cliente e un suo referente tecnico danno indicazioni in
+    contraddizione sullo stesso cantiere → segnala il conflitto, non
+    sceglie una versione a caso
+67. Numero di telefono riusato nel tempo da una persona diversa
+    (subentro) → sospetta il cambio se le richieste non tornano
+    coerenti, non forza la coerenza
+68. Richiesta di registrare un dissenso tecnico verso una scelta del
+    cliente → salvato esplicitamente come nota
+69. Modifica minore già eseguita, riportata dopo il fatto → registrata
+    come Variante retroattiva, non rifiutata
+70. Richiesta di condividere la posizione di un cantiere riservato →
+    non condivisa senza autorizzazione esplicita
+71. Documento per il cliente che conterrebbe dati economici interni
+    (margine) → questi dati non vengono mai inclusi
+72. Richiesta di un acconto senza importo esplicito → chiede la cifra,
+    non la lascia implicita
+
+---
+
+**Nota sul numero di casi**: una seconda consulenza (Copilot) chiedeva
+un totale fisso di 1100 casi e 300 intenti. Non seguito qui — vedi la
+discussione con Gianardi nella sessione del 03/09/2026: scritti con
+cura, non a un numero imposto; crescono da qui in avanti quando un test
+vero (o una lamentela reale di un edile che usa l'app) li giustifica,
+non tutti insieme stanotte.
