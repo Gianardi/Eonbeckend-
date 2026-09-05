@@ -1205,9 +1205,11 @@ solo sulla scrittura del libro.
    quel salvataggio (lo rilancia invece di ignorarlo) e passa la
    professione anche nei metadati di `signUp` (così il trigger
    `handle_new_user` la imposta già correttamente al primo inserimento,
-   non solo nell'update successivo). **Ancora da fare**: stesso
-   allargamento del vincolo su produzione — richiede conferma esplicita
-   di Gianardi prima di toccare produzione, non ancora data.
+   non solo nell'update successivo). **Stesso allargamento applicato
+   anche in produzione il 05/09/2026**, con conferma esplicita di
+   Gianardi ("facciamo quello che c'è da fare") — verificato che il
+   vincolo ora accetta anche `edile`/`idraulico` in entrambi gli
+   ambienti.
 2. **Scrivere i libri** delle altre 3 professioni di partenza —
    **Idraulico**, **Amministratore di condominio**, **Avvocato** — non
    ancora iniziati. Ora che l'architettura a Pack esiste davvero, ognuno
