@@ -1902,13 +1902,13 @@
             <div class="ob-card-sub">Interventi, impianti, manutenzioni</div>
           </div>
         </div>
-        <div class="ob-card" data-profession="elettricista">
+        <div class="ob-card" data-profession="avvocato">
           <div class="ob-card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </div>
           <div class="ob-card-body">
-            <div class="ob-card-title">Elettricista</div>
-            <div class="ob-card-sub">Impianti, quadri, certificazioni</div>
+            <div class="ob-card-title">Avvocato</div>
+            <div class="ob-card-sub">Pratiche, udienze, scadenze</div>
           </div>
         </div>
         <div class="ob-card" data-profession="amministratore">
@@ -9880,16 +9880,19 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
 
       const { data, error } = await supabaseClient.auth.signUp({
         email, password,
-        options: { data: { full_name: name } }
+        options: { data: { full_name: name, profession: obSelectedProfession } }
       });
       if(error) throw error;
       currentSession = data.session;
 
       // Aggiorna il profilo creato automaticamente con professione e nome attività
+      // (il trigger di creazione lo popola già dai metadati sopra, ma qui
+      // aggiungiamo anche business_name e ribadiamo profession per sicurezza)
       if(data.user){
-        await supabaseClient.from("profiles").update({
+        const { error: profErr } = await supabaseClient.from("profiles").update({
           full_name: name, business_name: businessName, profession: obSelectedProfession
         }).eq("id", data.user.id);
+        if(profErr) throw profErr;
 
         // Prepara i dati iniziali veri nel database (le stesse informazioni
         // che vedevi in demo, ma stavolta scritte davvero, sue e sue soltanto)

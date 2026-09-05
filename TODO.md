@@ -1026,11 +1026,12 @@ non come testo grezzo.
    professionisti.
 2. **Capitoli specifici per professione**, solo ciò che è davvero
    specifico (ontologia, linguaggio, scenari di mestiere) — **Edile**
-   già fatto; poi **Amministratore di condominio**, **Elettricista**,
-   **Avvocato** (4 professioni scelte da Gianardi il 03/09/2026; nota:
-   sostituisce l'Idraulico nell'elenco delle 4 professioni
-   dell'onboarding app usato finora in questo documento — da
-   riconciliare quando si arriva a scriverli).
+   già fatto. **Elenco finale delle 4 professioni di partenza,
+   confermato da Gianardi il 05/09/2026 (sostituisce ogni versione
+   precedente, incluso il cambio del 03/09/2026 sotto)**: **Edile**,
+   **Idraulico**, **Amministratore di condominio**, **Avvocato**.
+   L'Elettricista, presente nell'onboarding fino ad oggi, non è più fra
+   le prime 4 — rimosso anche dalle card di iscrizione (vedi sotto).
 3. **Insegnare a EON BRAIN**: estrarre i principi generali dallo strato
    comune + capitoli professione, aggiungerli al prompt di sistema.
 4. **Testing**: verificare i principi con `eval/live-check.js` contro
@@ -1171,18 +1172,56 @@ solo sulla scrittura del libro.
    `professionData.artigiano` già esistente (già generico/misto),
    nessuna nuova voce di dati serviva. Verificato con `node --check
    api/index.js`, `node eval/backend.test.js` (18/18) e un controllo
-   di sintassi dello script inline di `index.html`. **Non ancora
-   testato dal vivo su staging**: da fare, sia con un utente
-   `profession: "artigiano"` (il glossario edile non deve influenzare
-   il comportamento) sia rilanciando `edile-01/02/03` con
-   `profession: "edile"` per confermare che il pack funzioni davvero
-   quando attivo.
-2. **Scrivere i libri** delle altre 3 professioni — **Amministratore
-   di condominio**, **Elettricista**, **Avvocato** — non ancora
-   iniziati. Ora che l'architettura a Pack esiste davvero, ognuno
+   di sintassi dello script inline di `index.html`. **Testato dal vivo
+   su staging il 05/09/2026**: con `profession: "artigiano"` (pack
+   spento), `edile-02`/`edile-03` passano comunque (la conoscenza
+   generale del modello e lo strato comune bastano), `edile-01` è
+   corretto nella sostanza (il fornitore non viene mai cercato/creato
+   come cliente, `focus.tipo: "fornitore"`) ma il controllo automatico
+   segna FAIL perché "richiama" attiva la regola preesistente
+   sull'operazione "contatta" (si ferma onestamente con
+   `capacita_non_disponibile` invece di creare subito un impegno) — non
+   un bug, un test scritto in modo troppo rigido. Con `profession:
+   "edile"` (pack acceso), tutti e 3 passano, incluso `edile-01`
+   nell'automatico. Pack confermato funzionante e collegato.
+
+   **Bug reale trovato durante questo test, non legato al pack**: il
+   vincolo del database su `profiles.profession` accettava solo
+   `artigiano, amministratore, avvocato, consulente` — **non**
+   `edile`/`idraulico`, cioè due dei quattro mestieri offerti
+   dall'iscrizione. Chi si fosse iscritto scegliendo Edile o Idraulico
+   sarebbe silenziosamente rimasto "artigiano" (il salvataggio falliva,
+   ma `index.html` non controllava l'errore di quella chiamata). Mai
+   emerso prima perché i soli utenti reali finora (2 in produzione, 1 di
+   prova in staging) sono tutti "artigiano". **Corretto lo stesso
+   giorno**: vincolo allargato su staging (ora accetta anche
+   `edile`/`idraulico`); `index.html` ora controlla davvero l'errore di
+   quel salvataggio (lo rilancia invece di ignorarlo) e passa la
+   professione anche nei metadati di `signUp` (così il trigger
+   `handle_new_user` la imposta già correttamente al primo inserimento,
+   non solo nell'update successivo). **Ancora da fare**: stesso
+   allargamento del vincolo su produzione — richiede conferma esplicita
+   di Gianardi prima di toccare produzione, non ancora data.
+2. **Scrivere i libri** delle altre 3 professioni di partenza —
+   **Idraulico**, **Amministratore di condominio**, **Avvocato** — non
+   ancora iniziati. Ora che l'architettura a Pack esiste davvero, ognuno
    diventerà una propria `promptPackXxx()`, non altro testo nello
    strato comune.
 3. **Insegnarli a EON** una volta scritti, stesso metodo.
+
+**Posizionamento di EON, chiarito da Gianardi il 05/09/2026 (da
+ricordare sempre, riguarda l'intero progetto non solo l'edile)**: EON
+non è pensato solo per artigiani/professionisti con un mestiere
+specifico — è per **chiunque voglia organizzare la propria giornata e
+aumentare la produttività**, mestiere o no. Per questo esiste un
+livello generale (BRAIN CORE + strato comune, `libro/comune.md`, già
+scritto) valido per chiunque usi EON — la card di iscrizione "Altro /
+Generico" (`data-profession="artigiano"`, aggiunta oggi) è la porta
+d'ingresso a questo livello generale, non un ripiego per chi non trova
+la propria professione. Sopra a questo, per chi ha davvero un mestiere
+specifico, ci sono i Professional Brain Pack (edile fatto, altri tre in
+arrivo — vedi sopra). `libro/professional-brain-pack-metodo.md`
+aggiornato con questa distinzione esplicita.
 
 **Strato comune, prima bozza (04/09/2026)**: `libro/comune.md` creato
 da zero (senza guardare `libro/edile.md`), usando il lotto di 50 casi

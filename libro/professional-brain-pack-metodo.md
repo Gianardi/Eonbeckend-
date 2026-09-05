@@ -8,6 +8,36 @@ che l'assistente deve adottare. Il primo Pack è quello della categoria
 EDILE (`libro/edile.md`). Claude Code produce la prima bozza; viene poi
 revisionata e perfezionata con esperienza reale, casi d'uso e test.
 
+## 0. Posizionamento di EON (chiarito da Gianardi il 05/09/2026)
+
+EON non è pensato solo per chi ha un mestiere/professione specifico —
+è per **chiunque voglia organizzare la propria giornata e aumentare la
+produttività**. Da questo derivano due livelli distinti, entrambi
+necessari, mai in alternativa:
+
+- **Livello generale (BRAIN CORE + strato comune)** — valido per
+  chiunque usi EON, mestiere o no: come comportarsi con impegni,
+  clienti/contatti, comunicazioni, dati sensibili, correzioni,
+  ambiguità. Scritto in `libro/comune.md`, insegnato a EON come parte
+  sempre presente del prompt di sistema (`systemPromptAssistente()` in
+  `api/index.js`). In fase di iscrizione corrisponde alla card "Altro /
+  Generico" (`data-profession="artigiano"`) — non è un ripiego per chi
+  non trova la propria professione, è la porta d'ingresso naturale a
+  questo livello per chiunque non abbia (ancora) un Pack dedicato.
+- **Livello specifico (Professional Brain Pack)** — sopra al livello
+  generale, solo per chi ha scelto una professione con un Pack dedicato
+  in fase di iscrizione: vocabolario, oggetti e processi di quel
+  mestiere. Aggiunto al prompt SOLO per chi ha scelto quella
+  professione (`promptPackEdile()` e simili in `api/index.js`), mai per
+  tutti — un idraulico non deve portarsi dietro il glossario edile.
+
+**Le 4 professioni di partenza con un Pack dedicato, elenco finale
+confermato da Gianardi il 05/09/2026** (sostituisce ogni versione
+precedente discussa in `TODO.md`): **Edile** (fatto), **Idraulico**,
+**Amministratore di condominio**, **Avvocato**. In futuro se ne
+aggiungeranno altre — l'architettura a Pack è pensata apposta per
+crescere senza mai toccare il livello generale.
+
 ## 1. Principio fondamentale
 
 Il Professional Brain Pack NON è un manuale da dare passivamente al
