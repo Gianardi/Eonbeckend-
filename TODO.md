@@ -1257,10 +1257,39 @@ qui in avanti non è più "insegna quello che il prompt può fare oggi, e
 segnala i limiti strutturali per dopo" — è "insegna la conoscenza
 generale, e se durante l'insegnamento emerge la necessità di una
 funzione nuova, la si costruisce subito, poi si continua a insegnare
-sopra quella base". Primo limite strutturale reale da affrontare così:
-**il concetto di "Cantiere" distinto dal "Cliente"** (foto/documenti/
-pagamenti oggi si collegano solo al cliente, non a un cantiere/lavoro
-specifico — vedi nota sopra, Gruppo 3).
+sopra quella base".
+
+**Concetto di "Cantiere" — fatto (05/09/2026).** Primo limite
+strutturale reale, affrontato subito invece di essere solo segnalato.
+Scelta con Gianardi la **versione leggera** (non l'intera ontologia del
+libro Sopralluogo/Preventivo/Commessa/SAL/Garanzia — troppo lavoro e
+alcune di quelle funzioni non esistono ancora nell'app): un Cantiere è
+solo un'etichetta di lavoro collegata a un cliente.
+
+- Nuova tabella `cantieri` (`supabase/cantieri_entita_schema.sql`):
+  client_id, nome, stato aperto/chiuso. Applicata su staging.
+- `cantiere_foto.cantiere_id` (nullable, additivo — `client_id` resta
+  per il caso comune di un solo lavoro, non serve mai toccarlo).
+- Due nuovi strumenti: `cerca_cantiere` (elenca i lavori di un
+  cliente), `crea_cantiere` (ne registra uno nuovo con un nome che lo
+  distingua). `recupera_foto_cantiere` accetta ora anche `cantiere_id`.
+- Insegnato nello strato comune: verificare i cantieri solo quando è
+  plausibile che un cliente ne abbia più di uno (mai per il caso
+  comune, per non aggiungere frizione inutile).
+- **Verificato dal vivo su staging il 05/09/2026: 3 casi su 3
+  corretti** (`brain-comune-20/21/22`, 66 totali) — incluso il caso più
+  delicato: cliente con due cantieri ("Bagno"/"Tetto"), EON ha cercato
+  i cantieri, riconosciuto "tetto" dal testo dell'utente, mostrato solo
+  la foto di quel cantiere.
+- Corretta anche una piccola disciplina mancata: `eval/check-schema.js`
+  non aveva mai registrato la tabella `incomes` (aggiunta ieri) —
+  sistemato insieme al resto.
+- **Ancora da fare**: applicare la stessa migrazione anche in
+  produzione — richiede conferma esplicita di Gianardi, non ancora
+  data. Restano fuori scope per questa versione leggera: `incomes`
+  (pagamenti) e `cantiere_appunti`/`cantiere_documenti` non hanno
+  ancora un collegamento a `cantiere_id` — da valutare se servirà
+  quando/se emergerà un caso reale.
 
 **Gruppo 3 edile (05/09/2026): collegamento certo di foto/documenti/
 pagamenti al cliente/cantiere giusto.** Audit di `libro/edile.md`
