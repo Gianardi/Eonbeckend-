@@ -1183,7 +1183,13 @@ solo sulla scrittura del libro.
    `capacita_non_disponibile` invece di creare subito un impegno) — non
    un bug, un test scritto in modo troppo rigido. Con `profession:
    "edile"` (pack acceso), tutti e 3 passano, incluso `edile-01`
-   nell'automatico. Pack confermato funzionante e collegato.
+   nell'automatico. Pack confermato funzionante e collegato. (Nota per
+   chi rilancia questi casi in futuro: `edile-03` modifica per davvero
+   il cliente — dopo un primo lancio riuscito "Laura Rossi" diventa
+   "Laura Verdi", quindi un secondo lancio senza reseed non ritrova più
+   "Laura Rossi" e chiede conferma invece di fallire — comportamento
+   corretto, non un bug, ma va ri-seedato il cliente prima di ogni
+   nuovo lancio pulito.)
 
    **Bug reale trovato durante questo test, non legato al pack**: il
    vincolo del database su `profiles.profession` accettava solo

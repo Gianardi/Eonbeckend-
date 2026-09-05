@@ -1873,14 +1873,49 @@
 <div class="onboarding" id="onboardingScreen">
   <div class="onboarding-inner">
 
-    <!-- STEP 1: EON + scelta professione -->
-    <div class="ob-step visible" id="obStep1">
+    <!-- STEP 0: EON + scelta tra professione specifica o uso generico -->
+    <div class="ob-step visible" id="obStep0">
       <div class="ob-brand">
         <span>E</span>
         <span class="ob-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span>N</span>
       </div>
       <div class="ob-tagline">L'assistente che organizza la giornata di chi ha una professione o un'impresa.</div>
+
+      <div class="ob-label">Come vuoi usare EON?</div>
+      <div class="ob-cards" id="obTypeCards" style="grid-template-columns:1fr;">
+        <div class="ob-card" data-type="professioni">
+          <div class="ob-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg>
+          </div>
+          <div class="ob-card-body">
+            <div class="ob-card-title">Artigiani e Professioni</div>
+            <div class="ob-card-sub">Edile, Idraulico, Avvocato, Amministratore di Condominio</div>
+          </div>
+        </div>
+        <div class="ob-card" data-type="generico">
+          <div class="ob-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <div class="ob-card-body">
+            <div class="ob-card-title">Organizza la giornata e aumenta la produttività</div>
+            <div class="ob-card-sub">Piano Free</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="primary-btn ob-continue-btn" id="obType0ContinueBtn" disabled>
+        Continua
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- STEP 1: scelta professione specifica -->
+    <div class="ob-step" id="obStep1">
+      <button class="ob-back" id="obBackBtn0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Indietro
+      </button>
 
       <div class="ob-label">Che lavoro fai?</div>
       <div class="ob-cards" id="obProfessionCards">
@@ -1918,15 +1953,6 @@
           <div class="ob-card-body">
             <div class="ob-card-title">Amministratore di Condominio</div>
             <div class="ob-card-sub">Condomìni, assemblee, incarichi</div>
-          </div>
-        </div>
-        <div class="ob-card" data-profession="artigiano">
-          <div class="ob-card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-          </div>
-          <div class="ob-card-body">
-            <div class="ob-card-title">Altro / Generico</div>
-            <div class="ob-card-sub">Organizza la giornata, clienti e appuntamenti</div>
           </div>
         </div>
       </div>
@@ -9800,11 +9826,40 @@ async function loadProfession(){
 
 /* ============ ONBOARDING ============ */
 let obSelectedProfession = null;
+/* "professioni" (passa dallo step1 a scegliere un mestiere specifico) o
+   "generico" (salta direttamente allo step2 con profession "artigiano") —
+   serve solo per sapere dove torna il tasto Indietro dello step2. */
+let obSelectedType = null;
+
+document.getElementById("obTypeCards").addEventListener("click", (e) => {
+  const card = e.target.closest(".ob-card");
+  if(!card) return;
+  document.querySelectorAll("#obTypeCards .ob-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  obSelectedType = card.dataset.type;
+  document.getElementById("obType0ContinueBtn").disabled = false;
+});
+
+document.getElementById("obType0ContinueBtn").addEventListener("click", () => {
+  if(!obSelectedType) return;
+  document.getElementById("obStep0").classList.remove("visible");
+  if(obSelectedType === "generico"){
+    obSelectedProfession = "artigiano";
+    document.getElementById("obStep2").classList.add("visible");
+  } else {
+    document.getElementById("obStep1").classList.add("visible");
+  }
+});
+
+document.getElementById("obBackBtn0").addEventListener("click", () => {
+  document.getElementById("obStep1").classList.remove("visible");
+  document.getElementById("obStep0").classList.add("visible");
+});
 
 document.getElementById("obProfessionCards").addEventListener("click", (e) => {
   const card = e.target.closest(".ob-card");
   if(!card) return;
-  document.querySelectorAll(".ob-card").forEach(c => c.classList.remove("selected"));
+  document.querySelectorAll("#obProfessionCards .ob-card").forEach(c => c.classList.remove("selected"));
   card.classList.add("selected");
   obSelectedProfession = card.dataset.profession;
   document.getElementById("obContinueBtn").disabled = false;
@@ -9818,7 +9873,11 @@ document.getElementById("obContinueBtn").addEventListener("click", () => {
 
 document.getElementById("obBackBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.remove("visible");
-  document.getElementById("obStep1").classList.add("visible");
+  if(obSelectedType === "generico"){
+    document.getElementById("obStep0").classList.add("visible");
+  } else {
+    document.getElementById("obStep1").classList.add("visible");
+  }
 });
 
 /* Toggle tra "Crea account" e "Ho già un account" */
