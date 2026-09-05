@@ -729,6 +729,42 @@
       }
     },
     {
+      "id": "brain-comune-20",
+      "categoria": "Strato comune — cliente con un solo lavoro, nessuna verifica cantiere necessaria",
+      "situazione": "Il caso comune: un cliente ha un solo lavoro, quindi non serve controllare i cantieri prima di recuperare le foto",
+      "input": "Mandami le foto del cantiere di Marco Bianchi",
+      "atteso": {
+        "tipo": "risorsa",
+        "strumenti_attesi": ["recupera_foto_cantiere"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare direttamente recupera_foto_cantiere, SENZA cerca_cantiere — Marco Bianchi ha un solo lavoro, la verifica dei cantieri serve solo quando è plausibile che ce ne sia più di uno"
+      }
+    },
+    {
+      "id": "brain-comune-21",
+      "categoria": "Strato comune — cliente con più lavori, foto da collegare al cantiere giusto",
+      "situazione": "Un cliente ha più di un cantiere in corso — le foto vanno collegate a quello giusto, non scelte a caso",
+      "precondizione": "Il cliente 'Bianchi' deve avere almeno due cantieri registrati in tabella cantieri (es. 'Bagno' e 'Tetto')",
+      "input": "Mandami le foto del cantiere nuovo di Bianchi, quello del tetto",
+      "atteso": {
+        "tipo": "risorsa",
+        "verifica": "manuale",
+        "controllo": "deve usare cerca_cantiere per trovare i lavori di Bianchi e, riconoscendo 'tetto' tra i nomi restituiti, chiamare recupera_foto_cantiere con il cantiere_id giusto — non deve mostrare a caso le foto di un altro cantiere dello stesso cliente"
+      }
+    },
+    {
+      "id": "brain-comune-22",
+      "categoria": "Strato comune — nuovo cantiere per un cliente che ne ha già un altro",
+      "situazione": "L'utente segnala esplicitamente un nuovo lavoro per un cliente esistente — va registrato come cantiere distinto, non confuso con quello già in corso",
+      "input": "Apri un nuovo cantiere per Bianchi, questa volta è il garage",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_cantiere"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare crea_cantiere con il cliente Bianchi e un nome che richiami 'garage' — non deve confonderlo con un cantiere già esistente dello stesso cliente"
+      }
+    },
+    {
       "id": "edile-01",
       "categoria": "Edile — fornitore mai trattato come cliente",
       "situazione": "Un fornitore nominato in una frase che potrebbe sembrare un impegno con una persona — non deve mai essere cercato/creato in anagrafica clienti",

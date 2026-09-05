@@ -1576,7 +1576,10 @@ const TOOLS = {
      risorsa vera da mostrare. Se le foto sono taggate a un cliente
      preciso (client_id, opzionale su questa tabella) e quel cliente è
      già stato risolto da interpreta_richiesta, passa il suo id per
-     filtrare solo le sue; altrimenti restituisce le più recenti. */
+     filtrare solo le sue; altrimenti restituisce le più recenti.
+     cantiere_id (05/09/2026) è un affinamento ulteriore, mai
+     obbligatorio: solo quando un cliente ha più lavori distinti (vedi
+     cerca_cantiere) e serve isolare le foto di uno specifico. */
   recupera_foto_cantiere: {
     risk: "read",
     categoria: "risorsa",
@@ -1587,18 +1590,80 @@ const TOOLS = {
         type: "object",
         properties: {
           cliente_id: { type: "string", description: "Id del cliente a cui sono taggate le foto cercate, se noto (di solito da cliente_risolto in interpreta_richiesta). Lascia vuoto per le foto più recenti in generale." },
+          cantiere_id: { type: "string", description: "Id del cantiere/lavoro specifico, se noto (da cerca_cantiere) — usalo solo quando il cliente ha più di un lavoro e serve isolare le foto di uno in particolare, non per il caso comune di un solo lavoro" },
           limite: { type: "integer", description: "Quante foto restituire, default 10" },
         },
       },
     },
     async run(input, ctx) {
       if (eStringaNonVuota(input.cliente_id) && !eUuid(input.cliente_id)) throw fail("Id cliente non valido");
+      if (eStringaNonVuota(input.cantiere_id) && !eUuid(input.cantiere_id)) throw fail("Id cantiere non valido");
       const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
-      let query = `cantiere_foto?select=id,url,client_id,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
-      if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
+      let query = `cantiere_foto?select=id,url,client_id,cantiere_id,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
+      if (eStringaNonVuota(input.cantiere_id)) query += `&cantiere_id=eq.${encodeURIComponent(input.cantiere_id)}`;
+      else if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
       const righe = await db(query, { method: "GET" }, ctx.accessToken);
       const lista = Array.isArray(righe) ? righe : [];
       return { foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at })) };
+    },
+  },
+
+  /* EON BRAIN, 05/09/2026: un cliente può avere più lavori/cantieri nel
+     tempo (raro ma reale, vedi libro/edile.md) — questo strumento
+     elenca quelli di un cliente per disambiguare, sullo stesso
+     principio di cliente_risolto: se ne trova più di uno, il chiamante
+     (il prompt di sistema) deve chiedere quale, mai sceglierne uno a
+     caso. */
+  cerca_cantiere: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "cerca_cantiere",
+      description: "Elenca i cantieri/lavori già registrati per un cliente. Usalo quando un cliente potrebbe avere più di un lavoro in corso e serve capire a quale si riferisce l'utente, prima di collegare una foto o un pagamento al cantiere giusto.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente di cui elencare i cantieri" },
+        },
+        required: ["cliente_id"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente_id) || !eUuid(input.cliente_id)) throw fail("Id cliente mancante o non valido");
+      const righe = await db(
+        `cantieri?select=id,nome,stato,created_at&client_id=eq.${encodeURIComponent(input.cliente_id)}&deleted_at=is.null&order=created_at.desc`,
+        { method: "GET" }, ctx.accessToken
+      );
+      const lista = Array.isArray(righe) ? righe : [];
+      return { cantieri: lista.map((c) => ({ id: c.id, nome: c.nome, stato: c.stato })) };
+    },
+  },
+
+  crea_cantiere: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "crea_cantiere",
+      description: "Registra un nuovo cantiere/lavoro per un cliente, con un nome breve che lo distingua (es. 'Bagno', 'Tetto', 'Ristrutturazione cucina'). Usalo quando l'utente segnala esplicitamente un nuovo lavoro per un cliente che ne ha già un altro, o chiede di tenerli distinti — non per il caso comune di un cliente con un solo lavoro, dove non serve creare nulla.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente a cui appartiene il cantiere" },
+          nome: { type: "string", description: "Nome breve che distingue questo lavoro dagli altri dello stesso cliente" },
+        },
+        required: ["cliente_id", "nome"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente_id) || !eUuid(input.cliente_id)) throw fail("Id cliente mancante o non valido");
+      if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      const creati = await db(
+        "cantieri",
+        { method: "POST", body: JSON.stringify({ owner_id: ctx.user.id, client_id: input.cliente_id, nome: input.nome.trim() }), headers: { Prefer: "return=representation" } },
+        ctx.accessToken
+      );
+      const c = Array.isArray(creati) ? creati[0] : creati;
+      return { id: c.id, nome: c.nome };
     },
   },
 
@@ -1963,6 +2028,8 @@ Non condividere mai la posizione o l'indirizzo di un luogo riservato (es. un can
 Non dare mai per ricevuto un allegato o un documento solo perché il testo lo dichiara (es. "in allegato trovi tutto"): verifica che sia davvero presente (con lo strumento giusto per recuperarlo) prima di trattarlo come ricevuto. Una formula di cortesia che non risponde davvero a una domanda che aspettava un sì/no (es. "grazie, a presto" dopo che avevi chiesto conferma di qualcosa) non va trattata né come accettazione né come rifiuto: resta in sospeso, puoi chiederlo di nuovo in modo diretto. Se l'utente fa riferimento a un canale che EON non ha ancora (es. WhatsApp: "guarda quello che ho scritto ieri sera"), dillo onestamente con capacita_non_disponibile — non fingere mai di avere accesso a informazioni che non hai.
 
 Se l'utente chiede di vedere una risorsa in modo indiretto (es. "fammi vedere com'era prima", "a che punto eravamo rimasti"), trattala come una richiesta reale di foto/documenti storici — usa recupera_foto_cantiere o recupera_documenti_cliente esattamente come per una richiesta esplicita, non come una domanda generica da rispondere solo a parole. Se invece l'utente segnala una regola di disponibilità negativa e ricorrente (es. "sono sempre libero tranne il mercoledì"), registrala con crea_appunto così da poterne tenere conto nelle prossime richieste — è una regola da ricordare, non una singola esclusione isolata.
+
+Un cliente ha quasi sempre un solo lavoro/cantiere alla volta: per il caso comune non serve controllare nulla, procedi normalmente. Solo quando è plausibile che un cliente ne abbia più di uno (es. lo sai già da una richiesta precedente, o l'utente stesso lo lascia intendere, es. "quello nuovo", "l'altro lavoro"), usa cerca_cantiere prima di collegare una foto a un cliente con recupera_foto_cantiere: se trova più di un cantiere, chiedi quale esattamente come faresti con un cliente ambiguo, mai a caso; se ne trova uno solo o nessuno, procedi senza fermarti. Se l'utente segnala esplicitamente un nuovo lavoro per un cliente che ne ha già un altro (es. "apri un nuovo cantiere per Rossi, stavolta il tetto"), usa crea_cantiere con un nome breve che lo distingua chiaramente dagli altri.
 
 Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici.`;
 
