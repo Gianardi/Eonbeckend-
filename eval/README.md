@@ -97,6 +97,11 @@ che lo script trovi certi dati già in anagrafica, e molti altri casi
 scrivono davvero (creano impegni, appunti, a volte chiedono conferma
 per azioni delicate) — non è un ambiente "a vuoto" che non tocca nulla.
 
+Per rilanciare solo alcuni casi invece dell'intera suite (es. dopo aver
+aggiunto dati di precondizione per un gruppo specifico, o per risparmiare
+credito/tempo), aggiungere `EVAL_SOLO=id1,id2,id3` con gli id separati
+da virgola, senza spazi.
+
 Tra una richiesta e l'altra c'è una pausa (`EVAL_DELAY_MS`, default 3
 secondi) e un ritentativo automatico su un sovraccarico momentaneo di
 Anthropic (529): senza, la prima esecuzione reale ha sbattuto contro il
