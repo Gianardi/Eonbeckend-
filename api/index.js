@@ -1260,7 +1260,23 @@ const TOOLS = {
         if (nomiDistinti.length > 1) {
           throw fail(`Più clienti diversi hanno un incasso in sospeso che corrisponde a "${nome}": ${nomiDistinti.join(", ")}. Chiedi all'utente a quale di questi si riferisce prima di registrare il pagamento.`);
         }
-        const record = esistenti[0];
+        /* Stesso cliente ma più di un incasso in sospeso (es. due
+           acconti distinti): mai scegliere alla cieca quello con la
+           scadenza più vicina (era il bug prima di questa correzione,
+           trovato testando brain-comune-23) — solo se l'importo dato
+           corrisponde a uno solo dei candidati lo usiamo per scegliere,
+           altrimenti è un'ambiguità vera quanto quella tra clienti
+           diversi sopra. */
+        let record = esistenti[0];
+        if (esistenti.length > 1) {
+          const corrispondenti = eNumero(input.importo) ? esistenti.filter((r) => Number(r.amount) === Number(input.importo)) : [];
+          if (corrispondenti.length === 1) {
+            record = corrispondenti[0];
+          } else {
+            const opzioni = esistenti.map((r) => `${r.description || "senza descrizione"} (${r.amount} euro)`).join("; ");
+            throw fail(`"${nome}" ha più di un incasso in sospeso: ${opzioni}. Chiedi all'utente a quale di questi si riferisce prima di registrare il pagamento — non scegliere quello con la scadenza più vicina per default.`);
+          }
+        }
         const patch = { status: "incassato" };
         if (eNumero(input.importo)) patch.amount = input.importo;
         if (eStringaNonVuota(input.descrizione)) patch.description = input.descrizione.trim();
