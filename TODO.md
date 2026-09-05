@@ -1207,3 +1207,20 @@ pulita" — non un elenco chiuso, si riempie mano a mano che si individuano
 cose da sistemare durante l'uso reale dell'app.
 
 Richiesto da Gianardi il 31/08/2026.
+
+**05/09/2026 — pulizia e sistemazione grafica generale dell'app.**
+Gianardi vuole rivedere le tante card/cartelle nell'area con Registro
+AI, Pagamenti, ecc. ed eliminare quelle che non servono più.
+
+**05/09/2026 — interfaccia per i pagamenti (chi ha pagato/non ha
+pagato).** Idea di Gianardi: non solo lo strumento AI (mostra_incassi/
+segna_incasso_ricevuto, già fatto e testato il 05/09 — vedi sopra), ma
+anche una parte visiva:
+- I pagamenti/incassi creano sempre un impegno (come gli altri), ma
+  colorato in modo diverso per distinguerli a colpo d'occhio dagli
+  impegni generali
+- Una card dedicata nel menu, da mettere SOPRA quella di "Registro AI"
+  (nell'area con tante card, tra cui anche quella dei pagamenti)
+
+Da fare in una sessione dedicata al lavoro grafico/UI, separata da
+quella sul "cervello" di EON — sono due tipi di lavoro diversi.
