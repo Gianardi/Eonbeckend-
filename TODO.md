@@ -1217,6 +1217,37 @@ solo sulla scrittura del libro.
    strato comune.
 3. **Insegnarli a EON** una volta scritti, stesso metodo.
 
+**Gruppo 3 edile (05/09/2026): collegamento certo di foto/documenti/
+pagamenti al cliente/cantiere giusto.** Audit di `libro/edile.md`
+(sezioni C/I/K, "Catalogo errori critici"): la maggior parte è già
+coperta dallo strato comune esistente (`cliente_risolto` di
+`interpreta_richiesta` — trovato/simile/ambiguo/non_trovato — usato
+anche da `recupera_foto_cantiere`/`recupera_documenti_cliente`).
+**Trovato però un bug reale**, non teorico: `segna_incasso_ricevuto`
+(lo strumento pagamenti di ieri) NON passa da quella logica di
+sicurezza — cerca l'incasso per nome con un confronto approssimativo e
+`limit:1`, prendendo sempre il primo risultato anche quando altri
+clienti diversi corrispondevano allo stesso nome parziale. Rischio
+concreto: segnare come pagato il cliente sbagliato — l'errore più
+grave del catalogo del libro. **Corretto**: ora recupera più righe e,
+se corrispondono a più `client_name` diversi, si ferma con un errore
+esplicito invece di scegliere alla cieca; Claude lo riceve come
+tool_result di errore e deve chiedere conferma in testo. Nuovo caso
+`brain-pagamenti-03` (53 casi totali) — **verificato dal vivo su
+staging il 05/09/2026**: con due incassi in sospeso di "Colombo Andrea"
+e "Colombo Costruzioni", EON ha correttamente elencato entrambi e
+chiesto quale, senza registrare il pagamento su nessuno dei due.
+
+**Nota per il futuro**: il libro modella un'ontologia più ricca
+(Cliente → uno o più Cantiere → Commessa), ma lo schema reale collega
+foto/documenti/pagamenti solo a un `client_id`/`client_name`, non a un
+Cantiere distinto — in pratica oggi "collegare al cantiere giusto"
+significa "collegare al cliente giusto". Se un cliente avesse davvero
+più cantieri attivi insieme servirebbe una colonna nuova (fuori scope
+per una semplice correzione di prompt/tool) — non è un problema oggi
+perché il libro stesso nota che è raro avere più di un cantiere attivo
+per cliente, ma va tenuto a mente se emergerà nell'uso reale.
+
 **Posizionamento di EON, chiarito da Gianardi il 05/09/2026 (da
 ricordare sempre, riguarda l'intero progetto non solo l'edile)**: EON
 non è pensato solo per artigiani/professionisti con un mestiere
