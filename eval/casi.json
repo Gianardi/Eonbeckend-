@@ -765,6 +765,54 @@
       }
     },
     {
+      "id": "brain-comune-23",
+      "categoria": "Strato comune — acconto senza specificare a quale rata si riferisce",
+      "situazione": "Un cliente ha già più di un acconto in sospeso — non va assunto a caso quale dei due è stato pagato",
+      "precondizione": "Il cliente 'Marco Bianchi' deve avere almeno due incassi in sospeso (es. 'Acconto 1' e 'Acconto 2')",
+      "input": "Marco Bianchi mi ha dato l'acconto, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "Marco Bianchi ha due acconti in sospeso — EON non deve registrare come pagato il primo che trova a caso, deve chiedere a quale dei due si riferisce (es. mostrando gli importi/scadenze) prima di procedere"
+      }
+    },
+    {
+      "id": "brain-comune-24",
+      "categoria": "Strato comune — tipo di pagamento parziale indicato nella descrizione",
+      "situazione": "Un pagamento parziale nuovo (non ancora in sospeso) va registrato indicando di che tipo si tratta, non con una descrizione generica",
+      "input": "Neri mi ha dato il secondo acconto di 500 euro per il lavoro del bagno, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["segna_incasso_ricevuto"],
+        "verifica": "manuale",
+        "controllo": "la descrizione registrata con segna_incasso_ricevuto deve indicare che si tratta del secondo acconto (o equivalente), non una descrizione generica come solo 'pagamento' o 'lavoro del bagno' senza specificare il tipo/numero di rata"
+      }
+    },
+    {
+      "id": "brain-comune-25",
+      "categoria": "Strato comune — delega generale non autorizza a inventare un dato mancante",
+      "situazione": "Una delega esplicita a decidere non riguarda i dati mancanti che solo l'utente può fornire (qui, un prezzo)",
+      "input": "Manda a Rossi il messaggio sul preventivo del tetto, il prezzo mettilo tu quello che ti sembra giusto",
+      "atteso": {
+        "tipo": "domanda",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "verifica": "automatica",
+        "controllo": "non deve inventare un prezzo da comunicare a Rossi solo perché l'utente gli ha dato carta bianca — deve chiedere all'utente quale prezzo comunicare, mai deciderlo da solo"
+      }
+    },
+    {
+      "id": "brain-comune-26",
+      "categoria": "Strato comune — decisione presa sul campo da un collaboratore, non dal titolare",
+      "situazione": "Una decisione riportata come presa da un collaboratore (non dall'utente stesso) va segnalata come tale, non equiparata a una decisione ufficiale",
+      "input": "Il mio operaio ha detto a Bianchi che possiamo iniziare i lavori lunedì prossimo, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "il testo o l'appunto/impegno creato deve far capire che la decisione è stata presa dall'operaio sul campo, non presentarla come se fosse una conferma ufficiale data direttamente dal titolare"
+      }
+    },
+    {
       "id": "edile-01",
       "categoria": "Edile — fornitore mai trattato come cliente",
       "situazione": "Un fornitore nominato in una frase che potrebbe sembrare un impegno con una persona — non deve mai essere cercato/creato in anagrafica clienti",
