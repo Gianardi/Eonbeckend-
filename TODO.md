@@ -1067,19 +1067,35 @@ altri tre, stesso metodo (principi generali estratti da
 47 casi totali nel file). `node --check` e `eval/backend.test.js`
 (18/18) verificati dopo ogni gruppo, nessuna regressione.
 
-**Verificato dal vivo su staging (04/09/2026)**: Gianardi ha lanciato
-`eval/live-check.js` dal proprio Mac contro un deploy Preview del
-branch (Vercel richiedeva login per le anteprime — disattivato
+**Verificato dal vivo su staging (04-05/09/2026)**: Gianardi ha
+lanciato `eval/live-check.js` dal proprio Mac contro un deploy Preview
+del branch (Vercel richiedeva login per le anteprime — disattivato
 temporaneamente "Vercel Authentication" sul progetto di staging, e
 aggiunto "Preview" come ambiente alle 7 variabili d'ambiente che
-c'erano solo per "Production"). **9/10 controlli automatici passati,
-1 falso allarme del test** (non un bug: `intento-02` cerca prima i
-due clienti — corretto, non trovati — poi crea comunque i due impegni
-separati; il controllo automatico non teneva conto delle ricerche
-cliente). Nessun bug reale trovato nei 4 gruppi insegnati oggi. Il
-resto dei 44 casi (verifica manuale) è salvato in
-`~/Desktop/eon-test-risultato.txt` sul Mac di Gianardi, da leggere con
-calma quando vuole — non urgente.
+c'erano solo per "Production"). Il run del 04/09 si è fermato a metà
+per credito Anthropic esaurito (tutti i 9 casi `brain-comune-*`, cioè
+proprio quelli che testano il lavoro nuovo, non erano stati eseguiti
+davvero) — ricaricato il credito e rieseguito il 05/09.
+
+**Risultato pulito e completo**: 8 dei 9 casi `brain-comune-01..08`
+verificati e corretti (cortesia≠impegno, stato provvisorio, condizione
+conservata, riserva "salvo imprevisti" mantenuta nel messaggio, prezzo
+comunicato senza essere minimizzato, giudizio su un cliente mai nel
+messaggio a lui, dato sensibile su cliente "simile" → chiede conferma
+citando esplicitamente "dato sensibile di natura personale"). Il 9°
+(`brain-comune-09`) non è testabile con questo strumento (richiede
+continuità di conversazione). Caso 08 (pagamento già ricevuto): EON ha
+usato crea_appunto come miglior ripiego — scoperto che **non esiste
+ancora un tool per registrare un pagamento ricevuto/aggiornare lo stato
+di un pagamento**, quindi il comportamento osservato è già il massimo
+possibile con gli strumenti attuali (eventuale gap futuro, non di oggi).
+Nessun bug reale trovato nei 4 gruppi insegnati.
+
+Aggiunta la possibilità di rilanciare solo alcuni casi
+(`EVAL_SOLO=id1,id2,...` in `eval/live-check.js`) per risparmiare
+tempo/credito nei prossimi round — usata oggi stesso per riverificare
+04-07 dopo aver riseminato via Supabase MCP i clienti di test cancellati
+dal reset.
 
 Nota per la prossima volta: pulizia dati fatta direttamente da Claude
 via Supabase MCP (senza bisogno della service_role key sul Terminal)
