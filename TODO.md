@@ -1217,6 +1217,51 @@ solo sulla scrittura del libro.
    strato comune.
 3. **Insegnarli a EON** una volta scritti, stesso metodo.
 
+**Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
+nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
+generali, non specifici edile — vedi `systemPromptAssistente`):
+autocorrezione di un valore nella stessa frase (vale l'ultimo),
+negazione/misura ambigua in una trascrizione su un'azione con
+conseguenze concrete, messaggio isolato/emotivo che non deve produrre
+un'azione irreversibile, sconto eccezionale che non diventa standard,
+range vago preservato quando riportato a terzi, comando ampio senza
+scope dichiarato, indicazioni contrastanti da due fonti autorizzate,
+dati economici interni mai in un documento/messaggio cliente,
+posizione riservata condivisa solo se autorizzata, allegato mai dato
+per ricevuto solo perché dichiarato, formula di cortesia che non
+risponde a un sì/no, richiesta indiretta di risorse storiche, canale
+non ancora collegato (WhatsApp) dichiarato onestamente, regola di
+disponibilità ricorrente registrata come tale. 10 nuovi casi
+(`brain-comune-10..19`, 63 totali).
+
+**Verificato dal vivo su staging il 05/09/2026: 9 su 10 corretti.**
+`brain-comune-12` (comando ampio senza scope) ha un comportamento
+corretto (chiede a cosa si riferisce "tutto", non esegue nulla) ma la
+frase finale della risposta non finisce con "?" — il controllo
+automatico (che guarda solo l'ultimo carattere del testo) lo segna
+FAIL per questo motivo, non per un bug reale: pattern già visto oggi
+(`edile-01`) e nei giorni scorsi. `brain-comune-19` (formula di
+cortesia dopo una domanda sì/no) non si è potuto verificare come
+progettato: richiede un vero preventivo già esistente per il cliente,
+ma i preventivi non sono ancora gestiti da EON (stesso limite "non
+applicabile" del Gruppo 3) — non un fallimento, un limite di
+precondizione. Restano da insegnare esplicitamente solo 2 dei 19
+originali (decisione presa da un collaboratore non titolare, telefono
+riusato da una persona diversa) — scartati per ora perché difficili da
+verificare con un caso pulito data l'attuale mancanza dei concetti
+Squadra/storico-per-numero nell'app; da rivalutare se emergeranno
+nell'uso reale.
+
+**Prossimo passo, deciso con Gianardi il 05/09/2026**: il metodo da
+qui in avanti non è più "insegna quello che il prompt può fare oggi, e
+segnala i limiti strutturali per dopo" — è "insegna la conoscenza
+generale, e se durante l'insegnamento emerge la necessità di una
+funzione nuova, la si costruisce subito, poi si continua a insegnare
+sopra quella base". Primo limite strutturale reale da affrontare così:
+**il concetto di "Cantiere" distinto dal "Cliente"** (foto/documenti/
+pagamenti oggi si collegano solo al cliente, non a un cantiere/lavoro
+specifico — vedi nota sopra, Gruppo 3).
+
 **Gruppo 3 edile (05/09/2026): collegamento certo di foto/documenti/
 pagamenti al cliente/cantiere giusto.** Audit di `libro/edile.md`
 (sezioni C/I/K, "Catalogo errori critici"): la maggior parte è già
