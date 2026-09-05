@@ -612,6 +612,19 @@
         "verifica": "automatica",
         "controllo": "solo crea_appunto — 'SAL' è un termine tecnico (stato avanzamento lavori), non deve generare un cerca_cliente per 'SAL' come se fosse un nome"
       }
+    },
+    {
+      "id": "edile-03",
+      "categoria": "Edile — continuità di identità: cliente che cambia cognome",
+      "situazione": "Un cliente esistente ha cambiato cognome (matrimonio) — deve essere rinominato, non duplicato come cliente nuovo",
+      "precondizione": "Deve esistere un cliente 'Laura Rossi' in anagrafica",
+      "input": "Laura Rossi si è sposata, ora si chiama Laura Verdi, aggiornamelo in anagrafica",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["aggiorna_cliente"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare aggiorna_cliente su Laura Rossi esistente per rinominarla, MAI crea_cliente (creerebbe un doppione)"
+      }
     }
   ]
 }
