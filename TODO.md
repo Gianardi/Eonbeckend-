@@ -1291,6 +1291,44 @@ solo un'etichetta di lavoro collegata a un cliente.
   ancora un collegamento a `cantiere_id` — da valutare se servirà
   quando/se emergerà un caso reale.
 
+**Resto del gruppo "parziale" NON legato al Cantiere — fatto
+(05/09/2026).** Insegnati: SAL/acconto distinto dal saldo finale
+(chiedere quale rata se un cliente ne ha più di una in sospeso,
+indicare il tipo nella descrizione quando se ne registra uno nuovo),
+fornitore e subappaltatore come categorie distinte tra loro, verificare
+sempre il destinatario prima di un inoltro rapido di dati cliente, una
+delega generale autorizza a procedere ma mai a inventare un dato
+mancante, una decisione presa sul campo da un collaboratore va
+segnalata come tale. Lasciato fuori "telefono riusato da una persona
+diversa": richiede uno storico per numero di telefono che oggi non
+esiste, non un insegnamento mancante ma un dato che EON non ha modo di
+controllare. 4 nuovi casi (`brain-comune-23..26`, 70 totali).
+
+**Verificato dal vivo su staging, con due giri di correzione reale
+(05/09/2026)**: `brain-comune-24` (tipo di pagamento in descrizione)
+corretto al primo colpo, confermato leggendo direttamente il valore
+salvato su database ("Secondo acconto - Lavoro bagno"). `brain-comune-
+25` (delega non inventa il prezzo) corretto nella sostanza, stesso
+falso positivo del controllo automatico sul punto finale già visto più
+volte oggi. `brain-comune-26` (decisione da collaboratore) al primo
+giro NON seguiva l'istruzione (impegno creato senza menzionare
+l'operaio) — istruzione resa più esplicita e operativa (dire di
+scrivere ESPLICITAMENTE chi ha deciso nel titolo del tool, non solo
+"segnalarlo" in modo vago) e il secondo giro ha corretto
+("Inizio lavori Bianchi — confermato dal mio operaio"). `brain-comune-
+23` (acconto ambiguo) ha rivelato un **secondo bug di codice reale**,
+dello stesso tipo di quello di ieri: `segna_incasso_ricevuto`, quando
+un cliente aveva più di un incasso in sospeso, sceglieva sempre quello
+con la scadenza più vicina ignorando l'importo detto dall'utente —
+anche quando l'importo corrispondeva chiaramente a un altro dei
+candidati. **Corretto**: ora, con più incassi in sospeso per lo stesso
+cliente, l'importo (se corrisponde a uno solo) sceglie quale
+aggiornare; altrimenti si ferma elencando le opzioni invece di
+scegliere di default la scadenza più vicina. Il testo con cui EON
+chiede l'importo resta migliorabile (non elenca subito i due acconti
+come suggerito nel prompt) ma il comportamento è ormai sicuro a
+livello di codice — rifinitura di forma rimandabile, non un rischio.
+
 **Gruppo 3 edile (05/09/2026): collegamento certo di foto/documenti/
 pagamenti al cliente/cantiere giusto.** Audit di `libro/edile.md`
 (sezioni C/I/K, "Catalogo errori critici"): la maggior parte è già
