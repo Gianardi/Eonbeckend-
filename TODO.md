@@ -1284,9 +1284,10 @@ solo un'etichetta di lavoro collegata a un cliente.
 - Corretta anche una piccola disciplina mancata: `eval/check-schema.js`
   non aveva mai registrato la tabella `incomes` (aggiunta ieri) —
   sistemato insieme al resto.
-- **Ancora da fare**: applicare la stessa migrazione anche in
-  produzione — richiede conferma esplicita di Gianardi, non ancora
-  data. Restano fuori scope per questa versione leggera: `incomes`
+- **Applicata anche in produzione il 05/09/2026**, con conferma di
+  Gianardi — verificato che tabella `cantieri` e colonna
+  `cantiere_foto.cantiere_id` esistono in entrambi gli ambienti.
+  Restano fuori scope per questa versione leggera: `incomes`
   (pagamenti) e `cantiere_appunti`/`cantiere_documenti` non hanno
   ancora un collegamento a `cantiere_id` — da valutare se servirà
   quando/se emergerà un caso reale.
