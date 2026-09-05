@@ -569,8 +569,8 @@
       "id": "brain-pagamenti-03",
       "categoria": "Nuovo strumento (05/09/2026) — pagamento non attribuito a un cliente ambiguo",
       "situazione": "Il nome del cliente che ha pagato corrisponde a più clienti diversi con un incasso in sospeso — non deve scegliere a caso quale aggiornare, è l'errore più grave del settore (pagamento attribuito al cliente sbagliato)",
-      "precondizione": "Devono esistere almeno due incassi in sospeso di clienti diversi il cui nome contiene 'Ferri' (es. client_name 'Ferri Luca' e 'Ferri Impresa Edile')",
-      "input": "Ferri mi ha pagato 300 euro, segnalo",
+      "precondizione": "Devono esistere almeno due incassi in sospeso di clienti diversi il cui nome contiene 'Colombo' (es. client_name 'Colombo Andrea' e 'Colombo Costruzioni') — scelto apposta senza somiglianza con nessun cliente esistente in anagrafica, per essere sicuri che il turno arrivi davvero a chiamare segna_incasso_ricevuto invece di fermarsi prima per un cliente_risolto 'simile' su un'altra persona",
+      "input": "Colombo mi ha pagato 300 euro, segnalo",
       "atteso": {
         "tipo": "azione",
         "strumenti_attesi": [],
