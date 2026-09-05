@@ -1248,6 +1248,51 @@ per una semplice correzione di prompt/tool) — non è un problema oggi
 perché il libro stesso nota che è raro avere più di un cantiere attivo
 per cliente, ma va tenuto a mente se emergerà nell'uso reale.
 
+**Audit completo di `libro/edile.md` contro il prompt attuale
+(05/09/2026)**, richiesto da Gianardi ("cosa abbiamo preso e non preso
+dal libro?") — confronto voce per voce dei 72 casi in sezione L più la
+tabella "Catalogo errori critici", in 4 gruppi:
+
+1. **Già coperto e verificato (~30 dei 72 casi)** — quasi tutto dallo
+   strato comune, non scritto per l'edile ma che copre per costruzione
+   già molto: omonimi (#11-15), orario mancante/vago (#6-9), appunti vs
+   impegni (#16-17), conferma reale prima di comunicare (#20-23),
+   cortesia ≠ impegno (#41), stato provvisorio (#62), pianificazione
+   condizionale (#63), fornitore mai cliente (#30, verificato oggi come
+   `edile-01`), cliente/fornitore che cambia nome (#43/#64, verificato
+   oggi come `edile-03`), prezzo mai inventato, parere mai trasformato
+   in azione (#25), conferma vaga tra più opzioni (#38/#47, `brain-
+   comune-09`), acconto senza importo (#72). Più le due cose scritte
+   apposta per l'edile: il glossario tecnico (#19/#44,
+   `promptPackEdile()`) e il collegamento certo dei pagamenti (tabella
+   errori critici, corretto oggi in `segna_incasso_ricevuto`).
+2. **Coperto solo in parte, per un limite strutturale dell'app, non di
+   insegnamento (~10 casi: #2, #10, #18, #21 tono, #27, #31, #45, #52,
+   #61)** — soprattutto perché manca un concetto di "Cantiere" distinto
+   dal "Cliente" nello schema (foto/documenti/pagamenti sono legati
+   solo al cliente): "due cantieri diversi per lo stesso cliente" oggi
+   EON non può proprio distinguerli, non è risolvibile scrivendo meglio
+   il prompt (vedi nota sopra).
+3. **Non applicabile, perché la funzione non esiste ancora nell'app
+   (~12 casi: #24, #26, #28, #29, #33, #46, #49, #50, #51, #53, #65,
+   #69)** — preventivi, varianti, commesse, squadra/attività assegnate:
+   il libro li descrive perché fanno parte del mestiere, ma EON non ha
+   ancora strumenti AI per crearli/gestirli (i preventivi si fanno da
+   un'altra pagina dell'app, manuale). Buco di funzionalità, non di
+   insegnamento.
+4. **Scritto nel libro ma MAI ancora insegnato/testato — il vero "non
+   preso" (~19 casi): #3, #35, #36, #37, #39, #40, #42, #48, #54, #55,
+   #56, #57, #58, #59, #60, #66, #67, #70, #71** (oltre alle righe
+   corrispondenti nel "Catalogo errori critici": negazione persa nella
+   trascrizione, unità di misura ambigua, azione irreversibile da
+   messaggio emotivo isolato, dati economici interni mai in un
+   documento cliente, posizione/indirizzo riservato condiviso senza
+   autorizzazione, indicazioni contrastanti da due fonti autorizzate
+   risolte a caso). Sono principi generalizzabili, candidati naturali
+   per il prossimo gruppo da insegnare — molti sono anzi generici
+   (utili a qualunque professione, non solo edile), quindi probabile
+   che finiscano nello strato comune più che in `promptPackEdile()`.
+
 **Posizionamento di EON, chiarito da Gianardi il 05/09/2026 (da
 ricordare sempre, riguarda l'intero progetto non solo l'edile)**: EON
 non è pensato solo per artigiani/professionisti con un mestiere
