@@ -1097,6 +1097,26 @@ tempo/credito nei prossimi round — usata oggi stesso per riverificare
 04-07 dopo aver riseminato via Supabase MCP i clienti di test cancellati
 dal reset.
 
+**Nuovo strumento aggiunto (05/09/2026): incassi.** Dal gap trovato con
+il caso `brain-comune-08` (EON non aveva modo di segnare un pagamento
+ricevuto) — su richiesta di Gianardi ("aggiungiamo il tool pagamenti:
+chi ha pagato e chi non ha pagato"). Non serviva una tabella nuova: la
+tabella `incomes` (già usata dalla pagina "Entrate" dell'app, stati
+`attesa`/`scaduto`/`incassato`) non aveva ancora strumenti AI dedicati.
+Aggiunti in `api/index.js`:
+- `mostra_incassi` (lettura) — chi deve ancora pagare, filtrabile per
+  cliente, `tutti:true` per includere anche i già incassati
+- `segna_incasso_ricevuto` (scrittura) — aggiorna un incasso in sospeso
+  esistente a "incassato", oppure ne crea uno nuovo già incassato se il
+  pagamento non era mai stato fatturato prima (contanti/bonifico
+  diretto) — richiede l'importo solo in questo secondo caso
+
+Aggiornato `brain-comune-08` (ora verifica automatica sul tool vero) e
+aggiunti `brain-pagamenti-01/02` in `eval/casi.json` (49 casi totali).
+`node --check` e `backend.test.js` (18/18) verificati. **Da testare dal
+vivo**: serve un nuovo deploy Preview (il codice è cambiato) e clienti
+di prova con un incasso in sospeso — non ancora fatto in questa sessione.
+
 Nota per la prossima volta: pulizia dati fatta direttamente da Claude
 via Supabase MCP (senza bisogno della service_role key sul Terminal)
 — molto più semplice, da preferire se disponibile.

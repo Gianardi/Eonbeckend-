@@ -1198,6 +1198,77 @@ const TOOLS = {
     },
   },
 
+  mostra_incassi: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "mostra_incassi",
+      description: "Elenca gli incassi (pagamenti da clienti): chi deve ancora pagare e chi ha già pagato. Per default mostra solo quelli in sospeso (in attesa o scaduti); passa 'tutti':true per includere anche quelli già incassati. Puoi filtrare per nome cliente.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente: { type: "string", description: "Nome del cliente su cui filtrare, se la richiesta riguarda una persona precisa" },
+          tutti: { type: "boolean", description: "Se true, include anche gli incassi già ricevuti, non solo quelli in sospeso" },
+        },
+      },
+    },
+    async run(input, ctx) {
+      let filtro = "select=id,client_name,description,amount,due_date,status&deleted_at=is.null&order=due_date.asc";
+      if (eStringaNonVuota(input.cliente)) filtro += `&client_name=ilike.*${encodeURIComponent(input.cliente.trim())}*`;
+      if (!input.tutti) filtro += "&status=neq.incassato";
+      const righe = await db(`incomes?${filtro}`, { method: "GET" }, ctx.accessToken);
+      return {
+        incassi: (righe || []).map((r) => ({
+          id: r.id, cliente: r.client_name, importo: r.amount, scadenza: r.due_date,
+          stato: r.status, descrizione: r.description || null,
+        })),
+      };
+    },
+  },
+
+  segna_incasso_ricevuto: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "segna_incasso_ricevuto",
+      description: "Registra che un pagamento da un cliente è stato ricevuto. Se esiste già un incasso in sospeso per quel cliente lo segna come incassato; altrimenti ne crea uno nuovo già segnato come incassato (per un pagamento mai fatturato prima, es. contanti o bonifico diretto).",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente: { type: "string", description: "Nome del cliente che ha pagato" },
+          importo: { type: "number", description: "Importo ricevuto in euro — obbligatorio se non esiste già un incasso in sospeso da aggiornare" },
+          descrizione: { type: "string", description: "Cosa riguarda il pagamento, es. 'saldo lavoro bagno'" },
+        },
+        required: ["cliente"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente)) throw fail("Parametro 'cliente' mancante o vuoto");
+      const nome = input.cliente.trim();
+      const esistenti = await db(
+        `incomes?select=id,amount,description&client_name=ilike.*${encodeURIComponent(nome)}*&status=neq.incassato&deleted_at=is.null&order=due_date.asc&limit=1`,
+        { method: "GET" }, ctx.accessToken
+      );
+      if (Array.isArray(esistenti) && esistenti.length) {
+        const record = esistenti[0];
+        const patch = { status: "incassato" };
+        if (eNumero(input.importo)) patch.amount = input.importo;
+        if (eStringaNonVuota(input.descrizione)) patch.description = input.descrizione.trim();
+        await db(`incomes?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify(patch), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+        return { id: record.id, cliente: nome, esito: "incasso_in_sospeso_aggiornato" };
+      }
+      if (!eNumero(input.importo)) throw fail("Non ho trovato un incasso in sospeso per questo cliente: serve l'importo per registrarne uno nuovo");
+      const payload = {
+        owner_id: ctx.user.id, client_name: nome, amount: input.importo,
+        status: "incassato", due_date: new Date().toISOString().slice(0, 10),
+      };
+      if (eStringaNonVuota(input.descrizione)) payload.description = input.descrizione.trim();
+      const creati = await db("incomes", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+      const r = Array.isArray(creati) ? creati[0] : creati;
+      return { id: r.id, cliente: nome, esito: "nuovo_incasso_registrato" };
+    },
+  },
+
   crea_impegno: {
     risk: "low_write",
     categoria: "azione",

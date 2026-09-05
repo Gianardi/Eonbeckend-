@@ -542,15 +542,40 @@
       }
     },
     {
+      "id": "brain-pagamenti-01",
+      "categoria": "Nuovo strumento (05/09/2026) — chi non ha ancora pagato",
+      "situazione": "Richiesta di lettura sugli incassi in sospeso, senza nominare un cliente preciso",
+      "input": "Chi non mi ha ancora pagato?",
+      "atteso": {
+        "tipo": "risorsa",
+        "strumenti_attesi": ["mostra_incassi"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare mostra_incassi (di default solo i pendenti, senza bisogno di specificare 'tutti':false) e riportare la lista nella risposta, non inventare nomi se la lista è vuota"
+      }
+    },
+    {
+      "id": "brain-pagamenti-02",
+      "categoria": "Nuovo strumento (05/09/2026) — pagamento mai fatturato prima, nessun incasso in sospeso da aggiornare",
+      "situazione": "Un pagamento ricevuto per un lavoro mai registrato come incasso in attesa — deve crearne uno nuovo già segnato come incassato, non rifiutare per mancanza di un record da aggiornare",
+      "input": "Conti mi ha appena dato 500 euro in contanti per la riparazione del tetto, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["segna_incasso_ricevuto"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare segna_incasso_ricevuto con cliente 'Conti' e importo 500 — se non trova un incasso in sospeso per Conti, ne crea uno nuovo già 'incassato', non deve fermarsi a dire che non può registrarlo"
+      }
+    },
+    {
       "id": "brain-comune-08",
       "categoria": "Strato comune — informazione più recente detta dall'utente prevale su un dato esistente",
-      "situazione": "L'utente segnala che un pagamento è già avvenuto, anche se il sistema potrebbe non risultare aggiornato — non deve essere ignorato né contraddetto",
-      "precondizione": "Deve esistere un cliente con un pagamento/commessa ancora segnata come da saldare",
+      "situazione": "L'utente segnala che un pagamento è già avvenuto, anche se il sistema potrebbe non risultare aggiornato — non deve essere ignorato né contraddetto. Da quando esiste segna_incasso_ricevuto (05/09/2026), verificabile automaticamente.",
+      "precondizione": "Deve esistere un incasso 'Neri' con status diverso da 'incassato' (per verificare l'aggiornamento, non solo la creazione)",
       "input": "Neri mi ha già pagato il lavoro del bagno, anche se magari nel sistema risulta ancora da saldare, segnalo",
       "atteso": {
         "tipo": "azione",
-        "verifica": "manuale",
-        "controllo": "deve dare per buona l'informazione dell'utente (il pagamento è avvenuto) e proporre/eseguire l'aggiornamento corrispondente — non deve rispondere citando solo lo stato esistente nel sistema come se fosse più affidabile di quanto detto dall'utente"
+        "strumenti_attesi": ["segna_incasso_ricevuto"],
+        "verifica": "automatica",
+        "controllo": "deve chiamare segna_incasso_ricevuto per Neri — dà per buona l'informazione dell'utente invece di rispondere citando solo lo stato esistente nel sistema come se fosse più affidabile"
       }
     },
     {
