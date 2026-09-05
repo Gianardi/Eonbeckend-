@@ -656,6 +656,7 @@
       "id": "brain-comune-14",
       "categoria": "Strato comune — richiesta indiretta di una risorsa storica",
       "situazione": "Una richiesta formulata in modo indiretto (\"come stava prima\") è comunque una richiesta reale di foto/documenti storici, non una domanda generica",
+      "precondizione": "Deve esistere un cliente 'Neri' con almeno una foto collegata in cantiere_foto",
       "input": "Fammi vedere com'era il cantiere di Neri prima di iniziare i lavori",
       "atteso": {
         "tipo": "risorsa",
