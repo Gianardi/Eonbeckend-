@@ -1245,11 +1245,21 @@ const TOOLS = {
     async run(input, ctx) {
       if (!eStringaNonVuota(input.cliente)) throw fail("Parametro 'cliente' mancante o vuoto");
       const nome = input.cliente.trim();
+      /* Niente limit:1 qui: un incasso attribuito al cliente sbagliato è
+         l'errore più grave del settore (vedi libro/edile.md, "Catalogo
+         errori critici") — meglio prendere qualche riga in più e
+         verificare che il nome corrisponda a un solo cliente reale prima
+         di scegliere quale aggiornare, invece di prendere alla cieca il
+         primo risultato quando ce ne sono altri diversi. */
       const esistenti = await db(
-        `incomes?select=id,amount,description&client_name=ilike.*${encodeURIComponent(nome)}*&status=neq.incassato&deleted_at=is.null&order=due_date.asc&limit=1`,
+        `incomes?select=id,client_name,amount,description&client_name=ilike.*${encodeURIComponent(nome)}*&status=neq.incassato&deleted_at=is.null&order=due_date.asc&limit=10`,
         { method: "GET" }, ctx.accessToken
       );
       if (Array.isArray(esistenti) && esistenti.length) {
+        const nomiDistinti = [...new Set(esistenti.map((r) => r.client_name))];
+        if (nomiDistinti.length > 1) {
+          throw fail(`Più clienti diversi hanno un incasso in sospeso che corrisponde a "${nome}": ${nomiDistinti.join(", ")}. Chiedi all'utente a quale di questi si riferisce prima di registrare il pagamento.`);
+        }
         const record = esistenti[0];
         const patch = { status: "incassato" };
         if (eNumero(input.importo)) patch.amount = input.importo;

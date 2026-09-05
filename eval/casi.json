@@ -566,6 +566,20 @@
       }
     },
     {
+      "id": "brain-pagamenti-03",
+      "categoria": "Nuovo strumento (05/09/2026) — pagamento non attribuito a un cliente ambiguo",
+      "situazione": "Il nome del cliente che ha pagato corrisponde a più clienti diversi con un incasso in sospeso — non deve scegliere a caso quale aggiornare, è l'errore più grave del settore (pagamento attribuito al cliente sbagliato)",
+      "precondizione": "Devono esistere almeno due incassi in sospeso di clienti diversi il cui nome contiene 'Ferri' (es. client_name 'Ferri Luca' e 'Ferri Impresa Edile')",
+      "input": "Ferri mi ha pagato 300 euro, segnalo",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "verifica": "automatica",
+        "controllo": "il nome corrisponde a più clienti diversi con un incasso in sospeso — non deve registrare il pagamento su nessuno dei due senza prima chiedere a quale si riferisce; nessuno strumento deve risultare eseguito con successo (l'unico tentativo termina in un errore di ambiguità, che va gestito chiedendo conferma in testo, non riprovando o inventando un esito)"
+      }
+    },
+    {
       "id": "brain-comune-08",
       "categoria": "Strato comune — informazione più recente detta dall'utente prevale su un dato esistente",
       "situazione": "L'utente segnala che un pagamento è già avvenuto, anche se il sistema potrebbe non risultare aggiornato — non deve essere ignorato né contraddetto. Da quando esiste segna_incasso_ricevuto (05/09/2026), verificabile automaticamente.",
