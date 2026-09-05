@@ -588,6 +588,30 @@
         "verifica": "manuale",
         "controllo": "se EON ha appena proposto due orari alternativi e l'utente risponde solo 'va bene', EON deve chiedere quale dei due, non sceglierne uno a caso o entrambi"
       }
+    },
+    {
+      "id": "edile-01",
+      "categoria": "Edile — fornitore mai trattato come cliente",
+      "situazione": "Un fornitore nominato in una frase che potrebbe sembrare un impegno con una persona — non deve mai essere cercato/creato in anagrafica clienti",
+      "input": "Richiama la ferramenta per il cemento",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_impegno"],
+        "verifica": "automatica",
+        "controllo": "solo crea_impegno, senza NESSUN cerca_cliente/crea_cliente per 'ferramenta' — è un fornitore, non un cliente"
+      }
+    },
+    {
+      "id": "edile-02",
+      "categoria": "Edile — termine tecnico di settore non trattato come nome di persona",
+      "situazione": "Un termine tecnico (SAL) usato in una frase con anche un nome di cliente vero — non deve essere confuso con un'altra persona da cercare",
+      "input": "Devo controllare il SAL del cantiere di Neri, segnamelo in appunti",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_appunto"],
+        "verifica": "automatica",
+        "controllo": "solo crea_appunto — 'SAL' è un termine tecnico (stato avanzamento lavori), non deve generare un cerca_cliente per 'SAL' come se fosse un nome"
+      }
     }
   ]
 }

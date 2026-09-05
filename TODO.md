@@ -1127,11 +1127,26 @@ scritto E insegnato a EON (4 gruppi, testati oggi). Il capitolo
 EON con lo stesso procedimento — l'edile non è avanti sull'insegnamento,
 solo sulla scrittura del libro.
 
-**Prossimi passi, in ordine (da continuare domani)**:
-1. **Insegnare l'edile a EON** — stesso metodo di oggi: audit di cosa
+**Prossimi passi, in ordine**:
+1. **Insegnare l'edile a EON** — stesso metodo di ieri: audit di cosa
    è già coperto dallo strato comune, estrarre principi genuinamente
    specifici dell'edile, aggiungerli al prompt a piccoli gruppi
-   testati, uno alla volta.
+   testati, uno alla volta. **Gruppo 1 fatto (05/09/2026)**: fornitore/
+   subappaltatore mai trattato come cliente + glossario di settore
+   (SAL, capitolato, massetto, tondino, cls, varianti regionali) da
+   riconoscere senza correggere in silenzio se il microfono lo sente
+   male. 2 nuovi casi in `eval/casi.json` (`edile-01`, `edile-02`, 51
+   totali). Non ancora testato dal vivo su staging.
+
+   **Nota architetturale trovata oggi**: la professione scelta
+   all'iscrizione (edile/idraulico/elettricista/amministratore) oggi
+   serve SOLO per i dati demo dell'onboarding — il prompt di sistema è
+   identico per tutti, non sa quale professione ha scelto l'utente.
+   Il vocabolario edile aggiunto va quindi nel prompt condiviso
+   (innocuo per gli altri mestieri, semplicemente non lo useranno mai).
+   Da valutare in futuro (non ora): con 3-4 capitoli scritti potrebbe
+   convenire rendere il prompt specifico per professione invece di
+   accumulare tutto insieme.
 2. **Scrivere i libri** delle altre 3 professioni — **Amministratore
    di condominio**, **Elettricista**, **Avvocato** — non ancora
    iniziati.
