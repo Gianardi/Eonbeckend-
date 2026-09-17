@@ -1420,15 +1420,37 @@ mai inventare importi) senza bisogno di modellare quelle entità — se
 l'esperienza reale mostrerà che serve tracciarle davvero, si costruirà
 allora.
 
-**Prossimo passo**: guidare Gianardi nel live-check su staging — impostare
-`profiles.profession = 'amministratore'` sull'utente di test, seminare i
-dati di precondizione (due condomini/clienti, es. "Condominio via Roma 12"
-e "Condominio via Torino 5", con alcuni condomini dentro incluso un
-omonimo in entrambi e uno moroso), poi lanciare `eval/live-check.js` con
-`EVAL_SOLO=amministratore-01,amministratore-02,amministratore-03,amministratore-04,amministratore-05,amministratore-06,amministratore-07`.
-Dopo l'amministratore: `libro/avvocato.md`, stesso ordine confermato con
-Gianardi (validazione con tester reali resta l'ultimo passo, dopo tutti i
-cervelli).
+**Live-check su staging completato (17/09/2026), pack Amministratore
+confermato funzionante.** Impostato `profiles.profession = 'amministratore'`
+sull'utente di test, seminati due condomini/clienti ("Condominio via Roma
+12" e "Condominio via Torino 5") con condomini dentro (Marco Bianchi, Luca
+Ferri duplicato in entrambi come omonimo voluto, Anna Colombo morosa).
+
+Trovato un bug reale al primo giro: nel caso dell'omonimo (`amministratore-02`,
+"Luca Ferri" presente in due condomini), EON ignorava del tutto
+`cerca_condomino` e proponeva di aggiungerlo come **nuovo cliente** —
+esattamente l'errore che il pack doveva prevenire. Causa: `cliente_risolto`
+(da `interpreta_richiesta`) cerca solo tra gli edifici, e il suo
+"non_trovato" per un nome di persona veniva interpretato come "la persona
+non esiste", innescando la regola comune su clienti mai trovati. Corretto
+rendendo esplicita la sequenza operativa: sempre `cerca_condomino` PRIMA
+di considerare `crea_cliente`/chiedere se aggiungere un nuovo cliente,
+indipendentemente da cosa dice `cliente_risolto`. Ritestato: ora trova
+correttamente entrambi i Luca Ferri e chiede quale dei due (`amministratore-01`
+ora usa anche `cerca_condomino` per collegare l'impegno al condominio
+giusto, cosa che al primo giro non faceva pur non sbagliando).
+
+**Risultato finale: tutti e 7 i casi passano** (amministratore-01..07).
+Pack Amministratore di condominio considerato insegnato e testato, stesso
+livello di affidabilità di edile e idraulico — inclusa la parte più
+delicata (riservatezza morosità, spesa senza delibera, entità Condomini
+nuova).
+
+**Prossimo passo**: `libro/avvocato.md`, ultimo delle 4 professioni di
+partenza — stesso metodo (bozza → eventuale seconda bozza da Claude chat
+→ audit contro strato comune + pack esistenti → insegnamento a piccoli
+gruppi testati su staging). Dopo l'avvocato: validazione con tester reali,
+l'ultimo passo, ordine confermato con Gianardi.
 
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
