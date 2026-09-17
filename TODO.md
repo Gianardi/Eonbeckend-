@@ -2077,3 +2077,78 @@ da fare da Gianardi:
    a Gianardi come prematuro con solo 2 utenti veri in produzione (non
    c'è ancora abbastanza uso reale da cui imparare abitudini vere) — da
    riprendere quando ci sarà più uso reale su cui basarsi, non ora.
+
+## Visione: EON come "mente" personalizzata del professionista (17/09/2026)
+
+Gianardi, testuale: "EON deve essere la mente del professionista ed
+essere velocissimo... e deve diventare sempre di più come il
+professionista che lo usa... quindi personalizzato... un cervello che
+diventa sempre più uguale a come pensa il professionista che lo usa."
+
+Differenza chiave rispetto a tutto quello fatto finora: oggi il
+Professional Brain Pack è per MESTIERE (uguale per tutti gli idraulici,
+tutti gli avvocati, ecc.) — non ancora per PERSONA. Questa è la
+direzione futura: un livello in più, sopra quello di mestiere, che si
+avvicina nel tempo a come pensa e decide QUEL professionista specifico.
+
+**Tecniche già usate dalle big tech, applicabili da subito con quello
+che abbiamo già (nessuna tecnologia nuova da inventare):**
+- Imparare lo stile di scrittura da quello che il professionista ha già
+  scritto davvero ai clienti (come Superhuman, Gmail Smart Compose) —
+  i messaggi ci sono già nel database, si tratta di leggerli e farne
+  emergere il tono/le parole ricorrenti, invece di far scrivere a EON
+  bozze con un tono generico.
+- Imparare dalle correzioni dell'utente come segnale permanente, non
+  solo per il turno in corso (come Grammarly/Gmail): oggi una
+  correzione vale solo lì per lì e si perde — se lo stesso tipo di
+  correzione si ripete, EON dovrebbe iniziare a farlo giusto da solo.
+- Recupero delle situazioni simili già vissute (tecnica standard oggi,
+  RAG): prima di rispondere, EON cerca se ha già gestito qualcosa di
+  simile per questo professionista/cliente tra i dati reali suoi, e si
+  ispira a quello — un ricordo vero, non un'invenzione.
+
+**Tecniche nascenti nel settore — replicabili da noi, a modo nostro,
+senza aspettare che le finiscano le grandi aziende:**
+- Memoria "a due livelli": distinguere cosa è vero SOLO ora ("oggi mi
+  ha detto di chiamare Rossi") da cosa è vero SEMPRE per quel
+  professionista ("lavora sempre il sabato mattina"). Non è tecnologia
+  esclusiva delle big tech — è una scelta di progettazione (database +
+  cosa mandare al modello): costruibile da noi, adesso.
+- Un "adattatore" leggero per utente (riaddestrare un pezzo di modello
+  per ogni professionista) — questo SÌ richiede infrastruttura pesante
+  che non abbiamo (calcolo, addestramento) e non ci serve nemmeno: la
+  memoria con recupero sopra ottiene praticamente lo stesso risultato
+  pratico, senza mai dover toccare il modello.
+
+**Buchi reali dell'intero settore — non risolti nemmeno dalle più
+grandi aziende tech, non solo da EON (annotati per consapevolezza, non
+per essere risolti da noi prima di chi ci lavora a tempo pieno):**
+1. Nessuno ha ancora un modo economico per far "imparare per sempre"
+   un'informazione nuova senza doverla ripetere/reiniettare nel
+   contesto ogni volta — anche ChatGPT/Gemini "ricordano" solo perché
+   la riscrivono dentro ogni conversazione, non l'hanno davvero
+   assorbita.
+2. Nessuno sa bene come aggiornare/correggere un ricordo vecchio
+   diventato sbagliato (es. "non lavoro più il sabato") invece di
+   accumulare fatti contraddittori nel tempo — gestito ovunque con
+   soluzioni artigianali, non con una vera soluzione.
+3. Nessuno garantisce coerenza vera su un ricordo enorme accumulato
+   negli anni, senza mai contraddirsi o perdere per sbaglio qualcosa
+   detto tempo prima.
+4. Nessun grande prodotto ha ancora una buona interfaccia che spieghi
+   in modo chiaro all'utente COSA l'assistente ricorda di lui e PERCHÉ
+   lo ha usato in una risposta — più un sistema si personalizza, più
+   diventa opaco.
+
+   **Questo quarto punto, a differenza dei primi tre, è alla nostra
+   portata anche senza risolvere il problema tecnico di fondo**: una
+   EON potrebbe comunque essere onesta e mostrare "ecco cosa ricordo di
+   te e perché l'ho usato" — pura trasparenza verso l'utente, non
+   richiede di risolvere il problema di ricerca. Idea da valutare
+   insieme alla costruzione della memoria vera e propria, quando si
+   arriverà a costruirla.
+
+Nessuna implementazione ancora iniziata: questa è la mappa delle idee,
+da riprendere pezzo per pezzo (prima lo stile di scrittura dai
+messaggi reali, probabilmente il passo più semplice e già fattibile con
+i dati che abbiamo).
