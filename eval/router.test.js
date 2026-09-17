@@ -162,6 +162,56 @@ async function main() {
     verifica("\"segna un appuntamento\" NON è una richiesta di risorsa", risorse.nonRisorsa === false, JSON.stringify(risorse));
     verifica("\"chiama rossi\" NON è una richiesta di risorsa", risorse.nonRisorsaChiamata === false, JSON.stringify(risorse));
 
+    console.log("\n--- Riprova automatica per problemi di rete (17/09/2026) ---");
+    const riprova = await page.evaluate(async () => {
+      // sembraErroreDiRete: un errore vero di Postgres/PostgREST ha
+      // sempre un "code" (permesso negato, vincolo violato, ecc.) — non
+      // deve mai far scattare una riprova, che non risolverebbe nulla.
+      const erroreDiRete = sembraErroreDiRete({ message: "Failed to fetch" });
+      const erroreConCode = sembraErroreDiRete({ code: "23505", message: "duplicate key value" });
+      const erroreMessaggioIgnoto = sembraErroreDiRete({ message: "colonna sconosciuta" });
+      const nessunErrore = sembraErroreDiRete(null);
+
+      // conRiprovaDiRete: riprova solo su un errore di rete, si ferma
+      // subito su un errore vero, e rispetta il numero massimo di
+      // tentativi restituendo l'ultimo errore quando non recupera mai.
+      let chiamate1 = 0;
+      const successoAlTerzoTentativo = await conRiprovaDiRete(() => {
+        chiamate1++;
+        if(chiamate1 < 3) return { data: null, error: { message: "Failed to fetch" } };
+        return { data: { ok: true }, error: null };
+      });
+
+      let chiamate2 = 0;
+      const erroreVeroNonRiprova = await conRiprovaDiRete(() => {
+        chiamate2++;
+        return { data: null, error: { code: "42501", message: "permission denied" } };
+      });
+
+      let chiamate3 = 0;
+      const inizio = Date.now();
+      const semprefallito = await conRiprovaDiRete(() => {
+        chiamate3++;
+        return { data: null, error: { message: "network timeout" } };
+      });
+      const durata = Date.now() - inizio;
+
+      return {
+        erroreDiRete, erroreConCode, erroreMessaggioIgnoto, nessunErrore,
+        chiamate1, successoAlTerzoTentativo,
+        chiamate2, erroreVeroNonRiprova,
+        chiamate3, semprefallito, durata,
+      };
+    });
+    verifica("un errore senza code e messaggio di rete è riconosciuto come tale", riprova.erroreDiRete, JSON.stringify(riprova));
+    verifica("un errore CON code (vero errore Postgres) NON è di rete", riprova.erroreConCode === false, JSON.stringify(riprova));
+    verifica("un messaggio ignoto senza code NON è considerato di rete", riprova.erroreMessaggioIgnoto === false, JSON.stringify(riprova));
+    verifica("nessun errore -> non è un errore di rete", riprova.nessunErrore === false, JSON.stringify(riprova));
+    verifica("riprova fino al successo (3 tentativi totali)", riprova.chiamate1 === 3 && riprova.successoAlTerzoTentativo.data && riprova.successoAlTerzoTentativo.data.ok, JSON.stringify(riprova));
+    verifica("un errore vero (con code) si ferma al primo tentativo, mai riprovato", riprova.chiamate2 === 1 && riprova.erroreVeroNonRiprova.error.code === "42501", JSON.stringify(riprova));
+    verifica("un errore di rete persistente si ferma dopo il massimo dei tentativi (3)", riprova.chiamate3 === 3 && riprova.semprefallito.error.message === "network timeout", JSON.stringify(riprova));
+    verifica("il backoff tra i tentativi è crescente, non istantaneo (almeno 600ms+1200ms)", riprova.durata >= 1700, JSON.stringify(riprova));
+
     console.log("\n--- Router: appunti istantanei (fase 1d) ---");
     const appunti = await page.evaluate(async () => {
       // In questo ambiente di test non c'è un vero login Supabase, quindi

@@ -3573,10 +3573,36 @@ const TABELLE_CON_CESTINO = new Set([
   "cantiere_foto", "cantiere_documenti", "cantiere_appunti",
 ]);
 
+/* Riprova automatica per problemi di rete passeggeri (come fanno
+   WhatsApp/Gmail/Slack): utile perché i mestieri di EON si fanno spesso
+   in cantina o in cantiere, con poco segnale. Solo per LETTURE — mai
+   scrittura: una select ripetuta due volte da lo stesso risultato
+   identico, un insert/update ripetuto due volte no (rischio di
+   duplicati), quindi qui non tocchiamo dbInsert/dbUpdate/dbDelete.
+   Riprova solo se l'errore sembra davvero di rete (nessun "code" — gli
+   errori veri di PostgREST/Postgres ne hanno sempre uno, es. permesso
+   negato o vincolo violato — e un messaggio tipico di rete): un errore
+   vero non sparisce riprovando, quindi si passa subito. */
+function sembraErroreDiRete(errore){
+  if(!errore || errore.code) return false;
+  return /fetch|network|load failed|timeout|connection|ECONNRESET/i.test(errore.message || "");
+}
+async function conRiprovaDiRete(eseguiQuery, tentativiMax = 3){
+  let risultato;
+  for(let tentativo = 0; tentativo < tentativiMax; tentativo++){
+    risultato = await eseguiQuery();
+    if(!risultato.error || !sembraErroreDiRete(risultato.error) || tentativo === tentativiMax - 1) return risultato;
+    await new Promise(r => setTimeout(r, 600 * Math.pow(2, tentativo))); // 600ms, 1.2s
+  }
+  return risultato;
+}
+
 async function dbSelect(table){
-  let query = supabaseClient.from(table).select("*").order("created_at", { ascending:true });
-  if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
-  const { data, error } = await query;
+  const { data, error } = await conRiprovaDiRete(() => {
+    let query = supabaseClient.from(table).select("*").order("created_at", { ascending:true });
+    if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
+    return query;
+  });
   if(error){ console.error("Errore lettura " + table + ":", error.message); return []; }
   return data || [];
 }
@@ -3585,9 +3611,11 @@ async function dbSelect(table){
    toccato da un'azione dell'AI, invece di ricaricare l'intera tabella
    (vedi aggiornaDatiToccati). */
 async function dbSelectById(table, id){
-  let query = supabaseClient.from(table).select("*").eq("id", id);
-  if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
-  const { data, error } = await query.maybeSingle();
+  const { data, error } = await conRiprovaDiRete(() => {
+    let query = supabaseClient.from(table).select("*").eq("id", id);
+    if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
+    return query.maybeSingle();
+  });
   if(error){ console.error("Errore lettura " + table + " (" + id + "):", error.message); return null; }
   return data;
 }
@@ -3595,7 +3623,9 @@ async function dbSelectById(table, id){
 /* Solo per la schermata Cestino: le righe eliminate, non quelle vive. */
 async function dbSelectCestino(table){
   if(!TABELLE_CON_CESTINO.has(table)) return [];
-  const { data, error } = await supabaseClient.from(table).select("*").not("deleted_at", "is", null).order("deleted_at", { ascending:false });
+  const { data, error } = await conRiprovaDiRete(() =>
+    supabaseClient.from(table).select("*").not("deleted_at", "is", null).order("deleted_at", { ascending:false })
+  );
   if(error){ console.error("Errore lettura cestino " + table + ":", error.message); return []; }
   return data || [];
 }
@@ -3807,8 +3837,8 @@ async function loadChatsFromDB(){
 
   if(dbConvs.length === 0) return;
 
-  const { data: allMsgs } = await supabaseClient
-    .from("messages").select("*").is("deleted_at", null).order("created_at", { ascending:true });
+  const { data: allMsgs } = await conRiprovaDiRete(() => supabaseClient
+    .from("messages").select("*").is("deleted_at", null).order("created_at", { ascending:true }));
 
   dbConvs.forEach(c => {
     const msgs = (allMsgs || []).filter(m => m.conversation_id === c.id).map(m => ({
@@ -10508,7 +10538,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       if(error) throw error;
       currentSession = data.session;
 
-      const { data: profile } = await supabaseClient.from("profiles").select("*").eq("id", data.user.id).single();
+      const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.user.id).single());
       if(profile){
         obSelectedProfession = profile.profession;
         const firstName = (profile.full_name || "Marco").split(" ")[0];
@@ -10554,7 +10584,7 @@ async function initApp(){
     const { data } = await supabaseClient.auth.getSession();
     if(data && data.session){
       currentSession = data.session;
-      const { data: profile } = await supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single();
+      const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single());
       if(profile){
         document.getElementById("onboardingScreen").classList.add("hidden");
         const firstName = (profile.full_name || "Marco").split(" ")[0];

@@ -1957,3 +1957,52 @@ in poi vale come principio permanente di lavoro, in due direzioni:
 Mai una tecnica presa e applicata "perché lo fa Google": ogni proposta
 va sempre spiegata nel merito (che problema risolve per EON, quale
 compromesso comporta) prima di essere costruita.
+
+**Revisione del lavoro già fatto (17/09/2026), autorizzata da Gianardi
+con una regola precisa: chiedere ogni volta l'autorizzazione prima di
+ogni modifica, e farla solo se è davvero migliorativa.** Proposti 3
+miglioramenti, tutti e 3 autorizzati; da costruire uno alla volta:
+
+1. **FATTO — Riprova automatica per problemi di rete passeggeri**
+   (come WhatsApp/Gmail/Slack, utile perché i mestieri di EON si fanno
+   spesso in cantina/cantiere con poco segnale). Nuove funzioni
+   `sembraErroreDiRete()`/`conRiprovaDiRete()` in `index.html`: fino a 3
+   tentativi con attesa crescente (600ms, 1.2s), ma SOLO per le
+   LETTURE (`dbSelect`, `dbSelectById`, `dbSelectCestino`,
+   `loadChatsFromDB`, il profilo al login) — mai per le scritture
+   (`dbInsert`/`dbUpdate`/`dbDelete`), dove ripetere la stessa richiesta
+   due volte rischierebbe di creare un doppione se la prima fosse in
+   realtà già andata a buon fine (lo stesso motivo per cui Stripe usa le
+   "idempotency key" per i pagamenti — qui, più semplicemente, si evita
+   il rischio non riprovando affatto le scritture). Riprova solo se
+   l'errore sembra davvero di rete (nessun "code" — gli errori veri di
+   Postgres/PostgREST ne hanno sempre uno — e un messaggio tipico di
+   rete): un errore vero (permesso negato, vincolo violato) non sparisce
+   riprovando, quindi si passa e si mostra subito, come oggi. Nuova
+   sezione di test in `eval/router.test.js`: 62/62 verifiche passate
+   (era 54/54).
+
+   **Perché non anche l'assistente AI**: la richiesta a `/api?action=
+   assistant` può scrivere (crea_impegno, crea_appunto, ecc.) — se la
+   riprovassimo alla cieca dopo un errore di rete, rischieremmo di
+   duplicare un'azione se in realtà il server l'avesse già eseguita ma
+   la risposta si fosse persa per strada. Farlo in sicurezza servirebbe
+   un meccanismo vero (una "chiave di idempotenza" lato server, come fa
+   Stripe) — non costruito ora, da valutare se vale la pena in futuro.
+   Per ora l'assistente resta come oggi: se fallisce per un problema di
+   rete, lo dice chiaramente e serve un tentativo manuale.
+
+2. **DA FARE — "Fatto, annulla" al posto di "sei sicuro?"** (come Gmail
+   "Annulla invio", o Trello/Notion "fatto, tocca per annullare"): per
+   azioni già reversibili oggi (es. eliminare un cliente o un impegno
+   finiscono comunque nel Cestino), eseguire subito e offrire pochi
+   secondi per annullare, invece di fermarsi prima a chiedere conferma.
+   Tocca le regole di conferma già costruite con cura (`risk`/
+   `richiedeConferma` in `api/index.js`): da presentare a Gianardi con
+   un piano preciso azione per azione, PRIMA di toccare codice.
+
+3. **DA FARE — Risposte dell'AI a comparsa progressiva (streaming)**
+   invece di aspettare la risposta intera prima di mostrarla (come
+   ChatGPT/Claude.ai/Gemini). Tocca anche il backend (`api/index.js`,
+   l'endpoint `/api?action=assistant`) — il cambiamento più corposo dei
+   3, da scomporre in passi più piccoli prima di iniziare.
