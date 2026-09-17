@@ -2152,3 +2152,40 @@ Nessuna implementazione ancora iniziata: questa è la mappa delle idee,
 da riprendere pezzo per pezzo (prima lo stile di scrittura dai
 messaggi reali, probabilmente il passo più semplice e già fattibile con
 i dati che abbiamo).
+
+## Per il lancio definitivo: app + browser, due cose distinte (17/09/2026)
+
+Discusso con Gianardi: quello che c'è oggi in `index.html` è stato
+costruito per vedere come veniva, pensato solo per il telefono — va
+bene COSÌ COM'È per la versione app, nessuna modifica al modo in cui è
+fatta o si vede. Verificato nel codice: il contenitore principale
+(`.app`) ha una larghezza massima fissa di 460px sempre centrata, la
+navigazione è la barra in basso in stile app mobile — su uno schermo
+largo si vedrebbe come una strisciolina stretta in mezzo, non una vera
+esperienza da browser/desktop. Curiosità trovata: esiste già in CSS un
+accenno di navigazione desktop (`.rail`/`.sidebar`, una barra laterale)
+ma è disattivata (`display:none`) — sembra fosse stata immaginata una
+versione desktop tempo fa, poi lasciata da parte per concentrarsi solo
+sul mobile.
+
+Per il lancio definitivo servono DUE cose distinte, non una sola:
+
+1. **Formalizzare l'app** (nessuna modifica al codice/aspetto di oggi,
+   solo il "confezionamento" attorno): aggiungere `manifest.json` e un
+   service worker per renderla davvero installabile (icona vera su
+   Android, funzionamento offline — utile anche per la resilienza di
+   rete già costruita oggi, vedi sopra "Riprova automatica"), ed
+   eventualmente avvolgerla con uno strumento come Capacitor per
+   pubblicarla su App Store/Google Play — sempre lo stesso codice,
+   nessuna riscrittura.
+2. **Costruire una vera versione browser/desktop**, distinta da quella
+   mobile: stessa intelligenza/dati/funzioni di sotto, ma un layout
+   pensato per schermi larghi (probabilmente riprendendo l'idea già
+   accennata di `.rail`/`.sidebar` invece della barra in basso, più
+   contenuto visibile insieme invece di una colonna stretta). Un vero
+   lavoro di disegno a parte, non un ridimensionamento di quello che
+   c'è.
+
+Nessuna implementazione iniziata: entrambe restano da fare, in una
+sessione dedicata quando si arriverà a quel punto della roadmap
+(dopo la validazione con i primi tester veri).
