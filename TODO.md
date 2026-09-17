@@ -1365,12 +1365,70 @@ informazioni (chi ha diritto a saperlo, prima di decidere come
 comunicarlo) e il tono più formale/documentato richiesto dalle
 comunicazioni condominiali rispetto a un messaggio a un cliente singolo.
 
-**Prossimo passo**: audit di `libro/amministratore.md` contro strato
-comune + pack edile/idraulico (cosa è già coperto, cosa è genuinamente
-nuovo), poi insegnamento a EON a piccoli gruppi testati su staging, stesso
-metodo delle professioni precedenti. Dopo l'amministratore:
-`libro/avvocato.md`, stesso ordine confermato con Gianardi (validazione
-con tester reali resta l'ultimo passo, dopo tutti i cervelli).
+**Audit completato — trovata una lacuna architetturale, non solo di
+prompt (17/09/2026).** A differenza di edile e idraulico, la parte più
+importante del mestiere (un condominio con MOLTE persone dentro, spese
+ripartite, dati di morosità da non condividere tra condomini) richiedeva
+un'entità che EON non aveva affatto: un "cliente" nel database è sempre
+una singola entità. Chiesto a Gianardi come procedere (AskUserQuestion):
+ha scelto di costruire l'entità subito, invece di rimandare tutto a "non
+applicabile" come per una decina di voci del libro edile.
+
+**Entità Condomini costruita e insegnata.** Scelta di modello: il
+Condominio (l'edificio) NON è una tabella nuova — resta semplicemente un
+Cliente esistente (`clients`), quindi crea_cliente/cerca_cliente/
+cliente_risolto funzionano già per l'edificio senza alcuna modifica. Solo
+le PERSONE al suo interno mancavano: nuova tabella `condomini` (owner_id,
+client_id, nome, ruolo proprietario/inquilino, unita_immobiliare,
+quota_millesimale, telefono, morosita_importo, morosita_da), migrazione
+`supabase/condomini_entita_schema.sql`, applicata su staging. Tre nuovi
+strumenti: `cerca_condomino` (cerca una persona, in un condominio
+specifico o in tutti — restituisce anche il nome del condominio di
+ciascun risultato per disambiguare), `crea_condomino`, e
+`mostra_morosita_condominio` (solo per uso proprio dell'amministratore,
+mai da inoltrare a un altro condomino).
+
+**Nuova `promptPackAmministratore()`**, attivata per
+`profiles.profession === "amministratore"` (valore già ammesso dal
+vincolo esistente, non serve nessuna modifica al database per questo).
+Contenuto: (1) la distinzione chiave — un nome di persona è quasi sempre
+un condomino (cerca_condomino), un indirizzo/nome di edificio è il
+cliente (cerca_cliente), mai confonderli; se lo stesso condomino esiste
+in più condomini diversi, è un'ambiguità vera da chiedere; (2)
+"coordina, non esegue" — mai proporre che l'utente risolva di persona un
+problema tecnico; (3) riservatezza della morosità tra condomini, mai nel
+testo di un manda_messaggio ad altri; comunicazione collettiva = messaggio
+al cliente_id del condominio, comunicazione a un singolo condomino = EON
+non ha oggi un canale diretto, dichiararlo onestamente; (4) spesa
+straordinaria mai trattata come autorizzata senza una delibera reale
+menzionata dall'utente; (5) mai inventare quote millesimali o dati
+economici mancanti; mai prendere posizione in una disputa tra condomini;
+mai dare una risposta legale netta su "serve una delibera?"; (6)
+glossario con la coppia ad alto rischio fonetico consuntivo/preventivo
+(termini opposti).
+
+Aggiunti 7 nuovi casi a `eval/casi.json` (`amministratore-01..07`) e la
+tabella `condomini` al contratto di `eval/check-schema.js`. `node --check`
+e `eval/backend.test.js` confermano nessuna regressione (18/18).
+
+**Non ancora costruito, deliberatamente fuori scope per ora** (come le
+voci "non applicabile" del libro edile): delibere/assemblee come entità
+proprie, spese con ripartizione automatica per millesimi, fondo cassa/
+fondo lavori, rendiconto. Il pack insegna i PRINCIPI comportamentali
+corrispondenti (mai trattare una spesa come autorizzata senza delibera,
+mai inventare importi) senza bisogno di modellare quelle entità — se
+l'esperienza reale mostrerà che serve tracciarle davvero, si costruirà
+allora.
+
+**Prossimo passo**: guidare Gianardi nel live-check su staging — impostare
+`profiles.profession = 'amministratore'` sull'utente di test, seminare i
+dati di precondizione (due condomini/clienti, es. "Condominio via Roma 12"
+e "Condominio via Torino 5", con alcuni condomini dentro incluso un
+omonimo in entrambi e uno moroso), poi lanciare `eval/live-check.js` con
+`EVAL_SOLO=amministratore-01,amministratore-02,amministratore-03,amministratore-04,amministratore-05,amministratore-06,amministratore-07`.
+Dopo l'amministratore: `libro/avvocato.md`, stesso ordine confermato con
+Gianardi (validazione con tester reali resta l'ultimo passo, dopo tutti i
+cervelli).
 
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
