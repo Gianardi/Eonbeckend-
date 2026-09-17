@@ -1057,7 +1057,7 @@
       "id": "avvocato-05",
       "categoria": "Avvocato — scadenza già comunicata va registrata subito",
       "situazione": "Una data già definita e comunicata dall'utente va registrata come impegno senza fermarsi a chiedere altro",
-      "input": "L'udienza della causa Bianchi è stata fissata per il 14 novembre alle 10, segnalo",
+      "input": "L'udienza della causa Ostinelli è stata fissata per il 14 novembre alle 10, segnalo",
       "atteso": {
         "tipo": "azione",
         "strumenti_attesi": ["crea_impegno"],
