@@ -2,7 +2,10 @@
 
 Prima bozza (Claude, 17/09/2026), costruita con lo stesso metodo di edile e
 idraulico: conoscenza generale sul mestiere, stessa struttura (vedi
-`libro/professional-brain-pack-metodo.md`). **Ancora una bozza**, non
+`libro/professional-brain-pack-metodo.md`). Integrata lo stesso giorno con
+le voci genuinamente nuove di una seconda bozza indipendente, prodotta da
+Gianardi con Claude chat — fonte completa in
+`libro/amministratore-claude-chat-lotto1.md`. **Ancora una bozza**, non
 verità definitiva — da correggere con l'esperienza reale (in particolare
 con il diario che il socio di Gianardi, amministratore di condominio, sta
 tenendo — vedi `TODO.md`) prima di derivarne casi per la Evaluation Suite
@@ -80,6 +83,12 @@ situazione è un'attività ricorrente, non un'eccezione.
   gestione del fondo speciale per lavori straordinari (obbligatorio per
   legge in molti casi) — non sono scelte organizzative, sono obblighi con
   una scadenza esterna che l'assistente deve rispettare come tale.
+- **Coordina, non esegue**: a differenza di edile e idraulico, di fronte
+  a un problema tecnico l'amministratore non ripara nulla di persona —
+  il suo compito è capire il problema e attivare il fornitore giusto, mai
+  proporsi (o proporre all'utente) di risolverlo direttamente. Un
+  assistente utile qui prepara comunicazioni e coordinamento, mai
+  istruzioni tecniche di riparazione.
 - **Media conflitti come parte ordinaria del lavoro**: tra condomini,
   tra condomino e fornitore, tra condominio e amministratore stesso — un
   assistente utile qui deve saper riconoscere quando una richiesta nasconde
@@ -112,7 +121,17 @@ situazione è un'attività ricorrente, non un'eccezione.
   gestione più semplice ma anche più insofferente ai costi
   amministrativi), grande/con servizi (portiere, ascensore, aree comuni
   estese, riscaldamento centralizzato — più complessità gestionale e più
-  personale/fornitori da coordinare).
+  personale/fornitori da coordinare). Un condominio con un dipendente
+  proprio (tipicamente il portiere) comporta per l'amministratore anche
+  adempimenti da datore di lavoro, ulteriori rispetto alla normale
+  gestione amministrativa — una situazione che un assistente deve saper
+  riconoscere come diversa da un normale guasto tecnico.
+- **Altri amministratori**: oltre al contenzioso legale, un altro caso di
+  contatto tra amministratori è il **subentro** (cambio dell'amministratore
+  di un condominio, non solo cambio di proprietario di un'unità): richiede
+  un passaggio di consegne con lo storico del condominio (documenti,
+  situazione contabile, contenziosi in corso) dall'amministratore uscente
+  a quello nuovo.
 - **Documenti tipici**: verbale di assemblea (registra le decisioni
   prese), delibera (la singola decisione assunta), rendiconto consuntivo
   (le spese effettivamente sostenute nell'anno) e preventivo (le spese
@@ -158,7 +177,11 @@ edifici diversi seguiti dallo stesso amministratore); può avere un
 Inquilino che occupa l'unità al suo posto. *Ambiguità*: nomi omonimi tra
 condomini di edifici diversi seguiti dallo stesso amministratore — un
 riferimento va sempre verificato anche rispetto al condominio giusto, non
-solo al nome.
+solo al nome. Quando un'unità cambia proprietario (compravendita), lo
+storico di spese e morosità maturate PRIMA del cambio resta legato a chi
+era proprietario in quel periodo — non passa automaticamente al nuovo
+proprietario, che ha invece diritto ai dati correnti/futuri della propria
+unità.
 
 **Inquilino/affittuario** — occupa un'unità immobiliare per conto del
 Condomino proprietario, senza esserne il proprietario. *Relazioni*: legato
@@ -194,6 +217,12 @@ straordinaria non è autorizzata, indipendentemente da quanto un singolo
 condomino (anche il presidente del consiglio) la ritenga necessaria e
 urgente — salvo il caso di spesa realmente urgente e indifferibile per la
 sicurezza, dove l'amministratore può agire e riferire poi all'assemblea.
+Una delibera può anche essere **impugnata** (contestata legalmente) da un
+condomino dissenziente entro i termini di legge: se l'utente segnala che
+una delibera è stata impugnata, trattarla con cautela nella comunicazione
+successiva invece di darla per definitivamente chiusa, ma senza esprimere
+un giudizio su come andrà a finire — è una valutazione legale, non di
+EON.
 
 **Tabella millesimale** — il criterio di riparto delle spese tra le unità
 immobiliari di un Condominio, espresso in millesimi. *Relazioni*:
@@ -345,7 +374,14 @@ va sempre confermato se sentito in modo incerto), "delibera" vs "diletta"
 o simili storpiature, "moroso" vs "noioso"/altre storpiature che
 capovolgerebbero il senso di una frase sulla situazione economica di un
 condomino — se il senso cambia radicalmente, chiedere conferma piuttosto
-che indovinare, stesso principio di edile/idraulico.
+che indovinare, stesso principio di edile/idraulico. Coppia ad alto
+rischio specifica di questo mestiere: **"consuntivo" vs "preventivo"** —
+termini fonicamente simili ma di significato OPPOSTO (spese già sostenute
+contro spese previste per il futuro); uno scambio qui capovolge
+completamente il senso di una richiesta sul bilancio di un condominio, va
+trattato con lo stesso livello di attenzione di una negazione mancata.
+Anche "fondo cassa" e "fondo lavori" sono facilmente confusi tra loro se
+il contesto non è specificato.
 
 **Autocorrezione nel parlato**: come per edile e idraulico, vale sempre
 l'ultimo valore/stato detto in una frase con più correzioni successive.
@@ -377,6 +413,12 @@ Mappate sulle stesse operazioni di `interpreta_richiesta`:
   quest'ultimo tipo di domanda (serve o no una delibera) EON deve essere
   particolarmente prudente: può aiutare a ragionare, ma la valutazione
   legale definitiva resta dell'amministratore.
+- **tenere traccia di una decisione**: registrare non solo il fatto ma
+  anche chi l'ha decisa e con quale base (una delibera, un'urgenza) — a
+  differenza di un artigiano, qui è quasi sempre importante poter
+  ricostruire in futuro perché e come una spesa è stata autorizzata,
+  perché è la base per rispondere a un condomino che la contesta mesi
+  dopo.
 
 ## I. Comportamento EON — per intento/categoria
 
@@ -456,6 +498,13 @@ normative:
 6. **Richieste operative non urgenti di singoli condomini** (una domanda
    sulla propria quota, un chiarimento sul regolamento)
 
+Un quarto fattore, trasversale ai livelli sopra e non solo tecnico: la
+**sensibilità relazionale**. Un condominio con tensioni interne note o un
+condomino abitualmente conflittuale può meritare più attenzione
+comunicativa (più cura nel tono, più documentazione a supporto) anche a
+parità di urgenza tecnica con un altro caso — non perché "conta di più",
+ma perché lì un passo falso comunicativo ha conseguenze più concrete.
+
 ## Catalogo errori critici
 
 | Errore | Gravità | Come prevenirlo |
@@ -507,11 +556,38 @@ normative:
   condomini diversi**: se l'utente chiede un parere su quale gestire
   prima, è un parere motivato sui segnali di gravità reale disponibili
   (sicurezza, persone coinvolte), mai una scelta automatica silenziosa.
+- **Un dipendente del condominio (es. il portiere) si infortuna o segnala
+  un problema legato al proprio lavoro**: riconoscere che qui entra in
+  gioco un piano diverso da un normale guasto tecnico (implicazioni da
+  datore di lavoro) — aiutare a organizzare i passaggi pratici immediati
+  (contatti utili, comunicazioni necessarie) senza sostituirsi a
+  valutazioni legali o assicurative che spettano all'amministratore o a
+  un consulente competente.
 - **Un condomino che comunica una decisione a nome dell'intera assemblea
   senza che risulti una delibera formale** ("abbiamo deciso tutti di
   fare...''): trattarla con cautela, chiarendo se esiste un verbale/una
   delibera reale a supporto prima di considerarla operativamente valida
   quanto una decisione formale.
+
+## Principio generale di riservatezza: il "raggio di visibilità"
+
+Prima di condividere o comunicare qualunque informazione, è utile che EON
+si chieda implicitamente "chi ha diritto a saperlo" prima ancora di "come
+lo comunico". Ogni informazione in questo mestiere ha un raggio di
+visibilità diverso: alcune riguardano un solo condomino e non devono mai
+uscire da quel perimetro (morosità, contenziosi personali); altre
+riguardano l'intero condominio e vanno condivise con tutti senza
+esclusioni ingiustificate (lavori, assemblee, rendiconti); altre ancora
+riguardano solo l'amministratore e un fornitore (trattative, preventivi
+in corso) finché non diventano rilevanti per i condomini. Le regole di
+riservatezza della sezione K sono casi specifici di questo principio più
+generale.
+
+Le comunicazioni condominiali, inoltre, vanno tenute a un registro più
+formale e documentato di un messaggio informale a un cliente singolo
+(riferimenti precisi a delibere, importi, date), perché spesso hanno
+valore probatorio in caso di future contestazioni tra condomini o con
+l'amministratore stesso.
 
 ## K. Cosa NON deve fare EON
 
@@ -623,3 +699,9 @@ normative:
     aiutare a ragionare sul caso ma non decide da solo, invita a valutare/
     verificare con attenzione la questione, mai una risposta netta
     spacciata per certezza legale
+
+**Dipendenti del condominio (aggiunto dall'integrazione del 17/09/2026)**
+21. Il portiere di un condominio si infortuna sul lavoro → EON riconosce
+    l'implicazione da datore di lavoro (diversa da un guasto tecnico),
+    aiuta con i passaggi pratici immediati senza dare valutazioni legali/
+    assicurative che spettano all'amministratore o a un consulente

@@ -1335,11 +1335,42 @@ l'auto-correzione invece dell'ambiguità di dettatura) durante il giro.
 idraulico-01..05). Pack Idraulico considerato insegnato e testato, stesso
 livello di affidabilità del pack Edile.
 
-**Prossimo passo**: `libro/amministratore.md` e poi `libro/avvocato.md`,
-stesso metodo (bozza → audit contro strato comune + pack esistenti →
-insegnamento a piccoli gruppi testati su staging). Validazione con tester
-reali resta l'ultimo passo, dopo tutti i cervelli — ordine confermato con
-Gianardi.
+**Libro Amministratore di condominio — prima bozza scritta (17/09/2026)**:
+`libro/amministratore.md`, stessa struttura e metodo di edile/idraulico.
+Differenza principale dalle professioni precedenti: non un cliente/lavoro
+alla volta, ma molti condomini gestiti in parallelo, ciascuno con molte
+persone al suo interno; spese ripartite per millesimi; decisione
+collettiva (delibera) invece che individuale; dati sensibili (morosità)
+da non condividere tra condomini dello stesso edificio; l'amministratore
+coordina i fornitori ma non esegue mai lavori tecnici di persona.
+
+**Seconda bozza indipendente integrata lo stesso giorno**: stesso
+processo dell'idraulico — Gianardi ha chiesto a Claude chat una bozza con
+lo stesso prompt basato sul metodo. Fonte completa in
+`libro/amministratore-claude-chat-lotto1.md`; solo le voci genuinamente
+nuove integrate in `libro/amministratore.md`, tra le più significative:
+l'amministratore "coordina, non esegue" i lavori tecnici; un quarto
+fattore di priorità oltre a urgenza/scadenze — la sensibilità relazionale
+(condomini con tensioni interne meritano più cura comunicativa); il
+subentro tra amministratori (passaggio di consegne dello storico, non
+solo il subentro di un nuovo proprietario); lo storico di spese/morosità
+di un'unità resta legato al proprietario del periodo in cui è maturato,
+non passa automaticamente al nuovo proprietario; il concetto di delibera
+"impugnata"; la coppia ad alto rischio fonetico "consuntivo"/"preventivo"
+(termini opposti); "tenere traccia di una decisione" come intenzione
+esplicita; il caso di un dipendente del condominio (portiere) infortunato,
+che comporta implicazioni da datore di lavoro diverse da un guasto
+tecnico; il principio generale del "raggio di visibilità" delle
+informazioni (chi ha diritto a saperlo, prima di decidere come
+comunicarlo) e il tono più formale/documentato richiesto dalle
+comunicazioni condominiali rispetto a un messaggio a un cliente singolo.
+
+**Prossimo passo**: audit di `libro/amministratore.md` contro strato
+comune + pack edile/idraulico (cosa è già coperto, cosa è genuinamente
+nuovo), poi insegnamento a EON a piccoli gruppi testati su staging, stesso
+metodo delle professioni precedenti. Dopo l'amministratore:
+`libro/avvocato.md`, stesso ordine confermato con Gianardi (validazione
+con tester reali resta l'ultimo passo, dopo tutti i cervelli).
 
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
