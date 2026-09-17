@@ -116,6 +116,52 @@ async function main() {
     verifica("\"chi mi ha scritto\" trova Mario Rossi", letture.chiScritto && letture.chiScritto.testo.includes("Mario Rossi"), JSON.stringify(letture.chiScritto));
     verifica("\"segna un appuntamento\" NON è una lettura locale", letture.nonLettura === null, JSON.stringify(letture.nonLettura));
 
+    console.log("\n--- Router: risorse immediate (fase 1c) ---");
+    const risorse = await page.evaluate(() => {
+      clients.length = 0;
+      clients.push(
+        { id: "c1", name: "Mario Rossi", status: "attivo", value: 0, desc: "", last: "", phone: "", color: "", archived: false },
+        { id: "c2", name: "Luca Bianchi", status: "attivo", value: 0, desc: "", last: "", phone: "", color: "", archived: false },
+        { id: "c3", name: "Mario Bianchi", status: "attivo", value: 0, desc: "", last: "", phone: "", color: "", archived: false },
+        { id: "c4", name: "Vecchio Cliente", status: "inattivo", value: 0, desc: "", last: "", phone: "", color: "", archived: true }
+      );
+      cantiereFoto.length = 0;
+      cantiereFoto.push(
+        { id: "f1", url: "https://example.com/tetto1.jpg", created: "2026-09-10T10:00:00Z", clientId: "c1" },
+        { id: "f2", url: "https://example.com/tetto2.jpg", created: "2026-09-12T10:00:00Z", clientId: "c1" }
+      );
+      chats.length = 0;
+      chats.push({
+        name: "Mario Rossi", online: true, unread: 0, isClient: true, isProspect: false, archived: false, toSeeToday: false, toCallToday: false,
+        messages: [
+          { id: "m1", eventType: "doc", title: "Preventivo tetto", text: "Rifacimento tetto", amount: "3.200", time: "10 set, 09:00" },
+          { id: "m2", fileUrl: "https://example.com/allegato.pdf", fileName: "Foto_prima.pdf", time: "11 set, 09:00" },
+        ],
+      });
+
+      chiudiRisorsaCard();
+      const fotoOk = provaRisorsaImmediata("mi serve la foto di rossi");
+      const fotoApertaTesto = document.body.textContent.includes("Foto — Mario Rossi");
+      chiudiRisorsaCard();
+
+      const docOk = provaRisorsaImmediata("dammi il documento di rossi");
+      const docApertoTesto = document.body.textContent.includes("Documenti — Mario Rossi");
+      chiudiRisorsaCard();
+
+      const nessunCliente = provaRisorsaImmediata("mi serve il documento di sconosciuto");
+      const clienteAmbiguo = provaRisorsaImmediata("mi serve la foto di bianchi");
+      const nonRisorsa = provaRisorsaImmediata("segna un appuntamento con rossi domani");
+      const nonRisorsaChiamata = provaRisorsaImmediata("chiama rossi");
+
+      return { fotoOk, fotoApertaTesto, docOk, docApertoTesto, nessunCliente, clienteAmbiguo, nonRisorsa, nonRisorsaChiamata };
+    });
+    verifica("\"mi serve la foto di rossi\" apre la card foto", risorse.fotoOk && risorse.fotoApertaTesto, JSON.stringify(risorse));
+    verifica("\"dammi il documento di rossi\" apre la card documenti", risorse.docOk && risorse.docApertoTesto, JSON.stringify(risorse));
+    verifica("cliente non trovato NON intercetta (falso negativo innocuo)", risorse.nessunCliente === false, JSON.stringify(risorse));
+    verifica("cliente ambiguo (due Bianchi) NON intercetta", risorse.clienteAmbiguo === false, JSON.stringify(risorse));
+    verifica("\"segna un appuntamento\" NON è una richiesta di risorsa", risorse.nonRisorsa === false, JSON.stringify(risorse));
+    verifica("\"chiama rossi\" NON è una richiesta di risorsa", risorse.nonRisorsaChiamata === false, JSON.stringify(risorse));
+
     console.log("\n--- Contesto delle correzioni veloci (EON BRAIN punto 5) ---");
     const contesto = await page.evaluate(async () => {
       currentSession = { user: { id: "test-user" } };
@@ -201,7 +247,13 @@ async function main() {
       // Turno 3: nessun focus nella risposta -> deve restare quello del turno 2 (niente scadenza a tempo).
       await invia("grazie", { stato: "concluso", testo: "Prego.", azioni: [] });
       // Turno 4: un NUOVO focus esplicito e incompatibile -> sostituisce quello precedente.
-      await invia("fammi vedere il documento di Rossi", {
+      // Frase scelta apposta per NON iniziare con un verbo della fase 1c del
+      // Router (provaRisorsaImmediata, es. "fammi vedere"/"dammi"): "Mario
+      // Rossi" è un cliente vero e unico in questo fixture, quindi una frase
+      // come "fammi vedere il documento di Rossi" verrebbe intercettata dal
+      // Router (comportamento corretto e voluto) invece di arrivare qui,
+      // dove si vuole invece testare la gestione del Focus lato AI.
+      await invia("il cliente Rossi ha risposto sul documento", {
         stato: "concluso", testo: "Ecco il documento.", azioni: [],
         focus: { tipo: "documento", riferimento: "Rossi" },
       });

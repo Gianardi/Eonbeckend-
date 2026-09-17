@@ -7556,6 +7556,14 @@ function collegaHubRacconta(){
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
     }
+    /* Fase 1c: stesso principio, per una richiesta di foto/documento/
+       preventivo di un cliente riconoscibile con certezza. */
+    if(provaRisorsaImmediata(testo)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      chiudiHubAI();
+      return;
+    }
     if(!BACKEND_CONFIGURED || !currentSession){
       stato("attesa", "Serve essere collegati",
         "L'assistente scrive nel calendario vero: accedi per usarlo");
@@ -8438,6 +8446,88 @@ function provaLetturaLocale(testo){
   return null;
 }
 
+/* Fase 1c del Router (RISORSE — TODO.md, "EON BRAIN", 17/09/2026): come
+   provaLetturaLocale, ma per una richiesta di foto/documento/preventivo/
+   fattura di un cliente — "mi serve il documento tetto rossi",
+   "fammi vedere le foto di Bianchi". Zero chiamata all'AI, zero
+   chiamata di rete: legge solo dati già in memoria (clients, chats,
+   cantiereFoto), esattamente come farebbe recupera_foto_cantiere/
+   recupera_documenti_cliente lato server.
+
+   Il punto critico di sicurezza è riconoscere IL CLIENTE GIUSTO: qui non
+   c'è l'entity resolution con dettatura imprecisa che ha l'AI (fuzzy
+   match, conferma se "simile"), quindi il confronto resta rigido di
+   proposito — se il nome corrisponde a più di un cliente, o a nessuno,
+   NON si sceglie a caso: si torna false e la frase prosegue verso l'AI
+   come sempre (falso negativo innocuo, mai un falso positivo su QUALE
+   cliente). Apre direttamente la card risorsa (vedi mostraRisorsaFoto/
+   mostraRisorsaDocumenti) se riconosciuta. */
+const TRIGGER_RISORSA = /^(?:mi serve|mi servirebbe|dammi|mandami|fammi vedere|voglio vedere|recupera|cerca|trova|apri)\s+(?:il|la|lo|i|gli|le)?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|per)?\s*(.+)$/;
+
+function trovaClienteDaParole(parole){
+  let trovato = null, corrispondenze = 0;
+  for(const c of clients){
+    if(c.archived) continue;
+    const tokenNome = c.name.toLowerCase().split(/\s+/).filter(Boolean);
+    if(tokenNome.some(tok => parole.includes(tok))){
+      corrispondenze++;
+      trovato = c;
+    }
+  }
+  return corrispondenze === 1 ? trovato : null;
+}
+
+function provaRisorsaImmediata(testo){
+  const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  if(!t) return false;
+  const m = t.match(TRIGGER_RISORSA);
+  if(!m) return false;
+  const tipoRichiesto = m[1];
+  const resto = (m[2] || "").trim();
+  if(!resto) return false;
+
+  const parole = resto.split(/\s+/).filter(Boolean);
+  const cliente = trovaClienteDaParole(parole);
+  if(!cliente) return false;
+
+  /* Le parole che restano dopo aver tolto il nome del cliente sono un
+     eventuale filtro per titolo (es. "tetto" in "documento tetto
+     rossi") — un affinamento, non un requisito: se non restringe a
+     nulla si mostra comunque l'elenco intero, mai un elenco vuoto per
+     un filtro che non ha trovato corrispondenze. */
+  const paroleNomeCliente = cliente.name.toLowerCase().split(/\s+/);
+  const paroleFiltro = parole.filter(p => !paroleNomeCliente.includes(p));
+
+  if(/^(foto|fotografia|fotografie)$/.test(tipoRichiesto)){
+    const foto = cantiereFoto
+      .filter(f => f.clientId === cliente.id)
+      .slice()
+      .sort((a, b) => new Date(b.created) - new Date(a.created))
+      .slice(0, 10)
+      .map(f => ({ id: f.id, url: f.url, quando: f.created }));
+    mostraRisorsaFoto(foto, cliente.name);
+    return true;
+  }
+
+  const chat = chats.find(c => c.name === cliente.name);
+  let documenti = chat
+    ? chat.messages
+        .filter(msg => msg.eventType === "doc" || msg.fileUrl)
+        .slice()
+        .reverse() // chat.messages è in ordine cronologico crescente: i più recenti prima
+        .slice(0, 10)
+        .map(msg => msg.eventType === "doc"
+          ? { id: msg.id, tipo: "preventivo_o_fattura", titolo: msg.title, riepilogo: msg.text || null, importoTesto: msg.amount || null, url: null, quandoTesto: msg.time }
+          : { id: msg.id, tipo: "allegato", titolo: msg.fileName || "(senza nome)", url: msg.fileUrl, quandoTesto: msg.time })
+    : [];
+  if(paroleFiltro.length){
+    const filtrati = documenti.filter(d => paroleFiltro.some(p => (d.titolo || "").toLowerCase().includes(p)));
+    if(filtrati.length) documenti = filtrati;
+  }
+  mostraRisorsaDocumenti(documenti, cliente.name);
+  return true;
+}
+
 /* Fase 2 del contesto (vedi TODO.md, "EON BRAIN"): una correzione veloce
    ("no, alle 10") deve funzionare anche quando EON non ha fatto nessuna
    domanda esplicita — es. dopo "Segna Mario domani alle 9" → "Fatto.",
@@ -8552,6 +8642,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\n+/g, ". ") : ""));
         return;
       }
+    }
+
+    /* Stesso principio, fase 1c: una richiesta di foto/documento/
+       preventivo di un cliente già riconoscibile con certezza apre
+       subito la card risorsa, senza passare dall'AI. */
+    if(!inContinuazione && provaRisorsaImmediata(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      if(viaVoce) parlaRisposta("Ecco quello che hai chiesto");
+      return;
     }
 
     if(!BACKEND_CONFIGURED || !currentSession){
@@ -9189,6 +9289,17 @@ async function inviaRisorsaEonInterna(clienteNome, testoDaInviare){
   if(input){ input.value = testoDaInviare; input.focus(); }
 }
 
+/* doc/foto possono arrivare da EON (data ISO vera in "quando") o dal
+   Router — fase 1c, dati già in memoria dove a volte c'è solo un orario
+   già formattato in stringa (vedi mappatura chat.messages, "time"): in
+   quel caso lo si passa già pronto in "quandoTesto" invece di provare a
+   ricostruire una data che non abbiamo. */
+function testoData(item){
+  if(item.quandoTesto) return item.quandoTesto;
+  if(item.quando) return new Date(item.quando).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+  return null;
+}
+
 function creaVoceFoto(foto, clienteNome){
   const el = document.createElement("div");
   el.className = "risorsa-voce";
@@ -9197,10 +9308,11 @@ function creaVoceFoto(foto, clienteNome){
   img.alt = "";
   img.addEventListener("click", () => apriMedia(foto.url, "image/*"));
   el.appendChild(img);
-  if(foto.quando){
+  const dataFoto = testoData(foto);
+  if(dataFoto){
     const sotto = document.createElement("div");
     sotto.className = "risorsa-voce-sotto";
-    sotto.textContent = new Date(foto.quando).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+    sotto.textContent = dataFoto;
     el.appendChild(sotto);
   }
   const btnRiga = document.createElement("div");
@@ -9241,13 +9353,19 @@ function creaVoceDocumento(doc, clienteNome){
   const el = document.createElement("div");
   el.className = "risorsa-voce";
 
+  /* L'importo può arrivare già formattato (dati letti dalla chat già in
+     memoria, vedi provaRisorsaImmediata) o come numero grezzo (dal
+     backend, vedi recupera_documenti_cliente): mai riformattare due
+     volte, mai perderlo se manca solo la versione grezza. */
+  const importoTesto = doc.importoTesto || (doc.importo != null ? "€" + Number(doc.importo).toLocaleString("it-IT") : null);
+
   if(doc.tipo === "preventivo_o_fattura"){
     const eFattura = /fattura/i.test(doc.titolo || "");
     el.appendChild(creaIconaHero(eFattura ? "var(--green)" : "var(--teal)", eFattura ? ICONA_FATTURA : ICONA_DOCUMENTO));
-    if(doc.importo != null){
+    if(importoTesto){
       const importo = document.createElement("div");
       importo.className = "risorsa-hero-cifra";
-      importo.textContent = "€" + Number(doc.importo).toLocaleString("it-IT");
+      importo.textContent = importoTesto;
       el.appendChild(importo);
     }
     const titolo = document.createElement("div");
@@ -9265,7 +9383,7 @@ function creaVoceDocumento(doc, clienteNome){
     nota.textContent = "Visibile solo dentro l'app — nessun link da condividere";
     el.appendChild(nota);
     if(clienteNome){
-      const riassunto = doc.titolo + (doc.importo != null ? " — €" + Number(doc.importo).toLocaleString("it-IT") : "");
+      const riassunto = doc.titolo + (importoTesto ? " — " + importoTesto : "");
       el.appendChild(creaRigaCanaliInvio(clienteNome, riassunto));
     }
   } else {
@@ -9274,10 +9392,11 @@ function creaVoceDocumento(doc, clienteNome){
     titolo.className = "risorsa-voce-titolo";
     titolo.textContent = doc.titolo || "(senza titolo)";
     el.appendChild(titolo);
-    if(doc.quando){
+    const dataDoc = testoData(doc);
+    if(dataDoc){
       const sotto = document.createElement("div");
       sotto.className = "risorsa-voce-sotto";
-      sotto.textContent = new Date(doc.quando).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+      sotto.textContent = dataDoc;
       el.appendChild(sotto);
     }
     if(doc.url){

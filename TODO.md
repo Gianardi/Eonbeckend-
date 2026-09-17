@@ -250,6 +250,37 @@ era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
    alla radice con un confine di parola nell'espressione regolare, a
    beneficio anche del Calendario che la usava già.
 
+   **17/09/2026 — estensione fase 1c: risorse immediate.** Richiesta
+   esplicita di Gianardi ("SI ASSOLUTAMENTE. E' FONDAMENTALE QUESTO
+   PASSAGGIO.") dopo aver notato che una richiesta come "mi serve
+   documento tetto rossi" passava comunque dai due giri dell'AI prima di
+   mostrare la card risorsa (vedi voce del 17/09 sotto "Pulizia e
+   precisazioni"), anche quando il dato richiesto era già in memoria nel
+   browser. Nuova funzione `provaRisorsaImmediata()`, stesso principio
+   del router di navigazione/letture: riconosce "mi serve/dammi/fammi
+   vedere/recupera/cerca/trova/apri [il/la] foto/documento/preventivo/
+   fattura di [cliente]", risolve il cliente con un confronto rigido
+   (mai fuzzy: se il nome corrisponde a più di un cliente o a nessuno,
+   torna false e la frase prosegue verso l'AI come sempre — falso
+   negativo innocuo, mai un falso positivo su quale cliente), poi legge
+   foto/documenti già caricati in memoria (`cantiereFoto`, `chats[i]
+   .messages`) e apre la card risorsa direttamente — zero chiamate di
+   rete, verificato a 4ms in un test end-to-end con Playwright. Nessuna
+   scrittura passa mai da qui, solo letture, come le fasi 1a/1b.
+   Nuova sezione di test dedicata in `eval/router.test.js` ("Router:
+   risorse immediate, fase 1c"): casi positivi (foto e documenti di un
+   cliente univoco) e casi di sicurezza (cliente non trovato, cliente
+   ambiguo tra due omonimi, frasi che non sono richieste di risorsa) —
+   tutti verificati che NON vengano intercettati per errore. Ha
+   richiesto anche un piccolo aggiustamento a un test preesistente
+   ("Current Focus"): una delle sue frasi di prova ("fammi vedere il
+   documento di Rossi") ora viene intercettata legittimamente da questa
+   nuova fase 1c prima di arrivare al motore AI mockato che quel test
+   doveva verificare — riformulata la frase di prova per continuare a
+   testare quello che testava in origine, senza toccare il
+   comportamento vero. Suite completa verificata dopo la modifica:
+   `router.test.js` 39/39, `backend.test.js` 18/18.
+
 3. **Livelli di rischio a 4 valori — FATTO il 01/09/2026.** Sostituito
    `sensitive: true/false` nei 17 strumenti di `api/index.js` con
    `risk: "read"|"low_write"|"high_impact"|"external"` (5 read, 6
