@@ -281,6 +281,59 @@ era che OGNI richiesta, anche "apri calendario", passava dall'AI completa.
    comportamento vero. Suite completa verificata dopo la modifica:
    `router.test.js` 39/39, `backend.test.js` 18/18.
 
+   **17/09/2026 — fase 1d: appunti istantanei, e "stratagemma" per gli
+   appuntamenti.** Gianardi ha chiesto se lo stesso principio si potesse
+   estendere ad appunti e appuntamenti: "SI PER GLI APPUNTI. INVECE PER
+   APPUNTAMENTI FAREI UN METODO STRATAGEMMA: EON MANDA LA NOTIFICA
+   IMMEDIATA E POI LAVORA IN SILENZIO PER FISSARE CORRETTAMENTE TUTTO."
+   Due funzioni distinte, perché i due casi hanno rischi diversi:
+   - **Appunti (`provaAppuntoImmediato`)**: `crea_appunto` non ha NESSUNA
+     ambiguità da risolvere (salva il testo esatto detto, senza data né
+     cliente da collegare) — bypassa del tutto l'AI e scrive
+     direttamente su `cantiere_appunti`, la stessa identica scrittura
+     già usata dalla pagina dedicata "Appunti cantiere" (riusata da un
+     secondo punto d'ingresso, non una scorciatoia nuova). Riconosce
+     "segnami/annotami/scrivimi/metti/prendi [in appunti/una nota]
+     che...", ma SOLO se la frase non contiene anche un riferimento di
+     data/ora (in quel caso resta un impegno, gestito come sempre
+     dall'AI) — falso negativo innocuo, mai un falso positivo.
+   - **Appuntamenti (stratagemma di Gianardi)**: qui l'AI lavora
+     ESATTAMENTE come sempre — nessuna scorciatoia sulla correttezza,
+     data/ora/cliente restano sempre decisi dal motore vero, stesso
+     identico percorso di oggi. L'unica differenza è cosa vede l'utente
+     MENTRE aspetta: appena riconosciuta una frase che sembra un nuovo
+     appuntamento (un riferimento di tempo, non una cancellazione/
+     spostamento), compare subito nella lista di oggi un avviso
+     provvisorio col testo esatto detto dall'utente — **mai una data/ora
+     indovinata sul momento**: scelta esplicita di Gianardi (chiesto con
+     `AskUserQuestion`), per non rischiare di mostrare anche solo per un
+     istante un orario sbagliato. L'avviso sparisce da solo (mai scritto
+     su Supabase, mai dentro `tasks`) appena arriva la risposta vera,
+     sostituito dal risultato reale — stesso principio di una spunta
+     "inviato" prima della conferma di consegna, o di "Invio in corso…"
+     di Gmail.
+   Bug reale trovato mentre si verificava che l'avviso comparisse
+   davvero nella pagina Oggi vista dall'utente: `taskListAI`/
+   `taskListUser` (e altri id: `oggiHeroDate`, `difficultyFill`,
+   `summaryGrid`, `miniRing*`) erano DUPLICATI in due pagine — la vera
+   "Oggi" (`page-oggi`) e una pagina "Assemblee" per l'Amministratore
+   (`page-assemblee`) rimasta con dentro, per errore di una sessione
+   precedente, una copia mai completata della pagina Oggi invece del suo
+   vero contenuto. Poiché `getElementById` restituisce sempre il primo
+   elemento con quell'id nel documento (page-assemblee viene prima nel
+   file), TUTTI questi aggiornamenti (ring di avanzamento, difficoltà
+   della giornata, riepilogo, liste attività) sono sempre finiti nella
+   pagina Assemblee nascosta invece che nella vera pagina Oggi visibile
+   — probabile causa di una pagina Oggi che sembrava non aggiornarsi mai
+   dinamicamente. Corretto sostituendo il contenuto di `page-assemblee`
+   con la sua vera struttura (uguale a quella già funzionante di
+   "Udienze e Scadenze" per l'Avvocato: `assembleeList`/`assembleeCount`,
+   già attesi da `renderAssemblee()` ma mai collegati a nessun markup
+   HTML). Verificato con Playwright che l'avviso ora compare davvero
+   nella pagina Oggi vista dall'utente, non in una copia nascosta.
+   Nuove sezioni di test in `eval/router.test.js` (fase 1d e
+   stratagemma appuntamenti): 54/54 verifiche passate.
+
 3. **Livelli di rischio a 4 valori — FATTO il 01/09/2026.** Sostituito
    `sensitive: true/false` nei 17 strumenti di `api/index.js` con
    `risk: "read"|"low_write"|"high_impact"|"external"` (5 read, 6

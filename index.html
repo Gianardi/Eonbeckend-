@@ -1153,6 +1153,14 @@
   .azienda-link-card .module-icon{ margin-bottom:0; flex:none; }
   .azienda-link-card-body{ flex:1; min-width:0; }
   .azienda-link-card-arrow{ width:18px; height:18px; color:var(--faint); flex:none; }
+  /* Placeholder "notifica immediata" per un appuntamento appena detto: EON
+     lo sta ancora confermando in silenzio, non è ancora un impegno vero
+     (mai scritto su Supabase, mai in "tasks") — stile chiaramente
+     provvisorio, tratteggiato e non cliccabile, sostituito da solo dal
+     risultato vero appena l'AI risponde. */
+  .azienda-link-card.impegno-in-conferma{ cursor:default; border-style:dashed; opacity:.85; }
+  .azienda-link-card.impegno-in-conferma:hover{ transform:none; box-shadow:var(--shadow-sm); }
+  .impegno-in-conferma-icon svg{ animation:pulse-ring 1.2s ease-in-out infinite; }
   .goal-del-mini{
     width:26px; height:26px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center;
     color:var(--faint); cursor:pointer; margin-right:2px;
@@ -2603,7 +2611,7 @@
       </div>
     </div>
 
-    <!-- ==================== PAGINA: ASSEMBLEE (Amministratore di Condominio) ==================== -->
+    <!-- ==================== PAGINA: UDIENZE E SCADENZE (Avvocato) ==================== -->
     <div class="page" id="page-udienze">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -2618,62 +2626,18 @@
       </div>
     </div>
 
+    <!-- ==================== PAGINA: ASSEMBLEE (Amministratore di Condominio) ==================== -->
     <div class="page" id="page-assemblee">
-      <div class="oggi-hero">
-        <div class="oggi-hero-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" stroke-linecap="round"/></svg>
-        </div>
-        <h2 class="oggi-hero-title">Oggi</h2>
-        <div class="oggi-hero-date" id="oggiHeroDate">—</div>
-        <div class="difficulty-meter">
-          <div class="difficulty-label">Livello di difficoltà della giornata</div>
-          <div class="difficulty-bar"><div class="difficulty-fill" id="difficultyFill"></div></div>
-          <div class="difficulty-text" id="difficultyText">Calcolo in corso…</div>
-        </div>
-      </div>
-
-      <div class="card-panel" style="margin-bottom:14px;">
-        <div class="card-header">
-          <h2>Riepilogo di oggi, in breve</h2>
-        </div>
-        <div class="summary-grid" id="summaryGrid"></div>
+      <div class="back-link" data-page="gestisci-azienda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header">
-          <h2>Attività di oggi</h2>
-          <div class="mini-ring">
-            <div class="mini-ring-wrap">
-              <svg width="40" height="40">
-                <defs>
-                  <linearGradient id="miniRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#008C45"/>
-                    <stop offset="50%" stop-color="#F4F5F0"/>
-                    <stop offset="100%" stop-color="#CD212A"/>
-                  </linearGradient>
-                </defs>
-                <circle cx="20" cy="20" r="16" stroke="rgba(20,23,29,.08)" stroke-width="4.5" fill="none"/>
-                <circle id="miniRingFg" cx="20" cy="20" r="16" stroke="url(#miniRingGrad)" stroke-width="4.5" fill="none"
-                  stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5"/>
-              </svg>
-              <div class="mini-ring-pct" id="miniRingPct">0%</div>
-            </div>
-            <div class="mini-ring-label">Avanzamento<b id="miniRingCount">0/7</b></div>
-          </div>
+          <h2>Assemblee</h2>
+          <span class="count" id="assembleeCount">0</span>
         </div>
-
-        <div class="section-label">
-          <span class="badge-ai">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-            AI
-          </span>
-          Ci penso io — un click e lo fa l'AI
-        </div>
-        <div class="task-list" id="taskListAI"></div>
-
-        <div class="section-divider"></div>
-
-        <div class="section-label">Tocca a te</div>
-        <div class="task-list manual" id="taskListUser"></div>
+        <div id="assembleeList" style="padding:8px 0 16px;"></div>
       </div>
     </div>
 
@@ -4520,6 +4484,18 @@ const tasks = [
 ];
 const statusLabel = { todo:"Da fare", progress:"In corso", done:"Completata", late:"In ritardo", annullato:"Annullata" };
 
+/* "Notifica immediata" per un appuntamento appena detto (EON BRAIN,
+   stratagemma richiesto da Gianardi il 17/09/2026): mentre l'AI vera
+   lavora in silenzio per fissarlo correttamente (stesso motore, stessa
+   risoluzione cliente, stessa gestione degli orari di sempre — nessuna
+   scorciatoia sulla correttezza), qui compare SOLO un avviso provvisorio,
+   mai un dato indovinato: il testo esatto detto dall'utente, mai una
+   data/ora dedotta al volo. Mai scritto su Supabase, mai dentro "tasks"
+   (altrimenti contaminerebbe anello/difficoltà/riepilogo con un impegno
+   che potrebbe sparire un istante dopo) — solo un elenco a parte,
+   svuotato non appena arriva il risultato vero. */
+let impegniInConferma = [];
+
 const clients = [
   { name:"Bianchi Costruzioni S.r.l.", status:"attivo", value:48000, last:"2 giorni fa", color:"linear-gradient(135deg,#2FD9C7,#22B8AA)",
     desc:"Impresa edile storica, cliente dal 2021. Gestiamo la ristrutturazione di 3 cantieri residenziali. Referente: Sig. Bianchi." },
@@ -5560,8 +5536,32 @@ function buildTaskRow(t){
   return row;
 }
 
+/* Riga non cliccabile per un impegno ancora "in conferma" — vedi
+   impegniInConferma sopra. Mai t.id, mai un vero impegno: solo un
+   promemoria visivo che qualcosa è già stato ricevuto. */
+function buildImpegnoInConfermaRow(p){
+  const row = document.createElement("div");
+  row.className = "azienda-link-card impegno-in-conferma";
+  const icona = document.createElement("div");
+  icona.className = "module-icon impegno-in-conferma-icon";
+  icona.style.background = "var(--faint)";
+  icona.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  const corpo = document.createElement("div");
+  corpo.className = "azienda-link-card-body";
+  const titolo = document.createElement("div");
+  titolo.className = "module-title";
+  titolo.textContent = p.testo;
+  const sotto = document.createElement("div");
+  sotto.className = "module-sub";
+  sotto.textContent = "Ricevuto — sto confermando i dettagli…";
+  corpo.appendChild(titolo); corpo.appendChild(sotto);
+  row.appendChild(icona); row.appendChild(corpo);
+  return row;
+}
+
 function renderTasks(){
   listAI.innerHTML = ""; listUser.innerHTML = "";
+  impegniInConferma.forEach(p => listUser.appendChild(buildImpegnoInConfermaRow(p)));
   const sorted = tasks.slice().sort((a,b) => a.time.localeCompare(b.time));
   sorted.filter(t => t.owner === "ai").forEach(t => listAI.appendChild(buildTaskRow(t)));
   sorted.filter(t => t.owner === "user").forEach(t => listUser.appendChild(buildTaskRow(t)));
@@ -7564,11 +7564,24 @@ function collegaHubRacconta(){
       chiudiHubAI();
       return;
     }
+    /* Fase 1d: un appunto libero senza data si può salvare davvero
+       (stessa identica scrittura di sempre) senza passare dall'AI. */
+    if(await provaAppuntoImmediato(testo)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      chiudiHubAI();
+      return;
+    }
     if(!BACKEND_CONFIGURED || !currentSession){
       stato("attesa", "Serve essere collegati",
         "L'assistente scrive nel calendario vero: accedi per usarlo");
       return;
     }
+
+    /* Stratagemma per gli appuntamenti: avviso di ricezione immediato,
+       mentre l'AI vera (invariata) lavora in silenzio sui dettagli. */
+    const eImpegnoInArrivo = sembraRichiestaAppuntamento(testo);
+    if(eImpegnoInArrivo) aggiungiImpegnoInConferma(testo);
 
     stato("pensa", "Sto organizzando…", "Un attimo, metto in ordine quello che mi hai detto");
     btn.disabled = true;
@@ -7580,11 +7593,13 @@ function collegaHubRacconta(){
       );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
+      if(eImpegnoInArrivo) rimuoviImpegniInConferma();
       stato("attesa", "Non sono riuscita a organizzarla",
         "AI non raggiunta: " + err.message + " — riprova, magari con frasi più separate");
       btn.disabled = false;
       return;
     }
+    if(eImpegnoInArrivo) rimuoviImpegniInConferma();
 
     campo.value = "";
     btn.disabled = false;
@@ -8528,6 +8543,78 @@ function provaRisorsaImmediata(testo){
   return true;
 }
 
+/* EON Router, fase 1d — appunti istantanei (TODO.md, 17/09/2026).
+   crea_appunto è l'unica azione di scrittura senza NESSUNA ambiguità da
+   risolvere: salva il testo esatto detto dall'utente, senza risoluzione
+   cliente, senza calcolo di data/ora — esattamente quello che fa già,
+   bypassando del tutto l'AI, la pagina dedicata "Appunti cantiere" (vedi
+   collegaCantiereAppunti/dbInsert("cantiere_appunti",...) più sotto nel
+   file). Qui si riconosce la stessa intenzione detta dentro l'assistente
+   generico ("segnami in appunti che...") e si fa la stessa identica
+   scrittura diretta — non un'eccezione nuova, lo stesso percorso già
+   fidato riusato da un secondo punto d'ingresso.
+   Volutamente ristretto: serve la parola "appunti/appunto/nota" esplicita
+   (mai un generico "segnami che...", che l'AI deve continuare a poter
+   interpretare come impegno quando c'è un orario) E nessun riferimento a
+   data/ora nella frase (quello resta sempre e solo crea_impegno, mai
+   qui) — falso negativo innocuo (passa all'AI come sempre), mai un falso
+   positivo che trasformi un impegno in un semplice appunto senza data. */
+const TRIGGER_APPUNTO = /^(?:segna(?:mi)?|annota(?:mi)?|scrivi(?:mi)?|metti(?:mi)?|prendi)\s+(?:in\s+appunti|negli\s+appunti|un\s+appunto|una\s+nota)\s*(?:che)?\s*[:\-]?\s*(.+)$/i;
+const RIFERIMENTO_TEMPO = /\b(oggi|domani|dopodomani|lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|\d{1,2}[:.]\d{2}|ore\s+\d{1,2}\b|\d{1,2}\/\d{1,2})\b/i;
+
+async function provaAppuntoImmediato(testo){
+  const t = (testo || "").trim().replace(/[.!?]+$/, "");
+  if(!t) return false;
+  const m = t.match(TRIGGER_APPUNTO);
+  if(!m) return false;
+  if(RIFERIMENTO_TEMPO.test(t)) return false; // ha un orario/data: resta all'AI (potrebbe essere un impegno)
+
+  const appuntoTesto = (m[1] || "").trim();
+  if(!appuntoTesto) return false;
+
+  if(!isDbReady()) return false; // senza connessione l'AI non potrebbe farlo comunque: lascia il percorso normale spiegare perché
+  const creato = await dbInsert("cantiere_appunti", { testo: appuntoTesto });
+  if(!creato) return false;
+  cantiereAppunti.push({ id: creato.id, testo: creato.testo, created: creato.created_at });
+  aggiornaCantiereSottotitoli();
+  renderCantiereAppunti();
+  showAIToast("Appunto aggiunto", appuntoTesto);
+  return true;
+}
+
+/* EON BRAIN — "stratagemma" per gli appuntamenti (TODO.md, 17/09/2026,
+   richiesta esplicita di Gianardi). A differenza delle fasi sopra, qui
+   l'AI lavora ESATTAMENTE come sempre — nessuna scorciatoia sulla
+   correttezza: data, ora e cliente restano sempre decisi dal motore
+   vero, con la stessa risoluzione ed entity-resolution di sempre. Cambia
+   solo cosa vede l'utente MENTRE aspetta quei pochi secondi: invece di
+   restare senza nessun segno concreto, compare subito nella lista di
+   oggi un avviso con il testo esatto appena detto (mai una data/ora
+   indovinata sul momento — scelta esplicita di Gianardi, per non
+   rischiare di mostrare anche solo per un istante un orario sbagliato),
+   che sparisce da solo appena arriva la risposta vera. Stesso principio
+   di una spunta "inviato" prima della conferma di consegna: un avviso di
+   ricezione onesto, mai un risultato finto. */
+function sembraRichiestaAppuntamento(testo){
+  const t = (testo || "").trim();
+  if(t.length < 4) return false;
+  if(!RIFERIMENTO_TEMPO.test(t)) return false; // senza alcun riferimento temporale non è un impegno da fissare ora
+  if(/\b(cancella|elimina|annulla|sposta|rimanda|disdici|disdetta)\b/i.test(t)) return false; // modifica/cancellazione, non una nuova creazione
+  if(TRIGGER_APPUNTO.test(t.replace(/[.!?]+$/, ""))) return false; // già gestito come appunto istantaneo sopra
+  return true;
+}
+function aggiungiImpegnoInConferma(testo){
+  const id = "tmp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+  impegniInConferma.push({ id, testo });
+  renderTasks();
+  return id;
+}
+function rimuoviImpegniInConferma(){
+  if(!impegniInConferma.length) return;
+  impegniInConferma = [];
+  renderTasks();
+}
+
 /* Fase 2 del contesto (vedi TODO.md, "EON BRAIN"): una correzione veloce
    ("no, alle 10") deve funzionare anche quando EON non ha fatto nessuna
    domanda esplicita — es. dopo "Segna Mario domani alle 9" → "Fatto.",
@@ -8654,10 +8741,26 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
+    /* Fase 1d: un appunto libero senza data si può salvare davvero senza
+       passare dall'AI (stessa identica scrittura di sempre). */
+    if(!inContinuazione && await provaAppuntoImmediato(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      if(viaVoce) parlaRisposta("Appunto aggiunto");
+      return;
+    }
+
     if(!BACKEND_CONFIGURED || !currentSession){
       hint.textContent = "L'assistente scrive nei dati veri: accedi per usarlo";
       return;
     }
+
+    /* Stratagemma per gli appuntamenti: avviso di ricezione immediato
+       (mai su una risposta di continuazione: lì l'utente sta rispondendo
+       a una domanda di EON, non creando qualcosa di nuovo), mentre l'AI
+       vera lavora invariata sui dettagli. */
+    const eImpegnoInArrivo = !inContinuazione && sembraRichiestaAppuntamento(testo);
+    if(eImpegnoInArrivo) aggiungiImpegnoInConferma(testo);
 
     inCorso = true;
     send.disabled = true;
@@ -8686,6 +8789,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
+      if(eImpegnoInArrivo) rimuoviImpegniInConferma();
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
       if(viaVoce) parlaRisposta("Non sono riuscita a raggiungere l'assistente, riprova tra poco.");
       send.disabled = false;
@@ -8697,6 +8801,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
          funziona ancora, invece di far ripartire tutto da capo. */
       return;
     }
+    if(eImpegnoInArrivo) rimuoviImpegniInConferma();
 
     /* Da qui la richiesta è andata a buon fine: la conversazione aperta,
        se c'era, è stata davvero consumata dal server. La riapriamo più
