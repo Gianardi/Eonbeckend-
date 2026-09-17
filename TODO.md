@@ -1992,14 +1992,51 @@ miglioramenti, tutti e 3 autorizzati; da costruire uno alla volta:
    Per ora l'assistente resta come oggi: se fallisce per un problema di
    rete, lo dice chiaramente e serve un tentativo manuale.
 
-2. **DA FARE — "Fatto, annulla" al posto di "sei sicuro?"** (come Gmail
-   "Annulla invio", o Trello/Notion "fatto, tocca per annullare"): per
-   azioni già reversibili oggi (es. eliminare un cliente o un impegno
-   finiscono comunque nel Cestino), eseguire subito e offrire pochi
-   secondi per annullare, invece di fermarsi prima a chiedere conferma.
-   Tocca le regole di conferma già costruite con cura (`risk`/
-   `richiedeConferma` in `api/index.js`): da presentare a Gianardi con
-   un piano preciso azione per azione, PRIMA di toccare codice.
+2. **FATTO il 17/09/2026 — "Fatto, annulla" al posto di "sei sicuro?"**
+   (come Gmail "Annulla invio", o Trello/Notion "fatto, tocca per
+   annullare"). Presentato prima un elenco preciso a Gianardi (6 azioni
+   che oggi chiedono conferma, quali sono già reversibili e quali no) —
+   autorizzati i primi 2, i più sicuri: `elimina_cliente` ed
+   `elimina_impegno` (entrambi vanno comunque nel Cestino, già
+   ripristinabili). Lasciati fuori di proposito: `sposta_impegno`/
+   `annulla_impegno` (servirebbe prima salvare il valore "prima" per un
+   annullo vero — non ancora fatto), `svuota_cestino` (ultima linea di
+   difesa: una volta fatto non c'è più un Cestino da cui recuperare,
+   resta "sei sicuro?" come oggi, anche Gmail/Notion chiedono sempre
+   conferma vera per questo), `manda_messaggio` (visibile a una persona
+   vera fuori dall'app una volta arrivato: un "annulla" qui
+   funzionerebbe diversamente, come il ritardo reale di invio di Gmail,
+   non un semplice avviso — lavoro a parte).
+
+   Nuovo campo `annullabileSubito: true` sui due tool in `api/index.js`
+   (non cambia `risk`, resta `"high_impact"`: cambia solo COME si
+   protegge l'utente, prima o dopo l'esecuzione) — `richiedeConferma()`
+   li salta, eseguono subito come un tool ordinario. `elimina_impegno`
+   ora restituisce anche `tabella` (tasks o messages: un impegno può
+   stare su due tabelle diverse) ed `elimina_cliente` anche
+   `conversation_id`, entrambi necessari al frontend per sapere cosa
+   ripristinare con `dbRestore()` se l'utente tocca "Annulla".
+   Rimossi i `describe()` dei due tool (diventati codice morto: non
+   passano più dalla coda di conferma che li chiamava).
+
+   Frontend: nuova `showAIToastConAnnulla()` in `index.html` (avviso
+   con un solo pulsante "Annulla", sparisce da solo dopo 7 secondi) e
+   `annullaEliminazioneImpegni()`/`annullaEliminazioneCliente()` (stesso
+   `dbRestore()` già usato dalla schermata Cestino). Una cancellazione
+   bulk ("cancella tutti gli impegni di domani") mostra UN solo avviso
+   raggruppato con un solo "Annulla" per tutti, non uno per elemento —
+   stesso principio già usato per `crea_impegno`. Collegato sia in
+   `organizza()` (Hub AI) sia in `elabora()` (microfono/testo di Home,
+   Clienti, Cantiere cliente) — per la voce, l'annuncio parlato resta
+   com'era, solo il tocco su "Annulla" non è raggiungibile a voce.
+
+   Aggiornati 2 casi in `eval/casi.json` (`brain-bulk-01`/`02`) che
+   testavano la vecchia richiesta di conferma raggruppata per una
+   cancellazione bulk: ora verificano che l'esecuzione immediata copra
+   comunque TUTTO il gruppo trovato, non solo il primo elemento.
+   Verificato con Playwright che il tocco su "Annulla" richiama
+   davvero il ripristino e fa sparire l'avviso. `router.test.js` e
+   `backend.test.js` invariati: 62/62 e 18/18.
 
 3. **DA FARE — Risposte dell'AI a comparsa progressiva (streaming)**
    invece di aspettare la risposta intera prima di mostrarla (come

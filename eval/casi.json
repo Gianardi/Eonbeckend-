@@ -376,27 +376,27 @@
     },
     {
       "id": "brain-bulk-01",
-      "categoria": "Bulk/batch — una sola conferma per un gruppo, non una per elemento",
-      "situazione": "Cancellazione di più impegni con un solo comando — verifica la capacità generale (punto 6), con un dominio diverso dal 'cancella tutto il calendario' del Documento 3: qui solo gli impegni di un giorno preciso, non l'intero calendario",
+      "categoria": "Bulk/batch — un'azione applicata a un intero gruppo, non solo al primo elemento",
+      "situazione": "Cancellazione di più impegni con un solo comando — verifica la capacità generale (punto 6), con un dominio diverso dal 'cancella tutto il calendario' del Documento 3: qui solo gli impegni di un giorno preciso, non l'intero calendario. Dal 17/09/2026 elimina_impegno esegue subito senza chiedere conferma (resta reversibile dal Cestino — vedi annullabileSubito/'Fatto, annulla' in TODO.md): qui si verifica che l'esecuzione immediata copra comunque TUTTO il gruppo, non solo il primo elemento trovato.",
       "precondizione": "Devono esistere almeno 3 impegni segnati per domani",
       "input": "Cancella tutti gli impegni di domani",
       "atteso": {
-        "tipo": "conferma_sensibile",
-        "stato_atteso": "in_attesa_conferma",
+        "tipo": "azione",
+        "strumenti_attesi": ["elimina_impegno"],
         "verifica": "automatica",
-        "controllo": "deve arrivare UNA sola richiesta di conferma che elenca tutti gli impegni trovati (non tre richieste in sequenza) — elimina_impegno/annulla_impegno NON compaiono ancora in azioni a questo punto (normale, eseguono solo dopo la conferma); il testo della domanda deve contenere un elenco con più di una voce"
+        "controllo": "elimina_impegno deve comparire in azioni una volta per CIASCUNO dei 3 impegni di domani (id diversi), eseguiti nello stesso turno senza nessuna richiesta di conferma — non solo il primo trovato"
       }
     },
     {
       "id": "brain-bulk-02",
       "categoria": "Bulk/batch — combinato con ambiguità (combinazione mai testata)",
-      "situazione": "Un'azione bulk che coinvolge anche un'entità ambigua: deve prima risolvere l'ambiguità, poi chiedere una sola conferma per il gruppo — mai una combinazione delle due cose scritta a mano per questo caso specifico, deve emergere dalle due capacità generali già costruite",
+      "situazione": "Un'azione bulk che coinvolge anche un'entità ambigua: deve prima risolvere l'ambiguità, poi eseguire per l'intero gruppo trovato — mai una combinazione delle due cose scritta a mano per questo caso specifico, deve emergere dalle due capacità generali già costruite. Dal 17/09/2026 elimina_impegno non chiede più conferma (esegue subito, resta reversibile dal Cestino).",
       "precondizione": "Devono esistere almeno due clienti omonimi (es. due 'Mario'), ed entrambi con almeno un impegno segnato",
       "input": "Cancella tutti gli impegni di Mario",
       "atteso": {
         "tipo": "domanda",
         "verifica": "manuale",
-        "controllo": "deve prima chiedere quale Mario (l'ambiguità del cliente viene prima), non chiedere conferma bulk su un cliente sbagliato o su entrambi mescolati insieme; solo dopo aver saputo quale Mario, la cancellazione dei suoi impegni deve arrivare come UNA sola conferma raggruppata, non una per impegno"
+        "controllo": "deve prima chiedere quale Mario (l'ambiguità del cliente viene prima), non eliminare impegni del Mario sbagliato o di entrambi mescolati insieme; solo dopo aver saputo quale Mario, TUTTI i suoi impegni devono essere eliminati nello stesso turno (elimina_impegno una volta per ciascuno), senza nessuna conferma necessaria"
       }
     },
     {

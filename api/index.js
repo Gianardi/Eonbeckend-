@@ -672,6 +672,18 @@ const STRUMENTI_SEMPRE_CONCLUSIVI = new Set(["crea_impegno", "crea_appunto", "co
                        (mandare un messaggio a un cliente)
      Solo "high_impact" ed "external" richiedono la conferma
      dell'utente prima di eseguire — vedi richiedeConferma() più sotto.
+   - annullabileSubito: (17/09/2026, richiesto da Gianardi — "Fatto,
+     annulla" invece di "sei sicuro?", come Gmail/Trello/Notion) per un
+     tool "high_impact" che è GIÀ reversibile di suo (va nel Cestino):
+     esegue subito, SENZA fermarsi a chiedere conferma prima — il
+     frontend mostra un avviso con la possibilità di annullare per
+     pochi secondi invece del blocco preventivo. Non cambia `risk`
+     (resta "high_impact": l'impatto reale non è diminuito, cambia solo
+     COME lo si protegge — prima o dopo l'esecuzione), vedi
+     richiedeConferma() più sotto. Usarlo solo quando l'azione è
+     davvero recuperabile subito (un ripristino dal Cestino, non una
+     cancellazione per sempre) — mai su svuota_cestino o manda_messaggio,
+     dove "prima" resta l'unico momento sicuro per fermarsi.
    - categoria: la NATURA di ciò su cui il tool opera, non quanto è
      delicato (quello è "risk", sopra: i due campi sono ortogonali) —
        "risorsa"       mostra/recupera qualcosa che esiste o va
@@ -692,6 +704,7 @@ const STRUMENTI_SEMPRE_CONCLUSIVI = new Set(["crea_impegno", "crea_appunto", "co
    - run: la funzione vera, eseguita solo lato server
    ------------------------------------------------------------ */
 function richiedeConferma(tool) {
+  if (tool.annullabileSubito) return false;
   return tool.risk === "high_impact" || tool.risk === "external";
 }
 
@@ -1151,27 +1164,16 @@ const TOOLS = {
 
   elimina_cliente: {
     risk: "high_impact",
+    annullabileSubito: true,
     categoria: "azione",
     schema: {
       name: "elimina_cliente",
-      description: "Sposta un cliente nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Richiede conferma dell'utente.",
+      description: "Sposta subito un cliente nel cestino (e la sua conversazione, se esiste): non lo cancella per sempre, l'utente vede un avviso con la possibilità di annullare per pochi secondi. Non serve chiedere conferma prima di chiamarlo: è già reversibile.",
       input_schema: {
         type: "object",
         properties: { id: { type: "string", description: "Id del cliente da eliminare, trovato prima con cerca_cliente" } },
         required: ["id"],
       },
-    },
-    async describe(input, ctx) {
-      const cliente = await trovaProprio("clients", input.id, ctx);
-      if (!cliente) return "Eliminare questo cliente?";
-      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
-      const haConversazione = Array.isArray(conv) && conv.length > 0;
-      /* La domanda sulla conversazione è dentro la stessa conferma,
-         non un secondo giro: una sola risposta dell'utente copre
-         entrambe le eliminazioni. */
-      return haConversazione
-        ? `Spostare ${cliente.name} nel cestino insieme alla sua conversazione? Potrai ripristinare entrambi in seguito.`
-        : `Spostare ${cliente.name} nel cestino? Potrai ripristinarlo in seguito.`;
     },
     async run(input, ctx) {
       const cliente = await trovaProprio("clients", input.id, ctx);
@@ -1184,17 +1186,22 @@ const TOOLS = {
          (l'utente crederebbe che nulla sia successo, mentre il cliente
          è già stato spostato) — la segnaliamo solo nell'esito. */
       let conversazioneEliminata = false;
+      let conversationId = null;
       try {
         const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
         if (Array.isArray(conv) && conv.length) {
           await db(`conversations?id=eq.${conv[0].id}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
           conversazioneEliminata = true;
+          conversationId = conv[0].id;
         }
       } catch (err) {
         console.warn("Cliente eliminato ma la conversazione collegata no:", err.message);
       }
 
-      return { id: cliente.id, nome: cliente.name, conversazione_eliminata: conversazioneEliminata };
+      /* conversation_id serve al frontend per poter ripristinare ANCHE
+         la conversazione se l'utente tocca "Annulla" (vedi
+         annullabileSubito sopra) — senza saperne l'id non potrebbe. */
+      return { id: cliente.id, nome: cliente.name, conversazione_eliminata: conversazioneEliminata, conversation_id: conversationId };
     },
   },
 
@@ -1459,27 +1466,28 @@ const TOOLS = {
 
   elimina_impegno: {
     risk: "high_impact",
+    annullabileSubito: true,
     categoria: "azione",
     schema: {
       name: "elimina_impegno",
-      description: "Sposta un appuntamento o un impegno nel cestino: non lo cancella per sempre, si può ripristinare in seguito. Diverso da annulla_impegno, che invece lo segna come annullato mantenendolo visibile nello storico. Richiede conferma dell'utente.",
+      description: "Sposta subito un appuntamento o un impegno nel cestino: non lo cancella per sempre, l'utente vede un avviso con la possibilità di annullare per pochi secondi. Non serve chiedere conferma prima di chiamarlo: è già reversibile. Diverso da annulla_impegno, che invece lo segna come annullato mantenendolo visibile nello storico.",
       input_schema: {
         type: "object",
         properties: { id: { type: "string", description: "Id dell'impegno da eliminare" } },
         required: ["id"],
       },
     },
-    async describe(input, ctx) {
-      const trovato = await trovaImpegno(input.id, ctx);
-      fissaIdRisoltoImpegno(input, trovato);
-      return `Spostare "${trovato ? trovato.record.title : "questo impegno"}" nel cestino? Potrai ripristinarlo in seguito.`;
-    },
     async run(input, ctx) {
       const trovato = await trovaImpegno(input.id, ctx);
       if (!trovato) throw fail("Impegno non trovato", 404);
       const { tabella, record } = trovato;
       await db(`${tabella}?id=eq.${record.id}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
-      return { id: record.id, titolo: record.title };
+      /* tabella serve al frontend per sapere su quale tabella chiamare
+         il ripristino se l'utente tocca "Annulla" (vedi annullabileSubito
+         sopra) — un impegno può stare su "tasks" o su "messages"
+         (incontro/chiamata dentro la chat di un cliente), non è ovvio
+         da fuori quale delle due sia questa. */
+      return { id: record.id, titolo: record.title, tabella };
     },
   },
 

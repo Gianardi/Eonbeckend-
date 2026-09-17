@@ -3897,6 +3897,21 @@ async function ricaricaTuttoERidisegna(){
   renderChatList(); renderChatWindow(); renderRing(); renderDifficulty();
 }
 
+/* "Fatto, annulla" (17/09/2026): elimina_impegno/elimina_cliente ora
+   eseguono subito (vedi annullabileSubito in api/index.js) invece di
+   fermarsi a chiedere conferma prima — qui il ripristino vero se
+   l'utente tocca "Annulla" nell'avviso, stesso dbRestore già usato
+   dalla schermata Cestino. */
+async function annullaEliminazioneImpegni(esiti){
+  await Promise.all(esiti.map(e => dbRestore(e.tabella, e.id)));
+  await ricaricaTuttoERidisegna();
+}
+async function annullaEliminazioneCliente(esito){
+  await dbRestore("clients", esito.id);
+  if(esito.conversation_id) await dbRestore("conversations", esito.conversation_id);
+  await ricaricaTuttoERidisegna();
+}
+
 /* Etichette leggibili per la schermata Cestino: chiave = nome tabella. */
 const ETICHETTA_CESTINO = {
   clients: "Cliente", opportunities: "Opportunità", employees: "Dipendente",
@@ -4295,6 +4310,41 @@ function showAIToastConDecisione(titolo, testo, onSi, onNo, etichettaSi, etichet
   });
   container.appendChild(toast);
   /* Resta finche' non decidi: e' una scelta, non un avviso di passaggio. */
+}
+
+/* "Fatto, annulla" (17/09/2026, richiesto da Gianardi — come Gmail
+   "Annulla invio", o Trello/Notion "fatto, tocca per annullare"): a
+   differenza di showAIToastConDecisione sopra, l'azione è GIÀ successa
+   quando questo avviso compare — onAnnulla la ripristina, non la
+   evita. Sparisce da solo dopo "secondi" (default 7): passato quel
+   tempo l'azione resta definitiva, come oggi. */
+function showAIToastConAnnulla(titolo, testo, onAnnulla, secondi){
+  const container = document.getElementById("aiToastContainer");
+  const toast = document.createElement("div");
+  toast.className = "ai-toast decisione";
+  toast.innerHTML = `
+    <div class="ai-toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </div>
+    <div class="ai-toast-body">
+      <div class="ai-toast-title">${titolo}</div>
+      <div class="ai-toast-text">${testo}</div>
+      <div class="ai-toast-actions">
+        <button class="ai-toast-yes">Annulla</button>
+      </div>
+    </div>
+  `;
+  let deciso = false;
+  const chiudi = () => { if(!deciso){ deciso = true; toast.remove(); } };
+  toast.querySelector(".ai-toast-yes").addEventListener("click", async () => {
+    if(deciso) return;
+    deciso = true;
+    toast.querySelectorAll("button").forEach(b => b.disabled = true);
+    await onAnnulla();
+    toast.remove();
+  });
+  container.appendChild(toast);
+  setTimeout(chiudi, (secondi || 7) * 1000);
 }
 
 function addSuggestion(s){
@@ -7714,16 +7764,30 @@ function collegaHubRacconta(){
       );
     }
 
-    risultatiVisibili.filter(a => a.tool !== "crea_impegno").forEach(a => {
+    /* Raggruppati come impegniCreati sopra (un solo avviso anche per un
+       "cancella tutti gli impegni di domani"), non uno per elemento:
+       un solo "Annulla" li ripristina tutti insieme. */
+    const impegniEliminati = risultatiVisibili.filter(a => a.tool === "elimina_impegno");
+    if(impegniEliminati.length){
+      const esiti = impegniEliminati.map(a => a.esito);
+      showAIToastConAnnulla(
+        impegniEliminati.length === 1 ? "Impegno eliminato" : impegniEliminati.length + " impegni eliminati",
+        esiti.map(e => e.titolo).join("\n") + "\nNel Cestino.",
+        () => annullaEliminazioneImpegni(esiti)
+      );
+    }
+
+    risultatiVisibili.filter(a => a.tool !== "crea_impegno" && a.tool !== "elimina_impegno").forEach(a => {
       if(a.tool === "sposta_impegno"){
         showAIToast("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
       } else if(a.tool === "annulla_impegno"){
         showAIToast("Impegno annullato", a.esito.titolo);
-      } else if(a.tool === "elimina_impegno"){
-        showAIToast("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
       } else if(a.tool === "elimina_cliente"){
-        showAIToast("Cliente eliminato",
-          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.");
+        showAIToastConAnnulla(
+          "Cliente eliminato",
+          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.",
+          () => annullaEliminazioneCliente(a.esito)
+        );
       } else if(a.tool === "crea_cliente"){
         showAIToast("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
@@ -8923,16 +8987,30 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       );
     }
 
-    risultatiVisibili.filter(a => a.tool !== "crea_impegno").forEach(a => {
+    /* Come in organizza(): un solo avviso con "Annulla" anche per più
+       impegni eliminati insieme, non uno per elemento. L'annullo resta
+       solo al tocco (non c'è un modo affidabile per "sentirlo" e
+       rispondere a voce entro pochi secondi), ma la lettura ad alta
+       voce resta com'era: stessa informazione, stesso principio di
+       mostra() sopra. */
+    const impegniEliminatiMic = risultatiVisibili.filter(a => a.tool === "elimina_impegno");
+    if(impegniEliminatiMic.length){
+      const esiti = impegniEliminatiMic.map(a => a.esito);
+      const titoloAvviso = impegniEliminatiMic.length === 1 ? "Impegno eliminato" : impegniEliminatiMic.length + " impegni eliminati";
+      const testoAvviso = esiti.map(e => e.titolo).join("\n") + "\nNel Cestino.";
+      showAIToastConAnnulla(titoloAvviso, testoAvviso, () => annullaEliminazioneImpegni(esiti));
+      daDire.push(titoloAvviso + ": " + testoAvviso.replace(/\n+/g, ". "));
+    }
+
+    risultatiVisibili.filter(a => a.tool !== "crea_impegno" && a.tool !== "elimina_impegno").forEach(a => {
       if(a.tool === "sposta_impegno"){
         mostra("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
       } else if(a.tool === "annulla_impegno"){
         mostra("Impegno annullato", a.esito.titolo);
-      } else if(a.tool === "elimina_impegno"){
-        mostra("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
       } else if(a.tool === "elimina_cliente"){
-        mostra("Cliente eliminato",
-          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.");
+        const testoAvviso = a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.";
+        showAIToastConAnnulla("Cliente eliminato", testoAvviso, () => annullaEliminazioneCliente(a.esito));
+        daDire.push("Cliente eliminato: " + testoAvviso.replace(/\n+/g, ". "));
       } else if(a.tool === "crea_cliente"){
         mostra("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
