@@ -2050,3 +2050,30 @@ miglioramenti, tutti e 3 autorizzati; da costruire uno alla volta:
    lettura a voce, da ripensare), Gianardi ha deciso di non farlo per
    ora. Proposta rimasta sul tavolo se si vorrà tornarci: solo per le
    risposte lunghe di tipo "parere/spiegazione", non per tutto.
+
+**Seconda tornata di proposte (17/09/2026), stessa regola (autorizzazione
+prima, solo se migliorativo).** Presentate 4 tecniche per intelligenza e
+velocità; valutate nel merito una per una (niente adottato solo perché
+lo fa una grande app — precaricamento predittivo scartato perché
+`loadUserDataFromDB()` carica già tutto in blocco al login, non c'è
+nulla da precaricare in anticipo; schermate scheletro utili solo in
+punti isolati con un'attesa vera, es. il Cestino, non ovunque). Segnate
+da fare da Gianardi:
+
+4. **DA FARE — Ragionamento esteso sui casi difficili.** Su richieste
+   dove sbagliare costa caro (calcoli di date, ragionamenti con più
+   passaggi — impatto diretto: proprio in questa sessione trovato un
+   bug reale sul calcolo di una data, il promemoria caldaia
+   dell'idraulico), far "pensare di più" il modello prima di rispondere
+   invece di rispondere di getto, come le versioni "reasoning" di
+   ChatGPT/Gemini. Da scoprire quali casi in `api/index.js` meritano
+   davvero il costo in più di velocità (non tutti: le azioni semplici
+   restano come oggi) prima di costruire.
+
+5. **DA FARE (più avanti) — Memoria delle abitudini nel tempo.** Come le
+   routine di Google Assistant: imparare schemi ricorrenti dell'utente
+   (es. "ogni lunedì alle 9 chiama Rossi") per suggerire o velocizzare
+   le richieste future. Il più ambizioso dei cinque: segnalato onestamente
+   a Gianardi come prematuro con solo 2 utenti veri in produzione (non
+   c'è ancora abbastanza uso reale da cui imparare abitudini vere) — da
+   riprendere quando ci sarà più uso reale su cui basarsi, non ora.
