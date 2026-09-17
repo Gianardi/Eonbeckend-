@@ -1912,3 +1912,24 @@ headless, non l'app vera online): apertura/chiusura, singolo risultato
 vs più risultati, foto vera visualizzata correttamente, nessun errore
 JavaScript. Codice in `index.html`, nessuna modifica al backend/prompt —
 puramente grafico/strutturale, come richiesto.
+
+## Monetizzazione del Piano Free (uso generico) con pubblicità personalizzata
+
+Decisione di Gianardi (17/09/2026): la scelta "Organizza la giornata e
+aumenta la produttività" all'iscrizione (`data-type="generico"`, profilo
+salvato come `profession: "artigiano"`, nessun Professional Brain Pack —
+solo il cervello generale/strato comune) è pensata per una persona
+qualunque che vuole organizzare la sua giornata e le sue cose, anche il
+lavoro — non per chi ha uno dei 4 mestieri specifici (Edile, Idraulico,
+Avvocato, Amministratore di Condominio). Per questo segmento il piano
+sarà **gratuito, sostenuto da pubblicità personalizzata** invece che da
+un abbonamento.
+
+**Importante — riguarda SOLO il Piano Free/generico**: i 4 percorsi
+professionali restano come sono oggi, senza pubblicità.
+
+Ancora tutta da progettare: non esiste oggi nessuna infrastruttura
+tecnica (raccolta dati per il targeting, slot pubblicitari nell'app,
+integrazione con un network di ads, distinzione lato codice tra utenti
+"generico" e utenti professionisti ai fini della pubblicità). Da
+riprendere in una sessione dedicata quando si deciderà di costruirla.
