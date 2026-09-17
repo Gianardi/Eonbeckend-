@@ -1683,6 +1683,119 @@ const TOOLS = {
     },
   },
 
+  /* Amministratore di condominio: un "cliente" (`clients`) è già il
+     Condominio (l'edificio) nel suo insieme — crea_cliente/cerca_cliente
+     funzionano già per quello, senza bisogno di nulla di nuovo. Ciò che
+     mancava (vedi audit di libro/amministratore.md, 17/09/2026) era solo
+     l'insieme di PERSONE al suo interno: cerca_condomino/crea_condomino
+     coprono quello, in modo analogo a cerca_cantiere/crea_cantiere per
+     l'edile ma con una persona invece di un lavoro. */
+  cerca_condomino: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "cerca_condomino",
+      description: "Cerca un condomino (persona) per nome. Se cliente_id è dato, cerca solo tra i condomini di quel condominio/edificio. Se cliente_id non è dato, cerca in TUTTI i condomini gestiti dall'utente — usalo quando non è chiaro a quale edificio si riferisce l'utente, per capire se il nome è presente in uno solo o in più condomini diversi.",
+      input_schema: {
+        type: "object",
+        properties: {
+          nome: { type: "string", description: "Nome (anche parziale) del condomino da cercare" },
+          cliente_id: { type: "string", description: "Id del condominio/edificio (cliente) in cui cercare, se già noto" },
+        },
+        required: ["nome"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      let filtroCliente = "";
+      if (input.cliente_id) {
+        if (!eUuid(input.cliente_id)) throw fail("Id condominio non valido");
+        filtroCliente = `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
+      }
+      const righe = await db(
+        `condomini?select=id,nome,ruolo,unita_immobiliare,client_id&nome=ilike.*${encodeURIComponent(input.nome.trim())}*&deleted_at=is.null${filtroCliente}&order=nome.asc&limit=10`,
+        { method: "GET" }, ctx.accessToken
+      );
+      const lista = Array.isArray(righe) ? righe : [];
+      if (!lista.length) return { condomini: [] };
+
+      const idClienti = [...new Set(lista.map((r) => r.client_id))];
+      const clienti = await db(
+        `clients?select=id,name&id=in.(${idClienti.map(encodeURIComponent).join(",")})`,
+        { method: "GET" }, ctx.accessToken
+      );
+      const nomeCliente = Object.fromEntries((Array.isArray(clienti) ? clienti : []).map((c) => [c.id, c.name]));
+
+      return {
+        condomini: lista.map((r) => ({
+          id: r.id, nome: r.nome, ruolo: r.ruolo, unita_immobiliare: r.unita_immobiliare,
+          condominio_id: r.client_id, condominio: nomeCliente[r.client_id] || null,
+        })),
+      };
+    },
+  },
+
+  crea_condomino: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "crea_condomino",
+      description: "Registra un nuovo condomino (persona) in un condominio/edificio già esistente come cliente. Usalo quando l'utente vuole aggiungere una persona all'anagrafica di un edificio (es. dopo una compravendita, o per un condomino non ancora censito).",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del condominio/edificio (cliente) a cui appartiene il condomino" },
+          nome: { type: "string", description: "Nome del condomino" },
+          ruolo: { type: "string", enum: ["proprietario", "inquilino"], description: "Se non specificato dall'utente, usa 'proprietario' come default" },
+          unita_immobiliare: { type: "string", description: "Identificativo dell'unità, es. 'interno 4, terzo piano', se detto" },
+          quota_millesimale: { type: "number", description: "Quota millesimale, solo se l'utente la fornisce esplicitamente — mai inventarla" },
+          telefono: { type: "string" },
+        },
+        required: ["cliente_id", "nome"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente_id) || !eUuid(input.cliente_id)) throw fail("Id condominio mancante o non valido");
+      if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      const payload = { owner_id: ctx.user.id, client_id: input.cliente_id, nome: input.nome.trim(), ruolo: input.ruolo === "inquilino" ? "inquilino" : "proprietario" };
+      if (eStringaNonVuota(input.unita_immobiliare)) payload.unita_immobiliare = input.unita_immobiliare.trim();
+      if (eNumero(input.quota_millesimale)) payload.quota_millesimale = input.quota_millesimale;
+      if (eStringaNonVuota(input.telefono)) payload.telefono = input.telefono.trim();
+      const creati = await db("condomini", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+      const c = Array.isArray(creati) ? creati[0] : creati;
+      return { id: c.id, nome: c.nome, ruolo: c.ruolo };
+    },
+  },
+
+  /* Solo per uso proprio dell'amministratore: NON deve mai essere
+     inoltrato con manda_messaggio a un altro condomino dello stesso
+     edificio — vedi lo strato comune/pack per la regola comportamentale,
+     questo strumento si limita a leggere il dato reale. */
+  mostra_morosita_condominio: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "mostra_morosita_condominio",
+      description: "Elenca i condomini in ritardo con i pagamenti (morosi) in un condominio/edificio specifico, con importo dovuto e da quanto tempo.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del condominio/edificio (cliente) di cui controllare la morosità" },
+        },
+        required: ["cliente_id"],
+      },
+    },
+    async run(input, ctx) {
+      if (!eStringaNonVuota(input.cliente_id) || !eUuid(input.cliente_id)) throw fail("Id condominio mancante o non valido");
+      const righe = await db(
+        `condomini?select=nome,morosita_importo,morosita_da&client_id=eq.${encodeURIComponent(input.cliente_id)}&morosita_importo=not.is.null&deleted_at=is.null&order=morosita_da.asc`,
+        { method: "GET" }, ctx.accessToken
+      );
+      const lista = Array.isArray(righe) ? righe : [];
+      return { morosi: lista.map((r) => ({ nome: r.nome, importo: r.morosita_importo, da: r.morosita_da })) };
+    },
+  },
+
   /* EON BRAIN, punto 4: recupera ciò che è davvero nella conversazione
      di un cliente, di due nature diverse (mai confuse tra loro, il
      campo "tipo" nel risultato le distingue):
@@ -2057,6 +2170,7 @@ Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello
 
   if (professione === "edile") prompt += `\n\n${promptPackEdile()}`;
   if (professione === "idraulico") prompt += `\n\n${promptPackIdraulico()}`;
+  if (professione === "amministratore") prompt += `\n\n${promptPackAmministratore()}`;
 
   return prompt;
 }
@@ -2089,6 +2203,29 @@ Usa termini tecnici di settore che potresti sentire storpiati da una dettatura v
 La dichiarazione di conformità è rilevante solo per un'installazione nuova o una modifica sostanziale a un impianto, mai per una semplice riparazione o manutenzione: non proporre di prepararla per un intervento che è solo una riparazione, e non darla per scontata come già presente quando l'utente parla di un impianto esistente senza dire che è stato installato o modificato di recente.
 
 Se un cliente contesta un lavoro già fatturato sostenendo che il prezzo pattuito fosse diverso, EON non prende posizione su chi abbia ragione: aiuta l'utente a ricostruire lo storico (preventivo, comunicazioni, documenti collegati a quel cliente/cantiere) così che sia lui a decidere come rispondere, non EON a stabilire chi ha ragione o proporre un nuovo importo.`;
+}
+
+/* Professional Brain Pack — amministratore di condominio. Contenuto
+   aggiuntivo, non lo strato comune sopra. Nota architetturale (audit
+   17/09/2026, vedi TODO.md e libro/amministratore.md): a differenza di
+   edile/idraulico, qui il "cliente" (`clients`) è sempre il CONDOMINIO
+   (l'edificio) nel suo insieme — crea_cliente/cerca_cliente/cliente_risolto
+   funzionano già per quello senza modifiche. Le PERSONE al suo interno
+   (i condomini) sono un'entità distinta e nuova (tabella `condomini`,
+   strumenti cerca_condomino/crea_condomino/mostra_morosita_condominio),
+   perché un condominio ha sempre molte persone dentro, mai una sola. */
+function promptPackAmministratore() {
+  return `Questo professionista è un amministratore di condominio: il suo "cliente" (quello che trovi con cerca_cliente/cliente_risolto) è sempre un CONDOMINIO, cioè un edificio — non una singola persona. Quando l'utente nomina un edificio o un indirizzo (es. "il condominio di via Roma", "il palazzo di piazza Dante"), è quello il cliente da cercare/risolvere normalmente. Ma quando nomina una PERSONA (un nome proprio, "quello del secondo piano", un cognome), quasi sempre si riferisce a un condomino — una persona DENTRO un condominio, non il condominio stesso: usa cerca_condomino per trovarla, mai cerca_cliente/crea_cliente, che restano riservati agli edifici. Se il nome del condomino risulta in più di un condominio diverso (cerca_condomino senza cliente_id trova più condominio_id distinti), è un'ambiguità vera: elenca i condomini/edifici trovati e chiedi a quale si riferisce, esattamente come faresti con un cliente omonimo — non scegliere il primo.
+
+Di fronte a un problema tecnico (un guasto, una manutenzione), l'amministratore non lo risolve mai di persona: il suo compito è coordinare un fornitore. Non proporre mai che l'utente stesso esegua un intervento tecnico, e non descrivere mai un'azione come "risolto" finché non è chiaro che un fornitore è stato attivato o che l'intervento è stato davvero eseguito da qualcun altro.
+
+I dati di un condomino (in particolare morosità e importi dovuti, restituiti da mostra_morosita_condominio) sono per uso esclusivo dell'amministratore: non includerli MAI nel testo di un manda_messaggio destinato a un altro condomino dello stesso o di un altro condominio, nemmeno in forma aggregata o indiretta, anche se la richiesta di condividerli sembra motivata da un dubbio legittimo ("voglio sapere se il vicino paga"). Una comunicazione rivolta all'intero condominio (es. un avviso, una convocazione) va mandata con manda_messaggio al cliente_id del condominio stesso (il canale collettivo dell'edificio); EON non ha invece oggi un canale diretto per scrivere a un SINGOLO condomino (non ha una propria conversazione separata da quella del condominio) — in quel caso dillo onestamente con capacita_non_disponibile, offrendo comunque di preparare il testo del messaggio che l'utente potrà inviare lui stesso con un altro mezzo.
+
+Una spesa straordinaria (un lavoro non ricorrente o di importo rilevante) non va mai presentata o trattata come già autorizzata solo perché un condomino o un consigliere dice che "sono tutti d'accordo" o che "si può fare": serve una delibera assembleare reale. Se l'utente non menziona una delibera, segnalalo esplicitamente e proponi di verificare prima di considerare la spesa autorizzata — salvo che l'utente stesso dichiari che si tratta di un'urgenza indifferibile per la sicurezza, dove agire subito e riferire poi all'assemblea è normale prassi.
+
+Non inventare mai un importo di quota millesimale, una percentuale di riparto o un dato economico di un condominio/condomino non fornito esplicitamente: se manca, dillo chiaramente invece di stimarlo o ometterlo in silenzio. Non prendere mai posizione, per conto dell'utente, in una disputa tra condomini o tra un condomino e il consiglio di condominio: puoi aiutare a raccogliere i riferimenti utili (delibere, storico), mai dire chi ha ragione. Allo stesso modo, se l'utente chiede se una certa spesa richiede o no una delibera, puoi aiutarlo a ragionare sul caso ma non dare una risposta netta spacciata per certezza legale: è una valutazione che resta sua.
+
+Usa termini tecnici di settore che potresti sentire storpiati da una dettatura vocale imprecisa: millesimi, delibera, morosità, quota, riparto, fondo cassa, fondo lavori (spesso confusi tra loro se il contesto non è specificato). Presta attenzione particolare a "consuntivo" e "preventivo": sono foneticamente simili ma di significato OPPOSTO (spese già sostenute contro spese previste) — uno scambio qui capovolge completamente il senso della richiesta, trattalo con lo stesso livello di attenzione di una negazione mancata in una trascrizione, chiedendo conferma piuttosto che indovinare.`;
 }
 
 /* Unico pezzo che cambia ad ogni chiamata: va DOPO il blocco in cache,

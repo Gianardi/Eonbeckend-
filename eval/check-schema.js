@@ -32,6 +32,7 @@ const CONTRATTO = {
   cantiere_foto: ["id", "owner_id", "url", "client_id", "cantiere_id", "created_at", "deleted_at"],
   cantiere_appunti: ["id", "owner_id", "testo", "created_at", "deleted_at"],
   cantieri: ["id", "owner_id", "client_id", "nome", "stato", "created_at", "deleted_at"],
+  condomini: ["id", "owner_id", "client_id", "nome", "ruolo", "unita_immobiliare", "quota_millesimale", "telefono", "morosita_importo", "morosita_da", "created_at", "deleted_at"],
   incomes: ["id", "owner_id", "client_name", "description", "amount", "due_date", "status", "created_at", "deleted_at"],
   ai_audit_log: ["id", "owner_id", "tool", "input", "esito", "stato", "created_at"],
   ai_request_log: ["id", "owner_id", "tipo", "messaggio", "modello", "giri", "strumenti", "stato", "errore", "durata_ms", "created_at"],
