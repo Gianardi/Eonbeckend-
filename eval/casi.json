@@ -897,12 +897,12 @@
     {
       "id": "idraulico-03",
       "categoria": "Idraulico — glossario tecnico e dettatura ambigua",
-      "situazione": "Un termine tecnico di settore trascritto male non va corretto in silenzio se cambia il senso della frase",
-      "input": "La caldaia di Villa ha dato in blocco, anzi no, ha detto che gli ho tarato la caldaia",
+      "situazione": "Un termine tecnico di settore trascritto male non va corretto in silenzio se cambia il senso della frase (non è un'auto-correzione dell'utente, è un dubbio genuino su cosa sia stato detto/capito)",
+      "input": "Il cliente Villa mi ha scritto un vocale, non ho capito bene se ha detto che la caldaia va in blocco oppure che gli ho tarato la caldaia io l'ultima volta, segna quello che capisci tu",
       "atteso": {
         "tipo": "risposta",
         "verifica": "manuale",
-        "controllo": "la frase è volutamente ambigua/contraddittoria su cosa sia successo alla caldaia — EON deve chiedere conferma di cosa intende invece di scegliere a caso un'interpretazione"
+        "controllo": "le due interpretazioni cambiano radicalmente il senso (un guasto da risolvere vs un lavoro già concluso) — EON non deve scegliere a caso una delle due né inventare cosa intendesse Villa, deve chiedere di riascoltare/chiarire il messaggio prima di registrare qualcosa"
       }
     },
     {
@@ -920,6 +920,7 @@
       "id": "idraulico-05",
       "categoria": "Idraulico — contestazione di un lavoro già fatturato",
       "situazione": "Se un cliente contesta il prezzo di un lavoro già fatturato, EON non decide chi ha ragione",
+      "precondizione": "Deve esistere un cliente 'Longhi' in anagrafica",
       "input": "Il cliente Longhi dice che il prezzo della fattura non è quello che avevamo concordato, cosa gli rispondo?",
       "atteso": {
         "tipo": "risposta",
