@@ -1304,15 +1304,42 @@ diagnosi tecnica definitiva senza dati sufficienti") non è stato
 insegnato a parte: è già coperto dal principio generale esistente di
 non inventare mai dati non forniti dall'utente.
 
-**Prossimo passo**: guidare Gianardi nel live-check su staging (impostare
-`profiles.profession = 'idraulico'` sull'utente di test, seminare i dati
-di precondizione necessari — es. un cliente con manutenzione caldaia da
-registrare — e lanciare `eval/live-check.js` con
-`EVAL_SOLO=brain-comune-27,brain-comune-28,idraulico-01,idraulico-02,idraulico-03,idraulico-04,idraulico-05`),
-poi eventuali correzioni di formulazione trovate nel test reale, stesso
-metodo dell'edile. Dopo l'idraulico: `libro/amministratore.md` e
-`libro/avvocato.md`, stesso ordine confermato con Gianardi (validazione
-con tester reali resta l'ultimo passo, dopo tutti i cervelli).
+**Live-check su staging completato (17/09/2026), pack Idraulico confermato
+funzionante.** Prima di partire, scoperto che sia il progetto Supabase di
+staging sia quello di produzione erano in pausa (stato "INACTIVE") per
+inattività durante la vacanza di Gianardi — ripristinati entrambi
+(`mcp__Supabase__restore_project`); questo significa che l'app reale non
+ha funzionato per nessun utente durante quei giorni, da tenere a mente
+per il futuro (magari un controllo periodico, o capire se Supabase offre
+un piano che non mette in pausa i progetti attivi).
+
+Impostato `profiles.profession = 'idraulico'` sull'utente di test in
+staging, creato un cliente di prova "Longhi" per la precondizione di
+`idraulico-05`, e guidato Gianardi (passo-passo nel Terminale, con
+qualche inciampo per via di una cartella locale scaricata dal branch
+sbagliato — risolto scaricando lo ZIP del branch giusto da GitHub) nel
+lanciare `eval/live-check.js` con i 7 casi nuovi.
+
+Trovato un bug reale al primo giro: il promemoria per la manutenzione
+caldaia veniva datato per OGGI invece che per l'anno prossimo (l'istruzione
+originale non era abbastanza esplicita/meccanica). Corretto il testo del
+pack (due iterazioni, commit separati) rendendo il calcolo della data
+esplicito ("stesso giorno e mese, anno successivo"). Verificato
+direttamente sul database di staging (colonna `scheduled_at`, non solo il
+campo `time` mostrato a schermo che non include mai l'anno) che il
+promemoria creato è davvero datato un anno dopo — confermato corretto.
+Migliorato anche il caso `idraulico-03` (testava per errore
+l'auto-correzione invece dell'ambiguità di dettatura) durante il giro.
+
+**Risultato finale: tutti e 7 i casi nuovi passano** (brain-comune-27/28,
+idraulico-01..05). Pack Idraulico considerato insegnato e testato, stesso
+livello di affidabilità del pack Edile.
+
+**Prossimo passo**: `libro/amministratore.md` e poi `libro/avvocato.md`,
+stesso metodo (bozza → audit contro strato comune + pack esistenti →
+insegnamento a piccoli gruppi testati su staging). Validazione con tester
+reali resta l'ultimo passo, dopo tutti i cervelli — ordine confermato con
+Gianardi.
 
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
