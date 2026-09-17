@@ -1217,6 +1217,61 @@ solo sulla scrittura del libro.
    strato comune.
 3. **Insegnarli a EON** una volta scritti, stesso metodo.
 
+**Ripresa dei lavori (17/09/2026)**, dopo una pausa di Gianardi.
+Confermato con lui il metodo definitivo, per essere chiari una volta per
+tutte: **conoscenza generale AI per ogni professione → insegnata e
+testata a EON → se serve una funzione nuova la si costruisce →
+validazione con esperienza reale è l'ULTIMO passo, quando il prodotto
+va ai tester**, non durante la costruzione — a differenza di quanto
+pensato in precedenza, non si valida ogni libro con esperienza reale
+subito dopo averlo scritto. Importante: il "cervello generale" (strato
+comune) NON cresce da solo — EON non impara dall'uso, non ha nessun
+meccanismo di auto-aggiornamento. Cresce solo come effetto collaterale
+deliberato del nostro processo: ogni volta che scriviamo il libro di una
+professione e facciamo l'audit, troviamo principi che sono in realtà
+generali e li aggiungiamo di proposito allo strato comune (come successo
+con l'edile) — mai in automatico.
+
+**Libro Idraulico — prima bozza scritta (17/09/2026)**: `libro/idraulico.md`,
+stessa struttura e metodo dell'edile. Differenze principali dal mestiere
+edile: lavora per interventi puntuali più che cantieri lunghi, urgenze
+reali molto più frequenti (allagamenti, assenza di acqua/riscaldamento —
+con la regola esplicita che l'odore di gas non è mai gestito come
+intervento idraulico, va sempre indirizzato a chi di competenza),
+manutenzioni programmate ricorrenti (caldaia), dichiarazione di
+conformità solo per installazioni/modifiche sostanziali.
+
+**Seconda bozza indipendente integrata lo stesso giorno**: Gianardi ha
+chiesto anche a Claude chat (claude.ai) di scrivere una bozza per la
+stessa professione, con un prompt basato sul metodo che gli ho preparato
+io. Fonte completa in `libro/idraulico-claude-chat-lotto1.md`; solo le
+voci genuinamente nuove integrate in `libro/idraulico.md` (non tutto in
+blocco, stesso principio dei lotti Copilot/OpenAI per l'edile) — tra le
+più significative: il furgone come ufficio mobile/magazzino la cui
+organizzazione condiziona se un intervento si chiude in giornata, tre
+soglie mentali per organizzare la giornata (urgenza/posizione/materiale
+disponibile), il Contratto di manutenzione come entità distinta da una
+singola manutenzione (con l'ambiguità che il cliente pensi copra anche i
+guasti imprevisti), "fatturato non equivale a incassato", e tre divieti
+forti aggiunti alla sezione K: mai suggerire di evitare la fatturazione
+("lavoro in nero") nemmeno su richiesta del cliente, mai suggerire di
+eseguire lavori che richiedono un'abilitazione diversa dalla propria
+(es. opere elettriche collegate a una caldaia), mai dare una diagnosi
+tecnica definitiva senza dati sufficienti.
+
+**Nota per dopo**: i due divieti su "mai suggerire di non fatturare" e
+"mai suggerire di eseguire lavori fuori dalla propria abilitazione"
+sembrano principi generali (validi per qualunque professione — un
+avvocato o un amministratore potrebbero ricevere richieste analoghe),
+non specifici dell'idraulico. Per ora restano nel Pack idraulico dove
+sono stati trovati; da valutare se spostarli nello strato comune quando
+faremo il prossimo giro di audit generale (stesso pattern già visto con
+l'edile: molto di quello che sembra specifico in realtà non lo è).
+
+**Prossimo passo**: audit di `libro/idraulico.md` contro strato comune +
+pack edile (cosa è già coperto, cosa è genuinamente nuovo), poi
+insegnamento a EON a piccoli gruppi testati, stesso metodo dell'edile.
+
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
 generali, non specifici edile — vedi `systemPromptAssistente`):
