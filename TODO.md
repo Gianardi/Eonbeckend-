@@ -1478,16 +1478,37 @@ comunicazione richiesto (es. PEC), non appiattirlo in un invio generico;
 Aggiunti 8 nuovi casi a `eval/casi.json` (`avvocato-01..08`). `node
 --check` e `eval/backend.test.js` confermano nessuna regressione (18/18).
 
-**Prossimo passo**: guidare Gianardi nel live-check su staging — impostare
-`profiles.profession = 'avvocato'` sull'utente di test, seminare un
-cliente con due pratiche/cantieri distinti (es. "Mario Rossi" con "Causa
-di lavoro" e "Separazione"), poi lanciare `eval/live-check.js` con
-`EVAL_SOLO=avvocato-01,avvocato-02,avvocato-03,avvocato-04,avvocato-05,avvocato-06,avvocato-07,avvocato-08`.
+**Live-check su staging completato (17/09/2026), pack Avvocato confermato
+funzionante.** Impostato `profiles.profession = 'avvocato'` sull'utente di
+test, seminato il cliente "Mario Rossi" con due pratiche/cantieri distinti
+("Causa di lavoro" e "Separazione").
 
-Con l'avvocato si chiudono le 4 professioni di partenza (Edile, Idraulico,
-Amministratore di condominio, Avvocato). Prossimo passo dopo il
-live-check: validazione con tester reali, l'ultimo passo dell'ordine
-confermato con Gianardi.
+Trovato un bug reale al primo giro (`avvocato-03`): quando ho chiesto di
+scrivere alla controparte Bianchi per un accordo, EON preparava
+direttamente il testo del messaggio, chiedendo solo la conferma di invio
+(il meccanismo automatico di manda_messaggio) — senza fermarsi prima a
+chiedere se Bianchi avesse un legale, cosa che l'istruzione originale
+diceva ma non abbastanza esplicitamente. Corretto rendendo la sequenza
+meccanica: mai chiamare manda_messaggio per una controparte quando non è
+chiaro se assistita, sempre una domanda di testo PRIMA di redigere
+qualunque bozza. Ritestato: ora chiede correttamente prima di procedere.
+
+Trovato anche un problema di dati, non di prompt: il caso `avvocato-05`
+usava "Bianchi" come nome, che collideva con un cliente "Bianchi" già
+usato da altri test (con cantieri edile "Garage"/"Bagno"/"Tetto"
+scollegati), generando un'ambiguità non voluta. Rinominato il cliente del
+test in "Ostinelli" — nessun bug di prompt, solo un caso da correggere.
+
+**Risultato finale: tutti e 8 i casi passano** (avvocato-01..08). Pack
+Avvocato considerato insegnato e testato, stesso livello di affidabilità
+delle altre 3 professioni.
+
+**Le 4 professioni di partenza sono complete**: Edile, Idraulico,
+Amministratore di condominio, Avvocato — tutte scritte, insegnate e
+testate con lo stesso metodo. Prossimo passo, ordine confermato con
+Gianardi: validazione con tester reali, l'ultimo passo prima che il
+prodotto vada in mano a professionisti veri al di fuori di questo lavoro
+di costruzione.
 
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
