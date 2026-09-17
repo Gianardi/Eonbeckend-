@@ -1428,6 +1428,34 @@
     padding:12px 18px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
   }
 
+  /* ---- Card risorsa (foto/documento/preventivo recuperati da EON) ---- */
+  .risorsa-voce{
+    border:1px solid var(--border); border-radius:14px; padding:13px; margin-bottom:12px; background:#FBFBFD;
+  }
+  .risorsa-voce img{
+    width:100%; max-height:220px; object-fit:cover; border-radius:11px; cursor:pointer; margin-bottom:10px; display:block;
+  }
+  .risorsa-voce-titolo{ font-size:14px; font-weight:800; color:var(--text); }
+  .risorsa-voce-sotto{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .risorsa-voce-riepilogo{ font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.5; white-space:pre-line; }
+  .risorsa-voce-importo{ font-family:'Manrope'; font-size:18px; font-weight:900; color:var(--indigo); margin-top:6px; }
+  .risorsa-riga-btn{ display:flex; gap:8px; margin-top:11px; flex-wrap:wrap; }
+  .risorsa-sezione{
+    font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--faint); margin:4px 0 9px;
+  }
+  .risorsa-canali{ display:flex; gap:8px; }
+  .risorsa-canale{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;
+    border:1px solid var(--border); border-radius:12px; padding:10px 6px;
+    background:var(--card); cursor:pointer; font-family:inherit;
+  }
+  .risorsa-canale svg{ width:18px; height:18px; color:var(--indigo); }
+  .risorsa-canale span{ font-size:10.5px; font-weight:700; color:var(--text); }
+  .risorsa-canale.disabilitato{ opacity:.45; cursor:default; }
+  .risorsa-canale.disabilitato svg{ color:var(--muted); }
+  .risorsa-vuoto{ color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
+
   /* la scheda del documento dentro la conversazione */
   .msg-documento{
     max-width:80%; flex:none; border-radius:16px; overflow:hidden; cursor:pointer;
@@ -1810,6 +1838,21 @@
       <button class="doc-btn-secondario" id="docAnnulla">Annulla</button>
       <button class="primary-btn" id="docInvia" style="flex:1;justify-content:center;">Invia al cliente</button>
     </div>
+  </div>
+</div>
+
+<!-- Card a tutto schermo per una risorsa richiesta a voce/testo (foto, documento,
+     preventivo/fattura): si apre da sola quando EON recupera davvero qualcosa da
+     mostrare, invece di lasciare il risultato solo in un messaggio di testo. -->
+<div class="doc-overlay" id="risorsaOverlay" style="display:none;">
+  <div class="doc-panel">
+    <div class="doc-head">
+      <div class="doc-head-titolo" id="risorsaTitolo">Risultato</div>
+      <button class="doc-chiudi" id="risorsaChiudi" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="doc-corpo" id="risorsaCorpo"></div>
   </div>
 </div>
 
@@ -7508,6 +7551,25 @@ function collegaHubRacconta(){
     }
 
     const azioni = risposta.azioni || [];
+
+    /* Una richiesta di RISORSA (foto/documento/preventivo) apre la card
+       a schermo quasi intero invece di restare solo in un messaggio di
+       testo — mai per un impegno, che segue il percorso di sempre più
+       sotto. */
+    const clienteNomeFocus = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
+    const azioneFoto = azioni.find(a => a.tool === "recupera_foto_cantiere");
+    const azioneDocumenti = azioni.find(a => a.tool === "recupera_documenti_cliente");
+    if(azioneFoto){
+      mostraRisorsaFoto(azioneFoto.esito.foto || [], clienteNomeFocus);
+      chiudiHubAI();
+      return;
+    }
+    if(azioneDocumenti){
+      mostraRisorsaDocumenti(azioneDocumenti.esito.documenti || [], clienteNomeFocus);
+      chiudiHubAI();
+      return;
+    }
+
     /* Non tutte le richieste finiscono in crea_impegno: "cancella cliente
        Rossi" o "elimina questo appuntamento" sono azioni vere, non
        impegni. Prima ignoravamo tutto ciò che non fosse crea_impegno —
@@ -8525,6 +8587,21 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
 
     const azioni = risposta.azioni || [];
+
+    /* Una richiesta di RISORSA (foto/documento/preventivo) apre la card
+       a schermo quasi intero invece di restare solo in un messaggio di
+       testo — mai per un impegno, che segue il percorso di sempre più
+       sotto. */
+    const clienteNomeFocusMic = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
+    const azioneFotoMic = azioni.find(a => a.tool === "recupera_foto_cantiere");
+    const azioneDocumentiMic = azioni.find(a => a.tool === "recupera_documenti_cliente");
+    if(azioneFotoMic || azioneDocumentiMic){
+      if(azioneFotoMic) mostraRisorsaFoto(azioneFotoMic.esito.foto || [], clienteNomeFocusMic);
+      else mostraRisorsaDocumenti(azioneDocumentiMic.esito.documenti || [], clienteNomeFocusMic);
+      if(viaVoce) parlaRisposta(risposta.testo || "Ecco quello che ho trovato");
+      return;
+    }
+
     const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
@@ -9005,6 +9082,179 @@ function apriMedia(url, tipo){
   v.appendChild(c);
   v.addEventListener("click", e => { if(e.target === v) v.remove(); });
   document.body.appendChild(v);
+}
+
+/* ============================================================
+   CARD RISORSA — quando l'utente chiede qualcosa che EON deve
+   RECUPERARE davvero (una foto, un documento, un preventivo/
+   fattura — mai un impegno, che resta come oggi), il risultato si
+   apre qui a schermo quasi intero invece di restare solo in un
+   messaggio di testo. "EON interna" scrive davvero nella chat del
+   cliente; Email e WhatsApp sono già in struttura ma disabilitati
+   finché non costruiamo il Communication Hub multicanale (TODO.md).
+   ============================================================ */
+function apriRisorsaCard(titolo, corpoEl){
+  document.getElementById("risorsaTitolo").textContent = titolo;
+  const corpo = document.getElementById("risorsaCorpo");
+  corpo.innerHTML = "";
+  corpo.appendChild(corpoEl);
+  document.getElementById("risorsaOverlay").style.display = "flex";
+}
+function chiudiRisorsaCard(){
+  document.getElementById("risorsaOverlay").style.display = "none";
+}
+document.getElementById("risorsaChiudi").addEventListener("click", chiudiRisorsaCard);
+document.getElementById("risorsaOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "risorsaOverlay") chiudiRisorsaCard();
+});
+
+function creaRigaCanaliInvio(clienteNome, testoDaInviare){
+  const riga = document.createElement("div");
+  riga.className = "risorsa-canali";
+  const canali = [
+    { nome: "EON", icona: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', attivo: true },
+    { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', attivo: false },
+    { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 1 1-4-6.9"/><path d="M12 4v8l5 3"/>', attivo: false },
+  ];
+  canali.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "risorsa-canale" + (c.attivo ? "" : " disabilitato");
+    b.type = "button";
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.innerHTML = c.icona;
+    b.appendChild(svg);
+    const span = document.createElement("span");
+    span.textContent = c.attivo ? c.nome : c.nome + " · presto";
+    b.appendChild(span);
+    if(c.attivo) b.addEventListener("click", () => inviaRisorsaEonInterna(clienteNome, testoDaInviare));
+    riga.appendChild(b);
+  });
+  return riga;
+}
+
+/* Non manda da sola: apre la chat vera del cliente con il testo già
+   pronto nel campo, così l'utente vede cosa parte e decide lui quando
+   inviarlo davvero — stesso principio del resto dell'app, mai un invio
+   silenzioso. */
+async function inviaRisorsaEonInterna(clienteNome, testoDaInviare){
+  const cliente = clienteNome ? clients.find(c => c.name === clienteNome) : null;
+  if(!cliente){
+    chiudiRisorsaCard();
+    showAIToast("Cliente non trovato", "Non riesco a collegare questa risorsa a un cliente in anagrafica.");
+    return;
+  }
+  chiudiRisorsaCard();
+  await openClientChat(cliente);
+  const input = document.getElementById("chatInput");
+  if(input){ input.value = testoDaInviare; input.focus(); }
+}
+
+function creaVoceFoto(foto, clienteNome){
+  const el = document.createElement("div");
+  el.className = "risorsa-voce";
+  const img = document.createElement("img");
+  img.src = foto.url;
+  img.alt = "";
+  img.addEventListener("click", () => apriMedia(foto.url, "image/*"));
+  el.appendChild(img);
+  if(foto.quando){
+    const sotto = document.createElement("div");
+    sotto.className = "risorsa-voce-sotto";
+    sotto.textContent = new Date(foto.quando).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+    el.appendChild(sotto);
+  }
+  const btnRiga = document.createElement("div");
+  btnRiga.className = "risorsa-riga-btn";
+  const apriBtn = document.createElement("button");
+  apriBtn.className = "doc-btn-secondario";
+  apriBtn.type = "button";
+  apriBtn.textContent = "Apri";
+  apriBtn.addEventListener("click", () => window.open(foto.url, "_blank"));
+  btnRiga.appendChild(apriBtn);
+  el.appendChild(btnRiga);
+  if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando la foto: " + foto.url));
+  return el;
+}
+
+function creaVoceDocumento(doc, clienteNome){
+  const el = document.createElement("div");
+  el.className = "risorsa-voce";
+  const titolo = document.createElement("div");
+  titolo.className = "risorsa-voce-titolo";
+  titolo.textContent = doc.titolo || "(senza titolo)";
+  el.appendChild(titolo);
+
+  if(doc.tipo === "preventivo_o_fattura"){
+    if(doc.importo != null){
+      const importo = document.createElement("div");
+      importo.className = "risorsa-voce-importo";
+      importo.textContent = "€" + Number(doc.importo).toLocaleString("it-IT");
+      el.appendChild(importo);
+    }
+    if(doc.riepilogo){
+      const riep = document.createElement("div");
+      riep.className = "risorsa-voce-riepilogo";
+      riep.textContent = doc.riepilogo;
+      el.appendChild(riep);
+    }
+    const nota = document.createElement("div");
+    nota.className = "risorsa-voce-sotto";
+    nota.textContent = "Visibile solo dentro l'app — nessun link da condividere";
+    el.appendChild(nota);
+    if(clienteNome){
+      const riassunto = doc.titolo + (doc.importo != null ? " — €" + Number(doc.importo).toLocaleString("it-IT") : "");
+      el.appendChild(creaRigaCanaliInvio(clienteNome, riassunto));
+    }
+  } else {
+    if(doc.quando){
+      const sotto = document.createElement("div");
+      sotto.className = "risorsa-voce-sotto";
+      sotto.textContent = new Date(doc.quando).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+      el.appendChild(sotto);
+    }
+    if(doc.url){
+      const btnRiga = document.createElement("div");
+      btnRiga.className = "risorsa-riga-btn";
+      const apriBtn = document.createElement("button");
+      apriBtn.className = "doc-btn-secondario";
+      apriBtn.type = "button";
+      apriBtn.textContent = "Apri";
+      apriBtn.addEventListener("click", () => window.open(doc.url, "_blank"));
+      btnRiga.appendChild(apriBtn);
+      el.appendChild(btnRiga);
+      if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando il documento \"" + doc.titolo + "\": " + doc.url));
+    }
+  }
+  return el;
+}
+
+function mostraRisorsaFoto(foto, clienteNome){
+  const wrap = document.createElement("div");
+  if(!foto.length){
+    const vuoto = document.createElement("div");
+    vuoto.className = "risorsa-vuoto";
+    vuoto.textContent = "Nessuna foto trovata.";
+    wrap.appendChild(vuoto);
+  } else {
+    foto.forEach(f => wrap.appendChild(creaVoceFoto(f, clienteNome)));
+  }
+  apriRisorsaCard(clienteNome ? "Foto — " + clienteNome : "Foto", wrap);
+}
+function mostraRisorsaDocumenti(documenti, clienteNome){
+  const wrap = document.createElement("div");
+  if(!documenti.length){
+    const vuoto = document.createElement("div");
+    vuoto.className = "risorsa-vuoto";
+    vuoto.textContent = "Nessun documento trovato.";
+    wrap.appendChild(vuoto);
+  } else {
+    documenti.forEach(d => wrap.appendChild(creaVoceDocumento(d, clienteNome)));
+  }
+  apriRisorsaCard(clienteNome ? "Documenti — " + clienteNome : "Documenti", wrap);
 }
 
 
