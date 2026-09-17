@@ -1268,9 +1268,51 @@ sono stati trovati; da valutare se spostarli nello strato comune quando
 faremo il prossimo giro di audit generale (stesso pattern già visto con
 l'edile: molto di quello che sembra specifico in realtà non lo è).
 
-**Prossimo passo**: audit di `libro/idraulico.md` contro strato comune +
-pack edile (cosa è già coperto, cosa è genuinamente nuovo), poi
-insegnamento a EON a piccoli gruppi testati, stesso metodo dell'edile.
+**Audit completato e insegnato a EON (17/09/2026)**: confrontato
+`libro/idraulico.md` con strato comune + pack edile. La maggior parte era
+già coperta (fornitore mai cliente, cerca_cantiere/crea_cantiere già
+generalizzano bene a "immobile" anche per l'idraulico, no-invenzione,
+ecc.). Aggiunto in `api/index.js`:
+- **Allo strato comune** (`systemPromptAssistente`, non nel pack
+  idraulico): i due principi identificati come generali nella nota sopra
+  — mai suggerire/assecondare di evitare la fatturazione anche su
+  richiesta del cliente; mai suggerire di eseguire un lavoro che richiede
+  un'abilitazione diversa dalla propria professione, aiutare invece a
+  coordinarsi con il tecnico giusto.
+- **Nuova `promptPackIdraulico()`**, attivata quando
+  `profiles.profession === "idraulico"`, con le 5 cose genuinamente
+  specifiche trovate nell'audit: (1) modello di priorità idraulico —
+  urgenza vera vs percepita, con la regola esplicita che un odore di gas
+  non va MAI gestito come intervento idraulico ordinario (chiudere il gas
+  e chiamare il pronto intervento gas, non programmare un passaggio);
+  (2) promemoria automatico (`crea_impegno`) per la prossima manutenzione
+  caldaia quando se ne registra una fatta, con aggiornamento
+  (`sposta_impegno`) se il cliente la rimanda invece di duplicarlo;
+  (3) glossario tecnico per la dettatura vocale (caldaia, scaldabagno,
+  autoclave, sifone, guarnizione, rubinetteria, valvola, raccordo, spurgo,
+  tenuta, "va in blocco/errore", "tarare la caldaia", lavoro a corpo vs a
+  misura); (4) dichiarazione di conformità rilevante solo per
+  installazioni/modifiche sostanziali, mai per una semplice riparazione;
+  (5) contestazione di un lavoro già fatturato — EON non prende
+  posizione, aiuta solo a ricostruire lo storico.
+
+Aggiunti 7 nuovi casi a `eval/casi.json`: `brain-comune-27`/`28` per i
+due principi generali, `idraulico-01..05` per il pack specifico.
+`node --check api/index.js` e `eval/backend.test.js` confermano nessuna
+regressione (18/18). Il terzo divieto della nota sopra ("mai dare una
+diagnosi tecnica definitiva senza dati sufficienti") non è stato
+insegnato a parte: è già coperto dal principio generale esistente di
+non inventare mai dati non forniti dall'utente.
+
+**Prossimo passo**: guidare Gianardi nel live-check su staging (impostare
+`profiles.profession = 'idraulico'` sull'utente di test, seminare i dati
+di precondizione necessari — es. un cliente con manutenzione caldaia da
+registrare — e lanciare `eval/live-check.js` con
+`EVAL_SOLO=brain-comune-27,brain-comune-28,idraulico-01,idraulico-02,idraulico-03,idraulico-04,idraulico-05`),
+poi eventuali correzioni di formulazione trovate nel test reale, stesso
+metodo dell'edile. Dopo l'idraulico: `libro/amministratore.md` e
+`libro/avvocato.md`, stesso ordine confermato con Gianardi (validazione
+con tester reali resta l'ultimo passo, dopo tutti i cervelli).
 
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
