@@ -2038,8 +2038,15 @@ miglioramenti, tutti e 3 autorizzati; da costruire uno alla volta:
    davvero il ripristino e fa sparire l'avviso. `router.test.js` e
    `backend.test.js` invariati: 62/62 e 18/18.
 
-3. **DA FARE — Risposte dell'AI a comparsa progressiva (streaming)**
-   invece di aspettare la risposta intera prima di mostrarla (come
-   ChatGPT/Claude.ai/Gemini). Tocca anche il backend (`api/index.js`,
-   l'endpoint `/api?action=assistant`) — il cambiamento più corposo dei
-   3, da scomporre in passi più piccoli prima di iniziare.
+3. **NON FATTO per scelta di Gianardi (17/09/2026) — Risposte dell'AI a
+   comparsa progressiva (streaming)**, come ChatGPT/Claude.ai/Gemini.
+   Valutato nel merito (non solo "perché lo fanno le grandi app"): per
+   EON il beneficio è più stretto che per un chatbot generico — la
+   maggior parte delle richieste sono azioni brevi che finiscono con un
+   "Fatto." di poche parole, dove lo streaming non aiuterebbe a nulla;
+   aiuterebbe solo nelle risposte lunghe (un parere, una spiegazione).
+   A fronte di un costo reale (tocca sia il backend — come Claude
+   risponde — sia il frontend — leggere la risposta a pezzi — sia la
+   lettura a voce, da ripensare), Gianardi ha deciso di non farlo per
+   ora. Proposta rimasta sul tavolo se si vorrà tornarci: solo per le
+   risposte lunghe di tipo "parere/spiegazione", non per tutto.
