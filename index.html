@@ -7547,6 +7547,15 @@ function collegaHubRacconta(){
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
     }
+    /* EON Router, fase 1a: un comando di sola navigazione ("apri
+       calendario") non ha bisogno né di rete né di login — si
+       riconosce qui, prima di tutto, e si evita del tutto la chiamata
+       all'AI. Vedi provaNavigazioneDiretta più sotto nel file. */
+    if(provaNavigazioneDiretta(testo)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      return;
+    }
     if(!BACKEND_CONFIGURED || !currentSession){
       stato("attesa", "Serve essere collegati",
         "L'assistente scrive nel calendario vero: accedi per usarlo");
