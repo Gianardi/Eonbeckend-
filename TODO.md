@@ -1446,11 +1446,48 @@ livello di affidabilità di edile e idraulico — inclusa la parte più
 delicata (riservatezza morosità, spesa senza delibera, entità Condomini
 nuova).
 
-**Prossimo passo**: `libro/avvocato.md`, ultimo delle 4 professioni di
-partenza — stesso metodo (bozza → eventuale seconda bozza da Claude chat
-→ audit contro strato comune + pack esistenti → insegnamento a piccoli
-gruppi testati su staging). Dopo l'avvocato: validazione con tester reali,
-l'ultimo passo, ordine confermato con Gianardi.
+**Libro Avvocato scritto, integrato e insegnato a EON (17/09/2026)**:
+`libro/avvocato.md`, stessa struttura di edile/idraulico/amministratore.
+Seconda bozza indipendente da Claude chat integrata lo stesso giorno
+(fonte in `libro/avvocato-claude-chat-lotto1.md`): canale PEC distinto,
+valore probatorio della forma/canale di comunicazione, mai scegliere tra
+fonti in conflitto su una data (segnalare, mai decidere), riservatezza
+estesa alla sola esistenza di una pratica.
+
+**Audit — a differenza dell'amministratore, nessuna nuova tabella
+necessaria.** Il concetto di "pratica" (un cliente con più fascicoli
+indipendenti) è esattamente lo stesso problema già risolto dai Cantieri
+per l'edile: `cerca_cantiere`/`crea_cantiere` sono stati riusati così come
+sono, semplicemente reinterpretando "cantiere" come "pratica" nel pack —
+nessuna modifica al database o al codice dei due strumenti.
+
+**Nuova `promptPackAvvocato()`**: (1) pratica ambigua → verificare con
+cerca_cantiere prima di agire, riservatezza estesa anche alla sola
+esistenza di una pratica; (2) controparte mai trattata come cliente,
+anche se la stessa persona è cliente in un'altra pratica dello studio;
+(3) mai contattare direttamente una controparte senza sapere se è
+assistita da un legale; (4) scadenza processuale mai calcolata/stimata da
+EON, solo registrata se già data esplicitamente — e mai scegliere tra
+fonti in conflitto sulla stessa data; (5) **eccezione esplicita** alla
+regola generale sui pareri (altrove nel prompt EON è istruito a dare un
+parere reale quando chiesto): per un giudizio legale di merito questa
+regola NON si applica, mai un parere di EON; (6) rispettare il canale di
+comunicazione richiesto (es. PEC), non appiattirlo in un invio generico;
+(7) glossario perentorio/ordinatorio, prescrizione/decadenza.
+
+Aggiunti 8 nuovi casi a `eval/casi.json` (`avvocato-01..08`). `node
+--check` e `eval/backend.test.js` confermano nessuna regressione (18/18).
+
+**Prossimo passo**: guidare Gianardi nel live-check su staging — impostare
+`profiles.profession = 'avvocato'` sull'utente di test, seminare un
+cliente con due pratiche/cantieri distinti (es. "Mario Rossi" con "Causa
+di lavoro" e "Separazione"), poi lanciare `eval/live-check.js` con
+`EVAL_SOLO=avvocato-01,avvocato-02,avvocato-03,avvocato-04,avvocato-05,avvocato-06,avvocato-07,avvocato-08`.
+
+Con l'avvocato si chiudono le 4 professioni di partenza (Edile, Idraulico,
+Amministratore di condominio, Avvocato). Prossimo passo dopo il
+live-check: validazione con tester reali, l'ultimo passo dell'ordine
+confermato con Gianardi.
 
 **Gruppo 4 edile (05/09/2026): i 19 principi mai insegnati, trovati
 nell'audit di oggi.** 10 aggiunti allo strato comune (quasi tutti
