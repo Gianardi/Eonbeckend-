@@ -1800,3 +1800,31 @@ anche una parte visiva:
 
 Da fare in una sessione dedicata al lavoro grafico/UI, separata da
 quella sul "cervello" di EON — sono due tipi di lavoro diversi.
+
+**17/09/2026 — Card risorsa a schermo intero (nuova funzione, non solo
+"pulizia").** Fino ad oggi, quando l'utente chiedeva a voce/testo una
+risorsa già esistente (una foto, un documento, un preventivo/fattura),
+EON la recuperava davvero (`recupera_foto_cantiere`/
+`recupera_documenti_cliente`) ma il risultato finiva quasi nascosto in
+un piccolo messaggio di testo/toast — un intervento importante perché
+prima di questo la richiesta non produceva nulla di concreto da vedere,
+il punto debole più visibile di "chiedi ed EON ti dà la cosa subito".
+
+Aggiunta una card centrata a schermo (margine tutto intorno, angoli
+arrotondati sui 4 lati — non una scheda che sale dal basso), che si apre
+da sola SOLO per le richieste di tipo "risorsa" (mai per un impegno, che
+resta come prima): una foto mostra l'immagine vera e grande; un
+documento/preventivo/fattura mostra un'icona grande e colorata in cima
+(o l'importo in grande per preventivi/fatture) con tutto il resto —
+titolo, dettagli, pulsanti — piccolo sotto, su indicazione precisa di
+Gianardi (bozzetto a mano). Ogni risultato ha una riga con 3 canali di
+invio: "EON" funzionante (apre la chat vera del cliente col testo già
+pronto, l'utente vede cosa parte prima di inviarlo), Email e WhatsApp
+già in struttura ma disabilitati ("presto disponibile") finché non
+costruiamo il Communication Hub multicanale.
+
+Testato in locale con Playwright/Chromium (server statico + browser
+headless, non l'app vera online): apertura/chiusura, singolo risultato
+vs più risultati, foto vera visualizzata correttamente, nessun errore
+JavaScript. Codice in `index.html`, nessuna modifica al backend/prompt —
+puramente grafico/strutturale, come richiesto.
