@@ -1449,11 +1449,24 @@
   .risorsa-voce img{
     width:100%; max-height:220px; object-fit:cover; border-radius:11px; cursor:pointer; margin-bottom:10px; display:block;
   }
-  .risorsa-voce-titolo{ font-size:14px; font-weight:800; color:var(--text); }
-  .risorsa-voce-sotto{ font-size:12px; color:var(--muted); margin-top:2px; }
-  .risorsa-voce-riepilogo{ font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.5; white-space:pre-line; }
+  .risorsa-voce-titolo{ font-size:13.5px; font-weight:800; color:var(--text); text-align:center; }
+  .risorsa-voce-sotto{ font-size:11.5px; color:var(--muted); margin-top:2px; text-align:center; }
+  .risorsa-voce-riepilogo{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5; white-space:pre-line; text-align:center; }
   .risorsa-voce-importo{ font-family:'Manrope'; font-size:18px; font-weight:900; color:var(--indigo); margin-top:6px; }
-  .risorsa-riga-btn{ display:flex; gap:8px; margin-top:11px; flex-wrap:wrap; }
+  .risorsa-riga-btn{ display:flex; gap:8px; margin-top:11px; flex-wrap:wrap; justify-content:center; }
+  /* L'icona/figura grande che dà nell'occhio, sempre in cima alla voce:
+     una foto vera (già grande di suo, vedi .risorsa-voce img) oppure,
+     per un documento/preventivo senza anteprima reale, un'icona grande
+     e colorata — mai solo testo piccolo come unica cosa da guardare. */
+  .risorsa-hero{
+    width:84px; height:84px; border-radius:22px; margin:2px auto 12px;
+    display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer;
+  }
+  .risorsa-hero svg{ width:36px; height:36px; }
+  .risorsa-hero-cifra{
+    font-family:'Manrope'; font-size:28px; font-weight:900; color:var(--text);
+    text-align:center; margin-bottom:2px;
+  }
   .risorsa-sezione{
     font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;
     color:var(--faint); margin:4px 0 9px;
@@ -9194,21 +9207,44 @@ function creaVoceFoto(foto, clienteNome){
   return el;
 }
 
+/* Icona grande e colorata che apre la voce — la "figura" ben visibile
+   che deve dare nell'occhio quando non c'è (o non serve) un'anteprima
+   vera come per una foto. Stessa iconografia già usata per le schede
+   preventivo/fattura dentro la chat (msg-doc-badge), solo più grande. */
+function creaIconaHero(colore, pathSvg, onClick){
+  const hero = document.createElement("div");
+  hero.className = "risorsa-hero";
+  hero.style.background = colore;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "2");
+  svg.innerHTML = pathSvg;
+  hero.appendChild(svg);
+  if(onClick) hero.addEventListener("click", onClick);
+  return hero;
+}
+const ICONA_FATTURA = '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>';
+const ICONA_DOCUMENTO = '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/>';
+
 function creaVoceDocumento(doc, clienteNome){
   const el = document.createElement("div");
   el.className = "risorsa-voce";
-  const titolo = document.createElement("div");
-  titolo.className = "risorsa-voce-titolo";
-  titolo.textContent = doc.titolo || "(senza titolo)";
-  el.appendChild(titolo);
 
   if(doc.tipo === "preventivo_o_fattura"){
+    const eFattura = /fattura/i.test(doc.titolo || "");
+    el.appendChild(creaIconaHero(eFattura ? "var(--green)" : "var(--teal)", eFattura ? ICONA_FATTURA : ICONA_DOCUMENTO));
     if(doc.importo != null){
       const importo = document.createElement("div");
-      importo.className = "risorsa-voce-importo";
+      importo.className = "risorsa-hero-cifra";
       importo.textContent = "€" + Number(doc.importo).toLocaleString("it-IT");
       el.appendChild(importo);
     }
+    const titolo = document.createElement("div");
+    titolo.className = "risorsa-voce-titolo";
+    titolo.textContent = doc.titolo || "(senza titolo)";
+    el.appendChild(titolo);
     if(doc.riepilogo){
       const riep = document.createElement("div");
       riep.className = "risorsa-voce-riepilogo";
@@ -9224,6 +9260,11 @@ function creaVoceDocumento(doc, clienteNome){
       el.appendChild(creaRigaCanaliInvio(clienteNome, riassunto));
     }
   } else {
+    if(doc.url) el.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => window.open(doc.url, "_blank")));
+    const titolo = document.createElement("div");
+    titolo.className = "risorsa-voce-titolo";
+    titolo.textContent = doc.titolo || "(senza titolo)";
+    el.appendChild(titolo);
     if(doc.quando){
       const sotto = document.createElement("div");
       sotto.className = "risorsa-voce-sotto";
