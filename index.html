@@ -1428,7 +1428,21 @@
     padding:12px 18px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
   }
 
-  /* ---- Card risorsa (foto/documento/preventivo recuperati da EON) ---- */
+  /* ---- Card risorsa (foto/documento/preventivo recuperati da EON) ----
+     Non una scheda che sale da sotto (come .doc-overlay/.doc-panel): una
+     card centrata, con un margine visibile tutto intorno e gli angoli
+     arrotondati sui 4 lati — la schermata generale resta visibile ai
+     bordi, come da bozzetto di Gianardi (17/09/2026). */
+  .risorsa-overlay{
+    position:fixed; inset:0; z-index:9997; background:rgba(20,23,29,.55);
+    display:flex; align-items:center; justify-content:center; padding:28px 20px;
+    animation:overlayIn .2s ease;
+  }
+  .risorsa-panel{
+    background:var(--card); width:100%; max-width:420px; max-height:85vh;
+    border-radius:26px; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:var(--shadow-md); animation:landingIn .25s ease;
+  }
   .risorsa-voce{
     border:1px solid var(--border); border-radius:14px; padding:13px; margin-bottom:12px; background:#FBFBFD;
   }
@@ -1844,8 +1858,8 @@
 <!-- Card a tutto schermo per una risorsa richiesta a voce/testo (foto, documento,
      preventivo/fattura): si apre da sola quando EON recupera davvero qualcosa da
      mostrare, invece di lasciare il risultato solo in un messaggio di testo. -->
-<div class="doc-overlay" id="risorsaOverlay" style="display:none;">
-  <div class="doc-panel">
+<div class="risorsa-overlay" id="risorsaOverlay" style="display:none;">
+  <div class="risorsa-panel">
     <div class="doc-head">
       <div class="doc-head-titolo" id="risorsaTitolo">Risultato</div>
       <button class="doc-chiudi" id="risorsaChiudi" aria-label="Chiudi">
