@@ -1933,3 +1933,27 @@ tecnica (raccolta dati per il targeting, slot pubblicitari nell'app,
 integrazione con un network di ads, distinzione lato codice tra utenti
 "generico" e utenti professionisti ai fini della pubblicità). Da
 riprendere in una sessione dedicata quando si deciderà di costruirla.
+
+## Principio permanente: imparare dalle grandi app per affinare EON
+
+Richiesto da Gianardi (17/09/2026): cercare attivamente le metodologie e
+le tecniche che usano le grandi app e le big tech, e usarle per affinare
+e migliorare EON.
+
+Non basta applicarle solo quando arriva un'idea o un problema da
+Gianardi (es. lo stratagemma per gli appuntamenti del 17/09 — "notifica
+immediata, poi lavoro in silenzio", stesso principio della spunta di
+WhatsApp prima della conferma di consegna, o di "Invio in corso…" di
+Gmail — è nato da un'idea sua, non da una ricerca proattiva): da ora
+in poi vale come principio permanente di lavoro, in due direzioni:
+1. **Reattivo** (già in uso): quando affrontiamo un problema concreto di
+   EON, guardare prima come lo risolvono le grandi app conosciute e
+   adattarlo, invece di inventare qualcosa da zero.
+2. **Proattivo** (nuovo, da fare di più): guardare periodicamente ai
+   flussi già esistenti di EON e proporre di mia iniziativa miglioramenti
+   ispirati a tecniche note (es. UI ottimistica, retry/backoff, caching,
+   conferme a più livelli di rischio, entity resolution, ecc.), non solo
+   rispondere a richieste già arrivate.
+Mai una tecnica presa e applicata "perché lo fa Google": ogni proposta
+va sempre spiegata nel merito (che problema risolve per EON, quale
+compromesso comporta) prima di essere costruita.
