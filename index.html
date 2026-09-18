@@ -8852,9 +8852,17 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Stratagemma per gli appuntamenti: avviso di ricezione immediato
        (mai su una risposta di continuazione: lì l'utente sta rispondendo
        a una domanda di EON, non creando qualcosa di nuovo), mentre l'AI
-       vera lavora invariata sui dettagli. */
+       vera lavora invariata sui dettagli. A voce l'avviso visivo da solo
+       non basta (18/09/2026, segnalato da Gianardi): chi parla senza
+       guardare lo schermo non lo vede, e senza un segnale sentito la
+       richiesta sembra ferma per tutta l'attesa — una breve conferma
+       parlata, subito, colma il buco senza dire nulla di non confermato
+       (mai un orario, solo la ricezione). */
     const eImpegnoInArrivo = !inContinuazione && sembraRichiestaAppuntamento(testo);
-    if(eImpegnoInArrivo) aggiungiImpegnoInConferma(testo);
+    if(eImpegnoInArrivo){
+      aggiungiImpegnoInConferma(testo);
+      if(viaVoce) parlaRisposta("Ricevuto, un attimo");
+    }
 
     inCorso = true;
     send.disabled = true;
