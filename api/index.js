@@ -2649,6 +2649,29 @@ async function handleAssistant(req, res, user, accessToken) {
          strumento chiamato) possa mai intervenire. */
       const puoRipiegarePerRete = (round === 0 || round === primoGiroSostanziale) && modelloUsato === MODEL_HAIKU && tentativo === 0;
 
+      /* Ragionamento esteso (17/09/2026, richiesto da Gianardi — "il
+         cervello ci pensa su di più sui casi difficili"): SOLO quando
+         tocca a Sonnet, mai su Haiku — Sonnet interviene già solo nei
+         casi che meritano più cura (conferme/continuazioni di una
+         conversazione, o il ripiego quando Haiku non è stato sicuro),
+         mai sui comandi diretti semplici, che restano veloci come oggi
+         su Haiku, invariati. Impatto diretto: proprio in questa
+         sessione trovato un bug reale sul calcolo di una data
+         (idraulico, promemoria caldaia) — questo riduce il rischio di
+         errori simili nei ragionamenti più delicati (date, più
+         passaggi), al costo di qualche token e un filo di tempo in
+         più SOLO in quei casi. claude-sonnet-4-5 è precedente alla
+         generazione con il "ragionamento adattivo" (vedi
+         claude-api skill): qui serve ancora la sintassi con
+         budget_tokens, che richiede max_tokens più alto di lui.
+         Mai insieme a tool_choice forzato (forzaInterpretazione): il
+         ragionamento esteso non è compatibile con una scelta di
+         strumento forzata — non è comunque una perdita, quel giro
+         dichiara solo l'IntentFrame, il ragionamento vero su date e
+         scelte serve nei giri successivi, dove la scelta è sempre
+         libera. */
+      const ragionamentoEsteso = modelloUsato === MODEL_SONNET && !forzaInterpretazione;
+
       let r;
       let erroreRete = null;
       try {
@@ -2657,7 +2680,8 @@ async function handleAssistant(req, res, user, accessToken) {
           headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
           body: JSON.stringify({
             model: modelloUsato,
-            max_tokens: 1200,
+            max_tokens: ragionamentoEsteso ? 4096 : 1200,
+            ...(ragionamentoEsteso ? { thinking: { type: "enabled", budget_tokens: 2000 } } : {}),
             /* Istruzioni + elenco strumenti sono identici ad ogni chiamata:
                il blocco cache_control sull'ultimo (e unico) testo statico
                mette in cache anche gli strumenti, che nell'ordine con cui
