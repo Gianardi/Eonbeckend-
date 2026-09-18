@@ -2078,6 +2078,20 @@ da fare da Gianardi:
    c'è ancora abbastanza uso reale da cui imparare abitudini vere) — da
    riprendere quando ci sarà più uso reale su cui basarsi, non ora.
 
+6. **DA FARE — Velocità vera della risposta, non solo percepita
+   (18/09/2026).** Nato dal primo test reale del tester: oggi ogni
+   richiesta nuova fa 2 giri separati con l'AI (interpreta_richiesta
+   forzato, poi l'azione vera) — verificato sul log reale, 3,8 secondi
+   per un "segna un appuntamento" su Haiku. L'idea: lasciare che il
+   modello dichiari l'intento e chiami subito l'azione nello stesso
+   turno, invece di due turni separati — dimezzerebbe circa il tempo
+   reale. Da fare con calma, non di fretta: tocca un meccanismo di
+   sicurezza costruito apposta (forzare interpreta_richiesta PRIMA di
+   ogni altra scelta), che ha già evitato errori reali in queste
+   settimane — richiede test approfonditi (`eval/live-check.js` per
+   intero, non solo un caso) prima di essere sicuri che non introduca
+   regressioni sulla qualità delle risposte.
+
 ## Visione: EON come "mente" personalizzata del professionista (17/09/2026)
 
 Gianardi, testuale: "EON deve essere la mente del professionista ed
