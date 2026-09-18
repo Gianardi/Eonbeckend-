@@ -2189,3 +2189,38 @@ Per il lancio definitivo servono DUE cose distinte, non una sola:
 Nessuna implementazione iniziata: entrambe restano da fare, in una
 sessione dedicata quando si arriverà a quel punto della roadmap
 (dopo la validazione con i primi tester veri).
+
+## Produzione allineata al lavoro delle ultime due settimane (18/09/2026)
+
+Scoperto oggi, controllando con git: il ramo di lavoro (`claude/ciao-ipc3fm`)
+non era mai stato unito al ramo principale (`main`) dal 3 settembre —
+la vera app di produzione (`eonbeckend.vercel.app`, quella dei 2 utenti
+reali) era quindi ferma a quella data, senza nessuno dei mestieri
+Idraulico/Amministratore/Avvocato, del Router, della card risorse, della
+riprova di rete, di "Fatto annulla", del ragionamento esteso. Il ramo di
+staging (Vercel `eonbeckend-mx2t`) era ugualmente fermo allo stesso commit.
+
+Corretto oggi, con l'autorizzazione esplicita di Gianardi (azione che
+tocca la produzione vera):
+1. Applicata a mano al database di produzione l'unica migrazione mancante,
+   `supabase/condomini_entita_schema.sql` (additiva, verificata: nessun
+   dato esistente toccato — tutte le altre migrazioni delle ultime
+   settimane erano già state applicate a produzione in precedenza).
+2. Unito `claude/ciao-ipc3fm` a `main` tramite PR #67 (fast-forward
+   pulito, zero conflitti, confermato `mergeable_state: clean`) —
+   merge eseguito da Gianardi stesso (un blocco di sicurezza
+   dell'ambiente di lavoro impedisce di eseguire il push su `main`/il
+   merge in autonomia: per la produzione serve sempre un'azione
+   umana esplicita, mai automatica).
+3. Verificato dal vivo sul Mac di Gianardi, con screenshot: l'app di
+   produzione si apre correttamente dopo il nuovo deploy e mostra tutti
+   e 4 i mestieri (Edile, Idraulico, Avvocato, Amministratore di
+   Condominio) nella schermata di iscrizione.
+
+**Lezione per il futuro**: dopo questo episodio, controllare periodicamente
+che il ramo di lavoro non resti scollegato troppo a lungo da `main`/dalla
+produzione — evita di scoprire un giorno che settimane di lavoro reale
+non sono mai arrivate agli utenti veri.
+
+Con questo, il primo tester (socio di Gianardi) può iniziare davvero i 3
+giorni di uso quotidiano sulla versione corretta e aggiornata dell'app.

@@ -7659,11 +7659,19 @@ function collegaHubRacconta(){
     }
 
     /* Stratagemma per gli appuntamenti: avviso di ricezione immediato,
-       mentre l'AI vera (invariata) lavora in silenzio sui dettagli. */
+       mentre l'AI vera (invariata) lavora in silenzio sui dettagli.
+       Oltre alla card in "Oggi" (aggiungiImpegnoInConferma), qui
+       dentro l'Hub stesso — dove l'utente sta davvero guardando in
+       questo momento, la card in "Oggi" resta nascosta sotto questa
+       schermata finché non la chiude — mostriamo subito il testo
+       esatto ricevuto, non un generico "sto organizzando": è la
+       differenza tra "sembra che non abbia capito ancora" e "ho
+       capito, sto solo confermando i dettagli" (segnalato da Gianardi
+       il 18/09, primo vero test in produzione). */
     const eImpegnoInArrivo = sembraRichiestaAppuntamento(testo);
     if(eImpegnoInArrivo) aggiungiImpegnoInConferma(testo);
 
-    stato("pensa", "Sto organizzando…", "Un attimo, metto in ordine quello che mi hai detto");
+    stato("pensa", "Ricevuto ✓", eImpegnoInArrivo ? `"${testo}" — sto confermando i dettagli…` : "Un attimo, metto in ordine quello che mi hai detto");
     btn.disabled = true;
 
     let risposta;
@@ -8852,9 +8860,17 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Stratagemma per gli appuntamenti: avviso di ricezione immediato
        (mai su una risposta di continuazione: lì l'utente sta rispondendo
        a una domanda di EON, non creando qualcosa di nuovo), mentre l'AI
-       vera lavora invariata sui dettagli. */
+       vera lavora invariata sui dettagli. A voce l'avviso visivo da solo
+       non basta (18/09/2026, segnalato da Gianardi): chi parla senza
+       guardare lo schermo non lo vede, e senza un segnale sentito la
+       richiesta sembra ferma per tutta l'attesa — una breve conferma
+       parlata, subito, colma il buco senza dire nulla di non confermato
+       (mai un orario, solo la ricezione). */
     const eImpegnoInArrivo = !inContinuazione && sembraRichiestaAppuntamento(testo);
-    if(eImpegnoInArrivo) aggiungiImpegnoInConferma(testo);
+    if(eImpegnoInArrivo){
+      aggiungiImpegnoInConferma(testo);
+      if(viaVoce) parlaRisposta("Ricevuto, un attimo");
+    }
 
     inCorso = true;
     send.disabled = true;
