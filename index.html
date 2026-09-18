@@ -1153,6 +1153,14 @@
   .azienda-link-card .module-icon{ margin-bottom:0; flex:none; }
   .azienda-link-card-body{ flex:1; min-width:0; }
   .azienda-link-card-arrow{ width:18px; height:18px; color:var(--faint); flex:none; }
+  /* Placeholder "notifica immediata" per un appuntamento appena detto: EON
+     lo sta ancora confermando in silenzio, non è ancora un impegno vero
+     (mai scritto su Supabase, mai in "tasks") — stile chiaramente
+     provvisorio, tratteggiato e non cliccabile, sostituito da solo dal
+     risultato vero appena l'AI risponde. */
+  .azienda-link-card.impegno-in-conferma{ cursor:default; border-style:dashed; opacity:.85; }
+  .azienda-link-card.impegno-in-conferma:hover{ transform:none; box-shadow:var(--shadow-sm); }
+  .impegno-in-conferma-icon svg{ animation:pulse-ring 1.2s ease-in-out infinite; }
   .goal-del-mini{
     width:26px; height:26px; border-radius:8px; flex:none; display:flex; align-items:center; justify-content:center;
     color:var(--faint); cursor:pointer; margin-right:2px;
@@ -1427,6 +1435,61 @@
     background:rgba(20,23,29,.05); color:var(--muted); border:none; border-radius:11px;
     padding:12px 18px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
   }
+
+  /* ---- Card risorsa (foto/documento/preventivo recuperati da EON) ----
+     Non una scheda che sale da sotto (come .doc-overlay/.doc-panel): una
+     card centrata, con un margine visibile tutto intorno e gli angoli
+     arrotondati sui 4 lati — la schermata generale resta visibile ai
+     bordi, come da bozzetto di Gianardi (17/09/2026). */
+  .risorsa-overlay{
+    position:fixed; inset:0; z-index:9997; background:rgba(20,23,29,.55);
+    display:flex; align-items:center; justify-content:center; padding:28px 20px;
+    animation:overlayIn .2s ease;
+  }
+  .risorsa-panel{
+    background:var(--card); width:100%; max-width:420px; max-height:85vh;
+    border-radius:26px; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:var(--shadow-md); animation:landingIn .25s ease;
+  }
+  .risorsa-voce{
+    border:1px solid var(--border); border-radius:14px; padding:13px; margin-bottom:12px; background:#FBFBFD;
+  }
+  .risorsa-voce img{
+    width:100%; max-height:220px; object-fit:cover; border-radius:11px; cursor:pointer; margin-bottom:10px; display:block;
+  }
+  .risorsa-voce-titolo{ font-size:13.5px; font-weight:800; color:var(--text); text-align:center; }
+  .risorsa-voce-sotto{ font-size:11.5px; color:var(--muted); margin-top:2px; text-align:center; }
+  .risorsa-voce-riepilogo{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5; white-space:pre-line; text-align:center; }
+  .risorsa-voce-importo{ font-family:'Manrope'; font-size:18px; font-weight:900; color:var(--indigo); margin-top:6px; }
+  .risorsa-riga-btn{ display:flex; gap:8px; margin-top:11px; flex-wrap:wrap; justify-content:center; }
+  /* L'icona/figura grande che dà nell'occhio, sempre in cima alla voce:
+     una foto vera (già grande di suo, vedi .risorsa-voce img) oppure,
+     per un documento/preventivo senza anteprima reale, un'icona grande
+     e colorata — mai solo testo piccolo come unica cosa da guardare. */
+  .risorsa-hero{
+    width:84px; height:84px; border-radius:22px; margin:2px auto 12px;
+    display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer;
+  }
+  .risorsa-hero svg{ width:36px; height:36px; }
+  .risorsa-hero-cifra{
+    font-family:'Manrope'; font-size:28px; font-weight:900; color:var(--text);
+    text-align:center; margin-bottom:2px;
+  }
+  .risorsa-sezione{
+    font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--faint); margin:4px 0 9px;
+  }
+  .risorsa-canali{ display:flex; gap:8px; }
+  .risorsa-canale{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;
+    border:1px solid var(--border); border-radius:12px; padding:10px 6px;
+    background:var(--card); cursor:pointer; font-family:inherit;
+  }
+  .risorsa-canale svg{ width:18px; height:18px; color:var(--indigo); }
+  .risorsa-canale span{ font-size:10.5px; font-weight:700; color:var(--text); }
+  .risorsa-canale.disabilitato{ opacity:.45; cursor:default; }
+  .risorsa-canale.disabilitato svg{ color:var(--muted); }
+  .risorsa-vuoto{ color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
 
   /* la scheda del documento dentro la conversazione */
   .msg-documento{
@@ -1813,6 +1876,21 @@
   </div>
 </div>
 
+<!-- Card a tutto schermo per una risorsa richiesta a voce/testo (foto, documento,
+     preventivo/fattura): si apre da sola quando EON recupera davvero qualcosa da
+     mostrare, invece di lasciare il risultato solo in un messaggio di testo. -->
+<div class="risorsa-overlay" id="risorsaOverlay" style="display:none;">
+  <div class="risorsa-panel">
+    <div class="doc-head">
+      <div class="doc-head-titolo" id="risorsaTitolo">Risultato</div>
+      <button class="doc-chiudi" id="risorsaChiudi" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="doc-corpo" id="risorsaCorpo"></div>
+  </div>
+</div>
+
 <div class="sheet-overlay" id="sheetOverlay" style="display:none;">
   <div class="sheet" id="sheetPanel">
     <div class="sheet-handle"></div>
@@ -1873,14 +1951,49 @@
 <div class="onboarding" id="onboardingScreen">
   <div class="onboarding-inner">
 
-    <!-- STEP 1: EON + scelta professione -->
-    <div class="ob-step visible" id="obStep1">
+    <!-- STEP 0: EON + scelta tra professione specifica o uso generico -->
+    <div class="ob-step visible" id="obStep0">
       <div class="ob-brand">
         <span>E</span>
         <span class="ob-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span>N</span>
       </div>
       <div class="ob-tagline">L'assistente che organizza la giornata di chi ha una professione o un'impresa.</div>
+
+      <div class="ob-label">Come vuoi usare EON?</div>
+      <div class="ob-cards" id="obTypeCards" style="grid-template-columns:1fr;">
+        <div class="ob-card" data-type="professioni">
+          <div class="ob-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg>
+          </div>
+          <div class="ob-card-body">
+            <div class="ob-card-title">Artigiani e Professioni</div>
+            <div class="ob-card-sub">Edile, Idraulico, Avvocato, Amministratore di Condominio</div>
+          </div>
+        </div>
+        <div class="ob-card" data-type="generico">
+          <div class="ob-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <div class="ob-card-body">
+            <div class="ob-card-title">Organizza la giornata e aumenta la produttività</div>
+            <div class="ob-card-sub">Piano Free</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="primary-btn ob-continue-btn" id="obType0ContinueBtn" disabled>
+        Continua
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- STEP 1: scelta professione specifica -->
+    <div class="ob-step" id="obStep1">
+      <button class="ob-back" id="obBackBtn0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Indietro
+      </button>
 
       <div class="ob-label">Che lavoro fai?</div>
       <div class="ob-cards" id="obProfessionCards">
@@ -1902,13 +2015,13 @@
             <div class="ob-card-sub">Interventi, impianti, manutenzioni</div>
           </div>
         </div>
-        <div class="ob-card" data-profession="elettricista">
+        <div class="ob-card" data-profession="avvocato">
           <div class="ob-card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </div>
           <div class="ob-card-body">
-            <div class="ob-card-title">Elettricista</div>
-            <div class="ob-card-sub">Impianti, quadri, certificazioni</div>
+            <div class="ob-card-title">Avvocato</div>
+            <div class="ob-card-sub">Pratiche, udienze, scadenze</div>
           </div>
         </div>
         <div class="ob-card" data-profession="amministratore">
@@ -2498,7 +2611,7 @@
       </div>
     </div>
 
-    <!-- ==================== PAGINA: ASSEMBLEE (Amministratore di Condominio) ==================== -->
+    <!-- ==================== PAGINA: UDIENZE E SCADENZE (Avvocato) ==================== -->
     <div class="page" id="page-udienze">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -2513,62 +2626,18 @@
       </div>
     </div>
 
+    <!-- ==================== PAGINA: ASSEMBLEE (Amministratore di Condominio) ==================== -->
     <div class="page" id="page-assemblee">
-      <div class="oggi-hero">
-        <div class="oggi-hero-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" stroke-linecap="round"/></svg>
-        </div>
-        <h2 class="oggi-hero-title">Oggi</h2>
-        <div class="oggi-hero-date" id="oggiHeroDate">—</div>
-        <div class="difficulty-meter">
-          <div class="difficulty-label">Livello di difficoltà della giornata</div>
-          <div class="difficulty-bar"><div class="difficulty-fill" id="difficultyFill"></div></div>
-          <div class="difficulty-text" id="difficultyText">Calcolo in corso…</div>
-        </div>
-      </div>
-
-      <div class="card-panel" style="margin-bottom:14px;">
-        <div class="card-header">
-          <h2>Riepilogo di oggi, in breve</h2>
-        </div>
-        <div class="summary-grid" id="summaryGrid"></div>
+      <div class="back-link" data-page="gestisci-azienda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna al Menu
       </div>
       <div class="card-panel">
         <div class="card-header">
-          <h2>Attività di oggi</h2>
-          <div class="mini-ring">
-            <div class="mini-ring-wrap">
-              <svg width="40" height="40">
-                <defs>
-                  <linearGradient id="miniRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#008C45"/>
-                    <stop offset="50%" stop-color="#F4F5F0"/>
-                    <stop offset="100%" stop-color="#CD212A"/>
-                  </linearGradient>
-                </defs>
-                <circle cx="20" cy="20" r="16" stroke="rgba(20,23,29,.08)" stroke-width="4.5" fill="none"/>
-                <circle id="miniRingFg" cx="20" cy="20" r="16" stroke="url(#miniRingGrad)" stroke-width="4.5" fill="none"
-                  stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="100.5"/>
-              </svg>
-              <div class="mini-ring-pct" id="miniRingPct">0%</div>
-            </div>
-            <div class="mini-ring-label">Avanzamento<b id="miniRingCount">0/7</b></div>
-          </div>
+          <h2>Assemblee</h2>
+          <span class="count" id="assembleeCount">0</span>
         </div>
-
-        <div class="section-label">
-          <span class="badge-ai">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-            AI
-          </span>
-          Ci penso io — un click e lo fa l'AI
-        </div>
-        <div class="task-list" id="taskListAI"></div>
-
-        <div class="section-divider"></div>
-
-        <div class="section-label">Tocca a te</div>
-        <div class="task-list manual" id="taskListUser"></div>
+        <div id="assembleeList" style="padding:8px 0 16px;"></div>
       </div>
     </div>
 
@@ -3504,10 +3573,36 @@ const TABELLE_CON_CESTINO = new Set([
   "cantiere_foto", "cantiere_documenti", "cantiere_appunti",
 ]);
 
+/* Riprova automatica per problemi di rete passeggeri (come fanno
+   WhatsApp/Gmail/Slack): utile perché i mestieri di EON si fanno spesso
+   in cantina o in cantiere, con poco segnale. Solo per LETTURE — mai
+   scrittura: una select ripetuta due volte da lo stesso risultato
+   identico, un insert/update ripetuto due volte no (rischio di
+   duplicati), quindi qui non tocchiamo dbInsert/dbUpdate/dbDelete.
+   Riprova solo se l'errore sembra davvero di rete (nessun "code" — gli
+   errori veri di PostgREST/Postgres ne hanno sempre uno, es. permesso
+   negato o vincolo violato — e un messaggio tipico di rete): un errore
+   vero non sparisce riprovando, quindi si passa subito. */
+function sembraErroreDiRete(errore){
+  if(!errore || errore.code) return false;
+  return /fetch|network|load failed|timeout|connection|ECONNRESET/i.test(errore.message || "");
+}
+async function conRiprovaDiRete(eseguiQuery, tentativiMax = 3){
+  let risultato;
+  for(let tentativo = 0; tentativo < tentativiMax; tentativo++){
+    risultato = await eseguiQuery();
+    if(!risultato.error || !sembraErroreDiRete(risultato.error) || tentativo === tentativiMax - 1) return risultato;
+    await new Promise(r => setTimeout(r, 600 * Math.pow(2, tentativo))); // 600ms, 1.2s
+  }
+  return risultato;
+}
+
 async function dbSelect(table){
-  let query = supabaseClient.from(table).select("*").order("created_at", { ascending:true });
-  if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
-  const { data, error } = await query;
+  const { data, error } = await conRiprovaDiRete(() => {
+    let query = supabaseClient.from(table).select("*").order("created_at", { ascending:true });
+    if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
+    return query;
+  });
   if(error){ console.error("Errore lettura " + table + ":", error.message); return []; }
   return data || [];
 }
@@ -3516,9 +3611,11 @@ async function dbSelect(table){
    toccato da un'azione dell'AI, invece di ricaricare l'intera tabella
    (vedi aggiornaDatiToccati). */
 async function dbSelectById(table, id){
-  let query = supabaseClient.from(table).select("*").eq("id", id);
-  if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
-  const { data, error } = await query.maybeSingle();
+  const { data, error } = await conRiprovaDiRete(() => {
+    let query = supabaseClient.from(table).select("*").eq("id", id);
+    if(TABELLE_CON_CESTINO.has(table)) query = query.is("deleted_at", null);
+    return query.maybeSingle();
+  });
   if(error){ console.error("Errore lettura " + table + " (" + id + "):", error.message); return null; }
   return data;
 }
@@ -3526,7 +3623,9 @@ async function dbSelectById(table, id){
 /* Solo per la schermata Cestino: le righe eliminate, non quelle vive. */
 async function dbSelectCestino(table){
   if(!TABELLE_CON_CESTINO.has(table)) return [];
-  const { data, error } = await supabaseClient.from(table).select("*").not("deleted_at", "is", null).order("deleted_at", { ascending:false });
+  const { data, error } = await conRiprovaDiRete(() =>
+    supabaseClient.from(table).select("*").not("deleted_at", "is", null).order("deleted_at", { ascending:false })
+  );
   if(error){ console.error("Errore lettura cestino " + table + ":", error.message); return []; }
   return data || [];
 }
@@ -3738,8 +3837,8 @@ async function loadChatsFromDB(){
 
   if(dbConvs.length === 0) return;
 
-  const { data: allMsgs } = await supabaseClient
-    .from("messages").select("*").is("deleted_at", null).order("created_at", { ascending:true });
+  const { data: allMsgs } = await conRiprovaDiRete(() => supabaseClient
+    .from("messages").select("*").is("deleted_at", null).order("created_at", { ascending:true }));
 
   dbConvs.forEach(c => {
     const msgs = (allMsgs || []).filter(m => m.conversation_id === c.id).map(m => ({
@@ -3796,6 +3895,21 @@ async function ricaricaTuttoERidisegna(){
   renderClientArchive(); renderOpportunities(); renderPayments(); renderIncomes();
   renderGoals(); renderTasks(); renderCalendar(); renderAssignedTasks();
   renderChatList(); renderChatWindow(); renderRing(); renderDifficulty();
+}
+
+/* "Fatto, annulla" (17/09/2026): elimina_impegno/elimina_cliente ora
+   eseguono subito (vedi annullabileSubito in api/index.js) invece di
+   fermarsi a chiedere conferma prima — qui il ripristino vero se
+   l'utente tocca "Annulla" nell'avviso, stesso dbRestore già usato
+   dalla schermata Cestino. */
+async function annullaEliminazioneImpegni(esiti){
+  await Promise.all(esiti.map(e => dbRestore(e.tabella, e.id)));
+  await ricaricaTuttoERidisegna();
+}
+async function annullaEliminazioneCliente(esito){
+  await dbRestore("clients", esito.id);
+  if(esito.conversation_id) await dbRestore("conversations", esito.conversation_id);
+  await ricaricaTuttoERidisegna();
 }
 
 /* Etichette leggibili per la schermata Cestino: chiave = nome tabella. */
@@ -4198,6 +4312,41 @@ function showAIToastConDecisione(titolo, testo, onSi, onNo, etichettaSi, etichet
   /* Resta finche' non decidi: e' una scelta, non un avviso di passaggio. */
 }
 
+/* "Fatto, annulla" (17/09/2026, richiesto da Gianardi — come Gmail
+   "Annulla invio", o Trello/Notion "fatto, tocca per annullare"): a
+   differenza di showAIToastConDecisione sopra, l'azione è GIÀ successa
+   quando questo avviso compare — onAnnulla la ripristina, non la
+   evita. Sparisce da solo dopo "secondi" (default 7): passato quel
+   tempo l'azione resta definitiva, come oggi. */
+function showAIToastConAnnulla(titolo, testo, onAnnulla, secondi){
+  const container = document.getElementById("aiToastContainer");
+  const toast = document.createElement("div");
+  toast.className = "ai-toast decisione";
+  toast.innerHTML = `
+    <div class="ai-toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </div>
+    <div class="ai-toast-body">
+      <div class="ai-toast-title">${titolo}</div>
+      <div class="ai-toast-text">${testo}</div>
+      <div class="ai-toast-actions">
+        <button class="ai-toast-yes">Annulla</button>
+      </div>
+    </div>
+  `;
+  let deciso = false;
+  const chiudi = () => { if(!deciso){ deciso = true; toast.remove(); } };
+  toast.querySelector(".ai-toast-yes").addEventListener("click", async () => {
+    if(deciso) return;
+    deciso = true;
+    toast.querySelectorAll("button").forEach(b => b.disabled = true);
+    await onAnnulla();
+    toast.remove();
+  });
+  container.appendChild(toast);
+  setTimeout(chiudi, (secondi || 7) * 1000);
+}
+
 function addSuggestion(s){
   const gia = pendingSuggestions.some(p => p.tipo === s.tipo && p.cliente === s.cliente && p.valoreNuovo === s.valoreNuovo);
   if(gia) return;
@@ -4414,6 +4563,18 @@ const tasks = [
   { title:"Chiamata cliente Rossi SpA", time:"15:30", status:"progress", owner:"user" },
 ];
 const statusLabel = { todo:"Da fare", progress:"In corso", done:"Completata", late:"In ritardo", annullato:"Annullata" };
+
+/* "Notifica immediata" per un appuntamento appena detto (EON BRAIN,
+   stratagemma richiesto da Gianardi il 17/09/2026): mentre l'AI vera
+   lavora in silenzio per fissarlo correttamente (stesso motore, stessa
+   risoluzione cliente, stessa gestione degli orari di sempre — nessuna
+   scorciatoia sulla correttezza), qui compare SOLO un avviso provvisorio,
+   mai un dato indovinato: il testo esatto detto dall'utente, mai una
+   data/ora dedotta al volo. Mai scritto su Supabase, mai dentro "tasks"
+   (altrimenti contaminerebbe anello/difficoltà/riepilogo con un impegno
+   che potrebbe sparire un istante dopo) — solo un elenco a parte,
+   svuotato non appena arriva il risultato vero. */
+let impegniInConferma = [];
 
 const clients = [
   { name:"Bianchi Costruzioni S.r.l.", status:"attivo", value:48000, last:"2 giorni fa", color:"linear-gradient(135deg,#2FD9C7,#22B8AA)",
@@ -5455,8 +5616,32 @@ function buildTaskRow(t){
   return row;
 }
 
+/* Riga non cliccabile per un impegno ancora "in conferma" — vedi
+   impegniInConferma sopra. Mai t.id, mai un vero impegno: solo un
+   promemoria visivo che qualcosa è già stato ricevuto. */
+function buildImpegnoInConfermaRow(p){
+  const row = document.createElement("div");
+  row.className = "azienda-link-card impegno-in-conferma";
+  const icona = document.createElement("div");
+  icona.className = "module-icon impegno-in-conferma-icon";
+  icona.style.background = "var(--faint)";
+  icona.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  const corpo = document.createElement("div");
+  corpo.className = "azienda-link-card-body";
+  const titolo = document.createElement("div");
+  titolo.className = "module-title";
+  titolo.textContent = p.testo;
+  const sotto = document.createElement("div");
+  sotto.className = "module-sub";
+  sotto.textContent = "Ricevuto — sto confermando i dettagli…";
+  corpo.appendChild(titolo); corpo.appendChild(sotto);
+  row.appendChild(icona); row.appendChild(corpo);
+  return row;
+}
+
 function renderTasks(){
   listAI.innerHTML = ""; listUser.innerHTML = "";
+  impegniInConferma.forEach(p => listUser.appendChild(buildImpegnoInConfermaRow(p)));
   const sorted = tasks.slice().sort((a,b) => a.time.localeCompare(b.time));
   sorted.filter(t => t.owner === "ai").forEach(t => listAI.appendChild(buildTaskRow(t)));
   sorted.filter(t => t.owner === "user").forEach(t => listUser.appendChild(buildTaskRow(t)));
@@ -7442,11 +7627,41 @@ function collegaHubRacconta(){
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
     }
+    /* EON Router, fase 1a: un comando di sola navigazione ("apri
+       calendario") non ha bisogno né di rete né di login — si
+       riconosce qui, prima di tutto, e si evita del tutto la chiamata
+       all'AI. Vedi provaNavigazioneDiretta più sotto nel file. */
+    if(provaNavigazioneDiretta(testo)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      return;
+    }
+    /* Fase 1c: stesso principio, per una richiesta di foto/documento/
+       preventivo di un cliente riconoscibile con certezza. */
+    if(provaRisorsaImmediata(testo)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      chiudiHubAI();
+      return;
+    }
+    /* Fase 1d: un appunto libero senza data si può salvare davvero
+       (stessa identica scrittura di sempre) senza passare dall'AI. */
+    if(await provaAppuntoImmediato(testo)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      chiudiHubAI();
+      return;
+    }
     if(!BACKEND_CONFIGURED || !currentSession){
       stato("attesa", "Serve essere collegati",
         "L'assistente scrive nel calendario vero: accedi per usarlo");
       return;
     }
+
+    /* Stratagemma per gli appuntamenti: avviso di ricezione immediato,
+       mentre l'AI vera (invariata) lavora in silenzio sui dettagli. */
+    const eImpegnoInArrivo = sembraRichiestaAppuntamento(testo);
+    if(eImpegnoInArrivo) aggiungiImpegnoInConferma(testo);
 
     stato("pensa", "Sto organizzando…", "Un attimo, metto in ordine quello che mi hai detto");
     btn.disabled = true;
@@ -7458,11 +7673,13 @@ function collegaHubRacconta(){
       );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
+      if(eImpegnoInArrivo) rimuoviImpegniInConferma();
       stato("attesa", "Non sono riuscita a organizzarla",
         "AI non raggiunta: " + err.message + " — riprova, magari con frasi più separate");
       btn.disabled = false;
       return;
     }
+    if(eImpegnoInArrivo) rimuoviImpegniInConferma();
 
     campo.value = "";
     btn.disabled = false;
@@ -7473,6 +7690,25 @@ function collegaHubRacconta(){
     }
 
     const azioni = risposta.azioni || [];
+
+    /* Una richiesta di RISORSA (foto/documento/preventivo) apre la card
+       a schermo quasi intero invece di restare solo in un messaggio di
+       testo — mai per un impegno, che segue il percorso di sempre più
+       sotto. */
+    const clienteNomeFocus = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
+    const azioneFoto = azioni.find(a => a.tool === "recupera_foto_cantiere");
+    const azioneDocumenti = azioni.find(a => a.tool === "recupera_documenti_cliente");
+    if(azioneFoto){
+      mostraRisorsaFoto(azioneFoto.esito.foto || [], clienteNomeFocus);
+      chiudiHubAI();
+      return;
+    }
+    if(azioneDocumenti){
+      mostraRisorsaDocumenti(azioneDocumenti.esito.documenti || [], clienteNomeFocus);
+      chiudiHubAI();
+      return;
+    }
+
     /* Non tutte le richieste finiscono in crea_impegno: "cancella cliente
        Rossi" o "elimina questo appuntamento" sono azioni vere, non
        impegni. Prima ignoravamo tutto ciò che non fosse crea_impegno —
@@ -7528,16 +7764,30 @@ function collegaHubRacconta(){
       );
     }
 
-    risultatiVisibili.filter(a => a.tool !== "crea_impegno").forEach(a => {
+    /* Raggruppati come impegniCreati sopra (un solo avviso anche per un
+       "cancella tutti gli impegni di domani"), non uno per elemento:
+       un solo "Annulla" li ripristina tutti insieme. */
+    const impegniEliminati = risultatiVisibili.filter(a => a.tool === "elimina_impegno");
+    if(impegniEliminati.length){
+      const esiti = impegniEliminati.map(a => a.esito);
+      showAIToastConAnnulla(
+        impegniEliminati.length === 1 ? "Impegno eliminato" : impegniEliminati.length + " impegni eliminati",
+        esiti.map(e => e.titolo).join("\n") + "\nNel Cestino.",
+        () => annullaEliminazioneImpegni(esiti)
+      );
+    }
+
+    risultatiVisibili.filter(a => a.tool !== "crea_impegno" && a.tool !== "elimina_impegno").forEach(a => {
       if(a.tool === "sposta_impegno"){
         showAIToast("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
       } else if(a.tool === "annulla_impegno"){
         showAIToast("Impegno annullato", a.esito.titolo);
-      } else if(a.tool === "elimina_impegno"){
-        showAIToast("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
       } else if(a.tool === "elimina_cliente"){
-        showAIToast("Cliente eliminato",
-          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.");
+        showAIToastConAnnulla(
+          "Cliente eliminato",
+          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.",
+          () => annullaEliminazioneCliente(a.esito)
+        );
       } else if(a.tool === "crea_cliente"){
         showAIToast("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
@@ -8305,6 +8555,160 @@ function provaLetturaLocale(testo){
   return null;
 }
 
+/* Fase 1c del Router (RISORSE — TODO.md, "EON BRAIN", 17/09/2026): come
+   provaLetturaLocale, ma per una richiesta di foto/documento/preventivo/
+   fattura di un cliente — "mi serve il documento tetto rossi",
+   "fammi vedere le foto di Bianchi". Zero chiamata all'AI, zero
+   chiamata di rete: legge solo dati già in memoria (clients, chats,
+   cantiereFoto), esattamente come farebbe recupera_foto_cantiere/
+   recupera_documenti_cliente lato server.
+
+   Il punto critico di sicurezza è riconoscere IL CLIENTE GIUSTO: qui non
+   c'è l'entity resolution con dettatura imprecisa che ha l'AI (fuzzy
+   match, conferma se "simile"), quindi il confronto resta rigido di
+   proposito — se il nome corrisponde a più di un cliente, o a nessuno,
+   NON si sceglie a caso: si torna false e la frase prosegue verso l'AI
+   come sempre (falso negativo innocuo, mai un falso positivo su QUALE
+   cliente). Apre direttamente la card risorsa (vedi mostraRisorsaFoto/
+   mostraRisorsaDocumenti) se riconosciuta. */
+const TRIGGER_RISORSA = /^(?:mi serve|mi servirebbe|dammi|mandami|fammi vedere|voglio vedere|recupera|cerca|trova|apri)\s+(?:il|la|lo|i|gli|le)?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|per)?\s*(.+)$/;
+
+function trovaClienteDaParole(parole){
+  let trovato = null, corrispondenze = 0;
+  for(const c of clients){
+    if(c.archived) continue;
+    const tokenNome = c.name.toLowerCase().split(/\s+/).filter(Boolean);
+    if(tokenNome.some(tok => parole.includes(tok))){
+      corrispondenze++;
+      trovato = c;
+    }
+  }
+  return corrispondenze === 1 ? trovato : null;
+}
+
+function provaRisorsaImmediata(testo){
+  const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  if(!t) return false;
+  const m = t.match(TRIGGER_RISORSA);
+  if(!m) return false;
+  const tipoRichiesto = m[1];
+  const resto = (m[2] || "").trim();
+  if(!resto) return false;
+
+  const parole = resto.split(/\s+/).filter(Boolean);
+  const cliente = trovaClienteDaParole(parole);
+  if(!cliente) return false;
+
+  /* Le parole che restano dopo aver tolto il nome del cliente sono un
+     eventuale filtro per titolo (es. "tetto" in "documento tetto
+     rossi") — un affinamento, non un requisito: se non restringe a
+     nulla si mostra comunque l'elenco intero, mai un elenco vuoto per
+     un filtro che non ha trovato corrispondenze. */
+  const paroleNomeCliente = cliente.name.toLowerCase().split(/\s+/);
+  const paroleFiltro = parole.filter(p => !paroleNomeCliente.includes(p));
+
+  if(/^(foto|fotografia|fotografie)$/.test(tipoRichiesto)){
+    const foto = cantiereFoto
+      .filter(f => f.clientId === cliente.id)
+      .slice()
+      .sort((a, b) => new Date(b.created) - new Date(a.created))
+      .slice(0, 10)
+      .map(f => ({ id: f.id, url: f.url, quando: f.created }));
+    mostraRisorsaFoto(foto, cliente.name);
+    return true;
+  }
+
+  const chat = chats.find(c => c.name === cliente.name);
+  let documenti = chat
+    ? chat.messages
+        .filter(msg => msg.eventType === "doc" || msg.fileUrl)
+        .slice()
+        .reverse() // chat.messages è in ordine cronologico crescente: i più recenti prima
+        .slice(0, 10)
+        .map(msg => msg.eventType === "doc"
+          ? { id: msg.id, tipo: "preventivo_o_fattura", titolo: msg.title, riepilogo: msg.text || null, importoTesto: msg.amount || null, url: null, quandoTesto: msg.time }
+          : { id: msg.id, tipo: "allegato", titolo: msg.fileName || "(senza nome)", url: msg.fileUrl, quandoTesto: msg.time })
+    : [];
+  if(paroleFiltro.length){
+    const filtrati = documenti.filter(d => paroleFiltro.some(p => (d.titolo || "").toLowerCase().includes(p)));
+    if(filtrati.length) documenti = filtrati;
+  }
+  mostraRisorsaDocumenti(documenti, cliente.name);
+  return true;
+}
+
+/* EON Router, fase 1d — appunti istantanei (TODO.md, 17/09/2026).
+   crea_appunto è l'unica azione di scrittura senza NESSUNA ambiguità da
+   risolvere: salva il testo esatto detto dall'utente, senza risoluzione
+   cliente, senza calcolo di data/ora — esattamente quello che fa già,
+   bypassando del tutto l'AI, la pagina dedicata "Appunti cantiere" (vedi
+   collegaCantiereAppunti/dbInsert("cantiere_appunti",...) più sotto nel
+   file). Qui si riconosce la stessa intenzione detta dentro l'assistente
+   generico ("segnami in appunti che...") e si fa la stessa identica
+   scrittura diretta — non un'eccezione nuova, lo stesso percorso già
+   fidato riusato da un secondo punto d'ingresso.
+   Volutamente ristretto: serve la parola "appunti/appunto/nota" esplicita
+   (mai un generico "segnami che...", che l'AI deve continuare a poter
+   interpretare come impegno quando c'è un orario) E nessun riferimento a
+   data/ora nella frase (quello resta sempre e solo crea_impegno, mai
+   qui) — falso negativo innocuo (passa all'AI come sempre), mai un falso
+   positivo che trasformi un impegno in un semplice appunto senza data. */
+const TRIGGER_APPUNTO = /^(?:segna(?:mi)?|annota(?:mi)?|scrivi(?:mi)?|metti(?:mi)?|prendi)\s+(?:in\s+appunti|negli\s+appunti|un\s+appunto|una\s+nota)\s*(?:che)?\s*[:\-]?\s*(.+)$/i;
+const RIFERIMENTO_TEMPO = /\b(oggi|domani|dopodomani|lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|\d{1,2}[:.]\d{2}|ore\s+\d{1,2}\b|\d{1,2}\/\d{1,2})\b/i;
+
+async function provaAppuntoImmediato(testo){
+  const t = (testo || "").trim().replace(/[.!?]+$/, "");
+  if(!t) return false;
+  const m = t.match(TRIGGER_APPUNTO);
+  if(!m) return false;
+  if(RIFERIMENTO_TEMPO.test(t)) return false; // ha un orario/data: resta all'AI (potrebbe essere un impegno)
+
+  const appuntoTesto = (m[1] || "").trim();
+  if(!appuntoTesto) return false;
+
+  if(!isDbReady()) return false; // senza connessione l'AI non potrebbe farlo comunque: lascia il percorso normale spiegare perché
+  const creato = await dbInsert("cantiere_appunti", { testo: appuntoTesto });
+  if(!creato) return false;
+  cantiereAppunti.push({ id: creato.id, testo: creato.testo, created: creato.created_at });
+  aggiornaCantiereSottotitoli();
+  renderCantiereAppunti();
+  showAIToast("Appunto aggiunto", appuntoTesto);
+  return true;
+}
+
+/* EON BRAIN — "stratagemma" per gli appuntamenti (TODO.md, 17/09/2026,
+   richiesta esplicita di Gianardi). A differenza delle fasi sopra, qui
+   l'AI lavora ESATTAMENTE come sempre — nessuna scorciatoia sulla
+   correttezza: data, ora e cliente restano sempre decisi dal motore
+   vero, con la stessa risoluzione ed entity-resolution di sempre. Cambia
+   solo cosa vede l'utente MENTRE aspetta quei pochi secondi: invece di
+   restare senza nessun segno concreto, compare subito nella lista di
+   oggi un avviso con il testo esatto appena detto (mai una data/ora
+   indovinata sul momento — scelta esplicita di Gianardi, per non
+   rischiare di mostrare anche solo per un istante un orario sbagliato),
+   che sparisce da solo appena arriva la risposta vera. Stesso principio
+   di una spunta "inviato" prima della conferma di consegna: un avviso di
+   ricezione onesto, mai un risultato finto. */
+function sembraRichiestaAppuntamento(testo){
+  const t = (testo || "").trim();
+  if(t.length < 4) return false;
+  if(!RIFERIMENTO_TEMPO.test(t)) return false; // senza alcun riferimento temporale non è un impegno da fissare ora
+  if(/\b(cancella|elimina|annulla|sposta|rimanda|disdici|disdetta)\b/i.test(t)) return false; // modifica/cancellazione, non una nuova creazione
+  if(TRIGGER_APPUNTO.test(t.replace(/[.!?]+$/, ""))) return false; // già gestito come appunto istantaneo sopra
+  return true;
+}
+function aggiungiImpegnoInConferma(testo){
+  const id = "tmp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+  impegniInConferma.push({ id, testo });
+  renderTasks();
+  return id;
+}
+function rimuoviImpegniInConferma(){
+  if(!impegniInConferma.length) return;
+  impegniInConferma = [];
+  renderTasks();
+}
+
 /* Fase 2 del contesto (vedi TODO.md, "EON BRAIN"): una correzione veloce
    ("no, alle 10") deve funzionare anche quando EON non ha fatto nessuna
    domanda esplicita — es. dopo "Segna Mario domani alle 9" → "Fatto.",
@@ -8421,10 +8825,36 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       }
     }
 
+    /* Stesso principio, fase 1c: una richiesta di foto/documento/
+       preventivo di un cliente già riconoscibile con certezza apre
+       subito la card risorsa, senza passare dall'AI. */
+    if(!inContinuazione && provaRisorsaImmediata(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      if(viaVoce) parlaRisposta("Ecco quello che hai chiesto");
+      return;
+    }
+
+    /* Fase 1d: un appunto libero senza data si può salvare davvero senza
+       passare dall'AI (stessa identica scrittura di sempre). */
+    if(!inContinuazione && await provaAppuntoImmediato(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      if(viaVoce) parlaRisposta("Appunto aggiunto");
+      return;
+    }
+
     if(!BACKEND_CONFIGURED || !currentSession){
       hint.textContent = "L'assistente scrive nei dati veri: accedi per usarlo";
       return;
     }
+
+    /* Stratagemma per gli appuntamenti: avviso di ricezione immediato
+       (mai su una risposta di continuazione: lì l'utente sta rispondendo
+       a una domanda di EON, non creando qualcosa di nuovo), mentre l'AI
+       vera lavora invariata sui dettagli. */
+    const eImpegnoInArrivo = !inContinuazione && sembraRichiestaAppuntamento(testo);
+    if(eImpegnoInArrivo) aggiungiImpegnoInConferma(testo);
 
     inCorso = true;
     send.disabled = true;
@@ -8453,6 +8883,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
+      if(eImpegnoInArrivo) rimuoviImpegniInConferma();
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
       if(viaVoce) parlaRisposta("Non sono riuscita a raggiungere l'assistente, riprova tra poco.");
       send.disabled = false;
@@ -8464,6 +8895,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
          funziona ancora, invece di far ripartire tutto da capo. */
       return;
     }
+    if(eImpegnoInArrivo) rimuoviImpegniInConferma();
 
     /* Da qui la richiesta è andata a buon fine: la conversazione aperta,
        se c'era, è stata davvero consumata dal server. La riapriamo più
@@ -8490,6 +8922,21 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
 
     const azioni = risposta.azioni || [];
+
+    /* Una richiesta di RISORSA (foto/documento/preventivo) apre la card
+       a schermo quasi intero invece di restare solo in un messaggio di
+       testo — mai per un impegno, che segue il percorso di sempre più
+       sotto. */
+    const clienteNomeFocusMic = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
+    const azioneFotoMic = azioni.find(a => a.tool === "recupera_foto_cantiere");
+    const azioneDocumentiMic = azioni.find(a => a.tool === "recupera_documenti_cliente");
+    if(azioneFotoMic || azioneDocumentiMic){
+      if(azioneFotoMic) mostraRisorsaFoto(azioneFotoMic.esito.foto || [], clienteNomeFocusMic);
+      else mostraRisorsaDocumenti(azioneDocumentiMic.esito.documenti || [], clienteNomeFocusMic);
+      if(viaVoce) parlaRisposta(risposta.testo || "Ecco quello che ho trovato");
+      return;
+    }
+
     const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
@@ -8540,16 +8987,30 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       );
     }
 
-    risultatiVisibili.filter(a => a.tool !== "crea_impegno").forEach(a => {
+    /* Come in organizza(): un solo avviso con "Annulla" anche per più
+       impegni eliminati insieme, non uno per elemento. L'annullo resta
+       solo al tocco (non c'è un modo affidabile per "sentirlo" e
+       rispondere a voce entro pochi secondi), ma la lettura ad alta
+       voce resta com'era: stessa informazione, stesso principio di
+       mostra() sopra. */
+    const impegniEliminatiMic = risultatiVisibili.filter(a => a.tool === "elimina_impegno");
+    if(impegniEliminatiMic.length){
+      const esiti = impegniEliminatiMic.map(a => a.esito);
+      const titoloAvviso = impegniEliminatiMic.length === 1 ? "Impegno eliminato" : impegniEliminatiMic.length + " impegni eliminati";
+      const testoAvviso = esiti.map(e => e.titolo).join("\n") + "\nNel Cestino.";
+      showAIToastConAnnulla(titoloAvviso, testoAvviso, () => annullaEliminazioneImpegni(esiti));
+      daDire.push(titoloAvviso + ": " + testoAvviso.replace(/\n+/g, ". "));
+    }
+
+    risultatiVisibili.filter(a => a.tool !== "crea_impegno" && a.tool !== "elimina_impegno").forEach(a => {
       if(a.tool === "sposta_impegno"){
         mostra("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
       } else if(a.tool === "annulla_impegno"){
         mostra("Impegno annullato", a.esito.titolo);
-      } else if(a.tool === "elimina_impegno"){
-        mostra("Impegno eliminato", a.esito.titolo + "\nLo trovi nel Cestino.");
       } else if(a.tool === "elimina_cliente"){
-        mostra("Cliente eliminato",
-          a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.");
+        const testoAvviso = a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.";
+        showAIToastConAnnulla("Cliente eliminato", testoAvviso, () => annullaEliminazioneCliente(a.esito));
+        daDire.push("Cliente eliminato: " + testoAvviso.replace(/\n+/g, ". "));
       } else if(a.tool === "crea_cliente"){
         mostra("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
@@ -8970,6 +9431,226 @@ function apriMedia(url, tipo){
   v.appendChild(c);
   v.addEventListener("click", e => { if(e.target === v) v.remove(); });
   document.body.appendChild(v);
+}
+
+/* ============================================================
+   CARD RISORSA — quando l'utente chiede qualcosa che EON deve
+   RECUPERARE davvero (una foto, un documento, un preventivo/
+   fattura — mai un impegno, che resta come oggi), il risultato si
+   apre qui a schermo quasi intero invece di restare solo in un
+   messaggio di testo. "EON interna" scrive davvero nella chat del
+   cliente; Email e WhatsApp sono già in struttura ma disabilitati
+   finché non costruiamo il Communication Hub multicanale (TODO.md).
+   ============================================================ */
+function apriRisorsaCard(titolo, corpoEl){
+  document.getElementById("risorsaTitolo").textContent = titolo;
+  const corpo = document.getElementById("risorsaCorpo");
+  corpo.innerHTML = "";
+  corpo.appendChild(corpoEl);
+  document.getElementById("risorsaOverlay").style.display = "flex";
+}
+function chiudiRisorsaCard(){
+  document.getElementById("risorsaOverlay").style.display = "none";
+}
+document.getElementById("risorsaChiudi").addEventListener("click", chiudiRisorsaCard);
+document.getElementById("risorsaOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "risorsaOverlay") chiudiRisorsaCard();
+});
+
+function creaRigaCanaliInvio(clienteNome, testoDaInviare){
+  const riga = document.createElement("div");
+  riga.className = "risorsa-canali";
+  const canali = [
+    { nome: "EON", icona: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', attivo: true },
+    { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', attivo: false },
+    { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 1 1-4-6.9"/><path d="M12 4v8l5 3"/>', attivo: false },
+  ];
+  canali.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "risorsa-canale" + (c.attivo ? "" : " disabilitato");
+    b.type = "button";
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.innerHTML = c.icona;
+    b.appendChild(svg);
+    const span = document.createElement("span");
+    span.textContent = c.attivo ? c.nome : c.nome + " · presto";
+    b.appendChild(span);
+    if(c.attivo) b.addEventListener("click", () => inviaRisorsaEonInterna(clienteNome, testoDaInviare));
+    riga.appendChild(b);
+  });
+  return riga;
+}
+
+/* Non manda da sola: apre la chat vera del cliente con il testo già
+   pronto nel campo, così l'utente vede cosa parte e decide lui quando
+   inviarlo davvero — stesso principio del resto dell'app, mai un invio
+   silenzioso. */
+async function inviaRisorsaEonInterna(clienteNome, testoDaInviare){
+  const cliente = clienteNome ? clients.find(c => c.name === clienteNome) : null;
+  if(!cliente){
+    chiudiRisorsaCard();
+    showAIToast("Cliente non trovato", "Non riesco a collegare questa risorsa a un cliente in anagrafica.");
+    return;
+  }
+  chiudiRisorsaCard();
+  await openClientChat(cliente);
+  const input = document.getElementById("chatInput");
+  if(input){ input.value = testoDaInviare; input.focus(); }
+}
+
+/* doc/foto possono arrivare da EON (data ISO vera in "quando") o dal
+   Router — fase 1c, dati già in memoria dove a volte c'è solo un orario
+   già formattato in stringa (vedi mappatura chat.messages, "time"): in
+   quel caso lo si passa già pronto in "quandoTesto" invece di provare a
+   ricostruire una data che non abbiamo. */
+function testoData(item){
+  if(item.quandoTesto) return item.quandoTesto;
+  if(item.quando) return new Date(item.quando).toLocaleDateString("it-IT", { day:"2-digit", month:"short", year:"numeric" });
+  return null;
+}
+
+function creaVoceFoto(foto, clienteNome){
+  const el = document.createElement("div");
+  el.className = "risorsa-voce";
+  const img = document.createElement("img");
+  img.src = foto.url;
+  img.alt = "";
+  img.addEventListener("click", () => apriMedia(foto.url, "image/*"));
+  el.appendChild(img);
+  const dataFoto = testoData(foto);
+  if(dataFoto){
+    const sotto = document.createElement("div");
+    sotto.className = "risorsa-voce-sotto";
+    sotto.textContent = dataFoto;
+    el.appendChild(sotto);
+  }
+  const btnRiga = document.createElement("div");
+  btnRiga.className = "risorsa-riga-btn";
+  const apriBtn = document.createElement("button");
+  apriBtn.className = "doc-btn-secondario";
+  apriBtn.type = "button";
+  apriBtn.textContent = "Apri";
+  apriBtn.addEventListener("click", () => window.open(foto.url, "_blank"));
+  btnRiga.appendChild(apriBtn);
+  el.appendChild(btnRiga);
+  if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando la foto: " + foto.url));
+  return el;
+}
+
+/* Icona grande e colorata che apre la voce — la "figura" ben visibile
+   che deve dare nell'occhio quando non c'è (o non serve) un'anteprima
+   vera come per una foto. Stessa iconografia già usata per le schede
+   preventivo/fattura dentro la chat (msg-doc-badge), solo più grande. */
+function creaIconaHero(colore, pathSvg, onClick){
+  const hero = document.createElement("div");
+  hero.className = "risorsa-hero";
+  hero.style.background = colore;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "2");
+  svg.innerHTML = pathSvg;
+  hero.appendChild(svg);
+  if(onClick) hero.addEventListener("click", onClick);
+  return hero;
+}
+const ICONA_FATTURA = '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>';
+const ICONA_DOCUMENTO = '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/>';
+
+function creaVoceDocumento(doc, clienteNome){
+  const el = document.createElement("div");
+  el.className = "risorsa-voce";
+
+  /* L'importo può arrivare già formattato (dati letti dalla chat già in
+     memoria, vedi provaRisorsaImmediata) o come numero grezzo (dal
+     backend, vedi recupera_documenti_cliente): mai riformattare due
+     volte, mai perderlo se manca solo la versione grezza. */
+  const importoTesto = doc.importoTesto || (doc.importo != null ? "€" + Number(doc.importo).toLocaleString("it-IT") : null);
+
+  if(doc.tipo === "preventivo_o_fattura"){
+    const eFattura = /fattura/i.test(doc.titolo || "");
+    el.appendChild(creaIconaHero(eFattura ? "var(--green)" : "var(--teal)", eFattura ? ICONA_FATTURA : ICONA_DOCUMENTO));
+    if(importoTesto){
+      const importo = document.createElement("div");
+      importo.className = "risorsa-hero-cifra";
+      importo.textContent = importoTesto;
+      el.appendChild(importo);
+    }
+    const titolo = document.createElement("div");
+    titolo.className = "risorsa-voce-titolo";
+    titolo.textContent = doc.titolo || "(senza titolo)";
+    el.appendChild(titolo);
+    if(doc.riepilogo){
+      const riep = document.createElement("div");
+      riep.className = "risorsa-voce-riepilogo";
+      riep.textContent = doc.riepilogo;
+      el.appendChild(riep);
+    }
+    const nota = document.createElement("div");
+    nota.className = "risorsa-voce-sotto";
+    nota.textContent = "Visibile solo dentro l'app — nessun link da condividere";
+    el.appendChild(nota);
+    if(clienteNome){
+      const riassunto = doc.titolo + (importoTesto ? " — " + importoTesto : "");
+      el.appendChild(creaRigaCanaliInvio(clienteNome, riassunto));
+    }
+  } else {
+    if(doc.url) el.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => window.open(doc.url, "_blank")));
+    const titolo = document.createElement("div");
+    titolo.className = "risorsa-voce-titolo";
+    titolo.textContent = doc.titolo || "(senza titolo)";
+    el.appendChild(titolo);
+    const dataDoc = testoData(doc);
+    if(dataDoc){
+      const sotto = document.createElement("div");
+      sotto.className = "risorsa-voce-sotto";
+      sotto.textContent = dataDoc;
+      el.appendChild(sotto);
+    }
+    if(doc.url){
+      const btnRiga = document.createElement("div");
+      btnRiga.className = "risorsa-riga-btn";
+      const apriBtn = document.createElement("button");
+      apriBtn.className = "doc-btn-secondario";
+      apriBtn.type = "button";
+      apriBtn.textContent = "Apri";
+      apriBtn.addEventListener("click", () => window.open(doc.url, "_blank"));
+      btnRiga.appendChild(apriBtn);
+      el.appendChild(btnRiga);
+      if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando il documento \"" + doc.titolo + "\": " + doc.url));
+    }
+  }
+  return el;
+}
+
+function mostraRisorsaFoto(foto, clienteNome){
+  const wrap = document.createElement("div");
+  if(!foto.length){
+    const vuoto = document.createElement("div");
+    vuoto.className = "risorsa-vuoto";
+    vuoto.textContent = "Nessuna foto trovata.";
+    wrap.appendChild(vuoto);
+  } else {
+    foto.forEach(f => wrap.appendChild(creaVoceFoto(f, clienteNome)));
+  }
+  apriRisorsaCard(clienteNome ? "Foto — " + clienteNome : "Foto", wrap);
+}
+function mostraRisorsaDocumenti(documenti, clienteNome){
+  const wrap = document.createElement("div");
+  if(!documenti.length){
+    const vuoto = document.createElement("div");
+    vuoto.className = "risorsa-vuoto";
+    vuoto.textContent = "Nessun documento trovato.";
+    wrap.appendChild(vuoto);
+  } else {
+    documenti.forEach(d => wrap.appendChild(creaVoceDocumento(d, clienteNome)));
+  }
+  apriRisorsaCard(clienteNome ? "Documenti — " + clienteNome : "Documenti", wrap);
 }
 
 
@@ -9791,11 +10472,40 @@ async function loadProfession(){
 
 /* ============ ONBOARDING ============ */
 let obSelectedProfession = null;
+/* "professioni" (passa dallo step1 a scegliere un mestiere specifico) o
+   "generico" (salta direttamente allo step2 con profession "artigiano") —
+   serve solo per sapere dove torna il tasto Indietro dello step2. */
+let obSelectedType = null;
+
+document.getElementById("obTypeCards").addEventListener("click", (e) => {
+  const card = e.target.closest(".ob-card");
+  if(!card) return;
+  document.querySelectorAll("#obTypeCards .ob-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  obSelectedType = card.dataset.type;
+  document.getElementById("obType0ContinueBtn").disabled = false;
+});
+
+document.getElementById("obType0ContinueBtn").addEventListener("click", () => {
+  if(!obSelectedType) return;
+  document.getElementById("obStep0").classList.remove("visible");
+  if(obSelectedType === "generico"){
+    obSelectedProfession = "artigiano";
+    document.getElementById("obStep2").classList.add("visible");
+  } else {
+    document.getElementById("obStep1").classList.add("visible");
+  }
+});
+
+document.getElementById("obBackBtn0").addEventListener("click", () => {
+  document.getElementById("obStep1").classList.remove("visible");
+  document.getElementById("obStep0").classList.add("visible");
+});
 
 document.getElementById("obProfessionCards").addEventListener("click", (e) => {
   const card = e.target.closest(".ob-card");
   if(!card) return;
-  document.querySelectorAll(".ob-card").forEach(c => c.classList.remove("selected"));
+  document.querySelectorAll("#obProfessionCards .ob-card").forEach(c => c.classList.remove("selected"));
   card.classList.add("selected");
   obSelectedProfession = card.dataset.profession;
   document.getElementById("obContinueBtn").disabled = false;
@@ -9809,7 +10519,11 @@ document.getElementById("obContinueBtn").addEventListener("click", () => {
 
 document.getElementById("obBackBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.remove("visible");
-  document.getElementById("obStep1").classList.add("visible");
+  if(obSelectedType === "generico"){
+    document.getElementById("obStep0").classList.add("visible");
+  } else {
+    document.getElementById("obStep1").classList.add("visible");
+  }
 });
 
 /* Toggle tra "Crea account" e "Ho già un account" */
@@ -9871,16 +10585,19 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
 
       const { data, error } = await supabaseClient.auth.signUp({
         email, password,
-        options: { data: { full_name: name } }
+        options: { data: { full_name: name, profession: obSelectedProfession } }
       });
       if(error) throw error;
       currentSession = data.session;
 
       // Aggiorna il profilo creato automaticamente con professione e nome attività
+      // (il trigger di creazione lo popola già dai metadati sopra, ma qui
+      // aggiungiamo anche business_name e ribadiamo profession per sicurezza)
       if(data.user){
-        await supabaseClient.from("profiles").update({
+        const { error: profErr } = await supabaseClient.from("profiles").update({
           full_name: name, business_name: businessName, profession: obSelectedProfession
         }).eq("id", data.user.id);
+        if(profErr) throw profErr;
 
         // Prepara i dati iniziali veri nel database (le stesse informazioni
         // che vedevi in demo, ma stavolta scritte davvero, sue e sue soltanto)
@@ -9899,7 +10616,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       if(error) throw error;
       currentSession = data.session;
 
-      const { data: profile } = await supabaseClient.from("profiles").select("*").eq("id", data.user.id).single();
+      const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.user.id).single());
       if(profile){
         obSelectedProfession = profile.profession;
         const firstName = (profile.full_name || "Marco").split(" ")[0];
@@ -9945,7 +10662,7 @@ async function initApp(){
     const { data } = await supabaseClient.auth.getSession();
     if(data && data.session){
       currentSession = data.session;
-      const { data: profile } = await supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single();
+      const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single());
       if(profile){
         document.getElementById("onboardingScreen").classList.add("hidden");
         const firstName = (profile.full_name || "Marco").split(" ")[0];

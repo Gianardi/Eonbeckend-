@@ -88,7 +88,7 @@ async function main() {
     "conversations", "clients", "opportunities", "employees", "tasks",
     "assigned_tasks", "payments", "incomes", "goals", "documents",
     "cantiere_cliente", "cantiere_foto", "cantiere_documenti", "cantiere_appunti",
-    "ai_audit_log", "ai_runs", "ai_rate_limits",
+    "ai_audit_log", "ai_runs", "ai_rate_limits", "ai_request_log",
   ]) {
     await svuota(tabella);
   }

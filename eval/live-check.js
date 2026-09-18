@@ -149,8 +149,14 @@ async function eseguiCaso(caso) {
   }
 }
 
+/* EVAL_SOLO (opzionale): lista di id separati da virgola, per rilanciare
+   solo alcuni casi invece dell'intera suite (es. dopo aver aggiunto dati
+   di precondizione per un gruppo specifico) — risparmia tempo e credito
+   quando serve verificare solo pochi casi mirati. */
 async function main() {
-  const daEseguire = catalogo.casi.filter((c) => c.atteso.tipo !== "router_locale");
+  let daEseguire = catalogo.casi.filter((c) => c.atteso.tipo !== "router_locale");
+  const solo = (process.env.EVAL_SOLO || "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (solo.length) daEseguire = daEseguire.filter((c) => solo.includes(c.id));
   console.log(`${daEseguire.length} casi da eseguire dal vivo (${catalogo.casi.length - daEseguire.length} sono di solo router, già coperti da eval/router.test.js).`);
   for (const caso of daEseguire) {
     await eseguiCaso(caso);

@@ -116,6 +116,173 @@ async function main() {
     verifica("\"chi mi ha scritto\" trova Mario Rossi", letture.chiScritto && letture.chiScritto.testo.includes("Mario Rossi"), JSON.stringify(letture.chiScritto));
     verifica("\"segna un appuntamento\" NON è una lettura locale", letture.nonLettura === null, JSON.stringify(letture.nonLettura));
 
+    console.log("\n--- Router: risorse immediate (fase 1c) ---");
+    const risorse = await page.evaluate(() => {
+      clients.length = 0;
+      clients.push(
+        { id: "c1", name: "Mario Rossi", status: "attivo", value: 0, desc: "", last: "", phone: "", color: "", archived: false },
+        { id: "c2", name: "Luca Bianchi", status: "attivo", value: 0, desc: "", last: "", phone: "", color: "", archived: false },
+        { id: "c3", name: "Mario Bianchi", status: "attivo", value: 0, desc: "", last: "", phone: "", color: "", archived: false },
+        { id: "c4", name: "Vecchio Cliente", status: "inattivo", value: 0, desc: "", last: "", phone: "", color: "", archived: true }
+      );
+      cantiereFoto.length = 0;
+      cantiereFoto.push(
+        { id: "f1", url: "https://example.com/tetto1.jpg", created: "2026-09-10T10:00:00Z", clientId: "c1" },
+        { id: "f2", url: "https://example.com/tetto2.jpg", created: "2026-09-12T10:00:00Z", clientId: "c1" }
+      );
+      chats.length = 0;
+      chats.push({
+        name: "Mario Rossi", online: true, unread: 0, isClient: true, isProspect: false, archived: false, toSeeToday: false, toCallToday: false,
+        messages: [
+          { id: "m1", eventType: "doc", title: "Preventivo tetto", text: "Rifacimento tetto", amount: "3.200", time: "10 set, 09:00" },
+          { id: "m2", fileUrl: "https://example.com/allegato.pdf", fileName: "Foto_prima.pdf", time: "11 set, 09:00" },
+        ],
+      });
+
+      chiudiRisorsaCard();
+      const fotoOk = provaRisorsaImmediata("mi serve la foto di rossi");
+      const fotoApertaTesto = document.body.textContent.includes("Foto — Mario Rossi");
+      chiudiRisorsaCard();
+
+      const docOk = provaRisorsaImmediata("dammi il documento di rossi");
+      const docApertoTesto = document.body.textContent.includes("Documenti — Mario Rossi");
+      chiudiRisorsaCard();
+
+      const nessunCliente = provaRisorsaImmediata("mi serve il documento di sconosciuto");
+      const clienteAmbiguo = provaRisorsaImmediata("mi serve la foto di bianchi");
+      const nonRisorsa = provaRisorsaImmediata("segna un appuntamento con rossi domani");
+      const nonRisorsaChiamata = provaRisorsaImmediata("chiama rossi");
+
+      return { fotoOk, fotoApertaTesto, docOk, docApertoTesto, nessunCliente, clienteAmbiguo, nonRisorsa, nonRisorsaChiamata };
+    });
+    verifica("\"mi serve la foto di rossi\" apre la card foto", risorse.fotoOk && risorse.fotoApertaTesto, JSON.stringify(risorse));
+    verifica("\"dammi il documento di rossi\" apre la card documenti", risorse.docOk && risorse.docApertoTesto, JSON.stringify(risorse));
+    verifica("cliente non trovato NON intercetta (falso negativo innocuo)", risorse.nessunCliente === false, JSON.stringify(risorse));
+    verifica("cliente ambiguo (due Bianchi) NON intercetta", risorse.clienteAmbiguo === false, JSON.stringify(risorse));
+    verifica("\"segna un appuntamento\" NON è una richiesta di risorsa", risorse.nonRisorsa === false, JSON.stringify(risorse));
+    verifica("\"chiama rossi\" NON è una richiesta di risorsa", risorse.nonRisorsaChiamata === false, JSON.stringify(risorse));
+
+    console.log("\n--- Riprova automatica per problemi di rete (17/09/2026) ---");
+    const riprova = await page.evaluate(async () => {
+      // sembraErroreDiRete: un errore vero di Postgres/PostgREST ha
+      // sempre un "code" (permesso negato, vincolo violato, ecc.) — non
+      // deve mai far scattare una riprova, che non risolverebbe nulla.
+      const erroreDiRete = sembraErroreDiRete({ message: "Failed to fetch" });
+      const erroreConCode = sembraErroreDiRete({ code: "23505", message: "duplicate key value" });
+      const erroreMessaggioIgnoto = sembraErroreDiRete({ message: "colonna sconosciuta" });
+      const nessunErrore = sembraErroreDiRete(null);
+
+      // conRiprovaDiRete: riprova solo su un errore di rete, si ferma
+      // subito su un errore vero, e rispetta il numero massimo di
+      // tentativi restituendo l'ultimo errore quando non recupera mai.
+      let chiamate1 = 0;
+      const successoAlTerzoTentativo = await conRiprovaDiRete(() => {
+        chiamate1++;
+        if(chiamate1 < 3) return { data: null, error: { message: "Failed to fetch" } };
+        return { data: { ok: true }, error: null };
+      });
+
+      let chiamate2 = 0;
+      const erroreVeroNonRiprova = await conRiprovaDiRete(() => {
+        chiamate2++;
+        return { data: null, error: { code: "42501", message: "permission denied" } };
+      });
+
+      let chiamate3 = 0;
+      const inizio = Date.now();
+      const semprefallito = await conRiprovaDiRete(() => {
+        chiamate3++;
+        return { data: null, error: { message: "network timeout" } };
+      });
+      const durata = Date.now() - inizio;
+
+      return {
+        erroreDiRete, erroreConCode, erroreMessaggioIgnoto, nessunErrore,
+        chiamate1, successoAlTerzoTentativo,
+        chiamate2, erroreVeroNonRiprova,
+        chiamate3, semprefallito, durata,
+      };
+    });
+    verifica("un errore senza code e messaggio di rete è riconosciuto come tale", riprova.erroreDiRete, JSON.stringify(riprova));
+    verifica("un errore CON code (vero errore Postgres) NON è di rete", riprova.erroreConCode === false, JSON.stringify(riprova));
+    verifica("un messaggio ignoto senza code NON è considerato di rete", riprova.erroreMessaggioIgnoto === false, JSON.stringify(riprova));
+    verifica("nessun errore -> non è un errore di rete", riprova.nessunErrore === false, JSON.stringify(riprova));
+    verifica("riprova fino al successo (3 tentativi totali)", riprova.chiamate1 === 3 && riprova.successoAlTerzoTentativo.data && riprova.successoAlTerzoTentativo.data.ok, JSON.stringify(riprova));
+    verifica("un errore vero (con code) si ferma al primo tentativo, mai riprovato", riprova.chiamate2 === 1 && riprova.erroreVeroNonRiprova.error.code === "42501", JSON.stringify(riprova));
+    verifica("un errore di rete persistente si ferma dopo il massimo dei tentativi (3)", riprova.chiamate3 === 3 && riprova.semprefallito.error.message === "network timeout", JSON.stringify(riprova));
+    verifica("il backoff tra i tentativi è crescente, non istantaneo (almeno 600ms+1200ms)", riprova.durata >= 1700, JSON.stringify(riprova));
+
+    console.log("\n--- Router: appunti istantanei (fase 1d) ---");
+    const appunti = await page.evaluate(async () => {
+      // In questo ambiente di test non c'è un vero login Supabase, quindi
+      // isDbReady() è false: provaAppuntoImmediato deve riconoscere
+      // comunque la frase giusta ma fermarsi prima di scrivere, tornando
+      // false senza mai lanciare un errore — esattamente il comportamento
+      // sicuro atteso quando manca la connessione vera.
+      const dbNonPronto = !isDbReady();
+
+      const match1 = "segnami in appunti che devo vedere il costo del materiale".match(TRIGGER_APPUNTO);
+      const match2 = "annotami una nota che il cliente vuole il preventivo scontato".match(TRIGGER_APPUNTO);
+      const testoEstratto1 = match1 ? match1[1] : null;
+
+      const nonAppunto1 = "segnami di chiamare Bianchi domani".match(TRIGGER_APPUNTO); // niente "appunti/nota" esplicito
+      const nonAppunto2 = TRIGGER_APPUNTO.test("segnami in appunti che devo richiamare domani") && RIFERIMENTO_TEMPO.test("segnami in appunti che devo richiamare domani");
+
+      let esitoSenzaDb = null, lanciatoErrore = false;
+      try{
+        esitoSenzaDb = await provaAppuntoImmediato("segnami in appunti che devo vedere il costo del materiale");
+      }catch(e){ lanciatoErrore = true; }
+
+      return { dbNonPronto, match1: !!match1, match2: !!match2, testoEstratto1, nonAppunto1: !!nonAppunto1, nonAppunto2, esitoSenzaDb, lanciatoErrore };
+    });
+    verifica("\"segnami in appunti che...\" riconosciuto dal trigger", appunti.match1, JSON.stringify(appunti));
+    verifica("il testo estratto è quello dopo \"che\", non l'intera frase", appunti.testoEstratto1 === "devo vedere il costo del materiale", JSON.stringify(appunti));
+    verifica("\"annotami una nota che...\" riconosciuto dal trigger", appunti.match2, JSON.stringify(appunti));
+    verifica("\"segnami di chiamare... domani\" (nessun \"appunti/nota\" esplicito) NON è un appunto", appunti.nonAppunto1 === false, JSON.stringify(appunti));
+    verifica("\"segnami in appunti che devo richiamare DOMANI\" ha comunque un riferimento di tempo (va escluso a valle)", appunti.nonAppunto2, JSON.stringify(appunti));
+    verifica("senza connessione vera, provaAppuntoImmediato torna false senza errori (mai un crash)", appunti.dbNonPronto && appunti.esitoSenzaDb === false && !appunti.lanciatoErrore, JSON.stringify(appunti));
+
+    console.log("\n--- Router: stratagemma appuntamenti, avviso di ricezione (EON BRAIN 17/09/2026) ---");
+    const stratagemma = await page.evaluate(() => {
+      impegniInConferma.length = 0;
+
+      const conRiferimento = sembraRichiestaAppuntamento("chiamare Rossi domani alle 10");
+      const senzaRiferimento = sembraRichiestaAppuntamento("chiamare Rossi appena possibile");
+      const cancellazione = sembraRichiestaAppuntamento("cancella l'appuntamento di domani");
+      const spostamento = sembraRichiestaAppuntamento("sposta l'appuntamento di domani alle 15");
+      const eGiaUnAppunto = sembraRichiestaAppuntamento("segnami in appunti che domani devo comprare il materiale");
+
+      // Nota: si legge il testo del solo elenco (listUser), non
+      // document.body — quest'ultimo include anche il tag <script> con
+      // tutto il codice sorgente della pagina, che contiene esso stesso
+      // (come stringa letterale) le frasi cercate qui: un confronto su
+      // document.body.textContent risulterebbe sempre vero a prescindere
+      // dal vero contenuto del DOM.
+      const id = aggiungiImpegnoInConferma("chiamare Rossi domani alle 10");
+      const testoVisibileSubito = listUser.textContent.includes("chiamare Rossi domani alle 10");
+      const contieneAvvisoProvvisorio = listUser.textContent.includes("Ricevuto — sto confermando i dettagli…");
+      const contatoreDopoAggiunta = impegniInConferma.length;
+
+      rimuoviImpegniInConferma();
+      const testoSparitoDopoRimozione = !listUser.textContent.includes("Ricevuto — sto confermando i dettagli…");
+      const contatoreDopoRimozione = impegniInConferma.length;
+
+      return {
+        conRiferimento, senzaRiferimento, cancellazione, spostamento, eGiaUnAppunto,
+        id, testoVisibileSubito, contieneAvvisoProvvisorio, contatoreDopoAggiunta,
+        testoSparitoDopoRimozione, contatoreDopoRimozione,
+      };
+    });
+    verifica("\"chiamare Rossi domani alle 10\" sembra un appuntamento da segnalare subito", stratagemma.conRiferimento, JSON.stringify(stratagemma));
+    verifica("senza alcun riferimento di tempo NON scatta l'avviso", stratagemma.senzaRiferimento === false, JSON.stringify(stratagemma));
+    verifica("una cancellazione NON scatta l'avviso (non è una nuova creazione)", stratagemma.cancellazione === false, JSON.stringify(stratagemma));
+    verifica("uno spostamento NON scatta l'avviso (non è una nuova creazione)", stratagemma.spostamento === false, JSON.stringify(stratagemma));
+    verifica("un appunto (fase 1d) NON scatta anche l'avviso da appuntamento", stratagemma.eGiaUnAppunto === false, JSON.stringify(stratagemma));
+    verifica("l'avviso mostra il testo esatto detto dall'utente, subito", stratagemma.testoVisibileSubito, JSON.stringify(stratagemma));
+    verifica("l'avviso è chiaramente provvisorio (mai un dato indovinato)", stratagemma.contieneAvvisoProvvisorio, JSON.stringify(stratagemma));
+    verifica("un solo avviso presente dopo l'aggiunta", stratagemma.contatoreDopoAggiunta === 1, JSON.stringify(stratagemma));
+    verifica("l'avviso sparisce da solo quando arriva il risultato vero", stratagemma.testoSparitoDopoRimozione && stratagemma.contatoreDopoRimozione === 0, JSON.stringify(stratagemma));
+
     console.log("\n--- Contesto delle correzioni veloci (EON BRAIN punto 5) ---");
     const contesto = await page.evaluate(async () => {
       currentSession = { user: { id: "test-user" } };
@@ -201,7 +368,13 @@ async function main() {
       // Turno 3: nessun focus nella risposta -> deve restare quello del turno 2 (niente scadenza a tempo).
       await invia("grazie", { stato: "concluso", testo: "Prego.", azioni: [] });
       // Turno 4: un NUOVO focus esplicito e incompatibile -> sostituisce quello precedente.
-      await invia("fammi vedere il documento di Rossi", {
+      // Frase scelta apposta per NON iniziare con un verbo della fase 1c del
+      // Router (provaRisorsaImmediata, es. "fammi vedere"/"dammi"): "Mario
+      // Rossi" è un cliente vero e unico in questo fixture, quindi una frase
+      // come "fammi vedere il documento di Rossi" verrebbe intercettata dal
+      // Router (comportamento corretto e voluto) invece di arrivare qui,
+      // dove si vuole invece testare la gestione del Focus lato AI.
+      await invia("il cliente Rossi ha risposto sul documento", {
         stato: "concluso", testo: "Ecco il documento.", azioni: [],
         focus: { tipo: "documento", riferimento: "Rossi" },
       });
