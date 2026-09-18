@@ -2224,3 +2224,39 @@ non sono mai arrivate agli utenti veri.
 
 Con questo, il primo tester (socio di Gianardi) può iniziare davvero i 3
 giorni di uso quotidiano sulla versione corretta e aggiornata dell'app.
+
+## Primi due bug reali trovati dal tester (18/09/2026, PR #68)
+
+A pochi minuti dall'inizio del test vero, segnalati da Gianardi:
+
+1. **Date lunghe e formali** nelle risposte di EON ("domani sabato 19
+   settembre dell'anno 2026" invece di "domani alle 10"): copiava lo
+   stesso stile lungo dato come riferimento interno in `dataOraCorrente()`.
+   Corretto con un'istruzione esplicita nel prompt: sempre uno stile
+   breve e parlato quando EON parla, il formato lungo resta solo per i
+   suoi calcoli interni.
+2. **"Sembra lento/non ha capito"**: verificato sul log reale
+   (`ai_request_log` di produzione) che la richiesta ("domani mattina
+   ore 11:00 appuntamento con Fregoli") ha impiegato 3,8 secondi su
+   Haiku — il costo noto dell'architettura a 2 giri (interpreta_richiesta
+   forzato, poi l'azione vera), non un rallentamento nuovo né legato al
+   ragionamento esteso di oggi (quello riguarda solo Sonnet). La vera
+   causa: il tester ha usato l'Hub "Racconta la giornata", dove l'avviso
+   di ricezione immediato (stratagemma del 17/09) finiva su una pagina
+   nascosta sotto la schermata dell'Hub — invisibile. Corretto: l'Hub
+   ora mostra subito il testo esatto ricevuto al posto del messaggio
+   generico "Sto organizzando…".
+
+**Discussione aperta con Gianardi su come rendere la risposta vera più
+veloce** (non solo la percezione): l'architettura a 2 giri (classifica
+poi esegue) potrebbe diventare 1 giro solo, se il modello dichiara
+l'intento e chiama subito l'azione nello stesso turno invece che in due
+turni separati — dimezzerebbe circa il tempo reale. Non fatto ora: tocca
+un meccanismo di sicurezza costruito apposta (il forzare
+interpreta_richiesta PRIMA di ogni altra scelta, che ha già evitato
+errori reali in queste settimane) e richiederebbe test approfonditi
+prima di essere sicuro che non introduca regressioni. Da riprendere con
+calma, non deciso di fretta durante un test in corso.
+
+Verificato: `router.test.js` 62/62, `backend.test.js` 18/18. Merge in
+produzione confermato (PR #68, unita da Gianardi).
