@@ -2167,6 +2167,43 @@ da riprendere pezzo per pezzo (prima lo stile di scrittura dai
 messaggi reali, probabilmente il passo più semplice e già fattibile con
 i dati che abbiamo).
 
+## Idea di Gianardi: EON impara dalle risposte tecniche già date (21/09/2026)
+
+Nata da una domanda concreta di Gianardi: oggi, se un utente fa una
+domanda tecnica/generale (es. "quando è valida una delibera
+condominiale"), EON risponde attingendo alla conoscenza generale del
+modello (Claude) — nessuna base di conoscenza costruita da noi, nessuna
+verifica contro una fonte giuridica aggiornata, e un costo reale
+(chiamata vera all'AI) ogni singola volta, anche per domande già fatte
+prima da altri.
+
+Idea di Gianardi ("principio democratico dell'apprendimento graduale"):
+salvare le risposte già date e riusarle per domande simili future,
+invece di richiamare sempre Claude da capo — EON che "impara" dalle
+proprie stesse risposte nel tempo. Tecnica reale e nota (si chiama
+cache semantica: prima di rispondere, si controlla se una domanda
+abbastanza simile ha già una risposta salvata), non ancora costruita.
+
+**Il rischio reale da risolvere prima di costruirla, non dopo**: oggi un
+errore su una domanda tecnica è isolato (capita una volta). Se si
+riusano risposte salvate senza verificarle, un errore diventerebbe
+permanente e si ripeterebbe identico per tutti gli utenti che fanno una
+domanda simile — più pericoloso, non più sicuro. La parte davvero
+irrisolta (collegata al punto 1 dei "buchi del settore" sopra, "nessuno
+sa aggiornare bene un ricordo vecchio diventato sbagliato"): capire
+QUANDO una risposta salvata non è più affidabile e va rifatta, invece
+di fidarsene per sempre.
+
+**Prerequisito**: prima di costruire questa cache, ha senso risolvere
+il problema base già identificato sopra — dare a EON un modo di
+verificare (o almeno segnalare onestamente il limite di) una risposta
+tecnica, invece di rispondere sempre e solo dalla conoscenza generale
+del modello senza nessun controllo.
+
+Non fattibile ora con solo 2 utenti veri (poco traffico, poco risparmio
+reale) — da riprendere quando ci sarà più uso reale, insieme alla
+visione della "mente personalizzata" sopra.
+
 ## Per il lancio definitivo: app + browser, due cose distinte (17/09/2026)
 
 Discusso con Gianardi: quello che c'è oggi in `index.html` è stato
