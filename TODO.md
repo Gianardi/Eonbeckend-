@@ -2400,3 +2400,11 @@ Idea di Gianardi, discussa e definita insieme. Due parti distinte:
 Nessuna implementazione iniziata. Da riprendere con un disegno tecnico
 vero (nuova colonna/tabella per la categoria su appunti/impegni, nuova
 UI per crearle/rinominarle, e il riconoscimento nel prompt di EON).
+
+**Aggiunta di Gianardi, stesso giorno**: quando un utente entra
+nell'app la prima volta, serve una schermata/pagina che spieghi come
+funziona EON in generale — e in particolare, per chi è nella sezione
+generica, che le cartelle si possono personalizzare (altrimenti non è
+un concetto ovvio senza spiegazione). Da costruire insieme al punto
+sopra, non prima: ha senso solo una volta che la personalizzazione
+esiste davvero.
