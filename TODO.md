@@ -2358,3 +2358,45 @@ nel tempo, un dato che gli investitori guardano con attenzione.
 Nessuna azione da fare ora — solo un riferimento per orientare le
 decisioni future (prezzo, crescita, quando eventualmente cercare
 investitori).
+
+## Card personalizzabili e cartelle libere per il Piano Free (22/09/2026)
+
+Idea di Gianardi, discussa e definita insieme. Due parti distinte:
+
+1. **Per i 4 mestieri (Idraulico, Edile, Amministratore, Avvocato)**: le
+   card restano con i loro nomi di default come oggi (es. "Cliente
+   cantiere", "Appunti", "Documenti", "Foto cantiere"), ma il
+   professionista potrà rinominarle se vuole. Modifica contenuta: solo
+   l'etichetta cambia, cosa fa e contiene ogni card resta invariato.
+
+2. **Per la sezione generica ("Organizza la giornata e aumenta la
+   produttività", Piano Free)**: cambiamento più grande — l'utente
+   parte da cartelle vuote e può crearne di sue da zero, dandogli il
+   nome che vuole (es. "Casa", "Progetto ristrutturazione", "Palestra").
+
+   **Disegno concordato per il contenuto delle cartelle** (dopo
+   ragionamento insieme, per non duplicare lavoro già fatto): le
+   cartelle sono **categorie personalizzate per gli appunti e gli
+   impegni già esistenti**, non un secondo tipo di entità con dati/
+   foto/documenti propri (quello duplicherebbe l'architettura già
+   costruita per i clienti dei professionisti — molto più lavoro senza
+   un vero bisogno). Nessun limite al numero di cartelle creabili.
+
+   **La parte davvero interessante da costruire bene**: collegare le
+   cartelle libere al linguaggio naturale — se l'utente dice a voce
+   "segnami in Casa che devo chiamare l'idraulico", EON deve capire da
+   solo che "Casa" è una cartella che l'utente ha già creato, non un
+   tipo fisso come "cliente" o "impegno". È un problema di riconoscimento
+   più difficile delle categorie fisse già gestite oggi (che sono un
+   insieme chiuso e noto in anticipo), perché le cartelle sono libere e
+   decise dall'utente.
+
+   Non è un'idea "mai vista" (cartelle personalizzate esistono già in
+   Notion, Trello, Google Keep, Todoist — pattern collaudato, non
+   un'invenzione) — l'eventuale originalità sta nel collegarle bene al
+   riconoscimento del linguaggio naturale di EON, non nel concetto di
+   cartella in sé.
+
+Nessuna implementazione iniziata. Da riprendere con un disegno tecnico
+vero (nuova colonna/tabella per la categoria su appunti/impegni, nuova
+UI per crearle/rinominarle, e il riconoscimento nel prompt di EON).
