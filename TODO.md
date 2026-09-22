@@ -2204,6 +2204,40 @@ Non fattibile ora con solo 2 utenti veri (poco traffico, poco risparmio
 reale) — da riprendere quando ci sarà più uso reale, insieme alla
 visione della "mente personalizzata" sopra.
 
+**Seguito del ragionamento (22/09/2026)**: Gianardi ha chiesto come
+rendere questa idea innovativa invece di una semplice imitazione delle
+big tech, restando fedele al suo "principio democratico". Ragionato
+insieme fino a una proposta concreta, poi Gianardi stesso ha fatto un
+collegamento azzeccato con **Wikipedia** — il miglior esempio reale su
+grande scala di questo stesso principio applicato.
+
+**La proposta**: invece di una scadenza fissa decisa da noi (es. "ogni
+6 mesi rifai la domanda"), usare gli UTENTI STESSI come segnale
+collettivo di quando una risposta salvata non è più valida — se più
+professionisti diversi, in momenti diversi, la correggono o la mettono
+in dubbio (non solo un singolo caso isolato), quello fa perdere fiducia
+a EON nella risposta condivisa, finché non decide di richiamare Claude
+per aggiornarla davvero. Si collega direttamente all'idea già segnata
+sopra di "imparare dalle correzioni degli utenti" (visione mente
+personalizzata) — la stessa correzione servirebbe sia a quel singolo
+utente sia, se ripetuta da altri, ad abbassare la fiducia sulla
+risposta condivisa per tutti.
+
+**Cosa prendere in prestito dal modello Wikipedia, in concreto**:
+1. Più correttori indipendenti che segnalano la stessa cosa = segnale
+   più forte di un singolo caso isolato (il cuore della proposta sopra)
+2. Storico delle modifiche: sapere QUANDO e PERCHÉ una risposta salvata
+   è cambiata, non sovrascriverla in silenzio
+3. Marcare come "non verificata da una fonte ufficiale" le risposte
+   tecniche/legali finché nessuno le conferma davvero (come il
+   "servono fonti" di Wikipedia sulle affermazioni non referenziate)
+4. Trattare con più cautela le risposte sui temi più delicati/a rischio
+   (legali, normativi con conseguenze reali) — mai fidarsi ciecamente
+   della cache lì, come Wikipedia protegge le pagine più controverse
+
+Nessuna implementazione iniziata — resta un'estensione dell'idea sopra,
+da costruire insieme quando si arriverà a quel punto della roadmap.
+
 ## Per il lancio definitivo: app + browser, due cose distinte (17/09/2026)
 
 Discusso con Gianardi: quello che c'è oggi in `index.html` è stato
