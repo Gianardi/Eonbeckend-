@@ -2311,3 +2311,50 @@ calma, non deciso di fretta durante un test in corso.
 
 Verificato: `router.test.js` 62/62, `backend.test.js` 18/18. Merge in
 produzione confermato (PR #68, unita da Gianardi).
+
+## Scenari di valore economico di EON (22/09/2026)
+
+Discussione con Gianardi, non tecnica ma da tenere a mente per la
+direzione del progetto: quanto potrebbe valere EON a due traguardi di
+clienti paganti, e se potrebbe interessare a un fondo di investimento.
+Metodo usato: multiplo del fatturato ricorrente annuo (ARR), lo standard
+per valutare un software in abbonamento (SaaS) — il prezzo mensile non
+è ancora stato deciso, quindi sono scenari a 3 ipotesi di prezzo.
+
+**A 500 clienti paganti** (traguardo più vicino, ancora fascia
+"progetto agli inizi"):
+
+| Prezzo/mese | Fatturato annuo | Valore stimato (3x-8x ARR) |
+|---|---|---|
+| €20 | €120.000 | €360.000 – €960.000 |
+| €40 | €240.000 | €720.000 – €1.920.000 |
+| €60 | €360.000 | €1.080.000 – €2.880.000 |
+
+A questa scala, realisticamente interessa più a business angel o
+piccoli fondi pre-seed/seed italiani (o un investitore strategico del
+settore) che a un fondo istituzionale grande — quello che conta di più
+non è il numero assoluto ma la velocità di crescita e quanti clienti
+restano nel tempo.
+
+**A 10.000 clienti paganti** (azienda vera, non più "agli inizi"):
+
+| Prezzo/mese | Fatturato annuo | Valore stimato (5x-10x ARR) |
+|---|---|---|
+| €20 | €2.400.000 | €12M – €24M |
+| €40 | €4.800.000 | €24M – €48M |
+| €60 | €7.200.000 | €36M – €72M |
+
+A questa scala sì, con una crescita solida e pochi clienti persi, è il
+livello che interessa davvero a fondi seri (Serie A/B) — le software
+verticali con l'AI dentro sono oggi una categoria seguita con molto
+interesse dagli investitori, il che potrebbe giustificare multipli
+anche più alti della media se la storia di crescita è convincente.
+
+**Punto a favore di EON, strutturale**: un professionista che affida a
+EON calendario, clienti e dati ha un costo di uscita naturale alto (non
+cambia facilmente assistente) — di solito significa pochi clienti persi
+nel tempo, un dato che gli investitori guardano con attenzione.
+
+Nessuna azione da fare ora — solo un riferimento per orientare le
+decisioni future (prezzo, crescita, quando eventualmente cercare
+investitori).
