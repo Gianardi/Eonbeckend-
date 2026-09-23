@@ -531,6 +531,11 @@
     background:rgba(14,20,36,.72); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
   .cantiere-foto-elimina svg{ width:12px; height:12px; stroke:#fff; }
+  .cantiere-foto-scheda{ padding:14px 16px; border-bottom:1px solid var(--border); }
+  .cantiere-foto-scheda:last-child{ border-bottom:none; }
+  .cantiere-foto-scheda-testata{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .cantiere-foto-scheda-nome{ font-size:13.5px; font-weight:800; color:var(--text); }
+  .cantiere-foto-scheda-nome.muted{ font-weight:700; color:var(--muted); }
 
   .cantiere-appunto{ padding:12px 16px; border-bottom:1px solid var(--border); display:flex; gap:10px; align-items:flex-start; }
   .cantiere-appunto:last-child{ border-bottom:none; }
@@ -2598,7 +2603,7 @@
         Torna alla Home
       </div>
 
-      <input type="file" id="cantiereFotoInput" accept="image/*" capture="environment" style="display:none;">
+      <input type="file" id="cantiereFotoInput" accept="image/*" style="display:none;">
       <button class="home-hero-cal" id="cantiereFotoScattaBtn" type="button" style="margin-bottom:16px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <div class="home-hero-cal-testo">
@@ -2609,7 +2614,7 @@
 
       <div class="card-panel">
         <div class="card-header"><h2>Foto</h2><span class="count" id="cantiereFotoCount">0</span></div>
-        <div id="cantiereFotoGrid" class="cantiere-foto-grid" style="padding:8px 16px 16px;"></div>
+        <div id="cantiereFotoGrid" style="padding-bottom:4px;"></div>
       </div>
     </div>
 
@@ -8262,36 +8267,95 @@ document.getElementById("cantiereDocumentiInput").addEventListener("change", (e)
   if(f) caricaCantiereDocumento(f);
 });
 
-/* ---- Foto cantiere ---- */
+/* ---- Foto cantiere ----
+   Raggruppate per cliente (una "card" per cliente col suo nome sopra,
+   più "+" per aggiungere altre foto senza rifare il tag) invece di una
+   sola griglia indifferenziata — richiesto da Gianardi il 23/09/2026.
+   Le foto non ancora assegnate a nessun cliente restano in un gruppo a
+   parte, toccabili per assegnarle (stesso overlay di sempre). */
+let clienteIdPerProssimaFoto = null; // letto una volta sola dal listener di cantiereFotoInput, poi azzerato
+
 function renderCantiereFoto(){
   const wrap = document.getElementById("cantiereFotoGrid");
   document.getElementById("cantiereFotoCount").textContent = cantiereFoto.length;
   wrap.innerHTML = "";
   if(cantiereFoto.length === 0){
-    wrap.innerHTML = '<div class="empty-hint" style="grid-column:1/-1;">Ancora nessuna foto per questo cantiere.</div>';
+    wrap.innerHTML = '<div class="empty-hint">Ancora nessuna foto per questo cantiere.</div>';
     return;
   }
+
+  const gruppi = new Map(); // clientId (o "" per senza cliente) -> foto[]
   cantiereFoto.slice().reverse().forEach(f => {
-    const item = document.createElement("div");
-    item.className = "cantiere-foto-item";
-
-    const img = document.createElement("img");
-    img.src = f.url; img.alt = "";
-    img.addEventListener("click", () => window.open(f.url, "_blank"));
-
-    const elimina = document.createElement("button");
-    elimina.className = "cantiere-foto-elimina";
-    elimina.type = "button";
-    elimina.setAttribute("aria-label", "Elimina foto");
-    elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-    elimina.addEventListener("click", (e) => { e.stopPropagation(); eliminaCantiereFoto(f.id); });
-
-    item.appendChild(img); item.appendChild(elimina);
-    wrap.appendChild(item);
+    const chiave = f.clientId || "";
+    if(!gruppi.has(chiave)) gruppi.set(chiave, []);
+    gruppi.get(chiave).push(f);
   });
+
+  function disegnaGriglia(foto, onTocca){
+    const griglia = document.createElement("div");
+    griglia.className = "cantiere-foto-grid";
+    foto.forEach(f => {
+      const item = document.createElement("div");
+      item.className = "cantiere-foto-item";
+
+      const img = document.createElement("img");
+      img.src = f.url; img.alt = "";
+      img.addEventListener("click", () => onTocca ? onTocca(f) : window.open(f.url, "_blank"));
+
+      const elimina = document.createElement("button");
+      elimina.className = "cantiere-foto-elimina";
+      elimina.type = "button";
+      elimina.setAttribute("aria-label", "Elimina foto");
+      elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+      elimina.addEventListener("click", (e) => { e.stopPropagation(); eliminaCantiereFoto(f.id); });
+
+      item.appendChild(img); item.appendChild(elimina);
+      griglia.appendChild(item);
+    });
+    return griglia;
+  }
+
+  // Prima i clienti (una card ciascuno), poi le foto senza cliente in fondo.
+  [...gruppi.keys()].filter(k => k !== "").forEach(clientId => {
+    const cliente = clients.find(c => c.id === clientId);
+    const scheda = document.createElement("div");
+    scheda.className = "cantiere-foto-scheda";
+    const testata = document.createElement("div");
+    testata.className = "cantiere-foto-scheda-testata";
+    const nome = document.createElement("div");
+    nome.className = "cantiere-foto-scheda-nome";
+    nome.textContent = cliente ? cliente.name : "Cliente eliminato";
+    const aggiungi = document.createElement("button");
+    aggiungi.className = "card-header-add";
+    aggiungi.type = "button";
+    aggiungi.setAttribute("aria-label", "Aggiungi un'altra foto a " + (cliente ? cliente.name : "questo cliente"));
+    aggiungi.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+    aggiungi.addEventListener("click", () => {
+      clienteIdPerProssimaFoto = clientId;
+      document.getElementById("cantiereFotoInput").click();
+    });
+    testata.appendChild(nome); testata.appendChild(aggiungi);
+    scheda.appendChild(testata);
+    scheda.appendChild(disegnaGriglia(gruppi.get(clientId)));
+    wrap.appendChild(scheda);
+  });
+
+  if(gruppi.has("")){
+    const scheda = document.createElement("div");
+    scheda.className = "cantiere-foto-scheda";
+    const testata = document.createElement("div");
+    testata.className = "cantiere-foto-scheda-testata";
+    const nome = document.createElement("div");
+    nome.className = "cantiere-foto-scheda-nome muted";
+    nome.textContent = "Da assegnare a un cliente";
+    testata.appendChild(nome);
+    scheda.appendChild(testata);
+    scheda.appendChild(disegnaGriglia(gruppi.get(""), (f) => apriTagFotoCantiere(f)));
+    wrap.appendChild(scheda);
+  }
 }
 
-async function caricaCantiereFoto(file){
+async function caricaCantiereFoto(file, clienteIdForzato){
   if(!isDbReady()){
     showAILanding("Non collegato", "Per caricare foto serve la connessione al database.");
     return;
@@ -8310,9 +8374,18 @@ async function caricaCantiereFoto(file){
     if(!creato) throw new Error("scrittura non riuscita");
     const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null };
     cantiereFoto.push(nuovaFoto);
-    aggiornaCantiereSottotitoli();
-    renderCantiereFoto();
-    apriTagFotoCantiere(nuovaFoto);
+    if(clienteIdForzato){
+      /* Foto aggiunta dal "+" dentro la card di un cliente già noto:
+         nessun bisogno di richiedere di nuovo a chi si riferisce. */
+      nuovaFoto.clientId = clienteIdForzato;
+      await dbUpdate("cantiere_foto", creato.id, { client_id: clienteIdForzato });
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+    } else {
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      apriTagFotoCantiere(nuovaFoto);
+    }
   }catch(err){
     console.error("Caricamento foto non riuscito:", err);
     showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare la foto: " + (err.message || "riprova."));
@@ -8332,10 +8405,12 @@ async function eliminaCantiereFoto(id){
   if(isDbReady()) await dbDelete("cantiere_foto", id);
 }
 
-document.getElementById("cantiereFotoScattaBtn").addEventListener("click", () => document.getElementById("cantiereFotoInput").click());
+document.getElementById("cantiereFotoScattaBtn").addEventListener("click", () => { clienteIdPerProssimaFoto = null; document.getElementById("cantiereFotoInput").click(); });
 document.getElementById("cantiereFotoInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
-  if(f) caricaCantiereFoto(f);
+  const clienteId = clienteIdPerProssimaFoto;
+  clienteIdPerProssimaFoto = null;
+  if(f) caricaCantiereFoto(f, clienteId);
 });
 
 /* ---- Dopo lo scatto: a chi si riferisce la foto? ----
@@ -9059,7 +9134,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(/\?\s*$/.test(testoRisp.trim()) && risposta.runId){
           runIdAperto = risposta.runId;
           runIdApertoScadenza = Date.now() + 90 * 1000;
-          hint.textContent = "Ti ho chiesto una cosa — rispondimi pure";
+          /* Il campo di testo qui sotto resta sempre attivo (non solo
+             il microfono): il messaggio lo dice esplicitamente, perché
+             finora non era ovvio che si potesse anche scrivere invece
+             di parlare (segnalato da Gianardi il 23/09/2026). */
+          hint.textContent = "Ti ho chiesto una cosa — rispondimi a voce o scrivendo qui sotto";
         }
         if(/\?\s*$/.test(testoRisp.trim()) && /conferm/i.test(testoRisp) && !/quale/i.test(testoRisp)){
           testoRisp += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
