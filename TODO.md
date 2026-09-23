@@ -2685,21 +2685,23 @@ per le mappe) e chi ne copre il costo, prima che si possano collegare.
 
 ### F. Architettura app: navigazione tra profesioni e account
 
-39. **Oggi non c'è modo di uscire da una sezione professione (es.
-    "edile") e tornare alla schermata generale di EON.** Serve una
-    struttura simile a quella già esistente per la scelta iniziale
-    della professione: una prima pagina generale di EON, poi scorrendo
-    si arriva alla pagina di scelta professione (quella che già
-    esiste per Artigiani e Professionisti), e da dentro una sezione
-    professione dev'esserci sempre un modo per uscire e tornare alla
-    schermata generale.
-40. **Separazione dei dati per professione, quando l'app sarà
-    ufficiale.** Oggi con una sola email si accede a tutte le
-    professioni (comodo per i test attuali). A regime, come nelle
-    grandi app, una registrazione deve valere per la sola professione
-    scelta all'iscrizione: se un account è registrato su "edile", i
-    clienti/foto/documenti che aggiunge finiscono solo lì, mai anche
-    in idraulico/avvocato/altre sezioni.
+39. **FATTO (23/09/2026), confermato con Gianardi prima di
+    costruirlo.** ~~Oggi non c'è modo di uscire da una sezione
+    professione.~~ Nuova voce "Cambia professione" nel menu: apre lo
+    stesso selettore usato in fase di iscrizione, cambia solo
+    etichette e sezioni specifiche (mai i dati veri, che restano gli
+    stessi qualunque professione sia selezionata — applyProfession
+    chiamata sempre con skipDemoData=true).
+40. **Aperto, serve una decisione di Gianardi prima di procedere.**
+    Separazione dei dati per professione, quando l'app sarà ufficiale.
+    Oggi con una sola email si accede a tutte le professioni (comodo
+    per i test attuali). A regime, come nelle grandi app, una
+    registrazione deve valere per la sola professione scelta
+    all'iscrizione: se un account è registrato su "edile", i clienti/
+    foto/documenti che aggiunge finiscono solo lì, mai anche in
+    idraulico/avvocato/altre sezioni. È un cambiamento di architettura
+    vero (riguarda login/account), non un semplice fix — da
+    pianificare a parte quando si deciderà di implementarlo.
 41. **Sezione generica "per chi vuole aumentare la propria
     produttività"** (per chi non ha una professione specifica tra le
     4, uso quotidiano/personale) — dubbio aperto di Gianardi su cosa
