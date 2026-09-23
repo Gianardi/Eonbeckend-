@@ -2728,3 +2728,29 @@ proseguire un pezzo alla volta con l'autorizzazione di Gianardi ad ogni
 intervento, cominciando presumibilmente dai bug/comportamenti AI più
 semplici e sicuri (sezioni A e B) prima delle funzionalità e del
 redesign più grandi (sezioni D, E, F).
+
+## Aggiornamento: lista completata (23/09/2026)
+
+Tutti i 42 punti della lista sopra sono stati lavorati nella stessa
+giornata, con l'autorizzazione di Gianardi ad ogni gruppo di
+interventi (sezioni A/B fatte "di getto" dopo un primo via libera
+esplicito, poi confermato di continuare fino in fondo con "farei tutti
+i punti"). Risultato: 38/42 fatti, 4 rimasti aperti per motivi
+espliciti — 30/31 (meteo/mappe, serve scegliere e pagare un fornitore
+esterno), 40 (separazione dati per professione, cambiamento di
+architettura vero, rimandato apposta), 41 (sezione generica, dubbio
+di Gianardi da discutere insieme). Il punto 19 resta parziale
+(riconoscimento per nome fatto, riconoscimento dal contenuto del file
+no) e il 28 rimandato al disegno delle cartelle personalizzabili già
+previsto sopra.
+
+**Migrazioni applicate in produzione (23/09/2026), autorizzate da
+Gianardi ("falle tu")**: `ai_request_log_risposta_schema.sql` (colonna
+"risposta") e `feedback_schema.sql` (nuova tabella "feedback") —
+entrambe verificate col vero schema di produzione dopo l'applicazione,
+nessun dato esistente toccato.
+
+Prossimo passo concordato con Gianardi: aprire la PR con tutto il
+lavoro di oggi, lui fa il merge, poi si testa insieme (lui usa l'app
+vera, io guardo i dati/log reali dietro le quinte) prima di ridare in
+mano tutto al tester/socio/amministratore.
