@@ -2576,49 +2576,59 @@ di Gianardi.
 
 ### C. Piccole funzionalità mancanti (UI/UX)
 
-17. **Caricamento foto/file dalla galleria, non solo scatto diretto.**
-    In "foto cantiere" (e lo stesso per documenti/file), oggi si può
-    solo scattare una foto nuova — serve anche la possibilità di
-    scegliere una foto già esistente dalla galleria del telefono.
-18. **Quando EON fa una domanda di chiarimento dopo una richiesta
-    dell'utente, oggi si può rispondere solo a voce (microfono).**
-    Deve essere possibile rispondere anche scrivendo un messaggio di
-    testo.
-19. **Riconoscimento per nome simile + per contenuto, non solo nome
-    esatto.** Se si chiede un documento/foto/file con un nome simile
-    (non identico) a quello salvato, EON deve comunque trovarlo e
-    mandarlo — idealmente riconoscendo anche dal contenuto del
-    documento di che documento si tratta.
-20. **Icona "+" al posto della freccia in su** nel campo di input
-    sotto il microfono, sia in "cliente cantiere" che in "appunti".
-21. **Tasto "+" in alto a destra, in orizzontale con la scritta
-    "Documenti"**, nella sezione documenti, per aggiungere un
-    documento.
-22. **Foto di cantiere organizzate in una "card" per cantiere**, con
-    il nome del cantiere/cliente sopra alle foto, e la possibilità di
-    aggiungere altre foto dentro la stessa card.
-23. **Opzioni di invio per una foto recuperata**: email, WhatsApp, EON
-    interna. Per ora solo l'interfaccia (i pulsanti), da rendere
-    davvero funzionanti quando si farà il Communication Hub.
-24. **Piccolo microfono accanto a una foto recuperata**, per dire a
-    voce cosa farne (es. "mandala per email a Zinchini").
-25. **Registro AI: mostrare anche la risposta, non solo la domanda.**
-    Oggi cliccando su una voce del registro si vede solo la domanda
-    fatta.
-26. **Card per le risposte lunghe/discorsive.** Le risposte che
-    richiedono un discorso (non una semplice conferma di appuntamento)
-    spariscono troppo in fretta per fare in tempo a leggerle — devono
-    apparire come card nello stile già adottato, con la possibilità
-    per l'utente di chiuderle quando vuole.
-27. **Cliccare sul riquadro "Cosa devo fare oggi"** deve aprire una
-    card (stesso stile) con l'elenco sintetico e semplice degli
-    impegni/attività, non solo restare un testo fisso in home.
-28. **Nomi di cartelle/card modificabili da ogni utente**, in modo
-    personale — un utente che rinomina una cartella la vede rinominata
-    solo lui, gli altri utenti restano con il nome di default (o la
-    rinominano a loro volta in autonomia).
-29. **Freccia "indietro" più grande e più in alto/evidente** — quella
-    attuale è piccola e capita di sbagliarsi.
+17. **FATTO (23/09/2026).** ~~Caricamento foto/file dalla galleria.~~
+    Causa: solo "foto cantiere" forzava la fotocamera
+    (capture="environment"); documenti e allegati chat non avevano
+    questa restrizione. Rimosso l'attributo.
+18. **FATTO (23/09/2026), chiarimento.** ~~Rispondere solo a voce a una
+    domanda di chiarimento.~~ Il campo di testo era già sempre
+    scrivibile (nessun blocco tecnico trovato) — non era chiaro che si
+    potesse scrivere invece di parlare. Messaggio aggiornato per
+    dirlo esplicitamente.
+19. **PARZIALE (23/09/2026).** Riconoscimento per nome simile
+    implementato per i documenti impresa (ricerca per nome parziale,
+    punto 8/32) — un vero riconoscimento "dal contenuto del documento"
+    (leggere il file, non solo il suo nome) è una funzionalità più
+    grande, non iniziata: richiederebbe analisi del contenuto/OCR, da
+    progettare a parte quando servirà davvero.
+20. **FATTO (23/09/2026).** ~~Icona "+" al posto della freccia in su~~
+    nel campo di input sotto il microfono, in "cliente cantiere" e
+    "appunti".
+21. **FATTO (23/09/2026).** ~~Tasto "+" accanto alla scritta
+    "Documenti"~~, per aggiungere un documento senza scendere al
+    pulsante grande.
+22. **FATTO (23/09/2026).** ~~Foto di cantiere organizzate in una
+    "card" per cliente~~, col nome sopra e un "+" per aggiungere altre
+    foto senza rifare il tag; le foto non ancora assegnate restano in
+    un gruppo "Da assegnare" a parte.
+23. **Già presente.** Le opzioni di invio (EON attiva, Email/WhatsApp
+    disabilitate in attesa del Communication Hub) c'erano già sulla
+    scheda foto (creaRigaCanaliInvio) — nessuna modifica necessaria.
+24. **FATTO (23/09/2026).** ~~Piccolo microfono accanto a una foto
+    recuperata~~ per dire a voce cosa farne — nuovo bottone
+    riutilizzabile creaMicRapido(), un solo colpo di ascolto, invia il
+    comando a EON con il contesto della foto/cliente.
+25. **FATTO (23/09/2026).** ~~Registro AI: mostrare anche la
+    risposta.~~ Aggiunta la colonna "risposta" a ai_request_log
+    (migrazione additiva da applicare in produzione — vedi nota sotto)
+    e resa cliccabile ogni riga del registro.
+26. **FATTO (23/09/2026).** ~~Card per le risposte lunghe/
+    discorsive.~~ Sopra una soglia di lunghezza, e solo su risposte
+    puramente conversazionali (nessuna azione eseguita), la risposta
+    si apre nella scheda grande e chiudibile invece che nel toast (che
+    sparisce da solo dopo 8 secondi).
+27. **FATTO (23/09/2026).** ~~Cliccare sul riquadro "Cosa devo fare
+    oggi"~~ ora apre la stessa lista nella scheda grande, sola
+    lettura, senza interferire con le spunte dei singoli impegni.
+28. **Rimandato al disegno già previsto.** Nomi di cartelle/card
+    modificabili da ogni utente — stessa idea già segnata sopra in
+    "Card personalizzabili e cartelle libere per il Piano Free
+    (22/09/2026)": fattibile, ma da costruire insieme a quel disegno
+    tecnico (nuova colonna/tabella, UI per rinominare), non come
+    modifica isolata.
+29. **FATTO (23/09/2026).** ~~Freccia "indietro" più grande e più
+    evidente~~ (da 13px a 20px, testo più marcato, tocco più comodo)
+    in ogni pagina dell'app.
 
 ### D. Funzionalità nuove più grandi (da progettare a parte)
 
@@ -2626,11 +2636,10 @@ di Gianardi.
 31. **Integrazione mappe/traffico** — EON oggi non sa calcolare tempi
     di percorrenza reali tra due indirizzi/cantieri, serve un servizio
     mappe che consideri anche il traffico/le code in tempo reale.
-32. **Documenti aziendali recuperabili da EON** (fatture fornitori,
-    DDT, comunicazioni amministrative, "documenti impresa" in
-    generale) — oggi non transitano da nessuna parte che EON può
-    consultare; vanno resi recuperabili con lo stile a card già usato
-    in home.
+32. **FATTO (23/09/2026), stesso lavoro del punto 8.** ~~Documenti
+    aziendali recuperabili da EON.~~ Nuovo tool
+    recupera_documenti_impresa, si apre nella stessa scheda a card già
+    usata in home.
 33. **Primo formato personalizzato per fattura/preventivo/lettera/
     carta intestata/cartello fine lavori.** Al primo accesso alla
     sezione documenti (per chi non ha ancora impostato un formato),
