@@ -439,6 +439,7 @@ const AI_RATE_LIMIT = (puoSovrascrivereRateLimit && Number(process.env.AI_RATE_L
 const AI_RATE_WINDOW_SECONDS = (puoSovrascrivereRateLimit && Number(process.env.AI_RATE_WINDOW_SECONDS)) || 600; // 10 minuti
 
 const TIPI_IMPEGNO = new Set(["incontro", "chiamata", "commissione"]);
+const TIPI_DOCUMENTO = new Set(["preventivo", "fattura"]);
 const STATI_CLIENTE = new Set(["attivo", "trattativa", "inattivo"]);
 
 function eStringaNonVuota(v) { return typeof v === "string" && v.trim().length > 0; }
@@ -804,7 +805,7 @@ const TOOLS = {
     categoria: "risorsa",
     schema: {
       name: "elenca_appuntamenti",
-      description: "Elenca gli impegni già segnati in un intervallo di date (appuntamenti e task), utile per sapere cosa c'è già prima di aggiungerne altri.",
+      description: "Elenca gli impegni già segnati in un intervallo di date (appuntamenti e task). Usalo SEMPRE — non solo prima di aggiungerne altri — ogni volta che l'utente chiede cosa ha in programma/che impegni ha/il riepilogo della giornata per oggi, domani o un altro periodo: mai rispondere che non conosci il suo programma, o chiedergli di ripeterlo, senza aver prima chiamato questo strumento per il periodo richiesto.",
       input_schema: {
         type: "object",
         properties: {
@@ -844,21 +845,51 @@ const TOOLS = {
     },
     async run(input, ctx) {
       if (!eStringaNonVuota(input.testo)) throw fail("Parametro 'testo' mancante o vuoto");
-      const q = encodeURIComponent(input.testo.trim());
+      const testoCercato = input.testo.trim();
+      const q = encodeURIComponent(testoCercato);
       const [appuntamenti, impegni] = await Promise.all([
         db(`messages?select=id,title,scheduled_at&event_type=eq.appt&title=ilike.*${q}*&deleted_at=is.null&order=scheduled_at.asc&limit=10`, { method: "GET" }, ctx.accessToken),
         db(`tasks?select=id,title,scheduled_at,status&title=ilike.*${q}*&deleted_at=is.null&order=scheduled_at.asc&limit=10`, { method: "GET" }, ctx.accessToken),
       ]);
-      return {
-        risultati: [
-          ...(appuntamenti || [])
-            .filter((m) => !m.title.startsWith("❌"))
+      let risultati = [
+        ...(appuntamenti || [])
+          .filter((m) => !m.title.startsWith("❌"))
+          .map((m) => ({ id: m.id, titolo: m.title, quando: m.scheduled_at, tipo: "appuntamento" })),
+        ...(impegni || [])
+          .filter((t) => t.status !== "done" && t.status !== "annullato")
+          .map((t) => ({ id: t.id, titolo: t.title, quando: t.scheduled_at, tipo: "impegno" })),
+      ];
+
+      /* Gianardi, 23/09/2026: "mi sposti il dottore alle 17" non trovava
+         nessun impegno perché il titolo salvato era "Dottor Righi" —
+         "dottore" non è una sottostringa letterale di "Dottor Righi"
+         (manca la "e" finale), quindi il semplice ilike sopra fallisce
+         anche quando il significato è ovvio. Stesso principio già usato
+         per i clienti (paroleSimili/risolviClienteDaNome): quando la
+         sottostringa esatta non trova nulla, riprova sulle singole
+         parole con lo stesso confronto "quasi uguali", su un insieme
+         più ampio di impegni non ancora conclusi. */
+      if (risultati.length === 0) {
+        const paroleCercate = testoCercato.toLowerCase().split(/\s+/).filter(Boolean);
+        const corrisponde = (titolo) => {
+          const paroleTitolo = titolo.toLowerCase().split(/\s+/).filter(Boolean);
+          return paroleCercate.some((p) => paroleTitolo.some((pt) => paroleSimili(p, pt) || pt.startsWith(p) || p.startsWith(pt)));
+        };
+        const [tuttiAppuntamenti, tuttiImpegni] = await Promise.all([
+          db(`messages?select=id,title,scheduled_at&event_type=eq.appt&deleted_at=is.null&order=scheduled_at.asc&limit=200`, { method: "GET" }, ctx.accessToken),
+          db(`tasks?select=id,title,scheduled_at,status&deleted_at=is.null&order=scheduled_at.asc&limit=200`, { method: "GET" }, ctx.accessToken),
+        ]);
+        risultati = [
+          ...(tuttiAppuntamenti || [])
+            .filter((m) => !m.title.startsWith("❌") && corrisponde(m.title))
             .map((m) => ({ id: m.id, titolo: m.title, quando: m.scheduled_at, tipo: "appuntamento" })),
-          ...(impegni || [])
-            .filter((t) => t.status !== "done" && t.status !== "annullato")
+          ...(tuttiImpegni || [])
+            .filter((t) => t.status !== "done" && t.status !== "annullato" && corrisponde(t.title))
             .map((t) => ({ id: t.id, titolo: t.title, quando: t.scheduled_at, tipo: "impegno" })),
-        ],
-      };
+        ].slice(0, 10);
+      }
+
+      return { risultati };
     },
   },
 
@@ -1491,6 +1522,160 @@ const TOOLS = {
     },
   },
 
+  /* Gianardi, 23/09/2026: "mi fai preventivo a Mario Rampini per cambio
+     porte da 1200+IVA" rispondeva sempre "non ho ancora uno strumento
+     per creare preventivi, ti segno un promemoria" — anche quando
+     l'utente aveva già dato tutti i dati serviti a farlo per davvero.
+     Principio guida di Gianardi: "l'immediatezza tramite la
+     comunicazione a voce/testo è il fondamento di tutte le attività di
+     EON" — se i dati ci sono già, il documento va creato subito, non
+     rimandato a un secondo momento nell'app.
+
+     Stessa identica logica/formato già usata dalla creazione manuale
+     in chat (index.html, apriDocumento/calcolaTotali/prossimoNumero):
+     stesso oggetto "dati" salvato in messages.file_name (che il
+     frontend sa già leggere e disegnare come scheda/PDF), stesso
+     collegamento fattura -> entrata attesa. Non un sistema parallelo:
+     un preventivo/fattura creato da qui è indistinguibile, per il
+     resto dell'app, da uno compilato a mano. */
+  crea_preventivo_o_fattura: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "crea_preventivo_o_fattura",
+      description: "Crea SUBITO un preventivo o una fattura per un cliente, con le voci date dall'utente, e lo salva nella sua conversazione — visibile subito come scheda nell'app, esattamente come se fosse stato compilato a mano, mai solo un promemoria. Usalo quando l'utente chiede di fare/preparare un preventivo o una fattura E ha già dato almeno una voce con un prezzo. Se non ha ancora dato nessun dato (solo il nome del cliente e il tipo di documento, es. 'fammi un preventivo a Rossi'), NON chiamarlo: rispondi chiedendo tu prima i dati (cosa, quanto) in una risposta di testo — poi, quando li dà, chiamalo. Se il cliente nominato non esiste ancora in anagrafica, crealo prima con crea_cliente/trova_o_crea_cliente e usa l'id appena ottenuto, tutto nello stesso turno se i dati del documento ci sono già.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente destinatario (di solito già noto da cliente_risolto, o appena creato con crea_cliente/trova_o_crea_cliente nello stesso turno)" },
+          tipo: { type: "string", enum: ["preventivo", "fattura"] },
+          voci: {
+            type: "array",
+            description: "Le voci del documento — almeno una",
+            items: {
+              type: "object",
+              properties: {
+                descrizione: { type: "string" },
+                quantita: { type: "number", description: "Default 1 se l'utente non la specifica" },
+                prezzo: { type: "number", description: "Prezzo unitario in euro, IVA esclusa" },
+              },
+              required: ["descrizione", "prezzo"],
+            },
+          },
+          aliquota_iva: { type: "number", description: "Percentuale IVA, default 22 se non detta" },
+          condizioni: { type: "string", description: "Termini di pagamento (fattura) o validità (preventivo); se non detto, ometti e verrà usato un default ragionevole" },
+          note: { type: "string" },
+        },
+        required: ["cliente_id", "tipo", "voci"],
+      },
+    },
+    async run(input, ctx) {
+      if (!TIPI_DOCUMENTO.has(input.tipo)) throw fail("Tipo non valido: usa preventivo o fattura");
+      if (!Array.isArray(input.voci) || !input.voci.length) throw fail("Serve almeno una voce con descrizione e prezzo");
+      const cliente = await trovaProprio("clients", input.cliente_id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+
+      const voci = input.voci.map((v) => {
+        if (!eStringaNonVuota(v.descrizione)) throw fail("Ogni voce del documento deve avere una descrizione");
+        if (!eNumero(v.prezzo)) throw fail("Ogni voce del documento deve avere un prezzo");
+        return { desc: v.descrizione.trim(), qta: eNumero(v.quantita) ? v.quantita : 1, prezzo: v.prezzo };
+      });
+
+      const aliquota = eNumero(input.aliquota_iva) ? input.aliquota_iva : 22;
+      const imponibile = voci.reduce((t, v) => t + v.qta * v.prezzo, 0);
+      const iva = (imponibile * aliquota) / 100;
+      const totale = imponibile + iva;
+      const anno = new Date().getFullYear();
+
+      const [conversazione, tuttiDoc, righeProfilo] = await Promise.all([
+        trovaOCreaConversazione(cliente, ctx),
+        db(`messages?select=file_name&event_type=eq.doc&deleted_at=is.null`, { method: "GET" }, ctx.accessToken),
+        db(`profiles?select=business_name,full_name&id=eq.${ctx.user.id}&limit=1`, { method: "GET" }, ctx.accessToken),
+      ]);
+
+      /* Stesso conteggio del frontend (prossimoNumero in index.html),
+         ma sui documenti veri in database invece che sulle sole chat
+         già caricate in memoria: numero progressivo per tipo e anno. */
+      let contatore = 0;
+      (Array.isArray(tuttiDoc) ? tuttiDoc : []).forEach((m) => {
+        try {
+          const d = JSON.parse(m.file_name);
+          if (d && d.tipo === input.tipo && d.anno === anno) contatore++;
+        } catch (err) { /* riga senza dati validi: non conta, non blocca */ }
+      });
+      const numero = `${contatore + 1}/${anno}`;
+      const profilo = Array.isArray(righeProfilo) && righeProfilo[0];
+      const professionista = (profilo && (profilo.business_name || profilo.full_name)) || "Il professionista";
+
+      const dati = {
+        tipo: input.tipo,
+        numero,
+        anno,
+        data: new Date().toLocaleDateString("it-IT"),
+        cliente: cliente.name,
+        voci,
+        imponibile,
+        aliquota,
+        iva,
+        totale,
+        condizioni: eStringaNonVuota(input.condizioni) ? input.condizioni.trim() : (input.tipo === "fattura" ? "30 giorni data fattura" : "30 giorni dalla data di emissione"),
+        note: eStringaNonVuota(input.note) ? input.note.trim() : "",
+        professionista,
+      };
+
+      const titolo = `${input.tipo === "fattura" ? "Fattura" : "Preventivo"} n. ${numero}`;
+      const riassunto = voci.map((v) => v.desc).join(" · ");
+
+      const creato = await db(
+        "messages",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            conversation_id: conversazione.id,
+            sender: "me",
+            event_type: "doc",
+            title: titolo,
+            body: riassunto,
+            amount: totale,
+            file_name: JSON.stringify(dati),
+          }),
+          headers: { Prefer: "return=representation" },
+        },
+        ctx.accessToken
+      );
+      const m = Array.isArray(creato) ? creato[0] : creato;
+
+      let entrataCreata = false;
+      if (input.tipo === "fattura") {
+        try {
+          await db(
+            "incomes",
+            {
+              method: "POST",
+              body: JSON.stringify({ owner_id: ctx.user.id, client_name: cliente.name, description: riassunto.slice(0, 60), amount: totale, due_date: null, status: "attesa" }),
+              headers: { Prefer: "return=representation" },
+            },
+            ctx.accessToken
+          );
+          entrataCreata = true;
+        } catch (err) {
+          console.warn("Fattura creata ma non segnata tra le entrate attese:", err.message);
+        }
+      }
+
+      return {
+        id: m.id,
+        tipo: input.tipo,
+        numero,
+        titolo,
+        cliente: cliente.name,
+        conversation_id: conversazione.id,
+        totale,
+        entrata_creata: entrataCreata,
+      };
+    },
+  },
+
   manda_messaggio: {
     risk: "external",
     categoria: "comunicazione",
@@ -1629,6 +1814,83 @@ const TOOLS = {
       const righe = await db(query, { method: "GET" }, ctx.accessToken);
       const lista = Array.isArray(righe) ? righe : [];
       return { foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at })) };
+    },
+  },
+
+  /* Gianardi, 23/09/2026: "elimina la foto dell'armadio" falliva perché
+     non esisteva nessuno strumento per farlo — EON offriva solo un
+     promemoria. Stesso pattern di elimina_cliente/elimina_impegno:
+     sposta subito nel cestino (recuperabile), nessuna conferma
+     necessaria. Le foto non hanno un nome per essere scelte una per
+     una a voce: senza un id preciso già noto dalla conversazione,
+     elimina la più recente per il cliente/cantiere indicato — è il
+     caso reale che serve davvero (l'ultima foto appena mostrata o
+     caricata), non una selezione fine tra tante foto vecchie. */
+  elimina_foto_cantiere: {
+    risk: "high_impact",
+    annullabileSubito: true,
+    categoria: "azione",
+    schema: {
+      name: "elimina_foto_cantiere",
+      description: "Sposta subito nel cestino (recuperabile) una foto del cantiere già caricata. Usalo quando l'utente chiede di eliminare/cancellare/togliere una foto. Non serve chiedere conferma prima di chiamarlo: è già reversibile.",
+      input_schema: {
+        type: "object",
+        properties: {
+          foto_id: { type: "string", description: "Id della foto esatta da eliminare, se già noto da un recupero recente in questa conversazione (recupera_foto_cantiere). Lascia vuoto per eliminare l'ultima foto caricata per il cliente/cantiere indicato." },
+          cliente_id: { type: "string", description: "Id del cliente a cui è collegata la foto, se noto (di solito da cliente_risolto). Serve solo quando foto_id non è noto, per trovare l'ultima foto di quel cliente." },
+          cantiere_id: { type: "string", description: "Id del cantiere/lavoro specifico, se noto — usalo solo quando il cliente ha più di un lavoro e serve isolare la foto di uno in particolare." },
+        },
+      },
+    },
+    async run(input, ctx) {
+      let fotoId = input.foto_id;
+      if (eStringaNonVuota(fotoId)) {
+        if (!eUuid(fotoId)) throw fail("Id foto non valido");
+      } else {
+        if (eStringaNonVuota(input.cliente_id) && !eUuid(input.cliente_id)) throw fail("Id cliente non valido");
+        if (eStringaNonVuota(input.cantiere_id) && !eUuid(input.cantiere_id)) throw fail("Id cantiere non valido");
+        let query = `cantiere_foto?select=id&deleted_at=is.null&order=created_at.desc&limit=1`;
+        if (eStringaNonVuota(input.cantiere_id)) query += `&cantiere_id=eq.${encodeURIComponent(input.cantiere_id)}`;
+        else if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
+        const righe = await db(query, { method: "GET" }, ctx.accessToken);
+        if (!Array.isArray(righe) || !righe.length) throw fail("Non trovo nessuna foto da eliminare.", 404);
+        fotoId = righe[0].id;
+      }
+      await db(`cantiere_foto?id=eq.${fotoId}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
+      return { id: fotoId, tabella: "cantiere_foto" };
+    },
+  },
+
+  /* Gianardi, 23/09/2026: "dammi il documento X" per un documento
+     dell'impresa (non legato a un cliente: fatture fornitori, DDT,
+     modelli, comunicazioni amministrative — la sezione "Documenti
+     impresa" dell'app, tabella cantiere_documenti) rispondeva sempre
+     "non ho accesso a documenti non collegati a un cliente", perché
+     esisteva solo recupera_documenti_cliente (che legge dalla
+     conversazione di un cliente, tabella messages) — nessuno strumento
+     leggeva mai cantiere_documenti. Stesso pattern di
+     recupera_foto_cantiere: sola lettura, nessuna conferma. */
+  recupera_documenti_impresa: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "recupera_documenti_impresa",
+      description: "Recupera i documenti dell'impresa già caricati nell'app nella sezione 'Documenti impresa' (non collegati a un cliente specifico: es. fatture fornitori, DDT, modelli, comunicazioni amministrative). Usalo quando l'utente chiede un documento e non sta parlando di un cliente in particolare — per i documenti/preventivi/fatture di un cliente usa invece recupera_documenti_cliente.",
+      input_schema: {
+        type: "object",
+        properties: {
+          nome: { type: "string", description: "Parte del nome del documento cercato, se l'utente lo nomina (anche se detto in modo simile/impreciso, es. per dettatura vocale) — usa una singola parola distintiva se il nome completo non da' risultati. Lascia vuoto per i documenti più recenti in generale." },
+          limite: { type: "integer", description: "Quanti documenti restituire, default 10" },
+        },
+      },
+    },
+    async run(input, ctx) {
+      const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
+      let query = `cantiere_documenti?select=id,nome,tipo,url,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
+      if (eStringaNonVuota(input.nome)) query += `&nome=ilike.*${encodeURIComponent(input.nome.trim())}*`;
+      const righe = await db(query, { method: "GET" }, ctx.accessToken);
+      const lista = Array.isArray(righe) ? righe : [];
+      return { documenti: lista.map((d) => ({ id: d.id, titolo: d.nome, tipo: d.tipo, url: d.url, quando: d.created_at })) };
     },
   },
 
@@ -2047,6 +2309,7 @@ async function registraRichiesta(dati) {
     owner_id: dati.user.id,
     tipo: dati.tipo,
     messaggio: dati.messaggio || null,
+    risposta: dati.risposta || null,
     modello: dati.modello || null,
     giri: dati.giri,
     strumenti: dati.strumenti,
@@ -2112,7 +2375,9 @@ function systemPromptAssistente(professione) {
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
-Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato), prova prima recupera_foto_cantiere (foto del cantiere/lavoro) o recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Solo se nessuno dei due è adatto (es. un preventivo mai creato prima, o qualcosa che non è né una foto né un documento in una conversazione cliente) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
+Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" con operazione "mostra" (l'utente vuole vedere/recuperare qualcosa che esiste già), prova prima recupera_foto_cantiere (foto del cantiere/lavoro), recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente) o recupera_documenti_impresa (documenti dell'impresa NON legati a un cliente, es. fatture fornitori, DDT, modelli): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Se la richiesta non nomina né lascia intuire nessun cliente in particolare, prova recupera_documenti_impresa prima di concludere che non è disponibile. Se invece operazione è "crea" e l'oggetto è un preventivo o una fattura mai fatti prima, quella non è una richiesta di RECUPERO ma di CREAZIONE: usa crea_preventivo_o_fattura (vedi le sue istruzioni dettagliate più sotto), mai capacita_non_disponibile. Solo se la risorsa richiesta non è né recuperabile né creabile con nessuno strumento reale (es. un tipo di documento che l'app non gestisce affatto) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere o creare qualcosa che è a sua volta un documento/una risorsa. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
+
+Quando recupera_foto_cantiere o recupera_documenti_cliente vengono usati per MOSTRARE la risorsa direttamente all'utente (non per inoltrarla a qualcun altro con manda_messaggio), non scrivere mai l'url del file nel testo della risposta: l'app la mostra già visivamente in una scheda dedicata, ripetere il link tecnico non serve a nulla e, letto ad alta voce, è solo rumore. In questo caso il testo della risposta resta breve e naturale (es. "Ecco la foto di Zinchini, cosa vuoi fare?"), mai una descrizione di cosa hai recuperato o dell'indirizzo del file.
 
 Quando l'utente usa un riferimento implicito (usa_focus_corrente: "mandalo", "mandale", "quello", "lui/lei") per qualcosa già nominato in questa conversazione, cerca il riferimento in TUTTA la cronologia del turno, non solo nel messaggio immediatamente precedente: anche se nel mezzo c'è stato un turno completamente scollegato (una domanda diversa, un conteggio, un parere), il riferimento implicito torna quasi sempre a quello di cui si parlava PRIMA di quel turno di mezzo — non sparisce solo perché in mezzo si è parlato d'altro. Esempio concreto: turno 1 "il documento di Rossi" (magari senza nemmeno trovarlo, solo nominato), turno 2 una domanda scollegata ("quanti clienti ho"), turno 3 "mandalo" → "lo" è ancora il documento di Rossi del turno 1, non una richiesta generica: non rispondere "a cosa ti riferisci?" quando la cronologia lo dice già chiaramente.
 
@@ -2127,6 +2392,18 @@ Il modo in cui l'utente descrive un impegno o un accordo non va preso sempre all
 Quando la richiesta riguarda più elementi insieme (cardinalita "insieme" in interpreta_richiesta, es. "cancella tutti gli impegni di domani", "elimina tutti i clienti inattivi"), chiama lo strumento delicato corrispondente una volta per ciascun elemento (dopo averli trovati, es. con elenca_appuntamenti/cerca_impegno) esattamente come già fai per crea_impegno con più impegni distinti — il sistema le raggruppa da solo in un'unica richiesta di conferma quando sono chiamate ripetute dello stesso strumento nello stesso turno: non devi (e non puoi) chiedere tu la conferma una alla volta.
 
 REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario con crea_impegno — non solo incontri, anche telefonate, commissioni, pratiche da aggiornare, documenti da preparare, persone da sentire. Se in una frase ci sono più impegni distinti, chiama crea_impegno una volta per ciascuno: non riassumerli, non accorparli, non scartarne nessuno. Questa regola vale SOLO quando l'utente sta davvero chiedendo di registrare qualcosa (operazione "crea", o un impegno nominato dentro un'altra richiesta). NON si applica quando operazione è "consulta" — una domanda aperta, una richiesta di parere o di confronto ("cosa faresti tu?", "conviene prima X o Y?") non diventa MAI un impegno da solo: rispondi con un parere reale e motivato, usando quello che sai (impegni esistenti, clienti, urgenze), esattamente come farebbe un collega esperto a cui viene chiesto un consiglio. Solo se l'utente, DOPO aver sentito il tuo parere, accetta esplicitamente di trasformarlo in un'azione ("ok, allora segnamelo") chiama crea_impegno — mai come iniziativa tua per "coprire" comunque la domanda.
+
+Quando rispondi a una domanda tecnica, un consiglio o un riepilogo (operazione "consulta", o una spiegazione dentro un'altra risposta), vai dritto al punto: secco, concreto, preciso — mai prolisso, mai un elenco puntato lungo con ogni possibile dettaglio quando bastano due righe. L'obiettivo è alleggerire la testa del professionista, non riempirla: una risposta più corta e diretta che lascia all'utente la scelta di chiedere approfondimenti vale sempre più di una risposta completa ma lunga che nessuno legge fino in fondo. Esempio concreto: a "cosa mi consigli di fare domattina" con un programma già pieno, la risposta giusta è una frase tipo "Mattina pensa a X e Y, poi libero fino alle 18 per Z" — non un paragrafo con orari ripetuti e motivazioni per ognuno. Se una domanda tecnica è generica e la risposta dipenderebbe davvero dai dettagli del caso specifico (es. "devo cambiare una stanza, serve la SCIA?" dipende da cosa esattamente si modifica), fai prima la domanda che ti manca per rispondere in modo specifico e risolutivo, invece di dare la regola generale valida per tutti i casi — è più utile una risposta precisa alla situazione vera che una spiegazione completa ma generica.
+
+Un messaggio lungo detto tutto insieme, senza pause nette tra una cosa e l'altra (tipico del parlato/della dettatura), nasconde spesso PIÙ orari distinti anche dentro quella che sembra una sola frase su un solo evento — non fermarti al primo impegno riconosciuto, elenca mentalmente OGNI coppia (cosa, quando) prima di chiamare crea_impegno. Caso frequente: un evento con un orario di inizio PIÙ un orario diverso per prepararsi/arrivare prima ("dovrò essere lì per le 13:40" riferito a una "partita alle 15") sono DUE impegni distinti da segnare separatamente (uno per il promemoria di essere pronto/arrivare alle 13:40, uno per l'evento vero e proprio alle 15), non uno solo — la stessa logica vale per qualunque coppia "preparati entro X" + "evento alle Y". Per gli orari relativi al momento in cui si parla ("fra un'ora", "tra 20 minuti"), calcola SEMPRE partendo dall'ora corrente indicata sopra (mai un'ora arbitraria o quella in cui finisci di rispondere): "fra un'ora" detto alle 14:05 vuol dire le 15:05, non un'altra ora a caso.
+
+Quando l'utente chiede di fare/preparare un preventivo o una fattura, il principio guida è l'immediatezza: se i dati per farlo davvero ci sono già, il documento va creato SUBITO con crea_preventivo_o_fattura, mai rimandato a un promemoria da controllare dopo nell'app. Tre casi distinti:
+1. Nessun dato oltre al cliente e al tipo di documento (es. "mi fai un preventivo a Rossi per cambio porte" senza importi): rispondi chiedendo tu i dati mancanti ("Ok, te lo preparo: mi dai le voci e i prezzi?") — non chiamare crea_preventivo_o_fattura senza almeno una voce con un prezzo.
+2. Il cliente nominato non esiste ancora in anagrafica E mancano ancora i dati del documento: crealo comunque subito con crea_cliente/trova_o_crea_cliente (dillo: "Ok, intanto ti creo il cliente"), poi chiedi i dati del documento nella stessa risposta.
+3. Il cliente non esiste ancora MA l'utente ha già dato tutti i dati nello stesso messaggio (es. "mi fai preventivo Lombardi per porte e finestre da 1200+IVA"): crea il cliente E il documento nello stesso turno, senza fermarti a chiedere nulla — è il caso in cui l'immediatezza conta di più.
+Vale lo stesso, identico, sia per preventivo sia per fattura.
+
+Quando l'utente chiede cosa ha in programma, i suoi impegni, il riepilogo della giornata o cosa fare prima/dopo per oggi, domani o un altro periodo, chiama SEMPRE elenca_appuntamenti per quel periodo prima di rispondere — anche se ti sembra di non avere abbastanza informazioni per rispondere, anche se la domanda ti sembra già risposta in un turno precedente della stessa conversazione: non dare mai per scontato di non sapere cosa c'è già segnato, e non chiedere mai all'utente di ripetertelo. La stessa identica domanda fatta due volte deve dare la stessa risposta, basata sugli stessi dati veri, non una risposta diversa a seconda che tu ti ricordi o meno di controllare.
 
 Sull'orario: se l'utente non dice affatto quando (nessun riferimento di tempo, nemmeno vago), decidi SEMPRE tu senza chiedere nulla, senza eccezioni e senza dubbi: primo giorno utile, alle 08:00 — non lasciare mai un impegno senza data, e non trasformare questo caso in una domanda di conferma. Il criterio per capire se invece serve chiedere non è "la frase suona vaga": è se calcolare un orario concreto richiederebbe SUPPORRE qualcosa sull'intenzione dell'utente che potresti sbagliare (quanto tempo impiegherà, quando esattamente tornerà, cosa intende con "più tardi") — SOLO in quel caso (un riferimento vago/relativo espresso dall'utente, non la sua assenza) NON chiamare subito crea_impegno con un orario indovinato alla cieca: calcola tu una stima concreta e ragionevole partendo dall'ora di adesso (es. "quando rientro in ufficio" ≈ tra un'ora), e chiedi conferma in una risposta di testo — non uno strumento — tipo "Va bene se te lo segno fra un'ora, alle 15:40?". Poi fermati e aspetta: la risposta dell'utente arriverà nello stesso filo di conversazione, come conferma ("sì", "va bene") o come correzione ("no, fai fra due ore", "alle 16 piuttosto") — solo a quel punto chiama crea_impegno con l'orario giusto. Questo dubbio (stimare vs chiedere) esiste SOLO quando l'utente ha detto qualcosa di vago sul tempo: se non ha detto nulla affatto, non c'è alcun dubbio, si applica sempre la prima regola (08:00, primo giorno utile, nessuna domanda).
 
@@ -2174,7 +2451,7 @@ Prima di inoltrare o condividere dati di un cliente (indirizzo, contatto, docume
 
 Non suggerire mai di evitare o "dimenticare" la fatturazione di un lavoro, nemmeno se è l'utente stesso a proporlo o a chiederlo esplicitamente (es. "facciamo senza fattura", "diamoci un taglio, lavoriamo in nero per questo") — non è una scelta su cui EON assiste, in nessun caso. Allo stesso modo, non suggerire mai di eseguire un lavoro che richiede una competenza o un'abilitazione diversa dalla professione dell'utente (es. un impianto elettrico per un idraulico, un intervento strutturale per chi non è abilitato): se la richiesta lo implica, aiuta l'utente a organizzarsi con la persona giusta (es. annotando la necessità o creando un impegno per contattare il tecnico competente), mai a procedere comunque.
 
-Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici. Quando nomini una data o un'ora nella tua risposta, usa sempre uno stile breve e parlato, come lo direbbe un collega ("domani alle 10", "sabato alle 15", "gio 24 alle 9") — MAI il formato lungo e formale ("sabato 19 settembre dell'anno 2026", "giovedì 24 settembre 2026"): quello serve solo come riferimento interno per i tuoi calcoli (vedi la data/ora corrente sopra), non è lo stile con cui parli tu. Ometti sempre l'anno quando parli, a meno che non sia lontano più di qualche mese da oggi.`;
+Quando hai finito, rispondi con una riga di riepilogo breve e concreta di quello che hai fatto, in italiano, senza citare id tecnici. Quando nomini una data o un'ora nella tua risposta, usa sempre uno stile breve e parlato, come lo direbbe un collega ("domani alle 10", "sabato alle 15", "gio 24 alle 9") — MAI il formato lungo e formale ("sabato 19 settembre dell'anno 2026", "giovedì 24 settembre 2026"): quello serve solo come riferimento interno per i tuoi calcoli (vedi la data/ora corrente sopra), non è lo stile con cui parli tu. Ometti sempre l'anno quando parli, a meno che non sia lontano più di qualche mese da oggi. Non descrivere mai a parole un'emoji o un simbolo che usi o che hai in mente (es. non scrivere mai "faccina sorridente", "emoji del pollice in su"): se vuoi usarla scrivila direttamente com'è (😊, 👍), altrimenti non nominarla affatto — descriverla è sempre sbagliato, in ogni caso.`;
 
   if (professione === "edile") prompt += `\n\n${promptPackEdile()}`;
   if (professione === "idraulico") prompt += `\n\n${promptPackIdraulico()}`;
@@ -2428,7 +2705,7 @@ async function handleAssistant(req, res, user, accessToken) {
        parte, e una scrittura non attesa rischierebbe di non arrivare mai
        (stesso motivo per cui registraOperazione, sopra, è sempre awaited). */
     await registraRichiesta({
-      user, tipo: tipoTurno, messaggio: body.messaggio, modello: modelloUsato, giri: giriUsati,
+      user, tipo: tipoTurno, messaggio: body.messaggio, risposta: risposta && risposta.testo, modello: modelloUsato, giri: giriUsati,
       strumenti: azioniEseguite.map((a) => a.tool), stato: risposta && risposta.stato,
       durataMs: Date.now() - inizioTurno,
     });
@@ -3437,6 +3714,71 @@ async function handleTranscribe(req, res) {
   return send(res, 200, { text: (out.text || "").trim() });
 }
 
+/* Gianardi, 23/09/2026 (punto 33): al primo accesso alla sezione
+   Documenti, chi non ha ancora impostato un formato può scegliere di
+   caricare la foto di un documento che usa già (fattura/preventivo/
+   carta intestata cartacea) invece di compilare la Carta intestata a
+   mano da zero — EON legge i dati dell'azienda dalla foto (visione di
+   Claude) e li usa per pre-compilare il modulo, che l'utente rivede e
+   salva come sempre. Nessun salvataggio automatico qui: solo
+   estrazione, la scrittura vera passa sempre dal salvataggio esistente
+   della Carta intestata (stesso principio di "mai scrivere dati senza
+   conferma dell'utente" già seguito altrove). */
+async function handleLeggiIntestazioneDaFoto(req, res) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
+
+  const body = await readBody(req);
+  const base64 = body.immagine_base64;
+  const mediaType = body.media_type;
+  if (!eStringaNonVuota(base64)) throw fail("Campo 'immagine_base64' mancante");
+  const TIPI_IMMAGINE_VALIDI = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+  if (!TIPI_IMMAGINE_VALIDI.has(mediaType)) throw fail("Formato immagine non supportato: usa jpeg, png, webp o gif");
+  const MAX_LUNGHEZZA_BASE64 = 6 * 1024 * 1024; // margine prudente sotto il limite del body su Vercel
+  if (base64.length > MAX_LUNGHEZZA_BASE64) throw fail("Immagine troppo grande: riprova con una foto più piccola", 413);
+
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 400,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+            { type: "text", text: "Questa è la foto di un documento aziendale italiano (fattura, preventivo o carta intestata). Leggi SOLO i dati dell'azienda che emette il documento (non del cliente destinatario) e rispondi SOLO con un oggetto JSON, senza nessun altro testo, con questi campi: {\"nome_azienda\": string o null, \"indirizzo\": string o null, \"piva\": string o null, \"telefono\": string o null, \"email\": string o null}. Usa null per ogni campo che non riesci a leggere con certezza nella foto: non inventare mai un dato che non vedi scritto chiaramente." },
+          ],
+        }],
+      }),
+    });
+  } catch (netErr) {
+    throw fail("Non riesco a contattare l'AI: " + netErr.message, 502);
+  }
+  if (!r.ok) {
+    let motivo = "";
+    try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
+    throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+  }
+  const data = await r.json();
+  const testo = (data.content || []).map((b) => b.text || "").join("").trim();
+  let estratti;
+  try {
+    estratti = JSON.parse(testo.replace(/```json|```/g, "").trim());
+  } catch (err) {
+    throw fail("Non sono riuscita a leggere i dati dalla foto: riprova con un'altra foto, più leggibile", 502);
+  }
+  return send(res, 200, {
+    nome_azienda: estratti.nome_azienda || null,
+    indirizzo: estratti.indirizzo || null,
+    piva: estratti.piva || null,
+    telefono: estratti.telefono || null,
+    email: estratti.email || null,
+  });
+}
+
 /* Named export solo per i test automatici (eval/backend.test.js): sono
    funzioni pure (nessuna chiamata di rete/database), utili da
    verificare in isolamento senza un account Supabase né una chiave
@@ -3496,6 +3838,7 @@ export default async function handler(req, res) {
     if (action === "analizza_messaggio") return await handleAnalizzaMessaggio(req, res, user, accessToken);
     if (action === "rispondi_richiesta_cliente") return await handleRispondiRichiestaCliente(req, res, user, accessToken);
     if (action === "transcribe") return await handleTranscribe(req, res);
+    if (action === "leggi_intestazione_da_foto") return await handleLeggiIntestazioneDaFoto(req, res);
     if (action === "seed") return await handleSeed(req, res, user, accessToken);
     if (resource) return await handleResource(req, res, resource, user, accessToken);
 

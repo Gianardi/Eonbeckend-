@@ -2078,6 +2078,20 @@ da fare da Gianardi:
    c'è ancora abbastanza uso reale da cui imparare abitudini vere) — da
    riprendere quando ci sarà più uso reale su cui basarsi, non ora.
 
+6. **DA FARE — Velocità vera della risposta, non solo percepita
+   (18/09/2026).** Nato dal primo test reale del tester: oggi ogni
+   richiesta nuova fa 2 giri separati con l'AI (interpreta_richiesta
+   forzato, poi l'azione vera) — verificato sul log reale, 3,8 secondi
+   per un "segna un appuntamento" su Haiku. L'idea: lasciare che il
+   modello dichiari l'intento e chiami subito l'azione nello stesso
+   turno, invece di due turni separati — dimezzerebbe circa il tempo
+   reale. Da fare con calma, non di fretta: tocca un meccanismo di
+   sicurezza costruito apposta (forzare interpreta_richiesta PRIMA di
+   ogni altra scelta), che ha già evitato errori reali in queste
+   settimane — richiede test approfonditi (`eval/live-check.js` per
+   intero, non solo un caso) prima di essere sicuri che non introduca
+   regressioni sulla qualità delle risposte.
+
 ## Visione: EON come "mente" personalizzata del professionista (17/09/2026)
 
 Gianardi, testuale: "EON deve essere la mente del professionista ed
@@ -2153,6 +2167,77 @@ da riprendere pezzo per pezzo (prima lo stile di scrittura dai
 messaggi reali, probabilmente il passo più semplice e già fattibile con
 i dati che abbiamo).
 
+## Idea di Gianardi: EON impara dalle risposte tecniche già date (21/09/2026)
+
+Nata da una domanda concreta di Gianardi: oggi, se un utente fa una
+domanda tecnica/generale (es. "quando è valida una delibera
+condominiale"), EON risponde attingendo alla conoscenza generale del
+modello (Claude) — nessuna base di conoscenza costruita da noi, nessuna
+verifica contro una fonte giuridica aggiornata, e un costo reale
+(chiamata vera all'AI) ogni singola volta, anche per domande già fatte
+prima da altri.
+
+Idea di Gianardi ("principio democratico dell'apprendimento graduale"):
+salvare le risposte già date e riusarle per domande simili future,
+invece di richiamare sempre Claude da capo — EON che "impara" dalle
+proprie stesse risposte nel tempo. Tecnica reale e nota (si chiama
+cache semantica: prima di rispondere, si controlla se una domanda
+abbastanza simile ha già una risposta salvata), non ancora costruita.
+
+**Il rischio reale da risolvere prima di costruirla, non dopo**: oggi un
+errore su una domanda tecnica è isolato (capita una volta). Se si
+riusano risposte salvate senza verificarle, un errore diventerebbe
+permanente e si ripeterebbe identico per tutti gli utenti che fanno una
+domanda simile — più pericoloso, non più sicuro. La parte davvero
+irrisolta (collegata al punto 1 dei "buchi del settore" sopra, "nessuno
+sa aggiornare bene un ricordo vecchio diventato sbagliato"): capire
+QUANDO una risposta salvata non è più affidabile e va rifatta, invece
+di fidarsene per sempre.
+
+**Prerequisito**: prima di costruire questa cache, ha senso risolvere
+il problema base già identificato sopra — dare a EON un modo di
+verificare (o almeno segnalare onestamente il limite di) una risposta
+tecnica, invece di rispondere sempre e solo dalla conoscenza generale
+del modello senza nessun controllo.
+
+Non fattibile ora con solo 2 utenti veri (poco traffico, poco risparmio
+reale) — da riprendere quando ci sarà più uso reale, insieme alla
+visione della "mente personalizzata" sopra.
+
+**Seguito del ragionamento (22/09/2026)**: Gianardi ha chiesto come
+rendere questa idea innovativa invece di una semplice imitazione delle
+big tech, restando fedele al suo "principio democratico". Ragionato
+insieme fino a una proposta concreta, poi Gianardi stesso ha fatto un
+collegamento azzeccato con **Wikipedia** — il miglior esempio reale su
+grande scala di questo stesso principio applicato.
+
+**La proposta**: invece di una scadenza fissa decisa da noi (es. "ogni
+6 mesi rifai la domanda"), usare gli UTENTI STESSI come segnale
+collettivo di quando una risposta salvata non è più valida — se più
+professionisti diversi, in momenti diversi, la correggono o la mettono
+in dubbio (non solo un singolo caso isolato), quello fa perdere fiducia
+a EON nella risposta condivisa, finché non decide di richiamare Claude
+per aggiornarla davvero. Si collega direttamente all'idea già segnata
+sopra di "imparare dalle correzioni degli utenti" (visione mente
+personalizzata) — la stessa correzione servirebbe sia a quel singolo
+utente sia, se ripetuta da altri, ad abbassare la fiducia sulla
+risposta condivisa per tutti.
+
+**Cosa prendere in prestito dal modello Wikipedia, in concreto**:
+1. Più correttori indipendenti che segnalano la stessa cosa = segnale
+   più forte di un singolo caso isolato (il cuore della proposta sopra)
+2. Storico delle modifiche: sapere QUANDO e PERCHÉ una risposta salvata
+   è cambiata, non sovrascriverla in silenzio
+3. Marcare come "non verificata da una fonte ufficiale" le risposte
+   tecniche/legali finché nessuno le conferma davvero (come il
+   "servono fonti" di Wikipedia sulle affermazioni non referenziate)
+4. Trattare con più cautela le risposte sui temi più delicati/a rischio
+   (legali, normativi con conseguenze reali) — mai fidarsi ciecamente
+   della cache lì, come Wikipedia protegge le pagine più controverse
+
+Nessuna implementazione iniziata — resta un'estensione dell'idea sopra,
+da costruire insieme quando si arriverà a quel punto della roadmap.
+
 ## Per il lancio definitivo: app + browser, due cose distinte (17/09/2026)
 
 Discusso con Gianardi: quello che c'è oggi in `index.html` è stato
@@ -2224,3 +2309,448 @@ non sono mai arrivate agli utenti veri.
 
 Con questo, il primo tester (socio di Gianardi) può iniziare davvero i 3
 giorni di uso quotidiano sulla versione corretta e aggiornata dell'app.
+
+## Primi due bug reali trovati dal tester (18/09/2026, PR #68)
+
+A pochi minuti dall'inizio del test vero, segnalati da Gianardi:
+
+1. **Date lunghe e formali** nelle risposte di EON ("domani sabato 19
+   settembre dell'anno 2026" invece di "domani alle 10"): copiava lo
+   stesso stile lungo dato come riferimento interno in `dataOraCorrente()`.
+   Corretto con un'istruzione esplicita nel prompt: sempre uno stile
+   breve e parlato quando EON parla, il formato lungo resta solo per i
+   suoi calcoli interni.
+2. **"Sembra lento/non ha capito"**: verificato sul log reale
+   (`ai_request_log` di produzione) che la richiesta ("domani mattina
+   ore 11:00 appuntamento con Fregoli") ha impiegato 3,8 secondi su
+   Haiku — il costo noto dell'architettura a 2 giri (interpreta_richiesta
+   forzato, poi l'azione vera), non un rallentamento nuovo né legato al
+   ragionamento esteso di oggi (quello riguarda solo Sonnet). La vera
+   causa: il tester ha usato l'Hub "Racconta la giornata", dove l'avviso
+   di ricezione immediato (stratagemma del 17/09) finiva su una pagina
+   nascosta sotto la schermata dell'Hub — invisibile. Corretto: l'Hub
+   ora mostra subito il testo esatto ricevuto al posto del messaggio
+   generico "Sto organizzando…".
+
+**Discussione aperta con Gianardi su come rendere la risposta vera più
+veloce** (non solo la percezione): l'architettura a 2 giri (classifica
+poi esegue) potrebbe diventare 1 giro solo, se il modello dichiara
+l'intento e chiama subito l'azione nello stesso turno invece che in due
+turni separati — dimezzerebbe circa il tempo reale. Non fatto ora: tocca
+un meccanismo di sicurezza costruito apposta (il forzare
+interpreta_richiesta PRIMA di ogni altra scelta, che ha già evitato
+errori reali in queste settimane) e richiederebbe test approfonditi
+prima di essere sicuro che non introduca regressioni. Da riprendere con
+calma, non deciso di fretta durante un test in corso.
+
+Verificato: `router.test.js` 62/62, `backend.test.js` 18/18. Merge in
+produzione confermato (PR #68, unita da Gianardi).
+
+## Scenari di valore economico di EON (22/09/2026)
+
+Discussione con Gianardi, non tecnica ma da tenere a mente per la
+direzione del progetto: quanto potrebbe valere EON a due traguardi di
+clienti paganti, e se potrebbe interessare a un fondo di investimento.
+Metodo usato: multiplo del fatturato ricorrente annuo (ARR), lo standard
+per valutare un software in abbonamento (SaaS) — il prezzo mensile non
+è ancora stato deciso, quindi sono scenari a 3 ipotesi di prezzo.
+
+**A 500 clienti paganti** (traguardo più vicino, ancora fascia
+"progetto agli inizi"):
+
+| Prezzo/mese | Fatturato annuo | Valore stimato (3x-8x ARR) |
+|---|---|---|
+| €20 | €120.000 | €360.000 – €960.000 |
+| €40 | €240.000 | €720.000 – €1.920.000 |
+| €60 | €360.000 | €1.080.000 – €2.880.000 |
+
+A questa scala, realisticamente interessa più a business angel o
+piccoli fondi pre-seed/seed italiani (o un investitore strategico del
+settore) che a un fondo istituzionale grande — quello che conta di più
+non è il numero assoluto ma la velocità di crescita e quanti clienti
+restano nel tempo.
+
+**A 10.000 clienti paganti** (azienda vera, non più "agli inizi"):
+
+| Prezzo/mese | Fatturato annuo | Valore stimato (5x-10x ARR) |
+|---|---|---|
+| €20 | €2.400.000 | €12M – €24M |
+| €40 | €4.800.000 | €24M – €48M |
+| €60 | €7.200.000 | €36M – €72M |
+
+A questa scala sì, con una crescita solida e pochi clienti persi, è il
+livello che interessa davvero a fondi seri (Serie A/B) — le software
+verticali con l'AI dentro sono oggi una categoria seguita con molto
+interesse dagli investitori, il che potrebbe giustificare multipli
+anche più alti della media se la storia di crescita è convincente.
+
+**Punto a favore di EON, strutturale**: un professionista che affida a
+EON calendario, clienti e dati ha un costo di uscita naturale alto (non
+cambia facilmente assistente) — di solito significa pochi clienti persi
+nel tempo, un dato che gli investitori guardano con attenzione.
+
+Nessuna azione da fare ora — solo un riferimento per orientare le
+decisioni future (prezzo, crescita, quando eventualmente cercare
+investitori).
+
+## Card personalizzabili e cartelle libere per il Piano Free (22/09/2026)
+
+Idea di Gianardi, discussa e definita insieme. Due parti distinte:
+
+1. **Per i 4 mestieri (Idraulico, Edile, Amministratore, Avvocato)**: le
+   card restano con i loro nomi di default come oggi (es. "Cliente
+   cantiere", "Appunti", "Documenti", "Foto cantiere"), ma il
+   professionista potrà rinominarle se vuole. Modifica contenuta: solo
+   l'etichetta cambia, cosa fa e contiene ogni card resta invariato.
+
+2. **Per la sezione generica ("Organizza la giornata e aumenta la
+   produttività", Piano Free)**: cambiamento più grande — l'utente
+   parte da cartelle vuote e può crearne di sue da zero, dandogli il
+   nome che vuole (es. "Casa", "Progetto ristrutturazione", "Palestra").
+
+   **Disegno concordato per il contenuto delle cartelle** (dopo
+   ragionamento insieme, per non duplicare lavoro già fatto): le
+   cartelle sono **categorie personalizzate per gli appunti e gli
+   impegni già esistenti**, non un secondo tipo di entità con dati/
+   foto/documenti propri (quello duplicherebbe l'architettura già
+   costruita per i clienti dei professionisti — molto più lavoro senza
+   un vero bisogno). Nessun limite al numero di cartelle creabili.
+
+   **La parte davvero interessante da costruire bene**: collegare le
+   cartelle libere al linguaggio naturale — se l'utente dice a voce
+   "segnami in Casa che devo chiamare l'idraulico", EON deve capire da
+   solo che "Casa" è una cartella che l'utente ha già creato, non un
+   tipo fisso come "cliente" o "impegno". È un problema di riconoscimento
+   più difficile delle categorie fisse già gestite oggi (che sono un
+   insieme chiuso e noto in anticipo), perché le cartelle sono libere e
+   decise dall'utente.
+
+   Non è un'idea "mai vista" (cartelle personalizzate esistono già in
+   Notion, Trello, Google Keep, Todoist — pattern collaudato, non
+   un'invenzione) — l'eventuale originalità sta nel collegarle bene al
+   riconoscimento del linguaggio naturale di EON, non nel concetto di
+   cartella in sé.
+
+Nessuna implementazione iniziata. Da riprendere con un disegno tecnico
+vero (nuova colonna/tabella per la categoria su appunti/impegni, nuova
+UI per crearle/rinominarle, e il riconoscimento nel prompt di EON).
+
+**Aggiunta di Gianardi, stesso giorno**: quando un utente entra
+nell'app la prima volta, serve una schermata/pagina che spieghi come
+funziona EON in generale — e in particolare, per chi è nella sezione
+generica, che le cartelle si possono personalizzare (altrimenti non è
+un concetto ovvio senza spiegazione). Da costruire insieme al punto
+sopra, non prima: ha senso solo una volta che la personalizzazione
+esiste davvero.
+
+## Lista di test di Gianardi (23/09/2026) — mandata prima della fine
+settimana, non ancora divisa dal tester/socio/amministratore
+
+Gianardi ha iniziato a mandare le sue note di test in anticipo (non
+c'era motivo di aspettare). Solo documentazione per ora, nessun codice
+toccato. Organizzato per categoria per poterci lavorare un pezzo alla
+volta, con autorizzazione ad ogni intervento come da regola permanente
+di Gianardi.
+
+### A. Bug veri (comportamento sbagliato rispetto a oggi)
+
+1. **FATTO (23/09/2026).** ~~Correzione vocale di un nome cliente non
+   funziona bene.~~ Esempio reale: detto "Franci baicchi, 33384393,
+   impianto elettrico", EON ha capito e salvato "Franco Bike"; ripetuto
+   il nome corretto al microfono, non veniva trattato come correzione.
+   Causa: il meccanismo di correzione già esistente diceva di ignorare
+   il contesto recente quando il nuovo messaggio "nomina una persona
+   diversa" — ma un nome frainteso dal microfono è quasi per
+   definizione diverso nel testo. Aggiunto un caso esplicito: un nome
+   da solo, subito dopo aver creato un cliente, è quasi sempre una
+   ripetizione per correggere il nome frainteso, anche se sembra molto
+   diverso da quello salvato.
+2. **FATTO (23/09/2026).** ~~Multi-appuntamento da un solo messaggio
+   non gestito.~~ Esempio reale, un solo messaggio vocale: "Fra un'ora
+   incontro con Giulia. Domattina ore 12 colazione con dottor Righi poi
+   pomeriggio partita alle 15 e dovrò essere lì per le 13:40. Portare
+   distinta." Aggiunta un'istruzione esplicita: un messaggio lungo
+   detto tutto insieme nasconde spesso più orari distinti anche dentro
+   una frase che sembra su un solo evento — un "orario di arrivo/
+   preparazione" più un "orario dell'evento vero" sono due impegni
+   distinti, non uno; gli orari relativi ("fra un'ora") vanno sempre
+   calcolati dall'ora corrente indicata nel prompt.
+3. **FATTO (23/09/2026).** ~~Riferimento recente a un cliente non
+   riconosciuto in un comando successivo.~~ Causa reale trovata,
+   diversa da quella ipotizzata all'inizio: non era un problema di
+   "contesto di conversazione" — cerca_impegno cercava "dottore" come
+   sottostringa letterale del titolo salvato ("Dottor Righi"), e
+   "dottore" non è una sottostringa di "Dottor Righi" (manca la "e"
+   finale): la ricerca falliva anche a colpo sicuro, a prescindere dal
+   contesto. Aggiunto un secondo tentativo con lo stesso confronto
+   "parole quasi uguali" (Levenshtein) già usato per i clienti, quando
+   la sottostringa esatta non trova nulla.
+4. **FATTO (23/09/2026).** ~~Il microfono nella sezione "appunti" non
+   aggiunge l'appunto.~~ Causa reale: parlare riempiva solo il campo di
+   testo, serviva poi un secondo tocco separato su "invio" per salvare
+   — diverso da ogni altro microfono dell'app, dove parlare esegue
+   subito l'azione. Ora fermare l'ascolto (secondo tocco sul
+   microfono) salva direttamente.
+5. **FATTO (23/09/2026).** ~~Etichetta "Fatto" mostrata quando non è
+   stato fatto nulla.~~ Esempio: a "Ciao" EON rispondeva bene ma con
+   l'etichetta "Fatto" sopra, senza senso quando non c'è stata nessuna
+   azione. Ora l'etichetta compare solo se è stato chiamato almeno uno
+   strumento (anche di sola lettura); su una risposta solo
+   conversazionale resta vuota.
+6. **FATTO (23/09/2026).** ~~Calendario non ordinato
+   cronologicamente.~~ Un appuntamento delle
+   18:30 compare prima di appuntamenti del mattino nella stessa vista.
+   Confermato con screenshot da Gianardi (23/09/2026): succede sia
+   nella card "Cosa devo fare oggi" in home sia nella pagina Calendario
+   vera e propria — in entrambe l'ordine mostrato è 18:30, 08:00,
+   09:00, 18:00 (ordine di creazione, non di orario). Dettaglio
+   diagnostico importante: il toast di conferma che EON genera da solo
+   dopo aver creato i 4 impegni li elenca invece nell'ordine corretto
+   (08:00, 09:00, 18:00, 18:30) — quindi il problema NON è nei dati né
+   nella logica dell'AI, è solo nel rendering delle due liste in
+   `index.html`, che va ordinato per orario prima di disegnare le
+   card.
+7. **FATTO (23/09/2026).** ~~Domanda ripetuta = risposte diverse.~~ La
+   stessa domanda esatta fatta due volte ha dato due risposte diverse
+   ("programma di domani" — la prima volta "dovrei sapere cosa hai in
+   programma" pur avendo tutto già segnato). Causa probabile:
+   elenca_appuntamenti era descritto solo come controllo preliminare
+   prima di aggiungere impegni, non come lo strumento per rispondere a
+   "cosa ho in programma" — a volte il modello non lo chiamava affatto.
+   Rafforzata la descrizione del tool e aggiunta una regola esplicita:
+   chiamarlo sempre prima di rispondere su impegni/programma di un
+   periodo, mai dare per scontato di non saperlo.
+8. **FATTO (23/09/2026).** ~~Recupero documenti "impresa" (non legati
+   a un cliente) non funziona.~~ Causa reale: esisteva solo
+   recupera_documenti_cliente (legge dalla conversazione di UN
+   cliente), nessuno strumento leggeva mai la tabella
+   cantiere_documenti dietro la sezione "Documenti impresa". Aggiunto
+   il nuovo tool recupera_documenti_impresa, con ricerca per nome
+   parziale; si apre nella stessa scheda a card già usata per i
+   documenti cliente.
+9. **Eliminazione di una foto non possibile.** Chiesto "elimina la
+   foto dell'armadio", EON risponde di non avere questa funzione. Va
+   aggiunta la possibilità di eliminare foto — non solo in
+   cantiere/cliente-cantiere, ma anche in appunti e documenti.
+10. **FATTO (23/09/2026).** ~~Lettura ad alta voce del link tecnico
+    della foto.~~ Aggiunta un'istruzione nel prompt di sistema: quando
+    si mostra una risorsa già visibile in una scheda dell'app (non
+    quando la si inoltra con manda_messaggio), il testo/la voce di EON
+    restano brevi e naturali, mai con l'url del file.
+
+### B. Comportamento dell'AI da correggere (stile delle risposte)
+
+11. **FATTO (23/09/2026).** ~~Non deve mai descrivere a parole
+    faccine/emoji/simboli nella sua risposta.~~ Aggiunta un'istruzione
+    esplicita nel prompt.
+12. **FATTO (23/09/2026), da riverificare in produzione.** ~~Le date
+    vanno sempre dette in modo breve e parlato.~~ L'istruzione era già
+    corretta nel prompt dal 18/09 e resta invariata — segnalato di
+    nuovo da Gianardi, ma nessuna causa nuova trovata: probabile che il
+    test fosse su una versione di produzione precedente al merge di
+    quella correzione. Da confermare col prossimo test.
+13. **FATTO (23/09/2026).** ~~Risposte tecniche troppo prolisse.~~
+    Aggiunta una regola di concisione esplicita per le risposte
+    "consulta"/di parere, con l'obiettivo dichiarato da Gianardi della
+    "pulizia mentale".
+14. **FATTO (23/09/2026).** ~~Su una domanda tecnica generica, EON
+    dovrebbe prima chiedere il dettaglio specifico mancante.~~ Stessa
+    regola del punto 13: quando la risposta dipenderebbe dai dettagli
+    del caso specifico, fare prima la domanda di chiarimento invece
+    della regola generale.
+15. **FATTO (23/09/2026).** ~~Riepiloghi/consigli operativi troppo
+    lunghi.~~ Stessa regola dei punti 13/14, con l'esempio esatto di
+    Gianardi ("mattina pensa a X e Y, poi libero fino alle 18...")
+    incluso nel prompt come modello di risposta corretta.
+16. **FATTO (23/09/2026).** ~~Preventivi/fatture: EON deve poterli
+    creare subito.~~ Il punto più importante della sezione. Nuovo tool
+    crea_preventivo_o_fattura, stessa identica logica/formato già usata
+    dalla creazione manuale in chat — un documento creato da EON è
+    indistinguibile, per il resto dell'app, da uno compilato a mano.
+    Implementati tutti e tre i casi descritti da Gianardi (dati
+    mancanti → chiedili prima; cliente inesistente + dati mancanti →
+    crea il cliente e poi chiedi; cliente inesistente + dati già dati
+    → crea cliente e documento insieme, subito). Si apre nella stessa
+    scheda a card già usata per i documenti recuperati. Principio
+    dell'immediatezza annotato nel prompt come criterio guida generale.
+
+### C. Piccole funzionalità mancanti (UI/UX)
+
+17. **FATTO (23/09/2026).** ~~Caricamento foto/file dalla galleria.~~
+    Causa: solo "foto cantiere" forzava la fotocamera
+    (capture="environment"); documenti e allegati chat non avevano
+    questa restrizione. Rimosso l'attributo.
+18. **FATTO (23/09/2026), chiarimento.** ~~Rispondere solo a voce a una
+    domanda di chiarimento.~~ Il campo di testo era già sempre
+    scrivibile (nessun blocco tecnico trovato) — non era chiaro che si
+    potesse scrivere invece di parlare. Messaggio aggiornato per
+    dirlo esplicitamente.
+19. **PARZIALE (23/09/2026).** Riconoscimento per nome simile
+    implementato per i documenti impresa (ricerca per nome parziale,
+    punto 8/32) — un vero riconoscimento "dal contenuto del documento"
+    (leggere il file, non solo il suo nome) è una funzionalità più
+    grande, non iniziata: richiederebbe analisi del contenuto/OCR, da
+    progettare a parte quando servirà davvero.
+20. **FATTO (23/09/2026).** ~~Icona "+" al posto della freccia in su~~
+    nel campo di input sotto il microfono, in "cliente cantiere" e
+    "appunti".
+21. **FATTO (23/09/2026).** ~~Tasto "+" accanto alla scritta
+    "Documenti"~~, per aggiungere un documento senza scendere al
+    pulsante grande.
+22. **FATTO (23/09/2026).** ~~Foto di cantiere organizzate in una
+    "card" per cliente~~, col nome sopra e un "+" per aggiungere altre
+    foto senza rifare il tag; le foto non ancora assegnate restano in
+    un gruppo "Da assegnare" a parte.
+23. **Già presente.** Le opzioni di invio (EON attiva, Email/WhatsApp
+    disabilitate in attesa del Communication Hub) c'erano già sulla
+    scheda foto (creaRigaCanaliInvio) — nessuna modifica necessaria.
+24. **FATTO (23/09/2026).** ~~Piccolo microfono accanto a una foto
+    recuperata~~ per dire a voce cosa farne — nuovo bottone
+    riutilizzabile creaMicRapido(), un solo colpo di ascolto, invia il
+    comando a EON con il contesto della foto/cliente.
+25. **FATTO (23/09/2026).** ~~Registro AI: mostrare anche la
+    risposta.~~ Aggiunta la colonna "risposta" a ai_request_log
+    (migrazione additiva da applicare in produzione — vedi nota sotto)
+    e resa cliccabile ogni riga del registro.
+26. **FATTO (23/09/2026).** ~~Card per le risposte lunghe/
+    discorsive.~~ Sopra una soglia di lunghezza, e solo su risposte
+    puramente conversazionali (nessuna azione eseguita), la risposta
+    si apre nella scheda grande e chiudibile invece che nel toast (che
+    sparisce da solo dopo 8 secondi).
+27. **FATTO (23/09/2026).** ~~Cliccare sul riquadro "Cosa devo fare
+    oggi"~~ ora apre la stessa lista nella scheda grande, sola
+    lettura, senza interferire con le spunte dei singoli impegni.
+28. **Rimandato al disegno già previsto.** Nomi di cartelle/card
+    modificabili da ogni utente — stessa idea già segnata sopra in
+    "Card personalizzabili e cartelle libere per il Piano Free
+    (22/09/2026)": fattibile, ma da costruire insieme a quel disegno
+    tecnico (nuova colonna/tabella, UI per rinominare), non come
+    modifica isolata.
+29. **FATTO (23/09/2026).** ~~Freccia "indietro" più grande e più
+    evidente~~ (da 13px a 20px, testo più marcato, tocco più comodo)
+    in ogni pagina dell'app.
+
+### D. Funzionalità nuove più grandi (da progettare a parte)
+
+30. **Integrazione meteo** — EON oggi non ha accesso alle previsioni.
+31. **Integrazione mappe/traffico** — EON oggi non sa calcolare tempi
+    di percorrenza reali tra due indirizzi/cantieri, serve un servizio
+    mappe che consideri anche il traffico/le code in tempo reale.
+32. **FATTO (23/09/2026), stesso lavoro del punto 8.** ~~Documenti
+    aziendali recuperabili da EON.~~ Nuovo tool
+    recupera_documenti_impresa, si apre nella stessa scheda a card già
+    usata in home.
+33. **FATTO (23/09/2026).** ~~Primo formato personalizzato per
+    fattura/preventivo/lettera/carta intestata/cartello fine
+    lavori.~~ Al primo accesso a Documenti senza Carta intestata
+    salvata, propone la scelta "Scegli il formato da una foto"
+    (visione di Claude legge nome azienda/indirizzo/P.IVA/telefono/
+    email da una foto e pre-compila il modulo, mai un salvataggio
+    automatico) o "Usa il modello di EON" (prosegue con il default già
+    esistente).
+34. **FATTO (23/09/2026).** ~~Possibilità per gli utenti di mandare un
+    feedback.~~ Nuova voce "Manda un feedback" nel menu, nuova tabella
+    feedback (migrazione additiva da applicare in produzione).
+
+**Restano aperti in questa sezione, servono decisioni di Gianardi
+prima di poter procedere**: 30 (meteo) e 31 (mappe/traffico) —
+entrambi richiedono un servizio esterno a pagamento: serve scegliere
+il fornitore (es. OpenWeather per il meteo, Google Maps o alternative
+per le mappe) e chi ne copre il costo, prima che si possano collegare.
+
+### E. Redesign UI/UX (grafica e layout)
+
+35. **FATTO (23/09/2026).** ~~Home page: il logo "EON" non era ben
+    proporzionato.~~ Era più grande e vistoso (32px, cerchio a
+    gradiente) del titolo vero della pagina sotto (22px) — un marchio
+    permanente deve restare un riferimento discreto, non l'elemento
+    dominante. Ridotto a 14.5px, colore pieno invece del gradiente,
+    unito alla data in un'unica riga.
+36. **FATTO (23/09/2026).** ~~Calendario da semplificare
+    visivamente.~~ Il rilievo (bordo spesso, ombra) era identico per
+    ogni riga, oggi o no — ora riservato solo a "oggi"; i pulsanti
+    Scrivi/Chiama/Elimina si vedono solo toccando la riga invece di
+    restare sempre visibili raddoppiando l'altezza di ogni impegno.
+37. **FATTO (23/09/2026).** ~~Pulizia del menu.~~ Eliminate le 4 card
+    grosse; il cruscotto azienda è diventato "La tua azienda" (voce
+    piccola che apre/chiude gli stessi 4 dati sul posto); eliminate
+    tutte le voci tranne le quattro indicate (più EON AI, ricontrollato
+    e mantenuto perché non era un doppione come sembrava all'inizio, e
+    la nuova voce feedback).
+38. **FATTO (23/09/2026), stesso lavoro del punto 26.** ~~Card più
+    curate per le risposte "informative".~~ Le risposte discorsive
+    (spiegazioni, pareri — es. "cos'è la carta intestata") si aprono
+    già nella scheda grande e chiudibile invece che nel toast, sopra
+    una soglia di lunghezza.
+
+### F. Architettura app: navigazione tra profesioni e account
+
+39. **FATTO (23/09/2026), confermato con Gianardi prima di
+    costruirlo.** ~~Oggi non c'è modo di uscire da una sezione
+    professione.~~ Nuova voce "Cambia professione" nel menu: apre lo
+    stesso selettore usato in fase di iscrizione, cambia solo
+    etichette e sezioni specifiche (mai i dati veri, che restano gli
+    stessi qualunque professione sia selezionata — applyProfession
+    chiamata sempre con skipDemoData=true).
+40. **Aperto, serve una decisione di Gianardi prima di procedere.**
+    Separazione dei dati per professione, quando l'app sarà ufficiale.
+    Oggi con una sola email si accede a tutte le professioni (comodo
+    per i test attuali). A regime, come nelle grandi app, una
+    registrazione deve valere per la sola professione scelta
+    all'iscrizione: se un account è registrato su "edile", i clienti/
+    foto/documenti che aggiunge finiscono solo lì, mai anche in
+    idraulico/avvocato/altre sezioni. È un cambiamento di architettura
+    vero (riguarda login/account), non un semplice fix — da
+    pianificare a parte quando si deciderà di implementarlo.
+41. **Sezione generica "per chi vuole aumentare la propria
+    produttività"** (per chi non ha una professione specifica tra le
+    4, uso quotidiano/personale) — dubbio aperto di Gianardi su cosa
+    metterci davvero, da discutere insieme prima di costruirla.
+
+### G. Idee e principi (non tecnici, per il futuro)
+
+42. **Rinforzo del "principio della crescita democratica e graduale"**
+    (la stessa idea già segnata sopra sulla cache semantica delle
+    risposte, con riferimento a Wikipedia) — Gianardi lo ha
+    riformulato con due esempi concreti (TFR di 3 dipendenti, obbligo
+    di SCIA per una ristrutturazione): oggi EON "tampona" cercando su
+    internet/nella conoscenza generale dell'AI, ma l'obiettivo è che
+    impari gradualmente da queste risposte (proprio come da qualunque
+    altra domanda tecnica di settore — edile, idraulico, ecc.), così
+    che con più utenti nel tempo debba ricorrere sempre meno a
+    internet/all'AI esterna per le stesse domande. Nessuna
+    implementazione nuova rispetto a quanto già segnato il
+    21-22/09 — solo un rinforzo del principio con esempi reali di
+    utilizzo.
+
+Nessuna implementazione iniziata su nessuno dei punti sopra. Da
+proseguire un pezzo alla volta con l'autorizzazione di Gianardi ad ogni
+intervento, cominciando presumibilmente dai bug/comportamenti AI più
+semplici e sicuri (sezioni A e B) prima delle funzionalità e del
+redesign più grandi (sezioni D, E, F).
+
+## Aggiornamento: lista completata (23/09/2026)
+
+Tutti i 42 punti della lista sopra sono stati lavorati nella stessa
+giornata, con l'autorizzazione di Gianardi ad ogni gruppo di
+interventi (sezioni A/B fatte "di getto" dopo un primo via libera
+esplicito, poi confermato di continuare fino in fondo con "farei tutti
+i punti"). Risultato: 38/42 fatti, 4 rimasti aperti per motivi
+espliciti — 30/31 (meteo/mappe, serve scegliere e pagare un fornitore
+esterno), 40 (separazione dati per professione, cambiamento di
+architettura vero, rimandato apposta), 41 (sezione generica, dubbio
+di Gianardi da discutere insieme). Il punto 19 resta parziale
+(riconoscimento per nome fatto, riconoscimento dal contenuto del file
+no) e il 28 rimandato al disegno delle cartelle personalizzabili già
+previsto sopra.
+
+**Migrazioni applicate in produzione (23/09/2026), autorizzate da
+Gianardi ("falle tu")**: `ai_request_log_risposta_schema.sql` (colonna
+"risposta") e `feedback_schema.sql` (nuova tabella "feedback") —
+entrambe verificate col vero schema di produzione dopo l'applicazione,
+nessun dato esistente toccato.
+
+Prossimo passo concordato con Gianardi: aprire la PR con tutto il
+lavoro di oggi, lui fa il merge, poi si testa insieme (lui usa l'app
+vera, io guardo i dati/log reali dietro le quinte) prima di ridare in
+mano tutto al tester/socio/amministratore.

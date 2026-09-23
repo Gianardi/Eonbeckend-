@@ -125,32 +125,39 @@
   /* main */
   main{ flex:1; padding:16px 16px 20px; }
 
-  .brand-hero{ text-align:center; padding:10px 0 8px; }
+  /* Ridisegnato il 23/09/2026 (Gianardi: "il logo in alto non è ben
+     proporzionato rispetto al resto"). Un marchio permanente in cima a
+     una schermata di lavoro quotidiana deve restare un riferimento
+     discreto, non l'elemento più grande della pagina: prima il logo
+     (32px, cerchio a gradiente vivace da 30px) era visivamente più
+     pesante del titolo vero e proprio sotto ("Cosa facciamo oggi",
+     22px) — l'attenzione andava al marchio invece che al contenuto
+     operativo. Ora il marchio è piccolo e in un'unica riga con la
+     data (un solo blocco compatto, non due elementi separati che si
+     susseguono), e il titolo sotto resta l'elemento dominante della
+     pagina, come dovrebbe essere ogni giorno che si apre l'app. */
+  .brand-hero{ display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 0 18px; }
   /* Il marchio e la ricerca generale stanno solo in Home: nelle altre
      sezioni ci sarebbero due barre di ricerca e due titoli. */
   .brand-hero.nascosto{ display:none; }
   .brand-data{
-    font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    color:var(--faint); margin-bottom:10px;
+    font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--faint);
   }
   .brand-hero-wordmark{
-    display:flex; align-items:center; justify-content:center; gap:3px;
-    font-family:'Manrope'; font-weight:900; font-size:32px; letter-spacing:-.02em;
-    color:var(--text); margin-bottom:8px;
+    display:flex; align-items:center; justify-content:center; gap:2px;
+    font-family:'Manrope'; font-weight:800; font-size:14.5px; letter-spacing:-.01em;
+    color:var(--faint);
   }
   .logo-o{ display:inline-flex; align-items:center; justify-content:center; }
-  /* Il cerchio del marchio prende i colori delle card: turchese, blu
-     e viola. Tre dei sei, non tutti: riconoscibile senza diventare
-     un arcobaleno. */
+  /* Un solo colore pieno (l'indaco già usato per le azioni primarie
+     nel resto dell'app), non più un gradiente a tre colori: a
+     dimensione ridotta un gradiente vivace risulterebbe confuso invece
+     che riconoscibile — un marchio piccolo regge meglio un solo
+     colore netto. */
   .brand-hero-wordmark .logo-o{
-    width:30px; height:30px; margin:0 1px; border-radius:50%;
-    background:conic-gradient(from 210deg,
-      var(--teal) 0deg,
-      var(--indigo) 130deg,
-      var(--violet) 250deg,
-      var(--teal) 360deg);
-    color:#fff;
-    box-shadow:0 3px 12px rgba(59,111,255,.35);
+    width:16px; height:16px; margin:0 1px; border-radius:50%;
+    background:var(--indigo); color:#fff;
   }
   .brand-hero-wordmark .logo-o svg{ width:60%; height:60%; }
   .ai-clock-btn{
@@ -193,12 +200,12 @@
   .client-tag b{ color:var(--text); font-weight:800; }
 
   .back-link{
-    display:inline-flex; align-items:center; gap:6px;
-    font-size:12px; font-weight:700; color:var(--muted);
-    cursor:pointer; margin-bottom:12px;
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:14px; font-weight:800; color:var(--text);
+    cursor:pointer; margin-bottom:14px; padding:6px 4px 6px 0;
   }
-  .back-link:hover{ color:var(--text); }
-  .back-link svg{ width:13px; height:13px; }
+  .back-link:hover{ color:var(--muted); }
+  .back-link svg{ width:20px; height:20px; flex:none; }
 
   .topbar{ padding-top:2px;
     display:flex; align-items:center; justify-content:center;
@@ -366,7 +373,7 @@
   .home-hero-cal-testo b{ font-family:'Manrope'; font-size:14px; font-weight:800; }
   .home-hero-cal-testo span{ font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px; }
   .home-hero-cal-freccia{ width:14px; height:14px; flex:none; color:rgba(255,255,255,.6); }
-  .home-hero-oggi{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 15px; }
+  .home-hero-oggi{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 15px; cursor:pointer; }
   .home-hero-oggi-titolo{ font-family:'Manrope'; font-size:13px; font-weight:800; margin-bottom:9px; color:var(--text); }
   .home-hero-oggi-riga{ display:flex; align-items:center; gap:10px; padding:7px 0; font-size:13px; color:var(--text); }
   .home-hero-oggi-riga.fatto{ color:var(--faint); text-decoration:line-through; }
@@ -442,6 +449,11 @@
   .module-icon.coral{ background:var(--coral); }
   .module-title{ font-family:'Manrope'; font-size:14px; font-weight:900; letter-spacing:-.01em; color:var(--text); margin-bottom:3px; }
   .module-sub{ font-size:11px; color:var(--muted); line-height:1.35; }
+  .ai-log-risposta{
+    margin-top:8px; padding:9px 11px; border-radius:10px;
+    background:rgba(20,23,29,.045); font-size:12px; color:var(--text);
+    line-height:1.45; white-space:pre-line;
+  }
 
   .card-panel{ background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-sm); }
   #page-obiettivi .card-panel{ border:1.5px solid rgba(20,23,29,.18); }
@@ -468,6 +480,18 @@
     font-size:12px; font-weight:700; color:var(--muted);
     background:rgba(20,23,29,.045); padding:4px 10px; border-radius:20px;
   }
+  .card-header-destra{ display:flex; align-items:center; gap:8px; flex:none; }
+  .card-header-add{
+    width:28px; height:28px; flex:none; border-radius:50%; border:none;
+    background:var(--text); color:#fff; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-family:inherit;
+  }
+  .card-header-add svg{ width:15px; height:15px; }
+  .feedback-invia-btn{
+    width:100%; border-radius:14px; border:none; background:var(--text); color:#fff;
+    font-family:inherit; font-weight:700; font-size:13.5px; padding:13px; margin-top:10px; cursor:pointer;
+  }
+  .feedback-invia-btn:disabled{ opacity:.5; cursor:default; }
 
   .mini-ring{ display:flex; align-items:center; gap:9px; flex:none; }
   .mini-ring svg{ transform:rotate(-90deg); }
@@ -519,6 +543,11 @@
     background:rgba(14,20,36,.72); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
   .cantiere-foto-elimina svg{ width:12px; height:12px; stroke:#fff; }
+  .cantiere-foto-scheda{ padding:14px 16px; border-bottom:1px solid var(--border); }
+  .cantiere-foto-scheda:last-child{ border-bottom:none; }
+  .cantiere-foto-scheda-testata{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .cantiere-foto-scheda-nome{ font-size:13.5px; font-weight:800; color:var(--text); }
+  .cantiere-foto-scheda-nome.muted{ font-weight:700; color:var(--muted); }
 
   .cantiere-appunto{ padding:12px 16px; border-bottom:1px solid var(--border); display:flex; gap:10px; align-items:flex-start; }
   .cantiere-appunto:last-child{ border-bottom:none; }
@@ -669,14 +698,23 @@
   .cal-giorno.oggi i{ background:var(--text); color:#fff; }
   .cal-giorno.oggi::after{ background:var(--border-strong); }
 
+  /* Semplificato il 23/09/2026 (Gianardi: "pulizia visiva" come base
+     della "pulizia mentale" — il calendario era troppo affollato).
+     Prima OGNI riga portava un bordo spesso 2px + un'ombra marcata,
+     identici per un impegno qualunque e per quello di oggi: tutto
+     "urlava" alla stessa intensità, quindi in pratica niente si
+     distingueva davvero. Ora il bordo è sottile e uniforme (il
+     rilievo vero è riservato a "oggi", l'unico caso che conta
+     visivamente di più), e i pulsanti Scrivi/Chiama/Elimina — che da
+     soli raddoppiavano l'altezza di ogni riga — si vedono solo
+     toccando la riga (progressive disclosure), non sempre. */
   .cal-voce{
-    display:flex; align-items:center; gap:14px;
-    padding:15px 16px; margin-bottom:10px; border-radius:20px;
-    background:var(--card); border:2px solid var(--text);
-    box-shadow:0 6px 18px rgba(14,20,36,.1);
+    display:flex; align-items:center; gap:14px; cursor:pointer;
+    padding:13px 16px; margin-bottom:8px; border-radius:16px;
+    background:var(--card); border:1px solid var(--border);
     flex-wrap:wrap;
   }
-  .cal-voce.oggi{ box-shadow:0 6px 20px rgba(14,20,36,.16); }
+  .cal-voce.oggi{ border-color:var(--text); box-shadow:0 4px 14px rgba(14,20,36,.1); }
   .cal-ora-blocco{ flex:none; width:44px; text-align:center; }
   .cal-ora-hh{ font-family:'Manrope'; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.1; color:var(--text); }
   .cal-ora-mm{ font-size:11px; font-weight:700; color:var(--faint); margin-top:1px; }
@@ -687,7 +725,8 @@
   .cal-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:3px; color:var(--muted); }
   .cal-label.urgente{ color:var(--text); }
   .cal-sotto{ font-size:11px; color:var(--muted); margin-top:2px; }
-  .cal-azioni{ display:flex; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
+  .cal-azioni{ display:none; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
+  .cal-voce.aperta .cal-azioni{ display:flex; }
   .cal-btn{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
     padding:8px; border-radius:10px; cursor:pointer; font-family:inherit;
@@ -857,6 +896,7 @@
   .ai-toast-icon svg{ width:15px;height:15px; }
   .ai-toast-body{ flex:1; min-width:0; }
   .ai-toast-title{ font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:3px; }
+  .ai-toast-title:empty{ display:none; }
   .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; white-space:pre-line; }
   .ai-toast.decisione{ background:var(--card); border:2px solid var(--text); box-shadow:0 12px 34px rgba(20,23,29,.16); }
   .ai-toast-actions{ display:flex; gap:8px; margin-top:12px; }
@@ -1046,6 +1086,7 @@
   }
   .hub-racconta.fatto .hub-racconta-ico{ background:var(--teal); }
   .hub-racconta-titolo{ font-size:13.5px; font-weight:800; color:var(--violet); }
+  .hub-racconta-titolo:empty{ display:none; }
   .hub-racconta.fatto .hub-racconta-titolo{ color:#00907A; }
   .hub-racconta-sotto{ font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.4; white-space:pre-line; }
   .hub-racconta-campo{
@@ -1490,6 +1531,14 @@
   .risorsa-canale.disabilitato{ opacity:.45; cursor:default; }
   .risorsa-canale.disabilitato svg{ color:var(--muted); }
   .risorsa-vuoto{ color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
+  .risorsa-testo-discorsivo{ font-size:14px; line-height:1.6; color:var(--text); white-space:pre-line; padding:4px 2px; }
+  .risorsa-mic-rapido{
+    width:38px; height:38px; flex:none; border-radius:50%; border:1px solid var(--border);
+    background:var(--card); color:var(--indigo); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-family:inherit;
+  }
+  .risorsa-mic-rapido svg{ width:17px; height:17px; }
+  .risorsa-mic-rapido.ascolto{ background:var(--indigo); color:#fff; }
 
   /* la scheda del documento dentro la conversazione */
   .msg-documento{
@@ -1946,6 +1995,55 @@
   </div>
 </div>
 
+<!-- Primo accesso alla sezione Documenti senza un formato già impostato
+     (Gianardi, 23/09/2026, punto 33): scegliere il formato caricando la
+     foto di un documento già in uso, o usare il modello di EON. -->
+<div class="ai-landing-overlay" id="onboardingDocumentiOverlay" style="display:none;">
+  <div class="ai-landing-card">
+    <div class="ai-landing-icon" style="background:var(--indigo);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+    </div>
+    <div class="ai-landing-title">Crea il formato dei tuoi documenti</div>
+    <div class="ai-landing-text" id="onboardingDocumentiHint" style="margin-bottom:16px;">Preventivi, fatture, lettere e cartelli useranno questo formato — puoi cambiarlo quando vuoi dalla Carta intestata.</div>
+    <input type="file" id="onboardingDocFotoInput" accept="image/*" style="display:none;">
+    <button class="primary-btn" id="onboardingDocFotoBtn" type="button" style="margin:0 auto; width:100%;">Scegli il formato da una foto</button>
+    <button type="button" id="onboardingDocEonBtn" style="margin-top:12px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:6px;">Usa il modello di EON</button>
+  </div>
+</div>
+
+<!-- Cambio professione dentro l'app (Gianardi, 23/09/2026, punto 39):
+     stesse card della scelta iniziale in fase di iscrizione, ma qui
+     cambiano solo etichette e sezioni profession-specific (Assemblee/
+     Udienze/Chiamate/Revisioni, titoli, statistiche) — MAI i dati veri
+     già inseriti (clienti, appuntamenti, foto...), che restano gli
+     stessi qualunque professione sia selezionata: oggi un solo account
+     vede tutto insieme (vedi punto 40, separazione dati per
+     professione, ancora da decidere). -->
+<div class="ai-landing-overlay" id="cambiaProfessioneOverlay" style="display:none;">
+  <div class="ai-landing-card">
+    <div class="ai-landing-title">Cambia professione</div>
+    <div class="ai-landing-text" style="margin-bottom:16px;">Cambia solo le etichette e le sezioni della tua professione — i clienti e i dati che hai già inserito restano gli stessi.</div>
+    <div class="ob-cards" id="cambiaProfessioneCards" style="margin-bottom:0;">
+      <div class="ob-card" data-profession="edile">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Edile</div></div>
+      </div>
+      <div class="ob-card" data-profession="idraulico">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.7s6 5.4 6 10.1a6 6 0 0 1-12 0c0-4.7 6-10.1 6-10.1z"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Idraulico</div></div>
+      </div>
+      <div class="ob-card" data-profession="avvocato">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Avvocato</div></div>
+      </div>
+      <div class="ob-card" data-profession="amministratore">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Amministratore</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="app">
 
 <div class="onboarding" id="onboardingScreen">
@@ -2202,7 +2300,7 @@
           <svg class="home-hero-cal-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </button>
 
-        <div class="home-hero-oggi">
+        <div class="home-hero-oggi" id="homeHeroOggiBox" role="button" tabindex="0">
           <div class="home-hero-oggi-titolo">Cosa devo fare oggi</div>
           <div id="homeHeroOggiLista"><div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div></div>
         </div>
@@ -2258,8 +2356,8 @@
         <div class="home-hero-hint" id="cantiereClienteHint" style="margin-bottom:14px;">Aggiungi o modifica un cliente: nome, contatto, cosa deve fare — ci penso io</div>
         <div class="home-hero-textwrap">
           <textarea class="home-hero-campo" id="cantiereClienteCampo" rows="2" placeholder="Es. Mario Rossi, 333 1234567, deve rifare il tetto"></textarea>
-          <button class="home-hero-send" id="cantiereClienteSend" aria-label="Invia" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <button class="home-hero-send" id="cantiereClienteSend" aria-label="Aggiungi" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
       </div>
@@ -2290,8 +2388,8 @@
         <div class="home-hero-hint" id="cantiereAppuntiHint" style="margin-bottom:14px;">Tocca il microfono per dettare, o scrivi</div>
         <div class="home-hero-textwrap">
           <textarea class="home-hero-campo" id="cantiereAppuntiCampo" rows="3" placeholder="Scrivi un appunto sul cantiere..."></textarea>
-          <button class="home-hero-send" id="cantiereAppuntiSend" aria-label="Salva appunto" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <button class="home-hero-send" id="cantiereAppuntiSend" aria-label="Aggiungi appunto" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
         <button type="button" id="cantiereAppuntiAnnullaModifica" style="display:none; margin-top:8px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:4px;">Annulla modifica</button>
@@ -2367,7 +2465,15 @@
       </button>
 
       <div class="card-panel">
-        <div class="card-header"><h2>Documenti</h2><span class="count" id="cantiereDocumentiCount">0</span></div>
+        <div class="card-header">
+          <h2>Documenti</h2>
+          <div class="card-header-destra">
+            <span class="count" id="cantiereDocumentiCount">0</span>
+            <button class="card-header-add" id="cantiereDocumentiAddBtn" type="button" aria-label="Aggiungi documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
         <div id="cantiereDocumentiLista" class="azienda-list"></div>
       </div>
     </div>
@@ -2569,7 +2675,7 @@
         Torna alla Home
       </div>
 
-      <input type="file" id="cantiereFotoInput" accept="image/*" capture="environment" style="display:none;">
+      <input type="file" id="cantiereFotoInput" accept="image/*" style="display:none;">
       <button class="home-hero-cal" id="cantiereFotoScattaBtn" type="button" style="margin-bottom:16px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <div class="home-hero-cal-testo">
@@ -2580,7 +2686,7 @@
 
       <div class="card-panel">
         <div class="card-header"><h2>Foto</h2><span class="count" id="cantiereFotoCount">0</span></div>
-        <div id="cantiereFotoGrid" class="cantiere-foto-grid" style="padding:8px 16px 16px;"></div>
+        <div id="cantiereFotoGrid" style="padding-bottom:4px;"></div>
       </div>
     </div>
 
@@ -2855,44 +2961,113 @@
 
     <!-- ==================== PAGINA: GESTISCI AZIENDA ==================== -->
     <div class="page" id="page-gestisci-azienda">
-      <div class="module-grid">
-        <div class="module-card tint-coral" data-catfilter="urgenti" style="position:relative;">
-          <span class="badge" id="chatBadge" style="position:absolute; top:16px; right:16px;">3</span>
-          <div class="module-icon coral">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <!-- Pulizia menu (Gianardi, 23/09/2026): eliminate le 4 card grosse
+           (Urgenti/Da chiudere/Da acquisire/Team) e il cruscotto sempre
+           visibile — diventato "La tua azienda" qui sotto, una voce
+           piccola come le altre che apre gli stessi 4 numeri. Eliminate
+           anche Registro chiamate, Pagamenti da Fare, Entrate, Crea
+           Fattura, Crea Preventivo, Regalo, Business: solo questo menu
+           ci portava, confermato con Gianardi che possono sparire dalla
+           navigazione (le pagine restano nel codice, non cancellate,
+           solo senza più un punto d'accesso dal menu). EON AI invece è
+           stata mantenuta: apre l'hub "Racconta la giornata"
+           (aiHubOverlay/organizza()), diverso dall'orologio AI in home
+           (aiClockBtn, un generatore di piano più semplice) — NON un
+           doppione come pensavo all'inizio, l'ho ricontrollato prima di
+           toglierlo per errore. -->
+      <div class="azienda-list">
+        <div class="azienda-link-card" id="laTuaAziendaCard">
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 21V9h6v12"/></svg>
           </div>
-          <div class="module-eyebrow" style="color:var(--coral);">Priorità</div>
-          <div class="module-title">Urgenti</div>
-          <div class="module-sub">Cose che aspettano una risposta oggi</div>
-        </div>
-        <div class="module-card tint-green" data-catfilter="chiudere">
-          <div class="module-icon gem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
+          <div class="azienda-link-card-body">
+            <div class="module-title">La tua azienda</div>
+            <div class="module-sub">Clienti totali, attivi, in trattativa, valore portafoglio</div>
           </div>
-          <div class="module-eyebrow" style="color:var(--green);">Pipeline</div>
-          <div class="module-title">Da chiudere</div>
-          <div class="module-sub">Trattative vicine alla firma</div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="module-card tint-amber" data-catfilter="acquisire">
+        <div class="azienda-link-card" id="cardEonAI">
+          <div class="module-icon" style="background:var(--violet);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">EON AI</div>
+            <div class="module-sub">Organizza la giornata, strategia trattative e altro</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="assegna-compiti">
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Assegna Compiti</div>
+            <div class="module-sub">Manda un compito a uno o più dipendenti</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="extraTile">
+          <div class="module-icon" id="extraTileIcon" style="background:var(--coral);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title" id="extraTileTitle">Chiamate</div>
+            <div class="module-sub" id="extraTileSub">Clienti da sentire oggi, un tocco per la lista</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="cestino">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Cestino</div>
+            <div class="module-sub">Clienti, messaggi e altro che hai eliminato di recente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="ai-request-log">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Registro AI</div>
+            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="cambiaProfessioneCard">
           <div class="module-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
           </div>
-          <div class="module-eyebrow" style="color:var(--amber);">Nuovi contatti</div>
-          <div class="module-title">Da acquisire</div>
-          <div class="module-sub">Chi ti ha scritto per la prima volta</div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Cambia professione</div>
+            <div class="module-sub">Passa a un'altra sezione — Edile, Idraulico, Avvocato, Amministratore</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="module-card tint-violet" data-catfilter="team">
-          <div class="module-icon case">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="azienda-link-card" id="feedbackCard">
+          <div class="module-icon" style="background:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
           </div>
-          <div class="module-eyebrow" style="color:var(--violet);">Squadra</div>
-          <div class="module-title">Team</div>
-          <div class="module-sub">Collaboratori e dipendenti</div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Manda un feedback</div>
+            <div class="module-sub">Dicci cosa non va o cosa vorresti — ci arriva direttamente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
       </div>
 
-      <div class="section-label">Cruscotto Azienda</div>
-      <div class="stats-grid">
+      <!-- Cruscotto azienda: nascosto di default, si apre toccando "La
+           tua azienda" sopra. Stessi id di sempre (renderClientStats/
+           applyProfession continuano a scriverci senza saperlo, sia
+           visibile o no) — mai passato dalla scheda risorsa condivisa
+           (apriRisorsaCard), che svuota il suo contenuto ad ogni
+           apertura: sposterebbe qui dentro questi elementi per poi
+           cancellarli per sempre alla prima foto/documento aperto dopo. -->
+      <div class="stats-grid" id="cruscottoAziendaBox" style="display:none; margin-top:14px;">
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--teal-soft); color:var(--teal);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -2920,138 +3095,6 @@
           </div>
           <div class="stat-num" id="statValue">€262.800</div>
           <div class="stat-label" id="statValueLabel">Valore portafoglio</div>
-        </div>
-      </div>
-
-      <div class="azienda-list">
-        <div class="azienda-link-card" id="cardEonAI">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">EON AI</div>
-            <div class="module-sub">Organizza la giornata, strategia trattative e altro</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="chiamate">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Registro chiamate</div>
-            <div class="module-sub">Da fare oggi, programmate, recenti</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="assegna-compiti">
-          <div class="module-icon" style="background:var(--indigo);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Assegna Compiti</div>
-            <div class="module-sub">Manda un compito a uno o più dipendenti</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="pagamenti">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Pagamenti da Fare</div>
-            <div class="module-sub">Fornitori, rate e scadenze da saldare</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="entrate">
-          <div class="module-icon" style="background:var(--green);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Entrate</div>
-            <div class="module-sub">Incassi previsti e ricevuti dai clienti</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="crea-fattura">
-          <div class="module-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Crea Fattura</div>
-            <div class="module-sub">Genera una nuova fattura per un cliente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="crea-preventivo">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/><circle cx="17" cy="16" r="4" fill="none"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Crea Preventivo</div>
-            <div class="module-sub">Prepara un'offerta da inviare al cliente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="regalo">
-          <div class="module-icon" style="background:var(--wa);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7"/><path d="M12 8c-1.2 0-3-1-3-2.8A2.2 2.2 0 0 1 11.2 3c1.5 0 2.8 2 2.8 2s1.3-2 2.8-2A2.2 2.2 0 0 1 19 5.2C19 7 17.2 8 16 8"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Regalo</div>
-            <div class="module-sub">Fai un pensiero a un cliente o un dipendente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" id="extraTile">
-          <div class="module-icon" id="extraTileIcon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title" id="extraTileTitle">Chiamate</div>
-            <div class="module-sub" id="extraTileSub">Clienti da sentire oggi, un tocco per la lista</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="business">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 20.5h18"/>
-              <rect x="5.5" y="13" width="3" height="7.5" rx="1"/>
-              <rect x="10.5" y="8.5" width="3" height="12" rx="1"/>
-              <rect x="15.5" y="4" width="3" height="16.5" rx="1"/>
-            </svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Business</div>
-            <div class="module-sub">Come sta andando l'azienda, in numeri</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="cestino">
-          <div class="module-icon" style="background:var(--ink-3, #64748b);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Cestino</div>
-            <div class="module-sub">Clienti, messaggi e altro che hai eliminato di recente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="ai-request-log">
-          <div class="module-icon" style="background:var(--ink-3, #64748b);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Registro AI</div>
-            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
       </div>
     </div>
@@ -3538,6 +3581,9 @@ const ASSISTANT_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=assista
 /* Analisi della chat (appuntamenti/attività) e decisione del professionista
    su una richiesta del cliente — vedi ANALISI DELLA CHAT in api/index.js. */
 const ANALIZZA_MESSAGGIO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=analizza_messaggio";
+/* Legge i dati azienda dalla foto di un documento (primo formato dei
+   documenti, punto 33) — vedi handleLeggiIntestazioneDaFoto in api/index.js. */
+const LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=leggi_intestazione_da_foto";
 const RISPONDI_RICHIESTA_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=rispondi_richiesta_cliente";
 
 /* Il backend si considera attivo solo se ci sono i valori di configurazione
@@ -3911,6 +3957,10 @@ async function annullaEliminazioneCliente(esito){
   if(esito.conversation_id) await dbRestore("conversations", esito.conversation_id);
   await ricaricaTuttoERidisegna();
 }
+async function annullaEliminazioneFoto(esito){
+  await dbRestore(esito.tabella, esito.id);
+  await ricaricaTuttoERidisegna();
+}
 
 /* Etichette leggibili per la schermata Cestino: chiave = nome tabella. */
 const ETICHETTA_CESTINO = {
@@ -4053,9 +4103,14 @@ async function renderAiRequestLog(){
       : "(nessun testo, es. un turno di conferma)";
     const strumenti = Array.isArray(riga.strumenti) && riga.strumenti.length ? riga.strumenti.join(", ") : null;
 
+    /* Toccando la riga si vede anche la risposta che EON ha dato in
+       quel turno (non solo la domanda) — richiesto da Gianardi il
+       23/09/2026. Righe vecchie, scritte prima di questa colonna,
+       restano senza risposta salvata: lo diciamo chiaramente invece di
+       lasciare la riga muta al tocco. */
     const row = document.createElement("div");
     row.className = "azienda-link-card";
-    row.style.cursor = "default";
+    row.style.cursor = "pointer";
     row.innerHTML = `
       <div class="azienda-link-card-body">
         <div class="module-title">${escapeHtml(messaggio)}</div>
@@ -4065,8 +4120,16 @@ async function renderAiRequestLog(){
           ${strumenti ? " · " + escapeHtml(strumenti) : ""}
         </div>
         ${riga.errore ? `<div class="module-sub" style="color:#c0392b;margin-top:4px;">${escapeHtml(riga.errore)}</div>` : ""}
+        <div class="ai-log-risposta" style="display:none;"></div>
       </div>
     `;
+    row.addEventListener("click", () => {
+      const box = row.querySelector(".ai-log-risposta");
+      const aperta = box.style.display !== "none";
+      if(aperta){ box.style.display = "none"; return; }
+      box.textContent = riga.risposta || "(nessuna risposta salvata per questo turno — es. una conferma, o una riga precedente a questa funzione)";
+      box.style.display = "block";
+    });
     wrap.appendChild(row);
   });
 }
@@ -5117,6 +5180,13 @@ function renderCalendar(){
      di una griglia oraria che resterebbe quasi sempre vuota. */
   items.forEach(it => {
     it._data = interpretaQuando(it.when);
+    /* interpretaQuando azzera sempre l'ora a mezzanotte: senza questo,
+       due impegni nello stesso giorno restano nell'ordine in cui sono
+       stati creati invece che in ordine di orario (bug segnalato da
+       Gianardi il 23/09/2026, con screenshot). */
+    const ora = estraiOra(it.when);
+    if(ora){ const [h,m] = ora.split(":").map(Number); it._minuti = h*60+m; }
+    else it._minuti = null;
   });
 
   /* Un calendario che mostra il mese scorso non serve a niente: teniamo
@@ -5129,7 +5199,12 @@ function renderCalendar(){
     if(!a._data && !b._data) return 0;
     if(!a._data) return 1;      /* senza data vanno in fondo */
     if(!b._data) return -1;
-    return a._data - b._data;
+    const diffGiorno = a._data - b._data;
+    if(diffGiorno !== 0) return diffGiorno;
+    if(a._minuti === null && b._minuti === null) return 0;
+    if(a._minuti === null) return 1;   /* senza ora, in fondo alla giornata */
+    if(b._minuti === null) return -1;
+    return a._minuti - b._minuti;
   });
 
   const gruppi = [];
@@ -5197,6 +5272,12 @@ function renderCalendar(){
           </button>` : ''}
         </div>` : ''}
       `;
+
+      /* Le azioni sono nascoste finché non si tocca la riga (vedi CSS
+         .cal-voce.aperta): i tre pulsanti già fermano la propagazione
+         del click, quindi non richiudono la riga per sbaglio quando
+         vengono usati. */
+      row.addEventListener("click", () => row.classList.toggle("aperta"));
 
       const bScrivi = row.querySelector(".cal-scrivi");
       if(bScrivi) bScrivi.addEventListener("click", async (e) => {
@@ -6944,6 +7025,95 @@ document.getElementById("intestazioneLogoInput").addEventListener("change", (e) 
 });
 document.getElementById("intestazioneSalvaBtn").addEventListener("click", salvaCartaIntestata);
 
+/* ============ ONBOARDING DOCUMENTI: primo formato (23/09/2026) ============
+   Al primo accesso alla sezione Documenti, se non è ancora stata
+   salvata nessuna Carta intestata, propone di leggerla da una foto di
+   un documento già in uso invece di compilarla da zero — vedi
+   handleLeggiIntestazioneDaFoto in api/index.js. */
+function provaOnboardingDocumenti(){
+  if(localStorage.getItem("eon_documenti_onboarding_fatto")) return;
+  if(aziendaIntestazione && (aziendaIntestazione.nome_azienda || aziendaIntestazione.indirizzo)){
+    localStorage.setItem("eon_documenti_onboarding_fatto", "1");
+    return;
+  }
+  document.getElementById("onboardingDocumentiOverlay").style.display = "flex";
+}
+function chiudiOnboardingDocumenti(){
+  localStorage.setItem("eon_documenti_onboarding_fatto", "1");
+  document.getElementById("onboardingDocumentiOverlay").style.display = "none";
+}
+
+/* Ridimensiona (lato massimo 1400px) e comprime in JPEG prima di
+   inviarla: una foto scattata da un telefono può pesare diversi MB,
+   troppo per il limite del corpo della richiesta su Vercel e inutile
+   per leggere solo del testo. */
+function ridimensionaEConvertiInBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Non sono riuscita a leggere il file"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Immagine non valida"));
+      img.onload = () => {
+        const LATO_MASSIMO = 1400;
+        let { width, height } = img;
+        if(width > LATO_MASSIMO || height > LATO_MASSIMO){
+          const scala = LATO_MASSIMO / Math.max(width, height);
+          width = Math.round(width * scala);
+          height = Math.round(height * scala);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve({ base64: canvas.toDataURL("image/jpeg", 0.75).split(",")[1], mediaType: "image/jpeg" });
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById("onboardingDocEonBtn").addEventListener("click", chiudiOnboardingDocumenti);
+document.getElementById("onboardingDocumentiOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "onboardingDocumentiOverlay") chiudiOnboardingDocumenti();
+});
+document.getElementById("onboardingDocFotoBtn").addEventListener("click", () => document.getElementById("onboardingDocFotoInput").click());
+document.getElementById("onboardingDocFotoInput").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const btn = document.getElementById("onboardingDocFotoBtn");
+  const hint = document.getElementById("onboardingDocumentiHint");
+  const hintBase = hint.textContent;
+  btn.disabled = true;
+  hint.textContent = "Sto leggendo i dati dalla foto…";
+  try{
+    if(!BACKEND_CONFIGURED || !currentSession) throw new Error("accedi per usare questa funzione");
+    const { base64, mediaType } = await ridimensionaEConvertiInBase64(f);
+    const response = await fetch(LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      body: JSON.stringify({ immagine_base64: base64, media_type: mediaType })
+    });
+    const json = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(json.error || "Non sono riuscita a leggere la foto");
+    chiudiOnboardingDocumenti();
+    navigateTo("carta-intestata");
+    if(json.nome_azienda) document.getElementById("intestazioneNome").value = json.nome_azienda;
+    if(json.indirizzo) document.getElementById("intestazioneIndirizzo").value = json.indirizzo;
+    if(json.piva) document.getElementById("intestazionePiva").value = json.piva;
+    if(json.telefono) document.getElementById("intestazioneTelefono").value = json.telefono;
+    if(json.email) document.getElementById("intestazioneEmail").value = json.email;
+    showAIToast("Ho letto questi dati dalla foto", "Controllali e tocca Salva se vanno bene — puoi correggerli prima.");
+  }catch(err){
+    console.error("Lettura intestazione da foto non riuscita:", err);
+    showAILanding("Non sono riuscita a leggerla", err.message || "Riprova con un'altra foto, o usa il modello di EON.");
+  }finally{
+    btn.disabled = false;
+    hint.textContent = hintBase;
+    document.getElementById("onboardingDocFotoInput").value = "";
+  }
+});
+
 /* ============ CREA FATTURA ============ */
 const invoiceClientSel = document.getElementById("invoiceClient");
 function populateClientDropdowns(){
@@ -7307,9 +7477,6 @@ function renderChatList(){
     });
     wrap.appendChild(item);
   });
-  document.getElementById("chatBadge").textContent = chats.reduce((s,c)=>s+c.unread,0);
-  const totalUnread = chats.reduce((s,c)=>s+c.unread,0);
-  document.getElementById("chatBadge").style.display = totalUnread > 0 ? "flex" : "none";
   renderSummary();
   saveState("eon-chats", chats);
 }
@@ -7706,6 +7873,7 @@ function collegaHubRacconta(){
     const clienteNomeFocus = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
     const azioneFoto = azioni.find(a => a.tool === "recupera_foto_cantiere");
     const azioneDocumenti = azioni.find(a => a.tool === "recupera_documenti_cliente");
+    const azioneDocumentiImpresa = azioni.find(a => a.tool === "recupera_documenti_impresa");
     if(azioneFoto){
       mostraRisorsaFoto(azioneFoto.esito.foto || [], clienteNomeFocus);
       chiudiHubAI();
@@ -7716,13 +7884,18 @@ function collegaHubRacconta(){
       chiudiHubAI();
       return;
     }
+    if(azioneDocumentiImpresa){
+      mostraRisorsaDocumenti(azioneDocumentiImpresa.esito.documenti || [], null);
+      chiudiHubAI();
+      return;
+    }
 
     /* Non tutte le richieste finiscono in crea_impegno: "cancella cliente
        Rossi" o "elimina questo appuntamento" sono azioni vere, non
        impegni. Prima ignoravamo tutto ciò che non fosse crea_impegno —
        l'azione veniva comunque eseguita sul database (dopo conferma),
        ma l'interfaccia non se ne accorgeva: sembrava non fare nulla. */
-    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente"];
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
@@ -7738,7 +7911,12 @@ function collegaHubRacconta(){
         if(/\?\s*$/.test(testo.trim()) && /conferm/i.test(testo) && !/quale/i.test(testo)){
           testo += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
         }
-        stato("attesa", "Fatto", testo);
+        /* "Fatto" ha senso solo se EON ha davvero eseguito un'azione
+           (anche solo una lettura, es. cercare un cliente): su una
+           risposta puramente conversazionale (nessuno strumento
+           chiamato, es. "ciao") l'etichetta è fuorviante — segnalato
+           da Gianardi il 23/09/2026. */
+        stato("attesa", azioni.length === 0 ? "" : "Fatto", testo);
       }
       return;
     }
@@ -7796,6 +7974,8 @@ function collegaHubRacconta(){
           a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.",
           () => annullaEliminazioneCliente(a.esito)
         );
+      } else if(a.tool === "elimina_foto_cantiere"){
+        showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
       } else if(a.tool === "crea_cliente"){
         showAIToast("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
@@ -7806,6 +7986,14 @@ function collegaHubRacconta(){
         showAIToast("Appunto aggiunto", a.esito.testo);
       } else if(a.tool === "correggi_appunto"){
         showAIToast("Appunto corretto", a.esito.testo);
+      } else if(a.tool === "crea_preventivo_o_fattura"){
+        /* Stessa scheda già usata per i documenti recuperati
+           (mostraRisorsaDocumenti/creaVoceDocumento): un preventivo/
+           fattura appena creato da EON deve aprirsi e presentarsi
+           esattamente come uno già esistente, non solo un toast — "poi
+           aprire la carta e far vedere il caricamento del preventivo"
+           (Gianardi, 23/09/2026). */
+        mostraRisorsaDocumenti([{ titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale }], a.esito.cliente);
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
@@ -7837,6 +8025,56 @@ function apriHubAI(){ document.getElementById("aiHubOverlay").style.display = "f
 function chiudiHubAI(){ document.getElementById("aiHubOverlay").style.display = "none"; }
 
 document.getElementById("cardEonAI").addEventListener("click", apriHubAI);
+document.getElementById("laTuaAziendaCard").addEventListener("click", () => {
+  const box = document.getElementById("cruscottoAziendaBox");
+  box.style.display = box.style.display === "none" ? "grid" : "none";
+});
+document.getElementById("cambiaProfessioneCard").addEventListener("click", () => {
+  document.querySelectorAll("#cambiaProfessioneCards .ob-card").forEach(c => {
+    c.classList.toggle("selected", c.dataset.profession === currentProfession);
+  });
+  document.getElementById("cambiaProfessioneOverlay").style.display = "flex";
+});
+document.getElementById("cambiaProfessioneOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "cambiaProfessioneOverlay") document.getElementById("cambiaProfessioneOverlay").style.display = "none";
+  const card = e.target.closest(".ob-card");
+  if(!card) return;
+  document.getElementById("cambiaProfessioneOverlay").style.display = "none";
+  if(card.dataset.profession === currentProfession) return;
+  /* skipDemoData sempre true qui: cambia solo etichette e sezioni
+     profession-specific, mai i dati veri già inseriti (vedi nota HTML
+     sopra e la conferma di Gianardi sul punto 39). */
+  applyProfession(card.dataset.profession, true);
+  showAIToast("Professione cambiata", "Etichette e sezioni aggiornate — i tuoi dati sono rimasti gli stessi.");
+});
+document.getElementById("feedbackCard").addEventListener("click", () => {
+  const corpo = document.createElement("div");
+  corpo.innerHTML = `
+    <p class="module-sub" style="padding:0 2px 10px;">Cosa non va, cosa ti manca, cosa vorresti diverso: scrivilo qui, ci arriva direttamente.</p>
+    <textarea class="hub-racconta-campo" id="feedbackCampo" rows="4" placeholder="Scrivi qui il tuo feedback..." style="width:100%;"></textarea>
+    <button class="feedback-invia-btn" id="feedbackInvia" type="button">Invia feedback</button>
+  `;
+  apriRisorsaCard("Manda un feedback", corpo);
+  document.getElementById("feedbackInvia").addEventListener("click", async () => {
+    const campo = document.getElementById("feedbackCampo");
+    const testo = campo.value.trim();
+    if(testo.length < 2) return;
+    if(!isDbReady()){
+      showAILanding("Non collegato", "Per mandare un feedback serve la connessione al database.");
+      return;
+    }
+    const btn = document.getElementById("feedbackInvia");
+    btn.disabled = true;
+    const creato = await dbInsert("feedback", { testo });
+    btn.disabled = false;
+    if(!creato){
+      showAILanding("Non sono riuscita a inviarlo", "Riprova tra poco.");
+      return;
+    }
+    chiudiRisorsaCard();
+    showAIToast("Grazie!", "Il tuo feedback è arrivato.");
+  });
+});
 collegaHubRacconta();
 document.getElementById("aiHubChiudi").addEventListener("click", chiudiHubAI);
 document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
@@ -8053,7 +8291,7 @@ async function eliminaCantiereAppunto(id){
     testoSessione = "";
     testoIniziale = campo.value;
     mic.classList.add("ascolto");
-    hint.textContent = "Ti ascolto… tocca di nuovo per fermarti";
+    hint.textContent = "Ti ascolto… tocca di nuovo per salvare";
   };
   riconoscitore.onresult = (e) => {
     let t = "";
@@ -8081,7 +8319,17 @@ async function eliminaCantiereAppunto(id){
   };
 
   mic.addEventListener("click", () => {
-    if(attivo){ fermaAscolto(); return; }
+    /* Ovunque altro nell'app, parlare al microfono esegue subito
+       l'azione — qui invece serviva un secondo tocco su "invio" dopo
+       aver dettato, e l'appunto sembrava non salvarsi mai (segnalato
+       da Gianardi il 23/09/2026). Ora il secondo tocco sul microfono
+       (quello che ferma l'ascolto) salva direttamente, senza bisogno
+       di toccare anche "invio". */
+    if(attivo){
+      fermaAscolto();
+      if(campo.value.trim().length >= 2) salva();
+      return;
+    }
     if(inCorso) return;
     attivo = true;
     try{ riconoscitore.start(); }
@@ -8167,41 +8415,101 @@ async function eliminaCantiereDocumento(id){
 }
 
 document.getElementById("cantiereDocumentiCaricaBtn").addEventListener("click", () => document.getElementById("cantiereDocumentiInput").click());
+document.getElementById("cantiereDocumentiAddBtn").addEventListener("click", () => document.getElementById("cantiereDocumentiInput").click());
 document.getElementById("cantiereDocumentiInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
   if(f) caricaCantiereDocumento(f);
 });
 
-/* ---- Foto cantiere ---- */
+/* ---- Foto cantiere ----
+   Raggruppate per cliente (una "card" per cliente col suo nome sopra,
+   più "+" per aggiungere altre foto senza rifare il tag) invece di una
+   sola griglia indifferenziata — richiesto da Gianardi il 23/09/2026.
+   Le foto non ancora assegnate a nessun cliente restano in un gruppo a
+   parte, toccabili per assegnarle (stesso overlay di sempre). */
+let clienteIdPerProssimaFoto = null; // letto una volta sola dal listener di cantiereFotoInput, poi azzerato
+
 function renderCantiereFoto(){
   const wrap = document.getElementById("cantiereFotoGrid");
   document.getElementById("cantiereFotoCount").textContent = cantiereFoto.length;
   wrap.innerHTML = "";
   if(cantiereFoto.length === 0){
-    wrap.innerHTML = '<div class="empty-hint" style="grid-column:1/-1;">Ancora nessuna foto per questo cantiere.</div>';
+    wrap.innerHTML = '<div class="empty-hint">Ancora nessuna foto per questo cantiere.</div>';
     return;
   }
+
+  const gruppi = new Map(); // clientId (o "" per senza cliente) -> foto[]
   cantiereFoto.slice().reverse().forEach(f => {
-    const item = document.createElement("div");
-    item.className = "cantiere-foto-item";
-
-    const img = document.createElement("img");
-    img.src = f.url; img.alt = "";
-    img.addEventListener("click", () => window.open(f.url, "_blank"));
-
-    const elimina = document.createElement("button");
-    elimina.className = "cantiere-foto-elimina";
-    elimina.type = "button";
-    elimina.setAttribute("aria-label", "Elimina foto");
-    elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-    elimina.addEventListener("click", (e) => { e.stopPropagation(); eliminaCantiereFoto(f.id); });
-
-    item.appendChild(img); item.appendChild(elimina);
-    wrap.appendChild(item);
+    const chiave = f.clientId || "";
+    if(!gruppi.has(chiave)) gruppi.set(chiave, []);
+    gruppi.get(chiave).push(f);
   });
+
+  function disegnaGriglia(foto, onTocca){
+    const griglia = document.createElement("div");
+    griglia.className = "cantiere-foto-grid";
+    foto.forEach(f => {
+      const item = document.createElement("div");
+      item.className = "cantiere-foto-item";
+
+      const img = document.createElement("img");
+      img.src = f.url; img.alt = "";
+      img.addEventListener("click", () => onTocca ? onTocca(f) : window.open(f.url, "_blank"));
+
+      const elimina = document.createElement("button");
+      elimina.className = "cantiere-foto-elimina";
+      elimina.type = "button";
+      elimina.setAttribute("aria-label", "Elimina foto");
+      elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+      elimina.addEventListener("click", (e) => { e.stopPropagation(); eliminaCantiereFoto(f.id); });
+
+      item.appendChild(img); item.appendChild(elimina);
+      griglia.appendChild(item);
+    });
+    return griglia;
+  }
+
+  // Prima i clienti (una card ciascuno), poi le foto senza cliente in fondo.
+  [...gruppi.keys()].filter(k => k !== "").forEach(clientId => {
+    const cliente = clients.find(c => c.id === clientId);
+    const scheda = document.createElement("div");
+    scheda.className = "cantiere-foto-scheda";
+    const testata = document.createElement("div");
+    testata.className = "cantiere-foto-scheda-testata";
+    const nome = document.createElement("div");
+    nome.className = "cantiere-foto-scheda-nome";
+    nome.textContent = cliente ? cliente.name : "Cliente eliminato";
+    const aggiungi = document.createElement("button");
+    aggiungi.className = "card-header-add";
+    aggiungi.type = "button";
+    aggiungi.setAttribute("aria-label", "Aggiungi un'altra foto a " + (cliente ? cliente.name : "questo cliente"));
+    aggiungi.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+    aggiungi.addEventListener("click", () => {
+      clienteIdPerProssimaFoto = clientId;
+      document.getElementById("cantiereFotoInput").click();
+    });
+    testata.appendChild(nome); testata.appendChild(aggiungi);
+    scheda.appendChild(testata);
+    scheda.appendChild(disegnaGriglia(gruppi.get(clientId)));
+    wrap.appendChild(scheda);
+  });
+
+  if(gruppi.has("")){
+    const scheda = document.createElement("div");
+    scheda.className = "cantiere-foto-scheda";
+    const testata = document.createElement("div");
+    testata.className = "cantiere-foto-scheda-testata";
+    const nome = document.createElement("div");
+    nome.className = "cantiere-foto-scheda-nome muted";
+    nome.textContent = "Da assegnare a un cliente";
+    testata.appendChild(nome);
+    scheda.appendChild(testata);
+    scheda.appendChild(disegnaGriglia(gruppi.get(""), (f) => apriTagFotoCantiere(f)));
+    wrap.appendChild(scheda);
+  }
 }
 
-async function caricaCantiereFoto(file){
+async function caricaCantiereFoto(file, clienteIdForzato){
   if(!isDbReady()){
     showAILanding("Non collegato", "Per caricare foto serve la connessione al database.");
     return;
@@ -8220,9 +8528,18 @@ async function caricaCantiereFoto(file){
     if(!creato) throw new Error("scrittura non riuscita");
     const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null };
     cantiereFoto.push(nuovaFoto);
-    aggiornaCantiereSottotitoli();
-    renderCantiereFoto();
-    apriTagFotoCantiere(nuovaFoto);
+    if(clienteIdForzato){
+      /* Foto aggiunta dal "+" dentro la card di un cliente già noto:
+         nessun bisogno di richiedere di nuovo a chi si riferisce. */
+      nuovaFoto.clientId = clienteIdForzato;
+      await dbUpdate("cantiere_foto", creato.id, { client_id: clienteIdForzato });
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+    } else {
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      apriTagFotoCantiere(nuovaFoto);
+    }
   }catch(err){
     console.error("Caricamento foto non riuscito:", err);
     showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare la foto: " + (err.message || "riprova."));
@@ -8242,10 +8559,12 @@ async function eliminaCantiereFoto(id){
   if(isDbReady()) await dbDelete("cantiere_foto", id);
 }
 
-document.getElementById("cantiereFotoScattaBtn").addEventListener("click", () => document.getElementById("cantiereFotoInput").click());
+document.getElementById("cantiereFotoScattaBtn").addEventListener("click", () => { clienteIdPerProssimaFoto = null; document.getElementById("cantiereFotoInput").click(); });
 document.getElementById("cantiereFotoInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
-  if(f) caricaCantiereFoto(f);
+  const clienteId = clienteIdPerProssimaFoto;
+  clienteIdPerProssimaFoto = null;
+  if(f) caricaCantiereFoto(f, clienteId);
 });
 
 /* ---- Dopo lo scatto: a chi si riferisce la foto? ----
@@ -8581,6 +8900,13 @@ function provaLetturaLocale(testo){
    mostraRisorsaDocumenti) se riconosciuta. */
 const TRIGGER_RISORSA = /^(?:mi serve|mi servirebbe|dammi|mandami|fammi vedere|voglio vedere|recupera|cerca|trova|apri)\s+(?:il|la|lo|i|gli|le)?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|per)?\s*(.+)$/;
 
+/* Sopra questa lunghezza una risposta solo conversazionale (nessuna
+   azione eseguita) si considera "discorsiva" — una spiegazione, un
+   parere, un consiglio — e va mostrata nella scheda grande e
+   chiudibile invece che nel toast, che sparirebbe da solo dopo 8
+   secondi prima di fare in tempo a leggerla. */
+const SOGLIA_RISPOSTA_DISCORSIVA = 180;
+
 function trovaClienteDaParole(parole){
   let trovato = null, corrispondenze = 0;
   for(const c of clients){
@@ -8737,7 +9063,7 @@ function rimuoviImpegniInConferma(){
 function notaContestoRecente(azioni){
   if(!azioni || !azioni.length) return "";
   const elenco = azioni.map((a) => `- ${a.tool}: ${JSON.stringify(a.esito)}`).join("\n");
-  return `\n\n[Contesto: pochi istanti fa hai usato questi strumenti:\n${elenco}\nSe il messaggio sopra sembra una correzione o un seguito di UNA di queste azioni specifiche (es. cambiare solo l'orario o un dettaglio, senza nominare una persona o un cliente diverso da quelli qui sopra), usa gli strumenti giusti per correggerla — capendo da solo, se ce n'è più di una, a quale si riferisce. Se invece nomina qualcun altro, o sembra comunque una richiesta nuova e diversa, ignora completamente questo contesto e trattala come tale.]`;
+  return `\n\n[Contesto: pochi istanti fa hai usato questi strumenti:\n${elenco}\nSe il messaggio sopra sembra una correzione o un seguito di UNA di queste azioni specifiche (es. cambiare solo l'orario o un dettaglio, senza nominare una persona o un cliente diverso da quelli qui sopra), usa gli strumenti giusti per correggerla — capendo da solo, se ce n'è più di una, a quale si riferisce. Caso specifico e frequente: se una di queste azioni ha appena creato un cliente (crea_cliente/trova_o_crea_cliente) e il messaggio sopra è SOLO un nome di persona (da solo, o con gli stessi altri dettagli già dati poco prima, senza un nuovo telefono/lavoro diverso), è quasi sempre l'utente che ripete il nome perché il microfono lo ha capito male la prima volta — usa aggiorna_cliente sullo stesso id per correggere il nome, ANCHE SE il nuovo nome sembra scritto in modo molto diverso da quello già salvato (è proprio il segno che il microfono aveva capito male, non la prova che si tratti di una persona diversa). Se invece il messaggio nomina qualcun altro insieme a dettagli chiaramente nuovi e diversi (un altro telefono, un altro lavoro), o l'utente dice esplicitamente che è un cliente diverso/in più, ignora completamente questo contesto e trattala come una richiesta nuova.]`;
 }
 
 /* Current Focus (EON BRAIN, punto 2) — diverso dal contesto delle
@@ -8946,14 +9272,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     const clienteNomeFocusMic = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
     const azioneFotoMic = azioni.find(a => a.tool === "recupera_foto_cantiere");
     const azioneDocumentiMic = azioni.find(a => a.tool === "recupera_documenti_cliente");
-    if(azioneFotoMic || azioneDocumentiMic){
+    const azioneDocumentiImpresaMic = azioni.find(a => a.tool === "recupera_documenti_impresa");
+    if(azioneFotoMic || azioneDocumentiMic || azioneDocumentiImpresaMic){
       if(azioneFotoMic) mostraRisorsaFoto(azioneFotoMic.esito.foto || [], clienteNomeFocusMic);
-      else mostraRisorsaDocumenti(azioneDocumentiMic.esito.documenti || [], clienteNomeFocusMic);
+      else if(azioneDocumentiMic) mostraRisorsaDocumenti(azioneDocumentiMic.esito.documenti || [], clienteNomeFocusMic);
+      else mostraRisorsaDocumenti(azioneDocumentiImpresaMic.esito.documenti || [], null);
       if(viaVoce) parlaRisposta(risposta.testo || "Ecco quello che ho trovato");
       return;
     }
 
-    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente"];
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
@@ -8967,12 +9295,31 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(/\?\s*$/.test(testoRisp.trim()) && risposta.runId){
           runIdAperto = risposta.runId;
           runIdApertoScadenza = Date.now() + 90 * 1000;
-          hint.textContent = "Ti ho chiesto una cosa — rispondimi pure";
+          /* Il campo di testo qui sotto resta sempre attivo (non solo
+             il microfono): il messaggio lo dice esplicitamente, perché
+             finora non era ovvio che si potesse anche scrivere invece
+             di parlare (segnalato da Gianardi il 23/09/2026). */
+          hint.textContent = "Ti ho chiesto una cosa — rispondimi a voce o scrivendo qui sotto";
         }
         if(/\?\s*$/.test(testoRisp.trim()) && /conferm/i.test(testoRisp) && !/quale/i.test(testoRisp)){
           testoRisp += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
         }
-        showAIToast("Fatto", testoRisp);
+        /* Vedi la stessa nota in organizza(): "Fatto" solo se è stato
+           chiamato almeno uno strumento, mai su una risposta solo
+           conversazionale. Una risposta discorsiva (spiegazione,
+           parere, consiglio) sparirebbe dal toast prima di fare in
+           tempo a leggerla (8 secondi) — sopra una certa lunghezza, e
+           solo quando non è la conferma di un'azione, la mostriamo
+           nella scheda grande e chiudibile invece che nel toast
+           (Gianardi, 23/09/2026). */
+        if(azioni.length === 0 && testoRisp.length > SOGLIA_RISPOSTA_DISCORSIVA){
+          const corpo = document.createElement("div");
+          corpo.className = "risorsa-testo-discorsivo";
+          corpo.textContent = testoRisp;
+          apriRisorsaCard("EON", corpo);
+        } else {
+          showAIToast(azioni.length === 0 ? "" : "Fatto", testoRisp);
+        }
       }
       if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
@@ -9027,6 +9374,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         const testoAvviso = a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.";
         showAIToastConAnnulla("Cliente eliminato", testoAvviso, () => annullaEliminazioneCliente(a.esito));
         daDire.push("Cliente eliminato: " + testoAvviso.replace(/\n+/g, ". "));
+      } else if(a.tool === "elimina_foto_cantiere"){
+        showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
+        daDire.push("Foto eliminata");
       } else if(a.tool === "crea_cliente"){
         mostra("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
@@ -9037,6 +9387,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         mostra("Appunto aggiunto", a.esito.testo);
       } else if(a.tool === "correggi_appunto"){
         mostra("Appunto corretto", a.esito.testo);
+      } else if(a.tool === "crea_preventivo_o_fattura"){
+        mostraRisorsaDocumenti([{ titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale }], a.esito.cliente);
+        daDire.push(a.esito.titolo + " per " + a.esito.cliente + " pronto");
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
@@ -9235,6 +9588,35 @@ function aggiornaHomeHero(gruppiPerGiorno){
     lista.appendChild(riga);
   });
 }
+
+/* Toccando il riquadro "Cosa devo fare oggi" si apre la stessa lista,
+   ma nella scheda grande già usata per le risorse — elenco coinciso e
+   semplice, come richiesto da Gianardi il 23/09/2026 per la "pulizia
+   mentale" — mai quando si tocca la spunta di una riga (quella deve
+   continuare a segnare il singolo impegno come fatto, non aprire la
+   scheda). Sola lettura qui: per spuntare un impegno si resta sul
+   riquadro di casa o si va in Calendario. */
+document.getElementById("homeHeroOggiBox").addEventListener("click", (e) => {
+  if(e.target.closest(".home-hero-oggi-check")) return;
+  const righeOrig = document.querySelectorAll("#homeHeroOggiLista .home-hero-oggi-riga");
+  const corpo = document.createElement("div");
+  if(!righeOrig.length){
+    corpo.innerHTML = '<div class="risorsa-vuoto">Niente in programma per oggi.</div>';
+  } else {
+    righeOrig.forEach(r => {
+      const riga = document.createElement("div");
+      riga.className = "home-hero-oggi-riga" + (r.classList.contains("fatto") ? " fatto" : "");
+      const segno = document.createElement("span");
+      segno.className = "home-hero-oggi-check";
+      if(r.classList.contains("fatto")) segno.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+      const testo = document.createElement("span");
+      testo.textContent = r.querySelector("span:last-child").textContent;
+      riga.appendChild(segno); riga.appendChild(testo);
+      corpo.appendChild(riga);
+    });
+  }
+  apriRisorsaCard("Cosa devo fare oggi", corpo);
+});
 
 /* Organizza la giornata: la stessa cosa dell'orologio nel logo */
 document.getElementById("aiHubGiornata").addEventListener("click", () => {
@@ -9529,6 +9911,45 @@ function testoData(item){
   return null;
 }
 
+/* Bottone microfono compatto e riutilizzabile, un solo colpo di
+   ascolto: usato per comandi rapidi legati a una risorsa già mostrata
+   (es. "mandala per email a Zinchini" su una foto appena recuperata,
+   Gianardi 23/09/2026) — non serve un widget dedicato per ogni caso. */
+function creaMicRapido(callback){
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "risorsa-mic-rapido";
+  btn.setAttribute("aria-label", "Parla per dire cosa fare con questa foto");
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
+  const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!RecognitionAPI){
+    btn.addEventListener("click", () => showAILanding("Microfono non disponibile", "Questo browser non supporta il riconoscimento vocale. Su iPhone funziona da Safari; su Android da Chrome."));
+    return btn;
+  }
+  const riconoscitore = new RecognitionAPI();
+  riconoscitore.lang = "it-IT";
+  riconoscitore.continuous = false;
+  riconoscitore.interimResults = false;
+  let attivo = false;
+  riconoscitore.onstart = () => { attivo = true; btn.classList.add("ascolto"); };
+  riconoscitore.onresult = (e) => {
+    const testo = e.results[0] && e.results[0][0] ? e.results[0][0].transcript : "";
+    if(testo.trim()) callback(testo.trim());
+  };
+  riconoscitore.onerror = (e) => {
+    attivo = false; btn.classList.remove("ascolto");
+    if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+      showAILanding("Microfono non autorizzato", "Per parlare, consenti l'accesso al microfono nelle impostazioni del browser per questa pagina.");
+    }
+  };
+  riconoscitore.onend = () => { attivo = false; btn.classList.remove("ascolto"); };
+  btn.addEventListener("click", () => {
+    if(attivo) return;
+    try{ riconoscitore.start(); }catch(err){ console.warn("Impossibile avviare il microfono:", err.message); }
+  });
+  return btn;
+}
+
 function creaVoceFoto(foto, clienteNome){
   const el = document.createElement("div");
   el.className = "risorsa-voce";
@@ -9552,6 +9973,19 @@ function creaVoceFoto(foto, clienteNome){
   apriBtn.textContent = "Apri";
   apriBtn.addEventListener("click", () => window.open(foto.url, "_blank"));
   btnRiga.appendChild(apriBtn);
+  if(clienteNome){
+    btnRiga.appendChild(creaMicRapido(async (testo) => {
+      if(!BACKEND_CONFIGURED || !currentSession) return;
+      showAIToast("Un attimo…", testo);
+      try{
+        const risposta = await chiediAssistente(`Il professionista sta guardando una foto del cantiere di "${clienteNome}" (url: ${foto.url}) e ha detto a voce cosa farne: "${testo}".`);
+        showAIToast(risposta.stato === "in_attesa_conferma" ? "Conferma richiesta" : "Fatto", risposta.testo || "");
+      }catch(err){
+        console.warn("Comando rapido sulla foto non riuscito:", err.message);
+        showAIToast("Non ci sono riuscita", err.message);
+      }
+    }));
+  }
   el.appendChild(btnRiga);
   if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando la foto: " + foto.url));
   return el;
@@ -10344,6 +10778,7 @@ function navigateTo(page){
   if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
   if(page === "cantiere-appunti") renderCantiereAppunti();
   if(page === "documenti-impresa") renderCantiereDocumenti();
+  if(page === "cantiere-documenti") provaOnboardingDocumenti();
   if(page === "cantiere-foto") renderCantiereFoto();
   if(page === "carta-intestata") renderCartaIntestata();
   if(page === "crea-lettera") renderLetters();
