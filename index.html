@@ -3913,6 +3913,10 @@ async function annullaEliminazioneCliente(esito){
   if(esito.conversation_id) await dbRestore("conversations", esito.conversation_id);
   await ricaricaTuttoERidisegna();
 }
+async function annullaEliminazioneFoto(esito){
+  await dbRestore(esito.tabella, esito.id);
+  await ricaricaTuttoERidisegna();
+}
 
 /* Etichette leggibili per la schermata Cestino: chiave = nome tabella. */
 const ETICHETTA_CESTINO = {
@@ -7815,6 +7819,8 @@ function collegaHubRacconta(){
           a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.",
           () => annullaEliminazioneCliente(a.esito)
         );
+      } else if(a.tool === "elimina_foto_cantiere"){
+        showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
       } else if(a.tool === "crea_cliente"){
         showAIToast("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
@@ -9059,6 +9065,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         const testoAvviso = a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.";
         showAIToastConAnnulla("Cliente eliminato", testoAvviso, () => annullaEliminazioneCliente(a.esito));
         daDire.push("Cliente eliminato: " + testoAvviso.replace(/\n+/g, ". "));
+      } else if(a.tool === "elimina_foto_cantiere"){
+        showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
+        daDire.push("Foto eliminata");
       } else if(a.tool === "crea_cliente"){
         mostra("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){

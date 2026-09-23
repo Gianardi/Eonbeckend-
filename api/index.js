@@ -1632,6 +1632,50 @@ const TOOLS = {
     },
   },
 
+  /* Gianardi, 23/09/2026: "elimina la foto dell'armadio" falliva perché
+     non esisteva nessuno strumento per farlo — EON offriva solo un
+     promemoria. Stesso pattern di elimina_cliente/elimina_impegno:
+     sposta subito nel cestino (recuperabile), nessuna conferma
+     necessaria. Le foto non hanno un nome per essere scelte una per
+     una a voce: senza un id preciso già noto dalla conversazione,
+     elimina la più recente per il cliente/cantiere indicato — è il
+     caso reale che serve davvero (l'ultima foto appena mostrata o
+     caricata), non una selezione fine tra tante foto vecchie. */
+  elimina_foto_cantiere: {
+    risk: "high_impact",
+    annullabileSubito: true,
+    categoria: "azione",
+    schema: {
+      name: "elimina_foto_cantiere",
+      description: "Sposta subito nel cestino (recuperabile) una foto del cantiere già caricata. Usalo quando l'utente chiede di eliminare/cancellare/togliere una foto. Non serve chiedere conferma prima di chiamarlo: è già reversibile.",
+      input_schema: {
+        type: "object",
+        properties: {
+          foto_id: { type: "string", description: "Id della foto esatta da eliminare, se già noto da un recupero recente in questa conversazione (recupera_foto_cantiere). Lascia vuoto per eliminare l'ultima foto caricata per il cliente/cantiere indicato." },
+          cliente_id: { type: "string", description: "Id del cliente a cui è collegata la foto, se noto (di solito da cliente_risolto). Serve solo quando foto_id non è noto, per trovare l'ultima foto di quel cliente." },
+          cantiere_id: { type: "string", description: "Id del cantiere/lavoro specifico, se noto — usalo solo quando il cliente ha più di un lavoro e serve isolare la foto di uno in particolare." },
+        },
+      },
+    },
+    async run(input, ctx) {
+      let fotoId = input.foto_id;
+      if (eStringaNonVuota(fotoId)) {
+        if (!eUuid(fotoId)) throw fail("Id foto non valido");
+      } else {
+        if (eStringaNonVuota(input.cliente_id) && !eUuid(input.cliente_id)) throw fail("Id cliente non valido");
+        if (eStringaNonVuota(input.cantiere_id) && !eUuid(input.cantiere_id)) throw fail("Id cantiere non valido");
+        let query = `cantiere_foto?select=id&deleted_at=is.null&order=created_at.desc&limit=1`;
+        if (eStringaNonVuota(input.cantiere_id)) query += `&cantiere_id=eq.${encodeURIComponent(input.cantiere_id)}`;
+        else if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
+        const righe = await db(query, { method: "GET" }, ctx.accessToken);
+        if (!Array.isArray(righe) || !righe.length) throw fail("Non trovo nessuna foto da eliminare.", 404);
+        fotoId = righe[0].id;
+      }
+      await db(`cantiere_foto?id=eq.${fotoId}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
+      return { id: fotoId, tabella: "cantiere_foto" };
+    },
+  },
+
   /* EON BRAIN, 05/09/2026: un cliente può avere più lavori/cantieri nel
      tempo (raro ma reale, vedi libro/edile.md) — questo strumento
      elenca quelli di un cliente per disambiguare, sullo stesso
