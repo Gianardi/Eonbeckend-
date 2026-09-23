@@ -2483,14 +2483,20 @@ di Gianardi.
    - Se non c'è nessun contesto recente E non c'è un cliente che
      corrisponde in modo univoco (nessuno, o più di uno con quel
      termine) → chiedere "a quale cliente ti riferisci?".
-4. **Il microfono nella sezione "appunti" non aggiunge l'appunto.**
-   Parlando nel microfono in quella sezione, l'appunto non viene
-   creato. Da correggere.
-5. **Etichetta "Fatto" mostrata quando non è stato fatto nulla.**
-   Esempio: a "Ciao" EON risponde bene ("Ciao! Sono pronto ad
-   aiutarti...") ma con l'etichetta "Fatto" sopra, che non ha senso
-   quando non c'è stata nessuna azione.
-6. **Calendario non ordinato cronologicamente.** Un appuntamento delle
+4. **FATTO (23/09/2026).** ~~Il microfono nella sezione "appunti" non
+   aggiunge l'appunto.~~ Causa reale: parlare riempiva solo il campo di
+   testo, serviva poi un secondo tocco separato su "invio" per salvare
+   — diverso da ogni altro microfono dell'app, dove parlare esegue
+   subito l'azione. Ora fermare l'ascolto (secondo tocco sul
+   microfono) salva direttamente.
+5. **FATTO (23/09/2026).** ~~Etichetta "Fatto" mostrata quando non è
+   stato fatto nulla.~~ Esempio: a "Ciao" EON rispondeva bene ma con
+   l'etichetta "Fatto" sopra, senza senso quando non c'è stata nessuna
+   azione. Ora l'etichetta compare solo se è stato chiamato almeno uno
+   strumento (anche di sola lettura); su una risposta solo
+   conversazionale resta vuota.
+6. **FATTO (23/09/2026).** ~~Calendario non ordinato
+   cronologicamente.~~ Un appuntamento delle
    18:30 compare prima di appuntamenti del mattino nella stessa vista.
    Confermato con screenshot da Gianardi (23/09/2026): succede sia
    nella card "Cosa devo fare oggi" in home sia nella pagina Calendario
@@ -2521,10 +2527,11 @@ di Gianardi.
    foto dell'armadio", EON risponde di non avere questa funzione. Va
    aggiunta la possibilità di eliminare foto — non solo in
    cantiere/cliente-cantiere, ma anche in appunti e documenti.
-10. **Lettura ad alta voce del link tecnico della foto.** Quando EON
-    recupera una foto via microfono, legge anche l'URL completo di
-    Supabase invece di dire semplicemente "ecco la foto di zinchini,
-    cosa vuoi fare?".
+10. **FATTO (23/09/2026).** ~~Lettura ad alta voce del link tecnico
+    della foto.~~ Aggiunta un'istruzione nel prompt di sistema: quando
+    si mostra una risorsa già visibile in una scheda dell'app (non
+    quando la si inoltra con manda_messaggio), il testo/la voce di EON
+    restano brevi e naturali, mai con l'url del file.
 
 ### B. Comportamento dell'AI da correggere (stile delle risposte)
 
