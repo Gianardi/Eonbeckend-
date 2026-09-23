@@ -2454,22 +2454,27 @@ di Gianardi.
 
 ### A. Bug veri (comportamento sbagliato rispetto a oggi)
 
-1. **Correzione vocale di un nome cliente non funziona bene.** Esempio
-   reale: detto "Franci baicchi, 33384393, impianto elettrico", EON ha
-   capito e salvato "Franco Bike". Gianardi ha ripremuto il microfono
-   e ridetto il nome corretto, ma EON ha modificato il cliente in modo
-   sbagliato invece di correggere semplicemente il nome in "Franco
-   Baicchi". Deve: riconoscere che si tratta di una correzione sullo
-   stesso cliente appena creato/in corso, e correggere solo il campo
-   nome con quanto detto la seconda volta.
-2. **Multi-appuntamento da un solo messaggio non gestito.** Esempio
-   reale, un solo messaggio vocale: "Fra un'ora incontro con Giulia.
-   Domattina ore 12 colazione con dottor Righi poi pomeriggio partita
-   alle 15 e dovrò essere lì per le 13:40. Portare distinta." EON deve
-   segnare TUTTI gli impegni distinti nello stesso messaggio, con gli
-   orari calcolati correttamente (es. "fra un'ora" rispetto all'ora
-   reale in cui è stato detto, non un orario fisso), non solo il primo
-   o in modo confuso.
+1. **FATTO (23/09/2026).** ~~Correzione vocale di un nome cliente non
+   funziona bene.~~ Esempio reale: detto "Franci baicchi, 33384393,
+   impianto elettrico", EON ha capito e salvato "Franco Bike"; ripetuto
+   il nome corretto al microfono, non veniva trattato come correzione.
+   Causa: il meccanismo di correzione già esistente diceva di ignorare
+   il contesto recente quando il nuovo messaggio "nomina una persona
+   diversa" — ma un nome frainteso dal microfono è quasi per
+   definizione diverso nel testo. Aggiunto un caso esplicito: un nome
+   da solo, subito dopo aver creato un cliente, è quasi sempre una
+   ripetizione per correggere il nome frainteso, anche se sembra molto
+   diverso da quello salvato.
+2. **FATTO (23/09/2026).** ~~Multi-appuntamento da un solo messaggio
+   non gestito.~~ Esempio reale, un solo messaggio vocale: "Fra un'ora
+   incontro con Giulia. Domattina ore 12 colazione con dottor Righi poi
+   pomeriggio partita alle 15 e dovrò essere lì per le 13:40. Portare
+   distinta." Aggiunta un'istruzione esplicita: un messaggio lungo
+   detto tutto insieme nasconde spesso più orari distinti anche dentro
+   una frase che sembra su un solo evento — un "orario di arrivo/
+   preparazione" più un "orario dell'evento vero" sono due impegni
+   distinti, non uno; gli orari relativi ("fra un'ora") vanno sempre
+   calcolati dall'ora corrente indicata nel prompt.
 3. **FATTO (23/09/2026).** ~~Riferimento recente a un cliente non
    riconosciuto in un comando successivo.~~ Causa reale trovata,
    diversa da quella ipotizzata all'inizio: non era un problema di
@@ -2505,14 +2510,16 @@ di Gianardi.
    nella logica dell'AI, è solo nel rendering delle due liste in
    `index.html`, che va ordinato per orario prima di disegnare le
    card.
-7. **Domanda ripetuta = risposte diverse.** La stessa domanda esatta
-   fatta due volte ha dato due risposte diverse (un caso concreto:
-   "programma di domani" — la prima volta ha risposto "dovrei sapere
-   cosa hai in programma domani" anche se tutto era già segnato in
-   calendario, la seconda volta ha risposto correttamente con la
-   lista). Serve capire la causa: non deterministico quando dovrebbe
-   esserlo (i dati letti dal calendario sono gli stessi in entrambi i
-   casi).
+7. **FATTO (23/09/2026).** ~~Domanda ripetuta = risposte diverse.~~ La
+   stessa domanda esatta fatta due volte ha dato due risposte diverse
+   ("programma di domani" — la prima volta "dovrei sapere cosa hai in
+   programma" pur avendo tutto già segnato). Causa probabile:
+   elenca_appuntamenti era descritto solo come controllo preliminare
+   prima di aggiungere impegni, non come lo strumento per rispondere a
+   "cosa ho in programma" — a volte il modello non lo chiamava affatto.
+   Rafforzata la descrizione del tool e aggiunta una regola esplicita:
+   chiamarlo sempre prima di rispondere su impegni/programma di un
+   periodo, mai dare per scontato di non saperlo.
 8. **FATTO (23/09/2026).** ~~Recupero documenti "impresa" (non legati
    a un cliente) non funziona.~~ Causa reale: esisteva solo
    recupera_documenti_cliente (legge dalla conversazione di UN
