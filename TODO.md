@@ -2540,57 +2540,39 @@ di Gianardi.
 
 ### B. Comportamento dell'AI da correggere (stile delle risposte)
 
-11. **Non deve mai descrivere a parole faccine/emoji/simboli nella sua
-    risposta** (es. detto letteralmente "faccina sorridente" in un
-    caso reale) — mai nominarli, vanno solo mostrati/letti come sono.
-12. **Le date vanno sempre dette in modo breve e parlato** (già
-    corretto nel prompt il 18/09, ma da riverificare — nella lista
-    compare di nuovo come problema, quindi va controllato se il
-    comportamento è davvero cambiato in produzione).
-13. **Risposte tecniche troppo prolisse.** Su domande tecniche (es.
-    TFR, SCIA, "da dove inizio a rifare un pavimento") EON dà risposte
-    corrette ma lunghe, con elenchi puntati estesi. Deve rispondere
-    secco, concreto, conciso e preciso — andare dritto al punto della
-    domanda specifica e della professione dell'utente; è poi l'utente
-    a chiedere approfondimenti se vuole.
-14. **Su una domanda tecnica generica, EON dovrebbe prima chiedere il
-    dettaglio specifico mancante invece di dare una risposta generica
-    presa "da internet/da quello che sa l'AI".** Esempio: "Devo
-    cambiare una stanza di una casa, devo chiedere la SCIA?" — invece
-    di dare la regola generale, dovrebbe chiedere cosa esattamente si
-    fa in quella stanza per dare una risposta specifica e risolutiva.
-15. **Riepiloghi/consigli operativi (programma del giorno, cosa fare
-    prima) troppo lunghi e con troppi simboli.** Devono essere secchi,
-    diretti, essenziali — l'obiettivo esplicito di Gianardi è la
-    "pulizia mentale": svuotare la testa dell'imprenditore, non
-    riempirla. Esempio di risposta CORRETTA (come l'ha riformulata
-    lui): a "cosa mi consigli di fare domattina" con already un
-    programma pieno → "Mattina appena sveglio pensi ai prospect e
-    clienti aggiuntivi. Relax durante la giornata e torni alle 18 per
-    gli altri due appuntamenti." — non l'elenco lungo con spiegazioni
-    che EON aveva dato.
-16. **Preventivi/fatture: EON deve poterli creare subito, non solo
-    segnare un promemoria.** Oggi se gli chiedi "fammi un preventivo a
-    Mario Rampini per cambio porte" risponde che non può crearli e
-    offre solo un promemoria. Il comportamento corretto, in ordine di
-    completezza dei dati forniti:
-    - Se manca tutto (solo il nome del preventivo/cliente, senza
-      importi/dettagli) → EON deve rispondere "Ok te lo preparo, mi
-      fornisci i dati del preventivo?" e poi, una volta ricevuti,
-      generarlo davvero.
-    - Se il cliente citato non esiste ancora → EON deve dirlo e
-      crearlo lui stesso ("Ok, ti creo intanto il cliente. Mi
-      fornisci i dati del preventivo così te lo faccio?").
-    - Se vengono forniti già tutti i dati in una volta (es. "mi fai
-      preventivo Lombardi per porte e finestre da 1200+IVA" e Lombardi
-      non è ancora cliente) → EON deve creare il cliente E il
-      preventivo subito, senza altri passaggi, mostrandolo nello
-      stile della card grande già usato nella schermata iniziale.
-    - Stesso principio, identico, per le fatture.
-    - Principio generale di Gianardi: **l'immediatezza tramite
-      comunicazione a voce/testo è il fondamento di tutte le attività
-      di EON** — va tenuto come criterio guida per ogni nuova
-      funzione, non solo per preventivi/fatture.
+11. **FATTO (23/09/2026).** ~~Non deve mai descrivere a parole
+    faccine/emoji/simboli nella sua risposta.~~ Aggiunta un'istruzione
+    esplicita nel prompt.
+12. **FATTO (23/09/2026), da riverificare in produzione.** ~~Le date
+    vanno sempre dette in modo breve e parlato.~~ L'istruzione era già
+    corretta nel prompt dal 18/09 e resta invariata — segnalato di
+    nuovo da Gianardi, ma nessuna causa nuova trovata: probabile che il
+    test fosse su una versione di produzione precedente al merge di
+    quella correzione. Da confermare col prossimo test.
+13. **FATTO (23/09/2026).** ~~Risposte tecniche troppo prolisse.~~
+    Aggiunta una regola di concisione esplicita per le risposte
+    "consulta"/di parere, con l'obiettivo dichiarato da Gianardi della
+    "pulizia mentale".
+14. **FATTO (23/09/2026).** ~~Su una domanda tecnica generica, EON
+    dovrebbe prima chiedere il dettaglio specifico mancante.~~ Stessa
+    regola del punto 13: quando la risposta dipenderebbe dai dettagli
+    del caso specifico, fare prima la domanda di chiarimento invece
+    della regola generale.
+15. **FATTO (23/09/2026).** ~~Riepiloghi/consigli operativi troppo
+    lunghi.~~ Stessa regola dei punti 13/14, con l'esempio esatto di
+    Gianardi ("mattina pensa a X e Y, poi libero fino alle 18...")
+    incluso nel prompt come modello di risposta corretta.
+16. **FATTO (23/09/2026).** ~~Preventivi/fatture: EON deve poterli
+    creare subito.~~ Il punto più importante della sezione. Nuovo tool
+    crea_preventivo_o_fattura, stessa identica logica/formato già usata
+    dalla creazione manuale in chat — un documento creato da EON è
+    indistinguibile, per il resto dell'app, da uno compilato a mano.
+    Implementati tutti e tre i casi descritti da Gianardi (dati
+    mancanti → chiedili prima; cliente inesistente + dati mancanti →
+    crea il cliente e poi chiedi; cliente inesistente + dati già dati
+    → crea cliente e documento insieme, subito). Si apre nella stessa
+    scheda a card già usata per i documenti recuperati. Principio
+    dell'immediatezza annotato nel prompt come criterio guida generale.
 
 ### C. Piccole funzionalità mancanti (UI/UX)
 
