@@ -857,6 +857,7 @@
   .ai-toast-icon svg{ width:15px;height:15px; }
   .ai-toast-body{ flex:1; min-width:0; }
   .ai-toast-title{ font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:3px; }
+  .ai-toast-title:empty{ display:none; }
   .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; white-space:pre-line; }
   .ai-toast.decisione{ background:var(--card); border:2px solid var(--text); box-shadow:0 12px 34px rgba(20,23,29,.16); }
   .ai-toast-actions{ display:flex; gap:8px; margin-top:12px; }
@@ -1046,6 +1047,7 @@
   }
   .hub-racconta.fatto .hub-racconta-ico{ background:var(--teal); }
   .hub-racconta-titolo{ font-size:13.5px; font-weight:800; color:var(--violet); }
+  .hub-racconta-titolo:empty{ display:none; }
   .hub-racconta.fatto .hub-racconta-titolo{ color:#00907A; }
   .hub-racconta-sotto{ font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.4; white-space:pre-line; }
   .hub-racconta-campo{
@@ -7750,7 +7752,12 @@ function collegaHubRacconta(){
         if(/\?\s*$/.test(testo.trim()) && /conferm/i.test(testo) && !/quale/i.test(testo)){
           testo += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
         }
-        stato("attesa", "Fatto", testo);
+        /* "Fatto" ha senso solo se EON ha davvero eseguito un'azione
+           (anche solo una lettura, es. cercare un cliente): su una
+           risposta puramente conversazionale (nessuno strumento
+           chiamato, es. "ciao") l'etichetta è fuorviante — segnalato
+           da Gianardi il 23/09/2026. */
+        stato("attesa", azioni.length === 0 ? "" : "Fatto", testo);
       }
       return;
     }
@@ -8984,7 +8991,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(/\?\s*$/.test(testoRisp.trim()) && /conferm/i.test(testoRisp) && !/quale/i.test(testoRisp)){
           testoRisp += "\n\n(Se non vedi un pulsante di conferma qui sopra, usa i pulsanti dell'app — Calendario, Clienti o Chat — per farlo direttamente: è più affidabile.)";
         }
-        showAIToast("Fatto", testoRisp);
+        /* Vedi la stessa nota in organizza(): "Fatto" solo se è stato
+           chiamato almeno uno strumento, mai su una risposta solo
+           conversazionale. */
+        showAIToast(azioni.length === 0 ? "" : "Fatto", testoRisp);
       }
       if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
