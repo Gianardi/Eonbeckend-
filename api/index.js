@@ -2309,6 +2309,7 @@ async function registraRichiesta(dati) {
     owner_id: dati.user.id,
     tipo: dati.tipo,
     messaggio: dati.messaggio || null,
+    risposta: dati.risposta || null,
     modello: dati.modello || null,
     giri: dati.giri,
     strumenti: dati.strumenti,
@@ -2704,7 +2705,7 @@ async function handleAssistant(req, res, user, accessToken) {
        parte, e una scrittura non attesa rischierebbe di non arrivare mai
        (stesso motivo per cui registraOperazione, sopra, è sempre awaited). */
     await registraRichiesta({
-      user, tipo: tipoTurno, messaggio: body.messaggio, modello: modelloUsato, giri: giriUsati,
+      user, tipo: tipoTurno, messaggio: body.messaggio, risposta: risposta && risposta.testo, modello: modelloUsato, giri: giriUsati,
       strumenti: azioniEseguite.map((a) => a.tool), stato: risposta && risposta.stato,
       durataMs: Date.now() - inizioTurno,
     });

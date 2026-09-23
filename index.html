@@ -193,12 +193,12 @@
   .client-tag b{ color:var(--text); font-weight:800; }
 
   .back-link{
-    display:inline-flex; align-items:center; gap:6px;
-    font-size:12px; font-weight:700; color:var(--muted);
-    cursor:pointer; margin-bottom:12px;
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:14px; font-weight:800; color:var(--text);
+    cursor:pointer; margin-bottom:14px; padding:6px 4px 6px 0;
   }
-  .back-link:hover{ color:var(--text); }
-  .back-link svg{ width:13px; height:13px; }
+  .back-link:hover{ color:var(--muted); }
+  .back-link svg{ width:20px; height:20px; flex:none; }
 
   .topbar{ padding-top:2px;
     display:flex; align-items:center; justify-content:center;
@@ -442,6 +442,11 @@
   .module-icon.coral{ background:var(--coral); }
   .module-title{ font-family:'Manrope'; font-size:14px; font-weight:900; letter-spacing:-.01em; color:var(--text); margin-bottom:3px; }
   .module-sub{ font-size:11px; color:var(--muted); line-height:1.35; }
+  .ai-log-risposta{
+    margin-top:8px; padding:9px 11px; border-radius:10px;
+    background:rgba(20,23,29,.045); font-size:12px; color:var(--text);
+    line-height:1.45; white-space:pre-line;
+  }
 
   .card-panel{ background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-sm); }
   #page-obiettivi .card-panel{ border:1.5px solid rgba(20,23,29,.18); }
@@ -468,6 +473,13 @@
     font-size:12px; font-weight:700; color:var(--muted);
     background:rgba(20,23,29,.045); padding:4px 10px; border-radius:20px;
   }
+  .card-header-destra{ display:flex; align-items:center; gap:8px; flex:none; }
+  .card-header-add{
+    width:28px; height:28px; flex:none; border-radius:50%; border:none;
+    background:var(--text); color:#fff; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-family:inherit;
+  }
+  .card-header-add svg{ width:15px; height:15px; }
 
   .mini-ring{ display:flex; align-items:center; gap:9px; flex:none; }
   .mini-ring svg{ transform:rotate(-90deg); }
@@ -1492,6 +1504,13 @@
   .risorsa-canale.disabilitato{ opacity:.45; cursor:default; }
   .risorsa-canale.disabilitato svg{ color:var(--muted); }
   .risorsa-vuoto{ color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
+  .risorsa-mic-rapido{
+    width:38px; height:38px; flex:none; border-radius:50%; border:1px solid var(--border);
+    background:var(--card); color:var(--indigo); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-family:inherit;
+  }
+  .risorsa-mic-rapido svg{ width:17px; height:17px; }
+  .risorsa-mic-rapido.ascolto{ background:var(--indigo); color:#fff; }
 
   /* la scheda del documento dentro la conversazione */
   .msg-documento{
@@ -2260,8 +2279,8 @@
         <div class="home-hero-hint" id="cantiereClienteHint" style="margin-bottom:14px;">Aggiungi o modifica un cliente: nome, contatto, cosa deve fare — ci penso io</div>
         <div class="home-hero-textwrap">
           <textarea class="home-hero-campo" id="cantiereClienteCampo" rows="2" placeholder="Es. Mario Rossi, 333 1234567, deve rifare il tetto"></textarea>
-          <button class="home-hero-send" id="cantiereClienteSend" aria-label="Invia" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <button class="home-hero-send" id="cantiereClienteSend" aria-label="Aggiungi" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
       </div>
@@ -2292,8 +2311,8 @@
         <div class="home-hero-hint" id="cantiereAppuntiHint" style="margin-bottom:14px;">Tocca il microfono per dettare, o scrivi</div>
         <div class="home-hero-textwrap">
           <textarea class="home-hero-campo" id="cantiereAppuntiCampo" rows="3" placeholder="Scrivi un appunto sul cantiere..."></textarea>
-          <button class="home-hero-send" id="cantiereAppuntiSend" aria-label="Salva appunto" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <button class="home-hero-send" id="cantiereAppuntiSend" aria-label="Aggiungi appunto" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
         <button type="button" id="cantiereAppuntiAnnullaModifica" style="display:none; margin-top:8px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:4px;">Annulla modifica</button>
@@ -2369,7 +2388,15 @@
       </button>
 
       <div class="card-panel">
-        <div class="card-header"><h2>Documenti</h2><span class="count" id="cantiereDocumentiCount">0</span></div>
+        <div class="card-header">
+          <h2>Documenti</h2>
+          <div class="card-header-destra">
+            <span class="count" id="cantiereDocumentiCount">0</span>
+            <button class="card-header-add" id="cantiereDocumentiAddBtn" type="button" aria-label="Aggiungi documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
         <div id="cantiereDocumentiLista" class="azienda-list"></div>
       </div>
     </div>
@@ -4059,9 +4086,14 @@ async function renderAiRequestLog(){
       : "(nessun testo, es. un turno di conferma)";
     const strumenti = Array.isArray(riga.strumenti) && riga.strumenti.length ? riga.strumenti.join(", ") : null;
 
+    /* Toccando la riga si vede anche la risposta che EON ha dato in
+       quel turno (non solo la domanda) — richiesto da Gianardi il
+       23/09/2026. Righe vecchie, scritte prima di questa colonna,
+       restano senza risposta salvata: lo diciamo chiaramente invece di
+       lasciare la riga muta al tocco. */
     const row = document.createElement("div");
     row.className = "azienda-link-card";
-    row.style.cursor = "default";
+    row.style.cursor = "pointer";
     row.innerHTML = `
       <div class="azienda-link-card-body">
         <div class="module-title">${escapeHtml(messaggio)}</div>
@@ -4071,8 +4103,16 @@ async function renderAiRequestLog(){
           ${strumenti ? " · " + escapeHtml(strumenti) : ""}
         </div>
         ${riga.errore ? `<div class="module-sub" style="color:#c0392b;margin-top:4px;">${escapeHtml(riga.errore)}</div>` : ""}
+        <div class="ai-log-risposta" style="display:none;"></div>
       </div>
     `;
+    row.addEventListener("click", () => {
+      const box = row.querySelector(".ai-log-risposta");
+      const aperta = box.style.display !== "none";
+      if(aperta){ box.style.display = "none"; return; }
+      box.textContent = riga.risposta || "(nessuna risposta salvata per questo turno — es. una conferma, o una riga precedente a questa funzione)";
+      box.style.display = "block";
+    });
     wrap.appendChild(row);
   });
 }
@@ -8216,6 +8256,7 @@ async function eliminaCantiereDocumento(id){
 }
 
 document.getElementById("cantiereDocumentiCaricaBtn").addEventListener("click", () => document.getElementById("cantiereDocumentiInput").click());
+document.getElementById("cantiereDocumentiAddBtn").addEventListener("click", () => document.getElementById("cantiereDocumentiInput").click());
 document.getElementById("cantiereDocumentiInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
   if(f) caricaCantiereDocumento(f);
@@ -9589,6 +9630,45 @@ function testoData(item){
   return null;
 }
 
+/* Bottone microfono compatto e riutilizzabile, un solo colpo di
+   ascolto: usato per comandi rapidi legati a una risorsa già mostrata
+   (es. "mandala per email a Zinchini" su una foto appena recuperata,
+   Gianardi 23/09/2026) — non serve un widget dedicato per ogni caso. */
+function creaMicRapido(callback){
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "risorsa-mic-rapido";
+  btn.setAttribute("aria-label", "Parla per dire cosa fare con questa foto");
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
+  const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!RecognitionAPI){
+    btn.addEventListener("click", () => showAILanding("Microfono non disponibile", "Questo browser non supporta il riconoscimento vocale. Su iPhone funziona da Safari; su Android da Chrome."));
+    return btn;
+  }
+  const riconoscitore = new RecognitionAPI();
+  riconoscitore.lang = "it-IT";
+  riconoscitore.continuous = false;
+  riconoscitore.interimResults = false;
+  let attivo = false;
+  riconoscitore.onstart = () => { attivo = true; btn.classList.add("ascolto"); };
+  riconoscitore.onresult = (e) => {
+    const testo = e.results[0] && e.results[0][0] ? e.results[0][0].transcript : "";
+    if(testo.trim()) callback(testo.trim());
+  };
+  riconoscitore.onerror = (e) => {
+    attivo = false; btn.classList.remove("ascolto");
+    if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+      showAILanding("Microfono non autorizzato", "Per parlare, consenti l'accesso al microfono nelle impostazioni del browser per questa pagina.");
+    }
+  };
+  riconoscitore.onend = () => { attivo = false; btn.classList.remove("ascolto"); };
+  btn.addEventListener("click", () => {
+    if(attivo) return;
+    try{ riconoscitore.start(); }catch(err){ console.warn("Impossibile avviare il microfono:", err.message); }
+  });
+  return btn;
+}
+
 function creaVoceFoto(foto, clienteNome){
   const el = document.createElement("div");
   el.className = "risorsa-voce";
@@ -9612,6 +9692,19 @@ function creaVoceFoto(foto, clienteNome){
   apriBtn.textContent = "Apri";
   apriBtn.addEventListener("click", () => window.open(foto.url, "_blank"));
   btnRiga.appendChild(apriBtn);
+  if(clienteNome){
+    btnRiga.appendChild(creaMicRapido(async (testo) => {
+      if(!BACKEND_CONFIGURED || !currentSession) return;
+      showAIToast("Un attimo…", testo);
+      try{
+        const risposta = await chiediAssistente(`Il professionista sta guardando una foto del cantiere di "${clienteNome}" (url: ${foto.url}) e ha detto a voce cosa farne: "${testo}".`);
+        showAIToast(risposta.stato === "in_attesa_conferma" ? "Conferma richiesta" : "Fatto", risposta.testo || "");
+      }catch(err){
+        console.warn("Comando rapido sulla foto non riuscito:", err.message);
+        showAIToast("Non ci sono riuscita", err.message);
+      }
+    }));
+  }
   el.appendChild(btnRiga);
   if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando la foto: " + foto.url));
   return el;

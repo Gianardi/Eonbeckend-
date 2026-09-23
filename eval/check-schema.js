@@ -36,7 +36,7 @@ const CONTRATTO = {
   condomini: ["id", "owner_id", "client_id", "nome", "ruolo", "unita_immobiliare", "quota_millesimale", "telefono", "morosita_importo", "morosita_da", "created_at", "deleted_at"],
   incomes: ["id", "owner_id", "client_name", "description", "amount", "due_date", "status", "created_at", "deleted_at"],
   ai_audit_log: ["id", "owner_id", "tool", "input", "esito", "stato", "created_at"],
-  ai_request_log: ["id", "owner_id", "tipo", "messaggio", "modello", "giri", "strumenti", "stato", "errore", "durata_ms", "created_at"],
+  ai_request_log: ["id", "owner_id", "tipo", "messaggio", "risposta", "modello", "giri", "strumenti", "stato", "errore", "durata_ms", "created_at"],
   ai_runs: ["id", "owner_id", "stato", "messaggi", "in_sospeso", "azioni", "created_at", "updated_at"],
 };
 
