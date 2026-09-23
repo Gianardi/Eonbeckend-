@@ -2492,6 +2492,16 @@ di Gianardi.
    quando non c'è stata nessuna azione.
 6. **Calendario non ordinato cronologicamente.** Un appuntamento delle
    18:30 compare prima di appuntamenti del mattino nella stessa vista.
+   Confermato con screenshot da Gianardi (23/09/2026): succede sia
+   nella card "Cosa devo fare oggi" in home sia nella pagina Calendario
+   vera e propria — in entrambe l'ordine mostrato è 18:30, 08:00,
+   09:00, 18:00 (ordine di creazione, non di orario). Dettaglio
+   diagnostico importante: il toast di conferma che EON genera da solo
+   dopo aver creato i 4 impegni li elenca invece nell'ordine corretto
+   (08:00, 09:00, 18:00, 18:30) — quindi il problema NON è nei dati né
+   nella logica dell'AI, è solo nel rendering delle due liste in
+   `index.html`, che va ordinato per orario prima di disegnare le
+   card.
 7. **Domanda ripetuta = risposte diverse.** La stessa domanda esatta
    fatta due volte ha dato due risposte diverse (un caso concreto:
    "programma di domani" — la prima volta ha risposto "dovrei sapere
