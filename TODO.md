@@ -2640,19 +2640,23 @@ di Gianardi.
     aziendali recuperabili da EON.~~ Nuovo tool
     recupera_documenti_impresa, si apre nella stessa scheda a card già
     usata in home.
-33. **Primo formato personalizzato per fattura/preventivo/lettera/
-    carta intestata/cartello fine lavori.** Al primo accesso alla
-    sezione documenti (per chi non ha ancora impostato un formato),
-    proporre una scelta:
-    - "Scegli il formato della tua fattura caricando la foto di una
-      fattura che usi già" (EON legge la foto e riproduce il
-      formato), oppure
-    - "Usa il modello di EON" (EON decide lui il formato).
-    Una volta scelto il formato, si accede alla sezione normale con le
-    funzionalità già discusse sopra (preventivi/fatture creati subito
-    da EON, ecc.).
-34. **Possibilità per gli utenti di mandare un feedback** per
-    migliorare l'app, direttamente dall'interno.
+33. **FATTO (23/09/2026).** ~~Primo formato personalizzato per
+    fattura/preventivo/lettera/carta intestata/cartello fine
+    lavori.~~ Al primo accesso a Documenti senza Carta intestata
+    salvata, propone la scelta "Scegli il formato da una foto"
+    (visione di Claude legge nome azienda/indirizzo/P.IVA/telefono/
+    email da una foto e pre-compila il modulo, mai un salvataggio
+    automatico) o "Usa il modello di EON" (prosegue con il default già
+    esistente).
+34. **FATTO (23/09/2026).** ~~Possibilità per gli utenti di mandare un
+    feedback.~~ Nuova voce "Manda un feedback" nel menu, nuova tabella
+    feedback (migrazione additiva da applicare in produzione).
+
+**Restano aperti in questa sezione, servono decisioni di Gianardi
+prima di poter procedere**: 30 (meteo) e 31 (mappe/traffico) —
+entrambi richiedono un servizio esterno a pagamento: serve scegliere
+il fornitore (es. OpenWeather per il meteo, Google Maps o alternative
+per le mappe) e chi ne copre il costo, prima che si possano collegare.
 
 ### E. Redesign UI/UX (grafica e layout)
 
