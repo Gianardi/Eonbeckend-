@@ -8072,7 +8072,7 @@ async function eliminaCantiereAppunto(id){
     testoSessione = "";
     testoIniziale = campo.value;
     mic.classList.add("ascolto");
-    hint.textContent = "Ti ascolto… tocca di nuovo per fermarti";
+    hint.textContent = "Ti ascolto… tocca di nuovo per salvare";
   };
   riconoscitore.onresult = (e) => {
     let t = "";
@@ -8100,7 +8100,17 @@ async function eliminaCantiereAppunto(id){
   };
 
   mic.addEventListener("click", () => {
-    if(attivo){ fermaAscolto(); return; }
+    /* Ovunque altro nell'app, parlare al microfono esegue subito
+       l'azione — qui invece serviva un secondo tocco su "invio" dopo
+       aver dettato, e l'appunto sembrava non salvarsi mai (segnalato
+       da Gianardi il 23/09/2026). Ora il secondo tocco sul microfono
+       (quello che ferma l'ascolto) salva direttamente, senza bisogno
+       di toccare anche "invio". */
+    if(attivo){
+      fermaAscolto();
+      if(campo.value.trim().length >= 2) salva();
+      return;
+    }
     if(inCorso) return;
     attivo = true;
     try{ riconoscitore.start(); }
