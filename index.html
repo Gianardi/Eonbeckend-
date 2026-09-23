@@ -366,7 +366,7 @@
   .home-hero-cal-testo b{ font-family:'Manrope'; font-size:14px; font-weight:800; }
   .home-hero-cal-testo span{ font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px; }
   .home-hero-cal-freccia{ width:14px; height:14px; flex:none; color:rgba(255,255,255,.6); }
-  .home-hero-oggi{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 15px; }
+  .home-hero-oggi{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 15px; cursor:pointer; }
   .home-hero-oggi-titolo{ font-family:'Manrope'; font-size:13px; font-weight:800; margin-bottom:9px; color:var(--text); }
   .home-hero-oggi-riga{ display:flex; align-items:center; gap:10px; padding:7px 0; font-size:13px; color:var(--text); }
   .home-hero-oggi-riga.fatto{ color:var(--faint); text-decoration:line-through; }
@@ -1509,6 +1509,7 @@
   .risorsa-canale.disabilitato{ opacity:.45; cursor:default; }
   .risorsa-canale.disabilitato svg{ color:var(--muted); }
   .risorsa-vuoto{ color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
+  .risorsa-testo-discorsivo{ font-size:14px; line-height:1.6; color:var(--text); white-space:pre-line; padding:4px 2px; }
   .risorsa-mic-rapido{
     width:38px; height:38px; flex:none; border-radius:50%; border:1px solid var(--border);
     background:var(--card); color:var(--indigo); display:flex; align-items:center; justify-content:center;
@@ -2228,7 +2229,7 @@
           <svg class="home-hero-cal-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </button>
 
-        <div class="home-hero-oggi">
+        <div class="home-hero-oggi" id="homeHeroOggiBox" role="button" tabindex="0">
           <div class="home-hero-oggi-titolo">Cosa devo fare oggi</div>
           <div id="homeHeroOggiLista"><div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div></div>
         </div>
@@ -8746,6 +8747,13 @@ function provaLetturaLocale(testo){
    mostraRisorsaDocumenti) se riconosciuta. */
 const TRIGGER_RISORSA = /^(?:mi serve|mi servirebbe|dammi|mandami|fammi vedere|voglio vedere|recupera|cerca|trova|apri)\s+(?:il|la|lo|i|gli|le)?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|per)?\s*(.+)$/;
 
+/* Sopra questa lunghezza una risposta solo conversazionale (nessuna
+   azione eseguita) si considera "discorsiva" — una spiegazione, un
+   parere, un consiglio — e va mostrata nella scheda grande e
+   chiudibile invece che nel toast, che sparirebbe da solo dopo 8
+   secondi prima di fare in tempo a leggerla. */
+const SOGLIA_RISPOSTA_DISCORSIVA = 180;
+
 function trovaClienteDaParole(parole){
   let trovato = null, corrispondenze = 0;
   for(const c of clients){
@@ -9145,8 +9153,20 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         }
         /* Vedi la stessa nota in organizza(): "Fatto" solo se è stato
            chiamato almeno uno strumento, mai su una risposta solo
-           conversazionale. */
-        showAIToast(azioni.length === 0 ? "" : "Fatto", testoRisp);
+           conversazionale. Una risposta discorsiva (spiegazione,
+           parere, consiglio) sparirebbe dal toast prima di fare in
+           tempo a leggerla (8 secondi) — sopra una certa lunghezza, e
+           solo quando non è la conferma di un'azione, la mostriamo
+           nella scheda grande e chiudibile invece che nel toast
+           (Gianardi, 23/09/2026). */
+        if(azioni.length === 0 && testoRisp.length > SOGLIA_RISPOSTA_DISCORSIVA){
+          const corpo = document.createElement("div");
+          corpo.className = "risorsa-testo-discorsivo";
+          corpo.textContent = testoRisp;
+          apriRisorsaCard("EON", corpo);
+        } else {
+          showAIToast(azioni.length === 0 ? "" : "Fatto", testoRisp);
+        }
       }
       if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
@@ -9415,6 +9435,35 @@ function aggiornaHomeHero(gruppiPerGiorno){
     lista.appendChild(riga);
   });
 }
+
+/* Toccando il riquadro "Cosa devo fare oggi" si apre la stessa lista,
+   ma nella scheda grande già usata per le risorse — elenco coinciso e
+   semplice, come richiesto da Gianardi il 23/09/2026 per la "pulizia
+   mentale" — mai quando si tocca la spunta di una riga (quella deve
+   continuare a segnare il singolo impegno come fatto, non aprire la
+   scheda). Sola lettura qui: per spuntare un impegno si resta sul
+   riquadro di casa o si va in Calendario. */
+document.getElementById("homeHeroOggiBox").addEventListener("click", (e) => {
+  if(e.target.closest(".home-hero-oggi-check")) return;
+  const righeOrig = document.querySelectorAll("#homeHeroOggiLista .home-hero-oggi-riga");
+  const corpo = document.createElement("div");
+  if(!righeOrig.length){
+    corpo.innerHTML = '<div class="risorsa-vuoto">Niente in programma per oggi.</div>';
+  } else {
+    righeOrig.forEach(r => {
+      const riga = document.createElement("div");
+      riga.className = "home-hero-oggi-riga" + (r.classList.contains("fatto") ? " fatto" : "");
+      const segno = document.createElement("span");
+      segno.className = "home-hero-oggi-check";
+      if(r.classList.contains("fatto")) segno.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+      const testo = document.createElement("span");
+      testo.textContent = r.querySelector("span:last-child").textContent;
+      riga.appendChild(segno); riga.appendChild(testo);
+      corpo.appendChild(riga);
+    });
+  }
+  apriRisorsaCard("Cosa devo fare oggi", corpo);
+});
 
 /* Organizza la giornata: la stessa cosa dell'orologio nel logo */
 document.getElementById("aiHubGiornata").addEventListener("click", () => {
