@@ -2907,3 +2907,45 @@ aggiuntive nello stesso commit del punto precedente:
   documento — non va MAI chiesta una scomposizione in voci più
   piccole di propria iniziativa, solo se è l'utente stesso ad
   accennarla.
+
+**4° problema, scoperto SUBITO dopo aver messo online la correzione
+precedente, provando insieme in tempo reale (23/09/2026, dati veri
+ai_audit_log/ai_request_log)**: "Nessuna risposta di nuovo" — questa
+volta non un messaggio falso, ma proprio NESSUNA riga in
+ai_request_log per quella richiesta: il turno non è mai arrivato in
+fondo, nessuna risposta è mai stata inviata al professionista.
+
+Causa individuata nei dati reali: il correttivo di poco prima (passa
+subito a Sonnet + non accettare una risposta finale finché il
+documento non è davvero creato) espone un problema diverso — in più
+casi osservati (cliente "Bianchi", "villa Kolins", e infine "Mario
+Pecunia") l'assistente, dopo aver risolto/creato il cliente, richiama
+interpreta_richiesta una SECONDA volta cambiando operazione in
+"mostra" e chiama recupera_documenti_cliente per controllare se esiste
+già un documento simile — un giro completamente inutile per una
+richiesta di CREAZIONE — invece di procedere subito a
+crea_preventivo_o_fattura. Con TOOL_MAX_ROUNDS a 8 e ogni giro ormai su
+Sonnet con ragionamento esteso (più lento di Haiku), questi giri in
+più fanno superare il tempo massimo che Vercel concede a una funzione
+per rispondere: la richiesta viene interrotta a metà, senza che
+nessuna risposta (nemmeno una scusa) arrivi mai al professionista — il
+danno peggiore possibile.
+
+Due correzioni, entrambe già online:
+1. **Chiarito nel prompt di sistema**: quando il cliente risulta
+   "trovato" o è appena stato creato per una fattura/preventivo da
+   creare, "trovato" riguarda SOLO l'identità del cliente, mai un
+   documento — non richiamare mai interpreta_richiesta una seconda
+   volta per passare a "mostra", né controllare documenti esistenti
+   prima di creare: se ci sono già voci e prezzo, il passo giusto è
+   SEMPRE e SOLO crea_preventivo_o_fattura, subito.
+2. **Rete di sicurezza su Vercel**: aggiunto `vercel.json` con
+   `maxDuration: 60` sulla funzione (prima non c'era nessuna
+   configurazione esplicita, quindi valeva il limite di default della
+   piattaforma) — anche se il comportamento sopra si ripresentasse in
+   altra forma, il professionista deve sempre ricevere una risposta
+   entro un tempo ragionevole, mai il silenzio totale.
+
+Non ancora possibile un test dal vivo di questa correzione specifica
+(fatta subito dopo la segnalazione, in attesa che Gianardi la provi
+di nuovo dopo il prossimo merge).
