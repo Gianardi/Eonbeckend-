@@ -3023,6 +3023,24 @@ async function handleAssistant(req, res, user, accessToken) {
        cui deve sparire. */
     intentoAttivo = estraiIntentoDaMessaggi(messages);
 
+    /* Bug reale in produzione (23/09/2026): creare una fattura/preventivo
+       è un'operazione a più passaggi (risolvere il cliente, poi chiamare
+       crea_preventivo_o_fattura) — Haiku a volte porta a termine solo il
+       primo passo e al giro successivo si blocca, inventando una scusa
+       ("errore tecnico") invece di continuare o di dirlo onestamente. Il
+       ripiego "nonSicuro" sopra copre solo il PRIMO giro decisionale: non
+       basta qui, perché in questo caso Haiku un tool lo chiama davvero
+       (trova_o_crea_cliente) e solo un giro dopo si perde. Appena
+       l'intento dichiarato con interpreta_richiesta è la CREAZIONE di uno
+       di questi due documenti, passiamo a Sonnet per tutto il resto del
+       turno: sono operazioni delicate, meglio affidarle al modello più
+       capace fin dall'inizio invece di scoprire a metà che Haiku non ce
+       la fa. */
+    if (modelloUsato === MODEL_HAIKU && intentoAttivo && intentoAttivo.operazione === "crea"
+      && /fattura|preventivo/i.test((intentoAttivo.entita && intentoAttivo.entita.tipo) || "")) {
+      modelloUsato = MODEL_SONNET;
+    }
+
     if (data.stop_reason !== "tool_use") {
       const testo = testoDiRisposta(data);
       const continuabile = /\?\s*$/.test(testo);

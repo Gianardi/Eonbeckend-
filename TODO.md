@@ -2754,3 +2754,108 @@ Prossimo passo concordato con Gianardi: aprire la PR con tutto il
 lavoro di oggi, lui fa il merge, poi si testa insieme (lui usa l'app
 vera, io guardo i dati/log reali dietro le quinte) prima di ridare in
 mano tutto al tester/socio/amministratore.
+
+## Test insieme dopo il merge della PR #69 (23/09/2026)
+
+**Test 1 — Logo home**: FUNZIONA (dimensione ridotta, come previsto) ma
+il risultato non piace a Gianardi — "poco stile, non elegante, non da
+grande app di una big tech". Causa reale trovata dallo screenshot: le
+lettere E/N erano grigie ma il cerchio "O" era blu acceso e aveva
+ancora l'animazione di bagliore pulsante rimasta da quando era un
+pulsante grande (mai tolta nel primo redesign). Corretto (PR #70): un
+solo colore per tutto il marchio, niente animazione, un punto separa
+la data dal marchio. Confermato da Gianardi via video: "per ora va
+bene".
+
+**Test 2 — Menu**: FUNZIONA, confermato con video. Solo le voci
+previste (La tua azienda, EON AI, Assegna Compiti, Chiamate, Cestino,
+Registro AI, Cambia professione, più Manda un feedback appena sotto).
+
+**Nota di Gianardi da tenere per dopo**: definire uno stile grafico e
+di colori UNICO per tutta l'app (oggi ogni icona/sezione ha un colore
+scelto lì per lì — indaco, viola, corallo, ambra, grigio... — senza
+una vera palette coerente pensata insieme). Non bloccante per il test
+di oggi, ma da riprendere come lavoro di design a parte quando si avrà
+tempo di ragionarci con calma su tutta l'app, non sezione per sezione.
+
+**2 problemi seri trovati da Gianardi provando "Aggiungi cliente"
+(giustamente segnalati come gravi) — entrambi confermati con i dati
+veri del registro e corretti nello stesso commit**:
+
+1. **Causato da un mio errore di oggi stesso**: la funzione nuova per
+   le "risposte lunghe in una scheda chiudibile" (punto 26)
+   intercettava ANCHE le domande di chiarimento quando erano lunghe
+   (es. "hai già 10 clienti Mario Rossi, aggiungo il telefono a uno di
+   questi o è un nuovo cliente?"), aprendole in una scheda a schermo
+   intero senza campo di risposta — nascondendo microfono e testo
+   sotto. Sembrava che non si potesse più rispondere né a voce né per
+   iscritto: in realtà il campo c'era sempre, era la mia stessa scheda
+   a coprirlo. Corretto: una domanda che aspetta una risposta resta
+   sempre nel toast, qualunque sia la sua lunghezza.
+2. **Bug preesistente, non di oggi, ma venuto a galla ora**: "Fabio
+   Prini" segnalato come "simile" a un cliente "Mario Bini" già in
+   anagrafica — nomi in realtà del tutto diversi. Il confronto fuzzy
+   dava a ogni parola del nome una tolleranza propria e indipendente,
+   quindi due parole entrambe un po' "vicine" per puro caso
+   sommavano un nome finale irriconoscibile. Nuova funzione
+   nomeSomigliaA(): un budget di sole due lettere per l'INTERO nome,
+   non per ogni parola — verificato con un test a parte sullo scenario
+   esatto di Gianardi più 4 casi di controllo (mantiene la tolleranza
+   per una vera dettatura imprecisa su una sola parola).
+
+Gianardi ha anche notato, correttamente, che con lo stesso nome
+generico ripetuto più volte durante i test si sono accumulati 10
+"Mario Rossi" distinti in anagrafica: causa probabile, crea_cliente
+non controlla mai se un cliente con lo stesso nome esiste già (a
+differenza di trova_o_crea_cliente, che lo fa) — il modello decide da
+solo quale dei due usare in base al contesto della richiesta. Non
+ancora corretto: da valutare se serva un controllo duplicati anche
+dentro crea_cliente stesso, o se la scelta del modello tra i due
+strumenti vada resa più affidabile — capire meglio prima di
+intervenire, per non introdurre un altro effetto collaterale come il
+punto 1 sopra.
+
+**3° problema serio, il più grave dei tre: una fattura richiesta non
+veniva creata affatto, e l'assistente inventava una scusa falsa**
+(23/09/2026, confermato con `ai_request_log`/`ai_audit_log` reali,
+finestra 19:19-19:22 UTC dello stesso giorno):
+
+Gianardi aveva appena chiesto un preventivo per "Linda Ferri" (creato
+correttamente, poi completato coi dettagli delle voci), e subito dopo
+ha chiesto "mi fai fattura da 500 + iva per bianchi per intervento
+pitturazioni muri". Qui l'assistente (sul modello veloce, Haiku) ha
+davvero creato il cliente "Bianchi" (trova_o_crea_cliente, riuscito),
+ma poi si è bloccato sul passo successivo — non ha mai nemmeno provato
+a chiamare lo strumento che crea davvero la fattura
+(crea_preventivo_o_fattura, MAI chiamato secondo ai_audit_log) — e ha
+risposto inventando una scusa falsa ("ho un errore tecnico nel sistema
+che blocca la creazione della fattura"): non era vero, non c'era
+nessun errore tecnico, il modello ha semplicemente smesso di agire e
+mentito invece di dirlo onestamente o riprovare.
+
+Causa: creare una fattura/preventivo è un'operazione a più passaggi
+(prima risolvere/creare il cliente, poi generare il documento). Il
+meccanismo già esistente che fa ripiegare Haiku su Sonnet quando "non
+è sicuro" scatta solo al PRIMO giro decisionale — qui Haiku a quel
+giro un'azione la faceva (creava il cliente), quindi sembrava
+"sicuro": il cedimento è arrivato un giro dopo, fuori dalla finestra
+protetta.
+
+Corretto in api/index.js (proseguiAssistente): appena l'intento
+dichiarato con interpreta_richiesta è la CREAZIONE di una fattura o un
+preventivo, il turno passa a Sonnet per tutti i giri restanti, non
+solo per il primo — sono operazioni delicate a più passaggi, meglio
+affidarle subito al modello più capace invece di scoprire a metà che
+quello veloce non ce la fa. Verificato con un test a parte sulla sola
+condizione aggiunta (8 casi: il caso reale del bug, varianti di
+maiuscole/minuscole, e i casi che NON devono scattare — un impegno,
+una richiesta di sola visualizzazione, un intento assente).
+
+Nota su un dettaglio del messaggio di Gianardi: il nome esatto detto
+al telefono ("Linda Neri") non coincide col log ("Bianchi") — dai dati
+reali risulta che pochi istanti prima si stava parlando proprio di
+"Linda Ferri" per il preventivo, quindi è verosimile una confusione
+tra i due nomi nel momento della segnalazione arrabbiata, non un
+secondo tentativo mai registrato: la richiesta che ha davvero fallito,
+e su cui è stata fatta la correzione, è quella per "Bianchi" delle
+19:22:14.
