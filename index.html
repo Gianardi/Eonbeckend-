@@ -125,32 +125,39 @@
   /* main */
   main{ flex:1; padding:16px 16px 20px; }
 
-  .brand-hero{ text-align:center; padding:10px 0 8px; }
+  /* Ridisegnato il 23/09/2026 (Gianardi: "il logo in alto non è ben
+     proporzionato rispetto al resto"). Un marchio permanente in cima a
+     una schermata di lavoro quotidiana deve restare un riferimento
+     discreto, non l'elemento più grande della pagina: prima il logo
+     (32px, cerchio a gradiente vivace da 30px) era visivamente più
+     pesante del titolo vero e proprio sotto ("Cosa facciamo oggi",
+     22px) — l'attenzione andava al marchio invece che al contenuto
+     operativo. Ora il marchio è piccolo e in un'unica riga con la
+     data (un solo blocco compatto, non due elementi separati che si
+     susseguono), e il titolo sotto resta l'elemento dominante della
+     pagina, come dovrebbe essere ogni giorno che si apre l'app. */
+  .brand-hero{ display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 0 18px; }
   /* Il marchio e la ricerca generale stanno solo in Home: nelle altre
      sezioni ci sarebbero due barre di ricerca e due titoli. */
   .brand-hero.nascosto{ display:none; }
   .brand-data{
-    font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    color:var(--faint); margin-bottom:10px;
+    font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--faint);
   }
   .brand-hero-wordmark{
-    display:flex; align-items:center; justify-content:center; gap:3px;
-    font-family:'Manrope'; font-weight:900; font-size:32px; letter-spacing:-.02em;
-    color:var(--text); margin-bottom:8px;
+    display:flex; align-items:center; justify-content:center; gap:2px;
+    font-family:'Manrope'; font-weight:800; font-size:14.5px; letter-spacing:-.01em;
+    color:var(--faint);
   }
   .logo-o{ display:inline-flex; align-items:center; justify-content:center; }
-  /* Il cerchio del marchio prende i colori delle card: turchese, blu
-     e viola. Tre dei sei, non tutti: riconoscibile senza diventare
-     un arcobaleno. */
+  /* Un solo colore pieno (l'indaco già usato per le azioni primarie
+     nel resto dell'app), non più un gradiente a tre colori: a
+     dimensione ridotta un gradiente vivace risulterebbe confuso invece
+     che riconoscibile — un marchio piccolo regge meglio un solo
+     colore netto. */
   .brand-hero-wordmark .logo-o{
-    width:30px; height:30px; margin:0 1px; border-radius:50%;
-    background:conic-gradient(from 210deg,
-      var(--teal) 0deg,
-      var(--indigo) 130deg,
-      var(--violet) 250deg,
-      var(--teal) 360deg);
-    color:#fff;
-    box-shadow:0 3px 12px rgba(59,111,255,.35);
+    width:16px; height:16px; margin:0 1px; border-radius:50%;
+    background:var(--indigo); color:#fff;
   }
   .brand-hero-wordmark .logo-o svg{ width:60%; height:60%; }
   .ai-clock-btn{
@@ -691,14 +698,23 @@
   .cal-giorno.oggi i{ background:var(--text); color:#fff; }
   .cal-giorno.oggi::after{ background:var(--border-strong); }
 
+  /* Semplificato il 23/09/2026 (Gianardi: "pulizia visiva" come base
+     della "pulizia mentale" — il calendario era troppo affollato).
+     Prima OGNI riga portava un bordo spesso 2px + un'ombra marcata,
+     identici per un impegno qualunque e per quello di oggi: tutto
+     "urlava" alla stessa intensità, quindi in pratica niente si
+     distingueva davvero. Ora il bordo è sottile e uniforme (il
+     rilievo vero è riservato a "oggi", l'unico caso che conta
+     visivamente di più), e i pulsanti Scrivi/Chiama/Elimina — che da
+     soli raddoppiavano l'altezza di ogni riga — si vedono solo
+     toccando la riga (progressive disclosure), non sempre. */
   .cal-voce{
-    display:flex; align-items:center; gap:14px;
-    padding:15px 16px; margin-bottom:10px; border-radius:20px;
-    background:var(--card); border:2px solid var(--text);
-    box-shadow:0 6px 18px rgba(14,20,36,.1);
+    display:flex; align-items:center; gap:14px; cursor:pointer;
+    padding:13px 16px; margin-bottom:8px; border-radius:16px;
+    background:var(--card); border:1px solid var(--border);
     flex-wrap:wrap;
   }
-  .cal-voce.oggi{ box-shadow:0 6px 20px rgba(14,20,36,.16); }
+  .cal-voce.oggi{ border-color:var(--text); box-shadow:0 4px 14px rgba(14,20,36,.1); }
   .cal-ora-blocco{ flex:none; width:44px; text-align:center; }
   .cal-ora-hh{ font-family:'Manrope'; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.1; color:var(--text); }
   .cal-ora-mm{ font-size:11px; font-weight:700; color:var(--faint); margin-top:1px; }
@@ -709,7 +725,8 @@
   .cal-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:3px; color:var(--muted); }
   .cal-label.urgente{ color:var(--text); }
   .cal-sotto{ font-size:11px; color:var(--muted); margin-top:2px; }
-  .cal-azioni{ display:flex; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
+  .cal-azioni{ display:none; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
+  .cal-voce.aperta .cal-azioni{ display:flex; }
   .cal-btn{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
     padding:8px; border-radius:10px; cursor:pointer; font-family:inherit;
@@ -5212,6 +5229,12 @@ function renderCalendar(){
           </button>` : ''}
         </div>` : ''}
       `;
+
+      /* Le azioni sono nascoste finché non si tocca la riga (vedi CSS
+         .cal-voce.aperta): i tre pulsanti già fermano la propagazione
+         del click, quindi non richiudono la riga per sbaglio quando
+         vengono usati. */
+      row.addEventListener("click", () => row.classList.toggle("aperta"));
 
       const bScrivi = row.querySelector(".cal-scrivi");
       if(bScrivi) bScrivi.addEventListener("click", async (e) => {
