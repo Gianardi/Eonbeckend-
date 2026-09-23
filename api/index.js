@@ -439,6 +439,7 @@ const AI_RATE_LIMIT = (puoSovrascrivereRateLimit && Number(process.env.AI_RATE_L
 const AI_RATE_WINDOW_SECONDS = (puoSovrascrivereRateLimit && Number(process.env.AI_RATE_WINDOW_SECONDS)) || 600; // 10 minuti
 
 const TIPI_IMPEGNO = new Set(["incontro", "chiamata", "commissione"]);
+const TIPI_DOCUMENTO = new Set(["preventivo", "fattura"]);
 const STATI_CLIENTE = new Set(["attivo", "trattativa", "inattivo"]);
 
 function eStringaNonVuota(v) { return typeof v === "string" && v.trim().length > 0; }
@@ -1521,6 +1522,160 @@ const TOOLS = {
     },
   },
 
+  /* Gianardi, 23/09/2026: "mi fai preventivo a Mario Rampini per cambio
+     porte da 1200+IVA" rispondeva sempre "non ho ancora uno strumento
+     per creare preventivi, ti segno un promemoria" — anche quando
+     l'utente aveva già dato tutti i dati serviti a farlo per davvero.
+     Principio guida di Gianardi: "l'immediatezza tramite la
+     comunicazione a voce/testo è il fondamento di tutte le attività di
+     EON" — se i dati ci sono già, il documento va creato subito, non
+     rimandato a un secondo momento nell'app.
+
+     Stessa identica logica/formato già usata dalla creazione manuale
+     in chat (index.html, apriDocumento/calcolaTotali/prossimoNumero):
+     stesso oggetto "dati" salvato in messages.file_name (che il
+     frontend sa già leggere e disegnare come scheda/PDF), stesso
+     collegamento fattura -> entrata attesa. Non un sistema parallelo:
+     un preventivo/fattura creato da qui è indistinguibile, per il
+     resto dell'app, da uno compilato a mano. */
+  crea_preventivo_o_fattura: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "crea_preventivo_o_fattura",
+      description: "Crea SUBITO un preventivo o una fattura per un cliente, con le voci date dall'utente, e lo salva nella sua conversazione — visibile subito come scheda nell'app, esattamente come se fosse stato compilato a mano, mai solo un promemoria. Usalo quando l'utente chiede di fare/preparare un preventivo o una fattura E ha già dato almeno una voce con un prezzo. Se non ha ancora dato nessun dato (solo il nome del cliente e il tipo di documento, es. 'fammi un preventivo a Rossi'), NON chiamarlo: rispondi chiedendo tu prima i dati (cosa, quanto) in una risposta di testo — poi, quando li dà, chiamalo. Se il cliente nominato non esiste ancora in anagrafica, crealo prima con crea_cliente/trova_o_crea_cliente e usa l'id appena ottenuto, tutto nello stesso turno se i dati del documento ci sono già.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cliente_id: { type: "string", description: "Id del cliente destinatario (di solito già noto da cliente_risolto, o appena creato con crea_cliente/trova_o_crea_cliente nello stesso turno)" },
+          tipo: { type: "string", enum: ["preventivo", "fattura"] },
+          voci: {
+            type: "array",
+            description: "Le voci del documento — almeno una",
+            items: {
+              type: "object",
+              properties: {
+                descrizione: { type: "string" },
+                quantita: { type: "number", description: "Default 1 se l'utente non la specifica" },
+                prezzo: { type: "number", description: "Prezzo unitario in euro, IVA esclusa" },
+              },
+              required: ["descrizione", "prezzo"],
+            },
+          },
+          aliquota_iva: { type: "number", description: "Percentuale IVA, default 22 se non detta" },
+          condizioni: { type: "string", description: "Termini di pagamento (fattura) o validità (preventivo); se non detto, ometti e verrà usato un default ragionevole" },
+          note: { type: "string" },
+        },
+        required: ["cliente_id", "tipo", "voci"],
+      },
+    },
+    async run(input, ctx) {
+      if (!TIPI_DOCUMENTO.has(input.tipo)) throw fail("Tipo non valido: usa preventivo o fattura");
+      if (!Array.isArray(input.voci) || !input.voci.length) throw fail("Serve almeno una voce con descrizione e prezzo");
+      const cliente = await trovaProprio("clients", input.cliente_id, ctx);
+      if (!cliente) throw fail("Cliente non trovato", 404);
+
+      const voci = input.voci.map((v) => {
+        if (!eStringaNonVuota(v.descrizione)) throw fail("Ogni voce del documento deve avere una descrizione");
+        if (!eNumero(v.prezzo)) throw fail("Ogni voce del documento deve avere un prezzo");
+        return { desc: v.descrizione.trim(), qta: eNumero(v.quantita) ? v.quantita : 1, prezzo: v.prezzo };
+      });
+
+      const aliquota = eNumero(input.aliquota_iva) ? input.aliquota_iva : 22;
+      const imponibile = voci.reduce((t, v) => t + v.qta * v.prezzo, 0);
+      const iva = (imponibile * aliquota) / 100;
+      const totale = imponibile + iva;
+      const anno = new Date().getFullYear();
+
+      const [conversazione, tuttiDoc, righeProfilo] = await Promise.all([
+        trovaOCreaConversazione(cliente, ctx),
+        db(`messages?select=file_name&event_type=eq.doc&deleted_at=is.null`, { method: "GET" }, ctx.accessToken),
+        db(`profiles?select=business_name,full_name&id=eq.${ctx.user.id}&limit=1`, { method: "GET" }, ctx.accessToken),
+      ]);
+
+      /* Stesso conteggio del frontend (prossimoNumero in index.html),
+         ma sui documenti veri in database invece che sulle sole chat
+         già caricate in memoria: numero progressivo per tipo e anno. */
+      let contatore = 0;
+      (Array.isArray(tuttiDoc) ? tuttiDoc : []).forEach((m) => {
+        try {
+          const d = JSON.parse(m.file_name);
+          if (d && d.tipo === input.tipo && d.anno === anno) contatore++;
+        } catch (err) { /* riga senza dati validi: non conta, non blocca */ }
+      });
+      const numero = `${contatore + 1}/${anno}`;
+      const profilo = Array.isArray(righeProfilo) && righeProfilo[0];
+      const professionista = (profilo && (profilo.business_name || profilo.full_name)) || "Il professionista";
+
+      const dati = {
+        tipo: input.tipo,
+        numero,
+        anno,
+        data: new Date().toLocaleDateString("it-IT"),
+        cliente: cliente.name,
+        voci,
+        imponibile,
+        aliquota,
+        iva,
+        totale,
+        condizioni: eStringaNonVuota(input.condizioni) ? input.condizioni.trim() : (input.tipo === "fattura" ? "30 giorni data fattura" : "30 giorni dalla data di emissione"),
+        note: eStringaNonVuota(input.note) ? input.note.trim() : "",
+        professionista,
+      };
+
+      const titolo = `${input.tipo === "fattura" ? "Fattura" : "Preventivo"} n. ${numero}`;
+      const riassunto = voci.map((v) => v.desc).join(" · ");
+
+      const creato = await db(
+        "messages",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            conversation_id: conversazione.id,
+            sender: "me",
+            event_type: "doc",
+            title: titolo,
+            body: riassunto,
+            amount: totale,
+            file_name: JSON.stringify(dati),
+          }),
+          headers: { Prefer: "return=representation" },
+        },
+        ctx.accessToken
+      );
+      const m = Array.isArray(creato) ? creato[0] : creato;
+
+      let entrataCreata = false;
+      if (input.tipo === "fattura") {
+        try {
+          await db(
+            "incomes",
+            {
+              method: "POST",
+              body: JSON.stringify({ owner_id: ctx.user.id, client_name: cliente.name, description: riassunto.slice(0, 60), amount: totale, due_date: null, status: "attesa" }),
+              headers: { Prefer: "return=representation" },
+            },
+            ctx.accessToken
+          );
+          entrataCreata = true;
+        } catch (err) {
+          console.warn("Fattura creata ma non segnata tra le entrate attese:", err.message);
+        }
+      }
+
+      return {
+        id: m.id,
+        tipo: input.tipo,
+        numero,
+        titolo,
+        cliente: cliente.name,
+        conversation_id: conversazione.id,
+        totale,
+        entrata_creata: entrataCreata,
+      };
+    },
+  },
+
   manda_messaggio: {
     risk: "external",
     categoria: "comunicazione",
@@ -2219,7 +2374,7 @@ function systemPromptAssistente(professione) {
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
-Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato), prova prima recupera_foto_cantiere (foto del cantiere/lavoro), recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente) o recupera_documenti_impresa (documenti dell'impresa NON legati a un cliente, es. fatture fornitori, DDT, modelli): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Se la richiesta non nomina né lascia intuire nessun cliente in particolare, prova recupera_documenti_impresa prima di concludere che non è disponibile. Solo se nessuno dei tre è adatto (es. un preventivo mai creato prima) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
+Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" con operazione "mostra" (l'utente vuole vedere/recuperare qualcosa che esiste già), prova prima recupera_foto_cantiere (foto del cantiere/lavoro), recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente) o recupera_documenti_impresa (documenti dell'impresa NON legati a un cliente, es. fatture fornitori, DDT, modelli): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Se la richiesta non nomina né lascia intuire nessun cliente in particolare, prova recupera_documenti_impresa prima di concludere che non è disponibile. Se invece operazione è "crea" e l'oggetto è un preventivo o una fattura mai fatti prima, quella non è una richiesta di RECUPERO ma di CREAZIONE: usa crea_preventivo_o_fattura (vedi le sue istruzioni dettagliate più sotto), mai capacita_non_disponibile. Solo se la risorsa richiesta non è né recuperabile né creabile con nessuno strumento reale (es. un tipo di documento che l'app non gestisce affatto) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere o creare qualcosa che è a sua volta un documento/una risorsa. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
 
 Quando recupera_foto_cantiere o recupera_documenti_cliente vengono usati per MOSTRARE la risorsa direttamente all'utente (non per inoltrarla a qualcun altro con manda_messaggio), non scrivere mai l'url del file nel testo della risposta: l'app la mostra già visivamente in una scheda dedicata, ripetere il link tecnico non serve a nulla e, letto ad alta voce, è solo rumore. In questo caso il testo della risposta resta breve e naturale (es. "Ecco la foto di Zinchini, cosa vuoi fare?"), mai una descrizione di cosa hai recuperato o dell'indirizzo del file.
 
@@ -2240,6 +2395,12 @@ REGOLA PRINCIPALE: ogni impegno nominato dall'utente deve finire nel calendario 
 Quando rispondi a una domanda tecnica, un consiglio o un riepilogo (operazione "consulta", o una spiegazione dentro un'altra risposta), vai dritto al punto: secco, concreto, preciso — mai prolisso, mai un elenco puntato lungo con ogni possibile dettaglio quando bastano due righe. L'obiettivo è alleggerire la testa del professionista, non riempirla: una risposta più corta e diretta che lascia all'utente la scelta di chiedere approfondimenti vale sempre più di una risposta completa ma lunga che nessuno legge fino in fondo. Esempio concreto: a "cosa mi consigli di fare domattina" con un programma già pieno, la risposta giusta è una frase tipo "Mattina pensa a X e Y, poi libero fino alle 18 per Z" — non un paragrafo con orari ripetuti e motivazioni per ognuno. Se una domanda tecnica è generica e la risposta dipenderebbe davvero dai dettagli del caso specifico (es. "devo cambiare una stanza, serve la SCIA?" dipende da cosa esattamente si modifica), fai prima la domanda che ti manca per rispondere in modo specifico e risolutivo, invece di dare la regola generale valida per tutti i casi — è più utile una risposta precisa alla situazione vera che una spiegazione completa ma generica.
 
 Un messaggio lungo detto tutto insieme, senza pause nette tra una cosa e l'altra (tipico del parlato/della dettatura), nasconde spesso PIÙ orari distinti anche dentro quella che sembra una sola frase su un solo evento — non fermarti al primo impegno riconosciuto, elenca mentalmente OGNI coppia (cosa, quando) prima di chiamare crea_impegno. Caso frequente: un evento con un orario di inizio PIÙ un orario diverso per prepararsi/arrivare prima ("dovrò essere lì per le 13:40" riferito a una "partita alle 15") sono DUE impegni distinti da segnare separatamente (uno per il promemoria di essere pronto/arrivare alle 13:40, uno per l'evento vero e proprio alle 15), non uno solo — la stessa logica vale per qualunque coppia "preparati entro X" + "evento alle Y". Per gli orari relativi al momento in cui si parla ("fra un'ora", "tra 20 minuti"), calcola SEMPRE partendo dall'ora corrente indicata sopra (mai un'ora arbitraria o quella in cui finisci di rispondere): "fra un'ora" detto alle 14:05 vuol dire le 15:05, non un'altra ora a caso.
+
+Quando l'utente chiede di fare/preparare un preventivo o una fattura, il principio guida è l'immediatezza: se i dati per farlo davvero ci sono già, il documento va creato SUBITO con crea_preventivo_o_fattura, mai rimandato a un promemoria da controllare dopo nell'app. Tre casi distinti:
+1. Nessun dato oltre al cliente e al tipo di documento (es. "mi fai un preventivo a Rossi per cambio porte" senza importi): rispondi chiedendo tu i dati mancanti ("Ok, te lo preparo: mi dai le voci e i prezzi?") — non chiamare crea_preventivo_o_fattura senza almeno una voce con un prezzo.
+2. Il cliente nominato non esiste ancora in anagrafica E mancano ancora i dati del documento: crealo comunque subito con crea_cliente/trova_o_crea_cliente (dillo: "Ok, intanto ti creo il cliente"), poi chiedi i dati del documento nella stessa risposta.
+3. Il cliente non esiste ancora MA l'utente ha già dato tutti i dati nello stesso messaggio (es. "mi fai preventivo Lombardi per porte e finestre da 1200+IVA"): crea il cliente E il documento nello stesso turno, senza fermarti a chiedere nulla — è il caso in cui l'immediatezza conta di più.
+Vale lo stesso, identico, sia per preventivo sia per fattura.
 
 Quando l'utente chiede cosa ha in programma, i suoi impegni, il riepilogo della giornata o cosa fare prima/dopo per oggi, domani o un altro periodo, chiama SEMPRE elenca_appuntamenti per quel periodo prima di rispondere — anche se ti sembra di non avere abbastanza informazioni per rispondere, anche se la domanda ti sembra già risposta in un turno precedente della stessa conversazione: non dare mai per scontato di non sapere cosa c'è già segnato, e non chiedere mai all'utente di ripetertelo. La stessa identica domanda fatta due volte deve dare la stessa risposta, basata sugli stessi dati veri, non una risposta diversa a seconda che tu ti ricordi o meno di controllare.
 

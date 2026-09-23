@@ -7837,6 +7837,14 @@ function collegaHubRacconta(){
         showAIToast("Appunto aggiunto", a.esito.testo);
       } else if(a.tool === "correggi_appunto"){
         showAIToast("Appunto corretto", a.esito.testo);
+      } else if(a.tool === "crea_preventivo_o_fattura"){
+        /* Stessa scheda già usata per i documenti recuperati
+           (mostraRisorsaDocumenti/creaVoceDocumento): un preventivo/
+           fattura appena creato da EON deve aprirsi e presentarsi
+           esattamente come uno già esistente, non solo un toast — "poi
+           aprire la carta e far vedere il caricamento del preventivo"
+           (Gianardi, 23/09/2026). */
+        mostraRisorsaDocumenti([{ titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale }], a.esito.cliente);
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
@@ -9086,6 +9094,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         mostra("Appunto aggiunto", a.esito.testo);
       } else if(a.tool === "correggi_appunto"){
         mostra("Appunto corretto", a.esito.testo);
+      } else if(a.tool === "crea_preventivo_o_fattura"){
+        mostraRisorsaDocumenti([{ titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale }], a.esito.cliente);
+        daDire.push(a.esito.titolo + " per " + a.esito.cliente + " pronto");
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
