@@ -2660,28 +2660,28 @@ per le mappe) e chi ne copre il costo, prima che si possano collegare.
 
 ### E. Redesign UI/UX (grafica e layout)
 
-35. **Home page: il logo/scritta "EON" in alto non è ben proporzionato
-    rispetto al resto** — posizione, stile e colore da rivedere.
-    Richiesta esplicita di Gianardi: in questi interventi ragionare
-    come farebbe un vero UI/UX/Graphic/Visual Product Designer di una
-    big tech, non solo sistemare alla buona.
-36. **Calendario da semplificare visivamente**, oltre a essere
-    ordinato correttamente (vedi bug #6) — l'obiettivo dichiarato è la
-    "pulizia visiva" come base della "pulizia mentale": meno
-    affollato, più leggibile a colpo d'occhio.
-37. **Pulizia del menu.** Oggi il menu è un accumulo di funzioni
-    aggiunte nel tempo. Richiesta puntuale di Gianardi:
-    - Eliminare le 4 card grosse.
-    - Trasformare il "cruscotto azienda" (i 4 dati: clienti totali,
-      attivi, in trattativa, valore portafoglio) in una voce piccola
-      come le altre, chiamata "La tua azienda", che se aperta mostra
-      quei 4 dati — stile e colori coerenti con il resto dell'app.
-    - Eliminare tutte le altre voci piccole tranne queste quattro, da
-      mantenere: Registro AI, Cestino, Chiamate, Assegna un compito
-      (Team).
-38. **Card più curate per le risposte "informative"** (es. la
-    spiegazione di cosa sia la carta intestata) — stesso stile a card
-    grande già usato in home, ben delineato, chiudibile dall'utente.
+35. **FATTO (23/09/2026).** ~~Home page: il logo "EON" non era ben
+    proporzionato.~~ Era più grande e vistoso (32px, cerchio a
+    gradiente) del titolo vero della pagina sotto (22px) — un marchio
+    permanente deve restare un riferimento discreto, non l'elemento
+    dominante. Ridotto a 14.5px, colore pieno invece del gradiente,
+    unito alla data in un'unica riga.
+36. **FATTO (23/09/2026).** ~~Calendario da semplificare
+    visivamente.~~ Il rilievo (bordo spesso, ombra) era identico per
+    ogni riga, oggi o no — ora riservato solo a "oggi"; i pulsanti
+    Scrivi/Chiama/Elimina si vedono solo toccando la riga invece di
+    restare sempre visibili raddoppiando l'altezza di ogni impegno.
+37. **FATTO (23/09/2026).** ~~Pulizia del menu.~~ Eliminate le 4 card
+    grosse; il cruscotto azienda è diventato "La tua azienda" (voce
+    piccola che apre/chiude gli stessi 4 dati sul posto); eliminate
+    tutte le voci tranne le quattro indicate (più EON AI, ricontrollato
+    e mantenuto perché non era un doppione come sembrava all'inizio, e
+    la nuova voce feedback).
+38. **FATTO (23/09/2026), stesso lavoro del punto 26.** ~~Card più
+    curate per le risposte "informative".~~ Le risposte discorsive
+    (spiegazioni, pareri — es. "cos'è la carta intestata") si aprono
+    già nella scheda grande e chiudibile invece che nel toast, sopra
+    una soglia di lunghezza.
 
 ### F. Architettura app: navigazione tra profesioni e account
 
