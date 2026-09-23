@@ -2398,10 +2398,12 @@ Quando rispondi a una domanda tecnica, un consiglio o un riepilogo (operazione "
 Un messaggio lungo detto tutto insieme, senza pause nette tra una cosa e l'altra (tipico del parlato/della dettatura), nasconde spesso PIÙ orari distinti anche dentro quella che sembra una sola frase su un solo evento — non fermarti al primo impegno riconosciuto, elenca mentalmente OGNI coppia (cosa, quando) prima di chiamare crea_impegno. Caso frequente: un evento con un orario di inizio PIÙ un orario diverso per prepararsi/arrivare prima ("dovrò essere lì per le 13:40" riferito a una "partita alle 15") sono DUE impegni distinti da segnare separatamente (uno per il promemoria di essere pronto/arrivare alle 13:40, uno per l'evento vero e proprio alle 15), non uno solo — la stessa logica vale per qualunque coppia "preparati entro X" + "evento alle Y". Per gli orari relativi al momento in cui si parla ("fra un'ora", "tra 20 minuti"), calcola SEMPRE partendo dall'ora corrente indicata sopra (mai un'ora arbitraria o quella in cui finisci di rispondere): "fra un'ora" detto alle 14:05 vuol dire le 15:05, non un'altra ora a caso.
 
 Quando l'utente chiede di fare/preparare un preventivo o una fattura, il principio guida è l'immediatezza: se i dati per farlo davvero ci sono già, il documento va creato SUBITO con crea_preventivo_o_fattura, mai rimandato a un promemoria da controllare dopo nell'app. Tre casi distinti:
-1. Nessun dato oltre al cliente e al tipo di documento (es. "mi fai un preventivo a Rossi per cambio porte" senza importi): rispondi chiedendo tu i dati mancanti ("Ok, te lo preparo: mi dai le voci e i prezzi?") — non chiamare crea_preventivo_o_fattura senza almeno una voce con un prezzo.
+1. Nessun dato oltre al cliente e al tipo di documento (es. "mi fai un preventivo a Rossi per cambio porte" senza NESSUN importo): rispondi chiedendo tu i dati mancanti ("Ok, te lo preparo: mi dai le voci e i prezzi?") — non chiamare crea_preventivo_o_fattura senza almeno una voce con un prezzo.
 2. Il cliente nominato non esiste ancora in anagrafica E mancano ancora i dati del documento: crealo comunque subito con crea_cliente/trova_o_crea_cliente (dillo: "Ok, intanto ti creo il cliente"), poi chiedi i dati del documento nella stessa risposta.
 3. Il cliente non esiste ancora MA l'utente ha già dato tutti i dati nello stesso messaggio (es. "mi fai preventivo Lombardi per porte e finestre da 1200+IVA"): crea il cliente E il documento nello stesso turno, senza fermarti a chiedere nulla — è il caso in cui l'immediatezza conta di più.
 Vale lo stesso, identico, sia per preventivo sia per fattura.
+
+IMPORTANTE — una cifra unica con una descrizione generale (es. "preventivo a Ferri per facciata 30.500", "fattura a Bianchi da 500+IVA per pitturazione muri") NON è un caso 1 (dati mancanti): è già un documento completo con UNA SOLA voce (descrizione "facciata"/"pitturazione muri", prezzo il totale dato) — crealo SUBITO con quella singola voce, mai fermarti a chiedere di scomporlo in voci più piccole (es. "quanto è il ponteggio, quanto la pulizia..."). L'utente ha dato un lavoro e un prezzo: basta e avanza, la scomposizione in più voci è un dettaglio che spetta a lui aggiungere se e quando vuole, mai una domanda bloccante tua. Chiedi la scomposizione SOLO se l'utente stesso l'accenna esplicitamente (es. "un preventivo con ponteggio, pulizia e finiture" senza dire i prezzi delle singole voci) — mai come iniziativa tua di fronte a una cifra unica con una sola descrizione, per quanto il lavoro possa sembrare complesso o costoso.
 
 Quando l'utente chiede cosa ha in programma, i suoi impegni, il riepilogo della giornata o cosa fare prima/dopo per oggi, domani o un altro periodo, chiama SEMPRE elenca_appuntamenti per quel periodo prima di rispondere — anche se ti sembra di non avere abbastanza informazioni per rispondere, anche se la domanda ti sembra già risposta in un turno precedente della stessa conversazione: non dare mai per scontato di non sapere cosa c'è già segnato, e non chiedere mai all'utente di ripetertelo. La stessa identica domanda fatta due volte deve dare la stessa risposta, basata sugli stessi dati veri, non una risposta diversa a seconda che tu ti ricordi o meno di controllare.
 
@@ -3004,9 +3006,35 @@ async function handleAssistant(req, res, user, accessToken) {
          caso che il prompt è pensato per gestire bene. Non si applica
          al giro forzato di interpreta_richiesta: lì tool_choice
          garantisce già stop_reason "tool_use". */
-      const nonSicuro = round === primoGiroSostanziale && modelloUsato === MODEL_HAIKU && tentativo === 0
+      const nonSicuroAlGiroIniziale = round === primoGiroSostanziale && modelloUsato === MODEL_HAIKU && tentativo === 0
         && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data));
-      if (nonSicuro) {
+
+      /* Guardia specifica sulla creazione di fatture/preventivi (bug
+         reale in produzione, 23/09/2026, confermato con ai_audit_log):
+         osservato sia un finto messaggio di errore ("ho un problema
+         tecnico") SIA — ancora più grave — un finto messaggio di
+         SUCCESSO ("fatto, preventivo creato") quando crea_preventivo_o_fattura
+         non era mai stato chiamato affatto: il documento non esisteva,
+         ma il professionista se lo sarebbe visto confermato come vero.
+         Il ripiego "nonSicuroAlGiroIniziale" sopra non basta: si applica
+         solo al primo giro decisionale, mentre qui il cedimento arriva
+         dopo che trova_o_crea_cliente è già stato chiamato con successo
+         (quindi quel primo giro sembrava "sicuro"). Qui controlliamo,
+         ad OGNI giro fino alla fine del turno, che l'intento dichiarato
+         di creare l'uno o l'altro documento sia stato davvero eseguito
+         prima di accettare una risposta finale — una domanda onesta
+         (finisce con "?") resta comunque sempre permessa, esattamente
+         come sopra. Limite noto e accettato: se nello stesso turno
+         vengono creati PIÙ documenti diversi, un secondo documento mai
+         creato potrebbe sfuggire a questo controllo perché ne trova
+         già uno in azioniEseguite — caso raro, non quello osservato. */
+      const documentoRichiestoNonCreato = intentoAttivo && intentoAttivo.operazione === "crea"
+        && /fattura|preventivo/i.test((intentoAttivo.entita && intentoAttivo.entita.tipo) || "")
+        && !azioniEseguite.some((a) => a.tool === "crea_preventivo_o_fattura");
+      const nonSicuroSuDocumento = documentoRichiestoNonCreato && tentativo === 0
+        && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data));
+
+      if (nonSicuroAlGiroIniziale || nonSicuroSuDocumento) {
         modelloUsato = MODEL_SONNET;
         continue;
       }

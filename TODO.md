@@ -2859,3 +2859,51 @@ tra i due nomi nel momento della segnalazione arrabbiata, non un
 secondo tentativo mai registrato: la richiesta che ha davvero fallito,
 e su cui è stata fatta la correzione, è quella per "Bianchi" delle
 19:22:14.
+
+**Aggiornamento stesso giorno — il quadro era anche peggiore di così,
+e ancora nella stessa finestra 19:19-19:22**: controllando
+ai_audit_log riga per riga sono emersi altri DUE fallimenti dello
+stesso identico bug, entrambi sul preventivo per "Linda Ferri" fatto
+poco prima della fattura a "Bianchi":
+
+1. **19:19 — falso messaggio di SUCCESSO, ancora più grave di una
+   scusa falsa**: alla richiesta "Crea preventivo a Linda ferri per
+   facciata 30.500", l'assistente ha chiamato solo trova_o_crea_cliente
+   (creando davvero il cliente) ma MAI crea_preventivo_o_fattura —
+   eppure ha risposto "Fatto — preventivo... creato e salvato nella
+   sua scheda". Verificato che in tabella messages NON esiste nessun
+   documento per quel cliente: il preventivo non è mai esistito,
+   Gianardi lo avrebbe creduto fatto per un messaggio inventato.
+2. **19:20 — la schermata mandata da Gianardi**: un secondo tentativo,
+   quasi identico ("Crea preventivo per lavori facciata al Linda Ferri
+   30.500"), questa volta l'assistente ha chiesto di scomporre i
+   30.500 in voci singole (ponteggio, pulizia, isolamento...) prima di
+   procedere — inutile e sbagliato: un importo unico con una
+   descrizione del lavoro ("facciata", "pitturazione muri") è GIÀ una
+   voce completa (descrizione + prezzo), non mancano dati.
+
+Stessa causa di fondo del punto precedente (Haiku che si perde un
+passo dopo aver risolto il cliente), ma qui il correttivo "passa a
+Sonnet" da solo non basta a fidarsi: bisognava anche impedire che una
+risposta finale venisse accettata come vera senza aver davvero
+verificato che il documento fosse stato creato. Due correzioni
+aggiuntive nello stesso commit del punto precedente:
+
+- **Guardia esplicita in proseguiAssistente()**: ad ogni giro (non solo
+  il primo), se l'intento dichiarato è creare una fattura/un
+  preventivo e crea_preventivo_o_fattura non risulta MAI chiamato con
+  successo in questo turno, una risposta finale che non sia una vera
+  domanda (non finisce con "?") non viene accettata: si passa a Sonnet
+  e si ritenta, prima di lasciar credere all'utente che sia stato
+  fatto qualcosa che non è mai successo. Verificato con un test a
+  parte su 7 scenari, inclusi i due casi reali sopra, il caso "già
+  creato" (non deve intervenire) e la domanda onesta (deve passare).
+  Limite noto: se nello stesso turno si creano più documenti diversi,
+  un secondo documento mai creato potrebbe sfuggire — caso raro, non
+  osservato finora.
+- **Chiarito nel prompt di sistema**: un importo unico con una
+  descrizione (es. "facciata 30.500", "pitturazione muri 500+IVA") è
+  sempre una voce completa e sufficiente per creare subito il
+  documento — non va MAI chiesta una scomposizione in voci più
+  piccole di propria iniziativa, solo se è l'utente stesso ad
+  accennarla.
