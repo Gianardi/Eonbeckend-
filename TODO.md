@@ -2442,3 +2442,270 @@ generica, che le cartelle si possono personalizzare (altrimenti non è
 un concetto ovvio senza spiegazione). Da costruire insieme al punto
 sopra, non prima: ha senso solo una volta che la personalizzazione
 esiste davvero.
+
+## Lista di test di Gianardi (23/09/2026) — mandata prima della fine
+settimana, non ancora divisa dal tester/socio/amministratore
+
+Gianardi ha iniziato a mandare le sue note di test in anticipo (non
+c'era motivo di aspettare). Solo documentazione per ora, nessun codice
+toccato. Organizzato per categoria per poterci lavorare un pezzo alla
+volta, con autorizzazione ad ogni intervento come da regola permanente
+di Gianardi.
+
+### A. Bug veri (comportamento sbagliato rispetto a oggi)
+
+1. **Correzione vocale di un nome cliente non funziona bene.** Esempio
+   reale: detto "Franci baicchi, 33384393, impianto elettrico", EON ha
+   capito e salvato "Franco Bike". Gianardi ha ripremuto il microfono
+   e ridetto il nome corretto, ma EON ha modificato il cliente in modo
+   sbagliato invece di correggere semplicemente il nome in "Franco
+   Baicchi". Deve: riconoscere che si tratta di una correzione sullo
+   stesso cliente appena creato/in corso, e correggere solo il campo
+   nome con quanto detto la seconda volta.
+2. **Multi-appuntamento da un solo messaggio non gestito.** Esempio
+   reale, un solo messaggio vocale: "Fra un'ora incontro con Giulia.
+   Domattina ore 12 colazione con dottor Righi poi pomeriggio partita
+   alle 15 e dovrò essere lì per le 13:40. Portare distinta." EON deve
+   segnare TUTTI gli impegni distinti nello stesso messaggio, con gli
+   orari calcolati correttamente (es. "fra un'ora" rispetto all'ora
+   reale in cui è stato detto, non un orario fisso), non solo il primo
+   o in modo confuso.
+3. **Riferimento recente a un cliente non riconosciuto in un comando
+   successivo.** Dopo aver fissato "appuntamento con dottor Righi
+   domani alle 11", chiedere subito dopo "mi sposti il dottore alle
+   17" deve essere capito come riferito a quell'appuntamento appena
+   creato — oggi la prima risposta è stata "non trovo nessun cliente
+   di nome dottore", solo alla richiesta ripetuta ha funzionato.
+   Comportamento corretto da definire:
+   - Se c'è un riferimento recente/una conversazione recente che rende
+     ovvio a chi ci si riferisce → agire subito, senza richiedere
+     conferma del nome.
+   - Se non c'è nessun contesto recente E non c'è un cliente che
+     corrisponde in modo univoco (nessuno, o più di uno con quel
+     termine) → chiedere "a quale cliente ti riferisci?".
+4. **Il microfono nella sezione "appunti" non aggiunge l'appunto.**
+   Parlando nel microfono in quella sezione, l'appunto non viene
+   creato. Da correggere.
+5. **Etichetta "Fatto" mostrata quando non è stato fatto nulla.**
+   Esempio: a "Ciao" EON risponde bene ("Ciao! Sono pronto ad
+   aiutarti...") ma con l'etichetta "Fatto" sopra, che non ha senso
+   quando non c'è stata nessuna azione.
+6. **Calendario non ordinato cronologicamente.** Un appuntamento delle
+   18:30 compare prima di appuntamenti del mattino nella stessa vista.
+7. **Domanda ripetuta = risposte diverse.** La stessa domanda esatta
+   fatta due volte ha dato due risposte diverse (un caso concreto:
+   "programma di domani" — la prima volta ha risposto "dovrei sapere
+   cosa hai in programma domani" anche se tutto era già segnato in
+   calendario, la seconda volta ha risposto correttamente con la
+   lista). Serve capire la causa: non deterministico quando dovrebbe
+   esserlo (i dati letti dal calendario sono gli stessi in entrambi i
+   casi).
+8. **Recupero documenti "impresa" (non legati a un cliente) non
+   funziona.** Chiesto un documento salvato in "documenti impresa"
+   (es. "microfono stile.jpg", "schermata iniziale professionale"),
+   EON risponde di non avere accesso a documenti non collegati a un
+   cliente specifico. Deve invece poter recuperare e mostrare questi
+   documenti (con lo stesso stile a card della schermata iniziale),
+   visto che sono già caricati nell'app in una sezione dedicata.
+9. **Eliminazione di una foto non possibile.** Chiesto "elimina la
+   foto dell'armadio", EON risponde di non avere questa funzione. Va
+   aggiunta la possibilità di eliminare foto — non solo in
+   cantiere/cliente-cantiere, ma anche in appunti e documenti.
+10. **Lettura ad alta voce del link tecnico della foto.** Quando EON
+    recupera una foto via microfono, legge anche l'URL completo di
+    Supabase invece di dire semplicemente "ecco la foto di zinchini,
+    cosa vuoi fare?".
+
+### B. Comportamento dell'AI da correggere (stile delle risposte)
+
+11. **Non deve mai descrivere a parole faccine/emoji/simboli nella sua
+    risposta** (es. detto letteralmente "faccina sorridente" in un
+    caso reale) — mai nominarli, vanno solo mostrati/letti come sono.
+12. **Le date vanno sempre dette in modo breve e parlato** (già
+    corretto nel prompt il 18/09, ma da riverificare — nella lista
+    compare di nuovo come problema, quindi va controllato se il
+    comportamento è davvero cambiato in produzione).
+13. **Risposte tecniche troppo prolisse.** Su domande tecniche (es.
+    TFR, SCIA, "da dove inizio a rifare un pavimento") EON dà risposte
+    corrette ma lunghe, con elenchi puntati estesi. Deve rispondere
+    secco, concreto, conciso e preciso — andare dritto al punto della
+    domanda specifica e della professione dell'utente; è poi l'utente
+    a chiedere approfondimenti se vuole.
+14. **Su una domanda tecnica generica, EON dovrebbe prima chiedere il
+    dettaglio specifico mancante invece di dare una risposta generica
+    presa "da internet/da quello che sa l'AI".** Esempio: "Devo
+    cambiare una stanza di una casa, devo chiedere la SCIA?" — invece
+    di dare la regola generale, dovrebbe chiedere cosa esattamente si
+    fa in quella stanza per dare una risposta specifica e risolutiva.
+15. **Riepiloghi/consigli operativi (programma del giorno, cosa fare
+    prima) troppo lunghi e con troppi simboli.** Devono essere secchi,
+    diretti, essenziali — l'obiettivo esplicito di Gianardi è la
+    "pulizia mentale": svuotare la testa dell'imprenditore, non
+    riempirla. Esempio di risposta CORRETTA (come l'ha riformulata
+    lui): a "cosa mi consigli di fare domattina" con already un
+    programma pieno → "Mattina appena sveglio pensi ai prospect e
+    clienti aggiuntivi. Relax durante la giornata e torni alle 18 per
+    gli altri due appuntamenti." — non l'elenco lungo con spiegazioni
+    che EON aveva dato.
+16. **Preventivi/fatture: EON deve poterli creare subito, non solo
+    segnare un promemoria.** Oggi se gli chiedi "fammi un preventivo a
+    Mario Rampini per cambio porte" risponde che non può crearli e
+    offre solo un promemoria. Il comportamento corretto, in ordine di
+    completezza dei dati forniti:
+    - Se manca tutto (solo il nome del preventivo/cliente, senza
+      importi/dettagli) → EON deve rispondere "Ok te lo preparo, mi
+      fornisci i dati del preventivo?" e poi, una volta ricevuti,
+      generarlo davvero.
+    - Se il cliente citato non esiste ancora → EON deve dirlo e
+      crearlo lui stesso ("Ok, ti creo intanto il cliente. Mi
+      fornisci i dati del preventivo così te lo faccio?").
+    - Se vengono forniti già tutti i dati in una volta (es. "mi fai
+      preventivo Lombardi per porte e finestre da 1200+IVA" e Lombardi
+      non è ancora cliente) → EON deve creare il cliente E il
+      preventivo subito, senza altri passaggi, mostrandolo nello
+      stile della card grande già usato nella schermata iniziale.
+    - Stesso principio, identico, per le fatture.
+    - Principio generale di Gianardi: **l'immediatezza tramite
+      comunicazione a voce/testo è il fondamento di tutte le attività
+      di EON** — va tenuto come criterio guida per ogni nuova
+      funzione, non solo per preventivi/fatture.
+
+### C. Piccole funzionalità mancanti (UI/UX)
+
+17. **Caricamento foto/file dalla galleria, non solo scatto diretto.**
+    In "foto cantiere" (e lo stesso per documenti/file), oggi si può
+    solo scattare una foto nuova — serve anche la possibilità di
+    scegliere una foto già esistente dalla galleria del telefono.
+18. **Quando EON fa una domanda di chiarimento dopo una richiesta
+    dell'utente, oggi si può rispondere solo a voce (microfono).**
+    Deve essere possibile rispondere anche scrivendo un messaggio di
+    testo.
+19. **Riconoscimento per nome simile + per contenuto, non solo nome
+    esatto.** Se si chiede un documento/foto/file con un nome simile
+    (non identico) a quello salvato, EON deve comunque trovarlo e
+    mandarlo — idealmente riconoscendo anche dal contenuto del
+    documento di che documento si tratta.
+20. **Icona "+" al posto della freccia in su** nel campo di input
+    sotto il microfono, sia in "cliente cantiere" che in "appunti".
+21. **Tasto "+" in alto a destra, in orizzontale con la scritta
+    "Documenti"**, nella sezione documenti, per aggiungere un
+    documento.
+22. **Foto di cantiere organizzate in una "card" per cantiere**, con
+    il nome del cantiere/cliente sopra alle foto, e la possibilità di
+    aggiungere altre foto dentro la stessa card.
+23. **Opzioni di invio per una foto recuperata**: email, WhatsApp, EON
+    interna. Per ora solo l'interfaccia (i pulsanti), da rendere
+    davvero funzionanti quando si farà il Communication Hub.
+24. **Piccolo microfono accanto a una foto recuperata**, per dire a
+    voce cosa farne (es. "mandala per email a Zinchini").
+25. **Registro AI: mostrare anche la risposta, non solo la domanda.**
+    Oggi cliccando su una voce del registro si vede solo la domanda
+    fatta.
+26. **Card per le risposte lunghe/discorsive.** Le risposte che
+    richiedono un discorso (non una semplice conferma di appuntamento)
+    spariscono troppo in fretta per fare in tempo a leggerle — devono
+    apparire come card nello stile già adottato, con la possibilità
+    per l'utente di chiuderle quando vuole.
+27. **Cliccare sul riquadro "Cosa devo fare oggi"** deve aprire una
+    card (stesso stile) con l'elenco sintetico e semplice degli
+    impegni/attività, non solo restare un testo fisso in home.
+28. **Nomi di cartelle/card modificabili da ogni utente**, in modo
+    personale — un utente che rinomina una cartella la vede rinominata
+    solo lui, gli altri utenti restano con il nome di default (o la
+    rinominano a loro volta in autonomia).
+29. **Freccia "indietro" più grande e più in alto/evidente** — quella
+    attuale è piccola e capita di sbagliarsi.
+
+### D. Funzionalità nuove più grandi (da progettare a parte)
+
+30. **Integrazione meteo** — EON oggi non ha accesso alle previsioni.
+31. **Integrazione mappe/traffico** — EON oggi non sa calcolare tempi
+    di percorrenza reali tra due indirizzi/cantieri, serve un servizio
+    mappe che consideri anche il traffico/le code in tempo reale.
+32. **Documenti aziendali recuperabili da EON** (fatture fornitori,
+    DDT, comunicazioni amministrative, "documenti impresa" in
+    generale) — oggi non transitano da nessuna parte che EON può
+    consultare; vanno resi recuperabili con lo stile a card già usato
+    in home.
+33. **Primo formato personalizzato per fattura/preventivo/lettera/
+    carta intestata/cartello fine lavori.** Al primo accesso alla
+    sezione documenti (per chi non ha ancora impostato un formato),
+    proporre una scelta:
+    - "Scegli il formato della tua fattura caricando la foto di una
+      fattura che usi già" (EON legge la foto e riproduce il
+      formato), oppure
+    - "Usa il modello di EON" (EON decide lui il formato).
+    Una volta scelto il formato, si accede alla sezione normale con le
+    funzionalità già discusse sopra (preventivi/fatture creati subito
+    da EON, ecc.).
+34. **Possibilità per gli utenti di mandare un feedback** per
+    migliorare l'app, direttamente dall'interno.
+
+### E. Redesign UI/UX (grafica e layout)
+
+35. **Home page: il logo/scritta "EON" in alto non è ben proporzionato
+    rispetto al resto** — posizione, stile e colore da rivedere.
+    Richiesta esplicita di Gianardi: in questi interventi ragionare
+    come farebbe un vero UI/UX/Graphic/Visual Product Designer di una
+    big tech, non solo sistemare alla buona.
+36. **Calendario da semplificare visivamente**, oltre a essere
+    ordinato correttamente (vedi bug #6) — l'obiettivo dichiarato è la
+    "pulizia visiva" come base della "pulizia mentale": meno
+    affollato, più leggibile a colpo d'occhio.
+37. **Pulizia del menu.** Oggi il menu è un accumulo di funzioni
+    aggiunte nel tempo. Richiesta puntuale di Gianardi:
+    - Eliminare le 4 card grosse.
+    - Trasformare il "cruscotto azienda" (i 4 dati: clienti totali,
+      attivi, in trattativa, valore portafoglio) in una voce piccola
+      come le altre, chiamata "La tua azienda", che se aperta mostra
+      quei 4 dati — stile e colori coerenti con il resto dell'app.
+    - Eliminare tutte le altre voci piccole tranne queste quattro, da
+      mantenere: Registro AI, Cestino, Chiamate, Assegna un compito
+      (Team).
+38. **Card più curate per le risposte "informative"** (es. la
+    spiegazione di cosa sia la carta intestata) — stesso stile a card
+    grande già usato in home, ben delineato, chiudibile dall'utente.
+
+### F. Architettura app: navigazione tra profesioni e account
+
+39. **Oggi non c'è modo di uscire da una sezione professione (es.
+    "edile") e tornare alla schermata generale di EON.** Serve una
+    struttura simile a quella già esistente per la scelta iniziale
+    della professione: una prima pagina generale di EON, poi scorrendo
+    si arriva alla pagina di scelta professione (quella che già
+    esiste per Artigiani e Professionisti), e da dentro una sezione
+    professione dev'esserci sempre un modo per uscire e tornare alla
+    schermata generale.
+40. **Separazione dei dati per professione, quando l'app sarà
+    ufficiale.** Oggi con una sola email si accede a tutte le
+    professioni (comodo per i test attuali). A regime, come nelle
+    grandi app, una registrazione deve valere per la sola professione
+    scelta all'iscrizione: se un account è registrato su "edile", i
+    clienti/foto/documenti che aggiunge finiscono solo lì, mai anche
+    in idraulico/avvocato/altre sezioni.
+41. **Sezione generica "per chi vuole aumentare la propria
+    produttività"** (per chi non ha una professione specifica tra le
+    4, uso quotidiano/personale) — dubbio aperto di Gianardi su cosa
+    metterci davvero, da discutere insieme prima di costruirla.
+
+### G. Idee e principi (non tecnici, per il futuro)
+
+42. **Rinforzo del "principio della crescita democratica e graduale"**
+    (la stessa idea già segnata sopra sulla cache semantica delle
+    risposte, con riferimento a Wikipedia) — Gianardi lo ha
+    riformulato con due esempi concreti (TFR di 3 dipendenti, obbligo
+    di SCIA per una ristrutturazione): oggi EON "tampona" cercando su
+    internet/nella conoscenza generale dell'AI, ma l'obiettivo è che
+    impari gradualmente da queste risposte (proprio come da qualunque
+    altra domanda tecnica di settore — edile, idraulico, ecc.), così
+    che con più utenti nel tempo debba ricorrere sempre meno a
+    internet/all'AI esterna per le stesse domande. Nessuna
+    implementazione nuova rispetto a quanto già segnato il
+    21-22/09 — solo un rinforzo del principio con esempi reali di
+    utilizzo.
+
+Nessuna implementazione iniziata su nessuno dei punti sopra. Da
+proseguire un pezzo alla volta con l'autorizzazione di Gianardi ad ogni
+intervento, cominciando presumibilmente dai bug/comportamenti AI più
+semplici e sicuri (sezioni A e B) prima delle funzionalità e del
+redesign più grandi (sezioni D, E, F).
