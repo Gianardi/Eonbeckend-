@@ -5117,6 +5117,13 @@ function renderCalendar(){
      di una griglia oraria che resterebbe quasi sempre vuota. */
   items.forEach(it => {
     it._data = interpretaQuando(it.when);
+    /* interpretaQuando azzera sempre l'ora a mezzanotte: senza questo,
+       due impegni nello stesso giorno restano nell'ordine in cui sono
+       stati creati invece che in ordine di orario (bug segnalato da
+       Gianardi il 23/09/2026, con screenshot). */
+    const ora = estraiOra(it.when);
+    if(ora){ const [h,m] = ora.split(":").map(Number); it._minuti = h*60+m; }
+    else it._minuti = null;
   });
 
   /* Un calendario che mostra il mese scorso non serve a niente: teniamo
@@ -5129,7 +5136,12 @@ function renderCalendar(){
     if(!a._data && !b._data) return 0;
     if(!a._data) return 1;      /* senza data vanno in fondo */
     if(!b._data) return -1;
-    return a._data - b._data;
+    const diffGiorno = a._data - b._data;
+    if(diffGiorno !== 0) return diffGiorno;
+    if(a._minuti === null && b._minuti === null) return 0;
+    if(a._minuti === null) return 1;   /* senza ora, in fondo alla giornata */
+    if(b._minuti === null) return -1;
+    return a._minuti - b._minuti;
   });
 
   const gruppi = [];
