@@ -844,21 +844,51 @@ const TOOLS = {
     },
     async run(input, ctx) {
       if (!eStringaNonVuota(input.testo)) throw fail("Parametro 'testo' mancante o vuoto");
-      const q = encodeURIComponent(input.testo.trim());
+      const testoCercato = input.testo.trim();
+      const q = encodeURIComponent(testoCercato);
       const [appuntamenti, impegni] = await Promise.all([
         db(`messages?select=id,title,scheduled_at&event_type=eq.appt&title=ilike.*${q}*&deleted_at=is.null&order=scheduled_at.asc&limit=10`, { method: "GET" }, ctx.accessToken),
         db(`tasks?select=id,title,scheduled_at,status&title=ilike.*${q}*&deleted_at=is.null&order=scheduled_at.asc&limit=10`, { method: "GET" }, ctx.accessToken),
       ]);
-      return {
-        risultati: [
-          ...(appuntamenti || [])
-            .filter((m) => !m.title.startsWith("❌"))
+      let risultati = [
+        ...(appuntamenti || [])
+          .filter((m) => !m.title.startsWith("❌"))
+          .map((m) => ({ id: m.id, titolo: m.title, quando: m.scheduled_at, tipo: "appuntamento" })),
+        ...(impegni || [])
+          .filter((t) => t.status !== "done" && t.status !== "annullato")
+          .map((t) => ({ id: t.id, titolo: t.title, quando: t.scheduled_at, tipo: "impegno" })),
+      ];
+
+      /* Gianardi, 23/09/2026: "mi sposti il dottore alle 17" non trovava
+         nessun impegno perché il titolo salvato era "Dottor Righi" —
+         "dottore" non è una sottostringa letterale di "Dottor Righi"
+         (manca la "e" finale), quindi il semplice ilike sopra fallisce
+         anche quando il significato è ovvio. Stesso principio già usato
+         per i clienti (paroleSimili/risolviClienteDaNome): quando la
+         sottostringa esatta non trova nulla, riprova sulle singole
+         parole con lo stesso confronto "quasi uguali", su un insieme
+         più ampio di impegni non ancora conclusi. */
+      if (risultati.length === 0) {
+        const paroleCercate = testoCercato.toLowerCase().split(/\s+/).filter(Boolean);
+        const corrisponde = (titolo) => {
+          const paroleTitolo = titolo.toLowerCase().split(/\s+/).filter(Boolean);
+          return paroleCercate.some((p) => paroleTitolo.some((pt) => paroleSimili(p, pt) || pt.startsWith(p) || p.startsWith(pt)));
+        };
+        const [tuttiAppuntamenti, tuttiImpegni] = await Promise.all([
+          db(`messages?select=id,title,scheduled_at&event_type=eq.appt&deleted_at=is.null&order=scheduled_at.asc&limit=200`, { method: "GET" }, ctx.accessToken),
+          db(`tasks?select=id,title,scheduled_at,status&deleted_at=is.null&order=scheduled_at.asc&limit=200`, { method: "GET" }, ctx.accessToken),
+        ]);
+        risultati = [
+          ...(tuttiAppuntamenti || [])
+            .filter((m) => !m.title.startsWith("❌") && corrisponde(m.title))
             .map((m) => ({ id: m.id, titolo: m.title, quando: m.scheduled_at, tipo: "appuntamento" })),
-          ...(impegni || [])
-            .filter((t) => t.status !== "done" && t.status !== "annullato")
+          ...(tuttiImpegni || [])
+            .filter((t) => t.status !== "done" && t.status !== "annullato" && corrisponde(t.title))
             .map((t) => ({ id: t.id, titolo: t.title, quando: t.scheduled_at, tipo: "impegno" })),
-        ],
-      };
+        ].slice(0, 10);
+      }
+
+      return { risultati };
     },
   },
 
