@@ -1676,6 +1676,39 @@ const TOOLS = {
     },
   },
 
+  /* Gianardi, 23/09/2026: "dammi il documento X" per un documento
+     dell'impresa (non legato a un cliente: fatture fornitori, DDT,
+     modelli, comunicazioni amministrative — la sezione "Documenti
+     impresa" dell'app, tabella cantiere_documenti) rispondeva sempre
+     "non ho accesso a documenti non collegati a un cliente", perché
+     esisteva solo recupera_documenti_cliente (che legge dalla
+     conversazione di un cliente, tabella messages) — nessuno strumento
+     leggeva mai cantiere_documenti. Stesso pattern di
+     recupera_foto_cantiere: sola lettura, nessuna conferma. */
+  recupera_documenti_impresa: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "recupera_documenti_impresa",
+      description: "Recupera i documenti dell'impresa già caricati nell'app nella sezione 'Documenti impresa' (non collegati a un cliente specifico: es. fatture fornitori, DDT, modelli, comunicazioni amministrative). Usalo quando l'utente chiede un documento e non sta parlando di un cliente in particolare — per i documenti/preventivi/fatture di un cliente usa invece recupera_documenti_cliente.",
+      input_schema: {
+        type: "object",
+        properties: {
+          nome: { type: "string", description: "Parte del nome del documento cercato, se l'utente lo nomina (anche se detto in modo simile/impreciso, es. per dettatura vocale) — usa una singola parola distintiva se il nome completo non da' risultati. Lascia vuoto per i documenti più recenti in generale." },
+          limite: { type: "integer", description: "Quanti documenti restituire, default 10" },
+        },
+      },
+    },
+    async run(input, ctx) {
+      const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
+      let query = `cantiere_documenti?select=id,nome,tipo,url,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
+      if (eStringaNonVuota(input.nome)) query += `&nome=ilike.*${encodeURIComponent(input.nome.trim())}*`;
+      const righe = await db(query, { method: "GET" }, ctx.accessToken);
+      const lista = Array.isArray(righe) ? righe : [];
+      return { documenti: lista.map((d) => ({ id: d.id, titolo: d.nome, tipo: d.tipo, url: d.url, quando: d.created_at })) };
+    },
+  },
+
   /* EON BRAIN, 05/09/2026: un cliente può avere più lavori/cantieri nel
      tempo (raro ma reale, vedi libro/edile.md) — questo strumento
      elenca quelli di un cliente per disambiguare, sullo stesso
@@ -2156,7 +2189,7 @@ function systemPromptAssistente(professione) {
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
 
-Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato), prova prima recupera_foto_cantiere (foto del cantiere/lavoro) o recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Solo se nessuno dei due è adatto (es. un preventivo mai creato prima, o qualcosa che non è né una foto né un documento in una conversazione cliente) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
+Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" (l'utente vuole vedere/recuperare qualcosa che esiste o dovrebbe esistere: un documento, una foto, un preventivo, un cartello, un dato), prova prima recupera_foto_cantiere (foto del cantiere/lavoro), recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente) o recupera_documenti_impresa (documenti dell'impresa NON legati a un cliente, es. fatture fornitori, DDT, modelli): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Se la richiesta non nomina né lascia intuire nessun cliente in particolare, prova recupera_documenti_impresa prima di concludere che non è disponibile. Solo se nessuno dei tre è adatto (es. un preventivo mai creato prima) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere qualcosa che già esiste o dovrebbe esistere. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
 
 Quando recupera_foto_cantiere o recupera_documenti_cliente vengono usati per MOSTRARE la risorsa direttamente all'utente (non per inoltrarla a qualcun altro con manda_messaggio), non scrivere mai l'url del file nel testo della risposta: l'app la mostra già visivamente in una scheda dedicata, ripetere il link tecnico non serve a nulla e, letto ad alta voce, è solo rumore. In questo caso il testo della risposta resta breve e naturale (es. "Ecco la foto di Zinchini, cosa vuoi fare?"), mai una descrizione di cosa hai recuperato o dell'indirizzo del file.
 

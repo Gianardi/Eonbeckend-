@@ -7724,6 +7724,7 @@ function collegaHubRacconta(){
     const clienteNomeFocus = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
     const azioneFoto = azioni.find(a => a.tool === "recupera_foto_cantiere");
     const azioneDocumenti = azioni.find(a => a.tool === "recupera_documenti_cliente");
+    const azioneDocumentiImpresa = azioni.find(a => a.tool === "recupera_documenti_impresa");
     if(azioneFoto){
       mostraRisorsaFoto(azioneFoto.esito.foto || [], clienteNomeFocus);
       chiudiHubAI();
@@ -7734,13 +7735,18 @@ function collegaHubRacconta(){
       chiudiHubAI();
       return;
     }
+    if(azioneDocumentiImpresa){
+      mostraRisorsaDocumenti(azioneDocumentiImpresa.esito.documenti || [], null);
+      chiudiHubAI();
+      return;
+    }
 
     /* Non tutte le richieste finiscono in crea_impegno: "cancella cliente
        Rossi" o "elimina questo appuntamento" sono azioni vere, non
        impegni. Prima ignoravamo tutto ciò che non fosse crea_impegno —
        l'azione veniva comunque eseguita sul database (dopo conferma),
        ma l'interfaccia non se ne accorgeva: sembrava non fare nulla. */
-    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente"];
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
@@ -8981,14 +8987,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     const clienteNomeFocusMic = risposta.focus && risposta.focus.tipo === "cliente" ? risposta.focus.riferimento : null;
     const azioneFotoMic = azioni.find(a => a.tool === "recupera_foto_cantiere");
     const azioneDocumentiMic = azioni.find(a => a.tool === "recupera_documenti_cliente");
-    if(azioneFotoMic || azioneDocumentiMic){
+    const azioneDocumentiImpresaMic = azioni.find(a => a.tool === "recupera_documenti_impresa");
+    if(azioneFotoMic || azioneDocumentiMic || azioneDocumentiImpresaMic){
       if(azioneFotoMic) mostraRisorsaFoto(azioneFotoMic.esito.foto || [], clienteNomeFocusMic);
-      else mostraRisorsaDocumenti(azioneDocumentiMic.esito.documenti || [], clienteNomeFocusMic);
+      else if(azioneDocumentiMic) mostraRisorsaDocumenti(azioneDocumentiMic.esito.documenti || [], clienteNomeFocusMic);
+      else mostraRisorsaDocumenti(azioneDocumentiImpresaMic.esito.documenti || [], null);
       if(viaVoce) parlaRisposta(risposta.testo || "Ecco quello che ho trovato");
       return;
     }
 
-    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente"];
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
