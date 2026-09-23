@@ -2470,19 +2470,16 @@ di Gianardi.
    orari calcolati correttamente (es. "fra un'ora" rispetto all'ora
    reale in cui è stato detto, non un orario fisso), non solo il primo
    o in modo confuso.
-3. **Riferimento recente a un cliente non riconosciuto in un comando
-   successivo.** Dopo aver fissato "appuntamento con dottor Righi
-   domani alle 11", chiedere subito dopo "mi sposti il dottore alle
-   17" deve essere capito come riferito a quell'appuntamento appena
-   creato — oggi la prima risposta è stata "non trovo nessun cliente
-   di nome dottore", solo alla richiesta ripetuta ha funzionato.
-   Comportamento corretto da definire:
-   - Se c'è un riferimento recente/una conversazione recente che rende
-     ovvio a chi ci si riferisce → agire subito, senza richiedere
-     conferma del nome.
-   - Se non c'è nessun contesto recente E non c'è un cliente che
-     corrisponde in modo univoco (nessuno, o più di uno con quel
-     termine) → chiedere "a quale cliente ti riferisci?".
+3. **FATTO (23/09/2026).** ~~Riferimento recente a un cliente non
+   riconosciuto in un comando successivo.~~ Causa reale trovata,
+   diversa da quella ipotizzata all'inizio: non era un problema di
+   "contesto di conversazione" — cerca_impegno cercava "dottore" come
+   sottostringa letterale del titolo salvato ("Dottor Righi"), e
+   "dottore" non è una sottostringa di "Dottor Righi" (manca la "e"
+   finale): la ricerca falliva anche a colpo sicuro, a prescindere dal
+   contesto. Aggiunto un secondo tentativo con lo stesso confronto
+   "parole quasi uguali" (Levenshtein) già usato per i clienti, quando
+   la sottostringa esatta non trova nulla.
 4. **FATTO (23/09/2026).** ~~Il microfono nella sezione "appunti" non
    aggiunge l'appunto.~~ Causa reale: parlare riempiva solo il campo di
    testo, serviva poi un secondo tocco separato su "invio" per salvare
@@ -2516,13 +2513,14 @@ di Gianardi.
    lista). Serve capire la causa: non deterministico quando dovrebbe
    esserlo (i dati letti dal calendario sono gli stessi in entrambi i
    casi).
-8. **Recupero documenti "impresa" (non legati a un cliente) non
-   funziona.** Chiesto un documento salvato in "documenti impresa"
-   (es. "microfono stile.jpg", "schermata iniziale professionale"),
-   EON risponde di non avere accesso a documenti non collegati a un
-   cliente specifico. Deve invece poter recuperare e mostrare questi
-   documenti (con lo stesso stile a card della schermata iniziale),
-   visto che sono già caricati nell'app in una sezione dedicata.
+8. **FATTO (23/09/2026).** ~~Recupero documenti "impresa" (non legati
+   a un cliente) non funziona.~~ Causa reale: esisteva solo
+   recupera_documenti_cliente (legge dalla conversazione di UN
+   cliente), nessuno strumento leggeva mai la tabella
+   cantiere_documenti dietro la sezione "Documenti impresa". Aggiunto
+   il nuovo tool recupera_documenti_impresa, con ricerca per nome
+   parziale; si apre nella stessa scheda a card già usata per i
+   documenti cliente.
 9. **Eliminazione di una foto non possibile.** Chiesto "elimina la
    foto dell'armadio", EON risponde di non avere questa funzione. Va
    aggiunta la possibilità di eliminare foto — non solo in
