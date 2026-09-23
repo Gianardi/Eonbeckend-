@@ -3714,6 +3714,71 @@ async function handleTranscribe(req, res) {
   return send(res, 200, { text: (out.text || "").trim() });
 }
 
+/* Gianardi, 23/09/2026 (punto 33): al primo accesso alla sezione
+   Documenti, chi non ha ancora impostato un formato può scegliere di
+   caricare la foto di un documento che usa già (fattura/preventivo/
+   carta intestata cartacea) invece di compilare la Carta intestata a
+   mano da zero — EON legge i dati dell'azienda dalla foto (visione di
+   Claude) e li usa per pre-compilare il modulo, che l'utente rivede e
+   salva come sempre. Nessun salvataggio automatico qui: solo
+   estrazione, la scrittura vera passa sempre dal salvataggio esistente
+   della Carta intestata (stesso principio di "mai scrivere dati senza
+   conferma dell'utente" già seguito altrove). */
+async function handleLeggiIntestazioneDaFoto(req, res) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
+
+  const body = await readBody(req);
+  const base64 = body.immagine_base64;
+  const mediaType = body.media_type;
+  if (!eStringaNonVuota(base64)) throw fail("Campo 'immagine_base64' mancante");
+  const TIPI_IMMAGINE_VALIDI = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+  if (!TIPI_IMMAGINE_VALIDI.has(mediaType)) throw fail("Formato immagine non supportato: usa jpeg, png, webp o gif");
+  const MAX_LUNGHEZZA_BASE64 = 6 * 1024 * 1024; // margine prudente sotto il limite del body su Vercel
+  if (base64.length > MAX_LUNGHEZZA_BASE64) throw fail("Immagine troppo grande: riprova con una foto più piccola", 413);
+
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 400,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+            { type: "text", text: "Questa è la foto di un documento aziendale italiano (fattura, preventivo o carta intestata). Leggi SOLO i dati dell'azienda che emette il documento (non del cliente destinatario) e rispondi SOLO con un oggetto JSON, senza nessun altro testo, con questi campi: {\"nome_azienda\": string o null, \"indirizzo\": string o null, \"piva\": string o null, \"telefono\": string o null, \"email\": string o null}. Usa null per ogni campo che non riesci a leggere con certezza nella foto: non inventare mai un dato che non vedi scritto chiaramente." },
+          ],
+        }],
+      }),
+    });
+  } catch (netErr) {
+    throw fail("Non riesco a contattare l'AI: " + netErr.message, 502);
+  }
+  if (!r.ok) {
+    let motivo = "";
+    try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
+    throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+  }
+  const data = await r.json();
+  const testo = (data.content || []).map((b) => b.text || "").join("").trim();
+  let estratti;
+  try {
+    estratti = JSON.parse(testo.replace(/```json|```/g, "").trim());
+  } catch (err) {
+    throw fail("Non sono riuscita a leggere i dati dalla foto: riprova con un'altra foto, più leggibile", 502);
+  }
+  return send(res, 200, {
+    nome_azienda: estratti.nome_azienda || null,
+    indirizzo: estratti.indirizzo || null,
+    piva: estratti.piva || null,
+    telefono: estratti.telefono || null,
+    email: estratti.email || null,
+  });
+}
+
 /* Named export solo per i test automatici (eval/backend.test.js): sono
    funzioni pure (nessuna chiamata di rete/database), utili da
    verificare in isolamento senza un account Supabase né una chiave
@@ -3773,6 +3838,7 @@ export default async function handler(req, res) {
     if (action === "analizza_messaggio") return await handleAnalizzaMessaggio(req, res, user, accessToken);
     if (action === "rispondi_richiesta_cliente") return await handleRispondiRichiestaCliente(req, res, user, accessToken);
     if (action === "transcribe") return await handleTranscribe(req, res);
+    if (action === "leggi_intestazione_da_foto") return await handleLeggiIntestazioneDaFoto(req, res);
     if (action === "seed") return await handleSeed(req, res, user, accessToken);
     if (resource) return await handleResource(req, res, resource, user, accessToken);
 

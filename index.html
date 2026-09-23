@@ -1978,6 +1978,22 @@
   </div>
 </div>
 
+<!-- Primo accesso alla sezione Documenti senza un formato già impostato
+     (Gianardi, 23/09/2026, punto 33): scegliere il formato caricando la
+     foto di un documento già in uso, o usare il modello di EON. -->
+<div class="ai-landing-overlay" id="onboardingDocumentiOverlay" style="display:none;">
+  <div class="ai-landing-card">
+    <div class="ai-landing-icon" style="background:var(--indigo);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+    </div>
+    <div class="ai-landing-title">Crea il formato dei tuoi documenti</div>
+    <div class="ai-landing-text" id="onboardingDocumentiHint" style="margin-bottom:16px;">Preventivi, fatture, lettere e cartelli useranno questo formato — puoi cambiarlo quando vuoi dalla Carta intestata.</div>
+    <input type="file" id="onboardingDocFotoInput" accept="image/*" style="display:none;">
+    <button class="primary-btn" id="onboardingDocFotoBtn" type="button" style="margin:0 auto; width:100%;">Scegli il formato da una foto</button>
+    <button type="button" id="onboardingDocEonBtn" style="margin-top:12px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:6px;">Usa il modello di EON</button>
+  </div>
+</div>
+
 <div class="app">
 
 <div class="onboarding" id="onboardingScreen">
@@ -3505,6 +3521,9 @@ const ASSISTANT_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=assista
 /* Analisi della chat (appuntamenti/attività) e decisione del professionista
    su una richiesta del cliente — vedi ANALISI DELLA CHAT in api/index.js. */
 const ANALIZZA_MESSAGGIO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=analizza_messaggio";
+/* Legge i dati azienda dalla foto di un documento (primo formato dei
+   documenti, punto 33) — vedi handleLeggiIntestazioneDaFoto in api/index.js. */
+const LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=leggi_intestazione_da_foto";
 const RISPONDI_RICHIESTA_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=rispondi_richiesta_cliente";
 
 /* Il backend si considera attivo solo se ci sono i valori di configurazione
@@ -6939,6 +6958,95 @@ document.getElementById("intestazioneLogoInput").addEventListener("change", (e) 
   if(f) caricaLogoIntestazione(f);
 });
 document.getElementById("intestazioneSalvaBtn").addEventListener("click", salvaCartaIntestata);
+
+/* ============ ONBOARDING DOCUMENTI: primo formato (23/09/2026) ============
+   Al primo accesso alla sezione Documenti, se non è ancora stata
+   salvata nessuna Carta intestata, propone di leggerla da una foto di
+   un documento già in uso invece di compilarla da zero — vedi
+   handleLeggiIntestazioneDaFoto in api/index.js. */
+function provaOnboardingDocumenti(){
+  if(localStorage.getItem("eon_documenti_onboarding_fatto")) return;
+  if(aziendaIntestazione && (aziendaIntestazione.nome_azienda || aziendaIntestazione.indirizzo)){
+    localStorage.setItem("eon_documenti_onboarding_fatto", "1");
+    return;
+  }
+  document.getElementById("onboardingDocumentiOverlay").style.display = "flex";
+}
+function chiudiOnboardingDocumenti(){
+  localStorage.setItem("eon_documenti_onboarding_fatto", "1");
+  document.getElementById("onboardingDocumentiOverlay").style.display = "none";
+}
+
+/* Ridimensiona (lato massimo 1400px) e comprime in JPEG prima di
+   inviarla: una foto scattata da un telefono può pesare diversi MB,
+   troppo per il limite del corpo della richiesta su Vercel e inutile
+   per leggere solo del testo. */
+function ridimensionaEConvertiInBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Non sono riuscita a leggere il file"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Immagine non valida"));
+      img.onload = () => {
+        const LATO_MASSIMO = 1400;
+        let { width, height } = img;
+        if(width > LATO_MASSIMO || height > LATO_MASSIMO){
+          const scala = LATO_MASSIMO / Math.max(width, height);
+          width = Math.round(width * scala);
+          height = Math.round(height * scala);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve({ base64: canvas.toDataURL("image/jpeg", 0.75).split(",")[1], mediaType: "image/jpeg" });
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById("onboardingDocEonBtn").addEventListener("click", chiudiOnboardingDocumenti);
+document.getElementById("onboardingDocumentiOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "onboardingDocumentiOverlay") chiudiOnboardingDocumenti();
+});
+document.getElementById("onboardingDocFotoBtn").addEventListener("click", () => document.getElementById("onboardingDocFotoInput").click());
+document.getElementById("onboardingDocFotoInput").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const btn = document.getElementById("onboardingDocFotoBtn");
+  const hint = document.getElementById("onboardingDocumentiHint");
+  const hintBase = hint.textContent;
+  btn.disabled = true;
+  hint.textContent = "Sto leggendo i dati dalla foto…";
+  try{
+    if(!BACKEND_CONFIGURED || !currentSession) throw new Error("accedi per usare questa funzione");
+    const { base64, mediaType } = await ridimensionaEConvertiInBase64(f);
+    const response = await fetch(LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      body: JSON.stringify({ immagine_base64: base64, media_type: mediaType })
+    });
+    const json = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(json.error || "Non sono riuscita a leggere la foto");
+    chiudiOnboardingDocumenti();
+    navigateTo("carta-intestata");
+    if(json.nome_azienda) document.getElementById("intestazioneNome").value = json.nome_azienda;
+    if(json.indirizzo) document.getElementById("intestazioneIndirizzo").value = json.indirizzo;
+    if(json.piva) document.getElementById("intestazionePiva").value = json.piva;
+    if(json.telefono) document.getElementById("intestazioneTelefono").value = json.telefono;
+    if(json.email) document.getElementById("intestazioneEmail").value = json.email;
+    showAIToast("Ho letto questi dati dalla foto", "Controllali e tocca Salva se vanno bene — puoi correggerli prima.");
+  }catch(err){
+    console.error("Lettura intestazione da foto non riuscita:", err);
+    showAILanding("Non sono riuscita a leggerla", err.message || "Riprova con un'altra foto, o usa il modello di EON.");
+  }finally{
+    btn.disabled = false;
+    hint.textContent = hintBase;
+    document.getElementById("onboardingDocFotoInput").value = "";
+  }
+});
 
 /* ============ CREA FATTURA ============ */
 const invoiceClientSel = document.getElementById("invoiceClient");
@@ -10586,6 +10694,7 @@ function navigateTo(page){
   if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
   if(page === "cantiere-appunti") renderCantiereAppunti();
   if(page === "documenti-impresa") renderCantiereDocumenti();
+  if(page === "cantiere-documenti") provaOnboardingDocumenti();
   if(page === "cantiere-foto") renderCantiereFoto();
   if(page === "carta-intestata") renderCartaIntestata();
   if(page === "crea-lettera") renderLetters();
