@@ -38,6 +38,7 @@ const CONTRATTO = {
   ai_audit_log: ["id", "owner_id", "tool", "input", "esito", "stato", "created_at"],
   ai_request_log: ["id", "owner_id", "tipo", "messaggio", "risposta", "modello", "giri", "strumenti", "stato", "errore", "durata_ms", "created_at"],
   ai_runs: ["id", "owner_id", "stato", "messaggi", "in_sospeso", "azioni", "created_at", "updated_at"],
+  feedback: ["id", "owner_id", "testo", "created_at"],
 };
 
 function pulisciUrl(url) {

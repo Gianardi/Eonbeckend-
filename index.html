@@ -480,6 +480,11 @@
     cursor:pointer; font-family:inherit;
   }
   .card-header-add svg{ width:15px; height:15px; }
+  .feedback-invia-btn{
+    width:100%; border-radius:14px; border:none; background:var(--text); color:#fff;
+    font-family:inherit; font-weight:700; font-size:13.5px; padding:13px; margin-top:10px; cursor:pointer;
+  }
+  .feedback-invia-btn:disabled{ opacity:.5; cursor:default; }
 
   .mini-ring{ display:flex; align-items:center; gap:9px; flex:none; }
   .mini-ring svg{ transform:rotate(-90deg); }
@@ -2890,44 +2895,103 @@
 
     <!-- ==================== PAGINA: GESTISCI AZIENDA ==================== -->
     <div class="page" id="page-gestisci-azienda">
-      <div class="module-grid">
-        <div class="module-card tint-coral" data-catfilter="urgenti" style="position:relative;">
-          <span class="badge" id="chatBadge" style="position:absolute; top:16px; right:16px;">3</span>
-          <div class="module-icon coral">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <!-- Pulizia menu (Gianardi, 23/09/2026): eliminate le 4 card grosse
+           (Urgenti/Da chiudere/Da acquisire/Team) e il cruscotto sempre
+           visibile — diventato "La tua azienda" qui sotto, una voce
+           piccola come le altre che apre gli stessi 4 numeri. Eliminate
+           anche Registro chiamate, Pagamenti da Fare, Entrate, Crea
+           Fattura, Crea Preventivo, Regalo, Business: solo questo menu
+           ci portava, confermato con Gianardi che possono sparire dalla
+           navigazione (le pagine restano nel codice, non cancellate,
+           solo senza più un punto d'accesso dal menu). EON AI invece è
+           stata mantenuta: apre l'hub "Racconta la giornata"
+           (aiHubOverlay/organizza()), diverso dall'orologio AI in home
+           (aiClockBtn, un generatore di piano più semplice) — NON un
+           doppione come pensavo all'inizio, l'ho ricontrollato prima di
+           toglierlo per errore. -->
+      <div class="azienda-list">
+        <div class="azienda-link-card" id="laTuaAziendaCard">
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 21V9h6v12"/></svg>
           </div>
-          <div class="module-eyebrow" style="color:var(--coral);">Priorità</div>
-          <div class="module-title">Urgenti</div>
-          <div class="module-sub">Cose che aspettano una risposta oggi</div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">La tua azienda</div>
+            <div class="module-sub">Clienti totali, attivi, in trattativa, valore portafoglio</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="module-card tint-green" data-catfilter="chiudere">
-          <div class="module-icon gem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
+        <div class="azienda-link-card" id="cardEonAI">
+          <div class="module-icon" style="background:var(--violet);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
           </div>
-          <div class="module-eyebrow" style="color:var(--green);">Pipeline</div>
-          <div class="module-title">Da chiudere</div>
-          <div class="module-sub">Trattative vicine alla firma</div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">EON AI</div>
+            <div class="module-sub">Organizza la giornata, strategia trattative e altro</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="module-card tint-amber" data-catfilter="acquisire">
-          <div class="module-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        <div class="azienda-link-card" data-page="assegna-compiti">
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
           </div>
-          <div class="module-eyebrow" style="color:var(--amber);">Nuovi contatti</div>
-          <div class="module-title">Da acquisire</div>
-          <div class="module-sub">Chi ti ha scritto per la prima volta</div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Assegna Compiti</div>
+            <div class="module-sub">Manda un compito a uno o più dipendenti</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="module-card tint-violet" data-catfilter="team">
-          <div class="module-icon case">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="azienda-link-card" id="extraTile">
+          <div class="module-icon" id="extraTileIcon" style="background:var(--coral);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
           </div>
-          <div class="module-eyebrow" style="color:var(--violet);">Squadra</div>
-          <div class="module-title">Team</div>
-          <div class="module-sub">Collaboratori e dipendenti</div>
+          <div class="azienda-link-card-body">
+            <div class="module-title" id="extraTileTitle">Chiamate</div>
+            <div class="module-sub" id="extraTileSub">Clienti da sentire oggi, un tocco per la lista</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="cestino">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Cestino</div>
+            <div class="module-sub">Clienti, messaggi e altro che hai eliminato di recente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="ai-request-log">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Registro AI</div>
+            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="feedbackCard">
+          <div class="module-icon" style="background:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Manda un feedback</div>
+            <div class="module-sub">Dicci cosa non va o cosa vorresti — ci arriva direttamente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
       </div>
 
-      <div class="section-label">Cruscotto Azienda</div>
-      <div class="stats-grid">
+      <!-- Cruscotto azienda: nascosto di default, si apre toccando "La
+           tua azienda" sopra. Stessi id di sempre (renderClientStats/
+           applyProfession continuano a scriverci senza saperlo, sia
+           visibile o no) — mai passato dalla scheda risorsa condivisa
+           (apriRisorsaCard), che svuota il suo contenuto ad ogni
+           apertura: sposterebbe qui dentro questi elementi per poi
+           cancellarli per sempre alla prima foto/documento aperto dopo. -->
+      <div class="stats-grid" id="cruscottoAziendaBox" style="display:none; margin-top:14px;">
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--teal-soft); color:var(--teal);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -2955,138 +3019,6 @@
           </div>
           <div class="stat-num" id="statValue">€262.800</div>
           <div class="stat-label" id="statValueLabel">Valore portafoglio</div>
-        </div>
-      </div>
-
-      <div class="azienda-list">
-        <div class="azienda-link-card" id="cardEonAI">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">EON AI</div>
-            <div class="module-sub">Organizza la giornata, strategia trattative e altro</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="chiamate">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Registro chiamate</div>
-            <div class="module-sub">Da fare oggi, programmate, recenti</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="assegna-compiti">
-          <div class="module-icon" style="background:var(--indigo);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Assegna Compiti</div>
-            <div class="module-sub">Manda un compito a uno o più dipendenti</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="pagamenti">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Pagamenti da Fare</div>
-            <div class="module-sub">Fornitori, rate e scadenze da saldare</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="entrate">
-          <div class="module-icon" style="background:var(--green);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Entrate</div>
-            <div class="module-sub">Incassi previsti e ricevuti dai clienti</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="crea-fattura">
-          <div class="module-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Crea Fattura</div>
-            <div class="module-sub">Genera una nuova fattura per un cliente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="crea-preventivo">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/><circle cx="17" cy="16" r="4" fill="none"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Crea Preventivo</div>
-            <div class="module-sub">Prepara un'offerta da inviare al cliente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="regalo">
-          <div class="module-icon" style="background:var(--wa);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7"/><path d="M12 8c-1.2 0-3-1-3-2.8A2.2 2.2 0 0 1 11.2 3c1.5 0 2.8 2 2.8 2s1.3-2 2.8-2A2.2 2.2 0 0 1 19 5.2C19 7 17.2 8 16 8"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Regalo</div>
-            <div class="module-sub">Fai un pensiero a un cliente o un dipendente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" id="extraTile">
-          <div class="module-icon" id="extraTileIcon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.902.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.908.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title" id="extraTileTitle">Chiamate</div>
-            <div class="module-sub" id="extraTileSub">Clienti da sentire oggi, un tocco per la lista</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="business">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 20.5h18"/>
-              <rect x="5.5" y="13" width="3" height="7.5" rx="1"/>
-              <rect x="10.5" y="8.5" width="3" height="12" rx="1"/>
-              <rect x="15.5" y="4" width="3" height="16.5" rx="1"/>
-            </svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Business</div>
-            <div class="module-sub">Come sta andando l'azienda, in numeri</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="cestino">
-          <div class="module-icon" style="background:var(--ink-3, #64748b);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Cestino</div>
-            <div class="module-sub">Clienti, messaggi e altro che hai eliminato di recente</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" data-page="ai-request-log">
-          <div class="module-icon" style="background:var(--ink-3, #64748b);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Registro AI</div>
-            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
       </div>
     </div>
@@ -7371,9 +7303,6 @@ function renderChatList(){
     });
     wrap.appendChild(item);
   });
-  document.getElementById("chatBadge").textContent = chats.reduce((s,c)=>s+c.unread,0);
-  const totalUnread = chats.reduce((s,c)=>s+c.unread,0);
-  document.getElementById("chatBadge").style.display = totalUnread > 0 ? "flex" : "none";
   renderSummary();
   saveState("eon-chats", chats);
 }
@@ -7922,6 +7851,38 @@ function apriHubAI(){ document.getElementById("aiHubOverlay").style.display = "f
 function chiudiHubAI(){ document.getElementById("aiHubOverlay").style.display = "none"; }
 
 document.getElementById("cardEonAI").addEventListener("click", apriHubAI);
+document.getElementById("laTuaAziendaCard").addEventListener("click", () => {
+  const box = document.getElementById("cruscottoAziendaBox");
+  box.style.display = box.style.display === "none" ? "grid" : "none";
+});
+document.getElementById("feedbackCard").addEventListener("click", () => {
+  const corpo = document.createElement("div");
+  corpo.innerHTML = `
+    <p class="module-sub" style="padding:0 2px 10px;">Cosa non va, cosa ti manca, cosa vorresti diverso: scrivilo qui, ci arriva direttamente.</p>
+    <textarea class="hub-racconta-campo" id="feedbackCampo" rows="4" placeholder="Scrivi qui il tuo feedback..." style="width:100%;"></textarea>
+    <button class="feedback-invia-btn" id="feedbackInvia" type="button">Invia feedback</button>
+  `;
+  apriRisorsaCard("Manda un feedback", corpo);
+  document.getElementById("feedbackInvia").addEventListener("click", async () => {
+    const campo = document.getElementById("feedbackCampo");
+    const testo = campo.value.trim();
+    if(testo.length < 2) return;
+    if(!isDbReady()){
+      showAILanding("Non collegato", "Per mandare un feedback serve la connessione al database.");
+      return;
+    }
+    const btn = document.getElementById("feedbackInvia");
+    btn.disabled = true;
+    const creato = await dbInsert("feedback", { testo });
+    btn.disabled = false;
+    if(!creato){
+      showAILanding("Non sono riuscita a inviarlo", "Riprova tra poco.");
+      return;
+    }
+    chiudiRisorsaCard();
+    showAIToast("Grazie!", "Il tuo feedback è arrivato.");
+  });
+});
 collegaHubRacconta();
 document.getElementById("aiHubChiudi").addEventListener("click", chiudiHubAI);
 document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
