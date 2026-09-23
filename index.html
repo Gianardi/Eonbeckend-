@@ -2011,6 +2011,39 @@
   </div>
 </div>
 
+<!-- Cambio professione dentro l'app (Gianardi, 23/09/2026, punto 39):
+     stesse card della scelta iniziale in fase di iscrizione, ma qui
+     cambiano solo etichette e sezioni profession-specific (Assemblee/
+     Udienze/Chiamate/Revisioni, titoli, statistiche) — MAI i dati veri
+     già inseriti (clienti, appuntamenti, foto...), che restano gli
+     stessi qualunque professione sia selezionata: oggi un solo account
+     vede tutto insieme (vedi punto 40, separazione dati per
+     professione, ancora da decidere). -->
+<div class="ai-landing-overlay" id="cambiaProfessioneOverlay" style="display:none;">
+  <div class="ai-landing-card">
+    <div class="ai-landing-title">Cambia professione</div>
+    <div class="ai-landing-text" style="margin-bottom:16px;">Cambia solo le etichette e le sezioni della tua professione — i clienti e i dati che hai già inserito restano gli stessi.</div>
+    <div class="ob-cards" id="cambiaProfessioneCards" style="margin-bottom:0;">
+      <div class="ob-card" data-profession="edile">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Edile</div></div>
+      </div>
+      <div class="ob-card" data-profession="idraulico">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.7s6 5.4 6 10.1a6 6 0 0 1-12 0c0-4.7 6-10.1 6-10.1z"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Idraulico</div></div>
+      </div>
+      <div class="ob-card" data-profession="avvocato">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Avvocato</div></div>
+      </div>
+      <div class="ob-card" data-profession="amministratore">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Amministratore</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="app">
 
 <div class="onboarding" id="onboardingScreen">
@@ -3002,6 +3035,16 @@
           <div class="azienda-link-card-body">
             <div class="module-title">Registro AI</div>
             <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="cambiaProfessioneCard">
+          <div class="module-icon" style="background:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Cambia professione</div>
+            <div class="module-sub">Passa a un'altra sezione — Edile, Idraulico, Avvocato, Amministratore</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -7985,6 +8028,24 @@ document.getElementById("cardEonAI").addEventListener("click", apriHubAI);
 document.getElementById("laTuaAziendaCard").addEventListener("click", () => {
   const box = document.getElementById("cruscottoAziendaBox");
   box.style.display = box.style.display === "none" ? "grid" : "none";
+});
+document.getElementById("cambiaProfessioneCard").addEventListener("click", () => {
+  document.querySelectorAll("#cambiaProfessioneCards .ob-card").forEach(c => {
+    c.classList.toggle("selected", c.dataset.profession === currentProfession);
+  });
+  document.getElementById("cambiaProfessioneOverlay").style.display = "flex";
+});
+document.getElementById("cambiaProfessioneOverlay").addEventListener("click", (e) => {
+  if(e.target.id === "cambiaProfessioneOverlay") document.getElementById("cambiaProfessioneOverlay").style.display = "none";
+  const card = e.target.closest(".ob-card");
+  if(!card) return;
+  document.getElementById("cambiaProfessioneOverlay").style.display = "none";
+  if(card.dataset.profession === currentProfession) return;
+  /* skipDemoData sempre true qui: cambia solo etichette e sezioni
+     profession-specific, mai i dati veri già inseriti (vedi nota HTML
+     sopra e la conferma di Gianardi sul punto 39). */
+  applyProfession(card.dataset.profession, true);
+  showAIToast("Professione cambiata", "Etichette e sezioni aggiornate — i tuoi dati sono rimasti gli stessi.");
 });
 document.getElementById("feedbackCard").addEventListener("click", () => {
   const corpo = document.createElement("div");
