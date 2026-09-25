@@ -758,7 +758,8 @@ async function trovaOCreaConversazione(cliente, ctx) {
    aggiunge uno, va confermato con cura che il suo risultato non sia
    mai il parametro obbligatorio di un altro tool prima di metterlo
    qui. */
-const STRUMENTI_SEMPRE_CONCLUSIVI = new Set(["crea_impegno", "crea_appunto", "correggi_appunto", "aggiorna_cliente"]);
+// modifica_preventivo_o_fattura (25/09/2026): la scheda del documento mostra da sola il risultato, un giro in più per un commento era solo attesa
+const STRUMENTI_SEMPRE_CONCLUSIVI = new Set(["crea_impegno", "crea_appunto", "correggi_appunto", "aggiorna_cliente", "modifica_preventivo_o_fattura"]);
 
 /* ------------------------------------------------------------
    Elenco dei tool. Ognuno ha:

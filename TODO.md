@@ -3402,6 +3402,28 @@ non esisteva un formato salvato.
 - Test: `eval/formato.test.js` (20 verifiche) + 4 in percorso-rapido.test.mjs.
 - Da fare: applicare il formato anche a Lettera e Cartello fine lavori.
 
+### Scheda del documento: modifiche in chat e invio (25/09/2026)
+
+Gianardi: il microfono sotto la card "è brutto e non funziona bene"; le
+domande di EON devono comparire dentro la fattura, per rispondere senza
+chiuderla; un campo per scrivere le modifiche a mano; invio via email,
+WhatsApp o EON; "tutto ben delineato e armonioso". Trovato anche: una
+conferma chiesta con la scheda aperta finiva in un avviso NASCOSTO sotto la
+scheda (z-index 80 contro 9997).
+Ora (`mostraAnteprimaDocumento` in index.html): in alto PDF · WhatsApp ·
+Email · EON; il documento con il formato scelto; la conversazione con EON
+(domande e Sì/No dentro la scheda, risposte nello stesso filo via runId);
+in fondo, sempre visibile, campo di testo + microfono + invio. Una modifica
+chiara si applica subito e il documento si aggiorna lì. Il messaggio
+all'AI porta già i dati attuali del documento (niente giri per cercarlo) e
+modifica_preventivo_o_fattura è tra gli STRUMENTI_SEMPRE_CONCLUSIVI (niente
+giro finale solo per un commento). Nell'elenco dei documenti resta solo
+"Apri".
+Limite: WhatsApp ed Email partono con il riepilogo scritto (voci, IVA,
+totale); il PDF si apre a parte per salvarlo/allegarlo — l'allegato
+automatico del PDF è il passo successivo.
+Test: `eval/scheda.test.js` (18 verifiche).
+
 ### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
 
 Caso reale: la frase è andata all'AI, che l'ha capita come "crea una

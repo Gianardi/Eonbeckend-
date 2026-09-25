@@ -103,10 +103,10 @@ async function main() {
     const apertura = await page.evaluate(() => {
       document.querySelectorAll("#fpLista .doc-list-card")[1].click();
       const overlay = document.getElementById("risorsaOverlay");
-      return { aperta: overlay.style.display === "flex", titolo: document.getElementById("risorsaTitolo").textContent, corpo: document.getElementById("risorsaCorpo").textContent, modifica: !!document.querySelector("#risorsaCorpo .risorsa-riga-btn") };
+      return { aperta: overlay.style.display === "flex", titolo: document.getElementById("risorsaTitolo").textContent, corpo: document.getElementById("risorsaCorpo").textContent, modifica: !!document.querySelector("#risorsaPiede .scheda-composer textarea") };
     });
     verifica("tocco su una riga: si apre il documento vero", apertura.aperta && apertura.titolo === "Fattura n. 8/2026" && /Tommaso Greti/.test(apertura.corpo) && /fognatura/.test(apertura.corpo), JSON.stringify(apertura));
-    verifica("con il tasto Modifica a voce", apertura.modifica);
+    verifica("con la barra per scrivere o dettare la modifica", apertura.modifica);
 
     const dopoCorrezione = await page.evaluate(() => {
       chiudiRisorsaCard();
@@ -149,7 +149,7 @@ async function main() {
         chiudiRisorsaCard();
         document.getElementById("risorsaTitolo").textContent = "";
         const ok = provaRisorsaImmediata(frase);
-        return ok ? { titolo: document.getElementById("risorsaTitolo").textContent, voci: document.querySelectorAll("#risorsaCorpo .risorsa-voce, #risorsaCorpo .doc-list-card").length, modifica: !!document.querySelector("#risorsaCorpo .risorsa-riga-btn") } : false;
+        return ok ? { titolo: document.getElementById("risorsaTitolo").textContent, voci: document.querySelectorAll("#risorsaCorpo .risorsa-voce, #risorsaCorpo .doc-list-card").length, modifica: !!document.querySelector("#risorsaPiede .scheda-composer textarea") } : false;
       };
       return {
         serve: prova("Mi serve fattura testolina"),

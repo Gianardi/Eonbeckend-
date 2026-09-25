@@ -1540,6 +1540,40 @@
   .risorsa-mic-rapido svg{ width:17px; height:17px; }
   .risorsa-mic-rapido.ascolto{ background:var(--indigo); color:#fff; }
 
+  /* Scheda documento: invio in alto, documento, conversazione, barra in fondo */
+  .scheda-doc{ display:flex; flex-direction:column; gap:12px; }
+  .scheda-invio{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; }
+  .scheda-invio-btn{
+    display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 4px;
+    border:1px solid var(--border); border-radius:12px; background:var(--card);
+    font-family:inherit; font-size:11px; font-weight:700; color:var(--text); cursor:pointer;
+  }
+  .scheda-invio-btn svg{ width:19px; height:19px; color:var(--indigo); }
+  .scheda-invio-btn[data-canale="WhatsApp"] svg{ color:#1FA855; }
+  .scheda-anteprima .invoice-preview{ margin-top:0; }
+  .scheda-chat{ display:flex; flex-direction:column; gap:8px; }
+  .scheda-chat:empty{ display:none; }
+  .scheda-bolla{ max-width:85%; padding:9px 12px; border-radius:15px; font-size:13.5px; line-height:1.45; white-space:pre-line; }
+  .scheda-bolla.me{ align-self:flex-end; background:var(--indigo); color:#fff; border-bottom-right-radius:4px; }
+  .scheda-bolla.eon{ align-self:flex-start; background:#F1F2F6; color:var(--text); border-bottom-left-radius:4px; }
+  .scheda-bolla.attesa{ color:var(--muted); font-style:italic; }
+  .scheda-scelte{ display:flex; gap:8px; align-self:flex-start; }
+  .scheda-scelta{ padding:7px 18px; border-radius:18px; border:1px solid var(--border); background:var(--card); font:inherit; font-weight:700; font-size:13px; cursor:pointer; }
+  .scheda-scelta.si{ background:var(--indigo); color:#fff; border-color:var(--indigo); }
+  .scheda-piede{ border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); background:var(--card); }
+  .scheda-composer{ display:flex; align-items:flex-end; gap:8px; }
+  .scheda-campo{
+    flex:1; min-width:0; resize:none; border:1px solid var(--border); border-radius:19px;
+    padding:9px 14px; font:inherit; font-size:14px; line-height:1.35; max-height:96px; background:#F7F8FA; color:var(--text);
+  }
+  .scheda-campo:focus{ outline:none; border-color:var(--indigo); background:var(--card); }
+  .scheda-invia{
+    width:38px; height:38px; flex:none; border-radius:50%; border:none; background:var(--indigo); color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .scheda-invia:disabled{ opacity:.45; }
+  .scheda-invia svg{ width:18px; height:18px; }
+
   /* la scheda del documento dentro la conversazione */
   .msg-documento{
     max-width:80%; flex:none; border-radius:16px; overflow:hidden; cursor:pointer;
@@ -1973,6 +2007,7 @@
       </button>
     </div>
     <div class="doc-corpo" id="risorsaCorpo"></div>
+    <div class="scheda-piede" id="risorsaPiede" style="display:none;"></div>
   </div>
 </div>
 
@@ -4656,7 +4691,7 @@ async function callAI(prompt, maxTokens){
 /* extra: campi in più per il server, solo per un messaggio nuovo (es.
    ricordo: le azioni del turno precedente, usate dal percorso rapido
    degli appuntamenti per correggere subito "no, alle 11"). */
-async function chiediAssistente(messaggio, runId, extra){
+async function chiediAssistente(messaggio, runId, extra, opzioni){
   if(!BACKEND_CONFIGURED || !currentSession){
     throw new Error("l'assistente richiede un backend configurato e una sessione attiva");
   }
@@ -4674,6 +4709,12 @@ async function chiediAssistente(messaggio, runId, extra){
 
   async function gestisci(payload){
     const risposta = await chiamaBackend(payload);
+    /* Conferma chiesta DENTRO una scheda aperta (es. la chat di un
+       documento): il toast finirebbe sotto la scheda, invisibile. */
+    if(risposta.stato === "in_attesa_conferma" && opzioni && opzioni.chiediConferma){
+      const si = await opzioni.chiediConferma(risposta.domanda);
+      return gestisci({ runId: risposta.runId, conferma: !!si });
+    }
     if(risposta.stato === "in_attesa_conferma"){
       return new Promise((resolve, reject) => {
         showAIToastConDecisione(
@@ -10181,11 +10222,16 @@ function apriMedia(url, tipo){
    cliente; Email e WhatsApp sono già in struttura ma disabilitati
    finché non costruiamo il Communication Hub multicanale (TODO.md).
    ============================================================ */
-function apriRisorsaCard(titolo, corpoEl){
+function apriRisorsaCard(titolo, corpoEl, piedeEl){
   document.getElementById("risorsaTitolo").textContent = titolo;
   const corpo = document.getElementById("risorsaCorpo");
   corpo.innerHTML = "";
   corpo.appendChild(corpoEl);
+  // Piede fisso (es. la barra per scrivere/dettare le modifiche di un documento): solo se richiesto
+  const piede = document.getElementById("risorsaPiede");
+  piede.innerHTML = "";
+  if(piedeEl){ piede.appendChild(piedeEl); piede.style.display = ""; }
+  else piede.style.display = "none";
   document.getElementById("risorsaOverlay").style.display = "flex";
 }
 function chiudiRisorsaCard(){
@@ -10392,22 +10438,24 @@ function costruisciAnteprimaDocumento(dati, formato, intestazione){
   head.className = "invoice-preview-head";
   const sinistra = document.createElement("div");
   const brand = document.createElement("div");
-  /* Con un'intestazione di prova (galleria/proposta dalla foto) il marchio
-     si disegna qui; altrimenti ci pensa aggiornaMarchiDocumento. */
-  if(intestazione !== undefined){
-    brand.className = "invoice-preview-brand";
-    if(intest && intest.logo_url){
-      const img = document.createElement("img");
-      img.src = intest.logo_url; img.alt = intest.nome_azienda || "";
-      img.style.cssText = "height:30px; max-width:170px; object-fit:contain; display:block;";
-      brand.appendChild(img);
-    } else {
-      brand.textContent = (intest && intest.nome_azienda) || "La tua azienda";
-      brand.style.fontSize = "15px";
-    }
+  /* Il marchio si disegna subito, dall'intestazione (quella salvata o una
+     di prova per galleria/proposta dalla foto): prima si aspettava
+     aggiornaMarchiDocumento, che però non trova l'anteprima se non è
+     ancora sullo schermo — e restava il marchio EON. */
+  brand.className = "invoice-preview-brand" + (intestazione === undefined ? " doc-brand-dynamic" : "");
+  if(intest && intest.logo_url){
+    const img = document.createElement("img");
+    img.src = intest.logo_url; img.alt = intest.nome_azienda || "";
+    img.style.cssText = "height:30px; max-width:170px; object-fit:contain; display:block;";
+    brand.appendChild(img);
+  } else if(intest && intest.nome_azienda){
+    brand.textContent = intest.nome_azienda;
+    brand.style.fontSize = "15px";
+  } else if(intestazione !== undefined){
+    brand.textContent = "La tua azienda";
+    brand.style.fontSize = "15px";
   } else {
-    brand.className = "invoice-preview-brand doc-brand-dynamic";
-    brand.innerHTML = 'E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N';
+    brand.innerHTML = MARCHIO_EON_DEFAULT_HTML;
   }
   sinistra.appendChild(brand);
   const righe = righeIntestazione(intest);
@@ -10473,55 +10521,186 @@ function costruisciAnteprimaDocumento(dati, formato, intestazione){
   return wrap;
 }
 
-/* Apre l'anteprima vera dentro la stessa scheda sovrapposta già in uso
-   per foto/documenti (apriRisorsaCard) — non un secondo overlay: basta
-   sostituirne il contenuto. Riusata anche subito dopo una correzione
-   riuscita (creaMicRapidoModificaDocumento), così l'utente vede il
-   documento aggiornato senza doverlo riaprire lui stesso. */
+/* ============ SCHEDA DOCUMENTO (25/09/2026) ============
+   Gianardi: il microfono sotto la card "è brutto e non funziona bene";
+   le domande di EON devono comparire DENTRO la fattura, come una chat, per
+   poter rispondere senza chiuderla; serve anche un campo per scrivere le
+   modifiche a mano; e l'invio via email, WhatsApp o EON. "Tutto ben
+   delineato e armonioso."
+   La scheda: in alto l'invio (PDF · WhatsApp · Email · EON), poi il
+   documento, poi la conversazione; in fondo, sempre visibile, la barra
+   per scrivere o dettare la modifica. Una modifica chiara si applica
+   subito e il documento si aggiorna lì davanti. */
 function mostraAnteprimaDocumento(dati, docId, clienteNome){
-  const corpo = costruisciAnteprimaDocumento(dati);
-  if(docId){
-    const btnRiga = document.createElement("div");
-    btnRiga.className = "risorsa-riga-btn";
-    btnRiga.style.marginTop = "14px";
-    btnRiga.appendChild(creaMicRapidoModificaDocumento(dati, docId, clienteNome));
-    const etichetta = document.createElement("span");
-    etichetta.className = "risorsa-voce-sotto";
-    etichetta.textContent = "Modifica";
-    btnRiga.appendChild(etichetta);
-    corpo.appendChild(btnRiga);
-  }
-  apriRisorsaCard((dati.tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + (dati.numero || ""), corpo);
-  aggiornaMarchiDocumento();
-}
+  const stato = { dati, runId: null, inCorso: false };
+  const titoloScheda = () => (stato.dati.tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + (stato.dati.numero || "");
 
-/* Tasto microfono per correggere un documento già creato (Gianardi,
-   25/09/2026: "un tasto modifica anche tramite microfono che se
-   qualcosa non va l'utente può dirlo e chiedere la modifica") — stesso
-   pattern già rodato di creaMicRapido sulle foto, qui rivolto al nuovo
-   strumento modifica_preventivo_o_fattura. Se la correzione riesce,
-   riapre subito l'anteprima con i dati aggiornati invece di lasciare
-   l'utente a rileggere solo un messaggio di conferma testuale. */
-function creaMicRapidoModificaDocumento(dati, docId, clienteNome){
-  return creaMicRapido(async (testo) => {
-    if(!BACKEND_CONFIGURED || !currentSession) return;
-    showAIToast("Un attimo…", testo);
+  const corpo = document.createElement("div");
+  corpo.className = "scheda-doc";
+  corpo.appendChild(creaRigaInvioDocumento(() => stato.dati, clienteNome));
+  const anteprima = document.createElement("div");
+  anteprima.className = "scheda-anteprima";
+  const disegna = () => {
+    anteprima.innerHTML = "";
+    anteprima.appendChild(costruisciAnteprimaDocumento(stato.dati));
+    aggiornaMarchiDocumento();
+  };
+  disegna();
+  corpo.appendChild(anteprima);
+  const chat = document.createElement("div");
+  chat.className = "scheda-chat";
+  corpo.appendChild(chat);
+
+  const bolla = (chi, testo) => {
+    const b = document.createElement("div");
+    b.className = "scheda-bolla " + chi;
+    b.textContent = testo;
+    chat.appendChild(b);
+    b.scrollIntoView({ block: "end", behavior: "smooth" });
+    return b;
+  };
+  const chiediConfermaInChat = (domanda) => new Promise((resolve) => {
+    const b = bolla("eon", domanda);
+    const riga = document.createElement("div");
+    riga.className = "scheda-scelte";
+    [["Sì", true], ["No", false]].forEach(([etichetta, valore]) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = valore ? "scheda-scelta si" : "scheda-scelta";
+      btn.textContent = etichetta;
+      btn.addEventListener("click", () => { riga.remove(); bolla("me", etichetta); resolve(valore); });
+      riga.appendChild(btn);
+    });
+    b.after(riga);
+  });
+
+  const piede = document.createElement("div");
+  piede.className = "scheda-composer";
+  const campo = document.createElement("textarea");
+  campo.rows = 1;
+  campo.className = "scheda-campo";
+  campo.placeholder = "Scrivi o detta la modifica…";
+  const invia = document.createElement("button");
+  invia.type = "button";
+  invia.className = "scheda-invia";
+  invia.setAttribute("aria-label", "Invia la modifica");
+  invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+
+  async function mandaModifica(testo){
+    testo = (testo || "").trim();
+    if(!testo || stato.inCorso) return;
+    if(!BACKEND_CONFIGURED || !currentSession){ bolla("eon", "Per modificare il documento serve essere collegati."); return; }
+    stato.inCorso = true;
+    invia.disabled = true;
+    campo.value = "";
+    bolla("me", testo);
+    const attesa = bolla("eon attesa", "Sto modificando…");
     try{
-      const tipoDoc = dati.tipo === "fattura" ? "la fattura" : "il preventivo";
-      const risposta = await chiediAssistente(`Il professionista sta guardando ${tipoDoc} n. ${dati.numero} per ${dati.cliente} (id documento: ${docId}) e ha detto questa correzione a voce: "${testo}"`);
-      const azioneModifica = (risposta.azioni || []).find(a => a.tool === "modifica_preventivo_o_fattura");
-      if(azioneModifica){
-        aggiornaDocumentoInMemoria(azioneModifica.esito.id, azioneModifica.esito.dati);
-        mostraAnteprimaDocumento(azioneModifica.esito.dati, azioneModifica.esito.id, clienteNome);
-        showAIToast("Corretto", risposta.testo || "");
+      const tipoDoc = stato.dati.tipo === "fattura" ? "la fattura" : "il preventivo";
+      /* Con i dati attuali già nel messaggio l'AI non deve andarli a
+         cercare: una modifica chiara si fa in un passaggio solo. */
+      const attuali = {
+        voci: (stato.dati.voci || []).map(v => ({ descrizione: v.desc, quantita: v.qta, prezzo: v.prezzo })),
+        aliquota_iva: stato.dati.aliquota, condizioni: stato.dati.condizioni || "", note: stato.dati.note || "",
+      };
+      const messaggio = stato.runId ? testo
+        : `Il professionista sta guardando ${tipoDoc} n. ${stato.dati.numero} per ${stato.dati.cliente} (id documento: ${docId}). Dati attuali del documento: ${JSON.stringify(attuali)}. Ha chiesto questa modifica: "${testo}". Se è chiara applicala subito con modifica_preventivo_o_fattura (passa TUTTE le voci, anche quelle che non cambiano); se manca davvero un dato, chiedilo con una domanda breve.`;
+      const risposta = await chiediAssistente(messaggio, stato.runId || undefined, undefined, { chiediConferma: chiediConfermaInChat });
+      attesa.remove();
+      const modifica = (risposta.azioni || []).find(a => a.tool === "modifica_preventivo_o_fattura" && a.esito && a.esito.dati);
+      if(modifica){
+        stato.dati = modifica.esito.dati;
+        stato.runId = null;
+        aggiornaDocumentoInMemoria(docId, stato.dati);
+        disegna();
+        document.getElementById("risorsaTitolo").textContent = titoloScheda();
+        bolla("eon", "Fatto. Totale €" + Number(stato.dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 }) + ".");
       } else {
-        showAIToast(risposta.stato === "in_attesa_conferma" ? "Conferma richiesta" : "Fatto", risposta.testo || "");
+        const testoRisposta = (risposta.testo || "").trim() || "Non ho cambiato niente: prova a dirlo in un altro modo.";
+        // Una domanda di EON resta aperta: la prossima frase è la risposta
+        stato.runId = /\?\s*$/.test(testoRisposta) && risposta.runId ? risposta.runId : null;
+        bolla("eon", testoRisposta);
       }
     }catch(err){
-      console.warn("Correzione del documento non riuscita:", err.message);
-      showAIToast("Non ci sono riuscita", err.message);
+      attesa.remove();
+      stato.runId = null;
+      bolla("eon", "Non ci sono riuscita: " + err.message);
+    }finally{
+      stato.inCorso = false;
+      invia.disabled = false;
     }
+  }
+
+  invia.addEventListener("click", () => mandaModifica(campo.value));
+  campo.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); mandaModifica(campo.value); }
   });
+  // Dettatura: quello che dici si applica subito, come se l'avessi scritto e inviato
+  const mic = creaMicRapido((testo) => mandaModifica(testo));
+  mic.classList.add("scheda-mic");
+  mic.setAttribute("aria-label", "Detta la modifica");
+  piede.appendChild(mic);
+  piede.appendChild(campo);
+  piede.appendChild(invia);
+
+  apriRisorsaCard(titoloScheda(), corpo, piede);
+}
+
+/* Invio del documento: PDF, WhatsApp, Email, EON. WhatsApp ed Email
+   partono con il riepilogo già scritto (numero, voci, totale); il PDF si
+   apre a parte per salvarlo o allegarlo. EON apre la chat del cliente,
+   dove il documento c'è già. */
+function testoInvioDocumento(dati){
+  const euro = n => "€" + Number(n || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const tipo = dati.tipo === "fattura" ? "la fattura" : "il preventivo";
+  const righe = [`Buongiorno, le invio ${tipo} n. ${dati.numero}${dati.data ? " del " + dati.data : ""}.`, ""];
+  (dati.voci || []).forEach(v => righe.push(`- ${v.desc}${v.qta && Number(v.qta) !== 1 ? " × " + v.qta : ""}: ${euro(Number(v.prezzo) * Number(v.qta || 1))}`));
+  righe.push("", `Imponibile ${euro(dati.imponibile)} + IVA ${dati.aliquota ?? 22}% ${euro(dati.iva)}`, `Totale ${euro(dati.totale)}`);
+  if(dati.condizioni) righe.push((dati.tipo === "fattura" ? "Pagamento: " : "Validità: ") + dati.condizioni);
+  const firma = (aziendaIntestazione && aziendaIntestazione.nome_azienda) || dati.professionista || "";
+  if(firma) righe.push("", firma);
+  return righe.join("\n");
+}
+function numeroWhatsApp(telefono){
+  let n = String(telefono || "").replace(/\D/g, "");
+  if(!n) return "";
+  if(n.startsWith("00")) n = n.slice(2);
+  if(n.length <= 10 && n.startsWith("3")) n = "39" + n; // cellulare italiano senza prefisso
+  return n;
+}
+function creaRigaInvioDocumento(getDati, clienteNome){
+  const riga = document.createElement("div");
+  riga.className = "scheda-invio";
+  const cliente = clienteNome ? clients.find(c => c.name === clienteNome) : null;
+  const voci = [
+    { nome: "PDF", icona: '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 15h6M12 12v6"/>', azione: () => apriPdfDocumento(getDati()) },
+    { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => {
+      const d = getDati();
+      window.open("https://wa.me/" + numeroWhatsApp(cliente && cliente.phone) + "?text=" + encodeURIComponent(testoInvioDocumento(d)), "_blank");
+    } },
+    { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', azione: () => {
+      const d = getDati();
+      const oggetto = (d.tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + d.numero;
+      window.location.href = "mailto:?subject=" + encodeURIComponent(oggetto) + "&body=" + encodeURIComponent(testoInvioDocumento(d));
+    } },
+    { nome: "EON", icona: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', azione: () => {
+      const d = getDati();
+      inviaRisorsaEonInterna(clienteNome, `Le ho mandato ${d.tipo === "fattura" ? "la fattura" : "il preventivo"} n. ${d.numero} (totale €${Number(d.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 })}): lo trova qui in chat.`);
+    } },
+  ];
+  voci.forEach(v => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "scheda-invio-btn";
+    b.dataset.canale = v.nome;
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + v.icona + "</svg>";
+    const t = document.createElement("span");
+    t.textContent = v.nome;
+    b.appendChild(t);
+    b.addEventListener("click", v.azione);
+    riga.appendChild(b);
+  });
+  return riga;
 }
 
 function creaVoceDocumento(doc, clienteNome){
@@ -10563,13 +10742,10 @@ function creaVoceDocumento(doc, clienteNome){
       apriBtn.textContent = "Apri";
       apriBtn.addEventListener("click", () => mostraAnteprimaDocumento(doc.dati, doc.id, clienteNome));
       btnRiga.appendChild(apriBtn);
-      if(doc.id) btnRiga.appendChild(creaMicRapidoModificaDocumento(doc.dati, doc.id, clienteNome));
       el.appendChild(btnRiga);
     }
-    if(clienteNome){
-      const riassunto = doc.titolo + (importoTesto ? " — " + importoTesto : "");
-      el.appendChild(creaRigaCanaliInvio(clienteNome, riassunto));
-    }
+    /* Modifica e invio stanno dentro la scheda del documento (Apri):
+       qui solo cifra, numero e Apri. */
   } else {
     if(doc.url) el.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => window.open(doc.url, "_blank")));
     const titolo = document.createElement("div");
