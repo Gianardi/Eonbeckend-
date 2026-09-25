@@ -2949,3 +2949,68 @@ Due correzioni, entrambe già online:
 Non ancora possibile un test dal vivo di questa correzione specifica
 (fatta subito dopo la segnalazione, in attesa che Gianardi la provi
 di nuovo dopo il prossimo merge).
+
+**Credito Anthropic esaurito, scoperto nello stesso registro (23/09/2026,
+23:47:48 UTC)**: una richiesta ha fallito con errore reale dell'API
+("Your credit balance is too low to access the Anthropic API") — non
+un bug di codice, EON smette semplicemente di rispondere a qualunque
+richiesta finché non si ricarica il credito su console.anthropic.com,
+sezione Plans & Billing. Punto più urgente di qualunque correzione:
+senza credito, nessun fix conta.
+
+## Fatturazione elettronica vera (SdI) — discusso con Gianardi (24/09/2026)
+
+Oggi `crea_preventivo_o_fattura` crea SOLO un documento interno
+all'app (una riga in `messages`, mai inviata da nessuna parte): va
+benissimo per un preventivo (è solo un accordo tra professionista e
+cliente), ma **una "fattura" così non è una fattura elettronica valida
+per il fisco italiano** — verificato nel codice, nessun collegamento al
+Sistema di Interscambio (SdI). Un professionista che la scambia per una
+vera fattura emessa avrebbe un problema fiscale reale, non solo un
+limite del prodotto.
+
+Discusso con Gianardi: l'immediatezza ("chiedi e ricevi subito il
+documento", dettando a voce) è vista da lui come un vero vantaggio
+competitivo — nessuno strumento di fatturazione elettronica esistente
+(Fatture in Cloud, Aruba, ecc.) si usa a voce, si compilano sempre form
+manualmente. L'idea è di **mantenere esattamente lo stesso strato
+"assistente"** (capire la richiesta, risolvere/creare il cliente,
+generare le voci) e collegarlo, dietro le quinte, a un servizio vero di
+fatturazione elettronica (o costruire l'invio a SdI direttamente) — il
+flusso lato utente resta identico a oggi, cambia solo cosa succede
+internamente quando il documento è di tipo "fattura": invio reale
+invece del solo salvataggio interno, con ritorno di un numero di
+protocollo vero.
+
+**Prerequisito noto**: una fattura elettronica richiede dati fiscali
+precisi sul cliente (partita IVA o codice fiscale, più codice
+destinatario o PEC) che oggi l'anagrafica clienti di EON non ha (solo
+nome/telefono/valore/status) — andrà arricchita quando si costruirà
+questo pezzo. Nessuna implementazione iniziata: idea segnata per quando
+si deciderà di investirci, non urgente ora rispetto a rendere affidabile
+quello che già esiste.
+
+## Cache del telefono che mostrava una versione vecchia dell'app (25/09/2026)
+
+Trovato un falso allarme importante: dopo il merge della PR #71, Gianardi
+vedeva ancora il comportamento vecchio (fattura confermata solo con un
+piccolo messaggio in basso, mai con la scheda grande sovrapposta che il
+codice già prevede da tempo per `crea_preventivo_o_fattura`, tramite
+`mostraRisorsaDocumenti`/`apriRisorsaCard`). Non era un bug del codice:
+un "hard refresh" (chiudere del tutto la scheda del browser e ricaricare)
+ha risolto subito, confermato dal vivo con un test pulito ("Testolina",
+scheda "Documenti — Testolina" comparsa correttamente).
+
+Causa: `index.html` non aveva nessuna intestazione HTTP che dicesse al
+browser di controllare sempre col server se c'è una versione più nuova
+— un telefono può quindi restare bloccato su una copia vecchia della
+pagina anche dopo un nuovo deploy, senza che l'utente abbia modo di
+saperlo (a differenza di un sito con file con nome/hash diverso ad ogni
+build, qui è tutto in un unico index.html senza hash).
+
+Corretto in `vercel.json`: intestazione `Cache-Control: no-cache,
+must-revalidate` su `/` e `/index.html` — il browser deve sempre
+verificare col server prima di usare una copia in cache (non vuol dire
+"mai cache", solo "mai senza controllare prima"), così un nuovo deploy
+è visibile subito ad ogni apertura dell'app, senza dover spiegare a
+ogni professionista come svuotare la cache del telefono.
