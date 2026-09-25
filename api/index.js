@@ -4541,12 +4541,12 @@ async function handleLeggiIntestazioneDaFoto(req, res) {
       headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 400,
+        max_tokens: 500,
         messages: [{
           role: "user",
           content: [
             { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
-            { type: "text", text: "Questa è la foto di un documento aziendale italiano (fattura, preventivo o carta intestata). Leggi SOLO i dati dell'azienda che emette il documento (non del cliente destinatario) e rispondi SOLO con un oggetto JSON, senza nessun altro testo, con questi campi: {\"nome_azienda\": string o null, \"indirizzo\": string o null, \"piva\": string o null, \"telefono\": string o null, \"email\": string o null}. Usa null per ogni campo che non riesci a leggere con certezza nella foto: non inventare mai un dato che non vedi scritto chiaramente." },
+            { type: "text", text: "Questa è la foto di un documento aziendale italiano (fattura, preventivo o carta intestata). Leggi SOLO i dati dell'azienda che emette il documento (non del cliente destinatario) e guarda com'è impaginato. Rispondi SOLO con un oggetto JSON, senza nessun altro testo, con questi campi: {\"nome_azienda\": string o null, \"indirizzo\": string o null, \"piva\": string o null, \"telefono\": string o null, \"email\": string o null, \"colore_principale\": string o null, \"disposizione\": string}. colore_principale: il colore che caratterizza il documento (fascia in alto, logo, linee, titoli) in formato \"#RRGGBB\"; null se il documento è solo in bianco e nero/grigio. disposizione: una sola tra \"fascia\" (intestazione dentro una fascia colorata piena in alto), \"centrata\" (intestazione centrata, aspetto elegante o con caratteri con grazie), \"minimale\" (pochissime linee, molto spazio bianco) e \"classica\" (nome/logo in alto a sinistra, dati del documento in alto a destra, linee di separazione) — nel dubbio \"classica\". Usa null per ogni dato che non riesci a leggere con certezza nella foto: non inventare mai un dato che non vedi scritto chiaramente." },
           ],
         }],
       }),
@@ -4567,12 +4567,20 @@ async function handleLeggiIntestazioneDaFoto(req, res) {
   } catch (err) {
     throw fail("Non sono riuscita a leggere i dati dalla foto: riprova con un'altra foto, più leggibile", 502);
   }
+  /* Formato proposto (25/09/2026): la disposizione vista nella foto
+     diventa il modello di EON più vicino, il colore quello del documento.
+     Validati qui: mai un valore che il database rifiuterebbe. */
+  const MODELLO_PER_DISPOSIZIONE = { fascia: "moderno", centrata: "elegante", minimale: "essenziale", classica: "classico" };
+  const colore = typeof estratti.colore_principale === "string" && /^#[0-9A-Fa-f]{6}$/.test(estratti.colore_principale.trim())
+    ? estratti.colore_principale.trim().toUpperCase() : null;
   return send(res, 200, {
     nome_azienda: estratti.nome_azienda || null,
     indirizzo: estratti.indirizzo || null,
     piva: estratti.piva || null,
     telefono: estratti.telefono || null,
     email: estratti.email || null,
+    modello: MODELLO_PER_DISPOSIZIONE[estratti.disposizione] || "classico",
+    colore,
   });
 }
 

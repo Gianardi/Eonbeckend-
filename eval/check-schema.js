@@ -39,6 +39,7 @@ const CONTRATTO = {
   ai_request_log: ["id", "owner_id", "tipo", "messaggio", "risposta", "modello", "giri", "strumenti", "stato", "errore", "durata_ms", "created_at"],
   ai_runs: ["id", "owner_id", "stato", "messaggi", "in_sospeso", "azioni", "created_at", "updated_at"],
   feedback: ["id", "owner_id", "testo", "created_at"],
+  azienda_intestazione: ["owner_id", "nome_azienda", "indirizzo", "piva", "telefono", "email", "logo_url", "modello", "colore"],
 };
 
 function pulisciUrl(url) {

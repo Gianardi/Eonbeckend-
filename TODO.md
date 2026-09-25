@@ -3376,6 +3376,32 @@ documenti veri del suo tipo, il suo titolo e senza filtri (stessa pagina,
 Lettera, Cartello fine lavori e Carta intestata: NON vanno tolte (Gianardi,
 25/09/2026) — restano, e andranno migliorate più avanti.
 
+### Formato dei documenti: foto della propria fattura o modello di EON (25/09/2026)
+
+Richiesta di Gianardi: "vuoi usare il vecchio formato della tua fattura? Fai
+una foto qui così lo registriamo… sennò scegli un modello di EON; una volta
+scelto deve essere salvato". Prima: la foto leggeva solo i dati
+dell'intestazione, "Usa il modello di EON" chiudeva la finestra e basta, e
+non esisteva un formato salvato.
+- DB: `azienda_intestazione.modello` (classico|moderno|essenziale|elegante)
+  e `colore` (#RRGGBB), con vincoli — `supabase/intestazione_modello.sql`,
+  già applicata a staging e produzione (additiva).
+- Server (`handleLeggiIntestazioneDaFoto`): dalla foto anche colore
+  principale e disposizione → modello più vicino (fascia→Moderno,
+  centrata→Elegante, minimale→Essenziale, altrimenti Classico), validati.
+- App: finestra "Come vuoi le tue fatture?"; galleria dei 4 modelli con una
+  fattura d'esempio; dalla foto una proposta ("Va bene, usa questo" / "Prova
+  un altro modello con i miei colori" / "Correggi i dati"); salvataggio di
+  modello+colore (i dati letti riempiono solo i campi vuoti); sezione
+  "Formato dei documenti" nella Carta intestata per cambiarlo quando si vuole.
+- Anteprima in app e PDF usano modello, colore e intestazione (indirizzo,
+  P.IVA, contatti, logo); il PDF non mostra più "E·O·N" e non interpreta
+  più come HTML i testi di clienti/voci.
+- Limite dichiarato a Gianardi: dalla foto si riproduce l'aspetto (colori,
+  disposizione, dati), non una copia identica al millimetro.
+- Test: `eval/formato.test.js` (20 verifiche) + 4 in percorso-rapido.test.mjs.
+- Da fare: applicare il formato anche a Lettera e Cartello fine lavori.
+
 ### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
 
 Caso reale: la frase è andata all'AI, che l'ha capita come "crea una
