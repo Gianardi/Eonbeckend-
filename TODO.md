@@ -3483,6 +3483,14 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Da fare più avanti: "La tua azienda" e "Chiamate" (25/09/2026)
+
+Deciso con Gianardi: restano nel Menu, da sistemare dentro.
+- **La tua azienda** → diventa il cruscotto dell'impresa: entrate, uscite,
+  tasse, quanto resta. Oggi mostra solo 4 numeri sui clienti.
+- **Chiamate** → diventa la rubrica: tutti i clienti col telefono, un tocco
+  e si chiama (oggi mostra le chiamate da fare/programmate/recenti).
+
 ### Pulizia del Menu (25/09/2026)
 
 Gianardi: togliere "EON AI" (superato dal microfono in Home) e "Cambia
