@@ -101,6 +101,21 @@ iCloud. Più lavoro c'è dentro EON, più EON diventa indispensabile.
   non un cloud generico (lì si compete con Apple e Google).
 - **Argomento di vendita**: "Le foto di lavoro non ti riempiono più iCloud."
 
+### EON Memory — la memoria del tuo lavoro (25/09/2026)
+
+Nome deciso con Andrea. È il pilastro 2 ("ricorda tutto per te"):
+- **Non "un cloud"**: il valore non è conservare ma **ritrovare e usare**
+  (ordinato da solo per cliente/cantiere, ricerca a voce, collegato a
+  preventivi/fatture/chat, si manda al cliente in un tocco). Come cloud si
+  perde il confronto con iCloud/Google sul prezzo al GB.
+- **Solo lavoro**, mai il rullino intero: niente foto private.
+- **Mai perdere niente**: backup con ripristino a qualsiasi minuto,
+  **"Scarica tutto"** (export di foto e documenti, anche per il GDPR),
+  dati in Europa e cifrati; conservazione fiscale "a norma" solo con
+  fornitore accreditato.
+- **Anche i fatti, non solo i file**: "Rossi paga sempre in ritardo", "il
+  bagno di Bianchi ha piastrelle 30×60" — tutto quello che EON sa del lavoro.
+
 ## 3. Una "vera app" sul telefono
 
 - **[Claude] Installabile** dal browser ("Aggiungi a Home") con icona e
