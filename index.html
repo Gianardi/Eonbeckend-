@@ -683,56 +683,71 @@
     background:rgba(20,30,60,.05); font-size:11px; color:var(--faint); font-weight:700;
   }
 
-  .cal-giorno{
-    display:flex; align-items:center; gap:9px; margin:18px 0 9px;
-    font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.09em;
-    color:var(--faint);
+  /* Calendario rifatto il 25/09/2026: settimana in alto, un colore per
+     tipo di impegno (pallino + nome), ora su una riga, niente doppioni
+     ("DA FARE" / "da fare", titolo ripetuto sotto). */
+  .cal-settimana{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:6px; margin:2px 0 14px; }
+  .cal-sett-giorno{
+    display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 8px;
+    border-radius:14px; border:1px solid var(--border); background:var(--card); box-shadow:var(--shadow-sm);
+    font:inherit; color:var(--text); cursor:pointer;
   }
-  .cal-giorno:first-child{ margin-top:2px; }
-  .cal-giorno i{
-    font-style:normal; font-size:9.5px; background:rgba(20,30,60,.06);
-    color:var(--muted); border-radius:20px; padding:2px 7px; font-weight:800;
-  }
-  .cal-giorno::after{ content:""; flex:1; height:1px; background:var(--border); }
-  .cal-giorno.oggi{ color:var(--text); }
-  .cal-giorno.oggi i{ background:var(--text); color:#fff; }
-  .cal-giorno.oggi::after{ background:var(--border-strong); }
+  .cal-sett-giorno:disabled{ cursor:default; background:transparent; box-shadow:none; color:var(--faint); }
+  .cal-sett-nome{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+  .cal-sett-giorno:disabled .cal-sett-nome{ color:var(--faint); }
+  .cal-sett-num{ font-family:'Manrope'; font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.1; }
+  .cal-sett-punti{ display:flex; gap:3px; height:5px; }
+  .cal-sett-punti i{ width:5px; height:5px; border-radius:50%; background:var(--indigo); }
+  .cal-sett-giorno.oggi{ background:var(--text); border-color:var(--text); color:#fff; }
+  .cal-sett-giorno.oggi .cal-sett-nome{ color:rgba(255,255,255,.72); }
+  .cal-sett-giorno.oggi .cal-sett-punti i{ background:#fff; }
+  .cal-riepilogo{ font-size:13px; color:var(--muted); margin:0 2px 4px; }
+  .cal-riepilogo b{ color:var(--text); font-variant-numeric:tabular-nums; }
 
-  /* Semplificato il 23/09/2026 (Gianardi: "pulizia visiva" come base
-     della "pulizia mentale" — il calendario era troppo affollato).
-     Prima OGNI riga portava un bordo spesso 2px + un'ombra marcata,
-     identici per un impegno qualunque e per quello di oggi: tutto
-     "urlava" alla stessa intensità, quindi in pratica niente si
-     distingueva davvero. Ora il bordo è sottile e uniforme (il
-     rilievo vero è riservato a "oggi", l'unico caso che conta
-     visivamente di più), e i pulsanti Scrivi/Chiama/Elimina — che da
-     soli raddoppiavano l'altezza di ogni riga — si vedono solo
-     toccando la riga (progressive disclosure), non sempre. */
-  .cal-voce{
-    display:flex; align-items:center; gap:14px; cursor:pointer;
-    padding:13px 16px; margin-bottom:8px; border-radius:16px;
-    background:var(--card); border:1px solid var(--border);
-    flex-wrap:wrap;
+  .cal-giorno{
+    display:flex; align-items:baseline; gap:8px; margin:22px 2px 10px; scroll-margin-top:80px;
   }
-  .cal-voce.oggi{ border-color:var(--text); box-shadow:0 4px 14px rgba(14,20,36,.1); }
-  .cal-ora-blocco{ flex:none; width:44px; text-align:center; }
-  .cal-ora-hh{ font-family:'Manrope'; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.1; color:var(--text); }
-  .cal-ora-mm{ font-size:11px; font-weight:700; color:var(--faint); margin-top:1px; }
-  .cal-divider{ width:1.5px; align-self:stretch; background:var(--border); flex:none; }
-  .cal-corpo{ display:block; flex:1; min-width:0; }
-  .cal-testo{ min-width:0; }
-  .cal-nome{ font-size:14.5px; font-weight:700; color:var(--text); line-height:1.3; }
-  .cal-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:3px; color:var(--muted); }
-  .cal-label.urgente{ color:var(--text); }
-  .cal-sotto{ font-size:11px; color:var(--muted); margin-top:2px; }
-  .cal-azioni{ display:none; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
+  .cal-giorno-nome{ font-family:'Manrope'; font-size:16px; font-weight:800; color:var(--text); }
+  .cal-giorno-nome::first-letter{ text-transform:uppercase; }
+  .cal-giorno-data{ font-size:12.5px; color:var(--muted); }
+  .cal-giorno i{
+    margin-left:auto; font-style:normal; font-size:11px; font-weight:800; font-variant-numeric:tabular-nums;
+    color:var(--muted); background:rgba(20,30,60,.06); border-radius:20px; padding:2px 8px;
+  }
+  .cal-giorno.oggi i{ background:var(--text); color:#fff; }
+
+  #calendarList .scorri-wrap{ margin-bottom:8px; border-radius:16px; }
+  .cal-voce{
+    --tipo:var(--indigo);
+    display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; cursor:pointer;
+    padding:14px 16px; border-radius:16px;
+    background:var(--card); border:1px solid var(--border);
+  }
+  .cal-voce.tipo-todo{ --tipo:#B87E00; }
+  .cal-voce.tipo-attesa{ --tipo:var(--violet); }
+  .cal-voce.tipo-visit{ --tipo:#009E85; }
+  .cal-voce.oggi{ border-color:var(--border-strong); }
+  .cal-ora{
+    flex:none; width:48px; padding-top:1px;
+    font-family:'Manrope'; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--text);
+  }
+  .cal-ora.vuota{ color:var(--faint); }
+  .cal-voce.oggi .cal-ora{ color:var(--indigo); }
+  .cal-corpo{ flex:1; min-width:0; }
+  .cal-nome{ font-size:15px; font-weight:700; color:var(--text); line-height:1.35; overflow-wrap:anywhere; }
+  .cal-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin-top:5px; font-size:12.5px; color:var(--muted); }
+  .cal-tipo{ display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--tipo); }
+  .cal-tipo i{ width:7px; height:7px; border-radius:50%; background:var(--tipo); flex:none; }
+  .cal-sotto::before{ content:"·"; margin-right:8px; color:var(--faint); }
+  .cal-azioni{ display:none; gap:7px; width:100%; margin-top:4px; padding-left:62px; }
   .cal-voce.aperta .cal-azioni{ display:flex; }
   .cal-btn{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
     padding:8px; border-radius:10px; cursor:pointer; font-family:inherit;
-    font-size:11.5px; font-weight:700; border:1.5px solid var(--text); background:var(--card); color:var(--text);
+    font-size:12px; font-weight:700; border:1px solid var(--border-strong); background:var(--card); color:var(--text);
   }
-  .cal-btn svg{ width:13px; height:13px; }
+  .cal-btn.cal-elimina{ flex:none; width:40px; color:var(--coral); }
+  .cal-btn svg{ width:14px; height:14px; }
 
   .list-row{
     display:flex; align-items:center; gap:10px;
@@ -2824,14 +2839,16 @@
     </div>
 
     <!-- ==================== PAGINA: CALENDARIO ==================== -->
+    <!-- Rifatto il 25/09/2026 (Gianardi: "non c'è il tasto per tornare
+         indietro; rendilo più bello, più chiaro e più armonioso"). -->
     <div class="page" id="page-calendario">
-      <div class="card-panel">
-        <div class="card-header">
-          <h2>I tuoi prossimi impegni</h2>
-          <span class="count" id="calendarCount">0</span>
-        </div>
-        <div id="calendarList" style="padding:8px 0 16px;"></div>
+      <div class="back-link" id="calIndietro" role="button" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Indietro
       </div>
+      <div class="cal-settimana" id="calSettimana"></div>
+      <div class="cal-riepilogo"><b id="calendarCount">0</b> <span id="calendarCountTesto">impegni in arrivo</span></div>
+      <div id="calendarList"></div>
     </div>
 
     <!-- ==================== PAGINA: CHIAMATE ==================== -->
@@ -5356,6 +5373,38 @@ const ETICHETTE_CALENDARIO = {
   attesa:{ testo:"In sospeso" },
   todo:{ testo:"Da fare" }
 };
+function chiaveGiornoCal(d){ return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+
+/* Impegno nel cestino con "Annulla" (niente domanda prima), da tasto o scorrimento. */
+async function eliminaVoceCalendario(it){
+  let rimetti = () => {};
+  if(it.tabella === "messages"){
+    const chat = chats.find(c => c.messages.some(m => m.id === it.id));
+    if(chat){
+      const idx = chat.messages.findIndex(m => m.id === it.id);
+      const [msg] = chat.messages.splice(idx, 1);
+      rimetti = () => chat.messages.splice(Math.min(idx, chat.messages.length), 0, msg);
+    }
+  } else {
+    const idx = tasks.findIndex(t => t.id === it.id);
+    if(idx > -1){
+      const [t] = tasks.splice(idx, 1);
+      rimetti = () => tasks.splice(Math.min(idx, tasks.length), 0, t);
+    }
+  }
+  const ridisegna = () => {
+    renderCalendar(); renderTasks(); renderRing(); renderDifficulty();
+    if(it.tabella === "messages") renderChatWindow();
+  };
+  ridisegna();
+  if(isDbReady()) await dbDelete(it.tabella, it.id);
+  showAIToastConAnnulla("Impegno nel cestino", escapeHtml(it.title), async () => {
+    rimetti();
+    if(isDbReady()) await dbRestore(it.tabella, it.id);
+    ridisegna();
+  });
+}
+
 function renderCalendar(){
   const wrap = document.getElementById("calendarList");
   if(!wrap) return;
@@ -5453,6 +5502,31 @@ function renderCalendar(){
     g.voci.push(it);
   });
 
+  /* La settimana in alto: un tocco su un giorno porta ai suoi impegni */
+  const striscia = document.getElementById("calSettimana");
+  if(striscia){
+    striscia.innerHTML = "";
+    const NOMI_GIORNO = ["dom","lun","mar","mer","gio","ven","sab"];
+    for(let i = 0; i < 7; i++){
+      const d = new Date(inizioOggi); d.setDate(d.getDate() + i);
+      const quanti = items.filter(it => it._data && chiaveGiornoCal(it._data) === chiaveGiornoCal(d)).length;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "cal-sett-giorno" + (i === 0 ? " oggi" : "");
+      b.disabled = !quanti;
+      b.setAttribute("aria-label", d.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" }) + ": " + (quanti ? quanti + (quanti === 1 ? " impegno" : " impegni") : "nessun impegno"));
+      b.innerHTML = `<span class="cal-sett-nome">${i === 0 ? "oggi" : NOMI_GIORNO[d.getDay()]}</span><span class="cal-sett-num">${d.getDate()}</span><span class="cal-sett-punti">${"<i></i>".repeat(Math.min(quanti, 3))}</span>`;
+      b.addEventListener("click", () => {
+        const g = document.getElementById("cal-g-" + chiaveGiornoCal(d));
+        if(g) g.scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+      striscia.appendChild(b);
+    }
+  }
+  const testoConteggio = n => (n === 1 ? "impegno in arrivo" : "impegni in arrivo");
+  const elTestoConteggio = document.getElementById("calendarCountTesto");
+  if(elTestoConteggio) elTestoConteggio.textContent = testoConteggio(items.length);
+
   if(items.length === 0){
     wrap.innerHTML = `<div class="cal-vuoto">
       <b>Nessun impegno in arrivo</b>
@@ -5469,28 +5543,31 @@ function renderCalendar(){
   gruppi.forEach(g => {
     const intest = document.createElement("div");
     intest.className = "cal-giorno" + (g.oggi ? " oggi" : "");
-    intest.innerHTML = `<span>${g.et}</span><i>${g.voci.length}</i>`;
+    const d0 = g.voci[0]._data;
+    if(d0) intest.id = "cal-g-" + chiaveGiornoCal(d0);
+    const dataEstesa = (d0 && (g.et === "Oggi" || g.et === "Domani")) ? d0.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" }) : "";
+    intest.innerHTML = `<span class="cal-giorno-nome">${g.et}</span>${dataEstesa ? `<span class="cal-giorno-data">${dataEstesa}</span>` : ""}<i>${g.voci.length}</i>`;
     wrap.appendChild(intest);
 
     g.voci.forEach(it => {
       const row = document.createElement("div");
-      row.className = "cal-voce" + (g.oggi ? " oggi" : "");
+      const tipo = ETICHETTE_CALENDARIO[it.icon] ? it.icon : "appt";
+      row.className = "cal-voce tipo-" + tipo + (g.oggi ? " oggi" : "");
       const cliente = it.contatto ? clients.find(c => nomeChiave(c.name) === nomeChiave(it.contatto)) : null;
       const ora = estraiOra(it.when);
-      const [oraHH, oraMM] = ora ? ora.split(":") : ["—", ""];
-      const et = ETICHETTE_CALENDARIO[it.icon] || ETICHETTE_CALENDARIO.appt;
+      const et = ETICHETTE_CALENDARIO[tipo];
+      /* Sotto il titolo solo quello che aggiunge qualcosa: mai "da fare"
+         (lo dice già il tipo), mai il nome già scritto nel titolo. */
+      const sotto = String(it.sub || "").trim();
+      const sottoUtile = sotto && nomeChiave(sotto) !== "da fare" && !nomeChiave(it.title).includes(nomeChiave(sotto)) ? sotto : "";
 
       row.innerHTML = `
-        <div class="cal-ora-blocco">
-          <div class="cal-ora-hh">${oraHH}</div>
-          <div class="cal-ora-mm">${oraMM}</div>
-        </div>
-        <div class="cal-divider"></div>
+        <div class="cal-ora${ora ? "" : " vuota"}">${ora || "—"}</div>
         <div class="cal-corpo">
-          <div class="cal-testo">
-            <div class="cal-nome">${it.title}</div>
-            <div class="cal-label${it.urgent ? ' urgente' : ''}">${et.testo}${it.urgent ? ' · Urgente' : ''}</div>
-            <div class="cal-sotto">${it.sub}</div>
+          <div class="cal-nome">${escapeHtml(it.title)}</div>
+          <div class="cal-meta">
+            <span class="cal-tipo"><i></i>${et.testo}${it.urgent ? " · urgente" : ""}</span>
+            ${sottoUtile ? `<span class="cal-sotto">${escapeHtml(sottoUtile)}</span>` : ""}
           </div>
         </div>
         ${(it.contatto || it.id) ? `
@@ -5544,25 +5621,13 @@ function renderCalendar(){
       });
 
       const bElimina = row.querySelector(".cal-elimina");
-      if(bElimina) bElimina.addEventListener("click", async (e) => {
+      if(bElimina) bElimina.addEventListener("click", (e) => {
         e.stopPropagation();
-        if(!confirm('Spostare "' + it.title + '" nel cestino?')) return;
-        if(it.tabella === "messages"){
-          const chat = chats.find(c => c.name === it.contatto);
-          if(chat){
-            const idx = chat.messages.findIndex(m => m.id === it.id);
-            if(idx > -1) chat.messages.splice(idx, 1);
-          }
-        } else {
-          const idx = tasks.findIndex(t => t.id === it.id);
-          if(idx > -1) tasks.splice(idx, 1);
-        }
-        if(isDbReady()) await dbDelete(it.tabella, it.id);
-        renderCalendar(); renderTasks(); renderRing(); renderDifficulty();
-        if(it.tabella === "messages") renderChatWindow();
+        eliminaVoceCalendario(it);
       });
 
-      wrap.appendChild(row);
+      // Anche qui si elimina scorrendo a sinistra, come in Messaggi
+      wrap.appendChild(it.id ? rendiScorrevole(row, () => eliminaVoceCalendario(it)) : row);
     });
   });
 
@@ -12041,7 +12106,9 @@ const tabForPage = {
   "documenti-impresa":"home", "fatture-preventivi":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
 };
 
+var paginaAttuale = "home", paginaPrecedente = "home"; // var: navigateTo può partire prima di questa riga
 function navigateTo(page){
+  if(page !== paginaAttuale){ paginaPrecedente = paginaAttuale; paginaAttuale = page; }
   document.querySelectorAll(".page").forEach(p => p.classList.remove("visible"));
   const target = document.getElementById("page-" + page);
   if(target) target.classList.add("visible");
@@ -12518,6 +12585,14 @@ async function controllaNuovaVersione(){
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") controllaNuovaVersione(); });
 window.addEventListener("pageshow", (e) => { if(e.persisted) controllaNuovaVersione(); });
 controllaNuovaVersione(); // la versione con cui l'app è partita
+
+/* Calendario: "Indietro" torna dove eri (di solito la Home) */
+(function(){
+  const b = document.getElementById("calIndietro");
+  const vai = () => navigateTo(paginaPrecedente && paginaPrecedente !== "calendario" ? paginaPrecedente : "home");
+  b.addEventListener("click", vai);
+  b.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); vai(); } });
+})();
 
 initApp();
 </script>

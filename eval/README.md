@@ -165,6 +165,15 @@ da una nota.
 NODE_PATH=/opt/node22/lib/node_modules node eval/clienti-chat.test.js
 ```
 
+### `calendario.test.js` — calendario, gira subito
+
+Tasto Indietro, settimana in alto, righe senza doppioni, elimina scorrendo
+con Annulla, stato vuoto.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/calendario.test.js
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti

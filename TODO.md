@@ -3483,6 +3483,20 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Calendario rifatto (25/09/2026)
+
+Gianardi (screenshot): "non c'è il tasto per tornare indietro; rendilo più
+bello, più chiaro e più armonioso".
+- "Indietro" in alto: torna alla pagina da cui sei arrivato (navigateTo ora
+  ricorda `paginaPrecedente`), Home se non c'è.
+- Settimana in alto (oggi + 6 giorni) con i pallini degli impegni; un tocco
+  su un giorno porta ai suoi impegni.
+- Riga: ora su una riga ("08:00"), titolo, tipo con il suo colore
+  (Appuntamento blu, Da fare ambra, In sospeso viola, Da vedere verde) e il
+  cliente solo se aggiunge qualcosa: spariti "DA FARE / da fare" e il nome
+  ripetuto sotto sé stesso. Via il riquadro dentro il riquadro.
+- Elimina: scorrendo a sinistra o dal tasto, con "Annulla" (niente domanda).
+- Test: `eval/calendario.test.js` (14).
 ### Vercel: pubblica solo main (25/09/2026)
 
 Il 25/09 Vercel ha bloccato la pubblicazione di #94 ("Deployment rate
