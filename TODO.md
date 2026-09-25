@@ -3461,6 +3461,28 @@ SEPARATA dalla nota dell'utente.
 - Costo: una chiamata piccola a Haiku con un'immagine per foto.
 - Test: 3 in foto.test.js (19 in tutto) + 6 in percorso-rapido.test.mjs.
 
+### Un cliente, una chat + pulizia app (25/09/2026)
+
+Gianardi: "tanti clienti in Messaggi che non vedo in anagrafica" e "se
+aggiungo un cliente si crea ovunque, se lo cancello da una parte si
+cancella ovunque". Verificato sui log: i 63 clienti archiviati li aveva
+archiviati il tasto Archivia (nessuna conferma), non un errore; chat e
+cliente erano legati solo dal nome esatto (maiuscole comprese).
+- App: archivia/riattiva, cestina, rinomina, crea e ripristina valgono
+  per cliente e chat insieme; nome confrontato senza maiuscole; chat di un
+  cliente archiviato solo in "Archivio"; Archivia chiede conferma; niente
+  "null" sulle schede.
+- Server: crea_cliente / trova_o_crea_cliente creano subito la chat;
+  aggiorna_cliente la rinomina; ricerca chat senza maiuscole
+  (`filtroNomeConversazione`, ilike con caratteri speciali resi letterali).
+- Menu: "Messaggi" come prima voce (con i non letti). Cresci: "Lavori in
+  corso" (vecchio contenuto nascosto, non cancellato); tolte le righe della
+  Home e "Strategia trattative" che ci portavano.
+- Foto "a quale cliente?": "Rossi, porta da cambiare" → foto a Rossi e nota
+  "Porta da cambiare"; senza un nome non crea più un cliente (era nato
+  "Da cambiare"), chiede a chi si riferisce.
+- Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
+
 ### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
 
 Caso reale: la frase è andata all'AI, che l'ha capita come "crea una
