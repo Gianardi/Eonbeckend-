@@ -58,6 +58,28 @@ Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
 fiducia reperibile per le emergenze, commercialista e legale per contratti
 e fatture; backup con ripristino a qualsiasi minuto (Supabase).
 
+## 2b. Archivio di lavoro — un pezzo di business (idea di Andrea, 25/09/2026)
+
+Oggi molti artigiani tengono le foto di lavoro nel rullino e su iCloud, e
+quando lo spazio finisce devono pagare Apple. EON può essere **il posto dove
+sta tutto il lavoro**: ordinato per cliente, con note e descrizione,
+ritrovabile a voce, da mandare al cliente in un tocco, senza riempire
+iCloud. Più lavoro c'è dentro EON, più EON diventa indispensabile.
+
+- **Livello 1 — incluso**: spazio nell'abbonamento (es. 10 GB ≈ 30.000 foto
+  compresse), barra "spazio usato", avviso all'80%.
+- **Livello 2 — pacchetti in più**: es. +50 GB al mese a pochi euro (a noi
+  costano ~1 $/mese): margine alto.
+- **Livello 3 — conservazione a norma** di fatture e documenti fiscali
+  (10 anni per legge): serve un fornitore accreditato, progetto a sé.
+- **Da fare in app**: avviso alla prima foto "le foto scattate in EON non
+  occupano spazio sul tuo iPhone né su iCloud"; più avanti "Sposta in EON e
+  libera spazio" (scegli foto di lavoro dalla galleria, EON le archivia per
+  cliente e ricorda di cancellarle dall'iPhone).
+- **Attenzione**: restare *archivio di lavoro* legato a clienti e cantieri,
+  non un cloud generico (lì si compete con Apple e Google).
+- **Argomento di vendita**: "Le foto di lavoro non ti riempiono più iCloud."
+
 ## 3. Una "vera app" sul telefono
 
 - **[Claude] Installabile** dal browser ("Aggiungi a Home") con icona e
