@@ -8993,6 +8993,14 @@ function provaRisorsaImmediata(testo){
   const resto = (m[2] || "").trim();
   if(!resto) return false;
 
+  /* Fatture e preventivi: prima di tutto tra i documenti stessi. */
+  const tipoCercato = /^fattur/.test(tipoRichiesto) ? "fattura" : /^preventiv/.test(tipoRichiesto) ? "preventivo" : null;
+  if(tipoCercato){
+    const esito = cercaTraDocumenti(resto, tipoCercato);
+    if(esito === "crea") return false;
+    if(esito) return true;
+  }
+
   const parole = resto.split(/\s+/).filter(Boolean);
   const cliente = trovaClienteDaParole(parole);
   if(!cliente) return false;
@@ -10401,33 +10409,75 @@ function renderFatturePreventivi(){
     lista.appendChild(vuoto);
     return;
   }
-  visibili.forEach(d => {
-    const eFattura = d.dati.tipo === "fattura";
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "doc-list-card";
-    card.style.cssText = "width:calc(100% - 12px); background:none; font:inherit; text-align:left; cursor:pointer; color:inherit;";
-    const num = document.createElement("div");
-    num.className = "doc-num";
-    if(!eFattura){ num.style.color = "var(--violet)"; num.style.background = "var(--violet-soft)"; }
-    num.textContent = (eFattura ? "FT " : "PV ") + (d.dati.numero || "—");
-    const corpo = document.createElement("div");
-    corpo.className = "row-body";
-    const nome = document.createElement("div");
-    nome.className = "row-name";
-    nome.textContent = d.dati.cliente || d.clienteChat || "—";
-    const meta = document.createElement("div");
-    meta.className = "row-meta";
-    const primaVoce = Array.isArray(d.dati.voci) && d.dati.voci[0] ? d.dati.voci[0].desc : "";
-    meta.textContent = [primaVoce, d.dati.data].filter(Boolean).join(" · ");
-    corpo.appendChild(nome); corpo.appendChild(meta);
-    const valore = document.createElement("div");
-    valore.className = "row-value";
-    valore.textContent = "€" + Number(d.dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 });
-    card.appendChild(num); card.appendChild(corpo); card.appendChild(valore);
-    card.addEventListener("click", () => mostraAnteprimaDocumento(d.dati, d.id, d.clienteChat));
-    lista.appendChild(card);
-  });
+  visibili.forEach(d => lista.appendChild(creaRigaDocumento(d)));
+}
+/* Una riga della cartella (numero, cliente, lavoro, data, totale): tocco
+   → anteprima con Modifica. Usata dalla pagina Fatture e preventivi e
+   dall'elenco che si apre a voce ("preventivi rossi"). */
+function creaRigaDocumento(d){
+  const eFattura = d.dati.tipo === "fattura";
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "doc-list-card";
+  card.style.cssText = "width:calc(100% - 12px); background:none; font:inherit; text-align:left; cursor:pointer; color:inherit;";
+  const num = document.createElement("div");
+  num.className = "doc-num";
+  if(!eFattura){ num.style.color = "var(--violet)"; num.style.background = "var(--violet-soft)"; }
+  num.textContent = (eFattura ? "FT " : "PV ") + (d.dati.numero || "—");
+  const corpo = document.createElement("div");
+  corpo.className = "row-body";
+  const nome = document.createElement("div");
+  nome.className = "row-name";
+  nome.textContent = d.dati.cliente || d.clienteChat || "—";
+  const meta = document.createElement("div");
+  meta.className = "row-meta";
+  const primaVoce = Array.isArray(d.dati.voci) && d.dati.voci[0] ? d.dati.voci[0].desc : "";
+  meta.textContent = [primaVoce, d.dati.data].filter(Boolean).join(" · ");
+  corpo.appendChild(nome); corpo.appendChild(meta);
+  const valore = document.createElement("div");
+  valore.className = "row-value";
+  valore.textContent = "€" + Number(d.dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 });
+  card.appendChild(num); card.appendChild(corpo); card.appendChild(valore);
+  card.addEventListener("click", () => mostraAnteprimaDocumento(d.dati, d.id, d.clienteChat));
+  return card;
+}
+
+/* Richiesta a voce di fatture/preventivi (Gianardi, 25/09/2026: "deve
+   andare a vedere tra le fatture"): si cerca DIRETTAMENTE tra i documenti
+   veri, per il nome del cliente scritto sul documento — non passando
+   dall'anagrafica, dove un cliente archiviato o 10 "Mario Rossi" doppi
+   facevano inciampare la ricerca. Restituisce true se ha aperto qualcosa,
+   "crea" se la frase descrive un documento NUOVO (parole che non
+   corrispondono a nessun documento), null se non ha trovato nulla. */
+const PAROLE_VUOTE_DOC = /^(per|di|del|della|dello|dei|il|la|lo|i|gli|le|a|al|alla|e|che|un|una|mio|mia|miei)$/;
+function cercaTraDocumenti(resto, tipoDoc){
+  const parole = resto.split(/\s+/).filter(p => p && !PAROLE_VUOTE_DOC.test(p));
+  if(!parole.length) return null;
+  const nomeDi = d => (d.dati.cliente || d.clienteChat || "").toLowerCase().split(/\s+/).filter(Boolean);
+  /* Vince chi corrisponde a più parole del nome: "fattura mario rossi"
+     → Mario Rossi, non anche Luca Rossi; "fatture rossi" → tutti e due. */
+  const punti = d => nomeDi(d).filter(tok => parole.includes(tok)).length;
+  let trovati = documentiVeri().filter(d => d.dati.tipo === tipoDoc && punti(d) > 0);
+  if(!trovati.length) return null;
+  const migliore = Math.max(...trovati.map(punti));
+  trovati = trovati.filter(d => punti(d) === migliore);
+  const paroleNome = new Set(trovati.flatMap(nomeDi));
+  const altre = parole.filter(p => !paroleNome.has(p));
+  if(altre.length){
+    const testoDoc = d => ((d.dati.voci || []).map(v => v.desc).join(" ") + " " + (d.dati.numero || "")).toLowerCase();
+    const filtrati = trovati.filter(d => altre.some(p => testoDoc(d).includes(p)));
+    if(!filtrati.length) return "crea";
+    trovati = filtrati;
+  }
+  if(trovati.length === 1){
+    mostraAnteprimaDocumento(trovati[0].dati, trovati[0].id, trovati[0].clienteChat);
+    return true;
+  }
+  const wrap = document.createElement("div");
+  trovati.forEach(d => wrap.appendChild(creaRigaDocumento(d)));
+  const clientiDiversi = new Set(trovati.map(d => d.dati.cliente || d.clienteChat));
+  apriRisorsaCard((tipoDoc === "fattura" ? "Fatture" : "Preventivi") + (clientiDiversi.size === 1 ? " — " + [...clientiDiversi][0] : ""), wrap);
+  return true;
 }
 document.querySelectorAll(".fp-filtro").forEach(b => b.addEventListener("click", () => {
   filtroFatturePreventivi = b.dataset.f;

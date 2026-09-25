@@ -132,7 +132,7 @@ async function main() {
         chiudiRisorsaCard();
         document.getElementById("risorsaTitolo").textContent = "";
         const ok = provaRisorsaImmediata(frase);
-        return ok ? { titolo: document.getElementById("risorsaTitolo").textContent, voci: document.querySelectorAll("#risorsaCorpo .risorsa-voce").length, modifica: !!document.querySelector("#risorsaCorpo .risorsa-riga-btn") } : false;
+        return ok ? { titolo: document.getElementById("risorsaTitolo").textContent, voci: document.querySelectorAll("#risorsaCorpo .risorsa-voce, #risorsaCorpo .doc-list-card").length, modifica: !!document.querySelector("#risorsaCorpo .risorsa-riga-btn") } : false;
       };
       return {
         serve: prova("Mi serve fattura testolina"),
@@ -159,6 +159,31 @@ async function main() {
     verifica("\"preventivo rossi tetto\": apre direttamente quello del tetto", richieste.preventivoTetto && richieste.preventivoTetto.titolo === "Preventivo n. 2/2026", JSON.stringify(richieste.preventivoTetto));
     verifica("\"fatture rossi\": apre direttamente l'unica fattura", richieste.fattureRossi && richieste.fattureRossi.titolo === "Fattura n. 5/2026", JSON.stringify(richieste.fattureRossi));
     verifica("\"fattura bianchi\" senza documenti: decide l'AI (chiederà cosa fatturare)", richieste.nessunDocumento === false);
+
+    // Idea di Gianardi: cercare direttamente tra le fatture, non in anagrafica.
+    const traLeFatture = await page.evaluate(() => {
+      const doc = (id, tipo, numero, cliente, totale, desc) => ({ id, from: "me", eventType: "doc", title: (tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + numero,
+        docDati: { tipo, numero, anno: 2026, data: "25/09/2026", cliente, voci: [{ desc, qta: 1, prezzo: totale }], imponibile: totale, aliquota: 22, iva: 0, totale }, createdAt: "2026-09-25T10:00:00Z" });
+      clients.length = 0;
+      for (let i = 0; i < 10; i++) clients.push({ id: "mr" + i, name: "Mario Rossi", archived: false }); // i 10 doppioni veri
+      chats.length = 0;
+      chats.push({ id: "c1", name: "Mario Rossi", messages: [doc("m1", "fattura", "9/2026", "Mario Rossi", 610, "Massetto")] });
+      chats.push({ id: "c2", name: "Luca Rossi", messages: [doc("l1", "fattura", "11/2026", "Luca Rossi", 244, "Porte")] });
+      chats.push({ id: "c3", name: "Vecchio Cliente Cancellato", messages: [doc("v1", "preventivo", "1/2026", "Ferri", 1000, "Cancello")] });
+      const prova = (frase) => {
+        chiudiRisorsaCard();
+        const ok = provaRisorsaImmediata(frase);
+        return ok ? { titolo: document.getElementById("risorsaTitolo").textContent, righe: [...document.querySelectorAll("#risorsaCorpo .doc-list-card")].map((r) => r.textContent.replace(/\s+/g, " ")) } : false;
+      };
+      return {
+        mario: prova("fattura mario rossi"),
+        rossi: prova("fatture rossi"),
+        ferri: prova("preventivo ferri"),
+      };
+    });
+    verifica("10 \"Mario Rossi\" doppi in anagrafica, una sola fattura: si apre subito", traLeFatture.mario && traLeFatture.mario.titolo === "Fattura n. 9/2026", JSON.stringify(traLeFatture.mario));
+    verifica("\"fatture rossi\" con due Rossi diversi: elenco con il nome su ogni riga", traLeFatture.rossi && traLeFatture.rossi.righe.length === 2 && /Mario Rossi/.test(traLeFatture.rossi.righe.join()) && /Luca Rossi/.test(traLeFatture.rossi.righe.join()) && traLeFatture.rossi.titolo === "Fatture", JSON.stringify(traLeFatture.rossi));
+    verifica("cliente non più in anagrafica: il preventivo si trova lo stesso", traLeFatture.ferri && traLeFatture.ferri.titolo === "Preventivo n. 1/2026", JSON.stringify(traLeFatture.ferri));
 
     const vuoto = await page.evaluate(() => {
       chats.length = 0;
