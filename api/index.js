@@ -3155,7 +3155,11 @@ const STRUMENTO_LEGGI_CLIENTE = {
 function candidatoClienteRapido(body, testo) {
   if (!eStringaNonVuota(testo) || testo.length > 200 || TEMPO_PRECISO.test(testo) || ESCLUSI_RAPIDO.test(testo)) return false;
   if (body.messaggio.startsWith(PREFISSO_PAGINA_CLIENTI)) return true;
-  return body.messaggio.startsWith(PREFISSO_RACCONTO) && PAROLE_CLIENTE_HOME.test(testo);
+  /* Dalla Home basta la parola "cliente"/"telefono"... OPPURE un numero
+     di telefono nella frase (8+ cifre): Gianardi detta tutto dalla Home,
+     "Luca Ferretti 333 4455667 bagno" (25/09/2026) finiva nel motore
+     completo, che chiedeva di un appuntamento invece di creare il cliente. */
+  return body.messaggio.startsWith(PREFISSO_RACCONTO) && (PAROLE_CLIENTE_HOME.test(testo) || cifre(testo).length >= 8);
 }
 
 /* L'unico cliente creato nell'ultimo turno (dal ricordo), per la correzione del nome. */

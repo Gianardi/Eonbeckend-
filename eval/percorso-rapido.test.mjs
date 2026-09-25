@@ -447,9 +447,29 @@ await scenario(
 );
 
 await scenario(
-  "Home senza parole da cliente (\"Mario Rossi 333...\") → mai il percorso rapido",
+  "Home, nome + telefono + lavoro senza la parola 'cliente' (\"Luca Ferretti 333 4455667 bagno\", caso reale del 25/09)",
   null,
-  [{ body: nuovo("Mario Rossi 333 1234567"), copione: [...motore] }],
+  [{ body: nuovo("Luca Ferretti 333 4455667 bagno"), copione: [leggiC({ azione: "nuovo", nome: "Luca Ferretti", telefono: "333 4455667", lavoro: "bagno" })] }],
+  ([r], [ai]) => {
+    verifica("una chiamata piccola, cliente creato", ai.length === 1 && forzato(ai[0]) === "leggi_cliente" && tabelle.clients.length === 1 && tabelle.clients[0].name === "Luca Ferretti", `${ai.length} ${tabelle.clients.map((c) => c.name)}`);
+    verifica("telefono e lavoro salvati", tabelle.clients[0] && tabelle.clients[0].phone === "333 4455667" && tabelle.clients[0].description === "Bagno");
+    verifica("nessun appuntamento inventato", tabelle.tasks.length === 0 && appuntamenti().length === 0);
+  }
+);
+
+await scenario(
+  "Home, telefono ma è una chiamata da fare (l'AI dice 'altro') → motore completo",
+  null,
+  [{ body: nuovo("Chiama Rossi al 333 1234567 per il bagno"), copione: [leggiC({ azione: "altro" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, nessun cliente creato", ai.length === 3 && eMotoreCompleto(ai[1]) && tabelle.clients.length === 0);
+  }
+);
+
+await scenario(
+  "Home senza parole da cliente né telefono (\"Mario Rossi bagno\") → mai il percorso rapido",
+  null,
+  [{ body: nuovo("Mario Rossi bagno"), copione: [...motore] }],
   ([r], [ai]) => {
     verifica("prima chiamata già del motore completo", eMotoreCompleto(ai[0]));
   }
