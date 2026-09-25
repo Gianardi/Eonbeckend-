@@ -3290,3 +3290,14 @@ Correzione dopo il primo uso: Gianardi ha scritto dalla Home "Luca Ferretti
 chiesto di un appuntamento invece di creare il cliente. Andava previsto: lui
 detta tutto dalla Home. Ora dalla Home basta anche un numero di telefono
 (8+ cifre) per tentare il percorso rapido del cliente.
+
+### Sessione scaduta dopo circa un'ora (25/09/2026)
+
+Gianardi, al primo tentativo dopo una pausa: "AI non raggiunta: Sessione non
+valida o scaduta (... token is expired)". Causa: `currentSession` in
+index.html veniva impostata solo al login/all'avvio; la libreria Supabase
+rinnova il token da sola, ma l'app continuava a mandare quello vecchio.
+Corretto: `onAuthStateChange` tiene aggiornata currentSession, e ogni
+chiamata al backend usa `tokenValido()` (getSession, che rinnova se
+scaduto). Test: `eval/sessione.test.js` (sul codice di prima parte il
+token scaduto).
