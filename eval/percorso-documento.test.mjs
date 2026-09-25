@@ -114,12 +114,17 @@ globalThis.fetch = async (url, init) => {
 
 const { default: handler } = await import("../api/index.js");
 
+/* frase: stringa, oppure { frase, ricordo } dove ricordo è il testo delle
+   note di contesto/focus che il frontend aggiunge dopo la frase (vedi
+   notaContestoRecente/notaFocusCorrente in index.html). */
 async function chiedi(frase) {
+  const testo = typeof frase === "string" ? frase : frase.frase;
+  const ricordo = typeof frase === "string" ? "" : frase.ricordo;
   const req = {
     method: "POST",
     url: "/api?action=assistant",
     headers: { authorization: "Bearer token-finto" },
-    body: { messaggio: `Il professionista ti ha appena raccontato cosa deve fare: "${frase}"` },
+    body: { messaggio: `Il professionista ti ha appena raccontato cosa deve fare: "${testo}"${ricordo}` },
   };
   let uscita = "";
   const res = { statusCode: 0, setHeader() {}, end(d) { uscita = d || ""; } };
@@ -305,6 +310,130 @@ await scenario(
   () => {
     verifica("nessun documento creato (bloccato dalla regola 'risorsa')", documenti().length === 0);
     verifica("il blocco è stato spiegato all'AI", JSON.stringify(chiamateAI[2].messages).includes("mostra/recupera una risorsa"));
+  }
+);
+
+/* ---------- Regola del ricordo (25/09/2026) ----------
+   In produzione: "Mi crei preventivo per raspadori ... da 3000 euro",
+   detto subito dopo una fattura per Tommaso Greti, è finito su Tommaso
+   Greti: l'AI ha preso il cliente dal ricordo della richiesta prima.
+   Regola, decisa nel codice: se la frase nomina qualcuno vale quel nome;
+   il ricordo vale solo quando la frase non nomina nessuno. */
+const ricordoDi = (nome, cosa) => `\n\n[Contesto: pochi istanti fa hai usato questi strumenti:\n- ${cosa}: {"cliente":"${nome}"}\n...]\n\n[Focus attuale della conversazione: si stava parlando di "${nome}" (${cosa === "crea_impegno" ? "impegno" : "fattura"}). ...]`;
+/* Ultimo tool_result di interpreta_richiesta mandato all'AI. */
+function esitoInterpretaDa(corpo) {
+  for (let i = corpo.messages.length - 1; i >= 0; i--) {
+    const m = corpo.messages[i];
+    if (m.role !== "user" || !Array.isArray(m.content)) continue;
+    for (const b of m.content) {
+      try { const j = JSON.parse(b.content); if (j.intento_registrato) return j; } catch { /* non JSON */ }
+    }
+  }
+  return null;
+}
+
+/* 9 — il caso reale di stamattina */
+await scenario(
+  "Nome nuovo dopo un altro cliente: \"preventivo per raspadori\" dopo Tommaso Greti",
+  () => ({ greti: aggiungiCliente("Tommaso Greti") }),
+  { frase: "Mi crei preventivo per raspadori per pulizia scale e pitturazione da 3000 euro", ricordo: ricordoDi("Tommaso Greti", "crea_preventivo_o_fattura") },
+  [
+    // l'AI sbaglia come in produzione: prende Greti dal ricordo, ma copia il nome detto
+    interpreta({ entita: { tipo: "preventivo", cliente_di_riferimento: "Tommaso Greti", nome_nella_frase: "raspadori" }, documento_completo: true }),
+    () => usaStrumento("crea_preventivo_o_fattura", { cliente_id: "x", tipo: "preventivo", voci: [{ descrizione: "Pulizia scale e pitturazione", prezzo: 3000 }] }),
+  ],
+  (r) => {
+    const doc = documenti()[0];
+    verifica("preventivo creato su Raspadori, NON su Tommaso Greti", doc && datiDoc(doc).cliente === "Raspadori", doc && datiDoc(doc).cliente);
+    verifica("cliente nuovo Raspadori creato (iniziale maiuscola)", tabelle.clients.some((c) => c.name === "Raspadori"));
+    verifica("nessun documento su Tommaso Greti", !documenti().some((d) => datiDoc(d).cliente === "Tommaso Greti"));
+    verifica("veloce come prima: 2 chiamate, nessuna domanda", chiamateAI.length === 2 && r.corpo.stato === "concluso", `${chiamateAI.length} chiamate, ${r.corpo.stato}`);
+    verifica("totale 3660 (3000 + IVA)", doc && Number(doc.amount) === 3660, doc && doc.amount);
+  }
+);
+
+/* 10 — l'esempio di Andrea: "Dino appuntamento ore 11" e poi "crea preventivo per raspadori da 300" */
+await scenario(
+  "Esempio di Andrea: dopo l'appuntamento con Dino, \"crea preventivo per raspadori da 300\"",
+  () => ({ dino: aggiungiCliente("Dino") }),
+  { frase: "Crea preventivo per raspadori da 300", ricordo: ricordoDi("Dino", "crea_impegno") },
+  [
+    // qui l'AI copia anche la preposizione: "per raspadori"
+    interpreta({ entita: { tipo: "preventivo", cliente_di_riferimento: "Dino", nome_nella_frase: "per raspadori" }, documento_completo: true }),
+    () => usaStrumento("crea_preventivo_o_fattura", { cliente_id: "x", tipo: "preventivo", voci: [{ descrizione: "Lavori", prezzo: 300 }] }),
+  ],
+  () => {
+    const doc = documenti()[0];
+    verifica("preventivo su Raspadori, il ricordo di Dino ignorato", doc && datiDoc(doc).cliente === "Raspadori", doc && datiDoc(doc).cliente);
+  }
+);
+
+/* 11 — l'esempio di Andrea: "segna appuntamento Dini domani alle 10" e poi "no alle 11" */
+await scenario(
+  "Esempio di Andrea: \"no alle 11\" subito dopo l'appuntamento con Dini → il ricordo resta attivo",
+  () => ({ dini: aggiungiCliente("Dini") }),
+  { frase: "No alle 11", ricordo: ricordoDi("Dini", "crea_impegno") },
+  [
+    () => usaStrumento("interpreta_richiesta", { operazione: "modifica", oggetto: "azione", entita: { tipo: "impegno", usa_focus_corrente: true, cliente_di_riferimento: "Dini", nome_nella_frase: "" } }),
+    () => rispondiTesto("Sposto l'appuntamento con Dini alle 11."),
+    () => rispondiTesto("Sposto l'appuntamento con Dini alle 11."), // eventuale secondo tentativo (Sonnet) sulla stessa domanda
+  ],
+  (r, { dini }) => {
+    const esito = esitoInterpretaDa(chiamateAI[1]);
+    verifica("risposta 200", r.status === 200, r.status);
+    verifica("il cliente resta Dini (dal ricordo)", esito && esito.cliente_risolto && esito.cliente_risolto.id === dini.id, JSON.stringify(esito && esito.cliente_risolto));
+    verifica("nessuna correzione del cliente", esito && !esito.nota_cliente);
+    verifica("nessun cliente nuovo creato", tabelle.clients.length === 1);
+  }
+);
+
+/* 12 — stessa cosa, ma l'AI copia per sbaglio "Dini" dal ricordo in nome_nella_frase:
+   non è nella frase, il codice non ci crede e non cambia niente */
+await scenario(
+  "\"no alle 11\" con nome_nella_frase copiato dal ricordo per sbaglio → ignorato",
+  () => ({ dini: aggiungiCliente("Mirco Dini") }),
+  { frase: "No alle 11", ricordo: ricordoDi("Mirco Dini", "crea_impegno") },
+  [
+    () => usaStrumento("interpreta_richiesta", { operazione: "modifica", oggetto: "azione", entita: { tipo: "impegno", cliente_di_riferimento: "Mirco Dini", nome_nella_frase: "Dini" } }),
+    () => rispondiTesto("Sposto l'appuntamento con Mirco Dini alle 11."),
+    () => rispondiTesto("Sposto l'appuntamento con Mirco Dini alle 11."), // eventuale secondo tentativo (Sonnet) sulla stessa domanda
+  ],
+  (r, { dini }) => {
+    const esito = esitoInterpretaDa(chiamateAI[1]);
+    verifica("risposta 200", r.status === 200, r.status);
+    verifica("il cliente resta Mirco Dini", esito && esito.cliente_risolto && esito.cliente_risolto.id === dini.id, JSON.stringify(esito && esito.cliente_risolto));
+    verifica("nessuna correzione del cliente", esito && !esito.nota_cliente);
+  }
+);
+
+/* 13 — l'utente dice solo il cognome, l'AI completa il nome: va bene, niente correzione */
+await scenario(
+  "\"fattura per Dini\": l'AI completa in \"Mirco Dini\" → resta quello, nessun doppione",
+  () => ({ dini: aggiungiCliente("Mirco Dini") }),
+  { frase: "Fattura da 3000 per Dini per pulizia e sgombero", ricordo: ricordoDi("Tommaso Greti", "crea_preventivo_o_fattura") },
+  [
+    interpreta({ entita: { tipo: "fattura", cliente_di_riferimento: "Mirco Dini", nome_nella_frase: "Dini" }, documento_completo: true }),
+    () => usaStrumento("crea_preventivo_o_fattura", { cliente_id: "x", tipo: "fattura", voci: [{ descrizione: "Pulizia e sgombero", prezzo: 3000 }] }),
+  ],
+  () => {
+    const doc = documenti()[0];
+    verifica("fattura su Mirco Dini", doc && datiDoc(doc).cliente === "Mirco Dini", doc && datiDoc(doc).cliente);
+    verifica("nessun cliente nuovo creato", tabelle.clients.length === 1, tabelle.clients.map((c) => c.name).join(", "));
+  }
+);
+
+/* 14 — nome detto simile a uno esistente ma l'AI lo "corregge" da sola: deve chiedere, non decidere */
+await scenario(
+  "\"fattura per Tabri\" dichiarata dall'AI come \"Fabbri\" → si cerca il nome detto, e va chiesto",
+  () => ({ cliente: aggiungiCliente("Fabbri") }),
+  "Fattura per Tabri da 800 euro per pulizia grondaie",
+  [
+    interpreta({ entita: { tipo: "fattura", cliente_di_riferimento: "Fabbri", nome_nella_frase: "Tabri" }, documento_completo: true }),
+    () => rispondiTesto("Intendi Fabbri, che hai già in anagrafica, o è un cliente nuovo?"),
+  ],
+  () => {
+    verifica("nessun documento creato su Fabbri senza chiedere", documenti().length === 0);
+    verifica("nessun giro forzato", !chiamateAI.slice(1).some((c) => forzato(c)));
   }
 );
 

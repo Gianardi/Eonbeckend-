@@ -68,7 +68,9 @@ giusti, totale con IVA) sia cosa viene chiesto all'AI (quante chiamate,
 quale strumento forzato, quale modello, mai ragionamento esteso insieme
 a uno strumento forzato). Nato dal bug del 25/09/2026 (la regola
 "risorsa" che bloccava in silenzio crea_preventivo_o_fattura): sul
-codice di prima fallisce 18 controlli.
+codice di prima fallisce 18 controlli. Include anche la "regola del
+ricordo" (un nome detto nella frase vince sul cliente della richiesta
+precedente; il ricordo vale solo se la frase non nomina nessuno).
 
 ```
 node eval/percorso-documento.test.mjs
