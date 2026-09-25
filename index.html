@@ -2347,25 +2347,31 @@
         <div class="ob-auth-tab" data-mode="login" id="obTabLogin">Ho già un account</div>
       </div>
 
+      <!-- Un <form> vero (25/09/2026): così l'iPhone propone di salvare
+           email e password nel portachiavi e al prossimo accesso le
+           compila da solo con Face ID. -->
+      <form id="obFormAccesso" autocomplete="on">
       <div class="ob-form">
         <div class="form-row" id="obNameRow">
           <label>Il tuo nome</label>
-          <input type="text" id="obName" placeholder="Es. Marco Rossi">
+          <input type="text" id="obName" name="name" autocomplete="name" placeholder="Es. Marco Rossi">
         </div>
         <div class="form-row" id="obBusinessRow">
           <label>Nome attività / studio</label>
-          <input type="text" id="obBusinessName" placeholder="Es. Bianchi Costruzioni S.r.l.">
+          <input type="text" id="obBusinessName" name="organization" autocomplete="organization" placeholder="Es. Bianchi Costruzioni S.r.l.">
         </div>
         <div class="form-row">
           <label>Email</label>
-          <input type="email" id="obEmail" placeholder="nome@esempio.it">
+          <input type="email" id="obEmail" name="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@esempio.it">
         </div>
         <div class="form-row">
           <label>Password</label>
-          <input type="password" id="obPassword" placeholder="Almeno 8 caratteri">
+          <input type="password" id="obPassword" name="password" autocomplete="new-password" placeholder="Almeno 8 caratteri">
         </div>
         <button type="button" class="ob-link-piccolo" id="obPasswordDimenticata" style="display:none;">Password dimenticata?</button>
       </div>
+        <button type="submit" aria-hidden="true" tabindex="-1" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;"></button>
+      </form>
 
       <div class="ob-auth-error" id="obAuthError" style="display:none;"></div>
       <div class="ob-auth-info" id="obAuthInfo" style="display:none;"></div>
@@ -12683,6 +12689,11 @@ document.getElementById("obTabSignup").addEventListener("click", () => {
   setObAuthMode("signup");
 });
 document.getElementById("obTabLogin").addEventListener("click", () => setObAuthMode("login"));
+/* Invio sulla tastiera = tasto Accedi / Inizia */
+document.getElementById("obFormAccesso").addEventListener("submit", (e) => {
+  e.preventDefault();
+  document.getElementById("obFinishBtn").click();
+});
 
 /* Se il backend non è ancora collegato, lo diciamo chiaramente invece di
    far finta che l'account sia vero. */

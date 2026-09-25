@@ -3485,6 +3485,18 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Accesso con Face ID (25/09/2026)
+
+Gianardi: "accesso con Face ID, è lunga o immediata?".
+- **Fatto (immediato)**: il modulo di accesso è un `<form>` vero con
+  `autocomplete` giusti (email = username, password = current-password in
+  accesso / new-password in registrazione): l'iPhone propone di salvare
+  email e password nel portachiavi e al prossimo accesso le compila con
+  Face ID. Invio sulla tastiera = Accedi. Test: 2 in account.test.js.
+- **Da fare (1-2 giorni)**: accesso senza password con passkey (WebAuthn),
+  come banche e Google — Supabase non lo offre pronto per l'accesso, va
+  costruito lato server con cura. Meglio insieme all'app per gli store.
+
 ### Ingranaggio delle impostazioni in alto a destra (25/09/2026)
 
 Gianardi: "impostazioni piccole nelle singole sezioni, in alto a destra come

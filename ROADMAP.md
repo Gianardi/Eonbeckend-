@@ -55,6 +55,8 @@ Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
   sviluppatore (Apple 99 $/anno, Google 25 $ una volta).
 - **[Claude] Versione da computer**: oggi l'app è pensata solo per il
   telefono (colonna stretta su schermo largo).
+- **[Claude] Accesso con Face ID senza password** (passkey, 1-2 giorni): oggi
+  Face ID compila email e password salvate nel portachiavi dell'iPhone.
 - **[Claude] Avvisi all'ora giusta**: promemoria che suonano anche ad app
   chiusa ("tra 15 minuti chiama Rossi").
 

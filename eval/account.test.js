@@ -123,6 +123,14 @@ async function main() {
     const rs = (await chiamate()).find((c) => c.reset);
     verifica("con email: link mandato, messaggio che non rivela se l'account esiste", rs && rs.reset === "andrea@esempio.it" && /index\.html$/.test(rs.opz.redirectTo) && /Se c'è un account/.test(await page.textContent("#obAuthInfo")), JSON.stringify(rs));
 
+    // 3b. Accesso da iPhone: campi riconosciuti per il portachiavi (Face ID), Invio = Accedi
+    const campi = await page.evaluate(() => ({ form: !!document.getElementById("obEmail").closest("form"), email: document.getElementById("obEmail").autocomplete, pw: document.getElementById("obPassword").autocomplete }));
+    verifica("login dentro un form vero, email = username e password = current-password (Face ID del portachiavi)", campi.form && campi.email === "username" && campi.pw === "current-password", JSON.stringify(campi));
+    await page.fill("#obPassword", "passwordLunga1");
+    await page.press("#obPassword", "Enter");
+    await page.waitForTimeout(500);
+    verifica("Invio sulla tastiera = Accedi", await page.evaluate(() => document.getElementById("onboardingScreen").classList.contains("hidden")));
+
     // 4. Dal link dell'email: scegli una nuova password
     await apri({ sessione: true, recupero: true }, "#access_token=x&type=recovery");
     await page.waitForFunction(() => document.getElementById("risorsaTitolo").textContent === "Scegli una nuova password" && document.getElementById("risorsaOverlay").style.display === "flex", null, { timeout: 3000 });
