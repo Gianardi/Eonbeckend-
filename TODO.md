@@ -3052,3 +3052,46 @@ aliquota IVA diversa, quantità diversa da 1), e un nuovo caso nella eval
 suite (`fattura-07`) sul flusso "crea poi correggi" nella stessa
 conversazione. Non ancora provato dal vivo con l'AI vera in questa
 sessione (serve un turno reale con Gianardi).
+
+## Silenzio totale su fattura, di nuovo (25/09/2026) — causa più precisa trovata
+
+Subito dopo il merge della PR precedente, un'altra fattura ("Claudia
+Spori", 200€, pitturazione bagno) non ha dato nessuna risposta —
+identico al bug già corretto (PR #72) del 23/09. Confermato con
+`ai_audit_log` che è ESATTAMENTE lo stesso pattern di fondo, in una
+forma leggermente diversa: dopo aver risolto/creato il cliente,
+l'assistente richiama **interpreta_richiesta una SECONDA volta per LO
+STESSO documento** (stessa operazione "crea", stesso tipo "fattura",
+nessun cambio di argomento) invece di chiamare subito
+crea_preventivo_o_fattura — un giro sprecato che, ripetuto, fa
+accumulare abbastanza tempo da superare il limite della funzione Vercel
+(anche con `maxDuration: 60` già impostato dalla volta scorsa).
+
+La correzione precedente vietava solo di ricontrollare documenti
+esistenti ("mostra"/recupera_documenti_cliente) — non copriva questa
+variante (ridichiarare lo stesso intento di CREAZIONE senza motivo). Il
+divieto era già scritto nel prompt ("non richiamare interpreta_richiesta
+una seconda volta... trovato riguarda solo l'identità") ma da solo non
+è bastato una seconda volta.
+
+**Corretto in modo diverso questa volta, non solo a parole**: quando
+interpreta_richiesta viene chiamato di nuovo con la stessa operazione
+"crea" per lo stesso tipo di documento (fattura/preventivo) di un giro
+precedente, E il cliente risulta già "trovato", il risultato dello
+strumento stesso (non un paragrafo lontano nel prompt) porta ora un
+campo `avviso` che istruisce direttamente: "hai già dichiarato questo,
+chiama crea_preventivo_o_fattura ORA". L'istruzione viaggia dentro il
+tool_result che il modello vede subito dopo, nel punto esatto della
+conversazione dove serve — non affidata solo alla sua memoria del
+prompt di sistema. Verificato con un test a parte su 6 casi (il caso
+reale, il primo giro dove non deve scattare, un cambio di oggetto vero,
+un'operazione "mostra", ecc.).
+
+Resta un dubbio non risolto: **non è verificabile da qui se il limite
+`maxDuration: 60` di Vercel sia davvero rispettato** dal piano
+dell'account di Gianardi — nessun accesso diretto ai log/alla
+configurazione di Vercel in questa sessione. Se il silenzio totale si
+ripresentasse ANCORA dopo questa correzione, andrebbe verificato
+direttamente sul pannello Vercel (Settings → Functions, o i log della
+funzione per quella richiesta) quanto dura davvero l'esecuzione prima di
+essere interrotta.

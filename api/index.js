@@ -3316,6 +3316,32 @@ async function handleAssistant(req, res, user, accessToken) {
       }
       try {
         const esito = await tool.run(richiesta.input, ctx);
+
+        /* Bug reale in produzione (25/09/2026, confermato con
+           ai_audit_log): Haiku/Sonnet a volte richiama interpreta_richiesta
+           una SECONDA volta per LO STESSO documento da creare, con lo
+           stesso cliente già risolto ("trovato"), invece di chiamare
+           subito crea_preventivo_o_fattura — nessun cambio di argomento,
+           solo un giro sprecato. Il prompt lo vieta già a parole ("non
+           richiamare interpreta_richiesta una seconda volta... trovato
+           riguarda solo l'identità"), ma da solo non è bastato: qui la
+           stessa istruzione viaggia DENTRO il risultato del tool appena
+           eseguito, dove il modello non può ignorarla come farebbe con
+           un paragrafo lontano nel prompt. intentoAttivo qui dentro
+           riflette ancora il giro PRECEDENTE (viene aggiornato solo dopo
+           che tutta questa lista di richieste è stata processata), quindi
+           il confronto è sempre con la dichiarazione precedente, mai con
+           se stesso. */
+        if (richiesta.name === "interpreta_richiesta" && intentoAttivo && intentoAttivo.operazione === "crea" && richiesta.input.operazione === "crea") {
+          const tipoVecchio = eStringaNonVuota(intentoAttivo.entita && intentoAttivo.entita.tipo) ? intentoAttivo.entita.tipo.trim().toLowerCase() : "";
+          const tipoNuovo = eStringaNonVuota(richiesta.input.entita && richiesta.input.entita.tipo) ? richiesta.input.entita.tipo.trim().toLowerCase() : "";
+          const eDocumento = (t) => /fattura|preventivo/.test(t);
+          const clienteGiaRisolto = esito.cliente_risolto && esito.cliente_risolto.stato === "trovato";
+          if (eDocumento(tipoVecchio) && eDocumento(tipoNuovo) && clienteGiaRisolto) {
+            esito.avviso = "Hai già dichiarato questa stessa richiesta (creare " + tipoNuovo + ") in un giro precedente, e il cliente è già risolto: NON dichiararla di nuovo con interpreta_richiesta, chiama SUBITO crea_preventivo_o_fattura con le voci e il prezzo che hai già.";
+          }
+        }
+
         await registraOperazione(user, richiesta.name, richiesta.input, esito, "auto");
         if (!STRUMENTI_INTERNI.has(richiesta.name)) azioniEseguite.push({ tool: richiesta.name, esito });
         risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify(esito) });
