@@ -10604,7 +10604,7 @@ function mostraAnteprimaDocumento(dati, docId, clienteNome){
         aliquota_iva: stato.dati.aliquota, condizioni: stato.dati.condizioni || "", note: stato.dati.note || "",
       };
       const messaggio = stato.runId ? testo
-        : `Il professionista sta guardando ${tipoDoc} n. ${stato.dati.numero} per ${stato.dati.cliente} (id documento: ${docId}). Dati attuali del documento: ${JSON.stringify(attuali)}. Ha chiesto questa modifica: "${testo}". Se è chiara applicala subito con modifica_preventivo_o_fattura (passa TUTTE le voci, anche quelle che non cambiano); se manca davvero un dato, chiedilo con una domanda breve.`;
+        : `Il professionista sta guardando ${tipoDoc} n. ${stato.dati.numero} per ${stato.dati.cliente} (id documento: ${docId}). Dati attuali del documento: ${JSON.stringify(attuali)}. Ha chiesto questa modifica: "${testo}". Applicala subito con modifica_preventivo_o_fattura (passa TUTTE le voci, anche quelle che non cambiano). Regole: un importo detto da solo ("fammela da 57.000", "portala a 500") è il nuovo imponibile IVA esclusa, a meno che dica "totale" o "IVA inclusa" (allora è il totale con IVA); con una sola voce cambia il prezzo di quella, con più voci ricalcolale tutte in proporzione — non chiedere, fallo. Chiedi solo se manca davvero un dato indispensabile (es. il prezzo di una voce nuova). Qualunque risposta: una sola frase breve, mai spiegazioni o elenchi.`;
       const risposta = await chiediAssistente(messaggio, stato.runId || undefined, undefined, { chiediConferma: chiediConfermaInChat });
       attesa.remove();
       const modifica = (risposta.azioni || []).find(a => a.tool === "modifica_preventivo_o_fattura" && a.esito && a.esito.dati);
