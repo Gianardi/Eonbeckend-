@@ -8948,7 +8948,7 @@ function provaLetturaLocale(testo){
    come sempre (falso negativo innocuo, mai un falso positivo su QUALE
    cliente). Apre direttamente la card risorsa (vedi mostraRisorsaFoto/
    mostraRisorsaDocumenti) se riconosciuta. */
-const TRIGGER_RISORSA = /^(?:mi serve|mi servirebbe|dammi|mandami|fammi vedere|voglio vedere|recupera|cerca|trova|apri)\s+(?:il|la|lo|i|gli|le)?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|per)?\s*(.+)$/;
+const TRIGGER_RISORSA = /^(?:(?:mi serve|mi servirebbe|mi servono|ho bisogno (?:del|della|dei|delle|di)|dammi|mandami|fammi vedere|mi fai vedere|fai vedere|voglio vedere|vorrei vedere|vorrei|mostrami|mostra|recupera|cerca|trova|apri)\s+)?(?:il|la|lo|i|gli|le|l')?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|dello|dei|per|a)?\s*(.+)$/;
 
 /* Sopra questa lunghezza una risposta solo conversazionale (nessuna
    azione eseguita) si considera "discorsiva" — una spiegazione, un
@@ -8957,22 +8957,36 @@ const TRIGGER_RISORSA = /^(?:mi serve|mi servirebbe|dammi|mandami|fammi vedere|v
    secondi prima di fare in tempo a leggerla. */
 const SOGLIA_RISPOSTA_DISCORSIVA = 180;
 
+/* Prima tra i clienti attivi; se nessuno corrisponde, anche tra gli
+   archiviati (25/09/2026: "mi serve fattura testolina" finiva all'AI —
+   e veniva capita come "crea una fattura" — solo perché Testolina era
+   archiviato: i suoi documenti restano suoi e vanno ritrovati). */
 function trovaClienteDaParole(parole){
-  let trovato = null, corrispondenze = 0;
-  for(const c of clients){
-    if(c.archived) continue;
-    const tokenNome = c.name.toLowerCase().split(/\s+/).filter(Boolean);
-    if(tokenNome.some(tok => parole.includes(tok))){
-      corrispondenze++;
-      trovato = c;
+  const cerca = (archiviati) => {
+    let trovato = null, corrispondenze = 0;
+    for(const c of clients){
+      if(!!c.archived !== archiviati) continue;
+      const tokenNome = c.name.toLowerCase().split(/\s+/).filter(Boolean);
+      if(tokenNome.some(tok => parole.includes(tok))){
+        corrispondenze++;
+        trovato = c;
+      }
     }
-  }
-  return corrispondenze === 1 ? trovato : null;
+    return { trovato, corrispondenze };
+  };
+  const attivi = cerca(false);
+  if(attivi.corrispondenze) return attivi.corrispondenze === 1 ? attivi.trovato : null;
+  const archiviati = cerca(true);
+  return archiviati.corrispondenze === 1 ? archiviati.trovato : null;
 }
 
 function provaRisorsaImmediata(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return false;
+  /* Con un importo o una parola da creazione è una richiesta di FARE un
+     documento ("fattura testolina 300 per porte", "fammi un preventivo
+     per Rossi"): mai intercettarla qui, la crea l'AI. */
+  if(/\d/.test(t) || /\b(crea|creami|fai(?!\s+vedere)|fammi un|fammi una|prepara|preparami|nuov[oa]|emetti)\b/.test(t)) return false;
   const m = t.match(TRIGGER_RISORSA);
   if(!m) return false;
   const tipoRichiesto = m[1];
@@ -9010,12 +9024,34 @@ function provaRisorsaImmediata(testo){
         .reverse() // chat.messages è in ordine cronologico crescente: i più recenti prima
         .slice(0, 10)
         .map(msg => msg.eventType === "doc"
-          ? { id: msg.id, tipo: "preventivo_o_fattura", titolo: msg.title, riepilogo: msg.text || null, importoTesto: msg.amount || null, url: null, quandoTesto: msg.time }
+          ? { id: msg.id, tipo: "preventivo_o_fattura", titolo: msg.title, riepilogo: msg.text || null, importoTesto: msg.amount || null, url: null, quandoTesto: msg.time, dati: msg.docDati || null }
           : { id: msg.id, tipo: "allegato", titolo: msg.fileName || "(senza nome)", url: msg.fileUrl, quandoTesto: msg.time })
     : [];
-  if(paroleFiltro.length){
-    const filtrati = documenti.filter(d => paroleFiltro.some(p => (d.titolo || "").toLowerCase().includes(p)));
+
+  /* "fattura/fatture" o "preventivo/preventivi": solo i documenti di quel
+     tipo. Se il cliente non ne ha nessuno, decide l'AI (di solito vuol
+     dire che va creato: chiederà importo e lavoro). */
+  const tipoDoc = /^fattur/.test(tipoRichiesto) ? "fattura" : /^preventiv/.test(tipoRichiesto) ? "preventivo" : null;
+  if(tipoDoc){
+    documenti = documenti.filter(d => d.tipo === "preventivo_o_fattura" && ((d.dati && d.dati.tipo === tipoDoc) || new RegExp(tipoDoc, "i").test(d.titolo || "")));
+    if(!documenti.length) return false;
+  }
+  /* Parole in più oltre al nome ("fattura testolina porte"): filtrano per
+     titolo o lavoro. Se per una fattura/preventivo non corrispondono a
+     nessun documento esistente, è quasi sempre la descrizione di uno
+     NUOVO da fare ("preventivo per Rossi pulizia scale"): decide l'AI. */
+  const paroleUtili = paroleFiltro.filter(p => !/^(per|di|del|della|dello|dei|il|la|lo|i|gli|le|a|al|alla|e|che|un|una)$/.test(p));
+  if(paroleUtili.length){
+    const testoDoc = d => ((d.titolo || "") + " " + (d.dati && Array.isArray(d.dati.voci) ? d.dati.voci.map(v => v.desc).join(" ") : "")).toLowerCase();
+    const filtrati = documenti.filter(d => paroleUtili.some(p => testoDoc(d).includes(p)));
     if(filtrati.length) documenti = filtrati;
+    else if(tipoDoc) return false;
+  }
+  /* Un solo documento (Gianardi, 25/09/2026: "si apre nella home nello
+     stile della card grande"): si apre direttamente, con Modifica. */
+  if(documenti.length === 1 && documenti[0].dati){
+    mostraAnteprimaDocumento(documenti[0].dati, documenti[0].id, cliente.name);
+    return true;
   }
   mostraRisorsaDocumenti(documenti, cliente.name);
   return true;

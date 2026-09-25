@@ -118,6 +118,48 @@ async function main() {
     verifica("a voce \"apri fatture e preventivi\" → tutti", voce.r3 && voce.f3 === "tutti", JSON.stringify(voce));
     verifica("\"mostrami il preventivo di Rossi\" NON è navigazione (resta all'AI)", voce.r4 === false);
 
+    // "Mi serve fattura testolina" (caso reale 25/09/2026, cliente archiviato): si apre subito, senza AI.
+    const richieste = await page.evaluate(() => {
+      const doc = (id, tipo, numero, cliente, totale, desc) => ({ id, from: "me", eventType: "doc", title: (tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + numero, amount: "€" + totale,
+        docDati: { tipo, numero, anno: 2026, data: "25/09/2026", cliente, voci: [{ desc, qta: 1, prezzo: totale }], imponibile: totale, aliquota: 22, iva: 0, totale }, createdAt: "2026-09-25T10:00:00Z" });
+      clients.length = 0;
+      clients.push({ id: "t", name: "Testolina", archived: true }, { id: "r", name: "Rossi", archived: false }, { id: "b", name: "Bianchi", archived: false });
+      chats.length = 0;
+      chats.push({ id: "ct", name: "Testolina", messages: [doc("dt", "fattura", "4/2026", "Testolina", 122, "Prova")] });
+      chats.push({ id: "cr", name: "Rossi", messages: [doc("dr1", "preventivo", "2/2026", "Rossi", 5000, "Rifacimento tetto"), doc("dr2", "preventivo", "3/2026", "Rossi", 800, "Grondaie"), doc("dr3", "fattura", "5/2026", "Rossi", 900, "Grondaie")] });
+      chats.push({ id: "cb", name: "Bianchi", messages: [] });
+      const prova = (frase) => {
+        chiudiRisorsaCard();
+        document.getElementById("risorsaTitolo").textContent = "";
+        const ok = provaRisorsaImmediata(frase);
+        return ok ? { titolo: document.getElementById("risorsaTitolo").textContent, voci: document.querySelectorAll("#risorsaCorpo .risorsa-voce").length, modifica: !!document.querySelector("#risorsaCorpo .risorsa-riga-btn") } : false;
+      };
+      return {
+        serve: prova("Mi serve fattura testolina"),
+        nuda: prova("fattura testolina"),
+        vedere: prova("mi fai vedere la fattura di testolina"),
+        preventiviTestolina: prova("preventivi testolina"),
+        conImporto: prova("fattura testolina 300 per porte"),
+        creare: prova("fammi una fattura per testolina"),
+        nuovoLavoro: prova("preventivo per Rossi pulizia scale"),
+        preventiviRossi: prova("mostrami i preventivi di Rossi"),
+        preventivoTetto: prova("preventivo rossi tetto"),
+        fattureRossi: prova("fatture rossi"),
+        nessunDocumento: prova("fattura bianchi"),
+      };
+    });
+    verifica("\"Mi serve fattura testolina\" (archiviato): si apre SUBITO la fattura, card grande", richieste.serve && richieste.serve.titolo === "Fattura n. 4/2026" && richieste.serve.modifica, JSON.stringify(richieste.serve));
+    verifica("\"fattura testolina\" (senza verbo): idem", richieste.nuda && richieste.nuda.titolo === "Fattura n. 4/2026", JSON.stringify(richieste.nuda));
+    verifica("\"mi fai vedere la fattura di testolina\": idem", richieste.vedere && richieste.vedere.titolo === "Fattura n. 4/2026", JSON.stringify(richieste.vedere));
+    verifica("\"preventivi testolina\" senza preventivi: decide l'AI", richieste.preventiviTestolina === false, JSON.stringify(richieste.preventiviTestolina));
+    verifica("con un importo (\"fattura testolina 300 per porte\"): è da CREARE, decide l'AI", richieste.conImporto === false);
+    verifica("\"fammi una fattura per testolina\": è da creare, decide l'AI", richieste.creare === false);
+    verifica("\"preventivo per Rossi pulizia scale\" (lavoro nuovo): decide l'AI", richieste.nuovoLavoro === false, JSON.stringify(richieste.nuovoLavoro));
+    verifica("\"mostrami i preventivi di Rossi\": elenco dei 2 preventivi (non la fattura)", richieste.preventiviRossi && richieste.preventiviRossi.voci === 2, JSON.stringify(richieste.preventiviRossi));
+    verifica("\"preventivo rossi tetto\": apre direttamente quello del tetto", richieste.preventivoTetto && richieste.preventivoTetto.titolo === "Preventivo n. 2/2026", JSON.stringify(richieste.preventivoTetto));
+    verifica("\"fatture rossi\": apre direttamente l'unica fattura", richieste.fattureRossi && richieste.fattureRossi.titolo === "Fattura n. 5/2026", JSON.stringify(richieste.fattureRossi));
+    verifica("\"fattura bianchi\" senza documenti: decide l'AI (chiederà cosa fatturare)", richieste.nessunDocumento === false);
+
     const vuoto = await page.evaluate(() => {
       chats.length = 0;
       filtroFatturePreventivi = "tutti";
