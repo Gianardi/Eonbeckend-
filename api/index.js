@@ -454,6 +454,41 @@ function testoDettoDallUtente(messaggio) {
   const m = messaggio.match(/"([^"]*)"/);
   return m ? m[1] : messaggio;
 }
+/* Parole di un nome o di una frase, per confronti: minuscole, senza
+   accenti né punteggiatura ("Pietà, Raspadori!" -> ["pieta", "raspadori"]). */
+function paroleNormalizzate(testo) {
+  if (!eStringaNonVuota(testo)) return [];
+  return testo.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
+}
+
+/* Regola del ricordo (25/09/2026, caso "preventivo per Raspadori" finito
+   su Tommaso Greti, il cliente della richiesta precedente): se nella
+   frase l'utente NOMINA qualcuno, vale quel nome — il ricordo delle
+   richieste precedenti (note di contesto/focus) si usa solo quando la
+   frase non nomina nessuno ("no, alle 11", "spostalo", "aggiungi 200").
+   Lo decide il codice, non il modello: il modello si limita a copiare
+   le parole del nome così come compaiono nella frase (nome_nella_frase),
+   e qui si verifica che ci siano davvero. Restituisce il nome da cercare
+   in anagrafica, oppure null se va bene quello dichiarato dal modello. */
+const PAROLE_NON_NOME = new Set(["per", "a", "al", "alla", "di", "del", "della", "da", "dal", "dalla", "il", "la", "lo", "signor", "signora", "sig"]);
+function nomeClienteDallaFrase(nomeNellaFrase, clienteDichiarato, testoUtente) {
+  // "per raspadori" -> "raspadori": l'AI a volte copia anche la preposizione
+  const paroleOriginali = eStringaNonVuota(nomeNellaFrase)
+    ? nomeNellaFrase.trim().split(/\s+/).filter((p) => !PAROLE_NON_NOME.has(paroleNormalizzate(p)[0]))
+    : [];
+  const paroleNome = paroleNormalizzate(paroleOriginali.join(" "));
+  if (!paroleNome.length) return null; // nessun nome detto: vale il ricordo
+  const paroleTesto = new Set(paroleNormalizzate(testoUtente));
+  // Parole non presenti davvero nella frase: il modello le ha inventate o
+  // prese dal contesto, non le usiamo per decidere niente.
+  if (!paroleNome.every((p) => paroleTesto.has(p))) return null;
+  // Il nome dichiarato contiene già tutte le parole dette ("Dini" ->
+  // "Mirco Dini"): è una precisazione del modello, va bene così.
+  const paroleDichiarate = new Set(paroleNormalizzate(clienteDichiarato));
+  if (paroleNome.every((p) => paroleDichiarate.has(p))) return null;
+  return paroleOriginali.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+}
 function eNumero(v) { return typeof v === "number" && isFinite(v); }
 function eUuid(v) { return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); }
 function eIso(v) { return typeof v === "string" && !isNaN(new Date(v).getTime()); }
@@ -2344,6 +2379,7 @@ const TOOLS = {
               riferimento_esplicito: { type: "string", description: "Il riferimento così come detto dall'utente (es. 'Rossi', 'il preventivo del tetto'). Lascia vuoto se l'utente usa un riferimento implicito come 'lo'/'quello'/'quello di prima'." },
               usa_focus_corrente: { type: "boolean", description: "true se l'utente si riferisce con un pronome o un riferimento implicito a qualcosa già mostrato/creato in questa conversazione, invece di nominarlo esplicitamente." },
               cliente_di_riferimento: { type: "string", description: "Se la richiesta riguarda un cliente specifico, il suo nome così come detto dall'utente — ANCHE quando tipo non è 'cliente' (es. 'il preventivo DI Rossi' -> tipo:'preventivo', cliente_di_riferimento:'Rossi'; 'le foto del cantiere DI Fabbri' -> tipo:'foto', cliente_di_riferimento:'Fabbri'). Lascia vuoto se la richiesta non riguarda nessun cliente in particolare." },
+              nome_nella_frase: { type: "string", description: "Il nome della persona/cliente ESATTAMENTE come compare nella frase dell'utente (quella tra virgolette), copiato parola per parola, anche se scritto minuscolo o sembra strano (es. 'preventivo per raspadori da 300' -> 'raspadori'). Vuoto se la frase NON nomina nessuno (es. 'no, alle 11', 'spostalo a domani', 'aggiungi 200'). MAI un nome preso dalle note di contesto o dal focus: solo dalla frase." },
             },
           },
           cardinalita: {
@@ -2386,6 +2422,19 @@ const TOOLS = {
          originale (tipo==="cliente" + riferimento_esplicito). */
       const entita = input.entita;
       const tipoEntita = eStringaNonVuota(entita && entita.tipo) ? entita.tipo.trim().toLowerCase() : null;
+
+      /* Regola del ricordo (vedi nomeClienteDallaFrase): un nome detto
+         nella frase vince sempre su quello preso dal contesto. Si
+         corregge l'input stesso, così anche l'intento registrato nella
+         cronologia e il focus riportano il cliente giusto. */
+      if (entita && ctx.testoUtente && eStringaNonVuota(entita.cliente_di_riferimento)) {
+        const dallaFrase = nomeClienteDallaFrase(entita.nome_nella_frase, entita.cliente_di_riferimento, ctx.testoUtente);
+        if (dallaFrase) {
+          esito.nota_cliente = "Il cliente da usare è \"" + dallaFrase + "\", il nome detto nella frase, non \"" + entita.cliente_di_riferimento + "\" (preso dal contesto di una richiesta precedente).";
+          entita.cliente_di_riferimento = dallaFrase;
+        }
+      }
+
       const nomeClienteDaRisolvere = eStringaNonVuota(entita && entita.cliente_di_riferimento)
         ? entita.cliente_di_riferimento
         : (tipoEntita === "cliente" && eStringaNonVuota(entita.riferimento_esplicito) ? entita.riferimento_esplicito : null);
@@ -2871,7 +2920,8 @@ async function handleAssistant(req, res, user, accessToken) {
   await verificaLimiteRichieste(user);
 
   const body = await readBody(req);
-  const ctx = { user, accessToken };
+  // testoUtente: solo la frase vera dell'utente, senza note di contesto (regola del ricordo, vedi nomeClienteDallaFrase)
+  const ctx = { user, accessToken, testoUtente: testoDettoDallUtente(body && body.messaggio) };
   /* Professione scelta all'iscrizione (profiles.profession): decide quale
      Professional Brain Pack aggiungere al prompt di sistema, oltre allo
      strato comune sempre presente. "artigiano" è il valore usato per chi

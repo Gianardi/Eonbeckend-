@@ -3200,3 +3200,32 @@ Da valutare dopo: gli aggiramenti aggiunti inseguendo i sintomi (passaggio
 forzato a Sonnet per le fatture, nonSicuroSuDocumento, blocco della
 ridichiarazione) ora proteggono solo il percorso libero; se l'uso reale
 conferma che non servono più, toglierli riduce ancora i costi.
+
+### Regola del ricordo (25/09/2026, stesso giorno)
+
+Bug trovato nei registri subito dopo il merge del percorso fisso: "Mi crei
+preventivo per raspadori ... da 3000 euro", detto subito dopo una fattura
+per Tommaso Greti, ha creato il Preventivo 9/2026 **su Tommaso Greti**.
+L'AI ha preso il cliente dalle note di contesto/focus che il frontend
+aggiunge a ogni messaggio (il "ricordo"), trattando "raspadori" come parte
+della descrizione; il percorso fisso si è fidato. Andava previsto: una
+richiesta per un cliente nuovo subito dopo un'altra è l'uso normale.
+
+Regola concordata con Gianardi, decisa nel CODICE (`nomeClienteDallaFrase`
+in api/index.js): **se la frase nomina qualcuno vale quel nome; il ricordo
+vale solo quando la frase non nomina nessuno** ("no, alle 11", "spostalo",
+"aggiungi 200"). L'AI copia solo le parole del nome dalla frase (nuovo
+campo `nome_nella_frase` di interpreta_richiesta); il codice verifica che
+ci siano davvero nella frase (altrimenti le ignora) e, se il cliente
+dichiarato è un altro, lo sostituisce prima di cercarlo in anagrafica. Se
+il cliente dichiarato contiene già il nome detto ("Dini" -> "Mirco Dini")
+resta quello. Nessuna domanda in più e nessun giro in più.
+
+Verifica: 6 scenari nuovi in `eval/percorso-documento.test.mjs`, tra cui
+i due esempi di Gianardi (Dini "no alle 11" -> ricordo attivo; Dino e poi
+"preventivo per raspadori" -> ricordo ignorato). Sul codice prima: 5
+controlli falliti (preventivo su Greti/Dino). Limite: se l'AI non copia
+affatto il nome in `nome_nella_frase`, il codice non può accorgersene.
+
+Da fare: stesso schema (AI legge la frase, codice esegue) per appuntamenti,
+clienti nuovi, promemoria/note, messaggi — uno alla volta, con test.
