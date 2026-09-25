@@ -400,7 +400,7 @@ async function handleAI(req, res) {
     }
     console.error("Errore Anthropic:", r.status, motivo);
     throw fail(
-      "L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""),
+      erroreAILeggibile(r.status, motivo),
       502
     );
   }
@@ -443,6 +443,16 @@ const TIPI_DOCUMENTO = new Set(["preventivo", "fattura"]);
 const STATI_CLIENTE = new Set(["attivo", "trattativa", "inattivo"]);
 
 function eStringaNonVuota(v) { return typeof v === "string" && v.trim().length > 0; }
+
+/* Errore dell'AI in parole chiare: il caso del credito finito (24/09/2026,
+   l'app mostrava "Your credit balance is too low..." in inglese) dice
+   cosa fare. Gli altri restano come sono, con codice e motivo tecnico. */
+function erroreAILeggibile(status, motivo) {
+  if (/credit balance is too low/i.test(motivo || "")) {
+    return "Credito dell'AI esaurito: ricaricalo su console.anthropic.com (Plans & Billing), poi riprova";
+  }
+  return "L'AI ha rifiutato la richiesta (" + status + ")" + (motivo ? ": " + motivo : "");
+}
 
 /* Il frontend incornicia la frase vera dell'utente tra virgolette
    ('...cosa deve fare: "fattura da 300 per Rossi"') e ci aggiunge dopo
@@ -3593,7 +3603,7 @@ async function handleAssistant(req, res, user, accessToken) {
         if (puoRipiegarePerRete) { modelloUsato = MODEL_SONNET; continue; }
         let motivo = "";
         try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
-        throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+        throw fail(erroreAILeggibile(r.status, motivo), 502);
       }
 
       data = await r.json();
@@ -4089,7 +4099,7 @@ async function chiamaClaude(prompt, maxTokens) {
   if (!r.ok) {
     let motivo = "";
     try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
-    throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+    throw fail(erroreAILeggibile(r.status, motivo), 502);
   }
   const data = await r.json();
   const text = (data.content || []).map((b) => b.text || "").join("").trim();
@@ -4527,7 +4537,7 @@ async function handleLeggiIntestazioneDaFoto(req, res) {
   if (!r.ok) {
     let motivo = "";
     try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
-    throw fail("L'AI ha rifiutato la richiesta (" + r.status + ")" + (motivo ? ": " + motivo : ""), 502);
+    throw fail(erroreAILeggibile(r.status, motivo), 502);
   }
   const data = await r.json();
   const testo = (data.content || []).map((b) => b.text || "").join("").trim();

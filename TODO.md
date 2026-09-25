@@ -3301,3 +3301,23 @@ Corretto: `onAuthStateChange` tiene aggiornata currentSession, e ogni
 chiamata al backend usa `tokenValido()` (getSession, che rinnova se
 scaduto). Test: `eval/sessione.test.js` (sul codice di prima parte il
 token scaduto).
+
+### Appunti istantanei con le frasi vere (25/09/2026)
+
+Nei registri le note passavano tutte dall'AI (3-3,5 s) perché il percorso
+istantaneo del frontend (zero AI) voleva la frase che cominciasse proprio
+con "segnami/mettimi in appunti". Frasi vere di Gianardi: "mi appunti chiavi
+portone Amalfi 2 e Amalfi 4 per Ratti", "mi metti negli appunti convocare
+almeno tre riunioni", "mi aggiungi in appunti via XXIV Maggio 152 e anche un
+altro appunto parto tetto...". Ora riconosciute (`estraiAppunti` in
+index.html), anche più appunti nella stessa frase ("e anche un altro
+appunto"). Con un giorno/ora nella frase resta all'AI (può essere un
+impegno). Test in `eval/router.test.js` (73/73), compreso il salvataggio a
+metà (lo dice, mai un "fatto" finto).
+
+Messaggi (manda_messaggio): NON fatto il percorso rapido — nei registri
+nessun uso reale, e mandare un messaggio a un cliente resta un'azione che
+chiede conferma (va a una persona esterna). Da riprendere quando verrà usato.
+
+Credito dell'AI finito: l'app ora dice "Credito dell'AI esaurito: ricaricalo
+su console.anthropic.com" invece dell'errore in inglese (24/09/2026).
