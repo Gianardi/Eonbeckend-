@@ -3321,3 +3321,19 @@ chiede conferma (va a una persona esterna). Da riprendere quando verrà usato.
 
 Credito dell'AI finito: l'app ora dice "Credito dell'AI esaurito: ricaricalo
 su console.anthropic.com" invece dell'errore in inglese (24/09/2026).
+
+### Appunti sovrascritti per sbaglio (25/09/2026)
+
+Prova di Gianardi con l'app non ancora ricaricata (quindi via AI): "mi
+appunti comprare nastro e anche un altro appunto chiamare il fabbro", detto
+subito dopo "comprare silicone"/"chiamare il vetraio" → l'AI, per via del
+ricordo dell'ultima azione, ha usato correggi_appunto e ha SOVRASCRITTO i
+due appunti di prima (persi). Regola nel codice (`CHIEDE_CORREZIONE` in
+correggi_appunto): in un messaggio nuovo un appunto esistente si cambia solo
+se la frase ha parole di correzione ("correggi", "anzi", "non X ma Y",
+"cambia"...); altrimenti errore all'AI con l'istruzione di usare
+crea_appunto. Test: 3 scenari in `eval/percorso-rapido.test.mjs` (sul codice
+di prima riproduce la perdita).
+Da valutare: lo stesso rischio "il ricordo trasforma una richiesta nuova in
+una correzione" per gli altri strumenti che modificano (aggiorna_cliente,
+modifica_preventivo_o_fattura).

@@ -507,6 +507,9 @@ function nomeClienteDallaFrase(nomeNellaFrase, clienteDichiarato, testoUtente) {
   if (paroleNormalizzate(detto).every((p) => paroleDichiarate.has(p))) return null;
   return detto;
 }
+/* Parole con cui l'utente chiede di cambiare qualcosa che esiste già
+   (vedi correggi_appunto). */
+const CHIEDE_CORREZIONE = /\b(correggi\w*|corregg\w*|correzione|corrett[oa]|sbagliat\w*|ho sbagliato|errore|anzi|invece|cambia\w*|modific\w*|sostituisci|volevo dire|intendevo)\b|\bnon\s+\S+(?:\s+\S+)?\s+ma\b/i;
 function eNumero(v) { return typeof v === "number" && isFinite(v); }
 function eUuid(v) { return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); }
 function eIso(v) { return typeof v === "string" && !isNaN(new Date(v).getTime()); }
@@ -1207,6 +1210,19 @@ const TOOLS = {
     },
     async run(input, ctx) {
       if (!eStringaNonVuota(input.testo_nuovo)) throw fail("Parametro 'testo_nuovo' mancante o vuoto");
+
+      /* Bug reale (25/09/2026): "mi appunti comprare nastro e anche un
+         altro appunto chiamare il fabbro", detto subito dopo due appunti
+         diversi, è stato preso dall'AI come CORREZIONE (per via del ricordo
+         dell'ultima azione): ha sovrascritto "comprare silicone" e
+         "chiamare il vetraio", che sono spariti. Regola decisa nel codice:
+         in un messaggio nuovo, un appunto esistente si cambia SOLO se
+         l'utente lo chiede con parole di correzione; altrimenti è un
+         appunto nuovo. (Nelle continuazioni di una domanda, es. "sì,
+         correggilo", decide la conversazione già in corso.) */
+      if (ctx.nuovoMessaggio && !CHIEDE_CORREZIONE.test(ctx.testoUtente || "")) {
+        throw fail("L'utente NON ha chiesto di correggere un appunto esistente (nessuna parola come 'correggi', 'anzi', 'non X ma Y'): questo è un appunto NUOVO. Usa crea_appunto e non toccare quelli esistenti.");
+      }
 
       const recenti = await db(
         `cantiere_appunti?select=id,testo,created_at&deleted_at=is.null&order=created_at.desc&limit=20`,
@@ -3241,7 +3257,8 @@ async function handleAssistant(req, res, user, accessToken) {
 
   const body = await readBody(req);
   // testoUtente: solo la frase vera dell'utente, senza note di contesto (regola del ricordo, vedi nomeClienteDallaFrase)
-  const ctx = { user, accessToken, testoUtente: testoDettoDallUtente(body && body.messaggio) };
+  // nuovoMessaggio: non è la risposta a una domanda o una conferma (vedi correggi_appunto)
+  const ctx = { user, accessToken, testoUtente: testoDettoDallUtente(body && body.messaggio), nuovoMessaggio: !(body && body.runId) };
   /* Professione scelta all'iscrizione (profiles.profession): decide quale
      Professional Brain Pack aggiungere al prompt di sistema, oltre allo
      strato comune sempre presente. "artigiano" è il valore usato per chi
