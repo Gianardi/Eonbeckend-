@@ -3370,3 +3370,22 @@ menu; restano nel codice, da togliere del tutto più avanti.
 Test: `eval/fatture.test.js` (19 verifiche).
 Ancora da valutare: le pagine Lettera/Cartello/Carta intestata (verificare
 se sono collegate a dati veri).
+
+### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
+
+Caso reale: la frase è andata all'AI, che l'ha capita come "crea una
+fattura" e chiedeva i dati. Causa: il riconoscimento istantaneo
+(`provaRisorsaImmediata`, zero AI) saltava i clienti ARCHIVIATI, e
+Testolina lo era. Ora:
+- cliente cercato tra gli attivi e, se nessuno corrisponde, tra gli archiviati;
+- "fattura/preventivo": solo documenti di quel tipo; UN solo documento → si
+  apre direttamente la card grande con Modifica; più documenti → elenco;
+- più modi di chiederlo ("fattura testolina", "mi fai vedere", "mostrami",
+  "ho bisogno della", "vorrei"...);
+- resta all'AI (è una richiesta di CREARE): importo nella frase, parole
+  come "crea/fammi una/prepara/nuovo", parole in più che non corrispondono
+  a nessun documento esistente ("preventivo per Rossi pulizia scale"),
+  cliente senza documenti di quel tipo.
+Test: 11 verifiche nuove in `eval/fatture.test.js` (sul codice di prima
+riproduce il caso).
+Da fare: lo stesso per i documenti dell'impresa (senza cliente).
