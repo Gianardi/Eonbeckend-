@@ -3267,13 +3267,15 @@ async function handleAssistant(req, res, user, accessToken) {
      in quel caso non si aggiunge nessun pack, solo lo strato comune. Un
      fallimento qui non deve mai bloccare il turno: EON resta comunque
      utilizzabile, solo senza il pack specifico. */
-  let professione = null;
-  try {
-    const righeProfilo = await db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, accessToken);
-    professione = Array.isArray(righeProfilo) && righeProfilo[0] ? righeProfilo[0].profession : null;
-  } catch (err) {
-    console.warn("Professione non recuperata, proseguo con solo lo strato comune:", err.message);
-  }
+  /* Letta in parallelo e attesa solo quando serve davvero (il prompt del
+     motore completo): i percorsi rapidi non la usano e non devono
+     aspettare un viaggio in più al database (25/09/2026). */
+  const professionePromessa = db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, accessToken)
+    .then((righeProfilo) => (Array.isArray(righeProfilo) && righeProfilo[0] ? righeProfilo[0].profession : null))
+    .catch((err) => {
+      console.warn("Professione non recuperata, proseguo con solo lo strato comune:", err.message);
+      return null;
+    });
   const runId = body.runId || null;
   let messages;
   let azioniEseguite = [];
@@ -3479,6 +3481,7 @@ async function handleAssistant(req, res, user, accessToken) {
   }
 
   const schemi = Object.values(TOOLS).map((t) => t.schema);
+  const professione = await professionePromessa;
   const promptStatico = systemPromptAssistente(professione); // uguale ad ogni giro: costruito una sola volta fuori dal loop
 
   /* Un messaggio nuovo (nessun runId: non è né una conferma né la

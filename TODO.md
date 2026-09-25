@@ -3337,3 +3337,21 @@ di prima riproduce la perdita).
 Da valutare: lo stesso rischio "il ricordo trasforma una richiesta nuova in
 una correzione" per gli altri strumenti che modificano (aggiorna_cliente,
 modifica_preventivo_o_fattura).
+
+### App che si aggiorna da sola + server a Londra (25/09/2026)
+
+- Aggiornamento automatico (index.html, `controllaNuovaVersione`): tornando
+  su EON si confronta l'ETag/Last-Modified di index.html (solo intestazione)
+  con quello di avvio; se è cambiato la pagina si ricarica, mai con testo
+  scritto a metà in un campo visibile; al massimo un controllo ogni 30 s.
+  Motivo: dopo i merge Gianardi continuava a usare la versione vecchia
+  rimasta in memoria sul telefono. Test: `eval/aggiornamento.test.js`.
+- `vercel.json`: `"regions": ["lhr1"]` — il database (produzione e staging)
+  è a Londra (eu-west-2), la funzione girava nella regione predefinita di
+  Vercel (Stati Uniti): 8-10 viaggi al database per richiesta attraverso
+  l'oceano. Le chiamate ad Anthropic si allungano di poco (una per il
+  percorso rapido). Da misurare in ai_request_log (durata_ms) prima/dopo:
+  prima, percorso rapido 1,5-2,4 s.
+- La lettura del profilo (professione) ora parte in parallelo e si aspetta
+  solo quando serve (prompt del motore completo): i percorsi rapidi non la
+  aspettano più.

@@ -11366,6 +11366,43 @@ async function initApp(){
   renderChatList();
   renderChatWindow();
 }
+/* Aggiornamento automatico dell'app (25/09/2026). Sul telefono EON resta
+   aperta in memoria per ore: dopo un merge Gianardi continuava a usare la
+   versione vecchia finché non chiudeva e riapriva l'app a mano (provato:
+   le prove degli appunti istantanei passavano ancora dall'AI). Ora, ogni
+   volta che si torna su EON, si chiede al server se index.html è cambiata
+   (solo l'intestazione ETag/Last-Modified, niente download) e, se sì, la
+   pagina si ricarica da sola — ma MAI con del testo scritto a metà in un
+   campo visibile: in quel caso si aspetta il ritorno successivo. */
+let firmaVersione = null;
+let ultimoControlloVersione = 0;
+async function firmaVersioneAttuale(){
+  try{
+    const r = await fetch(location.pathname || "/", { method: "HEAD", cache: "no-store" });
+    if(!r.ok) return null;
+    return r.headers.get("etag") || r.headers.get("last-modified") || null;
+  }catch(e){ return null; } // senza rete: nessun controllo, nessun problema
+}
+function ricaricaApp(){ location.reload(); }
+function eSicuroRicaricare(){
+  const campi = document.querySelectorAll("textarea, input[type=text], input:not([type])");
+  for(const c of campi){
+    if(c.offsetParent !== null && c.value && c.value.trim()) return false;
+  }
+  return true;
+}
+async function controllaNuovaVersione(){
+  if(Date.now() - ultimoControlloVersione < 30000) return;
+  ultimoControlloVersione = Date.now();
+  const firma = await firmaVersioneAttuale();
+  if(!firma) return;
+  if(!firmaVersione){ firmaVersione = firma; return; }
+  if(firma !== firmaVersione && eSicuroRicaricare()) ricaricaApp();
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") controllaNuovaVersione(); });
+window.addEventListener("pageshow", (e) => { if(e.persisted) controllaNuovaVersione(); });
+controllaNuovaVersione(); // la versione con cui l'app è partita
+
 initApp();
 </script>
 </body>
