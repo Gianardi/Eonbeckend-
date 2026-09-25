@@ -555,6 +555,16 @@
   .cantiere-appunto-data{ font-size:10.5px; color:var(--faint); margin-top:4px; }
   .cantiere-appunto-elimina{ flex:none; width:26px; height:26px; border-radius:8px; border:none; background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--faint); }
   .cantiere-appunto-elimina svg{ width:14px; height:14px; }
+  .appunti-foto-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; margin:14px auto 0;
+    padding:10px 18px; border-radius:22px; border:1px solid var(--border-strong); background:var(--card);
+    font:inherit; font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; box-shadow:var(--shadow-sm);
+  }
+  .appunti-foto-btn svg{ width:18px; height:18px; color:var(--indigo); }
+  .appunti-foto-btn:disabled{ opacity:.6; cursor:default; }
+  .cantiere-appunto-foto{ flex:none; width:56px; height:56px; border-radius:10px; object-fit:cover; background:#F1F2F6; }
+  .cantiere-appunto-testo.vuoto{ color:var(--muted); }
+  .cantiere-appunto-descrizione{ font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.4; }
 
   .task-list{ padding:4px 0 6px; display:flex; flex-direction:column; gap:8px; }
   .task-list.manual{ padding-bottom:4px; }
@@ -2518,6 +2528,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
+        <!-- Foto negli appunti (25/09/2026, Gianardi): scatti, e nella
+             scheda della foto detti o scrivi la nota. -->
+        <input type="file" id="cantiereAppuntiFotoInput" accept="image/*" style="display:none;">
+        <button type="button" class="appunti-foto-btn" id="cantiereAppuntiFotoBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span id="cantiereAppuntiFotoTesto">Scatta una foto con appunto</span>
+        </button>
         <button type="button" id="cantiereAppuntiAnnullaModifica" style="display:none; margin-top:8px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:4px;">Annulla modifica</button>
       </div>
 
@@ -8695,7 +8712,8 @@ function aggiornaCantiereSottotitoli(){
   }
 
   const subAppunti = document.getElementById("cantiereAppuntiSub");
-  if(subAppunti) subAppunti.textContent = cantiereAppunti.length === 0 ? "Nessun appunto" : (cantiereAppunti.length === 1 ? "1 appunto" : cantiereAppunti.length + " appunti");
+  const nAppunti = cantiereAppunti.length + cantiereFoto.filter(eFotoDiAppunti).length;
+  if(subAppunti) subAppunti.textContent = nAppunti === 0 ? "Nessun appunto" : (nAppunti === 1 ? "1 appunto" : nAppunti + " appunti");
 
   const subDocumenti = document.getElementById("cantiereDocumentiSub");
   if(subDocumenti) subDocumenti.textContent = cantiereDocumenti.length === 0 ? "Nessun documento" : (cantiereDocumenti.length === 1 ? "1 documento" : cantiereDocumenti.length + " documenti");
@@ -8724,15 +8742,62 @@ function renderCantiereClienteCruscotto(){
 /* ---- Appunti cantiere: microfono che detta nel campo (nessun
    collegamento all'assistente AI: qui è solo dettatura, come chiesto:
    "prendere solo appunti", non chiedere all'AI di organizzarli). ---- */
+/* Le foto scattate da Appunti stanno nella stessa cartella delle foto
+   del cantiere, ma in "appunti/": così compaiono qui, tra gli appunti,
+   e restano anche nella galleria Foto. */
+const eFotoDiAppunti = f => /\/cantiere\/appunti\//.test(f.url || "");
+
+function rigaFotoAppunto(f){
+  const riga = document.createElement("div");
+  riga.className = "cantiere-appunto";
+  const img = document.createElement("img");
+  img.className = "cantiere-appunto-foto";
+  img.src = f.url; img.alt = f.nota || "Foto"; img.loading = "lazy";
+  const corpo = document.createElement("div");
+  corpo.style.cssText = "flex:1; min-width:0; cursor:pointer;";
+  const testoEl = document.createElement("div");
+  testoEl.className = "cantiere-appunto-testo" + (f.nota ? "" : " vuoto");
+  testoEl.textContent = f.nota || "Tocca per aggiungere una nota";
+  corpo.appendChild(testoEl);
+  if(f.descrizione){
+    const d = document.createElement("div");
+    d.className = "cantiere-appunto-descrizione";
+    d.textContent = "EON: " + f.descrizione;
+    corpo.appendChild(d);
+  }
+  const dataEl = document.createElement("div");
+  dataEl.className = "cantiere-appunto-data";
+  dataEl.textContent = f.created ? new Date(f.created).toLocaleDateString("it-IT", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" }) : "";
+  corpo.appendChild(dataEl);
+  const apri = () => { const cl = f.clientId ? clients.find(c => c.id === f.clientId) : null; mostraSchedaFoto(f, cl ? cl.name : null); };
+  img.addEventListener("click", apri);
+  corpo.addEventListener("click", apri);
+  const elimina = document.createElement("button");
+  elimina.className = "cantiere-appunto-elimina";
+  elimina.type = "button";
+  elimina.setAttribute("aria-label", "Elimina foto");
+  elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+  elimina.addEventListener("click", async () => { await eliminaCantiereFoto(f.id); renderCantiereAppunti(); });
+  riga.appendChild(img); riga.appendChild(corpo); riga.appendChild(elimina);
+  return riga;
+}
+
 function renderCantiereAppunti(){
   const wrap = document.getElementById("cantiereAppuntiLista");
-  document.getElementById("cantiereAppuntiCount").textContent = cantiereAppunti.length;
+  const fotoAppunti = cantiereFoto.filter(eFotoDiAppunti);
+  document.getElementById("cantiereAppuntiCount").textContent = cantiereAppunti.length + fotoAppunti.length;
   wrap.innerHTML = "";
-  if(cantiereAppunti.length === 0){
+  if(cantiereAppunti.length === 0 && fotoAppunti.length === 0){
     wrap.innerHTML = '<div class="empty-hint" style="padding:16px;">Ancora nessun appunto per questo cantiere.</div>';
     return;
   }
-  cantiereAppunti.slice().reverse().forEach(a => {
+  const tutti = cantiereAppunti.map((a, i) => ({ tipo:"testo", a, quando: a.created || "", i }))
+    .concat(fotoAppunti.map((f, i) => ({ tipo:"foto", f, quando: f.created || "", i })));
+  // Il più recente in cima (a parità di data, l'ultimo aggiunto)
+  tutti.sort((x, y) => (y.quando > x.quando) - (y.quando < x.quando) || y.i - x.i);
+  tutti.forEach(v => {
+    if(v.tipo === "foto"){ wrap.appendChild(rigaFotoAppunto(v.f)); return; }
+    const a = v.a;
     const riga = document.createElement("div");
     riga.className = "cantiere-appunto";
 
@@ -9120,17 +9185,19 @@ function renderCantiereFoto(){
   }
 }
 
-async function caricaCantiereFoto(file, clienteIdForzato){
+async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
+  const daAppunti = !!(opzioni && opzioni.daAppunti);
   if(!isDbReady()){
     showAILanding("Non collegato", "Per caricare foto serve la connessione al database.");
     return;
   }
-  const btn = document.getElementById("cantiereFotoScattaBtn");
-  const sub = document.getElementById("cantiereFotoCaricaSub");
+  const btn = document.getElementById(daAppunti ? "cantiereAppuntiFotoBtn" : "cantiereFotoScattaBtn");
+  const sub = document.getElementById(daAppunti ? "cantiereAppuntiFotoTesto" : "cantiereFotoCaricaSub");
+  const subPrima = sub.textContent;
   btn.disabled = true;
   sub.textContent = "Sto caricando…";
   try{
-    const percorso = currentSession.user.id + "/cantiere/foto/" + nomeFileSicuro(file.name);
+    const percorso = currentSession.user.id + (daAppunti ? "/cantiere/appunti/" : "/cantiere/foto/") + nomeFileSicuro(file.name);
     const { error: upErr } = await supabaseClient.storage
       .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
     if(upErr) throw upErr;
@@ -9140,7 +9207,14 @@ async function caricaCantiereFoto(file, clienteIdForzato){
     const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"" };
     cantiereFoto.push(nuovaFoto);
     descriviFoto(nuovaFoto); // in sottofondo: EON guarda la foto e ne scrive una descrizione
-    if(clienteIdForzato){
+    if(daAppunti){
+      /* Da Appunti: niente "a quale cliente?", si apre subito la scheda
+         della foto per dettare o scrivere la nota. */
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      renderCantiereAppunti();
+      mostraSchedaFoto(nuovaFoto, null, { appenaScattata: true });
+    } else if(clienteIdForzato){
       /* Foto aggiunta dal "+" dentro la card di un cliente già noto:
          nessun bisogno di richiedere di nuovo a chi si riferisce. */
       nuovaFoto.clientId = clienteIdForzato;
@@ -9159,8 +9233,9 @@ async function caricaCantiereFoto(file, clienteIdForzato){
     showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare la foto: " + (err.message || "riprova."));
   }finally{
     btn.disabled = false;
-    sub.textContent = "Si aggiunge subito qui sotto";
+    sub.textContent = subPrima;
     document.getElementById("cantiereFotoInput").value = "";
+    document.getElementById("cantiereAppuntiFotoInput").value = "";
   }
 }
 
@@ -9170,9 +9245,15 @@ async function eliminaCantiereFoto(id){
   cantiereFoto.splice(idx, 1);
   aggiornaCantiereSottotitoli();
   renderCantiereFoto();
+  renderCantiereAppunti();
   if(isDbReady()) await dbDelete("cantiere_foto", id);
 }
 
+document.getElementById("cantiereAppuntiFotoBtn").addEventListener("click", () => document.getElementById("cantiereAppuntiFotoInput").click());
+document.getElementById("cantiereAppuntiFotoInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) caricaCantiereFoto(f, null, { daAppunti: true });
+});
 document.getElementById("cantiereFotoScattaBtn").addEventListener("click", () => { clienteIdPerProssimaFoto = null; document.getElementById("cantiereFotoInput").click(); });
 document.getElementById("cantiereFotoInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
@@ -10822,6 +10903,7 @@ function descriviFoto(foto){
       foto.descrizione = json.descrizione;
       const inMemoria = cantiereFoto.find(f => f.id === foto.id);
       if(inMemoria) inMemoria.descrizione = json.descrizione;
+      if(document.getElementById("page-cantiere-appunti").classList.contains("visible")) renderCantiereAppunti();
       return json.descrizione;
     }catch(err){
       console.warn("Descrizione automatica della foto non riuscita:", err.message);
@@ -10919,6 +11001,7 @@ function mostraSchedaFoto(foto, clienteNome, opzioni){
     notaEl.classList.add("salvata");
     setTimeout(() => notaEl.classList.remove("salvata"), 900);
     if(document.getElementById("page-cantiere-foto").classList.contains("visible")) renderCantiereFoto();
+    if(document.getElementById("page-cantiere-appunti").classList.contains("visible")) renderCantiereAppunti();
   }
   salva.addEventListener("click", () => salvaNota(campo.value, stato.correzione));
   campo.addEventListener("keydown", (e) => {

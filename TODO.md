@@ -3483,6 +3483,21 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Foto negli Appunti (25/09/2026)
+
+Gianardi: "in Appunti mettere la possibilità di fare anche le foto" e "non
+vedo nessuna di queste funzioni" (nota e descrizione sulle foto). Verificato:
+nel database nessuna foto ha nota o descrizione, e Vercel bloccava le
+pubblicazioni già dalle 15:50 (anche #92): quelle funzioni non erano mai
+andate online, arrivano con il pacchetto unico.
+- Appunti: tasto "Scatta una foto con appunto" → foto salvata in
+  `cantiere/appunti/` (stessa tabella `cantiere_foto`, niente migrazione) →
+  si apre subito la scheda della foto per dettare o scrivere la nota.
+- L'elenco "Appunti salvati" mostra testi e foto insieme, il più recente in
+  cima: miniatura, nota, descrizione di EON, data. Tocco = scheda della foto.
+  La foto resta anche nella galleria Foto.
+- Test: 5 in foto.test.js (21 in tutto).
+
 ### Risposte di EON nella card bianca (25/09/2026)
 
 Gianardi (due screenshot): "Cosa ho da fare domani?" rispondeva nel

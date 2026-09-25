@@ -147,7 +147,8 @@ NODE_PATH=/opt/node22/lib/node_modules node eval/scheda.test.js
 ### `foto.test.js` — nota sulle foto, gira subito
 
 Scheda della foto, nota scritta/dettata/corretta, segno in galleria, nota
-proposta dopo lo scatto, ricerca a voce per nota, invio WhatsApp.
+proposta dopo lo scatto, ricerca a voce per nota, invio WhatsApp, foto con
+appunto dalla pagina Appunti.
 
 ```
 NODE_PATH=/opt/node22/lib/node_modules node eval/foto.test.js
