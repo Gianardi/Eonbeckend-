@@ -3890,7 +3890,7 @@ async function seedUserData(profession){
    la tabella) e aggiornaDatiToccati() (aggiorna solo il record giusto),
    così le due strade non rischiano di andare fuori sincrono tra loro. */
 function mappaCliente(c){
-  return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description, last:c.last_contact, phone:c.phone || "", color:c.color, archived:!!c.is_archived };
+  return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description || "", last:c.last_contact || "", phone:c.phone || "", color:c.color, archived:!!c.is_archived };
 }
 function mappaImpegno(t){
   return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
@@ -4151,6 +4151,12 @@ async function renderCestino(){
     `;
     row.querySelector(".cestino-restore-btn").addEventListener("click", async () => {
       await dbRestore(tabella, riga.id);
+      // Un cliente, una chat: si ripristinano insieme
+      const gemella = tabella === "clients" ? { t: "conversations", nome: riga.name } : tabella === "conversations" ? { t: "clients", nome: riga.contact_name } : null;
+      if(gemella){
+        const altre = righe.filter(x => x.tabella === gemella.t && nomeChiave(x.riga.name || x.riga.contact_name) === nomeChiave(gemella.nome));
+        for(const x of altre) await dbRestore(gemella.t, x.riga.id);
+      }
       await ricaricaTuttoERidisegna();
       renderCestino();
     });
@@ -4295,8 +4301,44 @@ function formatMsgTime(iso){
 }
 
 /* Crea la conversazione di un cliente la prima volta che la si apre. */
+/* ============ UN CLIENTE, UNA CHAT (25/09/2026) ============
+   Gianardi: "se aggiungo un cliente si crea ovunque, se lo cancello da una
+   parte si cancella ovunque". Cliente e chat sono collegati dal nome: qui
+   il confronto non bada più a maiuscole/spazi ("Martina Ceradelli" e
+   "Martina ceradelli" erano due persone diverse), e archiviare, cestinare,
+   ripristinare o rinominare li tocca sempre insieme. */
+const nomeChiave = n => String(n || "").trim().toLowerCase().replace(/\s+/g, " ");
+function chatDelCliente(cliente){ return cliente ? chats.find(c => nomeChiave(c.name) === nomeChiave(cliente.name)) : null; }
+function clienteDellaChat(chat){ return chat ? clients.find(c => nomeChiave(c.name) === nomeChiave(chat.name)) : null; }
+function chatArchiviata(chat){ const cl = clienteDellaChat(chat); return !!(chat.archived || (cl && cl.archived)); }
+async function impostaArchivioClienteEChat(cliente, chat, archiviato){
+  if(cliente){ cliente.archived = archiviato; if(isDbReady() && cliente.id) await dbUpdate("clients", cliente.id, { is_archived: archiviato }); }
+  if(chat){ chat.archived = archiviato; if(isDbReady() && chat.id) await dbUpdate("conversations", chat.id, { is_archived: archiviato }); }
+}
+async function cestinaClienteEChat(cliente, chat){
+  if(cliente){
+    const i = clients.indexOf(cliente); if(i > -1) clients.splice(i, 1);
+    if(isDbReady() && cliente.id) await dbDelete("clients", cliente.id);
+  }
+  if(chat){
+    const j = chats.indexOf(chat); if(j > -1) chats.splice(j, 1);
+    if(activeChatIndex !== null && chats[activeChatIndex] !== undefined && j > -1 && j <= activeChatIndex) activeChatIndex = null;
+    if(isDbReady() && chat.id) await dbDelete("conversations", chat.id);
+  }
+}
+async function rinominaChatDelCliente(vecchioNome, nuovoNome){
+  if(nomeChiave(vecchioNome) === nomeChiave(nuovoNome) && vecchioNome === nuovoNome) return;
+  const chat = chats.find(c => nomeChiave(c.name) === nomeChiave(vecchioNome));
+  if(!chat) return;
+  chat.name = nuovoNome;
+  if(isDbReady() && chat.id) await dbUpdate("conversations", chat.id, { contact_name: nuovoNome });
+}
+function ridisegnaClientiEChat(){
+  renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderSummary();
+}
+
 async function ensureConversationFor(client){
-  let chat = chats.find(c => c.name === client.name);
+  let chat = chatDelCliente(client);
   if(chat) return chat;
 
   if(isDbReady()){
@@ -4304,7 +4346,7 @@ async function ensureConversationFor(client){
        invece di crearne una seconda: due copie separerebbero la
        cronologia dei messaggi di questo cliente. */
     const cestinate = await dbSelectCestino("conversations");
-    const trovataNelCestino = cestinate.find(c => c.contact_name === client.name);
+    const trovataNelCestino = cestinate.find(c => nomeChiave(c.contact_name) === nomeChiave(client.name));
     if(trovataNelCestino){
       await dbRestore("conversations", trovataNelCestino.id);
       /* La conversazione ripristinata porta con sé i messaggi già
@@ -4434,7 +4476,7 @@ async function analyzeMessage(msg, chat){
 
   /* Stato e valore del cliente restano proposte da confermare, come
      prima: la scheda di un cliente non si tocca da sola. */
-  const cliente = clients.find(c => c.name === chat.name);
+  const cliente = clienteDellaChat(chat);
   if(cliente){
     if(risposta.cambioStato){
       addSuggestion({
@@ -5386,7 +5428,7 @@ function renderCalendar(){
     g.voci.forEach(it => {
       const row = document.createElement("div");
       row.className = "cal-voce" + (g.oggi ? " oggi" : "");
-      const cliente = it.contatto ? clients.find(c => c.name === it.contatto) : null;
+      const cliente = it.contatto ? clients.find(c => nomeChiave(c.name) === nomeChiave(it.contatto)) : null;
       const ora = estraiOra(it.when);
       const [oraHH, oraMM] = ora ? ora.split(":") : ["—", ""];
       const et = ETICHETTE_CALENDARIO[it.icon] || ETICHETTE_CALENDARIO.appt;
@@ -5886,17 +5928,17 @@ function buildClientCard(c){
   const initials = c.name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
   card.innerHTML = `
     <div class="client-archive-head">
-      <div class="row-avatar" style="background:${c.color};">${initials}</div>
+      <div class="row-avatar" style="background:${coloreCliente(c)};">${initials}</div>
       <div style="flex:1;min-width:0;">
         <div class="row-name">${c.name}</div>
         <div class="row-meta">
           <span class="pill ${c.status}">${clientStatusLabel[c.status]}</span>
-          <span>Ultimo contatto: ${c.last}</span>
+          ${c.last ? "<span>Ultimo contatto: " + c.last + "</span>" : ""}
         </div>
       </div>
       <div class="row-value">${c.value > 0 ? "€" + c.value.toLocaleString("it-IT") : "—"}</div>
     </div>
-    <p class="client-archive-desc">${c.desc}</p>
+    ${c.desc ? '<p class="client-archive-desc">' + c.desc + "</p>" : ""}
     <div class="client-archive-foot">
       <div class="row-action-btn" title="Invia email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/></svg></div>
       <div class="row-action-btn" title="Chiama"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg></div>
@@ -5927,9 +5969,11 @@ function buildClientCard(c){
   });
   card.querySelector(".client-archive-btn").addEventListener("click", async (e) => {
     e.stopPropagation();
-    c.archived = !c.archived;
-    if(isDbReady() && c.id) await dbUpdate("clients", c.id, { is_archived: c.archived });
-    renderClientArchive();
+    // Conferma: 63 clienti su 64 erano finiti in archivio con questo tasto (25/09/2026)
+    const domanda = c.archived ? 'Riportare "' + c.name + '" tra i clienti attivi?' : 'Archiviare "' + c.name + '"? Sparirà dalle liste (anche dalla chat) finché non lo riattivi.';
+    if(!confirm(domanda)) return;
+    await impostaArchivioClienteEChat(c, chatDelCliente(c), !c.archived);
+    ridisegnaClientiEChat();
     const pagCruscotto = document.getElementById("page-cantiere-cliente");
     if(pagCruscotto && pagCruscotto.classList.contains("visible")) renderCantiereClienteCruscotto();
   });
@@ -6027,6 +6071,15 @@ document.getElementById("clientVoiceBtn").addEventListener("click", function(){ 
    ed entrate: cambia solo l'elenco dei campi.
    ============================================================ */
 
+/* Colore dell'avatar: quello salvato, o uno stabile ricavato dal nome
+   (i clienti creati da EON non hanno un colore salvato: l'avatar restava
+   bianco su bianco, 25/09/2026). */
+function coloreCliente(c){
+  if(c && c.color) return c.color;
+  const nome = (c && c.name) || "";
+  let h = 0; for(const ch of nome) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return PALETTE[h % PALETTE.length];
+}
 const PALETTE = [
   "linear-gradient(135deg,#2FD9C7,#22B8AA)",
   "linear-gradient(135deg,#5C7CFA,#7C9BFF)",
@@ -6550,15 +6603,20 @@ document.getElementById("sheetSaveBtn").addEventListener("click", async () => {
     let appenaCreato = null;
     if(sheetState.editing){
       const item = sheetState.editing;
+      const nomePrima = item.name;
       const updated = form.toLocal(values, item);
       Object.keys(updated).forEach(k => { if(updated[k] !== undefined) item[k] = updated[k]; });
       if(isDbReady() && item.id) await dbUpdate(form.table, item.id, form.toDb(values));
+      // Cliente rinominato: la sua chat prende il nome nuovo (un cliente, una chat)
+      if(sheetState.form === "cliente" && nomePrima && nomePrima !== item.name) await rinominaChatDelCliente(nomePrima, item.name);
       appenaCreato = item;
     } else {
       let saved = null;
       if(isDbReady()) saved = await dbInsert(form.table, form.toDb(values));
       appenaCreato = form.toLocal(values, saved);
       arr.push(appenaCreato);
+      // Cliente nuovo: compare subito anche in Messaggi
+      if(sheetState.form === "cliente") await ensureConversationFor(appenaCreato);
     }
     /* Passiamo l'elemento appena salvato: serve a chi deve fare
        qualcosa con lui, come creare la conversazione col collaboratore. */
@@ -6588,6 +6646,14 @@ document.getElementById("sheetDeleteBtn").addEventListener("click", async () => 
   const nome = item.name || item.title || ("questa/o " + form.title);
   if(!confirm('Spostare "' + nome + '" nel cestino? Da lì potrai ripristinarla/o o eliminarla/o per sempre.')) return;
 
+  if(sheetState.form === "cliente"){
+    // Un cliente, una chat: nel cestino vanno insieme
+    await cestinaClienteEChat(item, chatDelCliente(item));
+    ridisegnaClientiEChat();
+    form.afterSave();
+    closeSheet();
+    return;
+  }
   const arr = form.array();
   const idx = arr.indexOf(item);
   if(idx > -1) arr.splice(idx, 1);
@@ -7738,13 +7804,15 @@ function renderChatList(){
   wrap.innerHTML = "";
 
   const withIdx = chats.map((c, idx) => ({ c, idx }));
-  let filtered = withIdx.filter(x => !x.c.archived);
-  if(chatFilter === "archivio") filtered = withIdx.filter(x => x.c.archived);
-  if(chatFilter === "urgenti") filtered = withIdx.filter(x => !x.c.archived && (x.c.toCallToday || x.c.unread > 0));
-  if(chatFilter === "clienti") filtered = withIdx.filter(x => !x.c.archived && x.c.isClient);
-  if(chatFilter === "chiudere") filtered = withIdx.filter(x => !x.c.archived && x.c.isClient && x.c.toSeeToday);
-  if(chatFilter === "acquisire") filtered = withIdx.filter(x => !x.c.archived && x.c.isProspect);
-  if(chatFilter === "team") filtered = withIdx.filter(x => !x.c.archived && !x.c.isClient && !x.c.isProspect);
+  // Archiviata se lo è la chat O il suo cliente: chat e anagrafica mostrano le stesse persone
+  const arch = x => chatArchiviata(x.c);
+  let filtered = withIdx.filter(x => !arch(x));
+  if(chatFilter === "archivio") filtered = withIdx.filter(x => arch(x));
+  if(chatFilter === "urgenti") filtered = withIdx.filter(x => !arch(x) && (x.c.toCallToday || x.c.unread > 0));
+  if(chatFilter === "clienti") filtered = withIdx.filter(x => !arch(x) && x.c.isClient);
+  if(chatFilter === "chiudere") filtered = withIdx.filter(x => !arch(x) && x.c.isClient && x.c.toSeeToday);
+  if(chatFilter === "acquisire") filtered = withIdx.filter(x => !arch(x) && x.c.isProspect);
+  if(chatFilter === "team") filtered = withIdx.filter(x => !arch(x) && !x.c.isClient && !x.c.isProspect);
 
   const emptyLabels = {
     archivio:"Nessuna conversazione archiviata.",
@@ -7808,16 +7876,21 @@ document.getElementById("chatFilterArchivio").addEventListener("click", () => { 
 document.getElementById("chatArchiviaBtn").addEventListener("click", async () => {
   if(activeChatIndex === null) return;
   const c = chats[activeChatIndex];
-  c.archived = !c.archived;
-  if(isDbReady() && c.id) await dbUpdate("conversations", c.id, { is_archived: c.archived });
-  renderChatList(); renderChatWindow();
+  const cliente = clienteDellaChat(c);
+  await impostaArchivioClienteEChat(cliente, c, !chatArchiviata(c));
+  ridisegnaClientiEChat();
 });
 
 document.getElementById("chatEliminaBtn").addEventListener("click", async () => {
   if(activeChatIndex === null) return;
   const c = chats[activeChatIndex];
-  if(!confirm('Spostare la chat con "' + c.name + '" nel cestino? Da lì potrai ripristinarla.')) return;
+  const clienteChat = clienteDellaChat(c);
+  if(!confirm(clienteChat
+    ? 'Spostare "' + c.name + '" nel cestino? Vanno nel cestino insieme la chat e la scheda del cliente; da lì potrai ripristinarli.'
+    : 'Spostare la chat con "' + c.name + '" nel cestino? Da lì potrai ripristinarla.')) return;
   if(isDbReady() && c.id) await dbDelete("conversations", c.id);
+  // Un cliente, una chat: cestinando la chat va nel cestino anche il cliente
+  if(clienteChat){ const k = clients.indexOf(clienteChat); if(k > -1) clients.splice(k, 1); if(isDbReady() && clienteChat.id) await dbDelete("clients", clienteChat.id); renderClientArchive(); renderClientStats(); }
   /* Non ci fidiamo più di activeChatIndex dopo l'attesa: nel frattempo
      l'utente potrebbe aver aperto un'altra chat, e quell'indice ora
      punterebbe alla conversazione sbagliata. Rimuoviamo per id, e
@@ -7901,7 +7974,7 @@ function renderChatWindow(){
 
   pinEl.innerHTML = "";
   if(c.isClient){
-    const match = clients.find(cl => cl.name === c.name);
+    const match = clienteDellaChat(c);
     if(match){
       const pill = `<span class="pill ${match.status}">${clientStatusLabel[match.status]}</span>`;
       pinEl.innerHTML = `
@@ -7910,8 +7983,8 @@ function renderChatWindow(){
             <div class="chat-context-pin-name">${match.name}</div>
             <div class="chat-context-pin-name">${match.value > 0 ? "€" + match.value.toLocaleString("it-IT") : "—"}</div>
           </div>
-          <div class="chat-context-pin-desc">${match.desc}</div>
-          <div class="chat-context-pin-foot">${pill}<span class="pill todo">Ultimo contatto: ${match.last}</span></div>
+          ${match.desc ? '<div class="chat-context-pin-desc">' + match.desc + "</div>" : ""}
+          <div class="chat-context-pin-foot">${pill}${match.last ? '<span class="pill todo">Ultimo contatto: ' + match.last + "</span>" : ""}</div>
         </div>
       `;
     }
@@ -9327,7 +9400,7 @@ function provaRisorsaImmediata(testo){
     return true;
   }
 
-  const chat = chats.find(c => c.name === cliente.name);
+  const chat = chatDelCliente(cliente);
   let documenti = chat
     ? chat.messages
         .filter(msg => msg.eventType === "doc" || msg.fileUrl)
@@ -10324,7 +10397,7 @@ function creaRigaCanaliInvio(clienteNome, testoDaInviare){
    inviarlo davvero — stesso principio del resto dell'app, mai un invio
    silenzioso. */
 async function inviaRisorsaEonInterna(clienteNome, testoDaInviare){
-  const cliente = clienteNome ? clients.find(c => c.name === clienteNome) : null;
+  const cliente = clienteNome ? clients.find(c => nomeChiave(c.name) === nomeChiave(clienteNome)) : null;
   if(!cliente){
     chiudiRisorsaCard();
     showAIToast("Cliente non trovato", "Non riesco a collegare questa risorsa a un cliente in anagrafica.");
@@ -10561,7 +10634,7 @@ function creaRigaInvioFoto(foto, clienteNome, getNota){
   const riga = document.createElement("div");
   riga.className = "scheda-invio";
   riga.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
-  const cliente = clienteNome ? clients.find(c => c.name === clienteNome) : null;
+  const cliente = clienteNome ? clients.find(c => nomeChiave(c.name) === nomeChiave(clienteNome)) : null;
   const testo = () => (getNota() ? getNota() + "\n" : "") + foto.url;
   const voci = [
     { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => window.open("https://wa.me/" + numeroWhatsApp(cliente && cliente.phone) + "?text=" + encodeURIComponent(testo()), "_blank") },
@@ -10876,7 +10949,7 @@ function numeroWhatsApp(telefono){
 function creaRigaInvioDocumento(getDati, clienteNome){
   const riga = document.createElement("div");
   riga.className = "scheda-invio";
-  const cliente = clienteNome ? clients.find(c => c.name === clienteNome) : null;
+  const cliente = clienteNome ? clients.find(c => nomeChiave(c.name) === nomeChiave(clienteNome)) : null;
   const voci = [
     { nome: "PDF", icona: '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 15h6M12 12v6"/>', azione: () => apriPdfDocumento(getDati()) },
     { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => {
@@ -11190,7 +11263,7 @@ function apriDocumento(tipo){
   docVoci = [{ desc:"", qta:1, prezzo:0 }];
 
   const chat = chats[activeChatIndex];
-  const cliente = clients.find(c => c.name === chat.name);
+  const cliente = clienteDellaChat(chat);
 
   document.getElementById("docTitolo").textContent =
     tipo === "fattura" ? "Nuova fattura" : "Nuovo preventivo";
@@ -11584,7 +11657,7 @@ let archFiltro = "tutto";
 function apriArchivio(){
   if(activeChatIndex === null) return;
   const chat = chats[activeChatIndex];
-  const cliente = clients.find(c => c.name === chat.name);
+  const cliente = clienteDellaChat(chat);
 
   const iniziali = chat.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
   const colore = cliente && cliente.color ? cliente.color : "var(--teal)";
