@@ -2053,6 +2053,7 @@ const TOOLS = {
           cliente_id: { type: "string", description: "Id del cliente a cui sono taggate le foto cercate, se noto (di solito da cliente_risolto in interpreta_richiesta). Lascia vuoto per le foto più recenti in generale." },
           cantiere_id: { type: "string", description: "Id del cantiere/lavoro specifico, se noto (da cerca_cantiere) — usalo solo quando il cliente ha più di un lavoro e serve isolare le foto di uno in particolare, non per il caso comune di un solo lavoro" },
           limite: { type: "integer", description: "Quante foto restituire, default 10" },
+          cerca: { type: "string", description: "Parole per ritrovare una foto dalla sua nota (es. 'crepa', 'contatore'), se l'utente descrive cosa c'è nella foto" },
         },
       },
     },
@@ -2060,12 +2061,25 @@ const TOOLS = {
       if (eStringaNonVuota(input.cliente_id) && !eUuid(input.cliente_id)) throw fail("Id cliente non valido");
       if (eStringaNonVuota(input.cantiere_id) && !eUuid(input.cantiere_id)) throw fail("Id cantiere non valido");
       const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
-      let query = `cantiere_foto?select=id,url,client_id,cantiere_id,created_at&deleted_at=is.null&order=created_at.desc&limit=${limite}`;
+      // Con parole da cercare si leggono più foto, poi si filtrano per nota (25/09/2026)
+      const daLeggere = eStringaNonVuota(input.cerca) ? 100 : limite;
+      let query = `cantiere_foto?select=id,url,client_id,cantiere_id,nota,created_at&deleted_at=is.null&order=created_at.desc&limit=${daLeggere}`;
       if (eStringaNonVuota(input.cantiere_id)) query += `&cantiere_id=eq.${encodeURIComponent(input.cantiere_id)}`;
       else if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
       const righe = await db(query, { method: "GET" }, ctx.accessToken);
-      const lista = Array.isArray(righe) ? righe : [];
-      return { foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at })) };
+      let lista = Array.isArray(righe) ? righe : [];
+      let trovataPerNota = null;
+      if (eStringaNonVuota(input.cerca)) {
+        const parole = paroleNormalizzate(input.cerca).filter((p) => p.length > 2);
+        const conNota = lista.filter((f) => { const n = paroleNormalizzate(f.nota || "").join(" "); return parole.some((p) => n.includes(p)); });
+        trovataPerNota = conNota.length > 0;
+        if (conNota.length) lista = conNota;
+      }
+      lista = lista.slice(0, limite);
+      return {
+        foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at, nota: f.nota || null })),
+        ...(trovataPerNota === false ? { nota_ricerca: "Nessuna foto ha una nota con queste parole: queste sono le più recenti." } : {}),
+      };
     },
   },
 

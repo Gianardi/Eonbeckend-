@@ -83,6 +83,7 @@ function postgrest(url, init) {
 
 /* ---------- AI finta ---------- */
 let copione, chiamateAI;
+let window_esito = null; // ultimo tool_result visto dall'AI finta (scenari che lo ispezionano)
 function anthropicFinto(init) {
   const corpo = JSON.parse(init.body);
   chiamateAI.push(corpo);
@@ -553,6 +554,33 @@ async function leggiFoto(testoAI) {
   verifica("intestazione centrata → Elegante", c.corpo.modello === "elegante", JSON.stringify(c.corpo));
   verifica("alla foto si chiede anche colore e disposizione", /colore_principale/.test(JSON.stringify(chiamateAI[0])) && /disposizione/.test(JSON.stringify(chiamateAI[0])));
 }
+
+/* ======== Foto ritrovate dalla nota (25/09/2026) ======== */
+await scenario(
+  "EON cerca \"la foto della crepa\": recupera_foto_cantiere filtra per nota e la restituisce",
+  () => {
+    tabelle.cantiere_foto = [
+      { id: "f1", owner_id: UTENTE.id, url: "https://file.test/1.jpg", client_id: null, nota: "Crepa sul muro della cucina", created_at: "2026-09-25T10:00:00Z", deleted_at: null },
+      { id: "f2", owner_id: UTENTE.id, url: "https://file.test/2.jpg", client_id: null, nota: null, created_at: "2026-09-25T11:00:00Z", deleted_at: null },
+    ];
+    return {};
+  },
+  [{ body: nuovo("Fammi vedere la foto dove c'era la crepa"),
+     copione: [
+       () => usaStrumento("interpreta_richiesta", { operazione: "mostra", oggetto: "risorsa", entita: { tipo: "foto" } }),
+       () => usaStrumento("recupera_foto_cantiere", { cerca: "crepa" }),
+       (corpo) => {
+         const esiti = corpo.messages.flatMap((m) => Array.isArray(m.content) ? m.content.filter((b) => b.type === "tool_result").map((b) => b.content) : []);
+         window_esito = esiti.at(-1);
+         return rispondiTesto("Ecco la foto della crepa.");
+       },
+     ] }],
+  ([r]) => {
+    const esito = JSON.parse(window_esito);
+    verifica("solo la foto con la crepa nella nota, con la sua nota", esito.foto.length === 1 && esito.foto[0].id === "f1" && /Crepa/.test(esito.foto[0].nota), window_esito);
+    verifica("la foto arriva all'app per essere mostrata", (r.corpo.azioni || []).some((a) => a.tool === "recupera_foto_cantiere"), JSON.stringify(r.corpo));
+  }
+);
 
 /* ======== Errori leggibili ======== */
 await scenario(

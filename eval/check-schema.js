@@ -29,7 +29,7 @@ const CONTRATTO = {
   conversations: ["id", "owner_id", "contact_name", "deleted_at"],
   messages: ["id", "conversation_id", "sender", "event_type", "title", "body", "amount", "file_url", "file_name", "scheduled_at", "deleted_at"],
   documents: ["id", "owner_id", "doc_type", "client_name", "amount", "content"],
-  cantiere_foto: ["id", "owner_id", "url", "client_id", "cantiere_id", "created_at", "deleted_at"],
+  cantiere_foto: ["id", "owner_id", "url", "client_id", "cantiere_id", "nota", "created_at", "deleted_at"],
   cantiere_documenti: ["id", "owner_id", "url", "nome", "tipo", "created_at", "deleted_at"],
   cantiere_appunti: ["id", "owner_id", "testo", "created_at", "deleted_at"],
   cantieri: ["id", "owner_id", "client_id", "nome", "stato", "created_at", "deleted_at"],

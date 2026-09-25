@@ -144,6 +144,15 @@ scheda, errore detto in chat. Backend dell'assistente simulato.
 NODE_PATH=/opt/node22/lib/node_modules node eval/scheda.test.js
 ```
 
+### `foto.test.js` — nota sulle foto, gira subito
+
+Scheda della foto, nota scritta/dettata/corretta, segno in galleria, nota
+proposta dopo lo scatto, ricerca a voce per nota, invio WhatsApp.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/foto.test.js
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti
