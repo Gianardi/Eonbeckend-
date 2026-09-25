@@ -1209,6 +1209,18 @@
   .goal-del-mini:hover{ color:var(--coral); background:var(--coral-soft); }
   .goal-del-mini svg{ width:13px; height:13px; }
   .azienda-list{ display:flex; flex-direction:column; gap:10px; }
+  .lavori-in-corso{
+    margin:24px 0; padding:32px 22px; text-align:center;
+    background:var(--card); border:1.5px dashed var(--border-strong); border-radius:18px;
+  }
+  .lavori-in-corso-ico{
+    width:52px; height:52px; margin:0 auto 14px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--teal-soft); color:var(--teal);
+  }
+  .lavori-in-corso-ico svg{ width:26px; height:26px; }
+  .lavori-in-corso h2{ margin:0 0 8px; font-size:20px; }
+  .lavori-in-corso p{ margin:0 auto; max-width:30ch; color:var(--muted); line-height:1.5; font-size:14.5px; }
 
   /* chat: schermata piena a scorrimento, come WhatsApp */
   #page-chat.visible{
@@ -1902,7 +1914,7 @@
         <svg class="ai-hub-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
       </button>
 
-      <button class="ai-hub-voce" id="aiHubStrategia">
+      <button class="ai-hub-voce" id="aiHubStrategia" style="display:none;">
         <div class="ai-hub-ico" style="background:var(--green);">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>
         </div>
@@ -2056,7 +2068,7 @@
   <div class="ai-landing-card" style="max-width:320px;">
     <img id="cantiereFotoTagAnteprima" src="" alt="" style="width:100%; max-height:150px; object-fit:cover; border-radius:14px; margin-bottom:14px; display:block;">
     <div class="ai-landing-title">Cosa vuoi farci?</div>
-    <div class="ai-landing-text" id="cantiereFotoTagHint" style="margin-bottom:14px;">Dì o scrivi a quale cliente si riferisce: la aggiungo alla sua scheda (creo il cliente se non esiste ancora)</div>
+    <div class="ai-landing-text" id="cantiereFotoTagHint" style="margin-bottom:14px;">A quale cliente? Dì il nome, e se vuoi anche una nota (es. «Rossi, porta da cambiare»)</div>
     <div class="home-hero-mic-wrap" style="margin-bottom:10px;">
       <button class="home-hero-mic" id="cantiereFotoTagMic" type="button" aria-label="Tocca per parlare" style="width:64px; height:64px;">
         <span class="home-hero-mic-ring"></span>
@@ -2064,7 +2076,7 @@
       </button>
     </div>
     <div class="home-hero-textwrap" style="text-align:left;">
-      <textarea class="home-hero-campo" id="cantiereFotoTagCampo" rows="2" placeholder="Es. Lavoro cliente Rossi Mario"></textarea>
+      <textarea class="home-hero-campo" id="cantiereFotoTagCampo" rows="2" placeholder="Es. Rossi, porta da cambiare"></textarea>
       <button class="home-hero-send" id="cantiereFotoTagSend" type="button" aria-label="Invia">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
@@ -2976,6 +2988,17 @@
 
     <!-- ==================== PAGINA: CRESCI (opportunità + obiettivi) ==================== -->
     <div class="page" id="page-cresci">
+      <!-- Cresci in sospensione (25/09/2026, Gianardi: "ad oggi non ha
+           reale funzione, mettiamola in lavori in corso"). Il vecchio
+           contenuto resta nel codice, solo nascosto, per ripartire da lì. -->
+      <div class="lavori-in-corso">
+        <div class="lavori-in-corso-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg>
+        </div>
+        <h2>Lavori in corso</h2>
+        <p>Qui arriverà lo spazio per far crescere la tua attività: nuovi clienti, trattative e obiettivi. Ci stiamo lavorando.</p>
+      </div>
+      <div hidden>
       <div class="section-label">Opportunità</div>
       <div id="page-opportunita">
         <!-- La strategia non ha piu' un riquadro tutto suo: e' una riga
@@ -3026,6 +3049,7 @@
         </div>
 
         <div class="goal-list" id="goalList"></div>
+      </div>
       </div>
     </div>
 
@@ -3086,6 +3110,18 @@
            doppione come pensavo all'inizio, l'ho ricontrollato prima di
            toglierlo per errore. -->
       <div class="azienda-list">
+        <!-- Messaggi (25/09/2026, Gianardi: "è sparita l'icona
+             messaggistica, aggiungila in menu"). -->
+        <div class="azienda-link-card" data-page="chat" id="menuMessaggi">
+          <div class="module-icon" style="background:var(--wa);">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.16 2 11.3c0 2.62 1.16 4.98 3.05 6.66-.1 1.05-.5 2.6-1.32 4.04 1.62-.2 3.38-.86 4.6-1.63 1.16.38 2.4.58 3.67.58 5.52 0 10-4.16 10-9.3S17.52 2 12 2z"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Messaggi</div>
+            <div class="module-sub" id="menuMessaggiSub">Le chat con i tuoi clienti</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
         <div class="azienda-link-card" id="laTuaAziendaCard">
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 21V9h6v12"/></svg>
@@ -5823,6 +5859,8 @@ function renderSummary(){
   const totalOppValue = opportunities.reduce((s,o) => s + o.value, 0);
 
   const unreadMessages = chats.reduce((s,c) => s + c.unread, 0);
+  const menuMsg = document.getElementById("menuMessaggiSub");
+  if(menuMsg) menuMsg.textContent = unreadMessages ? `${unreadMessages} da leggere` : "Le chat con i tuoi clienti";
   const toSeeToday = chats.filter(c => c.isClient && c.toSeeToday).length;
   const toCallToday = chats.filter(c => c.isClient && c.toCallToday).length;
 
@@ -5836,14 +5874,10 @@ function renderSummary(){
       text: `<b>€${totalDue.toLocaleString("it-IT")}</b> ancora da pagare ai fornitori` },
     { page:"entrate", bg:"var(--green)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>',
       text: `<b>€${totalIncomePending.toLocaleString("it-IT")}</b> in arrivo dai clienti` },
-    { page:"cresci", bg:"var(--teal)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3h11l3.5 5-9 13L3 8z"/></svg>',
-      text: `<b>${opportunities.length}</b> trattative aperte, valore <b>€${totalOppValue.toLocaleString("it-IT")}</b>` },
     { page:"chat", bg:"var(--wa)", svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.16 2 11.3c0 2.62 1.16 4.98 3.05 6.66-.1 1.05-.5 2.6-1.32 4.04 1.62-.2 3.38-.86 4.6-1.63 1.16.38 2.4.58 3.67.58 5.52 0 10-4.16 10-9.3S17.52 2 12 2z"/></svg>',
       text: `<b>${unreadMessages}</b> messaggi da leggere` },
     { page:"chat", bg:"var(--indigo)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
       text: `<b>${toSeeToday}</b> clienti da vedere e <b>${toCallToday}</b> da sentire oggi` },
-    { page:"cresci", bg:"var(--violet)", svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>',
-      text: `<b>${goalsDone}/${goalsTotal}</b> obiettivi raggiunti` },
   ];
 
   grid.innerHTML = rows.map(r => `
@@ -8972,13 +9006,29 @@ document.getElementById("cantiereFotoInput").addEventListener("change", (e) => {
    mai (non passa dalla sua conversazione). */
 let cantiereFotoTagId = null;
 
+/* Dalla frase detta sulla foto toglie il nome del cliente e le parole
+   di contorno ("cliente", "lavoro", "per"...): quello che resta è la
+   nota. "Rossi, porta da cambiare" -> "porta da cambiare";
+   "Lavoro cliente Rossi Mario" -> "" (nessuna nota). */
+function notaDopoIlNome(testo, nomeCliente){
+  const paroleNome = new Set(String(nomeCliente || "").toLowerCase().split(/\s+/).filter(Boolean));
+  const CONTORNO = new Set(["cliente","lavoro","lavori","cantiere","foto","questa","è","e","di","del","della","per","a","al","alla","sig","sig.","signor","signora"]);
+  let parole = String(testo || "").trim().split(/\s+/).filter(Boolean);
+  const pulita = p => p.toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+  parole = parole.filter(p => !paroleNome.has(pulita(p)));
+  while(parole.length && (CONTORNO.has(pulita(parole[0])) || !pulita(parole[0]))) parole.shift();
+  while(parole.length && (CONTORNO.has(pulita(parole[parole.length-1])) || !pulita(parole[parole.length-1]))) parole.pop();
+  const nota = parole.join(" ").replace(/^[\s,.;:–-]+|[\s,.;:–-]+$/g, "");
+  return nota.length >= 3 ? nota.charAt(0).toUpperCase() + nota.slice(1) : "";
+}
+
 let fermaAscoltoTagFoto = () => {}; // sostituita sotto se il riconoscimento vocale è disponibile
 
 function apriTagFotoCantiere(foto){
   cantiereFotoTagId = foto.id;
   document.getElementById("cantiereFotoTagAnteprima").src = foto.url;
   document.getElementById("cantiereFotoTagCampo").value = "";
-  document.getElementById("cantiereFotoTagHint").textContent = "Dì o scrivi a quale cliente si riferisce: la aggiungo alla sua scheda (creo il cliente se non esiste ancora)";
+  document.getElementById("cantiereFotoTagHint").textContent = "A quale cliente? Dì il nome, e se vuoi anche una nota (es. «Rossi, porta da cambiare»)";
   document.getElementById("cantiereFotoTagOverlay").style.display = "flex";
 }
 function chiudiTagFotoCantiere(){
@@ -9000,7 +9050,7 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
   const campo = document.getElementById("cantiereFotoTagCampo");
   const send = document.getElementById("cantiereFotoTagSend");
   const hint = document.getElementById("cantiereFotoTagHint");
-  const HINT_BASE = "Dì o scrivi a quale cliente si riferisce: la aggiungo alla sua scheda (creo il cliente se non esiste ancora)";
+  const HINT_BASE = "A quale cliente? Dì il nome, e se vuoi anche una nota (es. «Rossi, porta da cambiare»)";
   let inCorso = false;
 
   async function assegna(testo){
@@ -9018,7 +9068,10 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
 
     let risposta;
     try{
-      risposta = await chiediAssistente(`Il professionista ha appena scattato una foto per un lavoro e ha detto a chi si riferisce: "${testo}". Trova il cliente giusto o creane uno nuovo se non esiste (trova_o_crea_cliente).`);
+      /* 25/09/2026: "da cambiare e trovare modello uguale" detto qui era
+         diventato un cliente chiamato "Da cambiare". Se nella frase non
+         c'è un nome, niente cliente: si chiede a chi si riferisce. */
+      risposta = await chiediAssistente(`Il professionista ha appena scattato una foto per un lavoro e ha detto: "${testo}". La frase può contenere il nome del cliente e, in più, una nota sulla foto (es. "Rossi, porta da cambiare": cliente Rossi, nota "porta da cambiare"). Se c'è il nome di una persona o di un'azienda, chiama trova_o_crea_cliente con SOLO quel nome, mai con la nota. Se non c'è nessun nome (solo una nota, es. "da cambiare e trovare modello uguale"), NON chiamare nessuno strumento e rispondi solo: "A quale cliente si riferisce?"`);
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
@@ -9042,7 +9095,7 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
     const azioneCliente = (risposta.azioni || []).find(a => a.tool === "trova_o_crea_cliente");
     if(!azioneCliente){
       if(questaFotoEAncoraAperta){
-        hint.textContent = risposta.testo || "Non ho capito a quale cliente ti riferisci: prova a scrivere solo nome e cognome";
+        hint.textContent = "A quale cliente si riferisce? Dimmi il nome (la nota puoi scriverla anche dopo)";
       }
       return;
     }
@@ -9058,6 +9111,15 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
     }
     const foto = cantiereFoto.find(f => f.id === fotoId);
     if(foto) foto.clientId = azioneCliente.esito.id;
+
+    /* "Rossi, porta da cambiare": quello che resta tolto il nome è la
+       nota della foto, così non va ridetta. */
+    const notaDetta = notaDopoIlNome(testo, azioneCliente.esito.nome);
+    if(notaDetta && foto && isDbReady()){
+      const nuova = foto.nota ? foto.nota + "\n" + notaDetta : notaDetta;
+      const { error } = await supabaseClient.from("cantiere_foto").update({ nota: nuova }).eq("id", fotoId);
+      if(!error) foto.nota = nuova;
+    }
 
     if(questaFotoEAncoraAperta){
       campo.value = "";
@@ -11859,7 +11921,7 @@ const pageMeta = {
 const tabForPage = {
   home:"home", oggi:"home",
   clienti:"clienti",
-  chat:"home",
+  chat:"azienda",
   cresci:"cresci",
   "gestisci-azienda":"azienda", "assegna-compiti":"azienda", pagamenti:"azienda", entrate:"azienda",
   "crea-fattura":"azienda", "crea-preventivo":"azienda", regalo:"azienda", business:"azienda",

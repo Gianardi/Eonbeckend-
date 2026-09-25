@@ -153,6 +153,17 @@ proposta dopo lo scatto, ricerca a voce per nota, invio WhatsApp.
 NODE_PATH=/opt/node22/lib/node_modules node eval/foto.test.js
 ```
 
+### `clienti-chat.test.js` — un cliente, una chat, gira subito
+
+Archivio/cestino/nome/creazione valgono per cliente e chat insieme,
+conferma su Archivia, niente "null", Messaggi nel Menu, Cresci in
+"Lavori in corso", foto: nota separata dal nome e nessun cliente creato
+da una nota.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/clienti-chat.test.js
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti
