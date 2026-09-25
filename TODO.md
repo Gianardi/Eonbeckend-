@@ -3483,6 +3483,15 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Vercel: pubblica solo main (25/09/2026)
+
+Il 25/09 Vercel ha bloccato la pubblicazione di #94 ("Deployment rate
+limited", piano Hobby: 100 al giorno). Causa: ogni push sui rami di lavoro
+`claude/*` creava un'anteprima, doppia perché al repo sono collegati due
+progetti (eonbeckend ed eonbeckend-mx2t). Ora `vercel.json` ha
+`git.deploymentEnabled: {"claude/*": false}`: si pubblica solo main. Da
+valutare con Gianardi se scollegare eonbeckend-mx2t (l'app usa eonbeckend).
+
 ### Scorri per eliminare (25/09/2026)
 
 Gianardi: "cancellare i messaggi scorrendo il dito". Nella lista Messaggi
