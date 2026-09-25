@@ -3424,6 +3424,24 @@ totale); il PDF si apre a parte per salvarlo/allegarlo — l'allegato
 automatico del PDF è il passo successivo.
 Test: `eval/scheda.test.js` (18 verifiche).
 
+### Nota sulle foto (25/09/2026)
+
+Gianardi: "su questa foto vorrei segnarmi anche degli appunti in riferimento
+a questa foto" — scelta l'opzione 1 (nota), non il disegno sopra la foto.
+- DB: `cantiere_foto.nota` (text) — `supabase/foto_nota.sql`, già applicata
+  a staging e produzione (additiva).
+- App: tocco su una foto → scheda (invio WhatsApp/Email/EON con nota e link,
+  foto grande, nota) con la barra in fondo per scrivere o dettare; quello che
+  si scrive/detta si AGGIUNGE alla nota, toccando la nota la si corregge;
+  invio a vuoto non cancella mai. Salvataggio diretto (nessuna AI). Subito
+  dopo lo scatto (dal "+" di un cliente o dopo averla collegata a un
+  cliente) la scheda propone la nota. In galleria un segno sulle foto con
+  nota.
+- Ricerca a voce: "mostrami la foto della crepa di Rossi", "la foto del
+  contatore" (anche senza cliente) → dalla nota, senza AI; lato server
+  recupera_foto_cantiere ha `cerca` e restituisce la nota.
+- Test: `eval/foto.test.js` (19) + 2 in percorso-rapido.test.mjs.
+
 ### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
 
 Caso reale: la frase è andata all'AI, che l'ha capita come "crea una

@@ -1574,6 +1574,12 @@
   .scheda-invia:disabled{ opacity:.45; }
   .scheda-invia svg{ width:18px; height:18px; }
 
+  .scheda-foto-img{ width:100%; max-height:52vh; object-fit:contain; border-radius:14px; background:#F1F2F6; display:block; cursor:zoom-in; }
+  .scheda-foto-nota{ font-size:14.5px; line-height:1.5; color:var(--text); padding:2px 2px; white-space:pre-line; transition:background .3s; border-radius:8px; }
+  .scheda-foto-nota.vuota{ color:var(--muted); font-size:13px; }
+  .scheda-foto-nota.salvata{ background:#EAF7EF; }
+  .cantiere-foto-nota-segno{ position:absolute; left:6px; bottom:6px; width:22px; height:22px; border-radius:7px; background:rgba(20,23,29,.62); color:#fff; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  .cantiere-foto-nota-segno svg{ width:13px; height:13px; }
   /* la scheda del documento dentro la conversazione */
   .msg-documento{
     max-width:80%; flex:none; border-radius:16px; overflow:hidden; cursor:pointer;
@@ -3922,7 +3928,7 @@ async function loadUserDataFromDB(){
     id:a.id, title:a.title, deadline:a.deadline, employees:a.employee_names || []
   }));
 
-  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null }));
+  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "" }));
   cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push(mappaAppunto(a)));
   aggiornaCantiereSottotitoli();
@@ -8754,8 +8760,20 @@ function renderCantiereFoto(){
       item.className = "cantiere-foto-item";
 
       const img = document.createElement("img");
-      img.src = f.url; img.alt = "";
-      img.addEventListener("click", () => onTocca ? onTocca(f) : window.open(f.url, "_blank"));
+      img.src = f.url; img.alt = f.nota || "";
+      img.addEventListener("click", () => {
+        if(onTocca) return onTocca(f);
+        const cliente = clients.find(c => c.id === f.clientId);
+        mostraSchedaFoto(f, cliente ? cliente.name : null);
+      });
+      if(f.nota){
+        // Segno che la foto ha una nota
+        const segno = document.createElement("div");
+        segno.className = "cantiere-foto-nota-segno";
+        segno.setAttribute("aria-label", "Ha una nota");
+        segno.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>';
+        item.appendChild(segno);
+      }
 
       const elimina = document.createElement("button");
       elimina.className = "cantiere-foto-elimina";
@@ -8827,7 +8845,7 @@ async function caricaCantiereFoto(file, clienteIdForzato){
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
     const creato = await dbInsert("cantiere_foto", { url:pub.publicUrl });
     if(!creato) throw new Error("scrittura non riuscita");
-    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null };
+    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"" };
     cantiereFoto.push(nuovaFoto);
     if(clienteIdForzato){
       /* Foto aggiunta dal "+" dentro la card di un cliente già noto:
@@ -8836,6 +8854,8 @@ async function caricaCantiereFoto(file, clienteIdForzato){
       await dbUpdate("cantiere_foto", creato.id, { client_id: clienteIdForzato });
       aggiornaCantiereSottotitoli();
       renderCantiereFoto();
+      const clienteFoto = clients.find(c => c.id === clienteIdForzato);
+      mostraSchedaFoto(nuovaFoto, clienteFoto ? clienteFoto.name : null, { appenaScattata: true });
     } else {
       aggiornaCantiereSottotitoli();
       renderCantiereFoto();
@@ -8971,6 +8991,8 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
       azioneCliente.esito.creato ? "Cliente creato e foto collegata" : "Foto collegata alla scheda",
       azioneCliente.esito.nome
     );
+    // Subito dopo: la nota su questa foto, se vuole (scritta o dettata)
+    if(questaFotoEAncoraAperta && foto) mostraSchedaFoto(foto, azioneCliente.esito.nome, { appenaScattata: true });
     await loadUserDataFromDB();
     renderClientArchive(); renderClientStats();
   }
@@ -9234,6 +9256,23 @@ function trovaClienteDaParole(parole){
   return archiviati.corrispondenze === 1 ? archiviati.trovato : null;
 }
 
+/* Foto ritrovate dalla loro nota (25/09/2026): una sola → si apre la
+   sua scheda; più di una → elenco; nessuna → false (decide chi chiama). */
+function mostraFotoTrovate(elenco, parole, clienteNome){
+  const cercate = parole.filter(p => p.length > 2 && !/^(del|della|dello|dei|delle|con|per|sul|sulla|nel|nella|che)$/.test(p));
+  if(!cercate.length) return false;
+  const trovate = elenco.filter(f => f.nota && cercate.some(p => f.nota.toLowerCase().includes(p)))
+    .slice().sort((a, b) => new Date(b.created) - new Date(a.created));
+  if(!trovate.length) return false;
+  const nomeDi = f => clienteNome || ((clients.find(c => c.id === f.clientId) || {}).name) || null;
+  if(trovate.length === 1){
+    mostraSchedaFoto(trovate[0], nomeDi(trovate[0]));
+    return true;
+  }
+  mostraRisorsaFoto(trovate.slice(0, 10).map(f => ({ id: f.id, url: f.url, quando: f.created, nota: f.nota })), clienteNome);
+  return true;
+}
+
 function provaRisorsaImmediata(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return false;
@@ -9257,6 +9296,9 @@ function provaRisorsaImmediata(testo){
 
   const parole = resto.split(/\s+/).filter(Boolean);
   const cliente = trovaClienteDaParole(parole);
+  const eFoto = /^(foto|fotografia|fotografie)$/.test(tipoRichiesto);
+  // "la foto della crepa": nessun cliente nominato, si cerca nelle note di tutte le foto
+  if(!cliente && eFoto) return mostraFotoTrovate(cantiereFoto, parole, null);
   if(!cliente) return false;
 
   /* Le parole che restano dopo aver tolto il nome del cliente sono un
@@ -9267,13 +9309,15 @@ function provaRisorsaImmediata(testo){
   const paroleNomeCliente = cliente.name.toLowerCase().split(/\s+/);
   const paroleFiltro = parole.filter(p => !paroleNomeCliente.includes(p));
 
-  if(/^(foto|fotografia|fotografie)$/.test(tipoRichiesto)){
-    const foto = cantiereFoto
-      .filter(f => f.clientId === cliente.id)
+  if(eFoto){
+    const delCliente = cantiereFoto.filter(f => f.clientId === cliente.id);
+    // Parole oltre al nome ("foto rossi crepa"): si cercano nelle note
+    if(paroleFiltro.length && mostraFotoTrovate(delCliente, paroleFiltro, cliente.name)) return true;
+    const foto = delCliente
       .slice()
       .sort((a, b) => new Date(b.created) - new Date(a.created))
       .slice(0, 10)
-      .map(f => ({ id: f.id, url: f.url, quando: f.created }));
+      .map(f => ({ id: f.id, url: f.url, quando: f.created, nota: f.nota || "" }));
     mostraRisorsaFoto(foto, cliente.name);
     return true;
   }
@@ -10342,9 +10386,16 @@ function creaVoceFoto(foto, clienteNome){
   el.className = "risorsa-voce";
   const img = document.createElement("img");
   img.src = foto.url;
-  img.alt = "";
-  img.addEventListener("click", () => apriMedia(foto.url, "image/*"));
+  img.alt = foto.nota || "";
+  img.addEventListener("click", () => mostraSchedaFoto(foto, clienteNome));
   el.appendChild(img);
+  const nota = foto.nota || (cantiereFoto.find(f => f.id === foto.id) || {}).nota;
+  if(nota){
+    const n = document.createElement("div");
+    n.className = "risorsa-voce-riepilogo";
+    n.textContent = nota;
+    el.appendChild(n);
+  }
   const dataFoto = testoData(foto);
   if(dataFoto){
     const sotto = document.createElement("div");
@@ -10358,24 +10409,128 @@ function creaVoceFoto(foto, clienteNome){
   apriBtn.className = "doc-btn-secondario";
   apriBtn.type = "button";
   apriBtn.textContent = "Apri";
-  apriBtn.addEventListener("click", () => window.open(foto.url, "_blank"));
+  apriBtn.addEventListener("click", () => mostraSchedaFoto(foto, clienteNome));
   btnRiga.appendChild(apriBtn);
-  if(clienteNome){
-    btnRiga.appendChild(creaMicRapido(async (testo) => {
-      if(!BACKEND_CONFIGURED || !currentSession) return;
-      showAIToast("Un attimo…", testo);
-      try{
-        const risposta = await chiediAssistente(`Il professionista sta guardando una foto del cantiere di "${clienteNome}" (url: ${foto.url}) e ha detto a voce cosa farne: "${testo}".`);
-        showAIToast(risposta.stato === "in_attesa_conferma" ? "Conferma richiesta" : "Fatto", risposta.testo || "");
-      }catch(err){
-        console.warn("Comando rapido sulla foto non riuscito:", err.message);
-        showAIToast("Non ci sono riuscita", err.message);
-      }
-    }));
-  }
   el.appendChild(btnRiga);
-  if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando la foto: " + foto.url));
   return el;
+}
+
+/* ============ SCHEDA FOTO CON NOTA (25/09/2026) ============
+   Gianardi: "su questa foto vorrei segnarmi anche degli appunti in
+   riferimento a questa foto". Stesso schema della scheda documento: in
+   alto l'invio, la foto grande con la sua nota, in fondo la barra per
+   scrivere o dettare la nota. La nota si salva direttamente (nessuna AI
+   serve per salvare un testo) e poi la foto si ritrova a voce ("la foto
+   della crepa di Rossi"). */
+function mostraSchedaFoto(foto, clienteNome, opzioni){
+  const inMemoria = cantiereFoto.find(f => f.id === foto.id);
+  const stato = { nota: (inMemoria && inMemoria.nota) || foto.nota || "" };
+  const corpo = document.createElement("div");
+  corpo.className = "scheda-doc";
+  corpo.appendChild(creaRigaInvioFoto(foto, clienteNome, () => stato.nota));
+  const img = document.createElement("img");
+  img.className = "scheda-foto-img";
+  img.src = foto.url; img.alt = "";
+  img.addEventListener("click", () => apriMedia(foto.url, "image/*"));
+  corpo.appendChild(img);
+  const notaEl = document.createElement("div");
+  notaEl.className = "scheda-foto-nota";
+  const disegnaNota = () => {
+    notaEl.textContent = stato.nota || ((opzioni && opzioni.appenaScattata) ? "Vuoi aggiungere una nota a questa foto? Scrivila o dettala qui sotto." : "Nessuna nota: scrivila o dettala qui sotto.");
+    notaEl.classList.toggle("vuota", !stato.nota);
+  };
+  disegnaNota();
+  corpo.appendChild(notaEl);
+
+  const piede = document.createElement("div");
+  piede.className = "scheda-composer";
+  const campo = document.createElement("textarea");
+  campo.rows = 1;
+  campo.className = "scheda-campo";
+  campo.placeholder = stato.nota ? "Aggiungi alla nota…" : "Scrivi o detta una nota…";
+  /* Il campo parte vuoto: quello che si scrive o detta si AGGIUNGE alla
+     nota. Per correggerla si tocca la nota, che passa nel campo intero. */
+  stato.correzione = false;
+  notaEl.addEventListener("click", () => {
+    if(!stato.nota) return campo.focus();
+    campo.value = stato.nota;
+    stato.correzione = true;
+    campo.focus();
+  });
+  const salva = document.createElement("button");
+  salva.type = "button";
+  salva.className = "scheda-invia";
+  salva.setAttribute("aria-label", "Salva la nota");
+  salva.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+
+  async function salvaNota(testo, sostituisci){
+    const scritto = (testo || "").trim();
+    if(!scritto && !sostituisci) return; // invio a vuoto: mai cancellare la nota per sbaglio
+    const nuova = sostituisci ? scritto : (stato.nota ? stato.nota + " " + scritto : scritto);
+    if(nuova === stato.nota){ campo.value = ""; stato.correzione = false; return; }
+    if(!isDbReady()){ showAILanding("Non collegato", "Per salvare la nota serve la connessione al database."); return; }
+    salva.disabled = true;
+    const { error } = await supabaseClient.from("cantiere_foto").update({ nota: nuova || null }).eq("id", foto.id);
+    salva.disabled = false;
+    if(error){
+      console.error("Nota della foto non salvata:", error.message);
+      showAILanding("Nota non salvata", error.message);
+      return;
+    }
+    stato.nota = nuova;
+    foto.nota = nuova;
+    // Cercata di nuovo: l'elenco in memoria può essere stato ricaricato mentre la scheda era aperta
+    const fresca = cantiereFoto.find(f => f.id === foto.id);
+    if(fresca) fresca.nota = nuova;
+    campo.value = "";
+    stato.correzione = false;
+    campo.placeholder = "Aggiungi alla nota…";
+    disegnaNota();
+    notaEl.classList.add("salvata");
+    setTimeout(() => notaEl.classList.remove("salvata"), 900);
+    if(document.getElementById("page-cantiere-foto").classList.contains("visible")) renderCantiereFoto();
+  }
+  salva.addEventListener("click", () => salvaNota(campo.value, stato.correzione));
+  campo.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); salvaNota(campo.value, stato.correzione); }
+  });
+  // Dettata: si salva subito, aggiunta alla nota (o dentro la correzione in corso)
+  const mic = creaMicRapido((testo) => stato.correzione ? salvaNota(campo.value + " " + testo, true) : salvaNota(testo, false));
+  mic.classList.add("scheda-mic");
+  mic.setAttribute("aria-label", "Detta la nota");
+  piede.appendChild(mic);
+  piede.appendChild(campo);
+  piede.appendChild(salva);
+
+  apriRisorsaCard(clienteNome ? "Foto — " + clienteNome : "Foto", corpo, piede);
+}
+
+/* Invio della foto: WhatsApp ed Email con il link e la nota, EON nella
+   chat del cliente. */
+function creaRigaInvioFoto(foto, clienteNome, getNota){
+  const riga = document.createElement("div");
+  riga.className = "scheda-invio";
+  riga.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
+  const cliente = clienteNome ? clients.find(c => c.name === clienteNome) : null;
+  const testo = () => (getNota() ? getNota() + "\n" : "") + foto.url;
+  const voci = [
+    { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => window.open("https://wa.me/" + numeroWhatsApp(cliente && cliente.phone) + "?text=" + encodeURIComponent(testo()), "_blank") },
+    { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', azione: () => { window.location.href = "mailto:?subject=" + encodeURIComponent("Foto del cantiere") + "&body=" + encodeURIComponent(testo()); } },
+    { nome: "EON", icona: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', azione: () => inviaRisorsaEonInterna(clienteNome, "Ti mando la foto: " + testo()) },
+  ];
+  voci.forEach(v => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "scheda-invio-btn";
+    b.dataset.canale = v.nome;
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + v.icona + "</svg>";
+    const t = document.createElement("span");
+    t.textContent = v.nome;
+    b.appendChild(t);
+    b.addEventListener("click", v.azione);
+    riga.appendChild(b);
+  });
+  return riga;
 }
 
 /* Icona grande e colorata che apre la voce — la "figura" ben visibile
