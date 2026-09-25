@@ -3368,6 +3368,11 @@ aggiorna subito (`aggiornaDocumentoInMemoria`). A voce: "apri le fatture",
 Preventivo" (dati solo locali, mai collegati a niente) non sono più nel
 menu; restano nel codice, da togliere del tutto più avanti.
 Test: `eval/fatture.test.js` (19 verifiche).
+Poi, su richiesta di Gianardi ("le volevo separate come prima"): nel menu
+Documenti due cartelle, **Preventivi** e **Fatture**, ognuna con i soli
+documenti veri del suo tipo, il suo titolo e senza filtri (stessa pagina,
+`data-fp-filtro`). La vista unica con i filtri resta solo a voce
+("apri fatture e preventivi").
 Lettera, Cartello fine lavori e Carta intestata: NON vanno tolte (Gianardi,
 25/09/2026) — restano, e andranno migliorate più avanti.
 
