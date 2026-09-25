@@ -77,6 +77,7 @@ async function main() {
       aperta: document.getElementById("risorsaOverlay").style.display === "flex",
     }));
     verifica("la modifica parte con i dati attuali del documento (niente passaggi in più)", /Dati attuali del documento/.test(richieste[0].messaggio) && /"prezzo":100/.test(richieste[0].messaggio) && /aggiungi 100 euro per smaltimento/.test(richieste[0].messaggio) && /doc1/.test(richieste[0].messaggio), richieste[0].messaggio);
+    verifica("regole nel messaggio: \"da 57.000\" = imponibile, una voce si cambia senza chiedere, risposta di una frase", /nuovo imponibile IVA esclusa/.test(richieste[0].messaggio) && /non chiedere, fallo/.test(richieste[0].messaggio) && /una sola frase breve/.test(richieste[0].messaggio));
     verifica("il documento si aggiorna lì davanti (nuova voce, nuovo totale)", /Smaltimento/.test(dopo1.documento) && dopo1.memoria === 244, JSON.stringify(dopo1));
     verifica("in chat: la mia richiesta e la risposta di EON", JSON.stringify(dopo1.bolle) === JSON.stringify(["me: aggiungi 100 euro per smaltimento", "eon: Fatto. Totale €244."]), JSON.stringify(dopo1.bolle));
     verifica("la scheda resta aperta e il campo si svuota", dopo1.aperta && dopo1.campo === "");
