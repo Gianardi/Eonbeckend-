@@ -3284,3 +3284,9 @@ nome non nella frase, un giorno/ora nella frase (c'è anche un impegno) →
 motore completo, mai un doppione. Prima: 4-9,5 s (pochi casi nei registri).
 Test: 9 scenari in `eval/percorso-rapido.test.mjs`, provati anche rompendo
 apposta ogni protezione.
+
+Correzione dopo il primo uso: Gianardi ha scritto dalla Home "Luca Ferretti
+333 4455667 bagno" (senza la parola "cliente") → motore completo, che ha
+chiesto di un appuntamento invece di creare il cliente. Andava previsto: lui
+detta tutto dalla Home. Ora dalla Home basta anche un numero di telefono
+(8+ cifre) per tentare il percorso rapido del cliente.
