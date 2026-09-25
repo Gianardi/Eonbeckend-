@@ -1234,6 +1234,12 @@
   .goal-del-mini:hover{ color:var(--coral); background:var(--coral-soft); }
   .goal-del-mini svg{ width:13px; height:13px; }
   .azienda-list{ display:flex; flex-direction:column; gap:10px; }
+  /* Scorrimento tra le pagine principali: la pagina nuova entra dal lato giusto */
+  @keyframes entra-da-destra{ from{ transform:translateX(28px); opacity:.35; } to{ transform:none; opacity:1; } }
+  @keyframes entra-da-sinistra{ from{ transform:translateX(-28px); opacity:.35; } to{ transform:none; opacity:1; } }
+  .page.entra-destra{ animation:entra-da-destra .22s ease-out; }
+  .page.entra-sinistra{ animation:entra-da-sinistra .22s ease-out; }
+  @media (prefers-reduced-motion: reduce){ .page.entra-destra, .page.entra-sinistra{ animation:none; } }
   .lavori-in-corso{
     margin:24px 0; padding:32px 22px; text-align:center;
     background:var(--card); border:1.5px dashed var(--border-strong); border-radius:18px;
@@ -12739,6 +12745,55 @@ async function controllaNuovaVersione(){
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") controllaNuovaVersione(); });
 window.addEventListener("pageshow", (e) => { if(e.persisted) controllaNuovaVersione(); });
 controllaNuovaVersione(); // la versione con cui l'app è partita
+
+/* Scorrere col dito tra le pagine principali (25/09/2026, Gianardi):
+   Home ⇄ Clienti ⇄ Cresci ⇄ Menu, nell'ordine della barra in basso.
+   Solo sulle quattro pagine della barra; mai partendo da un campo di
+   testo, da una riga che si elimina scorrendo, da una striscia che scorre
+   in orizzontale o dal bordo dello schermo (lì iPhone usa il suo "indietro"). */
+(function(){
+  const ORDINE = ["home", "clienti", "cresci", "gestisci-azienda"];
+  const BORDO = 24;
+  let inizio = null;
+  function siPuoPartireDa(el, pagina){
+    for(let n = el; n && n !== pagina; n = n.parentElement){
+      if(n.matches("input, textarea, select, button.home-hero-mic, [contenteditable], .scorri-wrap, .home-hero-textwrap")) return false;
+      const st = getComputedStyle(n);
+      if(/(auto|scroll)/.test(st.overflowX) && n.scrollWidth > n.clientWidth + 2) return false;
+    }
+    return true;
+  }
+  document.addEventListener("touchstart", (e) => {
+    inizio = null;
+    if(e.touches.length !== 1) return;
+    const pagina = document.querySelector(".page.visible");
+    if(!pagina || !ORDINE.includes(pagina.id.replace(/^page-/, ""))) return;
+    if(!pagina.contains(e.target) || !siPuoPartireDa(e.target, pagina)) return;
+    const t = e.touches[0];
+    if(t.clientX < BORDO || t.clientX > window.innerWidth - BORDO) return;
+    inizio = { x: t.clientX, y: t.clientY, quando: Date.now(), pagina: pagina.id.replace(/^page-/, "") };
+  }, { passive: true });
+  document.addEventListener("touchend", (e) => {
+    if(!inizio || !e.changedTouches.length) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - inizio.x, dy = t.clientY - inizio.y;
+    const da = inizio; inizio = null;
+    if(Date.now() - da.quando > 700) return;               // gesto lento: stava leggendo, non sfogliando
+    if(Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return; // corto o in verticale: è uno scroll
+    const i = ORDINE.indexOf(da.pagina);
+    const j = i + (dx < 0 ? 1 : -1);
+    if(j < 0 || j >= ORDINE.length) return;
+    navigateTo(ORDINE[j]);
+    const nuova = document.getElementById("page-" + ORDINE[j]);
+    if(nuova){
+      nuova.classList.remove("entra-destra", "entra-sinistra");
+      void nuova.offsetWidth; // riparte l'animazione
+      nuova.classList.add(dx < 0 ? "entra-destra" : "entra-sinistra");
+      nuova.addEventListener("animationend", () => nuova.classList.remove("entra-destra", "entra-sinistra"), { once: true });
+    }
+  }, { passive: true });
+  document.addEventListener("touchcancel", () => { inizio = null; }, { passive: true });
+})();
 
 /* Calendario: "Indietro" torna dove eri (di solito la Home) */
 (function(){

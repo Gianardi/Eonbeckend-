@@ -3483,6 +3483,17 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Scorrere col dito tra le pagine (25/09/2026)
+
+Gianardi: passare da Home a Clienti, Cresci, Menu (e indietro) scorrendo il
+dito. Dito verso sinistra = pagina dopo, verso destra = pagina prima,
+nell'ordine della barra in basso; la pagina nuova entra dal lato giusto.
+Solo sulle 4 pagine della barra. Non scatta: in verticale (scroll), gesto
+corto o lento, partendo da un campo di testo, dal microfono grande, da una
+riga che si elimina scorrendo, da una striscia che scorre di lato, o dal
+bordo dello schermo (lì c'è l'"indietro" di iPhone).
+- Test: `eval/scorri-pagine.test.js` (14), con tocchi veri simulati.
+
 ### Foto negli Appunti (25/09/2026)
 
 Gianardi: "in Appunti mettere la possibilità di fare anche le foto" e "non

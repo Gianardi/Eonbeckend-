@@ -166,6 +166,15 @@ da una nota.
 NODE_PATH=/opt/node22/lib/node_modules node eval/clienti-chat.test.js
 ```
 
+### `scorri-pagine.test.js` — scorrere tra le pagine, gira subito
+
+Home ⇄ Clienti ⇄ Cresci ⇄ Menu col dito (tocchi veri simulati), e i casi in
+cui non deve cambiare pagina.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/scorri-pagine.test.js
+```
+
 ### `risposte.test.js` — risposte di EON nella card, gira subito
 
 Titolo = domanda, orari in colonna, niente asterischi, domanda di EON con la
