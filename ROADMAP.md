@@ -79,42 +79,67 @@ pilastri, altrimenti non si fa.
 fiducia reperibile per le emergenze, commercialista e legale per contratti
 e fatture; backup con ripristino a qualsiasi minuto (Supabase).
 
-## 2b. Archivio di lavoro — un pezzo di business (idea di Andrea, 25/09/2026)
+## 2b. EON Memory — "l'iCloud del lavoro" (sezione business, 25/09/2026)
 
-Oggi molti artigiani tengono le foto di lavoro nel rullino e su iCloud, e
-quando lo spazio finisce devono pagare Apple. EON può essere **il posto dove
-sta tutto il lavoro**: ordinato per cliente, con note e descrizione,
-ritrovabile a voce, da mandare al cliente in un tocco, senza riempire
-iCloud. Più lavoro c'è dentro EON, più EON diventa indispensabile.
+**Cos'è.** Il servizio di EON che conserva **tutto il lavoro**: foto,
+documenti, preventivi, fatture, note e anche i fatti che EON impara ("Rossi
+paga sempre in ritardo", "bagno di Bianchi: piastrelle 30×60"). È il
+pilastro 2, "ricorda tutto per te". Tra noi lo chiamiamo "l'iCloud del
+lavoro"; ai clienti lo raccontiamo come **la memoria del tuo lavoro**.
 
-- **Livello 1 — incluso**: spazio nell'abbonamento (es. 10 GB ≈ 30.000 foto
-  compresse), barra "spazio usato", avviso all'80%.
-- **Livello 2 — pacchetti in più**: es. +50 GB al mese a pochi euro (a noi
-  costano ~1 $/mese): margine alto.
-- **Livello 3 — conservazione a norma** di fatture e documenti fiscali
-  (10 anni per legge): serve un fornitore accreditato, progetto a sé.
-- **Da fare in app**: avviso alla prima foto "le foto scattate in EON non
-  occupano spazio sul tuo iPhone né su iCloud"; più avanti "Sposta in EON e
-  libera spazio" (scegli foto di lavoro dalla galleria, EON le archivia per
-  cliente e ricorda di cancellarle dall'iPhone).
-- **Attenzione**: restare *archivio di lavoro* legato a clienti e cantieri,
-  non un cloud generico (lì si compete con Apple e Google).
-- **Argomento di vendita**: "Le foto di lavoro non ti riempiono più iCloud."
+**I piani**
 
-### EON Memory — la memoria del tuo lavoro (25/09/2026)
+| Piano | Spazio | Prezzo |
+|---|---|---|
+| Prova / Piano Free | 2 GB (~6.000 foto compresse) | gratis |
+| **Base — incluso nell'abbonamento** | **20 GB solo per il lavoro** (~60.000 foto) | incluso |
+| **Extra** | +100 GB | ~2–3 €/mese |
+| **Conservazione a norma** (più avanti) | fatture e documenti fiscali per 10 anni | da definire — serve un fornitore accreditato |
 
-Nome deciso con Andrea. È il pilastro 2 ("ricorda tutto per te"):
-- **Non "un cloud"**: il valore non è conservare ma **ritrovare e usare**
-  (ordinato da solo per cliente/cantiere, ricerca a voce, collegato a
-  preventivi/fatture/chat, si manda al cliente in un tocco). Come cloud si
-  perde il confronto con iCloud/Google sul prezzo al GB.
-- **Solo lavoro**, mai il rullino intero: niente foto private.
+A noi 20 GB pieni costano meno di 0,50 €/mese; 100 GB circa 2 $/mese:
+l'extra ha un margine alto. In app: barra "spazio usato" in Impostazioni →
+Account, avviso all'80%, mai cancellazioni automatiche.
+
+**Punti di forza per vendere EON** (da usare nel sito, nelle demo, nei
+messaggi):
+1. **Incluso nell'abbonamento** — nessuno spazio in più da pagare per le
+   foto di lavoro.
+2. **Non ti riempie più iCloud o Google** — il tuo spazio personale resta
+   per le tue cose; niente abbonamento extra ad Apple o Google per colpa
+   del lavoro.
+3. **Tutto in ordine da solo** — ogni foto e documento va nella scheda del
+   cliente giusto, con la nota e la descrizione di EON.
+4. **Lo ritrovi a voce in 3 secondi** — "la foto della crepa di Rossi",
+   "il preventivo di Bianchi".
+5. **Lo mandi al cliente in un tocco** — WhatsApp, email o EON.
+6. **Lavoro separato dalla vita privata** — niente foto dei figli in mezzo
+   ai cantieri, niente cantieri in mezzo alle vacanze.
+7. **Al sicuro** — backup automatici, dati in Europa e cifrati, "Scarica
+   tutto" quando vuoi.
+8. **Più ci metti, più ti serve** — la memoria del tuo lavoro diventa il
+   motivo per restare (per noi: clienti che restano anno dopo anno).
+
+Frase: *"Le foto e i documenti di lavoro sono inclusi in EON: in ordine per
+cliente, e non ti riempiono più iCloud."*
+
+**Paletti (da rispettare)**
+- **Mai dire "costa meno di iCloud"**: sul prezzo al GB Apple e Google non si
+  battono (2 TB a ~10 €). Il valore è ordine + ricerca + uso, non i GB.
+- **Solo lavoro**, mai il rullino intero (privacy, spazio, confusione).
 - **Mai perdere niente**: backup con ripristino a qualsiasi minuto,
-  **"Scarica tutto"** (export di foto e documenti, anche per il GDPR),
-  dati in Europa e cifrati; conservazione fiscale "a norma" solo con
-  fornitore accreditato.
-- **Anche i fatti, non solo i file**: "Rossi paga sempre in ritardo", "il
-  bagno di Bianchi ha piastrelle 30×60" — tutto quello che EON sa del lavoro.
+  "Scarica tutto" (anche per il GDPR).
+- **Conservazione fiscale "a norma"** solo con fornitore accreditato: non
+  prometterla prima.
+
+**Da fare in app** [Claude]
+- Compressione delle foto (subito dopo il merge).
+- Avviso alla prima foto: "le foto scattate in EON non occupano spazio sul
+  tuo iPhone né su iCloud".
+- Barra "spazio usato" e avviso all'80%.
+- "Scarica tutto".
+- Più avanti: "Sposta in EON e libera spazio" (scegli foto di lavoro dalla
+  galleria, EON le archivia per cliente e ricorda di cancellarle
+  dall'iPhone).
 
 ### Costi e spazio — analisi del 25/09/2026 (stime, da confermare coi token veri)
 
