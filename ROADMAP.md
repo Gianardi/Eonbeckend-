@@ -116,6 +116,50 @@ Nome deciso con Andrea. È il pilastro 2 ("ricorda tutto per te"):
 - **Anche i fatti, non solo i file**: "Rossi paga sempre in ritardo", "il
   bagno di Bianchi ha piastrelle 30×60" — tutto quello che EON sa del lavoro.
 
+### Costi e spazio — analisi del 25/09/2026 (stime, da confermare coi token veri)
+
+**Dati misurati in produzione**: 36 file per 38 MB (foto media 1,45 MB),
+database 15 MB. Una richiesta a EON manda all'AI ~18.000 token di istruzioni
+(regole + elenco strumenti) e fa in media 2–2,5 giri; oggi metà delle
+richieste va su Sonnet, metà su Haiku. I registri NON salvano ancora i token.
+
+**Costo per richiesta** (prezzi ufficiali: Haiku 4.5 $1/$5, Sonnet 4.5 $3/$15
+per milione di token in entrata/uscita; cache: scrittura 1,25×, lettura 0,1×):
+Haiku ~1–3 centesimi di $, Sonnet ~3–10 centesimi; media ~2–6 centesimi.
+Le cose fatte senza AI (percorsi veloci, letture locali) costano zero.
+
+**Costo per cliente al mese** (~450 richieste): AI ~10–25 € · spazio e
+traffico pochi centesimi · Stripe ~0,70 € su 30 € · costi fissi (Supabase +
+Vercel ~45 $) ~0,40 € con 100 clienti. **Il vero costo è l'AI, non lo
+spazio**: con 30 € di abbonamento oggi l'AI prende metà o più dell'incasso.
+
+**Le 4 leve, PRIMA di fissare il prezzo** [Claude]:
+1. **Registrare i token veri** di ogni richiesta (da stime a numeri reali).
+2. **Accorciare le istruzioni** da ~18.000 a 6–8.000 token (all'AI solo gli
+   strumenti che servono per quella richiesta): circa metà del costo in meno.
+3. **Più cose fatte senza AI** (percorsi veloci: calendario, clienti,
+   documenti).
+4. **Haiku come prima scelta**, Sonnet solo quando serve davvero.
+Obiettivo: ~3–8 € di AI per cliente al mese → abbonamento 29–39 € con
+margine sano.
+
+**Spazio incluso — proposta** (confronto: iCloud gratis 5 GB, poi 50 GB
+~0,99 €/mese, 200 GB ~2,99 €, 2 TB ~9,99 €; Google gratis 15 GB condivisi,
+poi 100 GB ~1,99 €, 2 TB ~9,99 € — prezzi indicativi):
+- Prova / Piano Free: **2 GB** (~6.000 foto compresse)
+- Abbonamento base: **20 GB solo per il lavoro** (~60.000 foto; a noi costa
+  meno di 0,50 €/mese anche se pieno)
+- Pacchetto extra: **+100 GB a ~2–3 €/mese**
+
+**Come raccontarlo — onesto**: sul prezzo al GB Apple e Google non si
+battono (2 TB a ~10 €), quindi mai dire "EON costa meno di iCloud". Il
+valore è: spazio **incluso** nell'abbonamento, il lavoro **non riempie più
+iCloud/Google** (niente spazio extra da comprare), tutto **in ordine per
+cliente** e ritrovabile a voce. Frase: *"Le foto e i documenti di lavoro
+sono inclusi in EON: in ordine per cliente, e non ti riempiono più iCloud."*
+Lo spazio è un argomento in più per scegliere EON e restarci; il motivo
+principale per pagare resta il tempo risparmiato e il lavoro fatto.
+
 ## 3. Una "vera app" sul telefono
 
 - **[Claude] Installabile** dal browser ("Aggiungi a Home") con icona e
