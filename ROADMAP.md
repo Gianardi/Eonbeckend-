@@ -8,6 +8,27 @@ Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
 
 ---
 
+## Cos'è EON — i tre pilastri (deciso con Andrea, 25/09/2026)
+
+1. **Fa le cose per te** — parli e EON segna l'appuntamento, scrive il
+   preventivo, prepara la fattura. *Il tempo.*
+2. **Ricorda tutto per te** — clienti, foto, documenti, note in un unico
+   posto di lavoro, separato dalla vita privata, ritrovabile a voce in 3
+   secondi. *La memoria.* (Vedi "Archivio di lavoro", sezione 2b.)
+3. **Ti fa lavorare e incassare di più** — preventivi più veloci, clienti
+   seguiti, messaggi in ordine, pagamenti sotto controllo. *I soldi.*
+
+**Il risultato: liberi la testa.** In una riga: **"Parli, EON fa. E si
+ricorda tutto."**
+
+Regola: ogni pilastro si deve poter mostrare in 30 secondi a un artigiano
+che non ci conosce. Oggi 1 e 2 sì; il 3 è il più debole (servono fattura
+elettronica SdI e promemoria dei pagamenti): è da lì che si parte dopo la
+parte "per vendere". Ogni nuova funzione deve rafforzare almeno uno dei tre
+pilastri, altrimenti non si fa.
+
+---
+
 ## 0. Domani mattina — pubblicare il pacchetto
 
 1. **[Andrea]** Merge del pacchetto unico (PR #97).
