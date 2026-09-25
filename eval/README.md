@@ -56,6 +56,24 @@ cambia in nessun modo il comportamento del vero endpoint.
 node eval/backend.test.js
 ```
 
+### `percorso-documento.test.mjs` — fatture/preventivi, gira subito
+
+Esegue il VERO handler di `api/index.js` (non una copia della logica)
+con il database Supabase e le risposte di Anthropic simulati: nessuna
+chiave, nessuna rete. Ogni scenario scrive in anticipo cosa "risponde"
+l'AI a ogni giro — comprese risposte sbagliate apposta (cliente o tipo
+inventati, voci vuote, "completo" detto senza nessun prezzo) — e
+controlla sia il risultato (documento creato o no, cliente e tipo
+giusti, totale con IVA) sia cosa viene chiesto all'AI (quante chiamate,
+quale strumento forzato, quale modello, mai ragionamento esteso insieme
+a uno strumento forzato). Nato dal bug del 25/09/2026 (la regola
+"risorsa" che bloccava in silenzio crea_preventivo_o_fattura): sul
+codice di prima fallisce 18 controlli.
+
+```
+node eval/percorso-documento.test.mjs
+```
+
 Entrambi `router.test.js` e `backend.test.js` fanno già parte del
 flusso di lavoro normale: da eseguire dopo ogni modifica al router, al
 contesto delle correzioni, all'IntentFrame o al Current Focus, prima di
