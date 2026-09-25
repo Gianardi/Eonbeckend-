@@ -200,6 +200,58 @@ async function main() {
     await page.waitForTimeout(150);
     const conNome = await page.evaluate(() => ({ foto: cantiereFoto[0], scheda: (document.querySelector(".scheda-foto-nota") || {}).textContent, scritture: window.__scritture.slice() }));
     verifica("\"Rossi, porta da cambiare\": foto a Rossi, nota \"Porta da cambiare\"", conNome.foto.clientId === "c-rossi" && conNome.foto.nota === "Porta da cambiare" && conNome.scheda === "Porta da cambiare", JSON.stringify(conNome));
+
+    /* ---- Scorri a sinistra per eliminare ---- */
+    const trascina = async (sel, dx, dy = 0) => {
+      const r = await page.locator(sel).first().boundingBox();
+      const x = r.x + r.width - 30, y = r.y + r.height / 2;
+      await page.mouse.move(x, y); await page.mouse.down();
+      for (let i = 1; i <= 8; i++) await page.mouse.move(x + (dx * i) / 8, y + (dy * i) / 8);
+      await page.mouse.up();
+      await page.waitForTimeout(250);
+    };
+    await prepara();
+    await page.evaluate(() => { chiudiRisorsaCard(); document.getElementById("aiToastContainer").innerHTML = ""; navigateTo("chat"); chatFilter = null; renderChatList(); });
+    const selDini = '#chatList .scorri-wrap:has(.chat-item-name:text-is("Dini")) .chat-item';
+    await trascina(selDini, -20);
+    verifica("scorrimento corto: la riga torna al suo posto, niente si apre", await page.evaluate(() => [...document.querySelectorAll("#chatList .scorri-elimina")].every((b) => parseFloat(b.style.width || "0") === 0) && !document.getElementById("chatSlider").classList.contains("show-conv")));
+    await trascina(selDini, -12, 80);
+    verifica("scorrimento in verticale: è uno scroll, non apre Elimina", await page.evaluate(() => [...document.querySelectorAll("#chatList .scorri-elimina")].every((b) => parseFloat(b.style.width || "0") === 0)));
+    await trascina(selDini, -120);
+    const aperta = await page.evaluate(() => { const w = [...document.querySelectorAll("#chatList .scorri-wrap")].find((x) => x.textContent.includes("Dini")); const b = w.querySelector(".scorri-elimina"); return { larghezza: b.getBoundingClientRect().width, testo: b.textContent, chatAperta: document.getElementById("chatSlider").classList.contains("show-conv") }; });
+    verifica("scorro la chat a sinistra: compare \"Elimina\" rosso, la chat non si apre", aperta.larghezza > 70 && aperta.testo === "Elimina" && !aperta.chatAperta, JSON.stringify(aperta));
+    domande = [];
+    await page.locator('#chatList .scorri-wrap:has(.chat-item-name:text-is("Dini")) .scorri-elimina').click();
+    await page.waitForTimeout(200);
+    s = await scritture();
+    verifica("tocco Elimina: chat e cliente nel cestino, senza domande", JSON.stringify(s.filter((w) => w.patch && w.patch.deleted_at).map((w) => w.tabella + ":" + w.id).sort()) === '["clients:c-dini","conversations:v-dini"]' && domande.length === 0, JSON.stringify({ s, domande }));
+    verifica("avviso \"Chat e cliente nel cestino\" con Annulla", await page.evaluate(() => /Chat e cliente nel cestino/.test(document.getElementById("aiToastContainer").textContent) && !(nomi => nomi.includes("Dini"))([...document.querySelectorAll("#chatList .chat-item-name")].map((e) => e.textContent))));
+    await page.evaluate(() => [...document.querySelectorAll("#aiToastContainer .ai-toast-yes")].at(-1).click());
+    await page.waitForTimeout(200);
+    s = await scritture();
+    verifica("Annulla: chat e cliente tornano", s.some((w) => w.tabella === "conversations" && w.id === "v-dini" && w.patch.deleted_at === null) && s.some((w) => w.tabella === "clients" && w.id === "c-dini" && w.patch.deleted_at === null) && (await nomiInChat(null)).includes("Dini") && (await page.evaluate(() => clients.some((c) => c.id === "c-dini"))), JSON.stringify(s));
+
+    // Messaggio singolo
+    await prepara();
+    await page.evaluate(() => {
+      document.getElementById("aiToastContainer").innerHTML = "";
+      const ch = chats.find((c) => c.id === "v-rossi");
+      ch.messages.push({ id: "m1", from: "them", text: "Buongiorno, quando passate?", time: "10:00" }, { id: "m2", from: "me", text: "Domani alle 9", time: "10:05" });
+      navigateTo("chat"); activeChatIndex = chats.indexOf(ch); renderChatWindow();
+      document.getElementById("chatSlider").classList.add("show-conv");
+    });
+    await page.waitForTimeout(400);
+    const selMsg = '#chatMessages .scorri-wrap:has(.bubble:text("Domani alle 9")) .scorri-contenuto';
+    await trascina(selMsg, -120);
+    await page.locator('#chatMessages .scorri-wrap:has(.bubble:text("Domani alle 9")) .scorri-elimina').click();
+    await page.waitForTimeout(200);
+    const dopoMsg = await page.evaluate(() => ({ testi: [...document.querySelectorAll("#chatMessages .bubble")].map((b) => b.textContent), scritture: window.__scritture.slice(), x: document.querySelectorAll("#chatMessages .goal-del-mini").length }));
+    verifica("scorro un messaggio e tocco Elimina: solo quel messaggio nel cestino", dopoMsg.testi.length === 1 && /quando passate/.test(dopoMsg.testi[0]) && dopoMsg.scritture.length === 1 && dopoMsg.scritture[0].tabella === "messages" && dopoMsg.scritture[0].id === "m2" && dopoMsg.scritture[0].patch.deleted_at, JSON.stringify(dopoMsg));
+    verifica("i messaggi non hanno più la piccola X", dopoMsg.x === 0);
+    await page.evaluate(() => [...document.querySelectorAll("#aiToastContainer .ai-toast-yes")].at(-1).click());
+    await page.waitForTimeout(200);
+    verifica("Annulla: il messaggio torna al suo posto", JSON.stringify(await page.evaluate(() => [...document.querySelectorAll("#chatMessages .bubble")].map((b) => b.textContent.replace(/\d\d:\d\d$/, "")))) === '["Buongiorno, quando passate?","Domani alle 9"]');
+    await page.screenshot({ path: process.env.SCREEN || "/dev/null" }).catch(() => {});
   } finally {
     await browser.close();
     server.kill();

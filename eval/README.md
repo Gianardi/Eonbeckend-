@@ -156,7 +156,8 @@ NODE_PATH=/opt/node22/lib/node_modules node eval/foto.test.js
 ### `clienti-chat.test.js` — un cliente, una chat, gira subito
 
 Archivio/cestino/nome/creazione valgono per cliente e chat insieme,
-conferma su Archivia, niente "null", Messaggi nel Menu, Cresci in
+conferma su Archivia, niente "null", scorri a sinistra per eliminare
+chat e messaggi (con Annulla), Messaggi nel Menu, Cresci in
 "Lavori in corso", foto: nota separata dal nome e nessun cliente creato
 da una nota.
 

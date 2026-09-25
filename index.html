@@ -1269,6 +1269,17 @@
     display:flex; align-items:center; gap:12px; padding:12px 10px; border-radius:14px; cursor:pointer;
   }
   .chat-item:hover{ background:rgba(20,23,29,.035); }
+  /* Scorri a sinistra per eliminare (chat e messaggi) */
+  .scorri-wrap{ position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; }
+  .scorri-contenuto{ position:relative; z-index:1; touch-action:pan-y; }
+  .chat-list .scorri-contenuto{ background:var(--card); }
+  .scorri-elimina{
+    position:absolute; top:0; right:0; bottom:0; width:0; overflow:hidden; z-index:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    border:none; padding:0; border-radius:14px; background:var(--coral); color:#fff;
+    font:inherit; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap;
+  }
+  .scorri-elimina svg{ width:18px; height:18px; flex:none; }
   .chat-item.active{ background:var(--indigo-soft); }
   .chat-item-body{ flex:1; min-width:0; }
   .chat-item-name{ font-size:14px; font-weight:700; color:var(--text); }
@@ -7833,6 +7844,115 @@ function anteprimaMessaggio(m){
   if(m.eventType === "update") return "Aggiornamento · " + (m.title || "Aggiornamento");
   return m.text || "";
 }
+/* Scorri a sinistra per eliminare (25/09/2026, Gianardi): trascinando
+   verso sinistra compare "Elimina" in rosso; un tocco sopra e l'elemento
+   va nel Cestino, con "Annulla" per qualche secondo. Uno scorrimento in
+   verticale resta lo scroll normale; una riga aperta si richiude
+   toccandola o aprendone un'altra. */
+const SCORRI_LARGHEZZA = 84;
+let chiudiRigaScorrevole = null;
+function rendiScorrevole(contenuto, onElimina){
+  const wrap = document.createElement("div");
+  wrap.className = "scorri-wrap";
+  const azione = document.createElement("button");
+  azione.type = "button";
+  azione.className = "scorri-elimina";
+  azione.setAttribute("aria-label", "Elimina");
+  azione.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span>Elimina</span>';
+  contenuto.classList.add("scorri-contenuto");
+  wrap.appendChild(azione);
+  wrap.appendChild(contenuto);
+
+  let x0 = null, y0 = 0, dx = 0, base = 0, trascinato = false, puntatore = null;
+  const sposta = (v, animato) => {
+    const t = animato ? "transform .2s ease, width .2s ease" : "none";
+    contenuto.style.transition = t; azione.style.transition = t;
+    contenuto.style.transform = v ? `translateX(${v}px)` : "";
+    azione.style.width = Math.max(0, -v) + "px";
+  };
+  const chiudi = () => {
+    base = 0; dx = 0; sposta(0, true);
+    if(chiudiRigaScorrevole === chiudi) chiudiRigaScorrevole = null;
+  };
+  contenuto.addEventListener("pointerdown", e => {
+    if(e.pointerType === "mouse" && e.button !== 0) return;
+    x0 = e.clientX; y0 = e.clientY; dx = base; trascinato = false; puntatore = e.pointerId;
+  });
+  contenuto.addEventListener("pointermove", e => {
+    if(x0 === null || e.pointerId !== puntatore) return;
+    const mx = e.clientX - x0, my = e.clientY - y0;
+    if(!trascinato){
+      if(Math.abs(mx) < 8) return;
+      if(Math.abs(my) > Math.abs(mx)){ x0 = null; return; } // è uno scroll
+      trascinato = true;
+      if(chiudiRigaScorrevole && chiudiRigaScorrevole !== chiudi) chiudiRigaScorrevole();
+      try{ contenuto.setPointerCapture(puntatore); }catch(_){}
+    }
+    dx = Math.min(0, Math.max(-SCORRI_LARGHEZZA * 1.5, base + mx));
+    sposta(dx, false);
+  });
+  const fine = () => {
+    if(x0 === null) return;
+    x0 = null;
+    if(!trascinato) return;
+    if(dx < -SCORRI_LARGHEZZA / 2){
+      base = -SCORRI_LARGHEZZA; sposta(base, true); chiudiRigaScorrevole = chiudi;
+    } else chiudi();
+  };
+  contenuto.addEventListener("pointerup", fine);
+  contenuto.addEventListener("pointercancel", fine);
+  /* Dopo un trascinamento il "click" non deve aprire la chat o il
+     documento; su una riga aperta un tocco la richiude soltanto. */
+  wrap.addEventListener("click", e => {
+    if(e.target.closest(".scorri-elimina")) return;
+    if(trascinato){ e.stopPropagation(); e.preventDefault(); trascinato = false; return; }
+    if(base){ e.stopPropagation(); e.preventDefault(); chiudi(); }
+  }, true);
+  azione.addEventListener("click", e => {
+    e.stopPropagation();
+    chiudi();
+    onElimina();
+  });
+  return wrap;
+}
+
+/* Messaggio nel cestino con "Annulla" (niente domanda prima). */
+async function eliminaMessaggioConAnnulla(chat, m){
+  const idx = chat.messages.indexOf(m);
+  if(idx < 0) return;
+  chat.messages.splice(idx, 1);
+  renderChatWindow(); renderChatList();
+  if(isDbReady() && m.id) await dbDelete("messages", m.id);
+  showAIToastConAnnulla("Messaggio nel cestino", "Lo ritrovi anche nel Cestino", async () => {
+    chat.messages.splice(Math.min(idx, chat.messages.length), 0, m);
+    if(isDbReady() && m.id) await dbRestore("messages", m.id);
+    renderChatWindow(); renderChatList();
+  });
+}
+
+/* Chat nel cestino dalla lista: un cliente, una chat — va anche il cliente. */
+async function eliminaChatConAnnulla(chat){
+  const cliente = clienteDellaChat(chat);
+  const attiva = activeChatIndex !== null ? chats[activeChatIndex] : null;
+  const iChat = chats.indexOf(chat);
+  const iCliente = cliente ? clients.indexOf(cliente) : -1;
+  await cestinaClienteEChat(cliente, chat);
+  if(attiva === chat) document.getElementById("chatSlider").classList.remove("show-conv");
+  activeChatIndex = attiva && attiva !== chat && chats.indexOf(attiva) > -1 ? chats.indexOf(attiva) : null;
+  ridisegnaClientiEChat();
+  showAIToastConAnnulla(cliente ? "Chat e cliente nel cestino" : "Chat nel cestino", escapeHtml(chat.name), async () => {
+    const aperta = activeChatIndex !== null ? chats[activeChatIndex] : null;
+    if(iChat > -1) chats.splice(Math.min(iChat, chats.length), 0, chat);
+    if(cliente && iCliente > -1) clients.splice(Math.min(iCliente, clients.length), 0, cliente);
+    activeChatIndex = aperta ? chats.indexOf(aperta) : null;
+    if(isDbReady()){
+      if(chat.id) await dbRestore("conversations", chat.id);
+      if(cliente && cliente.id) await dbRestore("clients", cliente.id);
+    }
+    ridisegnaClientiEChat();
+  });
+}
+
 function renderChatList(){
   const wrap = document.getElementById("chatList");
   wrap.innerHTML = "";
@@ -7886,7 +8006,7 @@ function renderChatList(){
       renderChatWindow();
       document.getElementById("chatSlider").classList.add("show-conv");
     });
-    wrap.appendChild(item);
+    wrap.appendChild(rendiScorrevole(item, () => eliminaChatConAnnulla(c)));
   });
   renderSummary();
   saveState("eon-chats", chats);
@@ -8033,6 +8153,8 @@ function renderChatWindow(){
   const eventLabel = { doc:"Documento", appt:"Appuntamento", update:"Aggiornamento" };
 
   c.messages.forEach(m => {
+    // Ogni messaggio si elimina scorrendolo a sinistra
+    const metti = el => messagesEl.appendChild(rendiScorrevole(el, () => eliminaMessaggioConAnnulla(c, m)));
     /* Preventivi e fatture: scheda leggibile, si tocca per il PDF */
     if(m.eventType === "doc" && m.docDati){
       const d = m.docDati;
@@ -8059,7 +8181,7 @@ function renderChatWindow(){
         </div>
       `;
       card.addEventListener("click", () => apriPdfDocumento(d));
-      messagesEl.appendChild(card);
+      metti(card);
       return;
     }
 
@@ -8073,7 +8195,7 @@ function renderChatWindow(){
         ${m.amount ? '<div class="chat-event-amount">' + m.amount + '</div>' : ''}
         <span class="chat-event-time">${m.time}</span>
       `;
-      messagesEl.appendChild(card);
+      metti(card);
       return;
     }
     /* Allegati: foto e video si vedono, i vocali si ascoltano,
@@ -8086,7 +8208,7 @@ function renderChatWindow(){
         a.className = "msg-audio " + lato;
         a.innerHTML = `<audio src="${m.fileUrl}" controls preload="metadata"></audio>
           <span class="msg-audio-time">${m.time}</span>`;
-        messagesEl.appendChild(a);
+        metti(a);
         return;
       }
       if(m.fileType && m.fileType.startsWith("image/")){
@@ -8094,7 +8216,7 @@ function renderChatWindow(){
         w.className = "msg-media " + lato;
         w.innerHTML = `<img src="${m.fileUrl}" alt="${m.fileName || "Foto"}" loading="lazy"><span class="msg-media-time">${m.time}</span>`;
         w.addEventListener("click", () => apriMedia(m.fileUrl, m.fileType));
-        messagesEl.appendChild(w);
+        metti(w);
         return;
       }
       if(m.fileType && m.fileType.startsWith("video/")){
@@ -8102,7 +8224,7 @@ function renderChatWindow(){
         w.className = "msg-media " + lato;
         w.innerHTML = `<video src="${m.fileUrl}" preload="metadata" playsinline></video><span class="msg-media-time">${m.time}</span>`;
         w.addEventListener("click", () => apriMedia(m.fileUrl, m.fileType));
-        messagesEl.appendChild(w);
+        metti(w);
         return;
       }
       const d = document.createElement("div");
@@ -8114,7 +8236,7 @@ function renderChatWindow(){
           <div class="msg-doc-sub">Tocca per aprire · ${m.time}</div>
         </div>`;
       d.addEventListener("click", () => window.open(m.fileUrl, "_blank"));
-      messagesEl.appendChild(d);
+      metti(d);
       return;
     }
 
@@ -8126,21 +8248,8 @@ function renderChatWindow(){
     b.className = "bubble " + lato;
     b.innerHTML = m.text + '<span class="bubble-time">' + m.time + '</span>';
 
-    const del = document.createElement("div");
-    del.className = "goal-del-mini";
-    del.title = "Elimina messaggio";
-    del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-    del.addEventListener("click", async () => {
-      if(!confirm("Spostare questo messaggio nel cestino?")) return;
-      const idx = c.messages.indexOf(m);
-      if(idx > -1) c.messages.splice(idx, 1);
-      if(isDbReady() && m.id) await dbDelete("messages", m.id);
-      renderChatWindow();
-    });
-
-    if(lato === "me"){ riga.appendChild(del); riga.appendChild(b); }
-    else { riga.appendChild(b); riga.appendChild(del); }
-    messagesEl.appendChild(riga);
+    riga.appendChild(b);
+    metti(riga);
   });
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
