@@ -3388,4 +3388,11 @@ Testolina lo era. Ora:
   cliente senza documenti di quel tipo.
 Test: 11 verifiche nuove in `eval/fatture.test.js` (sul codice di prima
 riproduce il caso).
+Idea di Gianardi, subito dopo: cercare DIRETTAMENTE tra le fatture per il
+nome scritto sul documento (`cercaTraDocumenti`), non passando
+dall'anagrafica — funziona anche con clienti archiviati, con i 10 "Mario
+Rossi" doppi o con clienti non più in anagrafica. Vince il documento che
+corrisponde a più parole del nome ("fattura mario rossi" non tira dentro
+Luca Rossi); più documenti → elenco con il nome su ogni riga. La ricerca
+per cliente in anagrafica resta come ripiego.
 Da fare: lo stesso per i documenti dell'impresa (senza cliente).
