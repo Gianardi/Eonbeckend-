@@ -705,15 +705,36 @@ function fissaIdRisoltoImpegno(input, trovato) {
   if (trovato && !eUuid(input.id)) input.id = trovato.record.id;
 }
 
+/* Un cliente, una chat (25/09/2026): la chat si ritrova dal nome del
+   cliente senza badare a maiuscole ("Martina Ceradelli" / "Martina
+   ceradelli" erano finite in due chat). ilike senza jolly = uguaglianza
+   che ignora maiuscole; i caratteri speciali di LIKE vanno resi letterali. */
+function filtroNomeConversazione(nome) {
+  return "contact_name=ilike." + encodeURIComponent(String(nome || "").trim().replace(/[\\%_*]/g, (c) => "\\" + c));
+}
+
+/* Un cliente nuovo ha subito la sua chat, come quando lo si aggiunge a
+   mano dall'app. Il cliente c'è già: se la chat fallisce non facciamo
+   fallire l'operazione, la chat si crea comunque al primo messaggio. */
+async function assicuraChatDelCliente(cliente, ctx) {
+  try {
+    await trovaOCreaConversazione(cliente, ctx);
+    return true;
+  } catch (err) {
+    console.warn("Cliente creato ma la chat collegata no:", err.message);
+    return false;
+  }
+}
+
 async function trovaOCreaConversazione(cliente, ctx) {
-  const nome = encodeURIComponent(cliente.name);
-  const trovate = await db(`conversations?select=*&contact_name=eq.${nome}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+  const filtroNome = filtroNomeConversazione(cliente.name);
+  const trovate = await db(`conversations?select=*&${filtroNome}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
   if (Array.isArray(trovate) && trovate.length) return trovate[0];
 
   /* Se la conversazione esiste ma è nel cestino, la ripristiniamo
      invece di crearne una seconda: sono la stessa conversazione, e
      due copie separerebbero la cronologia dei messaggi del cliente. */
-  const cestinate = await db(`conversations?select=*&contact_name=eq.${nome}&deleted_at=not.is.null&order=deleted_at.desc&limit=1`, { method: "GET" }, ctx.accessToken);
+  const cestinate = await db(`conversations?select=*&${filtroNome}&deleted_at=not.is.null&order=deleted_at.desc&limit=1`, { method: "GET" }, ctx.accessToken);
   if (Array.isArray(cestinate) && cestinate.length) {
     const ripristinata = await db(
       `conversations?id=eq.${cestinate[0].id}`,
@@ -1030,7 +1051,7 @@ const TOOLS = {
       const cliente = await trovaProprio("clients", input.cliente_id, ctx);
       if (!cliente) throw fail("Cliente non trovato", 404);
 
-      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conv = await db(`conversations?select=id&${filtroNomeConversazione(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
       const conversazione = Array.isArray(conv) && conv[0];
 
       let messaggi = [], documenti = [];
@@ -1073,7 +1094,7 @@ const TOOLS = {
       if (!cliente) throw fail("Cliente non trovato", 404);
       const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 50)) : 20;
 
-      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conv = await db(`conversations?select=id&${filtroNomeConversazione(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
       const conversazione = Array.isArray(conv) && conv[0];
       if (!conversazione) return { messaggi: [] };
 
@@ -1165,6 +1186,7 @@ const TOOLS = {
       if (eStringaNonVuota(input.telefono)) payload.phone = input.telefono.trim();
       const creati = await db("clients", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
       const c = Array.isArray(creati) ? creati[0] : creati;
+      await assicuraChatDelCliente(c, ctx);
       return { id: c.id, nome: c.name, creato: true };
     },
   },
@@ -1283,6 +1305,7 @@ const TOOLS = {
 
       const creati = await db("clients", { method: "POST", body: JSON.stringify(payload), headers: { Prefer: "return=representation" } }, ctx.accessToken);
       const c = Array.isArray(creati) ? creati[0] : creati;
+      await assicuraChatDelCliente(c, ctx);
       return { id: c.id, nome: c.name };
     },
   },
@@ -1323,6 +1346,16 @@ const TOOLS = {
       if (!cambiati.length) throw fail("Nessun campo da aggiornare");
 
       await db(`clients?id=eq.${cliente.id}`, { method: "PATCH", body: JSON.stringify(patch), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+
+      /* Un cliente, una chat: se cambia il nome, la sua chat lo segue
+         (altrimenti resterebbe col vecchio nome, staccata dal cliente). */
+      if (patch.name && patch.name !== cliente.name) {
+        try {
+          await db(`conversations?${filtroNomeConversazione(cliente.name)}&deleted_at=is.null`, { method: "PATCH", body: JSON.stringify({ contact_name: patch.name }) }, ctx.accessToken);
+        } catch (err) {
+          console.warn("Cliente rinominato ma la chat collegata no:", err.message);
+        }
+      }
       return { id: cliente.id, aggiornato: cambiati };
     },
   },
@@ -1353,7 +1386,7 @@ const TOOLS = {
       let conversazioneEliminata = false;
       let conversationId = null;
       try {
-        const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+        const conv = await db(`conversations?select=id&${filtroNomeConversazione(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
         if (Array.isArray(conv) && conv.length) {
           await db(`conversations?id=eq.${conv[0].id}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
           conversazioneEliminata = true;
@@ -2365,7 +2398,7 @@ const TOOLS = {
       if (!cliente) throw fail("Cliente non trovato", 404);
       const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
 
-      const conv = await db(`conversations?select=id&contact_name=eq.${encodeURIComponent(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
+      const conv = await db(`conversations?select=id&${filtroNomeConversazione(cliente.name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
       const conversazione = Array.isArray(conv) && conv[0];
       if (!conversazione) return { documenti: [] };
 

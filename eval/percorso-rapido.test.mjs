@@ -49,8 +49,11 @@ function filtra(righe, params) {
       if (v === "not.is.null") { if (r[k] == null) return false; continue; }
       if (v.startsWith("eq.")) { if (String(r[k]) !== v.slice(3)) return false; continue; }
       if (v.startsWith("ilike.")) {
-        const cerca = v.slice(6).replace(/\*/g, "").toLowerCase();
-        if (!String(r[k] || "").toLowerCase().includes(cerca)) return false;
+        /* come Postgres: con * è "contiene", senza è uguaglianza che ignora le maiuscole */
+        const grezzo = v.slice(6);
+        const cerca = grezzo.replace(/\\(.)/g, "$1").replace(/\*/g, "").toLowerCase();
+        const valore = String(r[k] || "").toLowerCase();
+        if (grezzo.includes("*") ? !valore.includes(cerca) : valore !== cerca) return false;
         continue;
       }
     }
@@ -372,6 +375,7 @@ await scenario(
     verifica("creato con una sola chiamata piccola", ai1.length === 1 && ai1[0].tools.length === 1 && r1.corpo.stato === "concluso", `${ai1.length} ${r1.corpo.stato}`);
     verifica("telefono e lavoro salvati", franco && franco.description === "Impianto elettrico", JSON.stringify(franco));
     verifica("azioni per l'app: crea_cliente", JSON.stringify(strumentiAzioni(r1)) === '["crea_cliente"]');
+    verifica("un cliente, una chat: la chat c'è ed è stata rinominata con lui", tabelle.conversations.length === 1 && tabelle.conversations[0].contact_name === "Franco Bike", tabelle.conversations.map((c) => c.contact_name).join(", "));
     verifica("correzione con una sola chiamata", ai2.length === 1 && r2.corpo.stato === "concluso");
     verifica("nome corretto in Franco Bike, nessun doppione", franco && franco.name === "Franco Bike" && tabelle.clients.length === 2, tabelle.clients.map((c) => c.name).join(", "));
     verifica("azioni per l'app: aggiorna_cliente", JSON.stringify(strumentiAzioni(r2)) === '["aggiorna_cliente"]');
@@ -386,6 +390,7 @@ await scenario(
   ([r], [ai]) => {
     verifica("una chiamata, cliente creato", ai.length === 1 && tabelle.clients.length === 1 && tabelle.clients[0].name === "Trani Valerio", tabelle.clients.map((c) => c.name).join(","));
     verifica("stato 'trattativa' come nel motore completo", tabelle.clients[0].status === "trattativa");
+    verifica("la sua chat nasce insieme a lui", tabelle.conversations.length === 1 && tabelle.conversations[0].contact_name === "Trani Valerio");
   }
 );
 
