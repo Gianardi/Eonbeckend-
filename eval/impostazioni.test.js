@@ -57,16 +57,20 @@ async function main() {
     verifica("con la sessione aperta si entra direttamente", dentro);
 
     await page.evaluate(() => navigateTo("impostazioni"));
+    const voci = await page.evaluate(() => [...document.querySelectorAll("#page-impostazioni > .azienda-list > .azienda-link-card .module-title")].map((e) => e.textContent));
+    verifica("sei card: Account, Profilo, Sicurezza, Aiuto, Esci, Elimina account", JSON.stringify(voci) === '["Account","Profilo","Sicurezza","Aiuto","Esci","Elimina account"]', JSON.stringify(voci));
+    verifica("sotto \"Account\": email e professione", (await page.textContent("#impAccountSotto")) === "andrea@esempio.it · Edile", await page.textContent("#impAccountSotto"));
+    if (process.env.SCREEN_IMPOSTAZIONI) await page.screenshot({ path: process.env.SCREEN_IMPOSTAZIONI, fullPage: true });
+    await page.click("#impVoceAccount");
     const acc = await page.evaluate(() => ({
+      titolo: document.getElementById("risorsaTitolo").textContent,
       nome: document.getElementById("impNome").textContent + " · " + document.getElementById("impAttivita").textContent, email: document.getElementById("impEmail").textContent,
       prof: document.getElementById("impProfessione").textContent,
-      voci: [...document.querySelectorAll("#page-impostazioni .azienda-link-card .module-title")].map((e) => e.textContent),
     }));
-    verifica("account: nome, attività, email", acc.nome === "Andrea Gianardi · Gianardi Costruzioni" && acc.email === "andrea@esempio.it", JSON.stringify(acc));
-    if (process.env.SCREEN_IMPOSTAZIONI) await page.screenshot({ path: process.env.SCREEN_IMPOSTAZIONI, fullPage: true });
-    verifica("professione mostrata e non modificabile", acc.prof === "Edile" && !(await page.$("#page-impostazioni select, #cambiaProfessioneCard")), JSON.stringify(acc));
-
-    verifica("tutto a card: Profilo, Password, feedback, Registro AI, Esci, Elimina", JSON.stringify(acc.voci) === '["Profilo","Password","Manda un feedback","Registro AI","Esci dall\'account","Elimina account"]', JSON.stringify(acc.voci));
+    verifica("Account: nome, attività, email", acc.titolo === "Account" && acc.nome === "Andrea Gianardi · Gianardi Costruzioni" && acc.email === "andrea@esempio.it", JSON.stringify(acc));
+    verifica("professione mostrata e non modificabile", acc.prof === "Edile" && !(await page.$("#risorsaCorpo input, #risorsaCorpo select, #cambiaProfessioneCard")), JSON.stringify(acc));
+    if (process.env.SCREEN_ACCOUNT) { await page.waitForTimeout(400); await page.screenshot({ path: process.env.SCREEN_ACCOUNT }); }
+    await page.evaluate(() => chiudiRisorsaCard());
     await page.click("#impVoceProfilo");
     verifica("tocco su Profilo: si apre la sua scheda col nome già scritto", (await page.textContent("#risorsaTitolo")) === "Profilo" && (await page.inputValue("#impCampoNome")) === "Andrea Gianardi");
     if (process.env.SCREEN_PROFILO) { await page.waitForTimeout(400); await page.screenshot({ path: process.env.SCREEN_PROFILO }); }
@@ -77,8 +81,11 @@ async function main() {
     verifica("modifica profilo: salvata nel profilo", salvato.ult.tabella === "profiles" && salvato.ult.patch.full_name === "Andrea G." && salvato.esito === "Salvato.", JSON.stringify(salvato));
 
     await page.evaluate(() => chiudiRisorsaCard());
-    verifica("il riquadro dell'account si aggiorna col nome nuovo", (await page.textContent("#impNome")) === "Andrea G.");
+    await page.click("#impVoceAccount");
+    verifica("Account mostra il nome nuovo", (await page.textContent("#impNome")) === "Andrea G.");
+    await page.evaluate(() => chiudiRisorsaCard());
     await page.click("#impVocePassword");
+    verifica("Sicurezza: si apre la scheda della password", (await page.textContent("#risorsaTitolo")) === "Sicurezza");
     await page.fill("#impCampoPassword", "corta");
     await page.click("#impCambiaPassword");
     verifica("password troppo corta: spiegato, nessun cambio", /almeno 8/.test(await page.textContent("#impEsitoPassword")) && !(await page.evaluate(() => window.__chiamate.some((c) => c.updateUser))));
@@ -91,6 +98,17 @@ async function main() {
     let domanda = "";
     page.once("dialog", (d) => { domanda = d.message(); d.accept(); });
     await page.evaluate(() => chiudiRisorsaCard());
+    await page.click("#impVoceAiuto");
+    const aiuto = await page.evaluate(() => ({ titolo: document.getElementById("risorsaTitolo").textContent, voci: [...document.querySelectorAll("#risorsaCorpo .module-title")].map((e) => e.textContent) }));
+    verifica("Aiuto: Manda un feedback e Registro AI", aiuto.titolo === "Aiuto" && JSON.stringify(aiuto.voci) === '["Manda un feedback","Registro AI"]', JSON.stringify(aiuto));
+    if (process.env.SCREEN_AIUTO) { await page.waitForTimeout(400); await page.screenshot({ path: process.env.SCREEN_AIUTO }); }
+    await page.click('#risorsaCorpo [data-azione="feedback"]');
+    verifica("dall'Aiuto: \"Manda un feedback\" apre il modulo", await page.evaluate(() => !!document.getElementById("feedbackCampo")));
+    await page.evaluate(() => chiudiRisorsaCard());
+    await page.click("#impVoceAiuto");
+    await page.click('#risorsaCorpo [data-azione="registro"]');
+    verifica("dall'Aiuto: \"Registro AI\" apre la sua pagina", await page.evaluate(() => paginaAttuale === "ai-request-log" && document.getElementById("risorsaOverlay").style.display === "none"));
+    await page.evaluate(() => navigateTo("impostazioni"));
     await Promise.all([page.waitForNavigation({ waitUntil: "networkidle" }), page.click("#impEsci")]);
     await page.waitForTimeout(300);
     const fuori = await page.evaluate(() => ({ onboarding: !document.getElementById("onboardingScreen").classList.contains("hidden"), passo0: document.getElementById("obStep0").classList.contains("visible") }));

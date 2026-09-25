@@ -87,10 +87,10 @@ async function main() {
       const titoli = (sel) => [...document.querySelectorAll(sel + " .azienda-link-card .module-title")].map((e) => e.textContent.trim());
       const menu = titoli("#page-gestisci-azienda > .azienda-list");
       document.getElementById("menuImpostazioni").click();
-      return { menu, impostazioni: titoli("#page-impostazioni"), aperta: document.getElementById("page-impostazioni").classList.contains("visible") };
+      return { menu, impostazioni: titoli("#page-impostazioni > .azienda-list"), aperta: document.getElementById("page-impostazioni").classList.contains("visible") };
     });
     verifica("Menu pulito: senza \"EON AI\" e \"Cambia professione\", con Impostazioni in fondo", !voci.menu.includes("EON AI") && !voci.menu.includes("Cambia professione") && voci.menu.at(-1) === "Impostazioni", JSON.stringify(voci.menu));
-    verifica("Impostazioni: Profilo, Password, feedback, Registro AI, Esci, Elimina", voci.aperta && JSON.stringify(voci.impostazioni) === '["Profilo","Password","Manda un feedback","Registro AI","Esci dall\'account","Elimina account"]', JSON.stringify(voci));
+    verifica("Impostazioni: Account, Profilo, Sicurezza, Aiuto, Esci, Elimina account", voci.aperta && JSON.stringify(voci.impostazioni) === '["Account","Profilo","Sicurezza","Aiuto","Esci","Elimina account"]', JSON.stringify(voci));
     const registro = await page.evaluate(() => { document.querySelector('#page-impostazioni [data-page="ai-request-log"]').click(); const indietro = document.querySelector("#page-ai-request-log .back-link"); indietro.click(); return document.querySelector(".page.visible").id; });
     verifica("dal Registro AI si torna alle Impostazioni", registro === "page-impostazioni", registro);
 

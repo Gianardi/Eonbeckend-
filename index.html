@@ -1267,6 +1267,8 @@
   .imp-form{ display:flex; flex-direction:column; gap:14px; padding:2px 2px 6px; }
   .imp-avviso{ font-size:14px; line-height:1.5; color:var(--text); background:var(--coral-soft); border-radius:12px; padding:12px 14px; }
   .imp-voce-pericolo .module-title{ color:var(--coral); }
+  .imp-aiuto-voce{ width:100%; text-align:left; font:inherit; color:inherit; }
+  .imp-nota{ font-size:12.5px; color:var(--muted); line-height:1.45; }
   /* Scorrimento tra le pagine principali: la pagina nuova entra dal lato giusto */
   @keyframes entra-da-destra{ from{ transform:translateX(28px); opacity:.35; } to{ transform:none; opacity:1; } }
   @keyframes entra-da-sinistra{ from{ transform:translateX(-28px); opacity:.35; } to{ transform:none; opacity:1; } }
@@ -3343,23 +3345,21 @@
         Torna al Menu
       </div>
 
-      <!-- Impostazioni tutte a card come il Menu (25/09/2026, Gianardi):
-           si tocca una voce e si apre la sua scheda. -->
-      <div class="imp-card">
-        <div class="imp-account">
-          <div class="imp-avatar" id="impAvatar">–</div>
-          <div style="min-width:0;">
-            <div class="imp-nome" id="impNome">—</div>
-            <div class="imp-attivita" id="impAttivita"></div>
-            <div class="imp-email" id="impEmail"></div>
-          </div>
-        </div>
-        <div class="imp-riga"><span>Professione</span><b id="impProfessione">—</b></div>
-      </div>
-
-      <div class="azienda-list" style="margin-top:12px;">
-        <div class="azienda-link-card" id="impVoceProfilo" role="button" tabindex="0">
+      <!-- Impostazioni: sei voci a card (25/09/2026, Gianardi): Account,
+           Profilo, Sicurezza, Aiuto, Esci, Elimina. Ognuna apre la sua scheda. -->
+      <div class="azienda-list">
+        <div class="azienda-link-card" id="impVoceAccount" role="button" tabindex="0">
           <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6 6 0 0 1 11 0"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Account</div>
+            <div class="module-sub" id="impAccountSotto">Email e professione</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVoceProfilo" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--teal);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
           </div>
           <div class="azienda-link-card-body">
@@ -3373,11 +3373,45 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           </div>
           <div class="azienda-link-card-body">
-            <div class="module-title">Password</div>
+            <div class="module-title">Sicurezza</div>
             <div class="module-sub">Cambia la password di accesso</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
+        <div class="azienda-link-card" id="impVoceAiuto" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--violet);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5v.01"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Aiuto</div>
+            <div class="module-sub">Manda un feedback, registro dell'assistente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impEsci" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Esci</div>
+            <div class="module-sub">Torni alla schermata iniziale</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card imp-voce-pericolo" id="impVoceElimina" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--coral);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Elimina account</div>
+            <div class="module-sub">Cancella per sempre account e dati</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+      <!-- Le due voci di "Aiuto": restano qui nascoste (hanno già i loro
+           comandi), la scheda Aiuto le richiama. -->
+      <div hidden id="impVociAiuto">
         <div class="azienda-link-card" id="feedbackCard">
           <div class="module-icon" style="background:var(--teal);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
@@ -3395,26 +3429,6 @@
           <div class="azienda-link-card-body">
             <div class="module-title">Registro AI</div>
             <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" id="impEsci" role="button" tabindex="0">
-          <div class="module-icon" style="background:var(--ink-3, #64748b);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Esci dall'account</div>
-            <div class="module-sub">Torni alla schermata iniziale</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card imp-voce-pericolo" id="impVoceElimina" role="button" tabindex="0">
-          <div class="module-icon" style="background:var(--coral);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Elimina account</div>
-            <div class="module-sub">Cancella per sempre account e dati</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -13019,14 +13033,13 @@ const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvoc
 function ricordaProfilo(profilo, email){
   profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
 }
-function disegnaImpostazioni(){
+function datiAccount(){
   const p = profiloUtente || { full_name:"", business_name:"", profession: currentProfession, email:"" };
-  const nome = p.full_name || "Il tuo account";
-  document.getElementById("impNome").textContent = nome;
-  document.getElementById("impAttivita").textContent = p.business_name || "";
-  document.getElementById("impEmail").textContent = p.email || "";
-  document.getElementById("impAvatar").textContent = (nome.split(/\s+/).map(w => w[0] || "").join("").slice(0, 2) || "–").toUpperCase();
-  document.getElementById("impProfessione").textContent = NOMI_PROFESSIONE[p.profession] || p.profession || "—";
+  return { ...p, nome: p.full_name || "Il tuo account", professione: NOMI_PROFESSIONE[p.profession] || p.profession || "—" };
+}
+function disegnaImpostazioni(){
+  const d = datiAccount();
+  document.getElementById("impAccountSotto").textContent = [d.email, d.professione].filter(x => x && x !== "—").join(" · ") || "Email e professione";
 }
 function esitoImp(id, testo, ok){
   const e = document.getElementById(id);
@@ -13047,6 +13060,43 @@ function suTocco(id, fn){
   el.addEventListener("click", fn);
   el.addEventListener("keydown", (e) => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); fn(); } });
 }
+
+suTocco("impVoceAccount", () => {
+  const d = datiAccount();
+  const iniziali = (d.nome.split(/\s+/).map(w => w[0] || "").join("").slice(0, 2) || "–").toUpperCase();
+  const corpo = schedaImpostazione("Account", `
+    <div class="imp-account">
+      <div class="imp-avatar" id="impAvatar"></div>
+      <div style="min-width:0;">
+        <div class="imp-nome" id="impNome"></div>
+        <div class="imp-attivita" id="impAttivita"></div>
+        <div class="imp-email" id="impEmail"></div>
+      </div>
+    </div>
+    <div class="imp-riga"><span>Professione</span><b id="impProfessione"></b></div>
+    <div class="imp-nota">La professione è legata al tuo account: si sceglie alla registrazione e non si cambia.</div>`);
+  corpo.querySelector("#impAvatar").textContent = iniziali;
+  corpo.querySelector("#impNome").textContent = d.nome;
+  corpo.querySelector("#impAttivita").textContent = d.business_name || "";
+  corpo.querySelector("#impEmail").textContent = d.email || "";
+  corpo.querySelector("#impProfessione").textContent = d.professione;
+});
+
+suTocco("impVoceAiuto", () => {
+  const corpo = schedaImpostazione("Aiuto", `
+    <div class="azienda-list">
+      <button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="feedback">
+        <div class="module-icon" style="background:var(--teal);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg></div>
+        <div class="azienda-link-card-body"><div class="module-title">Manda un feedback</div><div class="module-sub">Dicci cosa non va o cosa vorresti</div></div>
+      </button>
+      <button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="registro">
+        <div class="module-icon" style="background:var(--ink-3, #64748b);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div>
+        <div class="azienda-link-card-body"><div class="module-title">Registro AI</div><div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div></div>
+      </button>
+    </div>`);
+  corpo.querySelector('[data-azione="feedback"]').addEventListener("click", () => document.getElementById("feedbackCard").click());
+  corpo.querySelector('[data-azione="registro"]').addEventListener("click", () => { chiudiRisorsaCard(); navigateTo("ai-request-log"); });
+});
 
 suTocco("impVoceProfilo", () => {
   const p = profiloUtente || { full_name:"", business_name:"" };
@@ -13075,7 +13125,7 @@ suTocco("impVoceProfilo", () => {
 });
 
 suTocco("impVocePassword", () => {
-  const corpo = schedaImpostazione("Password", `
+  const corpo = schedaImpostazione("Sicurezza", `
     <label class="imp-campo"><span>Nuova password</span><input id="impCampoPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
     <button type="button" class="imp-btn" id="impCambiaPassword">Cambia password</button>
     <div class="imp-esito" id="impEsitoPassword"></div>`);
