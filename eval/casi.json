@@ -1097,6 +1097,98 @@
         "verifica": "manuale",
         "controllo": "EON non deve suggerire di confermare né negare la circostanza a un terzo non autorizzato — la sola esistenza di una pratica per un cliente è un dato riservato"
       }
+    },
+    {
+      "id": "fattura-01",
+      "categoria": "Fattura/preventivo — creazione immediata, cliente nuovo",
+      "situazione": "Cliente nuovo, importo unico e descrizione del lavoro nello stesso messaggio: deve creare cliente e documento nello stesso turno, senza fermarsi a chiedere nulla (bug reale 23/09/2026: si fermava a chiedere scomposizione in voci, o falliva del tutto)",
+      "input": "Fammi una fattura a Colombo Elisa da 450 euro più IVA per riparazione caldaia",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["trova_o_crea_cliente", "crea_preventivo_o_fattura"],
+        "strumento_richiesto_se_conclude": "crea_preventivo_o_fattura",
+        "verifica": "automatica",
+        "controllo": "cliente creato E documento creato nello stesso turno; NON deve chiedere di scomporre l'importo in più voci"
+      }
+    },
+    {
+      "id": "fattura-02",
+      "categoria": "Fattura/preventivo — creazione immediata, cliente già esistente",
+      "situazione": "Cliente già in anagrafica: 'trovato' riguarda solo l'identità, non deve MAI far scattare un controllo di documenti esistenti prima di creare (bug reale 23/09/2026: interpreta_richiesta veniva richiamato con operazione 'mostra' e recupera_documenti_cliente, sprecando giri fino al timeout)",
+      "precondizione": "In anagrafica deve esistere già un cliente 'Ferraro Community' (crearlo prima, o riusare un cliente esistente adattando il nome nell'input)",
+      "input": "Preventivo per Ferraro Community, tinteggiatura scale condominio, 3200 euro",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_preventivo_o_fattura"],
+        "strumento_richiesto_se_conclude": "crea_preventivo_o_fattura",
+        "verifica": "automatica",
+        "controllo": "NON deve comparire recupera_documenti_cliente tra gli strumenti chiamati, e il documento va creato entro 2-3 giri, non ai limiti del tetto massimo (indicatore di rischio timeout)"
+      }
+    },
+    {
+      "id": "fattura-03",
+      "categoria": "Fattura/preventivo — nessun importo dato",
+      "situazione": "Nessun dato oltre cliente e tipo di documento: deve chiedere i dati mancanti con una domanda vera, mai inventare un importo né creare un documento vuoto",
+      "input": "Fammi un preventivo per Neri Giordano per il rifacimento del tetto",
+      "atteso": {
+        "tipo": "domanda",
+        "strumenti_attesi": [],
+        "testo_finisce_con_domanda": true,
+        "verifica": "automatica",
+        "controllo": "nessun crea_preventivo_o_fattura chiamato; la domanda chiede voci/prezzo, non inventa un importo"
+      }
+    },
+    {
+      "id": "fattura-04",
+      "categoria": "Fattura/preventivo — nome diverso scambiato per simile",
+      "situazione": "Bug reale 23/09/2026: 'Dini Mirco' segnalato come simile a un cliente esistente 'Mario Bini', nomi in realtà del tutto diversi (distanza totale 3, sopra la soglia di 2) — non deve fermarsi a chiedere conferma d'identità",
+      "precondizione": "In anagrafica deve esistere già un cliente 'Mario Bini'",
+      "input": "Fattura Dini Mirco da 3000 euro per pulizia, sgombero e stuccate",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["trova_o_crea_cliente", "crea_preventivo_o_fattura"],
+        "strumento_richiesto_se_conclude": "crea_preventivo_o_fattura",
+        "verifica": "automatica",
+        "controllo": "deve creare 'Dini Mirco' come cliente nuovo, senza chiedere se si intendesse 'Mario Bini'"
+      }
+    },
+    {
+      "id": "fattura-05",
+      "categoria": "Fattura/preventivo — vera dettatura imprecisa su un nome",
+      "situazione": "Controllo di non-regressione opposto al caso precedente: una vera somiglianza (un nome mal dettato, distanza totale entro la soglia) deve ancora far scattare la richiesta di conferma, la correzione di ieri notte non deve aver reso il controllo troppo permissivo",
+      "precondizione": "In anagrafica deve esistere già un cliente 'Fabbri'",
+      "input": "Fattura per Tabri da 800 euro per pulizia grondaie",
+      "atteso": {
+        "tipo": "domanda_o_azione_con_conferma",
+        "verifica": "manuale",
+        "controllo": "deve chiedere se 'Tabri' è in realtà 'Fabbri' (nome dettato male), non crearlo silenziosamente come cliente nuovo né collegarlo a Fabbri senza dirlo"
+      }
+    },
+    {
+      "id": "fattura-06",
+      "categoria": "Fattura/preventivo — completamento in due turni",
+      "situazione": "L'utente dà i dati mancanti in un turno successivo (continuazione): deve concludere creando davvero il documento, non ripetere la domanda né perdere il contesto del cliente già risolto (bug reale 23/09/2026 sul cliente 'Trani': qui si verifica che, una volta dati i dati, il documento venga creato per davvero)",
+      "input_sequenza": ["Mi serve un preventivo per Neri Giordano, rifacimento tetto", "Diciamo 8500 euro tutto compreso"],
+      "note": "Due turni nella STESSA conversazione (stesso runId, come intento-05)",
+      "atteso": {
+        "tipo": "azione",
+        "strumenti_attesi": ["crea_preventivo_o_fattura"],
+        "strumento_richiesto_se_conclude": "crea_preventivo_o_fattura",
+        "verifica": "automatica",
+        "controllo": "il secondo turno deve creare davvero il documento, non chiedere di nuovo le voci"
+      }
+    },
+    {
+      "id": "fattura-07",
+      "categoria": "Fattura/preventivo — correzione di un documento già creato",
+      "situazione": "Nuovo tasto 'Modifica' sulla scheda del documento (Gianardi, 25/09/2026): l'utente segnala un errore su un documento appena creato e chiede di correggerlo — deve usare modifica_preventivo_o_fattura sullo STESSO documento (stesso id, stesso numero), mai crea_preventivo_o_fattura (che ne creerebbe un secondo duplicato)",
+      "input_sequenza": ["Fattura per Colombo Elisa da 450 euro per riparazione caldaia", "Il professionista sta guardando la fattura appena creata e ha detto questa correzione a voce: \"in realtà sono 550 euro, non 450\""],
+      "note": "Due turni nella STESSA conversazione (stesso runId): il secondo simula il messaggio che il tasto Modifica invia con l'id del documento del primo turno",
+      "atteso": {
+        "tipo": "azione",
+        "verifica": "manuale",
+        "controllo": "il secondo turno deve chiamare modifica_preventivo_o_fattura (mai un secondo crea_preventivo_o_fattura), sullo stesso documento, con l'importo corretto a 550 e la stessa descrizione"
+      }
     }
   ]
 }

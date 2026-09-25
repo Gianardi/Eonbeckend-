@@ -1703,10 +1703,126 @@ const TOOLS = {
         numero,
         titolo,
         cliente: cliente.name,
+        cliente_id: cliente.id,
         conversation_id: conversazione.id,
         totale,
         entrata_creata: entrataCreata,
+        /* Dettaglio completo (voci, imponibile, IVA, condizioni, note,
+           professionista) incluso qui, non solo il totale: il frontend
+           può aprire subito una vera anteprima del documento appena
+           creato, senza un secondo giro a recupera_documenti_cliente
+           solo per rileggere quello che ha appena scritto lui stesso. */
+        dati,
       };
+    },
+  },
+
+  /* Corregge un preventivo/fattura già creato, sostituendo le voci (mai
+     un aggiustamento parziale riga per riga: più semplice da ragionare,
+     sia per il modello sia per chi rilegge il documento dopo — "ho
+     rifatto il documento con questi dati", non "ho cambiato solo la
+     riga 2"). Pensato per il tasto "Modifica" sulla scheda del
+     documento (Gianardi, 25/09/2026): l'utente vede un errore, tocca
+     Modifica, dice a voce cosa correggere, e questo tool riscrive il
+     documento con gli stessi criteri di crea_preventivo_o_fattura
+     (stesso numero/conversazione, ricalcola imponibile/IVA/totale). */
+  modifica_preventivo_o_fattura: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "modifica_preventivo_o_fattura",
+      description: "Corregge un preventivo o una fattura già creato (mai per crearne uno nuovo: per quello usa crea_preventivo_o_fattura). Usalo quando l'utente, guardando un documento già fatto, segnala che qualcosa è sbagliato (importo, voce, cliente sbagliato) e chiede di correggerlo — tipicamente dopo aver toccato 'Modifica' su quel documento. Sostituisce TUTTE le voci con quelle date: se l'utente vuole cambiare solo un dettaglio, ripeti comunque tutte le voci corrette (quelle invariate incluse), non solo quella nuova.",
+      input_schema: {
+        type: "object",
+        properties: {
+          documento_id: { type: "string", description: "Id del documento da correggere (di solito noto dal contesto: l'utente ha appena aperto/creato quel documento)" },
+          voci: {
+            type: "array",
+            description: "Le voci corrette del documento, TUTTE (sostituiscono quelle esistenti) — almeno una",
+            items: {
+              type: "object",
+              properties: {
+                descrizione: { type: "string" },
+                quantita: { type: "number", description: "Default 1 se l'utente non la specifica" },
+                prezzo: { type: "number", description: "Prezzo unitario in euro, IVA esclusa" },
+              },
+              required: ["descrizione", "prezzo"],
+            },
+          },
+          aliquota_iva: { type: "number", description: "Percentuale IVA, se non detta mantieni quella già presente nel documento" },
+          condizioni: { type: "string", description: "Se non detto, mantieni quelle già presenti nel documento" },
+          note: { type: "string", description: "Se non detto, mantieni quelle già presenti nel documento" },
+        },
+        required: ["documento_id", "voci"],
+      },
+    },
+    async run(input, ctx) {
+      if (!Array.isArray(input.voci) || !input.voci.length) throw fail("Serve almeno una voce con descrizione e prezzo");
+
+      const righe = await db(`messages?select=id,conversation_id,file_name&id=eq.${input.documento_id}&event_type=eq.doc`, { method: "GET" }, ctx.accessToken);
+      const riga = Array.isArray(righe) && righe[0];
+      if (!riga) throw fail("Documento non trovato", 404);
+
+      let datiEsistenti;
+      try { datiEsistenti = JSON.parse(riga.file_name); } catch (err) { throw fail("Documento non leggibile, impossibile correggerlo"); }
+      if (!TIPI_DOCUMENTO.has(datiEsistenti.tipo)) throw fail("Documento non valido: manca il tipo (preventivo/fattura)");
+
+      const voci = input.voci.map((v) => {
+        if (!eStringaNonVuota(v.descrizione)) throw fail("Ogni voce del documento deve avere una descrizione");
+        if (!eNumero(v.prezzo)) throw fail("Ogni voce del documento deve avere un prezzo");
+        return { desc: v.descrizione.trim(), qta: eNumero(v.quantita) ? v.quantita : 1, prezzo: v.prezzo };
+      });
+
+      const aliquota = eNumero(input.aliquota_iva) ? input.aliquota_iva : datiEsistenti.aliquota;
+      const imponibile = voci.reduce((t, v) => t + v.qta * v.prezzo, 0);
+      const iva = (imponibile * aliquota) / 100;
+      const totale = imponibile + iva;
+
+      const dati = {
+        ...datiEsistenti,
+        voci,
+        aliquota,
+        imponibile,
+        iva,
+        totale,
+        condizioni: eStringaNonVuota(input.condizioni) ? input.condizioni.trim() : datiEsistenti.condizioni,
+        note: eStringaNonVuota(input.note) ? input.note.trim() : datiEsistenti.note,
+      };
+
+      const riassunto = voci.map((v) => v.desc).join(" · ");
+      const titolo = `${dati.tipo === "fattura" ? "Fattura" : "Preventivo"} n. ${dati.numero}`;
+
+      await db(
+        `messages?id=eq.${riga.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ title: titolo, body: riassunto, amount: totale, file_name: JSON.stringify(dati) }),
+          headers: { Prefer: "return=minimal" },
+        },
+        ctx.accessToken
+      );
+
+      /* Se una fattura genera un'entrata attesa, il suo importo deve
+         restare coerente col documento corretto — mai lasciare
+         un'entrata con l'importo vecchio dopo aver corretto la fattura.
+         L'entrata non ha un collegamento diretto all'id del documento
+         (tabella incomes senza quella colonna), quindi la troviamo con
+         la STESSA descrizione usata quando è stata creata — quella
+         VECCHIA (da datiEsistenti, prima della correzione), non quella
+         nuova appena calcolata: altrimenti, con voci cambiate, la
+         ricerca non troverebbe mai la riga giusta. */
+      if (dati.tipo === "fattura") {
+        try {
+          const riassuntoVecchio = (Array.isArray(datiEsistenti.voci) ? datiEsistenti.voci.map((v) => v.desc).join(" · ") : "").slice(0, 60);
+          await db(
+            `incomes?owner_id=eq.${ctx.user.id}&client_name=eq.${encodeURIComponent(dati.cliente)}&description=eq.${encodeURIComponent(riassuntoVecchio)}`,
+            { method: "PATCH", body: JSON.stringify({ amount: totale, description: riassunto.slice(0, 60) }), headers: { Prefer: "return=minimal" } },
+            ctx.accessToken
+          );
+        } catch (err) { /* nessuna entrata collegata da aggiornare, o già cambiata: non blocca la correzione del documento */ }
+      }
+
+      return { id: riga.id, tipo: dati.tipo, numero: dati.numero, titolo, cliente: dati.cliente, totale, dati };
     },
   },
 
@@ -2144,9 +2260,16 @@ const TOOLS = {
       return {
         documenti: (Array.isArray(righe) ? righe : []).map((m) => {
           const ePreventivoOFattura = m.event_type === "doc";
-          return ePreventivoOFattura
-            ? { id: m.id, tipo: "preventivo_o_fattura", titolo: m.title, riepilogo: m.body || null, importo: m.amount ?? null, url: null, quando: m.created_at }
-            : { id: m.id, tipo: "allegato", titolo: m.file_name || "(senza nome)", url: m.file_url, quando: m.created_at };
+          if (!ePreventivoOFattura) return { id: m.id, tipo: "allegato", titolo: m.file_name || "(senza nome)", url: m.file_url, quando: m.created_at };
+          /* dati (voci, imponibile, IVA, condizioni...) incluso qui per
+             lo stesso motivo di crea_preventivo_o_fattura: il frontend
+             deve poter aprire l'anteprima completa e proporre "Modifica"
+             anche su un documento recuperato, non solo su uno appena
+             creato nello stesso turno — null se il JSON è corrotto,
+             mai un errore che blocca l'intero elenco per un solo documento. */
+          let dati = null;
+          try { dati = JSON.parse(m.file_name); } catch (err) { /* riga senza dati validi: il documento resta comunque visibile in elenco */ }
+          return { id: m.id, tipo: "preventivo_o_fattura", titolo: m.title, riepilogo: m.body || null, importo: m.amount ?? null, url: null, quando: m.created_at, dati };
         }),
       };
     },
@@ -2440,6 +2563,8 @@ Vale lo stesso, identico, sia per preventivo sia per fattura.
 IMPORTANTE — una cifra unica con una descrizione generale (es. "preventivo a Ferri per facciata 30.500", "fattura a Bianchi da 500+IVA per pitturazione muri") NON è un caso 1 (dati mancanti): è già un documento completo con UNA SOLA voce (descrizione "facciata"/"pitturazione muri", prezzo il totale dato) — crealo SUBITO con quella singola voce, mai fermarti a chiedere di scomporlo in voci più piccole (es. "quanto è il ponteggio, quanto la pulizia..."). L'utente ha dato un lavoro e un prezzo: basta e avanza, la scomposizione in più voci è un dettaglio che spetta a lui aggiungere se e quando vuole, mai una domanda bloccante tua. Chiedi la scomposizione SOLO se l'utente stesso l'accenna esplicitamente (es. "un preventivo con ponteggio, pulizia e finiture" senza dire i prezzi delle singole voci) — mai come iniziativa tua di fronte a una cifra unica con una sola descrizione, per quanto il lavoro possa sembrare complesso o costoso.
 
 IMPORTANTE — quando cliente_risolto per una fattura/preventivo da CREARE risulta "trovato" o è appena stato creato (crea_cliente/trova_o_crea_cliente nello stesso turno), NON richiamare interpreta_richiesta una seconda volta per la stessa richiesta cambiando operazione in "mostra", e NON chiamare recupera_documenti_cliente per controllare se esiste già un documento simile prima di crearlo: "trovato" riguarda SOLO l'identità del cliente, mai un documento già esistente, e un eventuale doppione lo nota casomai l'utente stesso guardando la sua scheda dopo — non è un motivo per fermarsi. Se hai già voci e prezzo, il passo giusto è SEMPRE e SOLO chiamare crea_preventivo_o_fattura subito, nello stesso giro in cui hai risolto/creato il cliente quando possibile: ogni giro in più speso a "ricontrollare" prima di creare è tempo perso che rischia di far scadere la richiesta senza risposta, il danno peggiore possibile per il professionista.
+
+Se l'utente segnala un errore su un preventivo/fattura GIÀ creato (importo sbagliato, voce sbagliata, cliente sbagliato) e ti chiede di correggerlo — tipicamente subito dopo aver toccato "Modifica" sulla scheda di quel documento, quindi sai già a quale documento si riferisce — usa modifica_preventivo_o_fattura, mai crea_preventivo_o_fattura (che ne creerebbe un secondo, duplicato). Ripeti TUTTE le voci corrette nella chiamata, comprese quelle che l'utente non ha menzionato perché restano giuste: lo strumento sostituisce l'intero elenco, non aggiunge o modifica una riga sola. Se manca il documento_id e non riesci a capire da solo a quale documento si riferisce (più di uno recente, o nessun contesto), chiedi prima quale, non indovinare su un documento finanziario.
 
 Quando l'utente chiede cosa ha in programma, i suoi impegni, il riepilogo della giornata o cosa fare prima/dopo per oggi, domani o un altro periodo, chiama SEMPRE elenca_appuntamenti per quel periodo prima di rispondere — anche se ti sembra di non avere abbastanza informazioni per rispondere, anche se la domanda ti sembra già risposta in un turno precedente della stessa conversazione: non dare mai per scontato di non sapere cosa c'è già segnato, e non chiedere mai all'utente di ripetertelo. La stessa identica domanda fatta due volte deve dare la stessa risposta, basata sugli stessi dati veri, non una risposta diversa a seconda che tu ti ricordi o meno di controllare.
 

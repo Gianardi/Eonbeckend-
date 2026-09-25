@@ -3014,3 +3014,41 @@ verificare col server prima di usare una copia in cache (non vuol dire
 "mai cache", solo "mai senza controllare prima"), così un nuovo deploy
 è visibile subito ad ogni apertura dell'app, senza dover spiegare a
 ogni professionista come svuotare la cache del telefono.
+
+## Anteprima vera del documento + correzione a voce (25/09/2026)
+
+Dopo aver visto la fattura di "Giampiero Dini" funzionare correttamente,
+Gianardi ha chiesto tre cose sulla scheda che si apre subito dopo la
+creazione:
+
+1. **Stile più semplice, meno testo** — tolti il riepilogo e la nota
+   "Visibile solo dentro l'app" dalla scheda riassuntiva; resta solo
+   icona, cifra e numero documento.
+2. **"Devo poterla aprire e vedere"** — prima la scheda mostrava solo
+   cifra e numero, mai il documento vero. Aggiunta un'anteprima
+   completa (cliente, tabella voci, imponibile, IVA, totale — stessa
+   presentazione grafica già usata nella vecchia pagina "Crea Fattura"
+   manuale, qui però con i DATI VERI del documento), che si apre
+   toccando l'icona o il nuovo pulsante "Apri". Per farlo, il backend
+   ora restituisce anche il dettaglio completo (`dati`) sia appena creato
+   (`crea_preventivo_o_fattura`) sia quando recuperato dopo
+   (`recupera_documenti_cliente`) — prima veniva scartato dopo il calcolo,
+   il frontend avrebbe dovuto richiederlo di nuovo.
+3. **"Un tasto modifica anche tramite microfono"** — nuovo strumento
+   `modifica_preventivo_o_fattura` (api/index.js): l'utente tocca
+   "Modifica", dice a voce cosa correggere, e il documento viene
+   riscritto (sostituendo TUTTE le voci, mai un aggiustamento parziale
+   — più semplice da ragionare sia per il modello sia per chi rilegge
+   dopo) con imponibile/IVA/totale ricalcolati sullo stesso numero e
+   nella stessa conversazione — mai un secondo documento duplicato. Se
+   la fattura aveva già generato un'entrata attesa, anche quella viene
+   aggiornata (trovata tramite la vecchia descrizione, non quella nuova
+   — bug potenziale evitato: la ricerca doveva usare i dati di PRIMA
+   della correzione, altrimenti non avrebbe mai trovato la riga giusta).
+
+Verificato: `node --check`, un test a parte sul solo ricalcolo
+(imponibile/IVA/totale su 4 casi: correzione importo, voce aggiunta,
+aliquota IVA diversa, quantità diversa da 1), e un nuovo caso nella eval
+suite (`fattura-07`) sul flusso "crea poi correggi" nella stessa
+conversazione. Non ancora provato dal vivo con l'AI vera in questa
+sessione (serve un turno reale con Gianardi).

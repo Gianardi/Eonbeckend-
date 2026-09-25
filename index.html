@@ -7993,7 +7993,7 @@ function collegaHubRacconta(){
            esattamente come uno già esistente, non solo un toast — "poi
            aprire la carta e far vedere il caricamento del preventivo"
            (Gianardi, 23/09/2026). */
-        mostraRisorsaDocumenti([{ titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale }], a.esito.cliente);
+        mostraRisorsaDocumenti([{ id:a.esito.id, titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale, dati:a.esito.dati }], a.esito.cliente);
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
         const fallite = a.esito.fallite || [];
@@ -9398,7 +9398,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       } else if(a.tool === "correggi_appunto"){
         mostra("Appunto corretto", a.esito.testo);
       } else if(a.tool === "crea_preventivo_o_fattura"){
-        mostraRisorsaDocumenti([{ titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale }], a.esito.cliente);
+        mostraRisorsaDocumenti([{ id:a.esito.id, titolo:a.esito.titolo, tipo:"preventivo_o_fattura", riepilogo:null, importo:a.esito.totale, dati:a.esito.dati }], a.esito.cliente);
         daDire.push(a.esito.titolo + " per " + a.esito.cliente + " pronto");
       } else if(a.tool === "svuota_cestino"){
         const n = a.esito.totale_eliminati || 0;
@@ -10022,6 +10022,131 @@ function creaIconaHero(colore, pathSvg, onClick){
 const ICONA_FATTURA = '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>';
 const ICONA_DOCUMENTO = '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9.5 13h5M9.5 17h5"/>';
 
+/* Anteprima vera del documento (voci, imponibile, IVA, totale), non solo
+   la cifra e il titolo della scheda riassuntiva — richiesta esplicita di
+   Gianardi il 25/09/2026 ("devo poterla aprire e vedere"). Stessa
+   struttura visiva già usata nella vecchia pagina "Crea Fattura"
+   manuale (.invoice-preview*, mai collegata a dati veri, in via di
+   rimozione), qui però con i dati REALI del documento creato/recuperato
+   da EON — mai un secondo sistema di fatturazione, solo la stessa
+   presentazione applicata ai dati veri. */
+function costruisciAnteprimaDocumento(dati){
+  const wrap = document.createElement("div");
+  wrap.className = "invoice-preview";
+
+  const head = document.createElement("div");
+  head.className = "invoice-preview-head";
+  const sinistra = document.createElement("div");
+  const brand = document.createElement("div");
+  brand.className = "invoice-preview-brand doc-brand-dynamic";
+  brand.innerHTML = 'E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N';
+  sinistra.appendChild(brand);
+  const doctype = document.createElement("div");
+  doctype.className = "invoice-preview-doctype";
+  doctype.textContent = dati.tipo === "fattura" ? "Fattura" : "Preventivo";
+  sinistra.appendChild(doctype);
+  head.appendChild(sinistra);
+  const meta = document.createElement("div");
+  meta.className = "invoice-preview-meta";
+  meta.innerHTML = `<div>N. <b>${dati.numero || "—"}</b></div><div>Data: <span>${dati.data || "—"}</span></div>`;
+  head.appendChild(meta);
+  wrap.appendChild(head);
+
+  const label = document.createElement("div");
+  label.className = "invoice-preview-label";
+  label.textContent = "Cliente";
+  wrap.appendChild(label);
+  const valore = document.createElement("div");
+  valore.className = "invoice-preview-value";
+  valore.textContent = dati.cliente || "—";
+  wrap.appendChild(valore);
+
+  const table = document.createElement("table");
+  table.className = "invoice-preview-table";
+  table.innerHTML = "<thead><tr><th>Descrizione</th><th>Importo</th></tr></thead>";
+  const tbody = document.createElement("tbody");
+  (Array.isArray(dati.voci) ? dati.voci : []).forEach((v) => {
+    const tr = document.createElement("tr");
+    const tdDesc = document.createElement("td");
+    tdDesc.textContent = v.desc + (v.qta && v.qta !== 1 ? " × " + v.qta : "");
+    const tdImp = document.createElement("td");
+    tdImp.textContent = "€" + (Number(v.prezzo) * Number(v.qta || 1)).toLocaleString("it-IT");
+    tr.appendChild(tdDesc); tr.appendChild(tdImp);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+
+  const totali = document.createElement("div");
+  totali.className = "invoice-preview-totals";
+  totali.innerHTML = `
+    <div>Imponibile <span>€${Number(dati.imponibile || 0).toLocaleString("it-IT")}</span></div>
+    <div>IVA ${dati.aliquota ?? 22}% <span>€${Number(dati.iva || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 })}</span></div>
+    <div class="total">Totale <span>€${Number(dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 })}</span></div>
+  `;
+  wrap.appendChild(totali);
+
+  if(dati.condizioni){
+    const cond = document.createElement("div");
+    cond.className = "risorsa-voce-sotto";
+    cond.style.textAlign = "left";
+    cond.style.marginTop = "10px";
+    cond.textContent = dati.condizioni;
+    wrap.appendChild(cond);
+  }
+  return wrap;
+}
+
+/* Apre l'anteprima vera dentro la stessa scheda sovrapposta già in uso
+   per foto/documenti (apriRisorsaCard) — non un secondo overlay: basta
+   sostituirne il contenuto. Riusata anche subito dopo una correzione
+   riuscita (creaMicRapidoModificaDocumento), così l'utente vede il
+   documento aggiornato senza doverlo riaprire lui stesso. */
+function mostraAnteprimaDocumento(dati, docId, clienteNome){
+  const corpo = costruisciAnteprimaDocumento(dati);
+  if(docId){
+    const btnRiga = document.createElement("div");
+    btnRiga.className = "risorsa-riga-btn";
+    btnRiga.style.marginTop = "14px";
+    btnRiga.appendChild(creaMicRapidoModificaDocumento(dati, docId, clienteNome));
+    const etichetta = document.createElement("span");
+    etichetta.className = "risorsa-voce-sotto";
+    etichetta.textContent = "Modifica";
+    btnRiga.appendChild(etichetta);
+    corpo.appendChild(btnRiga);
+  }
+  apriRisorsaCard((dati.tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + (dati.numero || ""), corpo);
+  aggiornaMarchiDocumento();
+}
+
+/* Tasto microfono per correggere un documento già creato (Gianardi,
+   25/09/2026: "un tasto modifica anche tramite microfono che se
+   qualcosa non va l'utente può dirlo e chiedere la modifica") — stesso
+   pattern già rodato di creaMicRapido sulle foto, qui rivolto al nuovo
+   strumento modifica_preventivo_o_fattura. Se la correzione riesce,
+   riapre subito l'anteprima con i dati aggiornati invece di lasciare
+   l'utente a rileggere solo un messaggio di conferma testuale. */
+function creaMicRapidoModificaDocumento(dati, docId, clienteNome){
+  return creaMicRapido(async (testo) => {
+    if(!BACKEND_CONFIGURED || !currentSession) return;
+    showAIToast("Un attimo…", testo);
+    try{
+      const tipoDoc = dati.tipo === "fattura" ? "la fattura" : "il preventivo";
+      const risposta = await chiediAssistente(`Il professionista sta guardando ${tipoDoc} n. ${dati.numero} per ${dati.cliente} (id documento: ${docId}) e ha detto questa correzione a voce: "${testo}"`);
+      const azioneModifica = (risposta.azioni || []).find(a => a.tool === "modifica_preventivo_o_fattura");
+      if(azioneModifica){
+        mostraAnteprimaDocumento(azioneModifica.esito.dati, azioneModifica.esito.id, clienteNome);
+        showAIToast("Corretto", risposta.testo || "");
+      } else {
+        showAIToast(risposta.stato === "in_attesa_conferma" ? "Conferma richiesta" : "Fatto", risposta.testo || "");
+      }
+    }catch(err){
+      console.warn("Correzione del documento non riuscita:", err.message);
+      showAIToast("Non ci sono riuscita", err.message);
+    }
+  });
+}
+
 function creaVoceDocumento(doc, clienteNome){
   const el = document.createElement("div");
   el.className = "risorsa-voce";
@@ -10033,8 +10158,15 @@ function creaVoceDocumento(doc, clienteNome){
   const importoTesto = doc.importoTesto || (doc.importo != null ? "€" + Number(doc.importo).toLocaleString("it-IT") : null);
 
   if(doc.tipo === "preventivo_o_fattura"){
+    /* Stile volutamente minimo (Gianardi, 25/09/2026 — "niente scritte
+       o quasi poche"): solo cifra e numero documento, niente riepilogo
+       né la nota "visibile solo dentro l'app" di prima. L'icona stessa
+       apre il documento vero (costruisciAnteprimaDocumento) quando
+       abbiamo i dati completi (doc.dati) — se mancano (caso raro,
+       riga senza JSON valido) l'icona resta solo decorativa. */
     const eFattura = /fattura/i.test(doc.titolo || "");
-    el.appendChild(creaIconaHero(eFattura ? "var(--green)" : "var(--teal)", eFattura ? ICONA_FATTURA : ICONA_DOCUMENTO));
+    el.appendChild(creaIconaHero(eFattura ? "var(--green)" : "var(--teal)", eFattura ? ICONA_FATTURA : ICONA_DOCUMENTO,
+      doc.dati ? () => mostraAnteprimaDocumento(doc.dati, doc.id, clienteNome) : null));
     if(importoTesto){
       const importo = document.createElement("div");
       importo.className = "risorsa-hero-cifra";
@@ -10045,16 +10177,18 @@ function creaVoceDocumento(doc, clienteNome){
     titolo.className = "risorsa-voce-titolo";
     titolo.textContent = doc.titolo || "(senza titolo)";
     el.appendChild(titolo);
-    if(doc.riepilogo){
-      const riep = document.createElement("div");
-      riep.className = "risorsa-voce-riepilogo";
-      riep.textContent = doc.riepilogo;
-      el.appendChild(riep);
+    if(doc.dati){
+      const btnRiga = document.createElement("div");
+      btnRiga.className = "risorsa-riga-btn";
+      const apriBtn = document.createElement("button");
+      apriBtn.className = "doc-btn-secondario";
+      apriBtn.type = "button";
+      apriBtn.textContent = "Apri";
+      apriBtn.addEventListener("click", () => mostraAnteprimaDocumento(doc.dati, doc.id, clienteNome));
+      btnRiga.appendChild(apriBtn);
+      if(doc.id) btnRiga.appendChild(creaMicRapidoModificaDocumento(doc.dati, doc.id, clienteNome));
+      el.appendChild(btnRiga);
     }
-    const nota = document.createElement("div");
-    nota.className = "risorsa-voce-sotto";
-    nota.textContent = "Visibile solo dentro l'app — nessun link da condividere";
-    el.appendChild(nota);
     if(clienteNome){
       const riassunto = doc.titolo + (importoTesto ? " — " + importoTesto : "");
       el.appendChild(creaRigaCanaliInvio(clienteNome, riassunto));
