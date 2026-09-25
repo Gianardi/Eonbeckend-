@@ -3483,6 +3483,18 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Pulizia del Menu (25/09/2026)
+
+Gianardi: togliere "EON AI" (superato dal microfono in Home) e "Cambia
+professione" (non serve), aggiungere Impostazioni. Menu ora: Messaggi, La
+tua azienda, Assegna compiti, Chiamate, Cestino, Impostazioni. Impostazioni
+(pagina nuova): Manda un feedback, Registro AI (da lì si torna alle
+Impostazioni). Il codice dell'hub AI e del cambio professione resta, solo
+senza più un punto d'accesso dal Menu.
+- Messaggi sarà il punto unico del futuro communication hub (EON, WhatsApp,
+  email nella chat del cliente giusto).
+- Test: 3 in clienti-chat.test.js (31 in tutto).
+
 ### Scorrere col dito tra le pagine (25/09/2026)
 
 Gianardi: passare da Home a Clienti, Cresci, Menu (e indietro) scorrendo il

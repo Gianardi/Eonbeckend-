@@ -3192,16 +3192,6 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="azienda-link-card" id="cardEonAI">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">EON AI</div>
-            <div class="module-sub">Organizza la giornata, strategia trattative e altro</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
         <div class="azienda-link-card" data-page="assegna-compiti">
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
@@ -3234,33 +3224,15 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="azienda-link-card" data-page="ai-request-log">
+        <!-- Impostazioni (25/09/2026, Gianardi: pulizia del Menu). Tolti
+             "EON AI" (superato dal microfono in Home) e "Cambia professione". -->
+        <div class="azienda-link-card" data-page="impostazioni" id="menuImpostazioni">
           <div class="module-icon" style="background:var(--ink-3, #64748b);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
           </div>
           <div class="azienda-link-card-body">
-            <div class="module-title">Registro AI</div>
-            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" id="cambiaProfessioneCard">
-          <div class="module-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Cambia professione</div>
-            <div class="module-sub">Passa a un'altra sezione — Edile, Idraulico, Avvocato, Amministratore</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" id="feedbackCard">
-          <div class="module-icon" style="background:var(--teal);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Manda un feedback</div>
-            <div class="module-sub">Dicci cosa non va o cosa vorresti — ci arriva direttamente</div>
+            <div class="module-title">Impostazioni</div>
+            <div class="module-sub">Feedback e registro dell'assistente</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -3318,11 +3290,41 @@
       </div>
     </div>
 
-    <!-- ===== Sotto-pagina: Registro AI ===== -->
-    <div class="page" id="page-ai-request-log">
+    <!-- ===== Sotto-pagina: Impostazioni ===== -->
+    <div class="page" id="page-impostazioni">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Torna al Menu
+      </div>
+      <div class="azienda-list">
+        <div class="azienda-link-card" id="feedbackCard">
+          <div class="module-icon" style="background:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Manda un feedback</div>
+            <div class="module-sub">Dicci cosa non va o cosa vorresti — ci arriva direttamente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="ai-request-log">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Registro AI</div>
+            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Sotto-pagina: Registro AI ===== -->
+    <div class="page" id="page-ai-request-log">
+      <div class="back-link" data-page="impostazioni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna alle Impostazioni
       </div>
       <div class="card-panel">
         <div class="card-header"><h2>Registro AI</h2></div>
@@ -8643,15 +8645,13 @@ function collegaHubRacconta(){
   }
 }
 
-function apriHubAI(){ document.getElementById("aiHubOverlay").style.display = "flex"; }
 function chiudiHubAI(){ document.getElementById("aiHubOverlay").style.display = "none"; }
 
-document.getElementById("cardEonAI").addEventListener("click", apriHubAI);
 document.getElementById("laTuaAziendaCard").addEventListener("click", () => {
   const box = document.getElementById("cruscottoAziendaBox");
   box.style.display = box.style.display === "none" ? "grid" : "none";
 });
-document.getElementById("cambiaProfessioneCard").addEventListener("click", () => {
+document.getElementById("cambiaProfessioneCard")?.addEventListener("click", () => { // voce tolta dal Menu il 25/09/2026
   document.querySelectorAll("#cambiaProfessioneCards .ob-card").forEach(c => {
     c.classList.toggle("selected", c.dataset.profession === currentProfession);
   });
@@ -12241,6 +12241,7 @@ const pageMeta = {
   chiamate: { title:"Chiamate", sub:null },
   revisioni: { title:"Revisioni Portafoglio", sub:null },
   cestino: { title:"Cestino", sub:null },
+  impostazioni: { title:"Impostazioni", sub:null },
   "cantiere-cliente": { title:"Cliente cantiere", sub:null },
   "cantiere-appunti": { title:"Appunti", sub:null },
   "cantiere-documenti": { title:"Documenti", sub:null },
@@ -12261,7 +12262,7 @@ const tabForPage = {
   "crea-fattura":"azienda", "crea-preventivo":"azienda", regalo:"azienda", business:"azienda",
   "assemblee":"azienda", "udienze":"azienda", "revisioni":"azienda",
   calendario:"home", chiamate:"home",
-  cestino:"azienda", "ai-request-log":"azienda",
+  cestino:"azienda", "ai-request-log":"azienda", impostazioni:"azienda",
   "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home",
   "documenti-impresa":"home", "fatture-preventivi":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
 };

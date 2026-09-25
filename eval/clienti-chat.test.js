@@ -82,6 +82,17 @@ async function main() {
       return { primo: primo && primo.id, chatAperta: document.getElementById("page-chat").classList.contains("visible") };
     });
     verifica("Menu: \"Messaggi\" è la prima voce e apre le chat", menu.primo === "menuMessaggi" && menu.chatAperta, JSON.stringify(menu));
+    const voci = await page.evaluate(() => {
+      navigateTo("gestisci-azienda");
+      const titoli = (sel) => [...document.querySelectorAll(sel + " .azienda-link-card .module-title")].map((e) => e.textContent.trim());
+      const menu = titoli("#page-gestisci-azienda > .azienda-list");
+      document.getElementById("menuImpostazioni").click();
+      return { menu, impostazioni: titoli("#page-impostazioni"), aperta: document.getElementById("page-impostazioni").classList.contains("visible") };
+    });
+    verifica("Menu pulito: senza \"EON AI\" e \"Cambia professione\", con Impostazioni in fondo", !voci.menu.includes("EON AI") && !voci.menu.includes("Cambia professione") && voci.menu.at(-1) === "Impostazioni", JSON.stringify(voci.menu));
+    verifica("Impostazioni: Manda un feedback e Registro AI", voci.aperta && JSON.stringify(voci.impostazioni) === '["Manda un feedback","Registro AI"]', JSON.stringify(voci));
+    const registro = await page.evaluate(() => { document.querySelector('#page-impostazioni [data-page="ai-request-log"]').click(); const indietro = document.querySelector("#page-ai-request-log .back-link"); indietro.click(); return document.querySelector(".page.visible").id; });
+    verifica("dal Registro AI si torna alle Impostazioni", registro === "page-impostazioni", registro);
 
     const cresci = await page.evaluate(() => {
       navigateTo("cresci");
