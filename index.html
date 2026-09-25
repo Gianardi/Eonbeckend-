@@ -2433,11 +2433,17 @@
           </div>
           <div class="cantiere-card-title">Carta intestata</div>
         </button>
-        <button class="cantiere-card" type="button" data-page="fatture-preventivi">
+        <button class="cantiere-card" type="button" data-page="fatture-preventivi" data-fp-filtro="preventivo">
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/><circle cx="17" cy="16" r="4" fill="none"/></svg>
+          </div>
+          <div class="cantiere-card-title">Preventivi</div>
+        </button>
+        <button class="cantiere-card" type="button" data-page="fatture-preventivi" data-fp-filtro="fattura">
           <div class="cantiere-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
           </div>
-          <div class="cantiere-card-title">Fatture e preventivi</div>
+          <div class="cantiere-card-title">Fatture</div>
         </button>
       </div>
     </div>
@@ -10387,6 +10393,15 @@ function renderFatturePreventivi(){
   const lista = document.getElementById("fpLista");
   if(!lista) return;
   document.querySelectorAll(".fp-filtro").forEach(b => b.classList.toggle("on", b.dataset.f === filtroFatturePreventivi));
+  /* Cartelle separate (Gianardi, 25/09/2026: "le volevo separate come
+     prima"): aperta come Fatture o come Preventivi è una cartella a sé,
+     con il suo titolo e senza i filtri; i filtri restano solo nella vista
+     unica ("fatture e preventivi" a voce). */
+  const titoloCartella = filtroFatturePreventivi === "fattura" ? "Fatture" : filtroFatturePreventivi === "preventivo" ? "Preventivi" : "Fatture e preventivi";
+  const filtriEl = document.getElementById("fpFiltri");
+  if(filtriEl) filtriEl.style.display = filtroFatturePreventivi === "tutti" ? "" : "none";
+  const paginaEl = document.getElementById("page-fatture-preventivi");
+  if(paginaEl && paginaEl.classList.contains("visible")) document.getElementById("pageTitle").textContent = titoloCartella;
   const tutti = documentiVeri();
   const visibili = filtroFatturePreventivi === "tutti" ? tutti : tutti.filter(d => d.dati.tipo === filtroFatturePreventivi);
   document.getElementById("fpTitolo").textContent = filtroFatturePreventivi === "fattura" ? "Fatture" : filtroFatturePreventivi === "preventivo" ? "Preventivi" : "Fatture e preventivi";
@@ -11186,7 +11201,11 @@ function navigateTo(page){
 }
 
 document.querySelectorAll("[data-page]").forEach(el => {
-  el.addEventListener("click", () => navigateTo(el.dataset.page));
+  el.addEventListener("click", () => {
+    // Cartelle Fatture / Preventivi (menu Documenti): stessa pagina, già filtrata
+    if(el.dataset.fpFiltro) filtroFatturePreventivi = el.dataset.fpFiltro;
+    navigateTo(el.dataset.page);
+  });
 });
 
 document.getElementById("summaryGrid").addEventListener("click", (e) => {

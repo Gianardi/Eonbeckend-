@@ -56,15 +56,32 @@ async function main() {
       const pagine = [...document.querySelectorAll("#page-cantiere-documenti [data-page]")].map((b) => b.dataset.page);
       return pagine;
     });
-    verifica("menu Documenti: c'è \"Fatture e preventivi\"", hub.includes("fatture-preventivi"), JSON.stringify(hub));
+    verifica("menu Documenti: due cartelle vere, Preventivi e Fatture (separate come prima)", hub.filter((p) => p === "fatture-preventivi").length === 2, JSON.stringify(hub));
+
+    const cartelle = await page.evaluate(() => {
+      const apri = (f) => {
+        navigateTo("cantiere-documenti");
+        document.querySelector(`#page-cantiere-documenti [data-fp-filtro="${f}"]`).click();
+        return {
+          titolo: document.getElementById("pageTitle").textContent,
+          righe: [...document.querySelectorAll("#fpLista .doc-list-card")].map((r) => r.textContent.replace(/\s+/g, " ").trim()),
+          filtriVisibili: document.getElementById("fpFiltri").style.display !== "none",
+        };
+      };
+      return { fatture: apri("fattura"), preventivi: apri("preventivo") };
+    });
+    verifica("cartella Fatture: solo le 2 fatture, titolo \"Fatture\", senza filtri", cartelle.fatture.titolo === "Fatture" && cartelle.fatture.righe.length === 2 && cartelle.fatture.righe.every((r) => /^FT/.test(r)) && !cartelle.fatture.filtriVisibili, JSON.stringify(cartelle.fatture));
+    verifica("cartella Preventivi: solo il preventivo, titolo \"Preventivi\"", cartelle.preventivi.titolo === "Preventivi" && cartelle.preventivi.righe.length === 1 && /^PV/.test(cartelle.preventivi.righe[0]) && !cartelle.preventivi.filtriVisibili, JSON.stringify(cartelle.preventivi));
     verifica("menu Documenti: niente più le pagine finte Crea Fattura/Crea Preventivo", !hub.includes("crea-fattura") && !hub.includes("crea-preventivo"), JSON.stringify(hub));
 
+    // Vista unica (a voce "apri fatture e preventivi"), con i filtri.
     const lista = await page.evaluate(() => {
-      document.querySelector('#page-cantiere-documenti [data-page="fatture-preventivi"]').click();
+      filtroFatturePreventivi = "tutti";
+      navigateTo("fatture-preventivi");
       const righe = [...document.querySelectorAll("#fpLista .doc-list-card")].map((r) => r.textContent.replace(/\s+/g, " ").trim());
       return { visibile: document.getElementById("page-fatture-preventivi").classList.contains("visible"), titolo: document.getElementById("pageTitle").textContent, righe, count: document.getElementById("fpCount").textContent, totale: document.getElementById("fpTotale").textContent };
     });
-    verifica("la pagina si apre dal menu", lista.visibile && lista.titolo === "Fatture e preventivi", JSON.stringify(lista));
+    verifica("vista unica: si apre con il titolo \"Fatture e preventivi\"", lista.visibile && lista.titolo === "Fatture e preventivi", JSON.stringify(lista));
     verifica("3 documenti veri (esclusi messaggi normali e righe senza dati)", lista.count === "3" && lista.righe.length === 3, JSON.stringify(lista.righe));
     verifica("dal più recente: PV 10/2026, FT 8/2026, FT 7/2026", /PV 10\/2026/.test(lista.righe[0]) && /FT 8\/2026/.test(lista.righe[1]) && /FT 7\/2026/.test(lista.righe[2]), JSON.stringify(lista.righe));
     verifica("ogni riga ha cliente e totale", /Raspadori/.test(lista.righe[0]) && /€3\.660/.test(lista.righe[0]), lista.righe[0]);
