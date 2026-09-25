@@ -114,6 +114,16 @@ ricarichi — ma mai con del testo scritto a metà.
 NODE_PATH=/opt/node22/lib/node_modules node eval/aggiornamento.test.js
 ```
 
+### `fatture.test.js` — cartella vera Fatture e preventivi, gira subito
+
+Carica la vera index.html con documenti di prova in memoria e controlla
+lista, ordine, filtri, fatturato, apertura, aggiornamento dopo una
+correzione, i comandi a voce e che le pagine finte non siano più nel menu.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/fatture.test.js
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti

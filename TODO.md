@@ -3355,3 +3355,18 @@ modifica_preventivo_o_fattura).
 - La lettura del profilo (professione) ora parte in parallelo e si aspetta
   solo quando serve (prompt del motore completo): i percorsi rapidi non la
   aspettano più.
+
+### Cartella vera "Fatture e preventivi" (25/09/2026)
+
+Nuova pagina `fatture-preventivi` (menu Documenti): raccoglie TUTTI i
+preventivi e le fatture veri (messages con event_type "doc" nelle
+conversazioni dei clienti), dal più recente, con filtri Tutti/Fatture/
+Preventivi e il fatturato dell'anno. Tocco su una riga → la stessa
+anteprima con il tasto Modifica a voce; dopo una correzione la lista si
+aggiorna subito (`aggiornaDocumentoInMemoria`). A voce: "apri le fatture",
+"mostrami i preventivi". Le vecchie pagine finte "Crea Fattura"/"Crea
+Preventivo" (dati solo locali, mai collegati a niente) non sono più nel
+menu; restano nel codice, da togliere del tutto più avanti.
+Test: `eval/fatture.test.js` (19 verifiche).
+Ancora da valutare: le pagine Lettera/Cartello/Carta intestata (verificare
+se sono collegate a dati veri).

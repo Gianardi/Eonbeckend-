@@ -2433,18 +2433,34 @@
           </div>
           <div class="cantiere-card-title">Carta intestata</div>
         </button>
-        <button class="cantiere-card" type="button" data-page="crea-preventivo">
-          <div class="cantiere-card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/><circle cx="17" cy="16" r="4" fill="none"/></svg>
-          </div>
-          <div class="cantiere-card-title">Preventivo</div>
-        </button>
-        <button class="cantiere-card" type="button" data-page="crea-fattura">
+        <button class="cantiere-card" type="button" data-page="fatture-preventivi">
           <div class="cantiere-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
           </div>
-          <div class="cantiere-card-title">Fattura</div>
+          <div class="cantiere-card-title">Fatture e preventivi</div>
         </button>
+      </div>
+    </div>
+
+    <!-- ==================== PAGINA: FATTURE E PREVENTIVI ==================== -->
+    <!-- La cartella VERA (25/09/2026): tutti i preventivi e le fatture creati
+         davvero (a voce con EON o in chat), letti dalle conversazioni dei
+         clienti. Sostituisce le vecchie pagine "Crea Fattura"/"Crea
+         Preventivo", che non erano collegate a nessun dato vero. -->
+    <div class="page" id="page-fatture-preventivi">
+      <div class="back-link" data-page="cantiere-documenti">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna a Documenti
+      </div>
+      <div class="arch-filtri" id="fpFiltri" style="padding:0 0 12px;">
+        <button class="arch-filtro fp-filtro on" type="button" data-f="tutti">Tutti</button>
+        <button class="arch-filtro fp-filtro" type="button" data-f="fattura">Fatture</button>
+        <button class="arch-filtro fp-filtro" type="button" data-f="preventivo">Preventivi</button>
+      </div>
+      <div class="card-panel">
+        <div class="card-header"><h2 id="fpTitolo">Fatture e preventivi</h2><span class="count" id="fpCount">0</span></div>
+        <div id="fpTotale" class="risorsa-voce-sotto" style="text-align:left; padding:0 14px 6px;"></div>
+        <div id="fpLista"></div>
       </div>
     </div>
 
@@ -3926,6 +3942,7 @@ async function loadChatsFromDB(){
       docDati: leggiDatiDocumento(m),
       docTipo: leggiDatiDocumento(m) ? leggiDatiDocumento(m).tipo : undefined,
       docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
+      createdAt: m.created_at || undefined,
       fileType: m.file_type || undefined,
       time: formatMsgTime(m.created_at)
     }));
@@ -4520,6 +4537,7 @@ function subscribeToMessages(){
       docDati: leggiDatiDocumento(m),
       docTipo: leggiDatiDocumento(m) ? leggiDatiDocumento(m).tipo : undefined,
       docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
+      createdAt: m.created_at || undefined,
       fileType: m.file_type || undefined,
       time: formatMsgTime(m.created_at)
         });
@@ -8818,6 +8836,7 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "chat": ["chat", "conversazioni", "messaggi", "la chat", "le chat"],
   "cestino": ["cestino"],
   "documenti-impresa": ["documenti impresa", "documenti dell'impresa", "documenti azienda"],
+  "fatture-preventivi": ["fatture", "preventivi", "fatture e preventivi", "preventivi e fatture", "le fatture", "i preventivi", "le mie fatture", "i miei preventivi"],
   "pagamenti": ["pagamenti"],
   "entrate": ["entrate"],
 };
@@ -8849,6 +8868,8 @@ function provaNavigazioneDiretta(testo){
   for(const pagina in PAGINE_NAVIGABILI_A_VOCE){
     const sinonimi = PAGINE_NAVIGABILI_A_VOCE[pagina];
     if(sinonimi.includes(resto) || sinonimi.includes(restoSenzaArticolo)){
+      // "apri le fatture" / "mostrami i preventivi": la cartella già filtrata
+      if(pagina === "fatture-preventivi") filtroFatturePreventivi = /fatture\s+e\s+preventivi|preventivi\s+e\s+fatture/.test(resto) ? "tutti" : /fattur/.test(resto) ? "fattura" : /preventiv/.test(resto) ? "preventivo" : "tutti";
       navigateTo(pagina);
       return true;
     }
@@ -10188,6 +10209,7 @@ function creaMicRapidoModificaDocumento(dati, docId, clienteNome){
       const risposta = await chiediAssistente(`Il professionista sta guardando ${tipoDoc} n. ${dati.numero} per ${dati.cliente} (id documento: ${docId}) e ha detto questa correzione a voce: "${testo}"`);
       const azioneModifica = (risposta.azioni || []).find(a => a.tool === "modifica_preventivo_o_fattura");
       if(azioneModifica){
+        aggiornaDocumentoInMemoria(azioneModifica.esito.id, azioneModifica.esito.dati);
         mostraAnteprimaDocumento(azioneModifica.esito.dati, azioneModifica.esito.id, clienteNome);
         showAIToast("Corretto", risposta.testo || "");
       } else {
@@ -10300,6 +10322,97 @@ function mostraRisorsaDocumenti(documenti, clienteNome){
   apriRisorsaCard(clienteNome ? "Documenti — " + clienteNome : "Documenti", wrap);
 }
 
+
+/* Cartella vera "Fatture e preventivi" (25/09/2026). I documenti veri
+   vivono nelle conversazioni dei clienti (messages, event_type "doc",
+   dati completi in file_name): qui si raccolgono tutti, dal più recente,
+   e si aprono con la stessa anteprima (con il tasto Modifica a voce)
+   già usata dopo averli creati a voce. Nessun secondo archivio. */
+let filtroFatturePreventivi = "tutti";
+function documentiVeri(){
+  const out = [];
+  chats.forEach(c => (c.messages || []).forEach(m => {
+    if(m.eventType === "doc" && m.docDati) out.push({ id: m.id, dati: m.docDati, clienteChat: c.name, createdAt: m.createdAt || "" });
+  }));
+  /* Dal più recente: data di creazione vera; per righe senza (vecchie in
+     memoria) si ripiega su anno e numero del documento. */
+  const chiave = d => d.createdAt || (String(d.dati.anno || 0) + "-" + String(parseInt(d.dati.numero, 10) || 0).padStart(6, "0"));
+  return out.sort((a, b) => chiave(b).localeCompare(chiave(a)));
+}
+function renderFatturePreventivi(){
+  const lista = document.getElementById("fpLista");
+  if(!lista) return;
+  document.querySelectorAll(".fp-filtro").forEach(b => b.classList.toggle("on", b.dataset.f === filtroFatturePreventivi));
+  const tutti = documentiVeri();
+  const visibili = filtroFatturePreventivi === "tutti" ? tutti : tutti.filter(d => d.dati.tipo === filtroFatturePreventivi);
+  document.getElementById("fpTitolo").textContent = filtroFatturePreventivi === "fattura" ? "Fatture" : filtroFatturePreventivi === "preventivo" ? "Preventivi" : "Fatture e preventivi";
+  document.getElementById("fpCount").textContent = visibili.length;
+
+  const annoCorrente = new Date().getFullYear();
+  const fattureAnno = tutti.filter(d => d.dati.tipo === "fattura" && Number(d.dati.anno) === annoCorrente);
+  const totaleFatture = fattureAnno.reduce((s, d) => s + Number(d.dati.totale || 0), 0);
+  document.getElementById("fpTotale").textContent = filtroFatturePreventivi !== "preventivo" && fattureAnno.length
+    ? "Fatturato " + annoCorrente + ": €" + totaleFatture.toLocaleString("it-IT", { maximumFractionDigits: 2 })
+    : "";
+
+  lista.innerHTML = "";
+  if(!visibili.length){
+    const vuoto = document.createElement("div");
+    vuoto.className = "risorsa-vuoto";
+    vuoto.textContent = filtroFatturePreventivi === "preventivo" ? "Nessun preventivo ancora. Chiedilo a EON: «preventivo da 500 per Rossi»."
+      : filtroFatturePreventivi === "fattura" ? "Nessuna fattura ancora. Chiedila a EON: «fattura da 300 per Rossi»."
+      : "Nessun documento ancora. Chiedilo a EON: «fattura da 300 per Rossi».";
+    lista.appendChild(vuoto);
+    return;
+  }
+  visibili.forEach(d => {
+    const eFattura = d.dati.tipo === "fattura";
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "doc-list-card";
+    card.style.cssText = "width:calc(100% - 12px); background:none; font:inherit; text-align:left; cursor:pointer; color:inherit;";
+    const num = document.createElement("div");
+    num.className = "doc-num";
+    if(!eFattura){ num.style.color = "var(--violet)"; num.style.background = "var(--violet-soft)"; }
+    num.textContent = (eFattura ? "FT " : "PV ") + (d.dati.numero || "—");
+    const corpo = document.createElement("div");
+    corpo.className = "row-body";
+    const nome = document.createElement("div");
+    nome.className = "row-name";
+    nome.textContent = d.dati.cliente || d.clienteChat || "—";
+    const meta = document.createElement("div");
+    meta.className = "row-meta";
+    const primaVoce = Array.isArray(d.dati.voci) && d.dati.voci[0] ? d.dati.voci[0].desc : "";
+    meta.textContent = [primaVoce, d.dati.data].filter(Boolean).join(" · ");
+    corpo.appendChild(nome); corpo.appendChild(meta);
+    const valore = document.createElement("div");
+    valore.className = "row-value";
+    valore.textContent = "€" + Number(d.dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 });
+    card.appendChild(num); card.appendChild(corpo); card.appendChild(valore);
+    card.addEventListener("click", () => mostraAnteprimaDocumento(d.dati, d.id, d.clienteChat));
+    lista.appendChild(card);
+  });
+}
+document.querySelectorAll(".fp-filtro").forEach(b => b.addEventListener("click", () => {
+  filtroFatturePreventivi = b.dataset.f;
+  renderFatturePreventivi();
+}));
+
+/* Dopo una correzione a voce di un documento: aggiorna la copia in
+   memoria (chat e cartella), così la lista mostra subito il totale nuovo
+   senza ricaricare tutto. */
+function aggiornaDocumentoInMemoria(docId, dati){
+  chats.forEach(c => (c.messages || []).forEach(m => {
+    if(m.id === docId){
+      m.docDati = dati;
+      m.docTipo = dati.tipo;
+      m.docAnno = dati.anno;
+      if(dati.totale != null) m.amount = "€" + Number(dati.totale).toLocaleString("it-IT");
+    }
+  }));
+  const pagina = document.getElementById("page-fatture-preventivi");
+  if(pagina && pagina.classList.contains("visible")) renderFatturePreventivi();
+}
 
 /* ============================================================
    PREVENTIVO E FATTURA IN CHAT
@@ -10897,6 +11010,7 @@ const pageMeta = {
   entrate: { title:"Entrate", sub:null },
   "crea-fattura": { title:"Crea Fattura", sub:null },
   "crea-preventivo": { title:"Crea Preventivo", sub:null },
+  "fatture-preventivi": { title:"Fatture e preventivi", sub:null },
   "regalo": { title:"Regalo", sub:null },
   chat: { title:"Messaggi", sub:null },
   assemblee: { title:"Assemblee", sub:null },
@@ -10927,7 +11041,7 @@ const tabForPage = {
   calendario:"home", chiamate:"home",
   cestino:"azienda", "ai-request-log":"azienda",
   "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home",
-  "documenti-impresa":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
+  "documenti-impresa":"home", "fatture-preventivi":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
 };
 
 function navigateTo(page){
@@ -10975,6 +11089,7 @@ function navigateTo(page){
   if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
   if(page === "cantiere-appunti") renderCantiereAppunti();
   if(page === "documenti-impresa") renderCantiereDocumenti();
+  if(page === "fatture-preventivi") renderFatturePreventivi();
   if(page === "cantiere-documenti") provaOnboardingDocumenti();
   if(page === "cantiere-foto") renderCantiereFoto();
   if(page === "carta-intestata") renderCartaIntestata();
