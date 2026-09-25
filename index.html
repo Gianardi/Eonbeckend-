@@ -1569,6 +1569,15 @@
   .risorsa-canale.disabilitato{ opacity:.45; cursor:default; }
   .risorsa-canale.disabilitato svg{ color:var(--muted); }
   .risorsa-vuoto{ color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
+  /* Risposte di EON nella card bianca: paragrafi, elenchi, orari in colonna */
+  .eon-risposta{ display:flex; flex-direction:column; gap:12px; font-size:15px; line-height:1.55; color:var(--text); padding:2px 2px 6px; }
+  .eon-risposta p{ margin:0; overflow-wrap:anywhere; }
+  .eon-lista{ display:flex; flex-direction:column; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .eon-voce{ display:flex; align-items:baseline; gap:12px; padding:11px 14px; }
+  .eon-voce + .eon-voce{ border-top:1px solid var(--border); }
+  .eon-ora{ flex:none; width:46px; font-family:'Manrope'; font-weight:800; font-variant-numeric:tabular-nums; color:var(--indigo); }
+  .eon-punto{ flex:none; width:6px; height:6px; border-radius:50%; background:var(--indigo); transform:translateY(-2px); }
+  .eon-voce-testo{ min-width:0; overflow-wrap:anywhere; }
   .risorsa-testo-discorsivo{ font-size:14px; line-height:1.6; color:var(--text); white-space:pre-line; padding:4px 2px; }
   .risorsa-mic-rapido{
     width:38px; height:38px; flex:none; border-radius:50%; border:1px solid var(--border);
@@ -9538,13 +9547,6 @@ function provaLetturaLocale(testo){
    mostraRisorsaDocumenti) se riconosciuta. */
 const TRIGGER_RISORSA = /^(?:(?:mi serve|mi servirebbe|mi servono|ho bisogno (?:del|della|dei|delle|di)|dammi|mandami|fammi vedere|mi fai vedere|fai vedere|voglio vedere|vorrei vedere|vorrei|mostrami|mostra|recupera|cerca|trova|apri)\s+)?(?:il|la|lo|i|gli|le|l')?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|dello|dei|per|a)?\s*(.+)$/;
 
-/* Sopra questa lunghezza una risposta solo conversazionale (nessuna
-   azione eseguita) si considera "discorsiva" — una spiegazione, un
-   parere, un consiglio — e va mostrata nella scheda grande e
-   chiudibile invece che nel toast, che sparirebbe da solo dopo 8
-   secondi prima di fare in tempo a leggerla. */
-const SOGLIA_RISPOSTA_DISCORSIVA = 180;
-
 /* Prima tra i clienti attivi; se nessuno corrisponde, anche tra gli
    archiviati (25/09/2026: "mi serve fattura testolina" finiva all'AI —
    e veniva capita come "crea una fattura" — solo perché Testolina era
@@ -9882,7 +9884,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(lettura){
         campo.value = "";
         hint.textContent = TESTO_HINT_BASE;
-        showAIToast(lettura.titolo, lettura.testo);
+        const righeLettura = (lettura.testo || "").split("\n").filter(Boolean);
+        mostraRispostaEON(testo, righeLettura.length > 1 ? righeLettura.map(r => "- " + r).join("\n") : lettura.testo, { titolo: lettura.titolo });
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\n+/g, ". ") : ""));
         return;
       }
@@ -10052,14 +10055,12 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
            con un punto di domanda. Una domanda aperta resta sempre nel
            toast, qualunque sia la sua lunghezza: la priorità è tenere
            visibile il modo di rispondere, non la leggibilità. */
-        if(!eDomandaAperta && azioni.length === 0 && testoRisp.length > SOGLIA_RISPOSTA_DISCORSIVA){
-          const corpo = document.createElement("div");
-          corpo.className = "risorsa-testo-discorsivo";
-          corpo.textContent = testoRisp;
-          apriRisorsaCard("EON", corpo);
-        } else {
-          showAIToast(azioni.length === 0 ? "" : "Fatto", testoRisp);
-        }
+        /* 25/09/2026: ora OGNI risposta va nella card bianca (titolo =
+           la domanda). Per una domanda aperta la card ha in fondo la
+           barra per rispondere, quindi non nasconde più il modo di
+           rispondere (il problema del 23/09 descritto sopra). */
+        mostraRispostaEON(inContinuazione ? "" : testo, testoRisp,
+          eDomandaAperta ? { rispondi: (t) => { campo.value = t; send.click(); } } : undefined);
       }
       if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
@@ -10580,6 +10581,76 @@ function apriMedia(url, tipo){
    cliente; Email e WhatsApp sono già in struttura ma disabilitati
    finché non costruiamo il Communication Hub multicanale (TODO.md).
    ============================================================ */
+/* Le risposte di EON nella card bianca con titolo e X, come "Cosa devo
+   fare oggi" in Home (25/09/2026, Gianardi: "adottiamo quello stile tutte
+   le volte che EON ci risponde"), invece del riquadro "Fatto" con gli
+   asterischi del markdown a vista. */
+function titoloDallaDomanda(domanda){
+  let t = String(domanda || "").trim().replace(/\s+/g, " ");
+  if(!t || t.length > 48) return "EON";
+  t = t.charAt(0).toUpperCase() + t.slice(1);
+  if(!/[.!?]$/.test(t) && /^(cosa|che|chi|quando|dove|come|quant[oiae]|qual[ei]?|perch[eé]|ho|hai|c'è|ci sono)\b/i.test(t)) t += "?";
+  return t;
+}
+function formattaRispostaEON(testo){
+  const corpo = document.createElement("div");
+  corpo.className = "eon-risposta";
+  const inline = (x) => escapeHtml(x).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*\*/g, "");
+  let lista = null;
+  String(testo || "").split("\n").forEach(riga => {
+    const r = riga.trim();
+    if(!r){ lista = null; return; }
+    const voce = r.match(/^(?:[-•*]|\d+[.)])\s+(.*)$/);
+    if(!voce){
+      lista = null;
+      const p = document.createElement("p");
+      p.innerHTML = inline(r);
+      corpo.appendChild(p);
+      return;
+    }
+    if(!lista){ lista = document.createElement("div"); lista.className = "eon-lista"; corpo.appendChild(lista); }
+    const el = document.createElement("div");
+    const orario = voce[1].match(/^\**\s*(\d{1,2})[:.](\d{2})\s*\**\s*(?:[–—:-]\s*)?(.*)$/);
+    if(orario){
+      el.className = "eon-voce con-ora";
+      el.innerHTML = `<span class="eon-ora">${orario[1].padStart(2, "0")}:${orario[2]}</span><span class="eon-voce-testo">${inline(orario[3])}</span>`;
+    } else {
+      el.className = "eon-voce";
+      el.innerHTML = `<span class="eon-punto"></span><span class="eon-voce-testo">${inline(voce[1])}</span>`;
+    }
+    lista.appendChild(el);
+  });
+  return corpo;
+}
+/* opzioni.rispondi: EON ha fatto una domanda — in fondo alla card la
+   barra per rispondere (scrivendo o a voce), così la card non nasconde
+   mai il modo di rispondere. */
+function mostraRispostaEON(domanda, testo, opzioni){
+  opzioni = opzioni || {};
+  let piede = null;
+  if(opzioni.rispondi){
+    piede = document.createElement("div");
+    piede.className = "scheda-composer";
+    const campo = document.createElement("textarea");
+    campo.rows = 1;
+    campo.className = "scheda-campo";
+    campo.placeholder = "Rispondi a EON…";
+    const invia = document.createElement("button");
+    invia.type = "button";
+    invia.className = "scheda-invia";
+    invia.setAttribute("aria-label", "Invia la risposta");
+    invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    const manda = (t) => { t = String(t || "").trim(); if(!t) return; chiudiRisorsaCard(); opzioni.rispondi(t); };
+    invia.addEventListener("click", () => manda(campo.value));
+    campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(campo.value); } });
+    const mic = creaMicRapido((t) => manda(t));
+    mic.classList.add("scheda-mic");
+    mic.setAttribute("aria-label", "Rispondi a voce");
+    piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
+  }
+  apriRisorsaCard(opzioni.titolo || titoloDallaDomanda(domanda), formattaRispostaEON(testo), piede);
+}
+
 function apriRisorsaCard(titolo, corpoEl, piedeEl){
   document.getElementById("risorsaTitolo").textContent = titolo;
   const corpo = document.getElementById("risorsaCorpo");

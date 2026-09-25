@@ -3483,6 +3483,21 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Risposte di EON nella card bianca (25/09/2026)
+
+Gianardi (due screenshot): "Cosa ho da fare domani?" rispondeva nel
+riquadro "Fatto" con gli asterischi del markdown a vista; vuole lo stile
+della card "Cosa devo fare oggi" della Home, sempre.
+- `mostraRispostaEON(domanda, testo, {rispondi, titolo})`: card con titolo =
+  la domanda, paragrafi, elenchi, orari in colonna ("08:00 | impegno"),
+  **grassetto** vero, niente asterischi.
+- Una domanda di EON ("Quale intendi?") ha in fondo alla card la barra per
+  rispondere (scritta o a voce): continua la stessa conversazione.
+- Anche le letture senza AI ("appuntamenti di oggi") usano la card.
+- Restano nel riquadro in basso solo le conferme delle azioni ("Segnato in
+  calendario", "Impegno eliminato · Annulla").
+- Test: `eval/risposte.test.js` (11).
+
 ### Calendario rifatto (25/09/2026)
 
 Gianardi (screenshot): "non c'è il tasto per tornare indietro; rendilo più

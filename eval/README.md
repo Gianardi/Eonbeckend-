@@ -165,6 +165,15 @@ da una nota.
 NODE_PATH=/opt/node22/lib/node_modules node eval/clienti-chat.test.js
 ```
 
+### `risposte.test.js` — risposte di EON nella card, gira subito
+
+Titolo = domanda, orari in colonna, niente asterischi, domanda di EON con la
+barra per rispondere nella card, lettura senza AI nella stessa card.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/risposte.test.js
+```
+
 ### `calendario.test.js` — calendario, gira subito
 
 Tasto Indietro, settimana in alto, righe senza doppioni, elimina scorrendo
