@@ -476,6 +476,40 @@ function paroleSimili(a, b) {
   return distanzaLevenshtein(a, b) <= soglia;
 }
 
+/* Gianardi, 23/09/2026: "Fabio Prini" è stato segnalato come "simile"
+   a un cliente "Mario Bini" già in anagrafica — nomi in realtà del
+   tutto diversi. Causa: confrontare OGNI parola del nome cercato
+   contro OGNI parola del candidato, ciascuna con la propria soglia di
+   tolleranza INDIPENDENTE (paroleSimili sopra), permette di sommare
+   più "quasi uguale" separati (qui: "fabio"~"mario", 2 lettere diverse
+   su 5, e "prini"~"bini", 2 lettere diverse su 5 — ciascuno da solo
+   sotto soglia) fino a un nome finale completamente diverso nel suo
+   insieme. Corretto: la tolleranza è UN budget unico di due lettere
+   per l'INTERO nome (non due lettere per ogni singola parola), esatto
+   quanto basta per una vera dettatura imprecisa su una singola parola
+   ("Tabri" per "Fabbri", "Rossi" per "Rosi") ma non per due parole
+   entrambe leggermente diverse insieme. Stesso numero di parole
+   richiesto: un nome con una parola in più o in meno non passa più da
+   qui (lo gestiscono già i livelli "esatto"/"per parola" prima di
+   arrivare a questo, meno prudente, terzo tentativo). */
+function nomeSomigliaA(paroleCercate, paroleCandidato) {
+  if (paroleCercate.length !== paroleCandidato.length) return false;
+  const usate = new Set();
+  let totale = 0;
+  for (const p of paroleCercate) {
+    let migliore = Infinity, migliorIdx = -1;
+    paroleCandidato.forEach((pc, i) => {
+      if (usate.has(i)) return;
+      const d = distanzaLevenshtein(p, pc);
+      if (d < migliore) { migliore = d; migliorIdx = i; }
+    });
+    if (migliorIdx === -1) return false;
+    usate.add(migliorIdx);
+    totale += migliore;
+  }
+  return totale <= 2;
+}
+
 /* EON BRAIN, Entity Resolution uniforme (punto 3): stessa logica a tre
    livelli già usata da trova_o_crea_cliente (esatto -> substring per
    parola -> fuzzy, mai una corrispondenza fuzzy trattata come certa),
@@ -512,7 +546,7 @@ async function risolviClienteDaNome(nomeCercato, ctx) {
      conferma invece di usarla direttamente. */
   const simili = lista.filter((c) => {
     const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
-    return parole.every((p) => paroleCliente.some((pc) => paroleSimili(p, pc)));
+    return nomeSomigliaA(parole, paroleCliente);
   });
   if (simili.length === 1) return { stato: "simile", id: simili[0].id, nome: simili[0].name, telefono: simili[0].phone || null };
   if (simili.length > 1) return { stato: "ambiguo", candidati: simili.map((c) => ({ id: c.id, nome: c.name, telefono: c.phone || null })) };
@@ -787,7 +821,7 @@ const TOOLS = {
         righe = (Array.isArray(tutti) ? tutti : [])
           .filter((c) => {
             const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
-            return parole.every((p) => paroleCliente.some((pc) => paroleSimili(p, pc)));
+            return nomeSomigliaA(parole, paroleCliente);
           })
           .slice(0, 5);
       }
@@ -1020,7 +1054,7 @@ const TOOLS = {
       if (candidati.length === 0) {
         const simili = lista.filter((c) => {
           const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
-          return parole.every((p) => paroleCliente.some((pc) => paroleSimili(p, pc)));
+          return nomeSomigliaA(parole, paroleCliente);
         });
         if (simili.length === 1) {
           throw fail(`Non ho trovato "${nome}" esatto, ma c'è un cliente simile già in anagrafica: "${simili[0].name}". Potrebbe essere una dettatura imprecisa dello stesso nome, oppure un cliente diverso: chiedi all'utente di confermare prima di procedere.`);
@@ -2404,6 +2438,8 @@ Quando l'utente chiede di fare/preparare un preventivo o una fattura, il princip
 Vale lo stesso, identico, sia per preventivo sia per fattura.
 
 IMPORTANTE — una cifra unica con una descrizione generale (es. "preventivo a Ferri per facciata 30.500", "fattura a Bianchi da 500+IVA per pitturazione muri") NON è un caso 1 (dati mancanti): è già un documento completo con UNA SOLA voce (descrizione "facciata"/"pitturazione muri", prezzo il totale dato) — crealo SUBITO con quella singola voce, mai fermarti a chiedere di scomporlo in voci più piccole (es. "quanto è il ponteggio, quanto la pulizia..."). L'utente ha dato un lavoro e un prezzo: basta e avanza, la scomposizione in più voci è un dettaglio che spetta a lui aggiungere se e quando vuole, mai una domanda bloccante tua. Chiedi la scomposizione SOLO se l'utente stesso l'accenna esplicitamente (es. "un preventivo con ponteggio, pulizia e finiture" senza dire i prezzi delle singole voci) — mai come iniziativa tua di fronte a una cifra unica con una sola descrizione, per quanto il lavoro possa sembrare complesso o costoso.
+
+IMPORTANTE — quando cliente_risolto per una fattura/preventivo da CREARE risulta "trovato" o è appena stato creato (crea_cliente/trova_o_crea_cliente nello stesso turno), NON richiamare interpreta_richiesta una seconda volta per la stessa richiesta cambiando operazione in "mostra", e NON chiamare recupera_documenti_cliente per controllare se esiste già un documento simile prima di crearlo: "trovato" riguarda SOLO l'identità del cliente, mai un documento già esistente, e un eventuale doppione lo nota casomai l'utente stesso guardando la sua scheda dopo — non è un motivo per fermarsi. Se hai già voci e prezzo, il passo giusto è SEMPRE e SOLO chiamare crea_preventivo_o_fattura subito, nello stesso giro in cui hai risolto/creato il cliente quando possibile: ogni giro in più speso a "ricontrollare" prima di creare è tempo perso che rischia di far scadere la richiesta senza risposta, il danno peggiore possibile per il professionista.
 
 Quando l'utente chiede cosa ha in programma, i suoi impegni, il riepilogo della giornata o cosa fare prima/dopo per oggi, domani o un altro periodo, chiama SEMPRE elenca_appuntamenti per quel periodo prima di rispondere — anche se ti sembra di non avere abbastanza informazioni per rispondere, anche se la domanda ti sembra già risposta in un turno precedente della stessa conversazione: non dare mai per scontato di non sapere cosa c'è già segnato, e non chiedere mai all'utente di ripetertelo. La stessa identica domanda fatta due volte deve dare la stessa risposta, basata sugli stessi dati veri, non una risposta diversa a seconda che tu ti ricordi o meno di controllare.
 

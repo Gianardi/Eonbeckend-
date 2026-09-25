@@ -9288,11 +9288,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         let testoRisp = risposta.testo || fallbackHint;
         daDire.push(testoRisp);
         /* Una risposta che finisce con un punto di domanda vera è EON
-           che chiede qualcosa a te (es. un orario da confermare):
-           teniamo la conversazione aperta invece di richiudere tutto,
-           così la prossima frase arriva a lei come risposta, non come
-           comando scollegato. */
-        if(/\?\s*$/.test(testoRisp.trim()) && risposta.runId){
+           che chiede qualcosa a te (es. un orario da confermare, o una
+           disambiguazione tra clienti simili/omonimi): teniamo la
+           conversazione aperta invece di richiudere tutto, così la
+           prossima frase arriva a lei come risposta, non come comando
+           scollegato. */
+        const eDomandaAperta = /\?\s*$/.test(testoRisp.trim()) && !!risposta.runId;
+        if(eDomandaAperta){
           runIdAperto = risposta.runId;
           runIdApertoScadenza = Date.now() + 90 * 1000;
           /* Il campo di testo qui sotto resta sempre attivo (non solo
@@ -9311,8 +9313,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
            tempo a leggerla (8 secondi) — sopra una certa lunghezza, e
            solo quando non è la conferma di un'azione, la mostriamo
            nella scheda grande e chiudibile invece che nel toast
-           (Gianardi, 23/09/2026). */
-        if(azioni.length === 0 && testoRisp.length > SOGLIA_RISPOSTA_DISCORSIVA){
+           (Gianardi, 23/09/2026). MAI però quando è una domanda aperta
+           che aspetta una risposta (eDomandaAperta): quella scheda
+           copre tutto lo schermo e nasconde campo di testo e
+           microfono, rendendo impossibile rispondere — bug reale
+           trovato da Gianardi il 23/09/2026 subito dopo aver testato
+           la funzione, su una disambiguazione cliente lunga che finiva
+           con un punto di domanda. Una domanda aperta resta sempre nel
+           toast, qualunque sia la sua lunghezza: la priorità è tenere
+           visibile il modo di rispondere, non la leggibilità. */
+        if(!eDomandaAperta && azioni.length === 0 && testoRisp.length > SOGLIA_RISPOSTA_DISCORSIVA){
           const corpo = document.createElement("div");
           corpo.className = "risorsa-testo-discorsivo";
           corpo.textContent = testoRisp;
