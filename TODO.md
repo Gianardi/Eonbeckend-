@@ -1,5 +1,7 @@
 # Cose da fare in seguito
 
+> **La roadmap completa e in ordine è in [`ROADMAP.md`](ROADMAP.md)** (aggiornata al 25/09/2026). Qui sotto il dettaglio tecnico, voce per voce.
+
 Note di lavoro per interventi futuri, non urgenti. Ogni voce ha lo scopo e l'idea di base, da riprendere quando si decide di affrontarla.
 
 ## Velocità: rendere le azioni dell'AI immediate
