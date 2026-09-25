@@ -9016,26 +9016,49 @@ function provaRisorsaImmediata(testo){
    data/ora nella frase (quello resta sempre e solo crea_impegno, mai
    qui) — falso negativo innocuo (passa all'AI come sempre), mai un falso
    positivo che trasformi un impegno in un semplice appunto senza data. */
-const TRIGGER_APPUNTO = /^(?:segna(?:mi)?|annota(?:mi)?|scrivi(?:mi)?|metti(?:mi)?|prendi)\s+(?:in\s+appunti|negli\s+appunti|un\s+appunto|una\s+nota)\s*(?:che)?\s*[:\-]?\s*(.+)$/i;
+const TRIGGER_APPUNTO = /^(?:mi\s+)?(?:segna|annota|scrivi|metti|aggiungi|salva|prendi)(?:mi)?\s+(?:in\s+appunti|negli\s+appunti|tra\s+gli\s+appunti|agli\s+appunti|nelle\s+note|un\s+appunto|una\s+nota)\s*(?:che)?\s*[:\-]?\s*(.+)$/i;
+/* Stessa intenzione detta con il verbo "appuntare" (25/09/2026, frasi vere
+   di Gianardi dai registri: "mi appunti chiavi portone Amalfi 2 e Amalfi 4
+   per Ratti", "mi metti negli appunti...", "mi aggiungi in appunti..." —
+   finivano tutte all'AI, 3-3,5 s, perché la regola sopra voleva la frase
+   che cominciasse esattamente con "segnami/mettimi..."). */
+const TRIGGER_APPUNTO_VERBO = /^(?:mi\s+appunti|appuntami|appunta(?:mi)?)\s+(?:che\s+)?[:\-]?\s*(.+)$/i;
+/* Più appunti nella stessa frase: "... e anche un altro appunto ..." */
+const SEPARATORE_APPUNTI = /\s*,?\s+e\s+(?:anche\s+)?un\s+altro\s+appunto\s*(?:che)?\s*[:\-]?\s*/i;
+function eFraseAppunto(t){ return TRIGGER_APPUNTO.test(t) || TRIGGER_APPUNTO_VERBO.test(t); }
+/* I testi degli appunti da salvare, o null se la frase non è un appunto
+   da salvare così com'è (niente trigger, oppure c'è una data/ora: allora
+   può essere un impegno e decide l'AI, come sempre). */
+function estraiAppunti(testo){
+  const t = (testo || "").trim().replace(/[.!?]+$/, "");
+  const m = t.match(TRIGGER_APPUNTO) || t.match(TRIGGER_APPUNTO_VERBO);
+  if(!m || RIFERIMENTO_TEMPO.test(t)) return null;
+  const parti = (m[1] || "").split(SEPARATORE_APPUNTI).map(p => p.trim()).filter(Boolean);
+  return parti.length ? parti.map(p => p.charAt(0).toUpperCase() + p.slice(1)) : null;
+}
 const RIFERIMENTO_TEMPO = /\b(oggi|domani|dopodomani|lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|\d{1,2}[:.]\d{2}|ore\s+\d{1,2}\b|\d{1,2}\/\d{1,2})\b/i;
 
 async function provaAppuntoImmediato(testo){
-  const t = (testo || "").trim().replace(/[.!?]+$/, "");
-  if(!t) return false;
-  const m = t.match(TRIGGER_APPUNTO);
-  if(!m) return false;
-  if(RIFERIMENTO_TEMPO.test(t)) return false; // ha un orario/data: resta all'AI (potrebbe essere un impegno)
-
-  const appuntoTesto = (m[1] || "").trim();
-  if(!appuntoTesto) return false;
+  const appunti = estraiAppunti(testo); // null se non è un appunto, o se ha un orario/data (resta all'AI: potrebbe essere un impegno)
+  if(!appunti) return false;
 
   if(!isDbReady()) return false; // senza connessione l'AI non potrebbe farlo comunque: lascia il percorso normale spiegare perché
-  const creato = await dbInsert("cantiere_appunti", { testo: appuntoTesto });
-  if(!creato) return false;
-  cantiereAppunti.push({ id: creato.id, testo: creato.testo, created: creato.created_at });
+  const salvati = [];
+  for(const appuntoTesto of appunti){
+    const creato = await dbInsert("cantiere_appunti", { testo: appuntoTesto });
+    if(!creato) break;
+    cantiereAppunti.push({ id: creato.id, testo: creato.testo, created: creato.created_at });
+    salvati.push(creato.testo);
+  }
+  if(!salvati.length) return false; // niente salvato: l'AI ci riprova come sempre
   aggiornaCantiereSottotitoli();
   renderCantiereAppunti();
-  showAIToast("Appunto aggiunto", appuntoTesto);
+  /* Se se ne è salvata solo una parte, lo si dice: mai un "fatto" per
+     qualcosa che non c'è. Il resto NON va all'AI, per non duplicare
+     quelli già salvati. */
+  const mancanti = appunti.length - salvati.length;
+  showAIToast(salvati.length === 1 ? "Appunto aggiunto" : salvati.length + " appunti aggiunti",
+    salvati.join("\n") + (mancanti ? `\n(${mancanti} non salvat${mancanti === 1 ? "o" : "i"}: riprova)` : ""));
   return true;
 }
 
@@ -9057,7 +9080,7 @@ function sembraRichiestaAppuntamento(testo){
   if(t.length < 4) return false;
   if(!RIFERIMENTO_TEMPO.test(t)) return false; // senza alcun riferimento temporale non è un impegno da fissare ora
   if(/\b(cancella|elimina|annulla|sposta|rimanda|disdici|disdetta)\b/i.test(t)) return false; // modifica/cancellazione, non una nuova creazione
-  if(TRIGGER_APPUNTO.test(t.replace(/[.!?]+$/, ""))) return false; // già gestito come appunto istantaneo sopra
+  if(eFraseAppunto(t.replace(/[.!?]+$/, ""))) return false; // già gestito come appunto istantaneo sopra
   return true;
 }
 function aggiungiImpegnoInConferma(testo){

@@ -90,6 +90,7 @@ function anthropicFinto(init) {
   if (!passo) throw new Error(`Chiamata all'AI n. ${chiamateAI.length} non prevista dallo scenario`);
   const risposta = passo(corpo);
   if (risposta === "ERRORE_500") return rispostaJson({ error: { message: "sovraccarico" } }, 500);
+  if (risposta === "CREDITO_FINITO") return rispostaJson({ type: "error", error: { type: "invalid_request_error", message: "Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits." } }, 400);
   return rispostaJson({ id: "msg_finto", type: "message", role: "assistant", model: corpo.model, usage: { input_tokens: 1, output_tokens: 1 }, ...risposta });
 }
 const usaStrumento = (name, input) => ({ content: [{ type: "tool_use", id: "toolu_" + randomUUID().slice(0, 8), name, input }], stop_reason: "tool_use" });
@@ -472,6 +473,16 @@ await scenario(
   [{ body: nuovo("Mario Rossi bagno"), copione: [...motore] }],
   ([r], [ai]) => {
     verifica("prima chiamata già del motore completo", eMotoreCompleto(ai[0]));
+  }
+);
+
+/* ======== Errori leggibili ======== */
+await scenario(
+  "Credito dell'AI finito (24/09/2026) → messaggio chiaro in italiano, non l'errore in inglese",
+  null,
+  [{ body: nuovo("Mi prepari un riepilogo della settimana"), copione: [() => "CREDITO_FINITO", () => "CREDITO_FINITO"] }],
+  ([r]) => {
+    verifica("errore che dice cosa fare", r.status === 502 && /Credito dell'AI esaurito/.test(r.corpo.error) && !/credit balance/.test(r.corpo.error), JSON.stringify(r.corpo));
   }
 );
 

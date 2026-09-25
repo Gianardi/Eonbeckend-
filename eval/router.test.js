@@ -242,6 +242,45 @@ async function main() {
     verifica("\"segnami in appunti che devo richiamare DOMANI\" ha comunque un riferimento di tempo (va escluso a valle)", appunti.nonAppunto2, JSON.stringify(appunti));
     verifica("senza connessione vera, provaAppuntoImmediato torna false senza errori (mai un crash)", appunti.dbNonPronto && appunti.esitoSenzaDb === false && !appunti.lanciatoErrore, JSON.stringify(appunti));
 
+    console.log("\n--- Router: appunti istantanei, frasi vere dai registri (25/09/2026) ---");
+    const appuntiVeri = await page.evaluate(() => ({
+      chiavi: estraiAppunti("mi appunti chiavi portone Amalfi 2 e Amalfi 4 per Ratti"),
+      riunioni: estraiAppunti("mi metti negli appunti convocare almeno tre riunioni"),
+      due: estraiAppunti("mi aggiungi in appunti  via XXIV Maggio 152 e anche un altro Appunto parto tetto e finestra via XXIV Maggio 15"),
+      vecchia: estraiAppunti("segnami in appunti che devo vedere il costo del materiale"),
+      conOrario: estraiAppunti("Mi aggiungi venerdì mattina di fare un appunto a Roberto per lunedì 8:30 in via Picco 36"),
+      appuntamento: estraiAppunti("appuntamento con Rossi per il bagno"),
+      impegno: estraiAppunti("segnami di chiamare Bianchi"),
+      avvisoAppuntamentoSaltato: sembraRichiestaAppuntamento("mi metti negli appunti convocare almeno tre riunioni"),
+    }));
+    verifica("\"mi appunti chiavi portone... per Ratti\" → un appunto con tutto il testo (\"e\" interno non spezza)", JSON.stringify(appuntiVeri.chiavi) === JSON.stringify(["Chiavi portone Amalfi 2 e Amalfi 4 per Ratti"]), JSON.stringify(appuntiVeri.chiavi));
+    verifica("\"mi metti negli appunti convocare...\" → riconosciuto", JSON.stringify(appuntiVeri.riunioni) === JSON.stringify(["Convocare almeno tre riunioni"]), JSON.stringify(appuntiVeri.riunioni));
+    verifica("\"...e anche un altro appunto...\" → DUE appunti separati", JSON.stringify(appuntiVeri.due) === JSON.stringify(["Via XXIV Maggio 152", "Parto tetto e finestra via XXIV Maggio 15"]), JSON.stringify(appuntiVeri.due));
+    verifica("la frase di prima (\"segnami in appunti che...\") funziona ancora", JSON.stringify(appuntiVeri.vecchia) === JSON.stringify(["Devo vedere il costo del materiale"]), JSON.stringify(appuntiVeri.vecchia));
+    verifica("con giorno/ora (\"venerdì... lunedì 8:30\") NON è un appunto istantaneo: decide l'AI", appuntiVeri.conOrario === null, JSON.stringify(appuntiVeri.conOrario));
+    verifica("\"appuntamento con Rossi\" NON è un appunto", appuntiVeri.appuntamento === null, JSON.stringify(appuntiVeri.appuntamento));
+    verifica("\"segnami di chiamare Bianchi\" NON è un appunto", appuntiVeri.impegno === null, JSON.stringify(appuntiVeri.impegno));
+    verifica("un appunto non fa comparire l'avviso \"appuntamento in arrivo\"", appuntiVeri.avvisoAppuntamentoSaltato === false);
+
+    // Salvataggio vero, con il database simulato: due appunti, poi un salvataggio che fallisce a metà.
+    const salvataggi = await page.evaluate(async () => {
+      const originali = { isDbReady, dbInsert, showAIToast };
+      const scritti = [], avvisi = [];
+      let falliscaDopo = Infinity;
+      isDbReady = () => true;
+      dbInsert = async (tabella, riga) => scritti.length >= falliscaDopo ? null : (scritti.push({ tabella, ...riga }), { id: "id" + scritti.length, testo: riga.testo, created_at: "" });
+      showAIToast = (titolo, testo) => avvisi.push({ titolo, testo });
+      const esito1 = await provaAppuntoImmediato("mi aggiungi in appunti via XXIV Maggio 152 e anche un altro appunto parto tetto e finestra");
+      const scrittiPrima = scritti.slice();
+      falliscaDopo = scritti.length + 1;
+      const esito2 = await provaAppuntoImmediato("mi appunti comprare silicone e anche un altro appunto chiamare il vetraio");
+      isDbReady = originali.isDbReady; dbInsert = originali.dbInsert; showAIToast = originali.showAIToast;
+      return { esito1, scrittiPrima, esito2, scritti, avvisi };
+    });
+    verifica("due appunti salvati davvero, nella tabella giusta", salvataggi.esito1 === true && salvataggi.scrittiPrima.length === 2 && salvataggi.scrittiPrima.every((r) => r.tabella === "cantiere_appunti"), JSON.stringify(salvataggi.scrittiPrima));
+    verifica("avviso \"2 appunti aggiunti\"", salvataggi.avvisi[0] && salvataggi.avvisi[0].titolo === "2 appunti aggiunti", JSON.stringify(salvataggi.avvisi[0]));
+    verifica("salvataggio a metà: lo dice (mai un \"fatto\" finto) e non manda all'AI il resto", salvataggi.esito2 === true && salvataggi.scritti.length === 3 && /1 non salvato/.test(salvataggi.avvisi[1] && salvataggi.avvisi[1].testo), JSON.stringify(salvataggi.avvisi[1]));
+
     console.log("\n--- Router: stratagemma appuntamenti, avviso di ricezione (EON BRAIN 17/09/2026) ---");
     const stratagemma = await page.evaluate(() => {
       impegniInConferma.length = 0;
