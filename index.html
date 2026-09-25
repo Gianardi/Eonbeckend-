@@ -209,8 +209,17 @@
 
   .topbar{ padding-top:2px;
     display:flex; align-items:center; justify-content:center;
-    text-align:center; margin-bottom:16px;
+    text-align:center; margin-bottom:16px; position:relative;
   }
+  .topbar-imp{
+    position:absolute; right:0; top:50%; transform:translateY(-50%);
+    width:40px; height:40px; border-radius:12px; border:1px solid var(--border);
+    background:var(--card); color:var(--text); box-shadow:var(--shadow-sm);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .topbar.sola .topbar-imp{ top:calc(50% + 6px); }
+  .topbar-imp[hidden]{ display:none; }
+  .topbar-imp svg{ width:20px; height:20px; }
   .topbar.sola{ padding-top:14px; margin-bottom:14px; }
   .topbar h1{
     font-size:21px; font-weight:900; letter-spacing:-.02em; margin:0;
@@ -2460,6 +2469,11 @@
         <h1 id="pageTitle">Buongiorno, Marco</h1>
         <div class="sub" id="pageSub">—</div>
       </div>
+      <!-- Impostazioni della sezione, in alto a destra come nelle app
+           grandi (25/09/2026): compare solo dove una sezione ne ha. -->
+      <button type="button" class="topbar-imp" id="topbarImpostazioni" aria-label="Impostazioni della sezione" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
     </div>
 
     <!-- ==================== PAGINA: HOME ==================== -->
@@ -2744,7 +2758,10 @@
           </button>
         </div>
       </div>
-      <div class="card-panel">
+      <!-- Il formato ora si cambia dall'ingranaggio in alto a destra
+           (25/09/2026); questo riquadro resta nascosto perché i suoi
+           comandi (galleria, foto) sono richiamati da lì. -->
+      <div class="card-panel" hidden>
         <div class="card-header"><h2>Formato dei documenti</h2></div>
         <p class="module-sub" style="padding:0 16px 4px;" id="formatoAttualeTesto">Modello Classico</p>
         <div class="form-panel" style="display:flex; flex-direction:column; gap:10px;">
@@ -12418,6 +12435,8 @@ function navigateTo(page){
   }
 
   if(page === "cestino") renderCestino();
+  const btnImpSezione = document.getElementById("topbarImpostazioni");
+  if(btnImpSezione) btnImpSezione.hidden = !(IMPOSTAZIONI_SEZIONE && IMPOSTAZIONI_SEZIONE[page]);
   if(page === "impostazioni") disegnaImpostazioni();
   if(page === "ai-request-log") renderAiRequestLog();
   if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
@@ -13036,6 +13055,41 @@ controllaNuovaVersione(); // la versione con cui l'app è partita
   }, { passive: true });
   document.addEventListener("touchcancel", () => { inizio = null; }, { passive: true });
 })();
+
+/* ---- Impostazioni di sezione: l'ingranaggio in alto a destra ----
+   Ogni sezione che ha delle impostazioni le apre da lì, in una scheda a
+   card (25/09/2026). Per aggiungerne una basta una riga qui sotto. */
+function voceImpostazioneHtml(azione, colore, icona, titolo, sotto){
+  return `<button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="${azione}">
+    <div class="module-icon" style="background:${colore};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icona}</svg></div>
+    <div class="azienda-link-card-body"><div class="module-title">${titolo}</div><div class="module-sub">${sotto}</div></div>
+    <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+  </button>`;
+}
+function apriImpostazioniDocumenti(){
+  const f = formatoAttuale();
+  const nomeModello = (MODELLI_DOCUMENTO[f.modello] || {}).nome || "Classico";
+  const corpo = schedaImpostazione("Impostazioni documenti", `<div class="azienda-list">
+    ${voceImpostazioneHtml("carta", "var(--indigo)", '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/>', "Carta intestata", "Nome, indirizzo, P.IVA e logo sui tuoi documenti")}
+    ${voceImpostazioneHtml("modello", "var(--violet)", '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>', "Formato", "Adesso: modello " + escapeHtml(nomeModello) + " — scegline un altro")}
+    ${voceImpostazioneHtml("foto", "var(--teal)", '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>', "Formato da una foto", "Usa l'aspetto di una tua fattura")}
+  </div>`);
+  corpo.querySelector('[data-azione="carta"]').addEventListener("click", () => { chiudiRisorsaCard(); navigateTo("carta-intestata"); });
+  corpo.querySelector('[data-azione="modello"]').addEventListener("click", () => apriGalleriaModelli());
+  corpo.querySelector('[data-azione="foto"]').addEventListener("click", () => { chiudiRisorsaCard(); document.getElementById("formatoFotoInput").click(); });
+}
+var IMPOSTAZIONI_SEZIONE = { // var: navigateTo può partire prima di questa riga
+  "cantiere-documenti": apriImpostazioniDocumenti,
+  "fatture-preventivi": apriImpostazioniDocumenti,
+  "documenti-impresa": apriImpostazioniDocumenti,
+  "carta-intestata": apriImpostazioniDocumenti,
+  "crea-lettera": apriImpostazioniDocumenti,
+  "crea-cartello": apriImpostazioniDocumenti,
+};
+document.getElementById("topbarImpostazioni").addEventListener("click", () => {
+  const apri = IMPOSTAZIONI_SEZIONE[paginaAttuale];
+  if(apri) apri();
+});
 
 /* ---- Impostazioni: account e voci a card (25/09/2026) ---- */
 let profiloUtente = null;

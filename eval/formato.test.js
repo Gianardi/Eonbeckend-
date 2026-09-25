@@ -145,6 +145,22 @@ async function main() {
     await page.waitForTimeout(800);
     const errore = await page.evaluate(() => ({ salvati: window.__salvati.length, landing: document.body.innerText.includes("Non sono riuscita a leggerla") }));
     verifica("foto illeggibile: lo dice e non salva niente", errore.salvati === 0 && errore.landing, JSON.stringify(errore));
+
+    // 7. Ingranaggio in alto a destra: le impostazioni della sezione Documenti
+    const ing = await page.evaluate(() => {
+      document.querySelectorAll(".ai-landing-overlay").forEach((o) => { o.style.display = "none"; });
+      chiudiRisorsaCard();
+      const vis = {};
+      ["home", "clienti", "calendario", "cantiere-documenti", "fatture-preventivi", "documenti-impresa", "carta-intestata", "crea-lettera", "crea-cartello"].forEach((pg) => { navigateTo(pg); vis[pg] = !document.getElementById("topbarImpostazioni").hidden; });
+      if (typeof chiudiOnboardingDocumenti === "function") chiudiOnboardingDocumenti();
+      document.getElementById("topbarImpostazioni").click();
+      return { vis, titolo: document.getElementById("risorsaTitolo").textContent, voci: [...document.querySelectorAll("#risorsaCorpo .module-title")].map((e) => e.textContent), fondoNascosto: document.getElementById("formatoCambiaBtn").closest(".card-panel").hidden };
+    });
+    verifica("ingranaggio solo nelle pagine di Documenti", !ing.vis.home && !ing.vis.clienti && !ing.vis.calendario && ["cantiere-documenti", "fatture-preventivi", "documenti-impresa", "carta-intestata", "crea-lettera", "crea-cartello"].every((k) => ing.vis[k]), JSON.stringify(ing.vis));
+    verifica("ingranaggio: Carta intestata, Formato, Formato da una foto", ing.titolo === "Impostazioni documenti" && JSON.stringify(ing.voci) === '["Carta intestata","Formato","Formato da una foto"]', JSON.stringify(ing));
+    verifica("il formato non è più in fondo alla Carta intestata", ing.fondoNascosto);
+    const daIngranaggio = await page.evaluate(() => { document.querySelector('#risorsaCorpo [data-azione="modello"]').click(); return document.getElementById("risorsaTitolo").textContent; });
+    verifica("\"Formato\" apre la galleria dei modelli", daIngranaggio === "Scegli il modello", daIngranaggio);
   } finally {
     await browser.close();
     server.kill();

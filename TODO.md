@@ -3485,6 +3485,20 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Ingranaggio delle impostazioni in alto a destra (25/09/2026)
+
+Gianardi: "impostazioni piccole nelle singole sezioni, in alto a destra come
+le grandi app, non in fondo alla carta intestata". Nuovo pulsante
+`#topbarImpostazioni` nella barra del titolo, visibile solo nelle pagine
+che hanno impostazioni (`IMPOSTAZIONI_SEZIONE`: pagina → funzione; per
+aggiungere una sezione basta una riga). Documenti (hub, Fatture e
+preventivi, Documenti impresa, Carta intestata, Lettera, Cartello) →
+"Impostazioni documenti": Carta intestata, Formato (galleria modelli),
+Formato da una foto. Il riquadro "Formato" in fondo alla Carta intestata è
+nascosto. Test: 4 in formato.test.js.
+- Da fare poi: ingranaggio anche in altre sezioni (Calendario, Clienti,
+  Messaggi) quando avranno impostazioni proprie.
+
 ### Card del cliente: solo il lavoro da fare (25/09/2026)
 
 Gianardi (screenshot con "Ultimo contatto: null", "In trattativa", "null"):
