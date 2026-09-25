@@ -3266,3 +3266,21 @@ ai_request_log dopo il primo uso (giri = 1 per il percorso rapido).
 Da verificare: `dataOraCorrente()` usa l'ora del server (su Vercel di
 solito UTC, non l'ora italiana) — per "domani alle 10" non conta, per "fra
 un'ora" potrebbe sbagliare di 1-2 ore. Vale anche per il motore completo.
+
+**Primo uso reale (25/09/2026, dopo il merge)**: domanda sugli omonimi Dini
+1,9 s (prima 8,5), risposta "Giampiero" 1,5 s (prima 7), "Chiamata Valter
+lunedì 10:00" 2,4 s con data giusta, "No alle 13" 1,7 s senza conferma
+(prima 9 s + pulsante).
+
+### Percorso rapido per i clienti nuovi (25/09/2026)
+
+Stesso schema (`provaPercorsoRapidoCliente`, strumento `leggi_cliente`).
+Dalla pagina Clienti (ogni frase) o dalla Home con parole come "cliente",
+"numero", "telefono": un cliente NUOVO (nome non in anagrafica, nemmeno
+simile) viene creato con telefono e lavoro in una chiamata piccola; "non
+Bake ma Bike" subito dopo corregge il nome del cliente appena aggiunto.
+Nome già esistente, simile o con omonimi, telefono con cifre mai dette,
+nome non nella frase, un giorno/ora nella frase (c'è anche un impegno) →
+motore completo, mai un doppione. Prima: 4-9,5 s (pochi casi nei registri).
+Test: 9 scenari in `eval/percorso-rapido.test.mjs`, provati anche rompendo
+apposta ogni protezione.

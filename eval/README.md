@@ -86,8 +86,9 @@ aprire una PR — esattamente come `node --check` per la sintassi.
 Stesso sistema del test sopra (handler vero, database e AI simulati) per
 il percorso rapido degli appuntamenti: un appuntamento semplice con UNA
 sola chiamata piccola all'AI, "no alle 11" spostato senza conferma, gli
-omonimi chiesti e risolti dal codice, e soprattutto ogni caso dubbio
-passato al motore completo senza scrivere niente.
+omonimi chiesti e risolti dal codice, i clienti nuovi creati in una
+chiamata (con la correzione del nome subito dopo), e soprattutto ogni
+caso dubbio passato al motore completo senza scrivere niente.
 
 ```
 node eval/percorso-rapido.test.mjs
