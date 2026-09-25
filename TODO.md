@@ -3368,8 +3368,8 @@ aggiorna subito (`aggiornaDocumentoInMemoria`). A voce: "apri le fatture",
 Preventivo" (dati solo locali, mai collegati a niente) non sono più nel
 menu; restano nel codice, da togliere del tutto più avanti.
 Test: `eval/fatture.test.js` (19 verifiche).
-Ancora da valutare: le pagine Lettera/Cartello/Carta intestata (verificare
-se sono collegate a dati veri).
+Lettera, Cartello fine lavori e Carta intestata: NON vanno tolte (Gianardi,
+25/09/2026) — restano, e andranno migliorate più avanti.
 
 ### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
 
