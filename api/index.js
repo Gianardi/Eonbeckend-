@@ -2986,9 +2986,10 @@ function ultimoImpegnoDalRicordo(ricordo) {
   return { id, titolo: voce.esito.titolo || "", cliente: voce.esito.cliente || "" };
 }
 
-async function leggiImpegnoConAI(testo, ultimo) {
-  const righe = [`Frase del professionista: "${testo}"`];
-  if (ultimo) righe.push(`Ultimo impegno appena segnato: "${ultimo.titolo}"${ultimo.cliente ? " con " + ultimo.cliente : ""}, il ${ultimo.quando}.`);
+/* Una chiamata piccola all'AI: prompt corto, un solo strumento forzato.
+   Restituisce l'input compilato, o null per qualunque problema (il
+   chiamante allora passa al motore completo). */
+async function chiamaAIRapida(strumento, testoUtente) {
   let r;
   try {
     r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -2997,10 +2998,10 @@ async function leggiImpegnoConAI(testo, ultimo) {
       body: JSON.stringify({
         model: MODELLO_RAPIDO,
         max_tokens: 300,
-        system: "Leggi la frase di un professionista italiano che parla alla sua app di lavoro e compila leggi_impegno. Non inventare niente: nel dubbio, azione 'altro'. " + dataOraCorrente(),
-        tools: [STRUMENTO_LEGGI_IMPEGNO],
-        tool_choice: { type: "tool", name: "leggi_impegno" },
-        messages: [{ role: "user", content: righe.join("\n") }],
+        system: `Leggi la frase di un professionista italiano che parla alla sua app di lavoro e compila ${strumento.name}. Non inventare niente: nel dubbio, azione 'altro'. ` + dataOraCorrente(),
+        tools: [strumento],
+        tool_choice: { type: "tool", name: strumento.name },
+        messages: [{ role: "user", content: testoUtente }],
       }),
       signal: AbortSignal.timeout(8000),
     });
@@ -3010,8 +3011,14 @@ async function leggiImpegnoConAI(testo, ultimo) {
   }
   if (!r.ok) return null;
   const data = await r.json().catch(() => null);
-  const blocco = data && Array.isArray(data.content) && data.content.find((b) => b.type === "tool_use" && b.name === "leggi_impegno");
+  const blocco = data && Array.isArray(data.content) && data.content.find((b) => b.type === "tool_use" && b.name === strumento.name);
   return blocco ? blocco.input : null;
+}
+
+async function leggiImpegnoConAI(testo, ultimo) {
+  const righe = [`Frase del professionista: "${testo}"`];
+  if (ultimo) righe.push(`Ultimo impegno appena segnato: "${ultimo.titolo}"${ultimo.cliente ? " con " + ultimo.cliente : ""}, il ${ultimo.quando}.`);
+  return chiamaAIRapida(STRUMENTO_LEGGI_IMPEGNO, righe.join("\n"));
 }
 
 /* Data/ora nel formato che usa già il resto di EON ("2026-09-26T10:00:00",
@@ -3053,10 +3060,9 @@ async function creaImpegnoRapido(dati, cliente, user, ctx) {
   };
 }
 
-/* Restituisce { payload, azioni } se il percorso rapido ha gestito la
-   richiesta, null se va passata al motore completo. */
-async function provaPercorsoRapido(body, ctx, user) {
-  if (typeof body.messaggio !== "string" || !body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
+/* Appuntamenti: { payload, azioni } se gestito, null → motore completo. */
+async function provaPercorsoRapidoImpegno(body, ctx, user) {
+  if (!body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
   const testo = ctx.testoUtente;
   if (!candidatoPercorsoRapido(testo)) return null;
 
@@ -3110,6 +3116,107 @@ async function provaPercorsoRapido(body, ctx, user) {
     return { azioni: [], payload: { stato: "concluso", runId: salvato.id, testo: domanda, azioni: [] } };
   }
   return null; // "simile" o troppi omonimi: chiede il motore completo, come sempre
+}
+
+
+/* ---------- Percorso rapido per i clienti nuovi (25/09/2026) ----------
+   Stesso schema degli appuntamenti. Casi coperti, e SOLO questi:
+   - un cliente NUOVO (nome che non c'è in anagrafica, nemmeno simile),
+     con telefono e lavoro se detti: "Franco Bake 333 2517133 impianto
+     elettrico" dalla pagina Clienti, o "aggiungi cliente ..." dalla Home;
+   - la correzione del nome del cliente appena aggiunto ("non Bake ma
+     Bike"): il microfono aveva capito male.
+   Nome già in anagrafica, simile o con omonimi → motore completo (deve
+   capire se è lo stesso cliente o chiedere): mai un doppione creato qui. */
+const PREFISSO_PAGINA_CLIENTI = "Il professionista ha scritto o dettato questo, riguardo a un cliente";
+const PAROLE_CLIENTE_HOME = /\b(client[ei]|anagrafica|rubrica|contatt[oi]|numero|telefono|cellulare)\b/i;
+// Con un giorno o un'ora dentro c'è anche un impegno da segnare: motore completo.
+const TEMPO_PRECISO = /\b(oggi|domani|dopodomani|stasera|stamattina|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)\b|\b\d{1,2}[:.]\d{2}\b|\balle\s+\d/i;
+
+const STRUMENTO_LEGGI_CLIENTE = {
+  name: "leggi_cliente",
+  description: "Riporta cosa chiede la frase del professionista su un cliente.",
+  input_schema: {
+    type: "object",
+    properties: {
+      azione: {
+        type: "string",
+        enum: ["nuovo", "correggi_nome_ultimo", "altro"],
+        description: "nuovo = la frase dà i dati di UN cliente da aggiungere in anagrafica (almeno il nome; forse telefono e lavoro), e nient'altro. correggi_nome_ultimo = SOLO se sotto c'è un cliente appena aggiunto e la frase corregge solo come è scritto il suo nome ('non Bake ma Bike', 'si chiama Rossini non Rossi'). altro = tutto il resto: modificare un cliente esistente (stato, valore, note), più clienti insieme, impegni, messaggi, domande, qualunque dubbio.",
+      },
+      nome: { type: "string", description: "Per 'nuovo': nome e cognome come detti (es. 'Franco Bake'). Per 'correggi_nome_ultimo': il nome completo CORRETTO (es. 'Franco Bike')." },
+      telefono: { type: "string", description: "Solo per 'nuovo': il numero di telefono come detto, solo se detto." },
+      lavoro: { type: "string", description: "Solo per 'nuovo': il lavoro o la nota detta (es. 'Impianto elettrico'), solo se detta." },
+    },
+    required: ["azione"],
+  },
+};
+
+function candidatoClienteRapido(body, testo) {
+  if (!eStringaNonVuota(testo) || testo.length > 200 || TEMPO_PRECISO.test(testo) || ESCLUSI_RAPIDO.test(testo)) return false;
+  if (body.messaggio.startsWith(PREFISSO_PAGINA_CLIENTI)) return true;
+  return body.messaggio.startsWith(PREFISSO_RACCONTO) && PAROLE_CLIENTE_HOME.test(testo);
+}
+
+/* L'unico cliente creato nell'ultimo turno (dal ricordo), per la correzione del nome. */
+function ultimoClienteCreatoDalRicordo(ricordo) {
+  if (!Array.isArray(ricordo)) return null;
+  const creati = ricordo.filter((a) => a && a.esito && eUuid(a.esito.id) && eStringaNonVuota(a.esito.nome)
+    && (a.tool === "crea_cliente" || (a.tool === "trova_o_crea_cliente" && a.esito.creato === true)));
+  const ids = new Set(creati.map((a) => a.esito.id));
+  return ids.size === 1 ? { id: creati[0].esito.id, nome: creati[0].esito.nome } : null;
+}
+
+const cifre = (t) => String(t || "").replace(/\D/g, "");
+
+async function provaPercorsoRapidoCliente(body, ctx, user) {
+  const testo = ctx.testoUtente;
+  if (!candidatoClienteRapido(body, testo)) return null;
+  const ultimo = ultimoClienteCreatoDalRicordo(body.ricordo);
+  const righe = [`Frase del professionista: "${testo}"`];
+  if (ultimo) righe.push(`Cliente appena aggiunto: "${ultimo.nome}".`);
+  const letto = await chiamaAIRapida(STRUMENTO_LEGGI_CLIENTE, righe.join("\n"));
+  if (!letto || !eStringaNonVuota(letto.nome)) return null;
+
+  if (letto.azione === "correggi_nome_ultimo") {
+    if (!ultimo) return null;
+    /* Ogni parola del nome nuovo deve venire dalla frase o dal nome
+       vecchio ("Franco" + "Bike"), e almeno una deve essere cambiata. */
+    const paroleTesto = new Set(paroleNormalizzate(testo));
+    const paroleVecchie = new Set(paroleNormalizzate(ultimo.nome));
+    const paroleNuove = paroleNormalizzate(letto.nome);
+    if (!paroleNuove.length || !paroleNuove.every((p) => paroleTesto.has(p) || paroleVecchie.has(p))) return null;
+    if (paroleNuove.every((p) => paroleVecchie.has(p)) && paroleNuove.length === paroleVecchie.size) return null;
+    const nomeNuovo = letto.nome.trim().split(/\s+/).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+    const input = { id: ultimo.id, nome: nomeNuovo };
+    const esito = await TOOLS.aggiorna_cliente.run(input, ctx);
+    await registraOperazione(user, "aggiorna_cliente", input, esito, "auto");
+    return { azioni: [{ tool: "aggiorna_cliente", esito }], payload: { stato: "concluso", testo: "Fatto.", azioni: [{ tool: "aggiorna_cliente", esito }], focus: { tipo: "cliente", riferimento: nomeNuovo } } };
+  }
+
+  if (letto.azione !== "nuovo") return null;
+  const nome = nomeDettoNellaFrase(letto.nome, testo);
+  if (!nome) return null; // nome non davvero nella frase
+  // Il telefono deve essere fatto di cifre dette davvero, non inventate.
+  const telefono = eStringaNonVuota(letto.telefono) ? letto.telefono.trim() : "";
+  if (telefono && (cifre(telefono).length < 6 || !cifre(testo).includes(cifre(telefono)))) return null;
+
+  const risolto = await risolviClienteDaNome(nome, ctx);
+  if (risolto.stato !== "non_trovato") return null; // esiste già, simile o omonimi: decide il motore completo
+
+  const input = { nome };
+  if (telefono) input.telefono = telefono;
+  if (eStringaNonVuota(letto.lavoro)) input.note = letto.lavoro.trim().charAt(0).toUpperCase() + letto.lavoro.trim().slice(1);
+  const esito = await TOOLS.crea_cliente.run(input, ctx);
+  await registraOperazione(user, "crea_cliente", input, esito, "auto");
+  return { azioni: [{ tool: "crea_cliente", esito }], payload: { stato: "concluso", testo: "Fatto.", azioni: [{ tool: "crea_cliente", esito }], focus: { tipo: "cliente", riferimento: esito.nome } } };
+}
+
+/* Restituisce { payload, azioni } se un percorso rapido ha gestito la
+   richiesta, null se va passata al motore completo. */
+async function provaPercorsoRapido(body, ctx, user) {
+  if (typeof body.messaggio !== "string") return null;
+  return (await provaPercorsoRapidoCliente(body, ctx, user)) || (await provaPercorsoRapidoImpegno(body, ctx, user));
 }
 
 async function handleAssistant(req, res, user, accessToken) {

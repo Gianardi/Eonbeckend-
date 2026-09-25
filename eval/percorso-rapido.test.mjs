@@ -347,5 +347,113 @@ await scenario(
   }
 );
 
+
+/* ======== Clienti nuovi ======== */
+const PAGINA_CLIENTI = 'Il professionista ha scritto o dettato questo, riguardo a un cliente: ';
+const daClienti = (frase, extra) => ({ messaggio: PAGINA_CLIENTI + `"${frase}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente).`, ...(extra || {}) });
+const leggiC = (input) => () => usaStrumento("leggi_cliente", input);
+
+await scenario(
+  "Pagina Clienti: \"Franco Bake 33325 17133 impianto elettrico\" e poi \"non Bake ma bike\" (caso reale del 19/09)",
+  () => ({ altro: aggiungiCliente("Mario Rossi") }),
+  [
+    { body: daClienti("Franco Bake 33325 17133 impianto elettrico"),
+      copione: [leggiC({ azione: "nuovo", nome: "Franco Bake", telefono: "33325 17133", lavoro: "impianto elettrico" })] },
+    { body: (prec) => daClienti("Non Bake ma bike", { ricordo: prec[0].corpo.azioni }),
+      copione: [(corpo) => {
+        if (!JSON.stringify(corpo.messages).includes("Franco Bake")) throw new Error("cliente appena aggiunto non passato all'AI");
+        return usaStrumento("leggi_cliente", { azione: "correggi_nome_ultimo", nome: "Franco Bike" });
+      }] },
+  ],
+  ([r1, r2], [ai1, ai2]) => {
+    const franco = tabelle.clients.find((c) => c.phone === "33325 17133");
+    verifica("creato con una sola chiamata piccola", ai1.length === 1 && ai1[0].tools.length === 1 && r1.corpo.stato === "concluso", `${ai1.length} ${r1.corpo.stato}`);
+    verifica("telefono e lavoro salvati", franco && franco.description === "Impianto elettrico", JSON.stringify(franco));
+    verifica("azioni per l'app: crea_cliente", JSON.stringify(strumentiAzioni(r1)) === '["crea_cliente"]');
+    verifica("correzione con una sola chiamata", ai2.length === 1 && r2.corpo.stato === "concluso");
+    verifica("nome corretto in Franco Bike, nessun doppione", franco && franco.name === "Franco Bike" && tabelle.clients.length === 2, tabelle.clients.map((c) => c.name).join(", "));
+    verifica("azioni per l'app: aggiorna_cliente", JSON.stringify(strumentiAzioni(r2)) === '["aggiorna_cliente"]');
+  }
+);
+
+await scenario(
+  "Home: \"aggiungi cliente Trani Valerio lavori facciata\" → creato subito",
+  null,
+  [{ body: nuovo("Aggiungi cliente Trani Valerio lavori facciata"),
+     copione: [leggiC({ azione: "nuovo", nome: "Trani Valerio", lavoro: "lavori facciata" })] }],
+  ([r], [ai]) => {
+    verifica("una chiamata, cliente creato", ai.length === 1 && tabelle.clients.length === 1 && tabelle.clients[0].name === "Trani Valerio", tabelle.clients.map((c) => c.name).join(","));
+    verifica("stato 'trattativa' come nel motore completo", tabelle.clients[0].status === "trattativa");
+  }
+);
+
+await scenario(
+  "Cliente con lo stesso nome già in anagrafica → motore completo, nessun doppione",
+  () => ({ c: aggiungiCliente("Mario Rossi") }),
+  [{ body: daClienti("Mario Rossi 345 9012394"), copione: [leggiC({ azione: "nuovo", nome: "Mario Rossi", telefono: "345 9012394" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, nessun cliente creato", ai.length === 3 && eMotoreCompleto(ai[1]) && tabelle.clients.length === 1, `${ai.length} ${tabelle.clients.length}`);
+  }
+);
+
+await scenario(
+  "Nome simile a un cliente (\"Fabri\" / \"Fabbri\") → motore completo",
+  () => ({ c: aggiungiCliente("Fabbri") }),
+  [{ body: daClienti("Fabri 333 1234567"), copione: [leggiC({ azione: "nuovo", nome: "Fabri", telefono: "333 1234567" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, nessun cliente creato", ai.length === 3 && tabelle.clients.length === 1);
+  }
+);
+
+await scenario(
+  "Telefono con cifre mai dette → motore completo",
+  null,
+  [{ body: daClienti("Luca Neri 333 12"), copione: [leggiC({ azione: "nuovo", nome: "Luca Neri", telefono: "333 1299999" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, nessun cliente creato", ai.length === 3 && tabelle.clients.length === 0);
+  }
+);
+
+await scenario(
+  "Nome che non è nella frase → motore completo",
+  null,
+  [{ body: daClienti("Quello del tetto di via Roma"), copione: [leggiC({ azione: "nuovo", nome: "Mario Bianchi" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, nessun cliente creato", ai.length === 3 && tabelle.clients.length === 0);
+  }
+);
+
+await scenario(
+  "Correzione con un nome che non viene dalla frase → motore completo, nome invariato",
+  null,
+  [
+    { body: daClienti("Franco Bake 333 2517133"), copione: [leggiC({ azione: "nuovo", nome: "Franco Bake", telefono: "333 2517133" })] },
+    { body: (prec) => daClienti("Non Bake ma bike", { ricordo: prec[0].corpo.azioni }),
+      copione: [leggiC({ azione: "correggi_nome_ultimo", nome: "Luca Verdi" }), ...motore] },
+  ],
+  ([r1, r2], [ai1, ai2]) => {
+    verifica("nome rimasto Franco Bake", tabelle.clients[0].name === "Franco Bake");
+    verifica("motore completo", ai2.length === 3 && eMotoreCompleto(ai2[1]));
+  }
+);
+
+await scenario(
+  "Pagina Clienti con anche un appuntamento (\"sopralluogo domani alle 10\") → mai il percorso rapido",
+  null,
+  [{ body: daClienti("Rossi 333 1234567 sopralluogo domani alle 10"), copione: [...motore] }],
+  ([r], [ai]) => {
+    verifica("prima chiamata già del motore completo", eMotoreCompleto(ai[0]));
+  }
+);
+
+await scenario(
+  "Home senza parole da cliente (\"Mario Rossi 333...\") → mai il percorso rapido",
+  null,
+  [{ body: nuovo("Mario Rossi 333 1234567"), copione: [...motore] }],
+  ([r], [ai]) => {
+    verifica("prima chiamata già del motore completo", eMotoreCompleto(ai[0]));
+  }
+);
+
 console.log(falliti ? `\n${falliti} controlli FALLITI.` : "\nTutti i controlli passati.");
 if (falliti) process.exitCode = 1;
