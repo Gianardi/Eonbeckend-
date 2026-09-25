@@ -44,6 +44,12 @@ async function main() {
         r.start = () => setTimeout(() => { r.onstart && r.onstart(); r.onresult && r.onresult({ results: [[{ transcript: window.__dettato }]] }); r.onend && r.onend(); }, 10);
       };
     });
+    const descrizioniChieste = [];
+    await page.route("https://eonbeckend.vercel.app/api?action=descrivi_foto", (route) => {
+      const id = JSON.parse(route.request().postData()).foto_id;
+      descrizioniChieste.push(id);
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ descrizione: id === "f2" ? "Parete piastrellata del bagno" : "Porta scorrevole in vetro satinato" }) });
+    });
     await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: "networkidle" });
     await page.evaluate(() => {
       document.getElementById("onboardingScreen").style.display = "none";
@@ -78,6 +84,8 @@ async function main() {
     verifica("tocco su una foto: si apre la sua scheda", scheda.titolo === "Foto — Rossi" && scheda.foto, JSON.stringify(scheda));
     verifica("in alto l'invio: WhatsApp, Email, EON", JSON.stringify(scheda.invio) === '["WhatsApp","Email","EON"]', JSON.stringify(scheda.invio));
     verifica("senza nota: invita a scriverla o dettarla, con la barra in fondo", /Nessuna nota/.test(scheda.nota) && scheda.barra, JSON.stringify(scheda));
+    await page.waitForFunction(() => /EON: Parete piastrellata/.test((document.querySelector(".scheda-foto-descrizione") || {}).textContent || ""), null, { timeout: 3000 });
+    verifica("foto senza descrizione: EON la guarda e la scrive sotto la nota (\"EON: …\")", descrizioniChieste.includes("f2") && (await page.evaluate(() => cantiereFoto.find((f) => f.id === "f2").descrizione)) === "Parete piastrellata del bagno", JSON.stringify(descrizioniChieste));
 
     // Nota scritta a mano
     await page.fill("#risorsaPiede textarea", "Piastrelle da cambiare in bagno");
@@ -120,12 +128,16 @@ async function main() {
     verifica("\"foto rossi tetto\" (nessuna nota col tetto): comunque le foto di Rossi", cerca.senzaCorrispondenza && cerca.senzaCorrispondenza.voci === 2, JSON.stringify(cerca.senzaCorrispondenza));
     verifica("\"la foto del cancello\" (niente): decide l'AI", cerca.nienteDiNiente === false);
 
+    const perDescrizione = await page.evaluate(() => { chiudiRisorsaCard(); const ok = provaRisorsaImmediata("mostrami la foto della parete di rossi"); return ok ? document.getElementById("risorsaTitolo").textContent : false; });
+    verifica("\"la foto della parete di Rossi\": trovata dalla descrizione di EON (la nota non dice \"parete\")", perDescrizione === "Foto — Rossi", JSON.stringify(perDescrizione));
+
     // Foto scattata dal "+" di un cliente: subito la proposta di nota
     await page.evaluate(() => { chiudiRisorsaCard(); clienteIdPerProssimaFoto = "b"; });
     await page.setInputFiles("#cantiereFotoInput", { name: "nuova.jpg", mimeType: "image/png", buffer: PNG });
     await page.waitForFunction(() => document.getElementById("risorsaTitolo").textContent === "Foto — Bianchi" && document.getElementById("risorsaOverlay").style.display === "flex", null, { timeout: 3000 });
     const dopoScatto = await page.evaluate(() => document.querySelector(".scheda-foto-nota").textContent);
     verifica("appena scattata: \"Vuoi aggiungere una nota a questa foto?\"", /Vuoi aggiungere una nota/.test(dopoScatto), dopoScatto);
+    verifica("appena caricata: EON ne chiede subito la descrizione", descrizioniChieste.some((id) => /^nuova-/.test(id)), JSON.stringify(descrizioniChieste));
 
     // Invio WhatsApp con nota e link
     const wa = await page.evaluate(() => { let url = null; window.open = (u) => { url = u; }; chiudiRisorsaCard(); mostraSchedaFoto(cantiereFoto.find((f) => f.id === "f1"), "Rossi"); document.querySelector('.scheda-invio-btn[data-canale="WhatsApp"]').click(); return url; });

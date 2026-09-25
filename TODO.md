@@ -3440,7 +3440,26 @@ a questa foto" — scelta l'opzione 1 (nota), non il disegno sopra la foto.
 - Ricerca a voce: "mostrami la foto della crepa di Rossi", "la foto del
   contatore" (anche senza cliente) → dalla nota, senza AI; lato server
   recupera_foto_cantiere ha `cerca` e restituisce la nota.
-- Test: `eval/foto.test.js` (19) + 2 in percorso-rapido.test.mjs.
+- Test: `eval/foto.test.js` (16) + 2 in percorso-rapido.test.mjs.
+
+### Descrizione automatica delle foto (25/09/2026)
+
+Proposta mia, approvata da Gianardi dopo l'esempio della porta scorrevole
+("da cambiare e trovare modello uguale"): EON guarda la foto e scrive una
+frase breve ("Porta scorrevole in vetro satinato, telaio in alluminio"),
+salvata in `cantiere_foto.descrizione` (migrazione additiva
+`supabase/foto_descrizione.sql`, applicata a staging e produzione),
+SEPARATA dalla nota dell'utente.
+- Server: `POST /api?action=descrivi_foto` {foto_id} → Haiku con la foto letta
+  dal link pubblico dello storage di EON (link esterni rifiutati), una
+  chiamata per foto, mai ripetuta se già descritta; RLS sulla lettura.
+- App: chiesta in sottofondo dopo ogni caricamento; per le foto vecchie
+  quando si apre la loro scheda; mostrata piccola sotto la nota ("EON: …").
+- Ricerca a voce (app) e `recupera_foto_cantiere.cerca` (server) guardano
+  nota + descrizione: "la foto della porta" la trova anche se la nota dice
+  solo "da cambiare".
+- Costo: una chiamata piccola a Haiku con un'immagine per foto.
+- Test: 3 in foto.test.js (19 in tutto) + 6 in percorso-rapido.test.mjs.
 
 ### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
 

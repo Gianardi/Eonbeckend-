@@ -1578,6 +1578,7 @@
   .scheda-foto-nota{ font-size:14.5px; line-height:1.5; color:var(--text); padding:2px 2px; white-space:pre-line; transition:background .3s; border-radius:8px; }
   .scheda-foto-nota.vuota{ color:var(--muted); font-size:13px; }
   .scheda-foto-nota.salvata{ background:#EAF7EF; }
+  .scheda-foto-descrizione{ font-size:12.5px; line-height:1.45; color:var(--muted); padding:0 2px; }
   .cantiere-foto-nota-segno{ position:absolute; left:6px; bottom:6px; width:22px; height:22px; border-radius:7px; background:rgba(20,23,29,.62); color:#fff; display:flex; align-items:center; justify-content:center; pointer-events:none; }
   .cantiere-foto-nota-segno svg{ width:13px; height:13px; }
   /* la scheda del documento dentro la conversazione */
@@ -3693,6 +3694,7 @@ const ANALIZZA_MESSAGGIO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?actio
 /* Legge i dati azienda dalla foto di un documento (primo formato dei
    documenti, punto 33) — vedi handleLeggiIntestazioneDaFoto in api/index.js. */
 const LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=leggi_intestazione_da_foto";
+const DESCRIVI_FOTO_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=descrivi_foto";
 const RISPONDI_RICHIESTA_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?action=rispondi_richiesta_cliente";
 
 /* Il backend si considera attivo solo se ci sono i valori di configurazione
@@ -3928,7 +3930,7 @@ async function loadUserDataFromDB(){
     id:a.id, title:a.title, deadline:a.deadline, employees:a.employee_names || []
   }));
 
-  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "" }));
+  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "", descrizione:f.descrizione || "" }));
   cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push(mappaAppunto(a)));
   aggiornaCantiereSottotitoli();
@@ -8845,8 +8847,9 @@ async function caricaCantiereFoto(file, clienteIdForzato){
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
     const creato = await dbInsert("cantiere_foto", { url:pub.publicUrl });
     if(!creato) throw new Error("scrittura non riuscita");
-    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"" };
+    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"" };
     cantiereFoto.push(nuovaFoto);
+    descriviFoto(nuovaFoto); // in sottofondo: EON guarda la foto e ne scrive una descrizione
     if(clienteIdForzato){
       /* Foto aggiunta dal "+" dentro la card di un cliente già noto:
          nessun bisogno di richiedere di nuovo a chi si riferisce. */
@@ -9261,7 +9264,9 @@ function trovaClienteDaParole(parole){
 function mostraFotoTrovate(elenco, parole, clienteNome){
   const cercate = parole.filter(p => p.length > 2 && !/^(del|della|dello|dei|delle|con|per|sul|sulla|nel|nella|che)$/.test(p));
   if(!cercate.length) return false;
-  const trovate = elenco.filter(f => f.nota && cercate.some(p => f.nota.toLowerCase().includes(p)))
+  // Nella nota dell'utente e nella descrizione scritta da EON
+  const testoDi = f => ((f.nota || "") + " " + (f.descrizione || "")).toLowerCase();
+  const trovate = elenco.filter(f => (f.nota || f.descrizione) && cercate.some(p => testoDi(f).includes(p)))
     .slice().sort((a, b) => new Date(b.created) - new Date(a.created));
   if(!trovate.length) return false;
   const nomeDi = f => clienteNome || ((clients.find(c => c.id === f.clientId) || {}).name) || null;
@@ -9269,7 +9274,7 @@ function mostraFotoTrovate(elenco, parole, clienteNome){
     mostraSchedaFoto(trovate[0], nomeDi(trovate[0]));
     return true;
   }
-  mostraRisorsaFoto(trovate.slice(0, 10).map(f => ({ id: f.id, url: f.url, quando: f.created, nota: f.nota })), clienteNome);
+  mostraRisorsaFoto(trovate.slice(0, 10).map(f => ({ id: f.id, url: f.url, quando: f.created, nota: f.nota, descrizione: f.descrizione })), clienteNome);
   return true;
 }
 
@@ -10389,7 +10394,8 @@ function creaVoceFoto(foto, clienteNome){
   img.alt = foto.nota || "";
   img.addEventListener("click", () => mostraSchedaFoto(foto, clienteNome));
   el.appendChild(img);
-  const nota = foto.nota || (cantiereFoto.find(f => f.id === foto.id) || {}).nota;
+  const inMem = cantiereFoto.find(f => f.id === foto.id) || {};
+  const nota = foto.nota || inMem.nota || (foto.descrizione || inMem.descrizione ? "EON: " + (foto.descrizione || inMem.descrizione) : "");
   if(nota){
     const n = document.createElement("div");
     n.className = "risorsa-voce-riepilogo";
@@ -10413,6 +10419,39 @@ function creaVoceFoto(foto, clienteNome){
   btnRiga.appendChild(apriBtn);
   el.appendChild(btnRiga);
   return el;
+}
+
+/* Descrizione automatica (25/09/2026): EON guarda la foto e scrive una
+   frase breve ("porta scorrevole in vetro satinato, telaio in alluminio"),
+   salvata dal server. Non blocca mai niente: se non riesce, la foto resta
+   com'è. Una sola richiesta alla volta per foto. */
+const descrizioniInCorso = new Map();
+function descriviFoto(foto){
+  if(!foto || !foto.id || !BACKEND_CONFIGURED || !currentSession) return Promise.resolve(null);
+  if(foto.descrizione) return Promise.resolve(foto.descrizione);
+  if(descrizioniInCorso.has(foto.id)) return descrizioniInCorso.get(foto.id);
+  const promessa = (async () => {
+    try{
+      const response = await fetch(DESCRIVI_FOTO_ENDPOINT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
+        body: JSON.stringify({ foto_id: foto.id })
+      });
+      const json = await response.json().catch(() => ({}));
+      if(!response.ok || !json.descrizione) throw new Error(json.error || "descrizione non ricevuta");
+      foto.descrizione = json.descrizione;
+      const inMemoria = cantiereFoto.find(f => f.id === foto.id);
+      if(inMemoria) inMemoria.descrizione = json.descrizione;
+      return json.descrizione;
+    }catch(err){
+      console.warn("Descrizione automatica della foto non riuscita:", err.message);
+      return null;
+    }finally{
+      descrizioniInCorso.delete(foto.id);
+    }
+  })();
+  descrizioniInCorso.set(foto.id, promessa);
+  return promessa;
 }
 
 /* ============ SCHEDA FOTO CON NOTA (25/09/2026) ============
@@ -10441,6 +10480,17 @@ function mostraSchedaFoto(foto, clienteNome, opzioni){
   };
   disegnaNota();
   corpo.appendChild(notaEl);
+  // La descrizione scritta da EON guardando la foto: sotto la nota, piccola
+  const descrEl = document.createElement("div");
+  descrEl.className = "scheda-foto-descrizione";
+  const descrizioneNota = (inMemoria && inMemoria.descrizione) || foto.descrizione || "";
+  const disegnaDescrizione = (d) => { descrEl.textContent = d ? "EON: " + d : ""; descrEl.style.display = d ? "" : "none"; };
+  disegnaDescrizione(descrizioneNota);
+  corpo.appendChild(descrEl);
+  if(!descrizioneNota){
+    // Foto senza descrizione (scattata prima, o appena caricata): la chiede ora
+    descriviFoto(inMemoria || foto).then(d => { if(d && descrEl.isConnected) disegnaDescrizione(d); });
+  }
 
   const piede = document.createElement("div");
   piede.className = "scheda-composer";

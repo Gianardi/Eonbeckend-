@@ -2063,7 +2063,7 @@ const TOOLS = {
       const limite = eNumero(input.limite) ? Math.max(1, Math.min(input.limite, 30)) : 10;
       // Con parole da cercare si leggono più foto, poi si filtrano per nota (25/09/2026)
       const daLeggere = eStringaNonVuota(input.cerca) ? 100 : limite;
-      let query = `cantiere_foto?select=id,url,client_id,cantiere_id,nota,created_at&deleted_at=is.null&order=created_at.desc&limit=${daLeggere}`;
+      let query = `cantiere_foto?select=id,url,client_id,cantiere_id,nota,descrizione,created_at&deleted_at=is.null&order=created_at.desc&limit=${daLeggere}`;
       if (eStringaNonVuota(input.cantiere_id)) query += `&cantiere_id=eq.${encodeURIComponent(input.cantiere_id)}`;
       else if (eStringaNonVuota(input.cliente_id)) query += `&client_id=eq.${encodeURIComponent(input.cliente_id)}`;
       const righe = await db(query, { method: "GET" }, ctx.accessToken);
@@ -2071,13 +2071,14 @@ const TOOLS = {
       let trovataPerNota = null;
       if (eStringaNonVuota(input.cerca)) {
         const parole = paroleNormalizzate(input.cerca).filter((p) => p.length > 2);
-        const conNota = lista.filter((f) => { const n = paroleNormalizzate(f.nota || "").join(" "); return parole.some((p) => n.includes(p)); });
+        // Nella nota dell'utente e nella descrizione scritta da EON
+        const conNota = lista.filter((f) => { const n = paroleNormalizzate((f.nota || "") + " " + (f.descrizione || "")).join(" "); return parole.some((p) => n.includes(p)); });
         trovataPerNota = conNota.length > 0;
         if (conNota.length) lista = conNota;
       }
       lista = lista.slice(0, limite);
       return {
-        foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at, nota: f.nota || null })),
+        foto: lista.map((f) => ({ id: f.id, url: f.url, quando: f.created_at, nota: f.nota || null, descrizione: f.descrizione || null })),
         ...(trovataPerNota === false ? { nota_ricerca: "Nessuna foto ha una nota con queste parole: queste sono le più recenti." } : {}),
       };
     },
@@ -4599,6 +4600,66 @@ async function handleLeggiIntestazioneDaFoto(req, res) {
   });
 }
 
+/* Descrizione automatica di una foto del cantiere (25/09/2026, richiesta di
+   Gianardi dopo l'esempio della porta scorrevole). EON guarda la foto e
+   scrive una frase breve e concreta ("porta scorrevole in vetro satinato,
+   telaio in alluminio, maniglia incassata"), salvata in
+   cantiere_foto.descrizione, separata dalla nota dell'utente: serve a
+   ritrovare la foto a voce con parole che l'utente non ha scritto, e come
+   dettaglio per cercare un pezzo uguale. Modello economico, una chiamata
+   per foto; la foto la legge Anthropic direttamente dal link pubblico
+   dello storage di EON (mai link esterni). */
+async function handleDescriviFoto(req, res, user, accessToken) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
+  const body = await readBody(req);
+  if (!eUuid(body.foto_id)) throw fail("Campo 'foto_id' mancante o non valido");
+
+  // RLS: con il token dell'utente torna solo una foto sua
+  const righe = await db(`cantiere_foto?id=eq.${body.foto_id}&select=id,url,descrizione&deleted_at=is.null`, { method: "GET" }, accessToken);
+  const foto = Array.isArray(righe) ? righe[0] : null;
+  if (!foto) throw fail("Foto non trovata", 404);
+  if (eStringaNonVuota(foto.descrizione) && !body.rifai) return send(res, 200, { descrizione: foto.descrizione });
+  if (typeof foto.url !== "string" || !foto.url.startsWith(SUPABASE_URL + "/storage/v1/object/public/")) {
+    throw fail("Questa foto non è nello spazio di EON: non posso descriverla", 400);
+  }
+
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: MODELLO_RAPIDO,
+        max_tokens: 120,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "url", url: foto.url } },
+            { type: "text", text: "Foto scattata da un artigiano su un cantiere o in una casa. Descrivi in italiano, in UNA frase breve (massimo 15 parole), cosa si vede, con i dettagli utili a riconoscerla e a cercare un pezzo uguale: tipo di oggetto, materiale, colore, finitura, particolari. Solo la descrizione: niente frasi introduttive, niente ipotesi su cose che non si vedono." },
+          ],
+        }],
+      }),
+    });
+  } catch (netErr) {
+    throw fail("Non riesco a contattare l'AI: " + netErr.message, 502);
+  }
+  if (!r.ok) {
+    let motivo = "";
+    try { const j = await r.json(); motivo = (j.error && (j.error.message || j.error.type)) || ""; } catch (e) { /* niente */ }
+    throw fail(erroreAILeggibile(r.status, motivo), 502);
+  }
+  const data = await r.json();
+  let descrizione = (data.content || []).map((b) => b.text || "").join(" ").replace(/\s+/g, " ").trim()
+    .replace(/^["«']+|["»']+$/g, "").replace(/\.$/, "");
+  if (!descrizione) throw fail("Non sono riuscita a descrivere la foto", 502);
+  descrizione = descrizione.charAt(0).toUpperCase() + descrizione.slice(1);
+  if (descrizione.length > 200) descrizione = descrizione.slice(0, 200).replace(/\s+\S*$/, "") + "…";
+
+  await db(`cantiere_foto?id=eq.${foto.id}`, { method: "PATCH", body: JSON.stringify({ descrizione }) }, accessToken);
+  return send(res, 200, { descrizione });
+}
+
 /* Named export solo per i test automatici (eval/backend.test.js): sono
    funzioni pure (nessuna chiamata di rete/database), utili da
    verificare in isolamento senza un account Supabase né una chiave
@@ -4655,6 +4716,7 @@ export default async function handler(req, res) {
 
     if (action === "ai") return await handleAI(req, res);
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
+    if (action === "descrivi_foto") return await handleDescriviFoto(req, res, user, accessToken);
     if (action === "analizza_messaggio") return await handleAnalizzaMessaggio(req, res, user, accessToken);
     if (action === "rispondi_richiesta_cliente") return await handleRispondiRichiestaCliente(req, res, user, accessToken);
     if (action === "transcribe") return await handleTranscribe(req, res);
