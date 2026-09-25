@@ -1734,6 +1734,42 @@
   .invoice-preview-table td{ padding:10px 0; font-size:12.5px; color:var(--text); border-bottom:1px solid var(--border); vertical-align:top; }
   .invoice-preview-totals{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; font-size:13px; color:var(--muted); }
   .invoice-preview-totals .total{ font-size:15px; font-weight:900; color:var(--text); margin-top:6px; padding-top:8px; border-top:1.5px solid var(--border-strong); width:180px; text-align:right; }
+  /* Modelli di formato dei documenti (25/09/2026): stessa anteprima, quattro
+     aspetti. --doc-acc è il colore scelto (modello di EON o letto dalla
+     foto di una fattura dell'utente). */
+  .invoice-preview{ --doc-acc:#1F3A93; }
+  .invoice-preview .doc-intest{ font-size:11px; color:var(--muted); line-height:1.5; margin-top:6px; }
+  .invoice-preview.modello-classico .invoice-preview-head{ border-bottom:2px solid var(--doc-acc); }
+  .invoice-preview.modello-classico .invoice-preview-doctype,
+  .invoice-preview.modello-classico .invoice-preview-meta b{ color:var(--doc-acc); }
+  .invoice-preview.modello-classico .invoice-preview-totals .total{ border-top-color:var(--doc-acc); }
+  .invoice-preview.modello-moderno{ padding-top:0; overflow:hidden; }
+  .invoice-preview.modello-moderno .invoice-preview-head{ background:var(--doc-acc); color:#fff; margin:0 -18px 14px; padding:16px 18px; border-bottom:none; }
+  .invoice-preview.modello-moderno .invoice-preview-head *,
+  .invoice-preview.modello-moderno .invoice-preview-brand{ color:#fff !important; }
+  .invoice-preview.modello-moderno .invoice-preview-table th{ color:var(--doc-acc); border-bottom:2px solid var(--doc-acc); }
+  .invoice-preview.modello-moderno .invoice-preview-totals .total{ color:var(--doc-acc); border-top-color:var(--doc-acc); }
+  .invoice-preview.modello-essenziale{ box-shadow:none; }
+  .invoice-preview.modello-essenziale .invoice-preview-head{ border-bottom:none; }
+  .invoice-preview.modello-essenziale .invoice-preview-table th,
+  .invoice-preview.modello-essenziale .invoice-preview-table td{ border-bottom-color:#F1F2F5; }
+  .invoice-preview.modello-essenziale .invoice-preview-totals .total{ font-size:19px; color:var(--doc-acc); border-top:none; }
+  .invoice-preview.modello-essenziale .invoice-preview-meta b{ color:var(--doc-acc); }
+  .invoice-preview.modello-elegante{ font-family:Georgia,'Times New Roman',serif; }
+  .invoice-preview.modello-elegante .invoice-preview-head{ flex-direction:column; align-items:center; text-align:center; gap:8px; border-bottom:3px double var(--doc-acc); }
+  .invoice-preview.modello-elegante .invoice-preview-brand{ font-family:Georgia,'Times New Roman',serif; justify-content:center; }
+  .invoice-preview.modello-elegante .invoice-preview-meta{ text-align:center; }
+  .invoice-preview.modello-elegante .invoice-preview-doctype{ color:var(--doc-acc); letter-spacing:.18em; }
+  .invoice-preview.modello-elegante .invoice-preview-meta b{ color:var(--doc-acc); }
+  .invoice-preview.modello-elegante .invoice-preview-totals .total{ border-top:1px solid var(--doc-acc); }
+  .galleria-modelli{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+  .galleria-modello{ min-width:0; background:none; border:2px solid var(--border); border-radius:14px; padding:6px; cursor:pointer; font:inherit; color:inherit; text-align:center; }
+  .galleria-modello.scelto{ border-color:var(--indigo); }
+  /* Anteprima rimpicciolita: disegnata a 300px e ridotta, fuori dal calcolo delle colonne */
+  .galleria-mini{ position:relative; height:180px; overflow:hidden; border-radius:8px; pointer-events:none; text-align:left; }
+  .galleria-mini .invoice-preview{ position:absolute; top:0; left:0; width:300px; transform:scale(.48); transform-origin:top left; margin-top:0; box-shadow:none; }
+  .galleria-nome{ font-weight:800; font-size:13px; margin-top:6px; }
+  .galleria-nota{ font-size:11px; color:var(--indigo); font-weight:700; }
   @media print{
     body *{ visibility:hidden; }
     .invoice-preview, .invoice-preview *{ visibility:visible; }
@@ -2003,11 +2039,12 @@
     <div class="ai-landing-icon" style="background:var(--indigo);">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
     </div>
-    <div class="ai-landing-title">Crea il formato dei tuoi documenti</div>
-    <div class="ai-landing-text" id="onboardingDocumentiHint" style="margin-bottom:16px;">Preventivi, fatture, lettere e cartelli useranno questo formato — puoi cambiarlo quando vuoi dalla Carta intestata.</div>
+    <div class="ai-landing-title">Come vuoi le tue fatture?</div>
+    <div class="ai-landing-text" id="onboardingDocumentiHint" style="margin-bottom:16px;">Hai già delle fatture tue? Fai una foto a una di queste: EON registra il tuo formato e i tuoi documenti usciranno così. Oppure scegli uno dei modelli di EON.</div>
     <input type="file" id="onboardingDocFotoInput" accept="image/*" style="display:none;">
-    <button class="primary-btn" id="onboardingDocFotoBtn" type="button" style="margin:0 auto; width:100%;">Scegli il formato da una foto</button>
-    <button type="button" id="onboardingDocEonBtn" style="margin-top:12px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:6px;">Usa il modello di EON</button>
+    <button class="primary-btn" id="onboardingDocFotoBtn" type="button" style="margin:0 auto; width:100%;">Fai una foto a una tua fattura</button>
+    <button class="doc-btn-secondario" id="onboardingDocEonBtn" type="button" style="margin-top:10px; width:100%;">Scegli un modello di EON</button>
+    <button type="button" id="onboardingDocDopoBtn" style="margin-top:10px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:6px;">Più tardi</button>
   </div>
 </div>
 
@@ -2542,6 +2579,15 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             Salva carta intestata
           </button>
+        </div>
+      </div>
+      <div class="card-panel">
+        <div class="card-header"><h2>Formato dei documenti</h2></div>
+        <p class="module-sub" style="padding:0 16px 4px;" id="formatoAttualeTesto">Modello Classico</p>
+        <div class="form-panel" style="display:flex; flex-direction:column; gap:10px;">
+          <button class="doc-btn-secondario" id="formatoCambiaBtn" type="button" style="width:100%;">Scegli un modello di EON</button>
+          <input type="file" id="formatoFotoInput" accept="image/*" style="display:none;">
+          <button class="doc-btn-secondario" id="formatoFotoBtn" type="button" style="width:100%;">Usa il formato di una tua fattura (foto)</button>
         </div>
       </div>
     </div>
@@ -3850,7 +3896,8 @@ async function loadUserDataFromDB(){
   aziendaIntestazione = rigaIntestazione ? {
     nome_azienda:rigaIntestazione.nome_azienda || "", indirizzo:rigaIntestazione.indirizzo || "",
     piva:rigaIntestazione.piva || "", telefono:rigaIntestazione.telefono || "",
-    email:rigaIntestazione.email || "", logo_url:rigaIntestazione.logo_url || null
+    email:rigaIntestazione.email || "", logo_url:rigaIntestazione.logo_url || null,
+    modello:rigaIntestazione.modello || null, colore:rigaIntestazione.colore || null
   } : null;
   aggiornaMarchiDocumento();
 }
@@ -7005,6 +7052,8 @@ function renderCartaIntestata(){
   document.getElementById("intestazioneTelefono").value = (aziendaIntestazione && aziendaIntestazione.telefono) || "";
   document.getElementById("intestazioneEmail").value = (aziendaIntestazione && aziendaIntestazione.email) || "";
   renderLogoIntestazioneAnteprima();
+  const f = formatoAttuale();
+  document.getElementById("formatoAttualeTesto").textContent = "Modello " + MODELLI_DOCUMENTO[f.modello].nome + (aziendaIntestazione && aziendaIntestazione.modello ? "" : " (quello di partenza)");
 }
 
 async function caricaLogoIntestazione(file){
@@ -7066,7 +7115,8 @@ async function salvaCartaIntestata(){
     showAILanding("Salvataggio non riuscito", error.message);
     return;
   }
-  aziendaIntestazione = dati;
+  // modello e colore non sono in questo modulo: restano quelli già scelti
+  aziendaIntestazione = { ...dati, modello:(aziendaIntestazione && aziendaIntestazione.modello) || null, colore:(aziendaIntestazione && aziendaIntestazione.colore) || null };
   aggiornaMarchiDocumento();
   showAIToast("Carta intestata salvata", "Preventivo, Fattura, Lettera e Cartello fine lavori la useranno da ora in poi.");
 }
@@ -7126,46 +7176,203 @@ function ridimensionaEConvertiInBase64(file){
   });
 }
 
-document.getElementById("onboardingDocEonBtn").addEventListener("click", chiudiOnboardingDocumenti);
+/* ============ FORMATO DEI DOCUMENTI (25/09/2026) ============
+   Gianardi: "l'idea è dire all'artigiano: vuoi usare il vecchio formato
+   della tua fattura? Fai una foto qui così lo registriamo… sennò scegli un
+   modello di EON". Due strade, un solo risultato salvato (modello +
+   colore in azienda_intestazione), usato da anteprime e PDF. */
+function documentoEsempio(){
+  const oggi = new Date().toLocaleDateString("it-IT");
+  return { tipo:"fattura", numero:"1/" + new Date().getFullYear(), data:oggi, cliente:"Mario Rossi",
+    voci:[{ desc:"Rifacimento bagno", qta:1, prezzo:2500 }, { desc:"Smaltimento materiali", qta:1, prezzo:300 }],
+    imponibile:2800, aliquota:22, iva:616, totale:3416, condizioni:"30 giorni data fattura" };
+}
+
+async function salvaFormato(modello, colore, datiIntestazione){
+  if(!isDbReady()){
+    showAILanding("Non collegato", "Per salvare il formato serve la connessione al database.");
+    return false;
+  }
+  const riga = { owner_id:currentSession.user.id, modello, colore, updated_at:new Date().toISOString() };
+  // I dati letti dalla foto riempiono solo i campi ancora vuoti: mai sovrascrivere quelli già salvati.
+  if(datiIntestazione){
+    ["nome_azienda", "indirizzo", "piva", "telefono", "email"].forEach(k => {
+      if(datiIntestazione[k] && !(aziendaIntestazione && aziendaIntestazione[k])) riga[k] = datiIntestazione[k];
+    });
+  }
+  const { error } = await supabaseClient.from("azienda_intestazione").upsert(riga);
+  if(error){
+    console.error("Errore salvataggio formato:", error.message);
+    showAILanding("Salvataggio non riuscito", error.message);
+    return false;
+  }
+  aziendaIntestazione = { ...(aziendaIntestazione || {}), ...riga };
+  delete aziendaIntestazione.owner_id; delete aziendaIntestazione.updated_at;
+  localStorage.setItem("eon_documenti_onboarding_fatto", "1");
+  aggiornaMarchiDocumento();
+  if(document.getElementById("page-carta-intestata").classList.contains("visible")) renderCartaIntestata();
+  showAIToast("Formato salvato", "Modello " + MODELLI_DOCUMENTO[modello].nome + ": preventivi e fatture usciranno così.");
+  return true;
+}
+
+/* Galleria dei 4 modelli con una fattura d'esempio. colore: se arriva da
+   una foto, tutti i modelli si mostrano con il colore della fattura
+   dell'utente; consigliato: il modello più vicino alla sua fattura. */
+function apriGalleriaModelli(opzioni){
+  const { colore, consigliato, intestazione } = opzioni || {};
+  const intest = intestazione || aziendaIntestazione || null;
+  const wrap = document.createElement("div");
+  const griglia = document.createElement("div");
+  griglia.className = "galleria-modelli";
+  const attuale = formatoAttuale();
+  Object.keys(MODELLI_DOCUMENTO).forEach(chiave => {
+    const coloreModello = colore || (chiave === attuale.modello && aziendaIntestazione && aziendaIntestazione.colore) || MODELLI_DOCUMENTO[chiave].colore;
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "galleria-modello" + ((consigliato || attuale.modello) === chiave ? " scelto" : "");
+    card.dataset.modello = chiave;
+    const mini = document.createElement("div");
+    mini.className = "galleria-mini";
+    mini.appendChild(costruisciAnteprimaDocumento(documentoEsempio(), { modello:chiave, colore:coloreModello }, intest));
+    const nome = document.createElement("div");
+    nome.className = "galleria-nome";
+    nome.textContent = MODELLI_DOCUMENTO[chiave].nome;
+    card.appendChild(mini); card.appendChild(nome);
+    if(consigliato === chiave){
+      const nota = document.createElement("div");
+      nota.className = "galleria-nota";
+      nota.textContent = "Il più simile alla tua fattura";
+      card.appendChild(nota);
+    }
+    card.addEventListener("click", () => mostraModelloScelto(chiave, coloreModello, opzioni));
+    griglia.appendChild(card);
+  });
+  wrap.appendChild(griglia);
+  apriRisorsaCard("Scegli il modello", wrap);
+}
+
+/* Anteprima grande del modello toccato, con "Usa questo modello". */
+function mostraModelloScelto(modello, colore, opzioni){
+  const { intestazione } = opzioni || {};
+  const corpo = document.createElement("div");
+  corpo.appendChild(costruisciAnteprimaDocumento(documentoEsempio(), { modello, colore }, intestazione || aziendaIntestazione || null));
+  const riga = document.createElement("div");
+  riga.style.cssText = "display:flex; flex-direction:column; gap:10px; margin-top:14px;";
+  const usa = document.createElement("button");
+  usa.type = "button"; usa.className = "primary-btn"; usa.style.width = "100%";
+  usa.textContent = "Usa questo modello";
+  usa.addEventListener("click", async () => {
+    usa.disabled = true;
+    const ok = await salvaFormato(modello, colore, intestazione || null);
+    usa.disabled = false;
+    if(ok) chiudiRisorsaCard();
+  });
+  const altri = document.createElement("button");
+  altri.type = "button"; altri.className = "doc-btn-secondario"; altri.style.width = "100%";
+  altri.textContent = "Vedi gli altri modelli";
+  altri.addEventListener("click", () => apriGalleriaModelli(opzioni));
+  riga.appendChild(usa); riga.appendChild(altri);
+  corpo.appendChild(riga);
+  apriRisorsaCard("Modello " + MODELLI_DOCUMENTO[modello].nome, corpo);
+}
+
+/* Foto di una fattura dell'utente → dati dell'intestazione, colore e
+   disposizione (vedi handleLeggiIntestazioneDaFoto in api/index.js) →
+   proposta del modello più vicino, da confermare. */
+async function leggiFormatoDaFoto(file, avviso){
+  if(!BACKEND_CONFIGURED || !currentSession) throw new Error("accedi per usare questa funzione");
+  if(avviso) avviso("Sto guardando la tua fattura…");
+  const { base64, mediaType } = await ridimensionaEConvertiInBase64(file);
+  const response = await fetch(LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
+    body: JSON.stringify({ immagine_base64: base64, media_type: mediaType })
+  });
+  const json = await response.json().catch(() => ({}));
+  if(!response.ok) throw new Error(json.error || "Non sono riuscita a leggere la foto");
+  const modello = MODELLI_DOCUMENTO[json.modello] ? json.modello : "classico";
+  const colore = /^#[0-9A-Fa-f]{6}$/.test(json.colore || "") ? json.colore : MODELLI_DOCUMENTO[modello].colore;
+  // Anteprima con i dati già salvati, completati da quelli letti nella foto.
+  const intestazione = { ...(aziendaIntestazione || {}) };
+  ["nome_azienda", "indirizzo", "piva", "telefono", "email"].forEach(k => { if(json[k] && !intestazione[k]) intestazione[k] = json[k]; });
+  const dalla = {}; ["nome_azienda", "indirizzo", "piva", "telefono", "email"].forEach(k => { if(json[k]) dalla[k] = json[k]; });
+  mostraPropostaDaFoto(modello, colore, intestazione, dalla);
+}
+function mostraPropostaDaFoto(modello, colore, intestazione, datiLetti){
+  const corpo = document.createElement("div");
+  const testo = document.createElement("div");
+  testo.className = "risorsa-voce-sotto";
+  testo.style.cssText = "text-align:left; margin-bottom:6px;";
+  testo.textContent = "Ecco come usciranno i tuoi documenti, presi dalla tua fattura: colori, disposizione e dati. Controlla e conferma.";
+  corpo.appendChild(testo);
+  corpo.appendChild(costruisciAnteprimaDocumento(documentoEsempio(), { modello, colore }, intestazione));
+  const riga = document.createElement("div");
+  riga.style.cssText = "display:flex; flex-direction:column; gap:10px; margin-top:14px;";
+  const salva = document.createElement("button");
+  salva.type = "button"; salva.className = "primary-btn"; salva.style.width = "100%";
+  salva.textContent = "Va bene, usa questo";
+  salva.addEventListener("click", async () => {
+    salva.disabled = true;
+    const ok = await salvaFormato(modello, colore, datiLetti);
+    salva.disabled = false;
+    if(ok) chiudiRisorsaCard();
+  });
+  const altro = document.createElement("button");
+  altro.type = "button"; altro.className = "doc-btn-secondario"; altro.style.width = "100%";
+  altro.textContent = "Prova un altro modello con i miei colori";
+  altro.addEventListener("click", () => apriGalleriaModelli({ colore, consigliato:modello, intestazione }));
+  const dati = document.createElement("button");
+  dati.type = "button"; dati.className = "doc-btn-secondario"; dati.style.width = "100%";
+  dati.textContent = "Correggi i dati dell'intestazione";
+  dati.addEventListener("click", async () => {
+    // Salva il formato e porta ai dati da controllare, già compilati con quelli letti.
+    if(!(await salvaFormato(modello, colore, datiLetti))) return;
+    chiudiRisorsaCard();
+    navigateTo("carta-intestata");
+  });
+  riga.appendChild(salva); riga.appendChild(altro); riga.appendChild(dati);
+  corpo.appendChild(riga);
+  apriRisorsaCard("Il tuo formato", corpo);
+}
+
+function collegaFotoFormato(inputId, btnId, avviso, ripristina, riuscita){
+  document.getElementById(btnId).addEventListener("click", () => document.getElementById(inputId).click());
+  document.getElementById(inputId).addEventListener("change", async (e) => {
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const btn = document.getElementById(btnId);
+    btn.disabled = true;
+    try{
+      await leggiFormatoDaFoto(f, avviso);
+      if(riuscita) riuscita();
+    }catch(err){
+      console.error("Lettura del formato da foto non riuscita:", err);
+      showAILanding("Non sono riuscita a leggerla", (err.message || "Riprova") + " — riprova con una foto più dritta e leggibile, o scegli un modello di EON.");
+    }finally{
+      btn.disabled = false;
+      if(ripristina) ripristina();
+      document.getElementById(inputId).value = "";
+    }
+  });
+}
+
+// Prima volta in Documenti
+document.getElementById("onboardingDocEonBtn").addEventListener("click", () => { chiudiOnboardingDocumenti(); apriGalleriaModelli(); });
+document.getElementById("onboardingDocDopoBtn").addEventListener("click", chiudiOnboardingDocumenti);
 document.getElementById("onboardingDocumentiOverlay").addEventListener("click", (e) => {
   if(e.target.id === "onboardingDocumentiOverlay") chiudiOnboardingDocumenti();
 });
-document.getElementById("onboardingDocFotoBtn").addEventListener("click", () => document.getElementById("onboardingDocFotoInput").click());
-document.getElementById("onboardingDocFotoInput").addEventListener("change", async (e) => {
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const btn = document.getElementById("onboardingDocFotoBtn");
+(() => {
   const hint = document.getElementById("onboardingDocumentiHint");
   const hintBase = hint.textContent;
-  btn.disabled = true;
-  hint.textContent = "Sto leggendo i dati dalla foto…";
-  try{
-    if(!BACKEND_CONFIGURED || !currentSession) throw new Error("accedi per usare questa funzione");
-    const { base64, mediaType } = await ridimensionaEConvertiInBase64(f);
-    const response = await fetch(LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
-      body: JSON.stringify({ immagine_base64: base64, media_type: mediaType })
-    });
-    const json = await response.json().catch(() => ({}));
-    if(!response.ok) throw new Error(json.error || "Non sono riuscita a leggere la foto");
-    chiudiOnboardingDocumenti();
-    navigateTo("carta-intestata");
-    if(json.nome_azienda) document.getElementById("intestazioneNome").value = json.nome_azienda;
-    if(json.indirizzo) document.getElementById("intestazioneIndirizzo").value = json.indirizzo;
-    if(json.piva) document.getElementById("intestazionePiva").value = json.piva;
-    if(json.telefono) document.getElementById("intestazioneTelefono").value = json.telefono;
-    if(json.email) document.getElementById("intestazioneEmail").value = json.email;
-    showAIToast("Ho letto questi dati dalla foto", "Controllali e tocca Salva se vanno bene — puoi correggerli prima.");
-  }catch(err){
-    console.error("Lettura intestazione da foto non riuscita:", err);
-    showAILanding("Non sono riuscita a leggerla", err.message || "Riprova con un'altra foto, o usa il modello di EON.");
-  }finally{
-    btn.disabled = false;
-    hint.textContent = hintBase;
-    document.getElementById("onboardingDocFotoInput").value = "";
-  }
-});
+  collegaFotoFormato("onboardingDocFotoInput", "onboardingDocFotoBtn",
+    (t) => { hint.textContent = t; },
+    () => { hint.textContent = hintBase; },
+    chiudiOnboardingDocumenti); // la proposta si vede solo dopo aver chiuso questa finestra
+})();
+// Dalla Carta intestata, quando si vuole
+document.getElementById("formatoCambiaBtn").addEventListener("click", () => apriGalleriaModelli());
+collegaFotoFormato("formatoFotoInput", "formatoFotoBtn", (t) => showAIToast("Un attimo", t), null);
 
 /* ============ CREA FATTURA ============ */
 const invoiceClientSel = document.getElementById("invoiceClient");
@@ -10154,17 +10361,62 @@ const ICONA_DOCUMENTO = '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path 
    rimozione), qui però con i dati REALI del documento creato/recuperato
    da EON — mai un secondo sistema di fatturazione, solo la stessa
    presentazione applicata ai dati veri. */
-function costruisciAnteprimaDocumento(dati){
+/* I quattro modelli di formato (25/09/2026). Il colore è quello di
+   partenza di ogni modello, sostituito da quello scelto dall'utente o
+   letto dalla foto di una sua fattura. */
+const MODELLI_DOCUMENTO = {
+  classico:   { nome:"Classico",   colore:"#1F3A93" },
+  moderno:    { nome:"Moderno",    colore:"#0F766E" },
+  essenziale: { nome:"Essenziale", colore:"#111827" },
+  elegante:   { nome:"Elegante",   colore:"#7A2E2E" },
+};
+function formatoAttuale(){
+  const modello = aziendaIntestazione && MODELLI_DOCUMENTO[aziendaIntestazione.modello] ? aziendaIntestazione.modello : "classico";
+  const colore = aziendaIntestazione && /^#[0-9A-Fa-f]{6}$/.test(aziendaIntestazione.colore || "") ? aziendaIntestazione.colore : MODELLI_DOCUMENTO[modello].colore;
+  return { modello, colore };
+}
+/* Righe dell'intestazione sotto il marchio: indirizzo, P.IVA, contatti. */
+function righeIntestazione(intest){
+  if(!intest) return [];
+  return [intest.indirizzo, intest.piva ? "P.IVA " + intest.piva : "", [intest.telefono, intest.email].filter(Boolean).join(" · ")].filter(Boolean);
+}
+
+function costruisciAnteprimaDocumento(dati, formato, intestazione){
+  const f = formato || formatoAttuale();
+  const intest = intestazione === undefined ? aziendaIntestazione : intestazione;
   const wrap = document.createElement("div");
-  wrap.className = "invoice-preview";
+  wrap.className = "invoice-preview modello-" + f.modello;
+  wrap.style.setProperty("--doc-acc", f.colore);
 
   const head = document.createElement("div");
   head.className = "invoice-preview-head";
   const sinistra = document.createElement("div");
   const brand = document.createElement("div");
-  brand.className = "invoice-preview-brand doc-brand-dynamic";
-  brand.innerHTML = 'E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N';
+  /* Con un'intestazione di prova (galleria/proposta dalla foto) il marchio
+     si disegna qui; altrimenti ci pensa aggiornaMarchiDocumento. */
+  if(intestazione !== undefined){
+    brand.className = "invoice-preview-brand";
+    if(intest && intest.logo_url){
+      const img = document.createElement("img");
+      img.src = intest.logo_url; img.alt = intest.nome_azienda || "";
+      img.style.cssText = "height:30px; max-width:170px; object-fit:contain; display:block;";
+      brand.appendChild(img);
+    } else {
+      brand.textContent = (intest && intest.nome_azienda) || "La tua azienda";
+      brand.style.fontSize = "15px";
+    }
+  } else {
+    brand.className = "invoice-preview-brand doc-brand-dynamic";
+    brand.innerHTML = 'E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N';
+  }
   sinistra.appendChild(brand);
+  const righe = righeIntestazione(intest);
+  if(righe.length){
+    const det = document.createElement("div");
+    det.className = "doc-intest";
+    righe.forEach((r, i) => { if(i) det.appendChild(document.createElement("br")); det.appendChild(document.createTextNode(r)); });
+    sinistra.appendChild(det);
+  }
   const doctype = document.createElement("div");
   doctype.className = "invoice-preview-doctype";
   doctype.textContent = dati.tipo === "fattura" ? "Fattura" : "Preventivo";
@@ -10845,25 +11097,43 @@ function nomeProfessionista(){
 function apriPdfDocumento(dati){
   if(!dati){ return; }
   const euro = n => "€ " + Number(n).toLocaleString("it-IT", { minimumFractionDigits:2, maximumFractionDigits:2 });
+  // Testo dell'utente e dei clienti mai inserito come HTML
+  const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   const titolo = (dati.tipo === "fattura" ? "FATTURA" : "PREVENTIVO");
+  /* Formato scelto dall'utente (modello + colore) e sua intestazione
+     (25/09/2026): prima il PDF usciva sempre con il marchio E·O·N. */
+  const f = formatoAttuale();
+  const intest = aziendaIntestazione || {};
+  const nomeEmittente = intest.nome_azienda || dati.professionista || "";
+  const marchio = intest.logo_url
+    ? `<img src="${esc(intest.logo_url)}" alt="${esc(nomeEmittente)}" style="max-height:48px; max-width:220px; object-fit:contain;">`
+    : esc(nomeEmittente);
+  const dettagli = righeIntestazione(intest).map(esc).join("<br>");
 
-  const righe = dati.voci.map(v => `
+  const righe = (dati.voci || []).map(v => `
     <tr>
-      <td>${v.desc}</td>
-      <td class="c">${v.qta}</td>
+      <td>${esc(v.desc)}</td>
+      <td class="c">${esc(v.qta)}</td>
       <td class="r">${euro(v.prezzo)}</td>
       <td class="r">${euro((Number(v.qta)||0) * (Number(v.prezzo)||0))}</td>
     </tr>`).join("");
 
+  const STILI_MODELLO = {
+    classico: `.testata{ border-bottom:2px solid var(--acc); } .tipo h1{ color:var(--acc); } .totali .tot{ border-top-color:var(--acc); }`,
+    moderno: `.testata{ background:var(--acc); color:#fff; border:none; padding:18px 20px; border-radius:6px; } .testata *{ color:#fff !important; } th{ color:var(--acc); border-bottom:2px solid var(--acc); } .totali .tot{ color:var(--acc); border-top-color:var(--acc); }`,
+    essenziale: `.testata{ border-bottom:none; } td{ border-bottom-color:#F6F7F9; } .totali .tot{ border-top:none; font-size:21px; color:var(--acc); }`,
+    elegante: `body{ font-family:Georgia,'Times New Roman',serif; } .testata{ flex-direction:column; align-items:center; text-align:center; gap:10px; border-bottom:3px double var(--acc); } .tipo{ text-align:center; } .tipo h1{ color:var(--acc); letter-spacing:.2em; } .totali .tot{ border-top:1px solid var(--acc); }`,
+  };
+
   const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
-<title>${titolo} ${dati.numero}</title>
+<title>${titolo} ${esc(dati.numero)}</title>
 <style>
   @page { size:A4; margin:18mm; }
   *{ box-sizing:border-box; }
-  body{ font-family:-apple-system,'Helvetica Neue',Arial,sans-serif; color:#141726; margin:0; font-size:13px; line-height:1.5; }
+  body{ --acc:${f.colore}; font-family:-apple-system,'Helvetica Neue',Arial,sans-serif; color:#141726; margin:0; font-size:13px; line-height:1.5; }
   .testata{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #141726; padding-bottom:14px; margin-bottom:22px; }
-  .marchio{ font-size:22px; font-weight:800; letter-spacing:.12em; }
-  .marchio small{ display:block; font-size:11px; font-weight:400; letter-spacing:0; color:#5F667C; margin-top:3px; }
+  .marchio{ font-size:20px; font-weight:800; }
+  .marchio small{ display:block; font-size:11px; font-weight:400; color:#5F667C; margin-top:5px; line-height:1.5; }
   .tipo{ text-align:right; }
   .tipo h1{ margin:0; font-size:19px; letter-spacing:.06em; }
   .tipo p{ margin:3px 0 0; font-size:12px; color:#5F667C; }
@@ -10880,6 +11150,7 @@ function apriPdfDocumento(dati){
   .totali .tot{ border-top:2px solid #141726; margin-top:6px; padding-top:11px; font-size:17px; font-weight:800; color:#141726; }
   .piede{ margin-top:26px; padding-top:14px; border-top:1px solid #E2E5EC; font-size:11.5px; color:#5F667C; }
   .piede b{ color:#141726; }
+  ${STILI_MODELLO[f.modello] || ""}
   @media print{ .stampa{ display:none; } }
   .stampa{
     position:fixed; bottom:20px; right:20px; padding:13px 22px; border-radius:11px;
@@ -10888,12 +11159,12 @@ function apriPdfDocumento(dati){
   }
 </style></head><body>
   <div class="testata">
-    <div class="marchio">E·O·N<small>${dati.professionista}</small></div>
-    <div class="tipo"><h1>${titolo}</h1><p>n. ${dati.numero} — ${dati.data}</p></div>
+    <div class="marchio">${marchio}${dettagli ? "<small>" + dettagli + "</small>" : ""}</div>
+    <div class="tipo"><h1>${titolo}</h1><p>n. ${esc(dati.numero)} — ${esc(dati.data)}</p></div>
   </div>
   <div class="parti">
-    <div class="parte"><h3>Da</h3><p>${dati.professionista}</p></div>
-    <div class="parte"><h3>A</h3><p>${dati.cliente}</p></div>
+    <div class="parte"><h3>Da</h3><p>${esc(nomeEmittente)}</p></div>
+    <div class="parte"><h3>A</h3><p>${esc(dati.cliente)}</p></div>
   </div>
   <table>
     <thead><tr><th>Descrizione</th><th class="c">Q.tà</th><th class="r">Prezzo</th><th class="r">Totale</th></tr></thead>
@@ -10901,12 +11172,12 @@ function apriPdfDocumento(dati){
   </table>
   <div class="totali">
     <div><span>Imponibile</span><span>${euro(dati.imponibile)}</span></div>
-    <div><span>IVA ${dati.aliquota}%</span><span>${euro(dati.iva)}</span></div>
+    <div><span>IVA ${esc(dati.aliquota)}%</span><span>${euro(dati.iva)}</span></div>
     <div class="tot"><span>Totale</span><span>${euro(dati.totale)}</span></div>
   </div>
   <div class="piede">
-    ${dati.condizioni ? "<b>" + (dati.tipo === "fattura" ? "Termini di pagamento" : "Validità") + ":</b> " + dati.condizioni + "<br>" : ""}
-    ${dati.note ? dati.note.replace(/\n/g,"<br>") : ""}
+    ${dati.condizioni ? "<b>" + (dati.tipo === "fattura" ? "Termini di pagamento" : "Validità") + ":</b> " + esc(dati.condizioni) + "<br>" : ""}
+    ${dati.note ? esc(dati.note).replace(/\n/g,"<br>") : ""}
   </div>
   <button class="stampa" onclick="window.print()">Salva come PDF</button>
 </body></html>`;

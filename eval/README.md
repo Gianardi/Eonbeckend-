@@ -124,6 +124,16 @@ correzione, i comandi a voce e che le pagine finte non siano più nel menu.
 NODE_PATH=/opt/node22/lib/node_modules node eval/fatture.test.js
 ```
 
+### `formato.test.js` — formato dei documenti, gira subito
+
+Finestra "Come vuoi le tue fatture?", galleria dei 4 modelli, proposta dal
+la foto di una fattura (server finto), salvataggio di modello e colore
+senza sovrascrivere i dati già salvati, PDF con formato e intestazione.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/formato.test.js
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti

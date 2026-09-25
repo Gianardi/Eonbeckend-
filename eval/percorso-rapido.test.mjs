@@ -532,6 +532,28 @@ await scenario(
   }
 );
 
+/* ======== Formato dalla foto di una fattura (25/09/2026) ======== */
+async function leggiFoto(testoAI) {
+  chiamateAI = [];
+  copione = [() => ({ content: [{ type: "text", text: testoAI }], stop_reason: "end_turn" })];
+  const req = { method: "POST", url: "/api?action=leggi_intestazione_da_foto", headers: { authorization: "Bearer token-finto" },
+    body: { immagine_base64: "iVBORw0KGgo=", media_type: "image/png" } };
+  let uscita = "";
+  const res = { statusCode: 0, setHeader() {}, end(d) { uscita = d || ""; } };
+  await handler(req, res);
+  return { status: res.statusCode, corpo: JSON.parse(uscita) };
+}
+{
+  console.log("\n=== Foto di una fattura: colore e disposizione → modello proposto ===");
+  const a = await leggiFoto('{"nome_azienda":"Bianchi","indirizzo":null,"piva":"IT1","telefono":null,"email":null,"colore_principale":"#0f766e","disposizione":"fascia"}');
+  verifica("fascia colorata in alto → Moderno, colore normalizzato", a.status === 200 && a.corpo.modello === "moderno" && a.corpo.colore === "#0F766E" && a.corpo.nome_azienda === "Bianchi", JSON.stringify(a.corpo));
+  const b = await leggiFoto('```json\n{"nome_azienda":null,"colore_principale":"rosso scuro","disposizione":"boh"}\n```');
+  verifica("colore non valido → nessun colore; disposizione sconosciuta → Classico", b.status === 200 && b.corpo.colore === null && b.corpo.modello === "classico", JSON.stringify(b.corpo));
+  const c = await leggiFoto('{"colore_principale":null,"disposizione":"centrata"}');
+  verifica("intestazione centrata → Elegante", c.corpo.modello === "elegante", JSON.stringify(c.corpo));
+  verifica("alla foto si chiede anche colore e disposizione", /colore_principale/.test(JSON.stringify(chiamateAI[0])) && /disposizione/.test(JSON.stringify(chiamateAI[0])));
+}
+
 /* ======== Errori leggibili ======== */
 await scenario(
   "Credito dell'AI finito (24/09/2026) → messaggio chiaro in italiano, non l'errore in inglese",
