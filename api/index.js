@@ -443,6 +443,17 @@ const TIPI_DOCUMENTO = new Set(["preventivo", "fattura"]);
 const STATI_CLIENTE = new Set(["attivo", "trattativa", "inattivo"]);
 
 function eStringaNonVuota(v) { return typeof v === "string" && v.trim().length > 0; }
+
+/* Il frontend incornicia la frase vera dell'utente tra virgolette
+   ('...cosa deve fare: "fattura da 300 per Rossi"') e ci aggiunge dopo
+   note di contesto con id e importi di documenti precedenti. Per
+   controllare cosa ha detto DAVVERO l'utente (es. se c'è una cifra) serve
+   solo la parte tra le prime virgolette; senza virgolette, tutto il testo. */
+function testoDettoDallUtente(messaggio) {
+  if (!eStringaNonVuota(messaggio)) return "";
+  const m = messaggio.match(/"([^"]*)"/);
+  return m ? m[1] : messaggio;
+}
 function eNumero(v) { return typeof v === "number" && isFinite(v); }
 function eUuid(v) { return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); }
 function eIso(v) { return typeof v === "string" && !isNaN(new Date(v).getTime()); }
@@ -778,10 +789,29 @@ const STRUMENTI_INTERNI = new Set(["interpreta_richiesta", "capacita_non_disponi
      rischio che questa regola previene (saltare il parere e chiamare
      subito un'azione) può avvenire solo nel giro deciso del messaggio
      nuovo comunque — una continuazione non passa mai da qui senza che
-     l'utente abbia già risposto nel frattempo. */
+     l'utente abbia già risposto nel frattempo.
+
+   Eccezione "produceRisorsa" (25/09/2026, causa vera di giorni di bug
+   su fatture/preventivi): crea_preventivo_o_fattura e
+   modifica_preventivo_o_fattura sono di categoria "azione" ma PRODUCONO
+   proprio la risorsa chiesta — e per un preventivo/una fattura il
+   modello dichiara quasi sempre oggetto "risorsa" (la descrizione di
+   interpreta_richiesta lo suggerisce apertamente). La regola "risorsa"
+   li bloccava in silenzio (un blocco non passa da registraOperazione,
+   quindi non restava nemmeno in ai_audit_log), con un messaggio che
+   diceva al modello di chiamare capacita_non_disponibile: ecco i giri a
+   vuoto (ridichiarazioni per aggirare il blocco), il silenzio per tempo
+   scaduto e il falso "non riesco a creare il preventivo". Verificato su
+   ai_audit_log: ogni creazione riuscita è arrivata solo dopo che il
+   modello aveva ridichiarato oggetto "azione". */
 const REGOLE_GUARDRAIL_AZIONE = [
   {
-    condizione: (intento) => intento && intento.oggetto === "risorsa",
+    /* L'eccezione vale solo se l'utente vuole davvero creare/correggere il
+       documento: per "mostrami il preventivo di Rossi" (operazione
+       "mostra") il blocco resta, mai un documento nuovo al posto di
+       recuperare quello che c'è. */
+    condizione: (intento, runId, tool) => intento && intento.oggetto === "risorsa"
+      && !(tool && tool.produceRisorsa && (intento.operazione === "crea" || intento.operazione === "modifica")),
     messaggio: (nomeTool) => `Questa richiesta è stata classificata come "mostra/recupera una risorsa", non come un'azione da registrare: ${nomeTool} non è lo strumento giusto. Se non hai un tool che recuperi davvero questa risorsa, chiama capacita_non_disponibile invece di creare un impegno o un appunto.`,
   },
   {
@@ -1575,6 +1605,7 @@ const TOOLS = {
   crea_preventivo_o_fattura: {
     risk: "low_write",
     categoria: "azione",
+    produceRisorsa: true, // vedi REGOLE_GUARDRAIL_AZIONE: mai bloccato dalla regola "risorsa"
     schema: {
       name: "crea_preventivo_o_fattura",
       description: "Crea SUBITO un preventivo o una fattura per un cliente, con le voci date dall'utente, e lo salva nella sua conversazione — visibile subito come scheda nell'app, esattamente come se fosse stato compilato a mano, mai solo un promemoria. Usalo quando l'utente chiede di fare/preparare un preventivo o una fattura E ha già dato almeno una voce con un prezzo. Se non ha ancora dato nessun dato (solo il nome del cliente e il tipo di documento, es. 'fammi un preventivo a Rossi'), NON chiamarlo: rispondi chiedendo tu prima i dati (cosa, quanto) in una risposta di testo — poi, quando li dà, chiamalo. Se il cliente nominato non esiste ancora in anagrafica, crealo prima con crea_cliente/trova_o_crea_cliente e usa l'id appena ottenuto, tutto nello stesso turno se i dati del documento ci sono già.",
@@ -1729,6 +1760,7 @@ const TOOLS = {
   modifica_preventivo_o_fattura: {
     risk: "low_write",
     categoria: "azione",
+    produceRisorsa: true, // vedi REGOLE_GUARDRAIL_AZIONE: mai bloccato dalla regola "risorsa"
     schema: {
       name: "modifica_preventivo_o_fattura",
       description: "Corregge un preventivo o una fattura già creato (mai per crearne uno nuovo: per quello usa crea_preventivo_o_fattura). Usalo quando l'utente, guardando un documento già fatto, segnala che qualcosa è sbagliato (importo, voce, cliente sbagliato) e chiede di correggerlo — tipicamente dopo aver toccato 'Modifica' su quel documento. Sostituisce TUTTE le voci con quelle date: se l'utente vuole cambiare solo un dettaglio, ripeti comunque tutte le voci corrette (quelle invariate incluse), non solo quella nuova.",
@@ -2318,6 +2350,10 @@ const TOOLS = {
             type: "string",
             enum: ["singolare", "insieme"],
             description: "singolare = un solo elemento coinvolto. insieme = la richiesta riguarda più elementi insieme (es. 'tutti gli impegni di domani').",
+          },
+          documento_completo: {
+            type: "boolean",
+            description: "Solo quando operazione è 'crea' e l'entità è un preventivo o una fattura: true se il messaggio contiene GIÀ tutto quello che serve per crearlo subito — il nome del cliente E almeno un importo detto dall'utente (anche un totale unico, es. 'da 300', '1200+IVA') — E il messaggio non contiene anche altre richieste diverse (es. un impegno da segnare). false in tutti gli altri casi (manca il prezzo, manca il cliente, o ci sono altre richieste nello stesso messaggio). Ometti per qualunque altra richiesta.",
           },
         },
         required: ["operazione", "oggetto"],
@@ -3057,6 +3093,21 @@ async function handleAssistant(req, res, user, accessToken) {
   const primoGiroSostanziale = runId ? 0 : 1;
   let intentoAttivo = null; // ricalcolato da capo a ogni giro, subito dopo la risposta di Claude — vedi dentro il for
 
+  /* Percorso fisso per i documenti (25/09/2026). Per una richiesta
+     completa di preventivo/fattura ("fattura da 300 per Rossi per
+     pitturazione") lasciare all'AI la scelta di ogni passo si è
+     dimostrato inaffidabile: in produzione si è incartata a ridichiarare
+     la stessa richiesta fino a 6 volte, finendo in silenzio (tempo
+     scaduto) o dichiarando il falso ("non riesco a crearlo"). Qui invece
+     i passi sono decisi dal codice: il cliente viene trovato/creato dal
+     codice stesso, e al giro dopo l'AI è OBBLIGATA (tool_choice) a
+     compilare crea_preventivo_o_fattura — non ha altre scelte, quindi
+     non può girare a vuoto. Il turno finisce subito dopo, senza un
+     ultimo giro solo per scrivere un commento: meno chiamate, meno costi.
+     Si attiva SOLO quando è tutto chiaro (vedi dentro il for, a fine
+     giro 0); in ogni altro caso resta il percorso libero di sempre. */
+  let percorsoDocumento = null; // { clienteId, tipo, tentato } quando attivo
+
   /* Un messaggio nuovo ha diritto a un giro in più (TOOL_MAX_ROUNDS + 1):
      il giro 0 è sempre speso per il forzato interpreta_richiesta, quindi
      senza questo "+1" il budget di giri utili per la scelta e
@@ -3068,6 +3119,9 @@ async function handleAssistant(req, res, user, accessToken) {
     giriUsati = round + 1; // idem: per il registro richieste, tiene l'ultimo giro effettivamente iniziato
     let data;
     const forzaInterpretazione = !runId && round === 0;
+    const forzaDocumento = !!(percorsoDocumento && !percorsoDocumento.tentato);
+    const strumentoForzato = forzaInterpretazione ? "interpreta_richiesta" : (forzaDocumento ? "crea_preventivo_o_fattura" : null);
+    if (forzaDocumento) percorsoDocumento.tentato = true;
 
     /* Al massimo due tentativi in questo giro: solo al giro
        decisionale (round 0 per conferme/continuazioni, round 1 per un
@@ -3110,7 +3164,7 @@ async function handleAssistant(req, res, user, accessToken) {
          dichiara solo l'IntentFrame, il ragionamento vero su date e
          scelte serve nei giri successivi, dove la scelta è sempre
          libera. */
-      const ragionamentoEsteso = modelloUsato === MODEL_SONNET && !forzaInterpretazione;
+      const ragionamentoEsteso = modelloUsato === MODEL_SONNET && !strumentoForzato;
 
       let r;
       let erroreRete = null;
@@ -3135,7 +3189,11 @@ async function handleAssistant(req, res, user, accessToken) {
               { type: "text", text: dataOraCorrente() },
             ],
             tools: schemi,
-            tool_choice: forzaInterpretazione ? { type: "tool", name: "interpreta_richiesta" } : undefined,
+            /* Nel percorso documento anche disable_parallel_tool_use: una
+               sola chiamata in quel giro, mai due documenti per sbaglio. */
+            tool_choice: strumentoForzato
+              ? { type: "tool", name: strumentoForzato, ...(forzaDocumento ? { disable_parallel_tool_use: true } : {}) }
+              : undefined,
             messages,
           }),
         });
@@ -3225,7 +3283,7 @@ async function handleAssistant(req, res, user, accessToken) {
        turno: sono operazioni delicate, meglio affidarle al modello più
        capace fin dall'inizio invece di scoprire a metà che Haiku non ce
        la fa. */
-    if (modelloUsato === MODEL_HAIKU && intentoAttivo && intentoAttivo.operazione === "crea"
+    if (!percorsoDocumento && modelloUsato === MODEL_HAIKU && intentoAttivo && intentoAttivo.operazione === "crea"
       && /fattura|preventivo/i.test((intentoAttivo.entita && intentoAttivo.entita.tipo) || "")) {
       modelloUsato = MODEL_SONNET;
     }
@@ -3273,6 +3331,7 @@ async function handleAssistant(req, res, user, accessToken) {
        comparsa di ogni nome, esattamente come un array vi manterrebbe
        l'ordine delle richieste originali. */
     const codaPerNome = new Map();
+    let documentoCreatoOra = null; // esito di crea_preventivo_o_fattura se riuscito in QUESTO giro
 
     for (const richiesta of richieste) {
       const tool = TOOLS[richiesta.name];
@@ -3293,7 +3352,7 @@ async function handleAssistant(req, res, user, accessToken) {
          le azioni ad alto rischio passano comunque da una domanda
          esplicita all'utente, un secondo controllo naturale. */
       if (tool.categoria === "azione") {
-        const regolaViolata = REGOLE_GUARDRAIL_AZIONE.find((r) => r.condizione(intentoAttivo, runId));
+        const regolaViolata = REGOLE_GUARDRAIL_AZIONE.find((r) => r.condizione(intentoAttivo, runId, tool));
         if (regolaViolata) {
           risultati.push({
             type: "tool_result",
@@ -3305,19 +3364,15 @@ async function handleAssistant(req, res, user, accessToken) {
         }
       }
 
-      /* Bug reale in produzione (25/09/2026, "Claudia Spori"): dopo
-         essersi incartato a ridichiarare più volte lo stesso preventivo
-         da creare (l'avviso su interpreta_richiesta qui sopra non è
-         bastato a farlo smettere), il modello ha finito per chiamare
-         capacita_non_disponibile dichiarando FALSO che non riesce a
-         creare direttamente un preventivo — mentre crea_preventivo_o_fattura
-         esiste e funziona (dimostrato più volte nella stessa sessione).
-         Non è un limite onesto da lasciar passare come per una vera
-         risorsa mai gestita: qui blocchiamo la bugia alla radice, quando
-         l'intento è creare un documento e il cliente è già risolto —
-         se il modello non ha ancora tutti i dati (voci/prezzo), il modo
-         onesto di dirlo è una domanda in testo libero, non una falsa
-         dichiarazione di incapacità. */
+      /* Bug reale in produzione (25/09/2026, "Claudia Spori"): il modello
+         ha chiamato capacita_non_disponibile dichiarando FALSO di non
+         poter creare un preventivo. Causa principale: la regola "risorsa"
+         qui sopra bloccava crea_preventivo_o_fattura e gli diceva proprio
+         di chiamare capacita_non_disponibile (corretto con
+         produceRisorsa). Questo blocco resta come seconda protezione:
+         per creare un preventivo/una fattura lo strumento esiste sempre,
+         quindi dichiarare il contrario è sempre falso — se manca un dato
+         (es. il prezzo), il modo onesto è una domanda in testo libero. */
       if (richiesta.name === "capacita_non_disponibile" && intentoAttivo && intentoAttivo.operazione === "crea") {
         const tipoDoc = eStringaNonVuota(intentoAttivo.entita && intentoAttivo.entita.tipo) ? intentoAttivo.entita.tipo.trim().toLowerCase() : "";
         if (/fattura|preventivo/.test(tipoDoc)) {
@@ -3340,27 +3395,63 @@ async function handleAssistant(req, res, user, accessToken) {
         codaPerNome.get(richiesta.name).elementi.push({ input: richiesta.input, tool_use_id: richiesta.id });
         continue;
       }
+
+      /* Nel percorso fisso cliente e tipo li decide il codice, non il
+         modello: già risolti a fine giro 0, non devono poter cambiare
+         (mai un documento sul cliente sbagliato, mai un "preventivo"
+         quando l'utente ha chiesto una "fattura"). Il modello compila
+         solo le voci e i prezzi. */
+      if (forzaDocumento && richiesta.name === "crea_preventivo_o_fattura") {
+        richiesta.input = { ...richiesta.input, cliente_id: percorsoDocumento.clienteId, tipo: percorsoDocumento.tipo };
+      }
+
       try {
         const esito = await tool.run(richiesta.input, ctx);
 
-        /* Bug reale in produzione (25/09/2026, confermato con
-           ai_audit_log, caso "Claudia Spori"): Haiku/Sonnet a volte
-           richiama interpreta_richiesta ripetutamente per LO STESSO
-           documento da creare, con lo stesso cliente già risolto
-           ("trovato"), invece di chiamare crea_preventivo_o_fattura —
-           osservato fino a 6 ridichiarazioni di fila nello stesso turno,
-           finché non esaurisce i giri e (peggio ancora) inventa un
-           falso "non riesco a crearlo" con capacita_non_disponibile
-           (bloccato a parte più sotto). Il divieto era già nel prompt,
-           poi anche in un campo "avviso" nel risultato: nessuno dei due
-           è bastato a farlo smettere. Qui il blocco è un vero errore
-           (is_error), non solo un avviso testuale dentro un risultato
-           altrimenti "riuscito" — un errore tende a pesare di più nella
-           scelta del prossimo passo che un campo JSON in più da notare
-           da solo. intentoAttivo riflette ancora il giro PRECEDENTE
-           (si aggiorna solo dopo che tutta questa lista di richieste è
-           stata processata): il confronto è sempre con la dichiarazione
-           di prima, mai con se stesso. */
+        /* Percorso fisso per i documenti: si decide qui, a fine giro 0,
+           appena interpreta_richiesta ha risolto il cliente. Solo se è
+           tutto chiaro: crea preventivo/fattura, il modello dice che il
+           messaggio è completo (documento_completo), c'è davvero almeno
+           una cifra nel testo dell'utente (doppio controllo: mai
+           obbligare il modello a compilare un documento inventando un
+           prezzo mai detto), e il cliente è "trovato" o del tutto nuovo.
+           Con "simile"/"ambiguo" no: lì va chiesto all'utente, percorso
+           libero di sempre. */
+        if (richiesta.name === "interpreta_richiesta" && forzaInterpretazione) {
+          const tipoDoc = eStringaNonVuota(richiesta.input.entita && richiesta.input.entita.tipo) ? richiesta.input.entita.tipo.trim().toLowerCase() : "";
+          const nomeCliente = richiesta.input.entita && richiesta.input.entita.cliente_di_riferimento;
+          const statoCliente = esito.cliente_risolto && esito.cliente_risolto.stato;
+          const candidato = richiesta.input.operazione === "crea" && /fattura|preventivo/.test(tipoDoc)
+            && richiesta.input.documento_completo === true && /\d/.test(testoDettoDallUtente(body.messaggio))
+            && (statoCliente === "trovato" || (statoCliente === "non_trovato" && eStringaNonVuota(nomeCliente)));
+          if (candidato) {
+            let clienteId = statoCliente === "trovato" ? esito.cliente_risolto.id : null;
+            if (!clienteId) {
+              try {
+                const nuovo = await TOOLS.trova_o_crea_cliente.run({ nome: nomeCliente }, ctx);
+                await registraOperazione(user, "trova_o_crea_cliente", { nome: nomeCliente }, nuovo, "auto");
+                azioniEseguite.push({ tool: "trova_o_crea_cliente", esito: nuovo });
+                clienteId = nuovo.id;
+                esito.cliente_risolto = { stato: "trovato", id: nuovo.id, nome: nuovo.nome, telefono: null, creato_ora: true };
+              } catch (err) {
+                console.warn("Percorso documento: cliente non creato, resto sul percorso libero:", err.message);
+              }
+            }
+            if (clienteId) {
+              percorsoDocumento = { clienteId, tipo: /fattura/.test(tipoDoc) ? "fattura" : "preventivo", tentato: false };
+              modelloUsato = MODEL_HAIKU; // solo da compilare, nessuna scelta da fare: basta il modello economico
+            }
+          }
+        }
+
+        /* Ridichiarazione ripetuta dello stesso documento da creare
+           (25/09/2026, "Claudia Spori", fino a 6 volte di fila). Causa
+           principale: la regola "risorsa" bloccava crea_preventivo_o_fattura
+           e il modello ridichiarava per aggirarla (corretto con
+           produceRisorsa). Resta come seconda protezione: se ridichiara
+           lo stesso documento con il cliente già risolto, errore vero
+           con l'istruzione di procedere. intentoAttivo qui riflette
+           ancora il giro PRECEDENTE (si aggiorna dopo questa lista). */
         if (richiesta.name === "interpreta_richiesta" && intentoAttivo && intentoAttivo.operazione === "crea" && richiesta.input.operazione === "crea") {
           const tipoVecchio = eStringaNonVuota(intentoAttivo.entita && intentoAttivo.entita.tipo) ? intentoAttivo.entita.tipo.trim().toLowerCase() : "";
           const tipoNuovo = eStringaNonVuota(richiesta.input.entita && richiesta.input.entita.tipo) ? richiesta.input.entita.tipo.trim().toLowerCase() : "";
@@ -3383,6 +3474,7 @@ async function handleAssistant(req, res, user, accessToken) {
 
         await registraOperazione(user, richiesta.name, richiesta.input, esito, "auto");
         if (!STRUMENTI_INTERNI.has(richiesta.name)) azioniEseguite.push({ tool: richiesta.name, esito });
+        if (richiesta.name === "crea_preventivo_o_fattura") documentoCreatoOra = esito;
         risultati.push({ type: "tool_result", tool_use_id: richiesta.id, content: JSON.stringify(esito) });
       } catch (err) {
         const messaggioBase = err.message || "operazione non riuscita";
@@ -3438,6 +3530,25 @@ async function handleAssistant(req, res, user, accessToken) {
     }
 
     messages.push({ role: "user", content: risultati });
+
+    /* Percorso fisso: documento creato → turno finito qui, senza un
+       altro giro solo per far scrivere un commento al modello (il
+       frontend mostra già la scheda del documento da azioni[].esito).
+       Se invece la compilazione forzata è fallita (es. voci non valide),
+       percorsoDocumento.tentato è già true: dal prossimo giro si torna
+       al percorso libero di sempre, così il modello può spiegare o
+       chiedere il dato mancante — mai un secondo tentativo forzato. */
+    if (forzaDocumento) {
+      if (documentoCreatoOra && risultati.every((r) => !r.is_error)) {
+        const totaleTesto = Number(documentoCreatoOra.totale).toLocaleString("it-IT", { maximumFractionDigits: 2 });
+        return finisciTurno({
+          stato: "concluso",
+          testo: `${documentoCreatoOra.titolo} per ${documentoCreatoOra.cliente}: €${totaleTesto}`,
+          azioni: azioniEseguite,
+        });
+      }
+      percorsoDocumento = null; // fallito: da qui percorso libero, esattamente come prima di questa modifica
+    }
 
     /* Se in questo giro Claude ha chiamato solo strumenti della
        whitelist "sempre conclusivi" (vedi sopra) e tutti sono andati a
