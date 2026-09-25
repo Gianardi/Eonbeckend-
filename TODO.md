@@ -3483,6 +3483,36 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Account, Impostazioni ed Esci + pagina cliente sicura (25/09/2026)
+
+Gianardi: impostazioni come le altre app, logout, professione legata
+all'account, registrazione "da app commercializzabile".
+- **Impostazioni**: account (nome, attività, email, professione in sola
+  lettura), modifica nome/attività, cambio password (`auth.updateUser`),
+  Aiuto (feedback, registro AI), **Esci** (`signOut` + ricarica → schermata
+  iniziale). Test: `eval/impostazioni.test.js` (11).
+- **Prima schermata**: "Hai già un account? Accedi" porta dritto a email e
+  password; la professione arriva dal profilo, non si sceglie di nuovo.
+- **Professione fissa**: `supabase/profilo_professione_fissa.sql` (trigger:
+  solo il supporto con service_role la cambia). Provato su staging;
+  **in produzione DOPO il merge** (la versione online ha ancora "Cambia
+  professione").
+- **FALLA DI SICUREZZA trovata e chiusa**: la pagina cliente leggeva le
+  tabelle con policy aperte (`access_code IS NOT NULL`, `profiles: true`,
+  storage leggibile da tutti) e OGNI conversazione ha un codice → con la
+  chiave pubblica chiunque poteva leggere chat, clienti e profili di tutti
+  gli utenti ed elencare tutti i file. Ora cliente.html usa solo
+  `portale_apri` / `portale_messaggi` / `portale_scrivi` (security definer,
+  solo la conversazione del codice) e controlla i messaggi nuovi ogni 4 s.
+  `supabase/portale_sicuro.sql` applicato a staging e produzione (solo
+  aggiunte). **DOPO il merge** applicare `supabase/portale_chiudi_accessi.sql`
+  (toglie le policy aperte, storage solo nella propria cartella).
+  Test: `eval/portale.test.js` (8) + prove SQL come utente anonimo su staging.
+- **Da decidere**: dati finti di esempio scritti nell'account vero alla
+  registrazione (`seedUserData`: clienti, pagamenti, impegni — da qui i
+  "Mario Rossi"); conferma email (oggi spenta); password dimenticata;
+  eliminazione account; privacy/termini; abbonamento.
+
 ### Da fare più avanti: "La tua azienda" e "Chiamate" (25/09/2026)
 
 Deciso con Gianardi: restano nel Menu, da sistemare dentro.

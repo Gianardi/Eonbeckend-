@@ -166,6 +166,17 @@ da una nota.
 NODE_PATH=/opt/node22/lib/node_modules node eval/clienti-chat.test.js
 ```
 
+### `impostazioni.test.js` e `portale.test.js` — account e pagina cliente, girano subito
+
+Impostazioni (account, profilo, password, Esci che torna alla schermata
+iniziale, "Hai già un account? Accedi"); pagina cliente che passa solo dalle
+funzioni sicure col codice del link (nessuna tabella letta direttamente).
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/impostazioni.test.js
+NODE_PATH=/opt/node22/lib/node_modules node eval/portale.test.js
+```
+
 ### `scorri-pagine.test.js` — scorrere tra le pagine, gira subito
 
 Home ⇄ Clienti ⇄ Cresci ⇄ Menu col dito (tocchi veri simulati), e i casi in

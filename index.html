@@ -291,6 +291,8 @@
   .ob-back svg{ width:14px; height:14px; }
   .ob-form{ display:flex; flex-direction:column; gap:14px; margin-top:8px; margin-bottom:20px; }
   .ob-auth-toggle{ display:flex; gap:6px; margin:14px 0 4px; background:rgba(20,23,29,.04); border-radius:12px; padding:4px; }
+  .ob-link-accedi{ display:block; margin:16px auto 0; background:none; border:none; font:inherit; font-size:14px; color:var(--muted); cursor:pointer; padding:8px; }
+  .ob-link-accedi b{ color:var(--indigo); }
   .ob-auth-tab{ flex:1; text-align:center; padding:9px; border-radius:9px; font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer; }
   .ob-auth-tab.active{ background:var(--card); color:var(--text); box-shadow:var(--shadow-sm); }
   .ob-auth-error{ background:var(--coral-soft); color:var(--coral); font-size:12px; font-weight:600; padding:10px 12px; border-radius:10px; margin-bottom:14px; }
@@ -1234,6 +1236,29 @@
   .goal-del-mini:hover{ color:var(--coral); background:var(--coral-soft); }
   .goal-del-mini svg{ width:13px; height:13px; }
   .azienda-list{ display:flex; flex-direction:column; gap:10px; }
+  /* Impostazioni (25/09/2026) */
+  .imp-sezione{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); margin:20px 4px 8px; }
+  .imp-card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:12px; }
+  .imp-account{ display:flex; align-items:center; gap:12px; }
+  .imp-avatar{ width:46px; height:46px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); font-family:'Manrope'; font-weight:800; font-size:16px; }
+  .imp-nome{ font-size:16px; font-weight:800; color:var(--text); }
+  .imp-attivita{ font-size:13.5px; font-weight:600; color:var(--text); }
+  .imp-attivita:empty{ display:none; }
+  .imp-email{ font-size:13px; color:var(--muted); overflow-wrap:anywhere; }
+  .imp-riga{ display:flex; justify-content:space-between; gap:12px; font-size:14px; color:var(--muted); padding-top:12px; border-top:1px solid var(--border); }
+  .imp-riga b{ color:var(--text); }
+  .imp-nota{ font-size:12px; color:var(--faint); margin-top:-6px; }
+  .imp-campo{ display:flex; flex-direction:column; gap:5px; font-size:12.5px; font-weight:700; color:var(--muted); }
+  .imp-campo input{ font:inherit; font-size:15px; font-weight:500; color:var(--text); padding:11px 12px; border:1px solid var(--border-strong); border-radius:12px; background:#F7F8FA; }
+  .imp-campo input:focus{ outline:none; border-color:var(--indigo); background:var(--card); }
+  .imp-btn{ align-self:flex-start; padding:10px 20px; border-radius:12px; border:none; background:var(--text); color:#fff; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+  .imp-btn:disabled{ opacity:.5; }
+  .imp-esito{ font-size:13px; color:var(--muted); }
+  .imp-esito:empty{ display:none; }
+  .imp-esito.ok{ color:#12894F; }
+  .imp-esito.errore{ color:var(--coral); }
+  .imp-esci{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin:24px 0 8px; padding:14px; border-radius:16px; border:1px solid var(--coral-soft); background:var(--card); color:var(--coral); font:inherit; font-size:15px; font-weight:800; cursor:pointer; }
+  .imp-esci svg{ width:18px; height:18px; }
   /* Scorrimento tra le pagine principali: la pagina nuova entra dal lato giusto */
   @keyframes entra-da-destra{ from{ transform:translateX(28px); opacity:.35; } to{ transform:none; opacity:1; } }
   @keyframes entra-da-sinistra{ from{ transform:translateX(-28px); opacity:.35; } to{ transform:none; opacity:1; } }
@@ -2226,6 +2251,7 @@
         Continua
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
+      <button type="button" class="ob-link-accedi" id="obVaiAccedi">Hai già un account? <b>Accedi</b></button>
     </div>
 
     <!-- STEP 1: scelta professione specifica -->
@@ -3232,7 +3258,7 @@
           </div>
           <div class="azienda-link-card-body">
             <div class="module-title">Impostazioni</div>
-            <div class="module-sub">Feedback e registro dell'assistente</div>
+            <div class="module-sub">Account, password, esci</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -3296,6 +3322,37 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Torna al Menu
       </div>
+
+      <div class="imp-sezione">Il tuo account</div>
+      <div class="imp-card">
+        <div class="imp-account">
+          <div class="imp-avatar" id="impAvatar">–</div>
+          <div style="min-width:0;">
+            <div class="imp-nome" id="impNome">—</div>
+            <div class="imp-attivita" id="impAttivita"></div>
+            <div class="imp-email" id="impEmail"></div>
+          </div>
+        </div>
+        <div class="imp-riga"><span>Professione</span><b id="impProfessione">—</b></div>
+        <div class="imp-nota">La professione è legata al tuo account e non si cambia da qui.</div>
+      </div>
+
+      <div class="imp-sezione">Profilo</div>
+      <div class="imp-card">
+        <label class="imp-campo"><span>Nome e cognome</span><input id="impCampoNome" type="text" autocomplete="name"></label>
+        <label class="imp-campo"><span>Nome dell'attività</span><input id="impCampoAttivita" type="text" autocomplete="organization"></label>
+        <button type="button" class="imp-btn" id="impSalvaProfilo">Salva</button>
+        <div class="imp-esito" id="impEsitoProfilo"></div>
+      </div>
+
+      <div class="imp-sezione">Sicurezza</div>
+      <div class="imp-card">
+        <label class="imp-campo"><span>Nuova password</span><input id="impCampoPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
+        <button type="button" class="imp-btn" id="impCambiaPassword">Cambia password</button>
+        <div class="imp-esito" id="impEsitoPassword"></div>
+      </div>
+
+      <div class="imp-sezione">Aiuto</div>
       <div class="azienda-list">
         <div class="azienda-link-card" id="feedbackCard">
           <div class="module-icon" style="background:var(--teal);">
@@ -3318,6 +3375,10 @@
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
       </div>
+      <button type="button" class="imp-esci" id="impEsci">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Esci dall'account
+      </button>
     </div>
 
     <!-- ===== Sotto-pagina: Registro AI ===== -->
@@ -12310,6 +12371,7 @@ function navigateTo(page){
   }
 
   if(page === "cestino") renderCestino();
+  if(page === "impostazioni") disegnaImpostazioni();
   if(page === "ai-request-log") renderAiRequestLog();
   if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
   if(page === "cantiere-appunti") renderCantiereAppunti();
@@ -12509,8 +12571,18 @@ document.getElementById("obContinueBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.add("visible");
 });
 
+/* Chi ha già un account non sceglie di nuovo la professione: è legata al
+   suo account e arriva dal profilo quando accede (25/09/2026). */
+let obSoloAccesso = false;
+document.getElementById("obVaiAccedi").addEventListener("click", () => {
+  obSoloAccesso = true;
+  setObAuthMode("login");
+  document.getElementById("obStep0").classList.remove("visible");
+  document.getElementById("obStep2").classList.add("visible");
+});
 document.getElementById("obBackBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.remove("visible");
+  if(obSoloAccesso){ obSoloAccesso = false; setObAuthMode("signup"); document.getElementById("obStep0").classList.add("visible"); return; }
   if(obSelectedType === "generico"){
     document.getElementById("obStep0").classList.add("visible");
   } else {
@@ -12530,7 +12602,17 @@ function setObAuthMode(mode){
   document.getElementById("obFinishBtn").childNodes[0].textContent = mode === "signup" ? "Inizia a usare EON " : "Accedi ";
   document.getElementById("obAuthError").style.display = "none";
 }
-document.getElementById("obTabSignup").addEventListener("click", () => setObAuthMode("signup"));
+document.getElementById("obTabSignup").addEventListener("click", () => {
+  if(obSoloAccesso && !obSelectedProfession){
+    // Per creare un account serve prima scegliere il lavoro
+    obSoloAccesso = false;
+    setObAuthMode("signup");
+    document.getElementById("obStep2").classList.remove("visible");
+    document.getElementById("obStep0").classList.add("visible");
+    return;
+  }
+  setObAuthMode("signup");
+});
 document.getElementById("obTabLogin").addEventListener("click", () => setObAuthMode("login"));
 
 /* Se il backend non è ancora collegato, lo diciamo chiaramente invece di
@@ -12590,6 +12672,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
           full_name: name, business_name: businessName, profession: obSelectedProfession
         }).eq("id", data.user.id);
         if(profErr) throw profErr;
+        ricordaProfilo({ full_name: name, business_name: businessName, profession: obSelectedProfession }, email);
 
         // Prepara i dati iniziali veri nel database (le stesse informazioni
         // che vedevi in demo, ma stavolta scritte davvero, sue e sue soltanto)
@@ -12611,6 +12694,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.user.id).single());
       if(profile){
         obSelectedProfession = profile.profession;
+        ricordaProfilo(profile, data.user.email);
         const firstName = (profile.full_name || "Marco").split(" ")[0];
         pageMeta.home.title = "Buongiorno, " + firstName;
         document.getElementById("pageTitle").textContent = pageMeta.home.title;
@@ -12620,7 +12704,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       subscribeToMessages();
     }
 
-    await applyProfession(obSelectedProfession, true);
+    await applyProfession(obSelectedProfession || "artigiano", true);
     renderPayments(); renderIncomes();
     document.getElementById("onboardingScreen").classList.add("hidden");
 
@@ -12657,6 +12741,7 @@ async function initApp(){
       const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single());
       if(profile){
         document.getElementById("onboardingScreen").classList.add("hidden");
+        ricordaProfilo(profile, data.session.user.email);
         const firstName = (profile.full_name || "Marco").split(" ")[0];
         pageMeta.home.title = "Buongiorno, " + firstName;
         document.getElementById("pageTitle").textContent = pageMeta.home.title;
@@ -12795,6 +12880,69 @@ controllaNuovaVersione(); // la versione con cui l'app è partita
   }, { passive: true });
   document.addEventListener("touchcancel", () => { inizio = null; }, { passive: true });
 })();
+
+/* ---- Impostazioni: account, profilo, password, esci (25/09/2026) ---- */
+let profiloUtente = null;
+const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
+function ricordaProfilo(profilo, email){
+  profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
+}
+function disegnaImpostazioni(){
+  const p = profiloUtente || { full_name:"", business_name:"", profession: currentProfession, email:"" };
+  const nome = p.full_name || "Il tuo account";
+  document.getElementById("impNome").textContent = nome;
+  document.getElementById("impAttivita").textContent = p.business_name || "";
+  document.getElementById("impEmail").textContent = p.email || "";
+  document.getElementById("impAvatar").textContent = (nome.split(/\s+/).map(w => w[0] || "").join("").slice(0, 2) || "–").toUpperCase();
+  document.getElementById("impProfessione").textContent = NOMI_PROFESSIONE[p.profession] || p.profession || "—";
+  document.getElementById("impCampoNome").value = p.full_name;
+  document.getElementById("impCampoAttivita").value = p.business_name;
+  ["impEsitoProfilo", "impEsitoPassword"].forEach(id => { const e = document.getElementById(id); e.textContent = ""; e.className = "imp-esito"; });
+  document.getElementById("impCampoPassword").value = "";
+}
+function esitoImp(id, testo, ok){
+  const e = document.getElementById(id);
+  e.textContent = testo;
+  e.className = "imp-esito " + (ok ? "ok" : "errore");
+}
+document.getElementById("impSalvaProfilo").addEventListener("click", async () => {
+  const nome = document.getElementById("impCampoNome").value.trim();
+  const attivita = document.getElementById("impCampoAttivita").value.trim();
+  if(!nome) return esitoImp("impEsitoProfilo", "Scrivi il tuo nome.", false);
+  if(!isDbReady()) return esitoImp("impEsitoProfilo", "Serve la connessione per salvare.", false);
+  const b = document.getElementById("impSalvaProfilo");
+  b.disabled = true;
+  const { error } = await supabaseClient.from("profiles").update({ full_name: nome, business_name: attivita }).eq("id", currentSession.user.id);
+  b.disabled = false;
+  if(error) return esitoImp("impEsitoProfilo", "Non salvato: " + error.message, false);
+  profiloUtente = { ...(profiloUtente || {}), full_name: nome, business_name: attivita };
+  pageMeta.home.title = "Buongiorno, " + nome.split(" ")[0];
+  disegnaImpostazioni();
+  esitoImp("impEsitoProfilo", "Salvato.", true);
+});
+document.getElementById("impCambiaPassword").addEventListener("click", async () => {
+  const pw = document.getElementById("impCampoPassword").value;
+  if(pw.length < 8) return esitoImp("impEsitoPassword", "La password deve avere almeno 8 caratteri.", false);
+  if(!isDbReady()) return esitoImp("impEsitoPassword", "Serve la connessione per cambiarla.", false);
+  const b = document.getElementById("impCambiaPassword");
+  b.disabled = true;
+  const { error } = await supabaseClient.auth.updateUser({ password: pw });
+  b.disabled = false;
+  document.getElementById("impCampoPassword").value = "";
+  if(error) return esitoImp("impEsitoPassword", "Non cambiata: " + error.message, false);
+  esitoImp("impEsitoPassword", "Password cambiata.", true);
+});
+/* Esci: chiude la sessione su questo telefono e torna alla schermata
+   iniziale (registrati / accedi). Si ricarica l'app da zero, così in
+   memoria non resta nulla dell'account appena chiuso. */
+async function esciDallAccount(){
+  if(!confirm("Vuoi uscire dal tuo account? Per rientrare ti serviranno email e password.")) return;
+  try{ if(supabaseClient && supabaseClient.auth) await supabaseClient.auth.signOut(); }
+  catch(e){ console.warn("Uscita non completa:", e.message); }
+  currentSession = null;
+  window.location.reload();
+}
+document.getElementById("impEsci").addEventListener("click", esciDallAccount);
 
 /* Calendario: "Indietro" torna dove eri (di solito la Home) */
 (function(){
