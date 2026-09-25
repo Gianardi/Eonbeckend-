@@ -3305,6 +3305,32 @@ async function handleAssistant(req, res, user, accessToken) {
         }
       }
 
+      /* Bug reale in produzione (25/09/2026, "Claudia Spori"): dopo
+         essersi incartato a ridichiarare più volte lo stesso preventivo
+         da creare (l'avviso su interpreta_richiesta qui sopra non è
+         bastato a farlo smettere), il modello ha finito per chiamare
+         capacita_non_disponibile dichiarando FALSO che non riesce a
+         creare direttamente un preventivo — mentre crea_preventivo_o_fattura
+         esiste e funziona (dimostrato più volte nella stessa sessione).
+         Non è un limite onesto da lasciar passare come per una vera
+         risorsa mai gestita: qui blocchiamo la bugia alla radice, quando
+         l'intento è creare un documento e il cliente è già risolto —
+         se il modello non ha ancora tutti i dati (voci/prezzo), il modo
+         onesto di dirlo è una domanda in testo libero, non una falsa
+         dichiarazione di incapacità. */
+      if (richiesta.name === "capacita_non_disponibile" && intentoAttivo && intentoAttivo.operazione === "crea") {
+        const tipoDoc = eStringaNonVuota(intentoAttivo.entita && intentoAttivo.entita.tipo) ? intentoAttivo.entita.tipo.trim().toLowerCase() : "";
+        if (/fattura|preventivo/.test(tipoDoc)) {
+          risultati.push({
+            type: "tool_result",
+            tool_use_id: richiesta.id,
+            content: JSON.stringify({ errore: "Falso: crea_preventivo_o_fattura esiste e sa creare direttamente fatture e preventivi, non dichiarare che non è possibile. Se hai già cliente/voci/prezzo, chiamalo ORA. Se davvero manca un dato (es. il prezzo), chiedilo con una domanda in testo libero — mai capacita_non_disponibile per questo." }),
+            is_error: true,
+          });
+          continue;
+        }
+      }
+
       if (richiedeConferma(tool)) {
         /* Non eseguiamo subito: la mettiamo in coda (raggruppata per
            nome, vedi codaPerNome sopra) e continuiamo a esaminare le
@@ -3318,27 +3344,40 @@ async function handleAssistant(req, res, user, accessToken) {
         const esito = await tool.run(richiesta.input, ctx);
 
         /* Bug reale in produzione (25/09/2026, confermato con
-           ai_audit_log): Haiku/Sonnet a volte richiama interpreta_richiesta
-           una SECONDA volta per LO STESSO documento da creare, con lo
-           stesso cliente già risolto ("trovato"), invece di chiamare
-           subito crea_preventivo_o_fattura — nessun cambio di argomento,
-           solo un giro sprecato. Il prompt lo vieta già a parole ("non
-           richiamare interpreta_richiesta una seconda volta... trovato
-           riguarda solo l'identità"), ma da solo non è bastato: qui la
-           stessa istruzione viaggia DENTRO il risultato del tool appena
-           eseguito, dove il modello non può ignorarla come farebbe con
-           un paragrafo lontano nel prompt. intentoAttivo qui dentro
-           riflette ancora il giro PRECEDENTE (viene aggiornato solo dopo
-           che tutta questa lista di richieste è stata processata), quindi
-           il confronto è sempre con la dichiarazione precedente, mai con
-           se stesso. */
+           ai_audit_log, caso "Claudia Spori"): Haiku/Sonnet a volte
+           richiama interpreta_richiesta ripetutamente per LO STESSO
+           documento da creare, con lo stesso cliente già risolto
+           ("trovato"), invece di chiamare crea_preventivo_o_fattura —
+           osservato fino a 6 ridichiarazioni di fila nello stesso turno,
+           finché non esaurisce i giri e (peggio ancora) inventa un
+           falso "non riesco a crearlo" con capacita_non_disponibile
+           (bloccato a parte più sotto). Il divieto era già nel prompt,
+           poi anche in un campo "avviso" nel risultato: nessuno dei due
+           è bastato a farlo smettere. Qui il blocco è un vero errore
+           (is_error), non solo un avviso testuale dentro un risultato
+           altrimenti "riuscito" — un errore tende a pesare di più nella
+           scelta del prossimo passo che un campo JSON in più da notare
+           da solo. intentoAttivo riflette ancora il giro PRECEDENTE
+           (si aggiorna solo dopo che tutta questa lista di richieste è
+           stata processata): il confronto è sempre con la dichiarazione
+           di prima, mai con se stesso. */
         if (richiesta.name === "interpreta_richiesta" && intentoAttivo && intentoAttivo.operazione === "crea" && richiesta.input.operazione === "crea") {
           const tipoVecchio = eStringaNonVuota(intentoAttivo.entita && intentoAttivo.entita.tipo) ? intentoAttivo.entita.tipo.trim().toLowerCase() : "";
           const tipoNuovo = eStringaNonVuota(richiesta.input.entita && richiesta.input.entita.tipo) ? richiesta.input.entita.tipo.trim().toLowerCase() : "";
           const eDocumento = (t) => /fattura|preventivo/.test(t);
           const clienteGiaRisolto = esito.cliente_risolto && esito.cliente_risolto.stato === "trovato";
           if (eDocumento(tipoVecchio) && eDocumento(tipoNuovo) && clienteGiaRisolto) {
-            esito.avviso = "Hai già dichiarato questa stessa richiesta (creare " + tipoNuovo + ") in un giro precedente, e il cliente è già risolto: NON dichiararla di nuovo con interpreta_richiesta, chiama SUBITO crea_preventivo_o_fattura con le voci e il prezzo che hai già.";
+            risultati.push({
+              type: "tool_result",
+              tool_use_id: richiesta.id,
+              content: JSON.stringify({
+                errore: "Hai già dichiarato questa stessa richiesta (creare " + tipoNuovo + ") in un giro precedente: NON richiamare di nuovo interpreta_richiesta per lo stesso documento.",
+                cliente_risolto: esito.cliente_risolto,
+                istruzione: "Il cliente è già risolto. Chiama SUBITO crea_preventivo_o_fattura con cliente_id=" + esito.cliente_risolto.id + " e le voci/il prezzo che hai già da questa conversazione. Se davvero manca un dato (es. il prezzo), chiedilo con una domanda in testo libero — mai ridichiarare l'intento.",
+              }),
+              is_error: true,
+            });
+            continue;
           }
         }
 

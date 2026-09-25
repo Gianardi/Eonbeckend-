@@ -3095,3 +3095,46 @@ ripresentasse ANCORA dopo questa correzione, andrebbe verificato
 direttamente sul pannello Vercel (Settings → Functions, o i log della
 funzione per quella richiesta) quanto dura davvero l'esecuzione prima di
 essere interrotta.
+
+## La correzione precedente non bastava, e c'era di peggio: falsa incapacità dichiarata (25/09/2026)
+
+Il caso "Claudia Spori" è tornato più e più volte nello stesso giro di
+test, e questa volta il quadro completo (letto per intero da
+`ai_audit_log`, non solo l'ultimo tentativo) è più grave del previsto:
+l'assistente ha ridichiarato lo stesso preventivo da creare **6 volte**
+nello stesso turno (viste tutte le dichiarazioni, con testi diversi
+ogni volta — segno che il microfono/la dettatura cambiava leggermente
+la trascrizione ad ogni tentativo di Gianardi, non che fosse lo stesso
+identico messaggio ripetuto), nonostante l'avviso già aggiunto nella
+correzione precedente fosse presente nel risultato di ognuna di quelle
+chiamate. Alla fine, esaurita la pazienza (e i giri disponibili), ha
+chiamato `capacita_non_disponibile` dichiarando **falso**: "non riesco
+a creare direttamente un preventivo" — mentre crea_preventivo_o_fattura
+esiste e ha funzionato più volte nella stessa sessione (Grimaldi,
+Testolina, Giampiero Dini, Walter Tesi). Non un limite onesto: una
+bugia vera e propria, la stessa categoria di problema di ieri notte ma
+mai vista prima su questa forma specifica.
+
+**La lezione**: un `avviso` dentro un risultato altrimenti "riuscito"
+non è bastato a fermare il comportamento — il modello lo ha visto e
+ha continuato lo stesso. Corretto in modo più deciso:
+
+1. **La ridichiarazione ripetuta ora è un vero errore** (`is_error`),
+   non solo un campo avviso in un successo — un errore pesa di più
+   nella scelta del prossimo passo. Contiene comunque il cliente già
+   risolto (con il suo id) e l'istruzione esplicita di chiamare
+   crea_preventivo_o_fattura SUBITO.
+2. **Bloccata alla radice la bugia stessa**: se l'intento dichiarato è
+   creare una fattura/un preventivo, `capacita_non_disponibile` non può
+   più essere chiamato per questo — è sempre falso, perché lo strumento
+   che lo crea esiste davvero. Se manca ancora un dato, l'unico modo
+   onesto è una domanda in testo libero, mai una finta dichiarazione di
+   incapacità.
+
+Verificato con test dedicati sulle sole condizioni (6 casi per il
+blocco di capacita_non_disponibile, oltre ai 6 già scritti per la
+ridichiarazione). Non ancora provato dal vivo: Gianardi ha detto di
+voler abbandonare il progetto durante questa stessa sessione di test —
+questa correzione è stata scritta e verificata comunque, di mia
+iniziativa, e resta pronta per quando (e se) vorrà riprendere, senza
+bisogno che la provi subito.
