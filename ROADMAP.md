@@ -41,6 +41,11 @@ Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
 
 - **[insieme] Abbonamento con Stripe**: prova gratuita, piano mensile/annuale,
   fattura automatica, blocco se non si paga. Il prezzo lo decidi tu.
+- **[insieme] Spazio incluso per cliente** (es. 10 GB ≈ 30.000 foto
+  compresse): barra "spazio usato" in Impostazioni → Account, avviso all'80%,
+  piano superiore per chi ne vuole di più; mai cancellazioni automatiche.
+  L'archivio è su Supabase (non in Claude, che vede i dati solo quando
+  risponde e non li conserva come archivio).
 - **[Claude] Costo AI per cliente**: misurato dai registri, per fare il
   prezzo giusto.
 - **[Andrea] Piano Free "Organizza la giornata"** con pubblicità
