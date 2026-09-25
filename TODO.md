@@ -3229,3 +3229,40 @@ affatto il nome in `nome_nella_frase`, il codice non può accorgersene.
 
 Da fare: stesso schema (AI legge la frase, codice esegue) per appuntamenti,
 clienti nuovi, promemoria/note, messaggi — uno alla volta, con test.
+
+### Percorso rapido per gli appuntamenti (25/09/2026)
+
+Misurato in produzione prima della modifica (ai_request_log): "segna Dini
+domani alle 10" → domanda sugli omonimi 8,5 s, appuntamento 7 s, "no alle
+11" 9 s + pulsante di conferma, sempre su Sonnet. Richiesta di Gianardi:
+risposta immediata.
+
+Ora (`provaPercorsoRapido` in api/index.js): per i messaggi della Home con
+un riferimento di tempo e nessuna parola da altre richieste (fattura,
+messaggio, foto, cancella...), UNA sola chiamata piccola a Haiku (prompt
+corto, un solo strumento `leggi_impegno`) legge cosa/quando/chi; il codice:
+- segna l'appuntamento (cliente trovato → collegato; nome nuovo → senza
+  cliente, come già faceva il motore);
+- "no alle 11" sull'impegno appena segnato → spostato SUBITO, senza
+  conferma (il frontend manda il `ricordo` strutturato delle azioni del
+  turno prima, finestra 3 minuti);
+- omonimi → domanda "quale dei due?" fatta dal codice, e la risposta
+  ("Giampiero", "il secondo") risolta dal codice senza AI; se non è
+  chiara, il motore completo continua con la cronologia.
+Tutto il resto (orario vago, più impegni, nome simile, nome non nella
+frase, data strana o passata, AI piccola che non risponde) → motore
+completo di sempre, senza scrivere niente.
+
+Costo del compromesso: per un messaggio con un orario che poi NON è un
+appuntamento semplice, la chiamata piccola si aggiunge prima del motore
+completo (circa 1 secondo in più in quei casi).
+
+Verifica: `eval/percorso-rapido.test.mjs`, 14 scenari (35 controlli), tra
+cui gli esempi di Gianardi; provato anche rompendo apposta il codice (i
+controlli relativi falliscono) e sul codice di prima (falliscono). Limite:
+AI simulata — i tempi veri (obiettivo circa 2 s) vanno letti in
+ai_request_log dopo il primo uso (giri = 1 per il percorso rapido).
+
+Da verificare: `dataOraCorrente()` usa l'ora del server (su Vercel di
+solito UTC, non l'ora italiana) — per "domani alle 10" non conta, per "fra
+un'ora" potrebbe sbagliare di 1-2 ore. Vale anche per il motore completo.

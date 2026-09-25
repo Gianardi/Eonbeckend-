@@ -1,0 +1,351 @@
+/* Test del percorso rapido per gli appuntamenti — gira SENZA chiavi e
+   senza rete, come percorso-documento.test.mjs: esegue il vero handler
+   di api/index.js con database e AI simulati.
+
+   Cosa controlla: che un appuntamento semplice ("Dini domani alle 10")
+   si segni con UNA sola chiamata piccola all'AI; che "no alle 11" subito
+   dopo sposti l'appuntamento senza pulsante di conferma; che con due
+   clienti omonimi la domanda e la risposta le gestisca il codice; e
+   soprattutto che OGNI caso dubbio passi al motore completo di sempre
+   (orario vago, nome non nella frase, data strana, AI che non risponde,
+   fatture, messaggi...), senza scrivere niente di sbagliato.
+
+   Uso:  node eval/percorso-rapido.test.mjs
+   Esce con codice 1 se anche un solo controllo fallisce. */
+
+import { randomUUID } from "node:crypto";
+
+process.env.SUPABASE_URL = "https://finto.supabase.co";
+process.env.SUPABASE_ANON_KEY = "anon-finta";
+process.env.SUPABASE_SERVICE_ROLE_KEY = "service-finta";
+process.env.ANTHROPIC_API_KEY = "chiave-finta";
+
+const UTENTE = { id: "11111111-1111-4111-8111-111111111111" };
+const PREFISSO = "Il professionista ti ha appena raccontato cosa deve fare: ";
+
+/* date relative ad adesso, nel formato che usa EON (ora locale, senza fuso) */
+function giornoFra(n) {
+  const d = new Date(Date.now() + n * 24 * 3600 * 1000);
+  const p = (x) => String(x).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+const DOMANI = giornoFra(1);
+
+/* ---------- database finto ---------- */
+let tabelle;
+function databaseVuoto() {
+  tabelle = { clients: [], conversations: [], messages: [], tasks: [], incomes: [], profiles: [], ai_audit_log: [], ai_request_log: [], ai_runs: [] };
+}
+function aggiungiCliente(nome) {
+  const c = { id: randomUUID(), owner_id: UTENTE.id, name: nome, phone: null, status: "attivo", deleted_at: null };
+  tabelle.clients.push(c);
+  return c;
+}
+function filtra(righe, params) {
+  return righe.filter((r) => {
+    for (const [k, v] of params) {
+      if (["select", "limit", "order", "or"].includes(k)) continue;
+      if (v === "is.null") { if (r[k] != null) return false; continue; }
+      if (v === "not.is.null") { if (r[k] == null) return false; continue; }
+      if (v.startsWith("eq.")) { if (String(r[k]) !== v.slice(3)) return false; continue; }
+      if (v.startsWith("ilike.")) {
+        const cerca = v.slice(6).replace(/\*/g, "").toLowerCase();
+        if (!String(r[k] || "").toLowerCase().includes(cerca)) return false;
+        continue;
+      }
+    }
+    return true;
+  });
+}
+function rispostaJson(obj, status = 200) {
+  return new Response(obj === null ? "" : JSON.stringify(obj), { status, headers: { "content-type": "application/json" } });
+}
+function postgrest(url, init) {
+  const u = new URL(url);
+  const tabella = u.pathname.replace("/rest/v1/", "");
+  if (tabella === "rpc/ai_check_rate_limit") return rispostaJson(true);
+  if (!tabelle[tabella]) tabelle[tabella] = [];
+  const params = [...u.searchParams.entries()];
+  const metodo = (init && init.method) || "GET";
+  if (metodo === "GET") return rispostaJson(filtra(tabelle[tabella], params));
+  if (metodo === "POST") {
+    const riga = { id: randomUUID(), created_at: new Date().toISOString(), deleted_at: null, ...JSON.parse(init.body) };
+    tabelle[tabella].push(riga);
+    return rispostaJson([riga], 201);
+  }
+  if (metodo === "PATCH") {
+    const toccate = filtra(tabelle[tabella], params);
+    toccate.forEach((r) => Object.assign(r, JSON.parse(init.body)));
+    return rispostaJson(toccate);
+  }
+  return rispostaJson([], 200);
+}
+
+/* ---------- AI finta ---------- */
+let copione, chiamateAI;
+function anthropicFinto(init) {
+  const corpo = JSON.parse(init.body);
+  chiamateAI.push(corpo);
+  const passo = copione[chiamateAI.length - 1];
+  if (!passo) throw new Error(`Chiamata all'AI n. ${chiamateAI.length} non prevista dallo scenario`);
+  const risposta = passo(corpo);
+  if (risposta === "ERRORE_500") return rispostaJson({ error: { message: "sovraccarico" } }, 500);
+  return rispostaJson({ id: "msg_finto", type: "message", role: "assistant", model: corpo.model, usage: { input_tokens: 1, output_tokens: 1 }, ...risposta });
+}
+const usaStrumento = (name, input) => ({ content: [{ type: "tool_use", id: "toolu_" + randomUUID().slice(0, 8), name, input }], stop_reason: "tool_use" });
+const rispondiTesto = (text) => ({ content: [{ type: "text", text }], stop_reason: "end_turn" });
+const leggi = (input) => () => usaStrumento("leggi_impegno", input);
+/* il motore completo, quando la richiesta gli viene passata: interpreta + una domanda */
+const motore = [
+  () => usaStrumento("interpreta_richiesta", { operazione: "crea", oggetto: "azione" }),
+  () => rispondiTesto("A che ora te lo segno?"),
+];
+
+globalThis.fetch = async (url, init) => {
+  const s = String(url);
+  if (s.startsWith("https://api.anthropic.com/")) return anthropicFinto(init);
+  if (s.startsWith(process.env.SUPABASE_URL + "/auth/v1/user")) return rispostaJson(UTENTE);
+  if (s.startsWith(process.env.SUPABASE_URL + "/rest/v1/")) return postgrest(s, init);
+  throw new Error("fetch non prevista nel test: " + s);
+};
+
+const { default: handler } = await import("../api/index.js");
+
+async function chiama(bodyReq) {
+  const req = { method: "POST", url: "/api?action=assistant", headers: { authorization: "Bearer token-finto" }, body: bodyReq };
+  let uscita = "";
+  const res = { statusCode: 0, setHeader() {}, end(d) { uscita = d || ""; } };
+  await handler(req, res);
+  return { status: res.statusCode, corpo: uscita ? JSON.parse(uscita) : null };
+}
+
+/* ---------- controlli ---------- */
+let falliti = 0;
+function verifica(descrizione, condizione, dettaglio) {
+  console.log(`  ${condizione ? "OK  " : "FAIL"} ${descrizione}${condizione || dettaglio === undefined ? "" : "  — " + dettaglio}`);
+  if (!condizione) falliti++;
+}
+const forzato = (corpo) => corpo.tool_choice && corpo.tool_choice.name;
+const appuntamenti = () => tabelle.messages.filter((m) => m.event_type === "appt");
+const strumentiAzioni = (r) => ((r.corpo && r.corpo.azioni) || []).map((a) => a.tool);
+const eMotoreCompleto = (corpo) => forzato(corpo) === "interpreta_richiesta";
+
+/* passi: [{ body, copione }] eseguiti in sequenza sullo stesso database */
+async function scenario(titolo, prepara, passi, controlli) {
+  console.log(`\n=== ${titolo} ===`);
+  databaseVuoto();
+  const ctx = prepara ? prepara() : {};
+  const risultati = [];
+  const chiamatePerPasso = [];
+  for (const passo of passi) {
+    chiamateAI = [];
+    copione = passo.copione;
+    try {
+      const body = typeof passo.body === "function" ? passo.body(risultati, ctx) : passo.body;
+      risultati.push(await chiama(body));
+    } catch (err) {
+      verifica("il turno non deve lanciare eccezioni", false, err.message);
+      return;
+    }
+    chiamatePerPasso.push(chiamateAI);
+  }
+  try {
+    controlli(risultati, chiamatePerPasso, ctx);
+  } catch (err) {
+    verifica("i controlli dello scenario devono poter leggere la risposta", false, err.message);
+  }
+}
+const nuovo = (frase, extra) => ({ messaggio: PREFISSO + `"${frase}"`, ...(extra || {}) });
+
+/* 1 — il caso base */
+await scenario(
+  "\"Segna appuntamento con Claudia Spori domani alle 10\" → una sola chiamata piccola",
+  () => ({ spori: aggiungiCliente("Claudia Spori") }),
+  [{ body: nuovo("Segna appuntamento con Claudia Spori domani alle 10"),
+     copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Claudia Spori", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Claudia Spori" })] }],
+  ([r], [ai]) => {
+    verifica("risposta 200, concluso", r.status === 200 && r.corpo.stato === "concluso", JSON.stringify(r.corpo));
+    verifica("UNA sola chiamata all'AI", ai.length === 1, ai.length);
+    verifica("chiamata piccola: un solo strumento, prompt corto, modello economico", ai[0].tools.length === 1 && ai[0].system.length < 2000 && ai[0].model === "claude-haiku-4-5");
+    verifica("appuntamento segnato sul cliente, alle 10 di domani", appuntamenti().length === 1 && appuntamenti()[0].scheduled_at === `${DOMANI}T10:00:00` && tabelle.conversations[0].contact_name === "Claudia Spori");
+    verifica("azioni per l'app: crea_impegno", JSON.stringify(strumentiAzioni(r)) === '["crea_impegno"]', JSON.stringify(strumentiAzioni(r)));
+    verifica("focus sul cliente", r.corpo.focus && r.corpo.focus.riferimento === "Claudia Spori");
+    verifica("registrato in ai_audit_log e ai_request_log", tabelle.ai_audit_log.some((a) => a.tool === "crea_impegno") && tabelle.ai_request_log[0].giri === 1);
+  }
+);
+
+/* 2 — gli esempi di Andrea: "segna Dini domani alle 10", poi "no alle 11" */
+await scenario(
+  "Andrea: \"Segna appuntamento Dini domani alle 10\" e poi \"no alle 11\" → spostato subito, senza conferma",
+  () => ({ dini: aggiungiCliente("Giampiero Dini") }),
+  [
+    { body: nuovo("Segna appuntamento Dini domani alle 10"),
+      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
+    { body: (prec) => nuovo("No alle 11", { ricordo: prec[0].corpo.azioni.map((a) => ({ tool: a.tool, esito: a.esito })) }),
+      copione: [(corpo) => {
+        // l'AI deve ricevere l'ultimo impegno con la sua data
+        if (!JSON.stringify(corpo.messages).includes(`${DOMANI}T10:00`)) throw new Error("ultimo impegno non passato all'AI");
+        return usaStrumento("leggi_impegno", { azione: "correggi_ultimo", quando_iso: `${DOMANI}T11:00:00`, nome_nella_frase: "" });
+      }] },
+  ],
+  ([r1, r2], [ai1, ai2]) => {
+    verifica("primo: appuntamento alle 10 con Giampiero Dini", r1.corpo.stato === "concluso" && appuntamenti().length === 1);
+    verifica("secondo: una sola chiamata all'AI", ai2.length === 1, ai2.length);
+    verifica("secondo: NESSUNA richiesta di conferma", r2.corpo.stato === "concluso", r2.corpo.stato);
+    verifica("spostato alle 11, stesso appuntamento (nessun doppione)", appuntamenti().length === 1 && appuntamenti()[0].scheduled_at === `${DOMANI}T11:00:00`, appuntamenti().map((a) => a.scheduled_at).join(","));
+    verifica("azioni per l'app: sposta_impegno", JSON.stringify(strumentiAzioni(r2)) === '["sposta_impegno"]');
+  }
+);
+
+/* 3 — due omonimi: domanda e risposta gestite dal codice */
+await scenario(
+  "Due clienti Dini → \"quale dei due?\" e la risposta \"Giampiero\" risolta dal codice",
+  () => ({ sara: aggiungiCliente("Sara Dini"), gp: aggiungiCliente("Giampiero Dini") }),
+  [
+    { body: nuovo("Appuntamento Dini domani alle 10"),
+      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
+    { body: (prec) => ({ runId: prec[0].corpo.runId, messaggio: "Giampiero" }), copione: [] },
+  ],
+  ([r1, r2], [ai1, ai2]) => {
+    verifica("domanda con i due nomi, che finisce con '?'", /Sara Dini/.test(r1.corpo.testo) && /Giampiero Dini/.test(r1.corpo.testo) && /\?\s*$/.test(r1.corpo.testo), r1.corpo.testo);
+    verifica("conversazione aperta (runId)", !!r1.corpo.runId);
+    verifica("domanda con una sola chiamata all'AI", ai1.length === 1, ai1.length);
+    verifica("risposta risolta SENZA nessuna chiamata all'AI", ai2.length === 0, ai2.length);
+    verifica("appuntamento su Giampiero Dini alle 10", appuntamenti().length === 1 && tabelle.conversations[0].contact_name === "Giampiero Dini" && appuntamenti()[0].scheduled_at === `${DOMANI}T10:00:00`);
+    verifica("conversazione chiusa", tabelle.ai_runs[0].stato === "concluso");
+  }
+);
+
+/* 4 — "il secondo" */
+await scenario(
+  "Due omonimi, risposta \"il secondo\"",
+  () => ({ sara: aggiungiCliente("Sara Dini"), gp: aggiungiCliente("Giampiero Dini") }),
+  [
+    { body: nuovo("Chiamare Dini domani alle 9"),
+      copione: [leggi({ azione: "nuovo", titolo: "Chiamare Dini", tipo: "chiamata", quando_iso: `${DOMANI}T09:00:00`, nome_nella_frase: "Dini" })] },
+    { body: (prec) => ({ runId: prec[0].corpo.runId, messaggio: "il secondo" }), copione: [] },
+  ],
+  ([r1, r2]) => {
+    verifica("impegno creato", r2.corpo.stato === "concluso" && strumentiAzioni(r2)[0] === "crea_impegno", JSON.stringify(r2.corpo));
+  }
+);
+
+/* 5 — risposta non chiara all'omonimia: passa al motore completo con la cronologia */
+await scenario(
+  "Due omonimi, risposta non chiara (\"boh quello di Firenze\") → motore completo",
+  () => ({ sara: aggiungiCliente("Sara Dini"), gp: aggiungiCliente("Giampiero Dini") }),
+  [
+    { body: nuovo("Appuntamento Dini domani alle 10"),
+      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
+    { body: (prec) => ({ runId: prec[0].corpo.runId, messaggio: "boh quello di Firenze" }),
+      copione: [(corpo) => {
+        if (!JSON.stringify(corpo.messages).includes("Quale dei due intendi")) throw new Error("cronologia non passata al motore");
+        return rispondiTesto("Non ho la città dei clienti: mi dici il nome?");
+      }] },
+  ],
+  ([r1, r2], [ai1, ai2]) => {
+    verifica("il motore completo riceve la cronologia e risponde", r2.status === 200 && ai2.length === 1, `${r2.status} ${ai2.length}`);
+    verifica("nessun appuntamento creato a caso", appuntamenti().length === 0);
+  }
+);
+
+/* 6 — nome nuovo: impegno senza cliente, nessuna domanda */
+await scenario(
+  "Nome non in anagrafica (\"chiamare Pippo domani alle 9\") → segnato subito",
+  null,
+  [{ body: nuovo("Chiamare Pippo domani alle 9"),
+     copione: [leggi({ azione: "nuovo", titolo: "Chiamare Pippo", tipo: "chiamata", quando_iso: `${DOMANI}T09:00:00`, nome_nella_frase: "Pippo" })] }],
+  ([r], [ai]) => {
+    verifica("una chiamata, concluso", ai.length === 1 && r.corpo.stato === "concluso");
+    verifica("impegno tra le cose da fare, alle 9", tabelle.tasks.length === 1 && tabelle.tasks[0].scheduled_at === `${DOMANI}T09:00:00`);
+    verifica("nessun cliente creato", tabelle.clients.length === 0);
+  }
+);
+
+/* ----- casi che DEVONO passare al motore completo ----- */
+
+await scenario(
+  "Orario vago → l'AI dice 'altro' → motore completo",
+  () => ({ c: aggiungiCliente("Rossi") }),
+  [{ body: nuovo("Domani mattina chiamo Rossi"), copione: [leggi({ azione: "altro" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("dopo la chiamata piccola, motore completo", ai.length === 3 && eMotoreCompleto(ai[1]), ai.length);
+    verifica("niente scritto dal percorso rapido", tabelle.tasks.length === 0 && appuntamenti().length === 0);
+    verifica("risposta del motore", r.corpo.testo === "A che ora te lo segno?", r.corpo.testo);
+  }
+);
+
+await scenario(
+  "L'AI mette un nome che NON è nella frase (preso chissà dove) → motore completo",
+  () => ({ c: aggiungiCliente("Tommaso Greti") }),
+  [{ body: nuovo("Appuntamento con Raspadori domani alle 10"),
+     copione: [leggi({ azione: "nuovo", titolo: "Appuntamento", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Tommaso Greti" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, niente scritto", ai.length === 3 && appuntamenti().length === 0 && tabelle.tasks.length === 0);
+  }
+);
+
+await scenario(
+  "Data non valida o nel passato → motore completo",
+  null,
+  [{ body: nuovo("Chiamare Pippo lunedì alle 9"),
+     copione: [leggi({ azione: "nuovo", titolo: "Chiamare Pippo", tipo: "chiamata", quando_iso: "2020-01-06T09:00:00", nome_nella_frase: "Pippo" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, niente scritto", ai.length === 3 && tabelle.tasks.length === 0);
+  }
+);
+
+await scenario(
+  "Nome simile a un cliente (\"Tabri\" / \"Fabbri\") → motore completo, che chiede",
+  () => ({ c: aggiungiCliente("Fabbri") }),
+  [{ body: nuovo("Appuntamento Tabri domani alle 10"),
+     copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Tabri", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Tabri" }), ...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, niente scritto", ai.length === 3 && appuntamenti().length === 0 && tabelle.tasks.length === 0);
+  }
+);
+
+await scenario(
+  "\"no alle 11\" ma nomina un'altra persona → non è una correzione, motore completo",
+  () => ({ dini: aggiungiCliente("Giampiero Dini"), rossi: aggiungiCliente("Rossi") }),
+  [
+    { body: nuovo("Segna Dini domani alle 10"),
+      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
+    { body: (prec) => nuovo("No Rossi alle 11", { ricordo: prec[0].corpo.azioni }),
+      copione: [leggi({ azione: "correggi_ultimo", quando_iso: `${DOMANI}T11:00:00`, nome_nella_frase: "Rossi" }), ...motore] },
+  ],
+  ([r1, r2], [ai1, ai2]) => {
+    verifica("appuntamento di Dini NON spostato", appuntamenti()[0].scheduled_at === `${DOMANI}T10:00:00`);
+    verifica("motore completo", ai2.length === 3 && eMotoreCompleto(ai2[1]), ai2.length);
+  }
+);
+
+await scenario(
+  "L'AI piccola non risponde (errore 500) → motore completo, nessun blocco",
+  null,
+  [{ body: nuovo("Chiamare Pippo domani alle 9"), copione: [() => "ERRORE_500", ...motore] }],
+  ([r], [ai]) => {
+    verifica("risposta 200 dal motore completo", r.status === 200 && ai.length === 3 && eMotoreCompleto(ai[1]), `${r.status} ${ai.length}`);
+  }
+);
+
+await scenario(
+  "Fattura con una data dentro → mai il percorso rapido",
+  () => ({ c: aggiungiCliente("Rossi") }),
+  [{ body: nuovo("Fattura a Rossi da 300 per domani alle 10"), copione: [...motore] }],
+  ([r], [ai]) => {
+    verifica("prima chiamata già del motore completo", eMotoreCompleto(ai[0]));
+  }
+);
+
+await scenario(
+  "Messaggio da un'altra schermata (non la Home) → mai il percorso rapido",
+  () => ({ c: aggiungiCliente("Rossi") }),
+  [{ body: { messaggio: 'Il professionista ha scritto o dettato questo, riguardo a un cliente: "Rossi domani alle 10"' }, copione: [...motore] }],
+  ([r], [ai]) => {
+    verifica("prima chiamata già del motore completo", eMotoreCompleto(ai[0]));
+  }
+);
+
+console.log(falliti ? `\n${falliti} controlli FALLITI.` : "\nTutti i controlli passati.");
+if (falliti) process.exitCode = 1;

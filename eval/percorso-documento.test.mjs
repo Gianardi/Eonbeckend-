@@ -374,12 +374,14 @@ await scenario(
   () => ({ dini: aggiungiCliente("Dini") }),
   { frase: "No alle 11", ricordo: ricordoDi("Dini", "crea_impegno") },
   [
+    // "no alle 11" passa prima dal percorso rapido degli appuntamenti: qui senza ricordo strutturato, quindi 'altro'
+    () => usaStrumento("leggi_impegno", { azione: "altro" }),
     () => usaStrumento("interpreta_richiesta", { operazione: "modifica", oggetto: "azione", entita: { tipo: "impegno", usa_focus_corrente: true, cliente_di_riferimento: "Dini", nome_nella_frase: "" } }),
     () => rispondiTesto("Sposto l'appuntamento con Dini alle 11."),
     () => rispondiTesto("Sposto l'appuntamento con Dini alle 11."), // eventuale secondo tentativo (Sonnet) sulla stessa domanda
   ],
   (r, { dini }) => {
-    const esito = esitoInterpretaDa(chiamateAI[1]);
+    const esito = esitoInterpretaDa(chiamateAI[2]);
     verifica("risposta 200", r.status === 200, r.status);
     verifica("il cliente resta Dini (dal ricordo)", esito && esito.cliente_risolto && esito.cliente_risolto.id === dini.id, JSON.stringify(esito && esito.cliente_risolto));
     verifica("nessuna correzione del cliente", esito && !esito.nota_cliente);
@@ -394,12 +396,13 @@ await scenario(
   () => ({ dini: aggiungiCliente("Mirco Dini") }),
   { frase: "No alle 11", ricordo: ricordoDi("Mirco Dini", "crea_impegno") },
   [
+    () => usaStrumento("leggi_impegno", { azione: "altro" }),
     () => usaStrumento("interpreta_richiesta", { operazione: "modifica", oggetto: "azione", entita: { tipo: "impegno", cliente_di_riferimento: "Mirco Dini", nome_nella_frase: "Dini" } }),
     () => rispondiTesto("Sposto l'appuntamento con Mirco Dini alle 11."),
     () => rispondiTesto("Sposto l'appuntamento con Mirco Dini alle 11."), // eventuale secondo tentativo (Sonnet) sulla stessa domanda
   ],
   (r, { dini }) => {
-    const esito = esitoInterpretaDa(chiamateAI[1]);
+    const esito = esitoInterpretaDa(chiamateAI[2]);
     verifica("risposta 200", r.status === 200, r.status);
     verifica("il cliente resta Mirco Dini", esito && esito.cliente_risolto && esito.cliente_risolto.id === dini.id, JSON.stringify(esito && esito.cliente_risolto));
     verifica("nessuna correzione del cliente", esito && !esito.nota_cliente);
