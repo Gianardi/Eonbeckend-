@@ -3483,6 +3483,35 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Account "come le app grandi" (25/09/2026)
+
+Gianardi: "fallo come se fosse un'app grande già usata".
+- **Account nuovo vuoto**: tolto `seedUserData` (scriveva clienti, pagamenti
+  e impegni finti nell'account vero). Al primo ingresso la card "Benvenuto in
+  EON" con tre cose per partire.
+- **Password** almeno 8 caratteri; errori di Supabase tradotti in italiano.
+- **Conferma email**: l'app la gestisce già ("Controlla la tua email",
+  "Rimandala", "Ho confermato: accedi"); il nome dell'attività viaggia nei
+  dati dell'account (`supabase/profilo_nome_attivita.sql`, in produzione).
+  L'interruttore "Confirm email" di Supabase è ancora SPENTO: accenderlo solo
+  dopo aver collegato un servizio email (SMTP), vedi sotto.
+- **Password dimenticata**: link sotto la password; messaggio uguale che
+  l'account esista o no; dal link dell'email si apre "Scegli una nuova
+  password".
+- **Elimina account** (Impostazioni, scrivendo ELIMINA): il server
+  (`action=elimina_account`) cancella i file nello storage (cartella
+  dell'utente e delle sue chat coi clienti) e poi l'utente; nel database
+  tutto è collegato al profilo con cancellazione a cascata (provato in
+  produzione dentro una transazione annullata: 5 dati → 0).
+- **Da fare prima di vendere**: servizio email vero (SMTP, es. Resend) — il
+  servizio di Supabase manda email solo agli indirizzi del team e poche
+  all'ora, quindi conferma email e password dimenticata oggi funzionano
+  solo per noi; testi delle email in italiano; privacy e termini con i dati
+  dell'azienda (servono ragione sociale, P.IVA, indirizzo, email); staging
+  ha lo schema diverso da produzione (profilo senza cascata, niente trigger
+  di registrazione): riallinearlo.
+- Test: `eval/account.test.js` (15), `eval/elimina-account.test.mjs` (7).
+
 ### Account, Impostazioni ed Esci + pagina cliente sicura (25/09/2026)
 
 Gianardi: impostazioni come le altre app, logout, professione legata

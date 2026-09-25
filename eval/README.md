@@ -166,6 +166,17 @@ da una nota.
 NODE_PATH=/opt/node22/lib/node_modules node eval/clienti-chat.test.js
 ```
 
+### `account.test.js` e `elimina-account.test.mjs` — registrazione e account, girano subito
+
+Account nuovo vuoto con benvenuto, conferma email, password dimenticata,
+nuova password dal link, elimina account (app); cancellazione di file e
+utente lato server, anche con storage o amministrazione che non rispondono.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/account.test.js
+node eval/elimina-account.test.mjs
+```
+
 ### `impostazioni.test.js` e `portale.test.js` — account e pagina cliente, girano subito
 
 Impostazioni (account, profilo, password, Esci che torna alla schermata

@@ -293,6 +293,14 @@
   .ob-auth-toggle{ display:flex; gap:6px; margin:14px 0 4px; background:rgba(20,23,29,.04); border-radius:12px; padding:4px; }
   .ob-link-accedi{ display:block; margin:16px auto 0; background:none; border:none; font:inherit; font-size:14px; color:var(--muted); cursor:pointer; padding:8px; }
   .ob-link-accedi b{ color:var(--indigo); }
+  .ob-link-piccolo{ background:none; border:none; font:inherit; font-size:13px; font-weight:700; color:var(--indigo); cursor:pointer; padding:6px 0; align-self:flex-end; }
+  .ob-auth-info{ margin-top:10px; padding:10px 12px; border-radius:12px; background:var(--indigo-soft); color:var(--text); font-size:13px; line-height:1.45; }
+  .ob-controlla-email{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:18px 8px; }
+  .ob-controlla-email-ico{ width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); }
+  .ob-controlla-email-ico svg{ width:26px; height:26px; }
+  .ob-controlla-email b{ font-family:'Manrope'; font-size:18px; }
+  .ob-controlla-email p{ margin:0; font-size:14px; color:var(--muted); line-height:1.5; max-width:32ch; }
+  .ob-controlla-email .ob-link-piccolo{ align-self:center; }
   .ob-auth-tab{ flex:1; text-align:center; padding:9px; border-radius:9px; font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer; }
   .ob-auth-tab.active{ background:var(--card); color:var(--text); box-shadow:var(--shadow-sm); }
   .ob-auth-error{ background:var(--coral-soft); color:var(--coral); font-size:12px; font-weight:600; padding:10px 12px; border-radius:10px; margin-bottom:14px; }
@@ -1253,11 +1261,12 @@
   .imp-campo input:focus{ outline:none; border-color:var(--indigo); background:var(--card); }
   .imp-btn{ align-self:flex-start; padding:10px 20px; border-radius:12px; border:none; background:var(--text); color:#fff; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
   .imp-btn:disabled{ opacity:.5; }
+  .imp-btn-pericolo{ background:var(--coral); }
   .imp-esito{ font-size:13px; color:var(--muted); }
   .imp-esito:empty{ display:none; }
   .imp-esito.ok{ color:#12894F; }
   .imp-esito.errore{ color:var(--coral); }
-  .imp-esci{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin:24px 0 8px; padding:14px; border-radius:16px; border:1px solid var(--coral-soft); background:var(--card); color:var(--coral); font:inherit; font-size:15px; font-weight:800; cursor:pointer; }
+  .imp-esci{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin:20px 0 4px; padding:14px; border-radius:16px; border:1px solid var(--coral-soft); background:var(--card); color:var(--coral); font:inherit; font-size:15px; font-weight:800; cursor:pointer; }
   .imp-esci svg{ width:18px; height:18px; }
   /* Scorrimento tra le pagine principali: la pagina nuova entra dal lato giusto */
   @keyframes entra-da-destra{ from{ transform:translateX(28px); opacity:.35; } to{ transform:none; opacity:1; } }
@@ -2340,11 +2349,23 @@
         </div>
         <div class="form-row">
           <label>Password</label>
-          <input type="password" id="obPassword" placeholder="Almeno 6 caratteri">
+          <input type="password" id="obPassword" placeholder="Almeno 8 caratteri">
         </div>
+        <button type="button" class="ob-link-piccolo" id="obPasswordDimenticata" style="display:none;">Password dimenticata?</button>
       </div>
 
       <div class="ob-auth-error" id="obAuthError" style="display:none;"></div>
+      <div class="ob-auth-info" id="obAuthInfo" style="display:none;"></div>
+      <!-- Conferma email attiva: l'account è creato, si entra dal link nell'email -->
+      <div class="ob-controlla-email" id="obControllaEmail" style="display:none;">
+        <div class="ob-controlla-email-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/></svg>
+        </div>
+        <b>Controlla la tua email</b>
+        <p>Ti abbiamo mandato un link a <span id="obControllaEmailIndirizzo"></span>. Toccalo per attivare l'account: si apre EON e sei dentro.</p>
+        <button type="button" class="ob-link-piccolo" id="obRimandaEmail">Non è arrivata? Rimandala</button>
+        <button type="button" class="ob-link-piccolo" id="obHoConfermato">Ho confermato: accedi</button>
+      </div>
       <div class="ob-auth-note" id="obAuthNote">
         Il backend non è ancora collegato: questo passaggio userà il salvataggio locale finché non configuri Supabase (vedi guida).
       </div>
@@ -3379,6 +3400,15 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         Esci dall'account
       </button>
+
+      <div class="imp-sezione">Elimina account</div>
+      <div class="imp-card">
+        <div class="imp-nota" style="margin:0;">Cancella per sempre il tuo account e tutti i tuoi dati: clienti, messaggi, foto, documenti, appuntamenti. Non si può annullare.</div>
+        <label class="imp-campo"><span>Per confermare scrivi ELIMINA</span><input id="impCampoElimina" type="text" autocomplete="off" autocapitalize="characters"></label>
+        <button type="button" class="imp-btn imp-btn-pericolo" id="impEliminaAccount" disabled>Elimina il mio account</button>
+        <div class="imp-esito" id="impEsitoElimina"></div>
+      </div>
+
     </div>
 
     <!-- ===== Sotto-pagina: Registro AI ===== -->
@@ -3860,6 +3890,9 @@ const RISPONDI_RICHIESTA_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?actio
    E la libreria Supabase si e' caricata davvero. Se la rete e' lenta o
    assente, l'app ripiega sul salvataggio locale invece di andare in errore. */
 const BACKEND_CONFIGURED_VALUES = !SUPABASE_URL.startsWith("INCOLLA") && !SUPABASE_ANON_KEY.startsWith("INCOLLA");
+/* Link "scegli una nuova password" dall'email: va letto prima che la
+   libreria di Supabase pulisca l'indirizzo (25/09/2026). */
+const ARRIVO_DA_RECUPERO_PASSWORD = /type=recovery/.test(window.location.hash || "");
 const supabaseClient = (BACKEND_CONFIGURED_VALUES && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
@@ -3883,6 +3916,7 @@ try{
     supabaseClient.auth.onAuthStateChange((evento, sessione) => {
       if(evento === "SIGNED_OUT") currentSession = null;
       else if(sessione) currentSession = sessione;
+      if(evento === "PASSWORD_RECOVERY") setTimeout(() => apriNuovaPassword(), 0);
     });
   }
 }catch(e){ console.warn("Rinnovo automatico della sessione non attivo:", e.message); }
@@ -4022,27 +4056,6 @@ async function dbEliminaPerSempre(table, id){
 /* Quando un utente nuovo si iscrive, gli diamo gli stessi dati di esempio
    che vedeva in modalità demo, ma stavolta scritti davvero nel suo database
    personale — così parte con qualcosa di concreto da vedere e modificare. */
-async function seedUserData(profession){
-  const p = professionData[profession];
-  await dbInsertMany("clients", p.clients.map(c => ({
-    name:c.name, status:c.status, value:c.value, description:c.desc, last_contact:c.last, color:c.color
-  })));
-  await dbInsertMany("opportunities", p.opportunities.map(o => ({
-    name:o.name, client_name:o.client, value:o.value, probability:o.probability, deadline:o.deadline || null, stage:o.stage
-  })));
-  await dbInsertMany("employees", (p.employees || []).map(e => ({
-    name:e.name, role:e.role, color:e.color
-  })));
-  await dbInsertMany("payments", (p.payments || []).map(x => ({
-    supplier:x.supplier, description:x.desc, amount:x.amount, due_date:null, status:x.status
-  })));
-  await dbInsertMany("incomes", (p.incomes || []).map(x => ({
-    client_name:x.client, description:x.desc, amount:x.amount, due_date:null, status:x.status
-  })));
-  await dbInsertMany("tasks", tasks.map(t => ({
-    title:t.title, owner_type:t.owner, status:t.status, time:t.time
-  })));
-}
 
 /* Trasformano una riga grezza del database nella forma usata dagli
    array in memoria: condivise tra loadUserDataFromDB() (ricarica tutta
@@ -12601,6 +12614,9 @@ function setObAuthMode(mode){
   document.getElementById("obAuthLabel").textContent = mode === "signup" ? "Ultimo passo: crea il tuo account" : "Bentornato: accedi al tuo account";
   document.getElementById("obFinishBtn").childNodes[0].textContent = mode === "signup" ? "Inizia a usare EON " : "Accedi ";
   document.getElementById("obAuthError").style.display = "none";
+  document.getElementById("obAuthInfo").style.display = "none";
+  document.getElementById("obPasswordDimenticata").style.display = mode === "login" ? "block" : "none";
+  document.getElementById("obPassword").setAttribute("autocomplete", mode === "login" ? "current-password" : "new-password");
 }
 document.getElementById("obTabSignup").addEventListener("click", () => {
   if(obSoloAccesso && !obSelectedProfession){
@@ -12656,12 +12672,22 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       const name = document.getElementById("obName").value.trim();
       const businessName = document.getElementById("obBusinessName").value.trim();
       if(!name){ throw new Error("Inserisci il tuo nome."); }
+      if(password.length < 8){ throw new Error("La password deve avere almeno 8 caratteri."); }
 
       const { data, error } = await supabaseClient.auth.signUp({
         email, password,
-        options: { data: { full_name: name, profession: obSelectedProfession } }
+        options: {
+          data: { full_name: name, business_name: businessName, profession: obSelectedProfession },
+          emailRedirectTo: indirizzoApp()
+        }
       });
       if(error) throw error;
+      /* Con la conferma email attiva l'account esiste ma non c'è ancora una
+         sessione: si entra toccando il link nell'email. */
+      if(!data.session){
+        mostraControllaEmail(email);
+        return;
+      }
       currentSession = data.session;
 
       // Aggiorna il profilo creato automaticamente con professione e nome attività
@@ -12674,10 +12700,11 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
         if(profErr) throw profErr;
         ricordaProfilo({ full_name: name, business_name: businessName, profession: obSelectedProfession }, email);
 
-        // Prepara i dati iniziali veri nel database (le stesse informazioni
-        // che vedevi in demo, ma stavolta scritte davvero, sue e sue soltanto)
-        await seedUserData(obSelectedProfession);
+        /* Un account nuovo parte vuoto (25/09/2026): prima ci venivano
+           scritti clienti, pagamenti e impegni di esempio, finti ma nel suo
+           account vero (da qui i "Mario Rossi"). */
         await loadUserDataFromDB();
+        benvenutoDaMostrare = true;
       await loadChatsFromDB();
       subscribeToMessages();
       }
@@ -12707,17 +12734,112 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
     await applyProfession(obSelectedProfession || "artigiano", true);
     renderPayments(); renderIncomes();
     document.getElementById("onboardingScreen").classList.add("hidden");
+    if(benvenutoDaMostrare){ benvenutoDaMostrare = false; mostraBenvenuto(); }
 
   }catch(err){
     console.error("Errore autenticazione:", err);
-    errorBox.textContent = err.message === "Invalid login credentials"
-      ? "Email o password non corrette."
-      : (err.message || "Qualcosa è andato storto, riprova.");
+    errorBox.textContent = messaggioErroreAccesso(err);
     errorBox.style.display = "block";
   } finally {
     btn.disabled = false;
   }
 });
+
+/* ---- Account come nelle app grandi (25/09/2026) ---- */
+let benvenutoDaMostrare = false;
+function indirizzoApp(){ return window.location.origin + window.location.pathname; }
+function messaggioErroreAccesso(err){
+  const m = (err && err.message) || "";
+  if(m === "Invalid login credentials") return "Email o password non corrette.";
+  if(/email not confirmed/i.test(m)) return "Devi prima confermare l'email: tocca il link che ti abbiamo mandato. Non è arrivata? Usa \"Password dimenticata?\" o registrati di nuovo con la stessa email.";
+  if(/already registered|already been registered/i.test(m)) return "C'è già un account con questa email: accedi, oppure usa \"Password dimenticata?\".";
+  if(/password should be at least|weak password/i.test(m)) return "Password troppo debole: usa almeno 8 caratteri.";
+  if(/rate limit|too many/i.test(m)) return "Troppi tentativi: aspetta qualche minuto e riprova.";
+  if(/invalid email|unable to validate email/i.test(m)) return "Controlla l'indirizzo email.";
+  return m || "Qualcosa è andato storto, riprova.";
+}
+function infoAccesso(testo){
+  const el = document.getElementById("obAuthInfo");
+  el.textContent = testo;
+  el.style.display = testo ? "block" : "none";
+  document.getElementById("obAuthError").style.display = "none";
+}
+function mostraControllaEmail(email){
+  document.querySelector("#obStep2 .ob-form").style.display = "none";
+  document.querySelector("#obStep2 .ob-auth-toggle").style.display = "none";
+  document.getElementById("obFinishBtn").style.display = "none";
+  document.getElementById("obAuthLabel").style.display = "none";
+  document.getElementById("obControllaEmailIndirizzo").textContent = email;
+  document.getElementById("obControllaEmail").style.display = "flex";
+}
+function nascondiControllaEmail(){
+  document.querySelector("#obStep2 .ob-form").style.display = "";
+  document.querySelector("#obStep2 .ob-auth-toggle").style.display = "";
+  document.getElementById("obFinishBtn").style.display = "";
+  document.getElementById("obAuthLabel").style.display = "";
+  document.getElementById("obControllaEmail").style.display = "none";
+}
+document.getElementById("obRimandaEmail").addEventListener("click", async () => {
+  const email = document.getElementById("obControllaEmailIndirizzo").textContent;
+  const { error } = await supabaseClient.auth.resend({ type: "signup", email, options: { emailRedirectTo: indirizzoApp() } });
+  document.getElementById("obRimandaEmail").textContent = error ? messaggioErroreAccesso(error) : "Email rimandata ✓";
+});
+document.getElementById("obHoConfermato").addEventListener("click", () => {
+  nascondiControllaEmail();
+  setObAuthMode("login");
+});
+document.getElementById("obPasswordDimenticata").addEventListener("click", async () => {
+  const email = document.getElementById("obEmail").value.trim();
+  if(!email){ infoAccesso("Scrivi qui sopra la tua email, poi tocca di nuovo \"Password dimenticata?\"."); return; }
+  if(!BACKEND_CONFIGURED || !supabaseClient){ infoAccesso("Serve la connessione per recuperare la password."); return; }
+  const b = document.getElementById("obPasswordDimenticata");
+  b.disabled = true;
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: indirizzoApp() });
+  b.disabled = false;
+  /* Come le app grandi: stesso messaggio che l'email esista o no, così
+     nessuno può scoprire chi è registrato. */
+  if(error && /rate limit|too many/i.test(error.message)) infoAccesso(messaggioErroreAccesso(error));
+  else infoAccesso("Se c'è un account con " + email + ", ti abbiamo mandato un'email con il link per scegliere una nuova password.");
+});
+
+/* Link "scegli una nuova password" aperto dall'email */
+let nuovaPasswordAperta = false;
+function apriNuovaPassword(){
+  if(nuovaPasswordAperta) return;
+  nuovaPasswordAperta = true;
+  const corpo = document.createElement("div");
+  corpo.className = "imp-card";
+  corpo.style.boxShadow = "none"; corpo.style.border = "none"; corpo.style.padding = "0";
+  corpo.innerHTML = `
+    <label class="imp-campo"><span>Nuova password</span><input id="recPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
+    <button type="button" class="imp-btn" id="recSalva">Salva la nuova password</button>
+    <div class="imp-esito" id="recEsito"></div>`;
+  apriRisorsaCard("Scegli una nuova password", corpo);
+  corpo.querySelector("#recSalva").addEventListener("click", async () => {
+    const pw = corpo.querySelector("#recPassword").value;
+    const esito = corpo.querySelector("#recEsito");
+    if(pw.length < 8){ esito.textContent = "La password deve avere almeno 8 caratteri."; esito.className = "imp-esito errore"; return; }
+    const { error } = await supabaseClient.auth.updateUser({ password: pw });
+    if(error){ esito.textContent = messaggioErroreAccesso(error); esito.className = "imp-esito errore"; return; }
+    nuovaPasswordAperta = false;
+    try{ history.replaceState(null, "", indirizzoApp()); }catch(e){}
+    chiudiRisorsaCard();
+    showAIToast("Password aggiornata", "Da ora entri con la nuova password.");
+  });
+}
+
+/* Primo ingresso dopo la registrazione: tre cose per partire */
+function mostraBenvenuto(){
+  mostraRispostaEON("", [
+    "Il tuo EON è pronto e vuoto: dentro ci sarà solo il tuo lavoro.",
+    "",
+    "- Tocca il microfono e parla: \"Domani alle 10 sopralluogo da Rossi\"",
+    "- Aggiungi il primo cliente: \"Nuovo cliente Mario Bianchi, 333 1234567\"",
+    "- Fai una foto del cantiere e dettaci la nota",
+    "",
+    "Le impostazioni e il tasto Esci sono in Menu → Impostazioni."
+  ].join("\n"), { titolo: "Benvenuto in EON" });
+}
 
 async function loadOnboarding(){
   if(!STORAGE_AVAILABLE) return null;
@@ -12897,7 +13019,9 @@ function disegnaImpostazioni(){
   document.getElementById("impProfessione").textContent = NOMI_PROFESSIONE[p.profession] || p.profession || "—";
   document.getElementById("impCampoNome").value = p.full_name;
   document.getElementById("impCampoAttivita").value = p.business_name;
-  ["impEsitoProfilo", "impEsitoPassword"].forEach(id => { const e = document.getElementById(id); e.textContent = ""; e.className = "imp-esito"; });
+  document.getElementById("impCampoElimina").value = "";
+  document.getElementById("impEliminaAccount").disabled = true;
+  ["impEsitoProfilo", "impEsitoPassword", "impEsitoElimina"].forEach(id => { const e = document.getElementById(id); e.textContent = ""; e.className = "imp-esito"; });
   document.getElementById("impCampoPassword").value = "";
 }
 function esitoImp(id, testo, ok){
@@ -12944,6 +13068,36 @@ async function esciDallAccount(){
 }
 document.getElementById("impEsci").addEventListener("click", esciDallAccount);
 
+/* Elimina account: il server cancella file e account (con l'account se ne
+   vanno tutti i dati, collegati a lui nel database). */
+const ELIMINA_ACCOUNT_URL = "https://eonbeckend.vercel.app/api?action=elimina_account";
+document.getElementById("impCampoElimina").addEventListener("input", (e) => {
+  document.getElementById("impEliminaAccount").disabled = e.target.value.trim().toUpperCase() !== "ELIMINA";
+});
+document.getElementById("impEliminaAccount").addEventListener("click", async () => {
+  if(document.getElementById("impCampoElimina").value.trim().toUpperCase() !== "ELIMINA") return;
+  if(!isDbReady()) return esitoImp("impEsitoElimina", "Serve la connessione per eliminare l'account.", false);
+  const b = document.getElementById("impEliminaAccount");
+  b.disabled = true;
+  esitoImp("impEsitoElimina", "Sto eliminando tutto…", true);
+  try{
+    const r = await fetch(ELIMINA_ACCOUNT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
+      body: JSON.stringify({ conferma: "ELIMINA" })
+    });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(j.error || "eliminazione non riuscita");
+    try{ await supabaseClient.auth.signOut(); }catch(e){}
+    currentSession = null;
+    alert("Il tuo account è stato eliminato. Grazie per aver usato EON.");
+    window.location.reload();
+  }catch(err){
+    b.disabled = false;
+    esitoImp("impEsitoElimina", "Non eliminato: " + err.message, false);
+  }
+});
+
 /* Calendario: "Indietro" torna dove eri (di solito la Home) */
 (function(){
   const b = document.getElementById("calIndietro");
@@ -12952,7 +13106,7 @@ document.getElementById("impEsci").addEventListener("click", esciDallAccount);
   b.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); vai(); } });
 })();
 
-initApp();
+initApp().then(() => { if(ARRIVO_DA_RECUPERO_PASSWORD && currentSession) apriNuovaPassword(); });
 </script>
 </body>
 </html>
