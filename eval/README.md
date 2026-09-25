@@ -104,6 +104,16 @@ login (bug del 25/09/2026, "token is expired" dopo circa un'ora).
 NODE_PATH=/opt/node22/lib/node_modules node eval/sessione.test.js
 ```
 
+### `aggiornamento.test.js` — l'app si aggiorna da sola, gira subito
+
+Carica la vera index.html da un server locale, simula una nuova versione
+(cambia la data del file) e controlla che tornando sull'app la pagina si
+ricarichi — ma mai con del testo scritto a metà.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/aggiornamento.test.js
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti

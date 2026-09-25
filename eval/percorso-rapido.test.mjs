@@ -476,6 +476,62 @@ await scenario(
   }
 );
 
+/* ======== Appunti: mai sovrascritti se non lo chiedi (25/09/2026) ======== */
+const usaStrumenti = (...lista) => ({ content: lista.map(([name, input]) => ({ type: "tool_use", id: "toolu_" + randomUUID().slice(0, 8), name, input })), stop_reason: "tool_use" });
+const appunto = (testo) => ({ id: randomUUID(), owner_id: UTENTE.id, testo, created_at: new Date().toISOString(), deleted_at: null });
+const erroriMandatiAllAI = (corpo) => corpo.messages.flatMap((m) => Array.isArray(m.content) ? m.content.filter((b) => b.type === "tool_result" && b.is_error).map((b) => b.content) : []);
+
+await scenario(
+  "Caso reale: due appunti NUOVI detti subito dopo altri due → l'AI prova a correggerli, il codice lo impedisce",
+  () => { tabelle.cantiere_appunti = [appunto("comprare silicone"), appunto("chiamare il vetraio")]; return {}; },
+  [{ body: nuovo("mi appunti comprare nastro e anche un altro appunto chiamare il fabbro"),
+     copione: [
+       () => usaStrumento("interpreta_richiesta", { operazione: "modifica", oggetto: "azione", cardinalita: "insieme", entita: { tipo: "appunto" } }),
+       // l'errore visto in produzione: correggi_appunto sui due appunti di prima
+       () => usaStrumenti(["correggi_appunto", { cerca: "silicone", testo_nuovo: "comprare nastro" }], ["correggi_appunto", { cerca: "vetraio", testo_nuovo: "chiamare il fabbro" }]),
+       (corpo) => {
+         const errori = erroriMandatiAllAI(corpo);
+         if (errori.length !== 2 || !errori.every((e) => e.includes("crea_appunto"))) throw new Error("blocco non spiegato all'AI: " + JSON.stringify(errori));
+         return usaStrumenti(["crea_appunto", { testo: "comprare nastro" }], ["crea_appunto", { testo: "chiamare il fabbro" }]);
+       },
+       () => rispondiTesto("Fatto, due appunti aggiunti."),
+     ] }],
+  ([r]) => {
+    const testi = tabelle.cantiere_appunti.map((a) => a.testo).sort();
+    verifica("i due appunti di prima sono intatti", testi.includes("comprare silicone") && testi.includes("chiamare il vetraio"), JSON.stringify(testi));
+    verifica("i due appunti nuovi ci sono", testi.includes("comprare nastro") && testi.includes("chiamare il fabbro") && testi.length === 4, JSON.stringify(testi));
+    verifica("turno concluso", r.status === 200 && r.corpo.stato === "concluso", JSON.stringify(r.corpo));
+  }
+);
+
+await scenario(
+  "\"Correggi l'appunto del silicone: comprare nastro\" → la correzione è permessa",
+  () => { tabelle.cantiere_appunti = [appunto("comprare silicone")]; return {}; },
+  [{ body: nuovo("Correggi l'appunto del silicone: comprare nastro"),
+     copione: [
+       () => usaStrumento("interpreta_richiesta", { operazione: "modifica", oggetto: "azione", entita: { tipo: "appunto" } }),
+       () => usaStrumento("correggi_appunto", { cerca: "silicone", testo_nuovo: "comprare nastro" }),
+       () => rispondiTesto("Fatto."),
+     ] }],
+  () => {
+    verifica("appunto corretto", tabelle.cantiere_appunti.length === 1 && tabelle.cantiere_appunti[0].testo === "comprare nastro", JSON.stringify(tabelle.cantiere_appunti.map((a) => a.testo)));
+  }
+);
+
+await scenario(
+  "\"Non silicone ma nastro\" → anche questa è una correzione permessa",
+  () => { tabelle.cantiere_appunti = [appunto("comprare silicone")]; return {}; },
+  [{ body: nuovo("Non silicone ma nastro"),
+     copione: [
+       () => usaStrumento("interpreta_richiesta", { operazione: "modifica", oggetto: "azione", entita: { tipo: "appunto" } }),
+       () => usaStrumento("correggi_appunto", { cerca: "silicone", testo_nuovo: "comprare nastro" }),
+       () => rispondiTesto("Fatto."),
+     ] }],
+  () => {
+    verifica("appunto corretto", tabelle.cantiere_appunti[0].testo === "comprare nastro", tabelle.cantiere_appunti[0].testo);
+  }
+);
+
 /* ======== Errori leggibili ======== */
 await scenario(
   "Credito dell'AI finito (24/09/2026) → messaggio chiaro in italiano, non l'errore in inglese",
