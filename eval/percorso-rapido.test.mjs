@@ -582,6 +582,57 @@ await scenario(
   }
 );
 
+/* ======== Descrizione automatica delle foto (25/09/2026) ======== */
+async function descrivi(fotoId, testoAI) {
+  chiamateAI = [];
+  copione = testoAI === null ? [] : [() => ({ content: [{ type: "text", text: testoAI }], stop_reason: "end_turn" })];
+  const req = { method: "POST", url: "/api?action=descrivi_foto", headers: { authorization: "Bearer token-finto" }, body: { foto_id: fotoId } };
+  let uscita = "";
+  const res = { statusCode: 0, setHeader() {}, end(d) { uscita = d || ""; } };
+  await handler(req, res);
+  return { status: res.statusCode, corpo: JSON.parse(uscita) };
+}
+{
+  console.log("\n=== Descrizione automatica di una foto ===");
+  databaseVuoto();
+  const base = process.env.SUPABASE_URL + "/storage/v1/object/public/eon-files/u/cantiere/foto/";
+  tabelle.cantiere_foto = [
+    { id: "11111111-1111-4111-8111-000000000001", owner_id: UTENTE.id, url: base + "porta.jpg", nota: null, descrizione: null, deleted_at: null },
+    { id: "11111111-1111-4111-8111-000000000002", owner_id: UTENTE.id, url: base + "vecchia.jpg", nota: null, descrizione: "Lavandino in ceramica bianca", deleted_at: null },
+    { id: "11111111-1111-4111-8111-000000000003", owner_id: UTENTE.id, url: "https://sito-esterno.test/x.jpg", nota: null, descrizione: null, deleted_at: null },
+  ];
+  const a = await descrivi("11111111-1111-4111-8111-000000000001", "  «porta scorrevole in vetro satinato, telaio in alluminio, maniglia incassata.»  ");
+  verifica("descrizione pulita e salvata sulla foto", a.status === 200 && a.corpo.descrizione === "Porta scorrevole in vetro satinato, telaio in alluminio, maniglia incassata" && tabelle.cantiere_foto[0].descrizione === a.corpo.descrizione, JSON.stringify(a.corpo));
+  verifica("una sola chiamata piccola: modello economico, foto letta dal link di EON", chiamateAI.length === 1 && chiamateAI[0].model === "claude-haiku-4-5" && JSON.stringify(chiamateAI[0]).includes('"type":"url"') && JSON.stringify(chiamateAI[0]).includes("porta.jpg"), JSON.stringify(chiamateAI[0] && chiamateAI[0].model));
+  const b = await descrivi("11111111-1111-4111-8111-000000000002", null);
+  verifica("foto già descritta: nessuna nuova chiamata all'AI", b.status === 200 && b.corpo.descrizione === "Lavandino in ceramica bianca" && chiamateAI.length === 0, JSON.stringify(b));
+  const c = await descrivi("11111111-1111-4111-8111-000000000003", null);
+  verifica("foto fuori dallo spazio di EON: rifiutata, nessuna chiamata", c.status === 400 && chiamateAI.length === 0, JSON.stringify(c));
+  const d = await descrivi("11111111-1111-4111-8111-000000000009", null);
+  verifica("foto inesistente (o di un altro utente): non trovata", d.status === 404, JSON.stringify(d));
+}
+
+await scenario(
+  "EON cerca \"la foto della porta\": trovata dalla descrizione automatica, anche se la nota non dice \"porta\"",
+  () => {
+    tabelle.cantiere_foto = [
+      { id: "f1", owner_id: UTENTE.id, url: "https://file.test/1.jpg", nota: "Da cambiare, trovare modello uguale", descrizione: "Porta scorrevole in vetro satinato", created_at: "2026-09-25T10:00:00Z", deleted_at: null },
+      { id: "f2", owner_id: UTENTE.id, url: "https://file.test/2.jpg", nota: null, descrizione: "Contatore del gas", created_at: "2026-09-25T11:00:00Z", deleted_at: null },
+    ];
+    return {};
+  },
+  [{ body: nuovo("Fammi vedere la foto della porta"),
+     copione: [
+       () => usaStrumento("interpreta_richiesta", { operazione: "mostra", oggetto: "risorsa", entita: { tipo: "foto" } }),
+       () => usaStrumento("recupera_foto_cantiere", { cerca: "porta" }),
+       (corpo) => { window_esito = corpo.messages.flatMap((m) => Array.isArray(m.content) ? m.content.filter((b) => b.type === "tool_result").map((b) => b.content) : []).at(-1); return rispondiTesto("Ecco."); },
+     ] }],
+  () => {
+    const esito = JSON.parse(window_esito);
+    verifica("solo la foto della porta, con nota e descrizione", esito.foto.length === 1 && esito.foto[0].id === "f1" && /Porta/.test(esito.foto[0].descrizione) && /modello uguale/.test(esito.foto[0].nota), window_esito);
+  }
+);
+
 /* ======== Errori leggibili ======== */
 await scenario(
   "Credito dell'AI finito (24/09/2026) → messaggio chiaro in italiano, non l'errore in inglese",
