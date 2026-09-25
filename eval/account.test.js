@@ -137,9 +137,11 @@ async function main() {
     let richiestaElimina = null;
     await page.route("https://eonbeckend.vercel.app/api?action=elimina_account", (route) => { richiestaElimina = JSON.parse(route.request().postData()); route.fulfill({ status: 200, contentType: "application/json", body: '{"eliminato":true}' }); });
     await page.evaluate(() => navigateTo("impostazioni"));
+    await foto("6-impostazioni", true);
+    await page.click("#impVoceElimina");
     verifica("Elimina: il pulsante resta spento finché non scrivi ELIMINA", await page.isDisabled("#impEliminaAccount"));
     await page.fill("#impCampoElimina", "elimina");
-    await foto("6-impostazioni", true);
+    await foto("7-elimina");
     await Promise.all([page.waitForNavigation({ waitUntil: "networkidle" }), page.click("#impEliminaAccount")]);
     await page.waitForTimeout(300);
     const dopo = await page.evaluate(() => ({ fuori: !document.getElementById("onboardingScreen").classList.contains("hidden") }));

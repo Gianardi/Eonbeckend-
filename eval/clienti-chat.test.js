@@ -90,7 +90,7 @@ async function main() {
       return { menu, impostazioni: titoli("#page-impostazioni"), aperta: document.getElementById("page-impostazioni").classList.contains("visible") };
     });
     verifica("Menu pulito: senza \"EON AI\" e \"Cambia professione\", con Impostazioni in fondo", !voci.menu.includes("EON AI") && !voci.menu.includes("Cambia professione") && voci.menu.at(-1) === "Impostazioni", JSON.stringify(voci.menu));
-    verifica("Impostazioni: Manda un feedback e Registro AI", voci.aperta && JSON.stringify(voci.impostazioni) === '["Manda un feedback","Registro AI"]', JSON.stringify(voci));
+    verifica("Impostazioni: Profilo, Password, feedback, Registro AI, Esci, Elimina", voci.aperta && JSON.stringify(voci.impostazioni) === '["Profilo","Password","Manda un feedback","Registro AI","Esci dall\'account","Elimina account"]', JSON.stringify(voci));
     const registro = await page.evaluate(() => { document.querySelector('#page-impostazioni [data-page="ai-request-log"]').click(); const indietro = document.querySelector("#page-ai-request-log .back-link"); indietro.click(); return document.querySelector(".page.visible").id; });
     verifica("dal Registro AI si torna alle Impostazioni", registro === "page-impostazioni", registro);
 

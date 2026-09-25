@@ -1245,7 +1245,6 @@
   .goal-del-mini svg{ width:13px; height:13px; }
   .azienda-list{ display:flex; flex-direction:column; gap:10px; }
   /* Impostazioni (25/09/2026) */
-  .imp-sezione{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--faint); margin:20px 4px 8px; }
   .imp-card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:12px; }
   .imp-account{ display:flex; align-items:center; gap:12px; }
   .imp-avatar{ width:46px; height:46px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); font-family:'Manrope'; font-weight:800; font-size:16px; }
@@ -1255,7 +1254,6 @@
   .imp-email{ font-size:13px; color:var(--muted); overflow-wrap:anywhere; }
   .imp-riga{ display:flex; justify-content:space-between; gap:12px; font-size:14px; color:var(--muted); padding-top:12px; border-top:1px solid var(--border); }
   .imp-riga b{ color:var(--text); }
-  .imp-nota{ font-size:12px; color:var(--faint); margin-top:-6px; }
   .imp-campo{ display:flex; flex-direction:column; gap:5px; font-size:12.5px; font-weight:700; color:var(--muted); }
   .imp-campo input{ font:inherit; font-size:15px; font-weight:500; color:var(--text); padding:11px 12px; border:1px solid var(--border-strong); border-radius:12px; background:#F7F8FA; }
   .imp-campo input:focus{ outline:none; border-color:var(--indigo); background:var(--card); }
@@ -1266,8 +1264,9 @@
   .imp-esito:empty{ display:none; }
   .imp-esito.ok{ color:#12894F; }
   .imp-esito.errore{ color:var(--coral); }
-  .imp-esci{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin:20px 0 4px; padding:14px; border-radius:16px; border:1px solid var(--coral-soft); background:var(--card); color:var(--coral); font:inherit; font-size:15px; font-weight:800; cursor:pointer; }
-  .imp-esci svg{ width:18px; height:18px; }
+  .imp-form{ display:flex; flex-direction:column; gap:14px; padding:2px 2px 6px; }
+  .imp-avviso{ font-size:14px; line-height:1.5; color:var(--text); background:var(--coral-soft); border-radius:12px; padding:12px 14px; }
+  .imp-voce-pericolo .module-title{ color:var(--coral); }
   /* Scorrimento tra le pagine principali: la pagina nuova entra dal lato giusto */
   @keyframes entra-da-destra{ from{ transform:translateX(28px); opacity:.35; } to{ transform:none; opacity:1; } }
   @keyframes entra-da-sinistra{ from{ transform:translateX(-28px); opacity:.35; } to{ transform:none; opacity:1; } }
@@ -3344,7 +3343,8 @@
         Torna al Menu
       </div>
 
-      <div class="imp-sezione">Il tuo account</div>
+      <!-- Impostazioni tutte a card come il Menu (25/09/2026, Gianardi):
+           si tocca una voce e si apre la sua scheda. -->
       <div class="imp-card">
         <div class="imp-account">
           <div class="imp-avatar" id="impAvatar">–</div>
@@ -3355,26 +3355,29 @@
           </div>
         </div>
         <div class="imp-riga"><span>Professione</span><b id="impProfessione">—</b></div>
-        <div class="imp-nota">La professione è legata al tuo account e non si cambia da qui.</div>
       </div>
 
-      <div class="imp-sezione">Profilo</div>
-      <div class="imp-card">
-        <label class="imp-campo"><span>Nome e cognome</span><input id="impCampoNome" type="text" autocomplete="name"></label>
-        <label class="imp-campo"><span>Nome dell'attività</span><input id="impCampoAttivita" type="text" autocomplete="organization"></label>
-        <button type="button" class="imp-btn" id="impSalvaProfilo">Salva</button>
-        <div class="imp-esito" id="impEsitoProfilo"></div>
-      </div>
-
-      <div class="imp-sezione">Sicurezza</div>
-      <div class="imp-card">
-        <label class="imp-campo"><span>Nuova password</span><input id="impCampoPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
-        <button type="button" class="imp-btn" id="impCambiaPassword">Cambia password</button>
-        <div class="imp-esito" id="impEsitoPassword"></div>
-      </div>
-
-      <div class="imp-sezione">Aiuto</div>
-      <div class="azienda-list">
+      <div class="azienda-list" style="margin-top:12px;">
+        <div class="azienda-link-card" id="impVoceProfilo" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Profilo</div>
+            <div class="module-sub">Nome e nome dell'attività</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVocePassword" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Password</div>
+            <div class="module-sub">Cambia la password di accesso</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
         <div class="azienda-link-card" id="feedbackCard">
           <div class="module-icon" style="background:var(--teal);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
@@ -3395,20 +3398,27 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
+        <div class="azienda-link-card" id="impEsci" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Esci dall'account</div>
+            <div class="module-sub">Torni alla schermata iniziale</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card imp-voce-pericolo" id="impVoceElimina" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--coral);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Elimina account</div>
+            <div class="module-sub">Cancella per sempre account e dati</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
       </div>
-      <button type="button" class="imp-esci" id="impEsci">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        Esci dall'account
-      </button>
-
-      <div class="imp-sezione">Elimina account</div>
-      <div class="imp-card">
-        <div class="imp-nota" style="margin:0;">Cancella per sempre il tuo account e tutti i tuoi dati: clienti, messaggi, foto, documenti, appuntamenti. Non si può annullare.</div>
-        <label class="imp-campo"><span>Per confermare scrivi ELIMINA</span><input id="impCampoElimina" type="text" autocomplete="off" autocapitalize="characters"></label>
-        <button type="button" class="imp-btn imp-btn-pericolo" id="impEliminaAccount" disabled>Elimina il mio account</button>
-        <div class="imp-esito" id="impEsitoElimina"></div>
-      </div>
-
     </div>
 
     <!-- ===== Sotto-pagina: Registro AI ===== -->
@@ -13003,7 +13013,7 @@ controllaNuovaVersione(); // la versione con cui l'app è partita
   document.addEventListener("touchcancel", () => { inizio = null; }, { passive: true });
 })();
 
-/* ---- Impostazioni: account, profilo, password, esci (25/09/2026) ---- */
+/* ---- Impostazioni: account e voci a card (25/09/2026) ---- */
 let profiloUtente = null;
 const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
 function ricordaProfilo(profilo, email){
@@ -13017,45 +13027,73 @@ function disegnaImpostazioni(){
   document.getElementById("impEmail").textContent = p.email || "";
   document.getElementById("impAvatar").textContent = (nome.split(/\s+/).map(w => w[0] || "").join("").slice(0, 2) || "–").toUpperCase();
   document.getElementById("impProfessione").textContent = NOMI_PROFESSIONE[p.profession] || p.profession || "—";
-  document.getElementById("impCampoNome").value = p.full_name;
-  document.getElementById("impCampoAttivita").value = p.business_name;
-  document.getElementById("impCampoElimina").value = "";
-  document.getElementById("impEliminaAccount").disabled = true;
-  ["impEsitoProfilo", "impEsitoPassword", "impEsitoElimina"].forEach(id => { const e = document.getElementById(id); e.textContent = ""; e.className = "imp-esito"; });
-  document.getElementById("impCampoPassword").value = "";
 }
 function esitoImp(id, testo, ok){
   const e = document.getElementById(id);
+  if(!e) return;
   e.textContent = testo;
   e.className = "imp-esito " + (ok ? "ok" : "errore");
 }
-document.getElementById("impSalvaProfilo").addEventListener("click", async () => {
-  const nome = document.getElementById("impCampoNome").value.trim();
-  const attivita = document.getElementById("impCampoAttivita").value.trim();
-  if(!nome) return esitoImp("impEsitoProfilo", "Scrivi il tuo nome.", false);
-  if(!isDbReady()) return esitoImp("impEsitoProfilo", "Serve la connessione per salvare.", false);
-  const b = document.getElementById("impSalvaProfilo");
-  b.disabled = true;
-  const { error } = await supabaseClient.from("profiles").update({ full_name: nome, business_name: attivita }).eq("id", currentSession.user.id);
-  b.disabled = false;
-  if(error) return esitoImp("impEsitoProfilo", "Non salvato: " + error.message, false);
-  profiloUtente = { ...(profiloUtente || {}), full_name: nome, business_name: attivita };
-  pageMeta.home.title = "Buongiorno, " + nome.split(" ")[0];
-  disegnaImpostazioni();
-  esitoImp("impEsitoProfilo", "Salvato.", true);
+function schedaImpostazione(titolo, html){
+  const corpo = document.createElement("div");
+  corpo.className = "imp-form";
+  corpo.innerHTML = html;
+  apriRisorsaCard(titolo, corpo);
+  return corpo;
+}
+/* Una voce a card si apre anche da tastiera (Invio / spazio) */
+function suTocco(id, fn){
+  const el = document.getElementById(id);
+  el.addEventListener("click", fn);
+  el.addEventListener("keydown", (e) => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); fn(); } });
+}
+
+suTocco("impVoceProfilo", () => {
+  const p = profiloUtente || { full_name:"", business_name:"" };
+  const corpo = schedaImpostazione("Profilo", `
+    <label class="imp-campo"><span>Nome e cognome</span><input id="impCampoNome" type="text" autocomplete="name"></label>
+    <label class="imp-campo"><span>Nome dell'attività</span><input id="impCampoAttivita" type="text" autocomplete="organization"></label>
+    <button type="button" class="imp-btn" id="impSalvaProfilo">Salva</button>
+    <div class="imp-esito" id="impEsitoProfilo"></div>`);
+  corpo.querySelector("#impCampoNome").value = p.full_name;
+  corpo.querySelector("#impCampoAttivita").value = p.business_name;
+  corpo.querySelector("#impSalvaProfilo").addEventListener("click", async () => {
+    const nome = corpo.querySelector("#impCampoNome").value.trim();
+    const attivita = corpo.querySelector("#impCampoAttivita").value.trim();
+    if(!nome) return esitoImp("impEsitoProfilo", "Scrivi il tuo nome.", false);
+    if(!isDbReady()) return esitoImp("impEsitoProfilo", "Serve la connessione per salvare.", false);
+    const b = corpo.querySelector("#impSalvaProfilo");
+    b.disabled = true;
+    const { error } = await supabaseClient.from("profiles").update({ full_name: nome, business_name: attivita }).eq("id", currentSession.user.id);
+    b.disabled = false;
+    if(error) return esitoImp("impEsitoProfilo", "Non salvato: " + error.message, false);
+    profiloUtente = { ...(profiloUtente || {}), full_name: nome, business_name: attivita };
+    pageMeta.home.title = "Buongiorno, " + nome.split(" ")[0];
+    disegnaImpostazioni();
+    esitoImp("impEsitoProfilo", "Salvato.", true);
+  });
 });
-document.getElementById("impCambiaPassword").addEventListener("click", async () => {
-  const pw = document.getElementById("impCampoPassword").value;
-  if(pw.length < 8) return esitoImp("impEsitoPassword", "La password deve avere almeno 8 caratteri.", false);
-  if(!isDbReady()) return esitoImp("impEsitoPassword", "Serve la connessione per cambiarla.", false);
-  const b = document.getElementById("impCambiaPassword");
-  b.disabled = true;
-  const { error } = await supabaseClient.auth.updateUser({ password: pw });
-  b.disabled = false;
-  document.getElementById("impCampoPassword").value = "";
-  if(error) return esitoImp("impEsitoPassword", "Non cambiata: " + error.message, false);
-  esitoImp("impEsitoPassword", "Password cambiata.", true);
+
+suTocco("impVocePassword", () => {
+  const corpo = schedaImpostazione("Password", `
+    <label class="imp-campo"><span>Nuova password</span><input id="impCampoPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
+    <button type="button" class="imp-btn" id="impCambiaPassword">Cambia password</button>
+    <div class="imp-esito" id="impEsitoPassword"></div>`);
+  corpo.querySelector("#impCambiaPassword").addEventListener("click", async () => {
+    const campo = corpo.querySelector("#impCampoPassword");
+    const pw = campo.value;
+    if(pw.length < 8) return esitoImp("impEsitoPassword", "La password deve avere almeno 8 caratteri.", false);
+    if(!isDbReady()) return esitoImp("impEsitoPassword", "Serve la connessione per cambiarla.", false);
+    const b = corpo.querySelector("#impCambiaPassword");
+    b.disabled = true;
+    const { error } = await supabaseClient.auth.updateUser({ password: pw });
+    b.disabled = false;
+    campo.value = "";
+    if(error) return esitoImp("impEsitoPassword", "Non cambiata: " + messaggioErroreAccesso(error), false);
+    esitoImp("impEsitoPassword", "Password cambiata.", true);
+  });
 });
+
 /* Esci: chiude la sessione su questo telefono e torna alla schermata
    iniziale (registrati / accedi). Si ricarica l'app da zero, così in
    memoria non resta nulla dell'account appena chiuso. */
@@ -13066,36 +13104,42 @@ async function esciDallAccount(){
   currentSession = null;
   window.location.reload();
 }
-document.getElementById("impEsci").addEventListener("click", esciDallAccount);
+suTocco("impEsci", esciDallAccount);
 
 /* Elimina account: il server cancella file e account (con l'account se ne
    vanno tutti i dati, collegati a lui nel database). */
 const ELIMINA_ACCOUNT_URL = "https://eonbeckend.vercel.app/api?action=elimina_account";
-document.getElementById("impCampoElimina").addEventListener("input", (e) => {
-  document.getElementById("impEliminaAccount").disabled = e.target.value.trim().toUpperCase() !== "ELIMINA";
-});
-document.getElementById("impEliminaAccount").addEventListener("click", async () => {
-  if(document.getElementById("impCampoElimina").value.trim().toUpperCase() !== "ELIMINA") return;
-  if(!isDbReady()) return esitoImp("impEsitoElimina", "Serve la connessione per eliminare l'account.", false);
-  const b = document.getElementById("impEliminaAccount");
-  b.disabled = true;
-  esitoImp("impEsitoElimina", "Sto eliminando tutto…", true);
-  try{
-    const r = await fetch(ELIMINA_ACCOUNT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
-      body: JSON.stringify({ conferma: "ELIMINA" })
-    });
-    const j = await r.json().catch(() => ({}));
-    if(!r.ok) throw new Error(j.error || "eliminazione non riuscita");
-    try{ await supabaseClient.auth.signOut(); }catch(e){}
-    currentSession = null;
-    alert("Il tuo account è stato eliminato. Grazie per aver usato EON.");
-    window.location.reload();
-  }catch(err){
-    b.disabled = false;
-    esitoImp("impEsitoElimina", "Non eliminato: " + err.message, false);
-  }
+suTocco("impVoceElimina", () => {
+  const corpo = schedaImpostazione("Elimina account", `
+    <div class="imp-avviso">Cancella <b>per sempre</b> il tuo account e tutti i tuoi dati: clienti, messaggi, foto, documenti, appuntamenti. Non si può annullare.</div>
+    <label class="imp-campo"><span>Per confermare scrivi ELIMINA</span><input id="impCampoElimina" type="text" autocomplete="off" autocapitalize="characters"></label>
+    <button type="button" class="imp-btn imp-btn-pericolo" id="impEliminaAccount" disabled>Elimina il mio account</button>
+    <div class="imp-esito" id="impEsitoElimina"></div>`);
+  const campo = corpo.querySelector("#impCampoElimina");
+  const b = corpo.querySelector("#impEliminaAccount");
+  campo.addEventListener("input", () => { b.disabled = campo.value.trim().toUpperCase() !== "ELIMINA"; });
+  b.addEventListener("click", async () => {
+    if(campo.value.trim().toUpperCase() !== "ELIMINA") return;
+    if(!isDbReady()) return esitoImp("impEsitoElimina", "Serve la connessione per eliminare l'account.", false);
+    b.disabled = true;
+    esitoImp("impEsitoElimina", "Sto eliminando tutto…", true);
+    try{
+      const r = await fetch(ELIMINA_ACCOUNT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
+        body: JSON.stringify({ conferma: "ELIMINA" })
+      });
+      const j = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(j.error || "eliminazione non riuscita");
+      try{ await supabaseClient.auth.signOut(); }catch(e){}
+      currentSession = null;
+      alert("Il tuo account è stato eliminato. Grazie per aver usato EON.");
+      window.location.reload();
+    }catch(err){
+      b.disabled = false;
+      esitoImp("impEsitoElimina", "Non eliminato: " + err.message, false);
+    }
+  });
 });
 
 /* Calendario: "Indietro" torna dove eri (di solito la Home) */

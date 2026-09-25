@@ -3483,6 +3483,14 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Impostazioni tutte a card (25/09/2026)
+
+Gianardi: "vorrei che fosse tutto stile card". In cima il riquadro
+dell'account (nome, attività, email, professione); sotto sei voci a card
+come il Menu: Profilo, Password, Manda un feedback, Registro AI, Esci
+dall'account, Elimina account (in rosso). Profilo, Password ed Elimina
+aprono la loro scheda (la card bianca con titolo e X).
+
 ### Account "come le app grandi" (25/09/2026)
 
 Gianardi: "fallo come se fosse un'app grande già usata".

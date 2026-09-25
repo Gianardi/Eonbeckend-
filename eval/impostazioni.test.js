@@ -59,18 +59,26 @@ async function main() {
     await page.evaluate(() => navigateTo("impostazioni"));
     const acc = await page.evaluate(() => ({
       nome: document.getElementById("impNome").textContent + " · " + document.getElementById("impAttivita").textContent, email: document.getElementById("impEmail").textContent,
-      prof: document.getElementById("impProfessione").textContent, campoNome: document.getElementById("impCampoNome").value,
+      prof: document.getElementById("impProfessione").textContent,
+      voci: [...document.querySelectorAll("#page-impostazioni .azienda-link-card .module-title")].map((e) => e.textContent),
     }));
     verifica("account: nome, attività, email", acc.nome === "Andrea Gianardi · Gianardi Costruzioni" && acc.email === "andrea@esempio.it", JSON.stringify(acc));
     if (process.env.SCREEN_IMPOSTAZIONI) await page.screenshot({ path: process.env.SCREEN_IMPOSTAZIONI, fullPage: true });
     verifica("professione mostrata e non modificabile", acc.prof === "Edile" && !(await page.$("#page-impostazioni select, #cambiaProfessioneCard")), JSON.stringify(acc));
 
+    verifica("tutto a card: Profilo, Password, feedback, Registro AI, Esci, Elimina", JSON.stringify(acc.voci) === '["Profilo","Password","Manda un feedback","Registro AI","Esci dall\'account","Elimina account"]', JSON.stringify(acc.voci));
+    await page.click("#impVoceProfilo");
+    verifica("tocco su Profilo: si apre la sua scheda col nome già scritto", (await page.textContent("#risorsaTitolo")) === "Profilo" && (await page.inputValue("#impCampoNome")) === "Andrea Gianardi");
+    if (process.env.SCREEN_PROFILO) { await page.waitForTimeout(400); await page.screenshot({ path: process.env.SCREEN_PROFILO }); }
     await page.fill("#impCampoNome", "Andrea G.");
     await page.click("#impSalvaProfilo");
     await page.waitForTimeout(150);
     const salvato = await page.evaluate(() => ({ ult: window.__chiamate.at(-1), esito: document.getElementById("impEsitoProfilo").textContent }));
     verifica("modifica profilo: salvata nel profilo", salvato.ult.tabella === "profiles" && salvato.ult.patch.full_name === "Andrea G." && salvato.esito === "Salvato.", JSON.stringify(salvato));
 
+    await page.evaluate(() => chiudiRisorsaCard());
+    verifica("il riquadro dell'account si aggiorna col nome nuovo", (await page.textContent("#impNome")) === "Andrea G.");
+    await page.click("#impVocePassword");
     await page.fill("#impCampoPassword", "corta");
     await page.click("#impCambiaPassword");
     verifica("password troppo corta: spiegato, nessun cambio", /almeno 8/.test(await page.textContent("#impEsitoPassword")) && !(await page.evaluate(() => window.__chiamate.some((c) => c.updateUser))));
@@ -82,6 +90,7 @@ async function main() {
     // Esci
     let domanda = "";
     page.once("dialog", (d) => { domanda = d.message(); d.accept(); });
+    await page.evaluate(() => chiudiRisorsaCard());
     await Promise.all([page.waitForNavigation({ waitUntil: "networkidle" }), page.click("#impEsci")]);
     await page.waitForTimeout(300);
     const fuori = await page.evaluate(() => ({ onboarding: !document.getElementById("onboardingScreen").classList.contains("hidden"), passo0: document.getElementById("obStep0").classList.contains("visible") }));
