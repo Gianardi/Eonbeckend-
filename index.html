@@ -3600,6 +3600,32 @@ if(BACKEND_CONFIGURED_VALUES && !supabaseClient){
 
 let currentSession = null; // sessione utente Supabase (null finché non fa login)
 
+/* Il "pass" di accesso (access_token) scade dopo circa un'ora. La libreria
+   Supabase lo rinnova da sola, ma currentSession veniva impostata solo al
+   login/all'avvio e poi restava quella vecchia: dopo un'ora il backend
+   rispondeva "Sessione non valida o scaduta (token is expired)" (Gianardi,
+   25/09/2026, al primo tentativo dopo una pausa). Ora: currentSession segue
+   ogni rinnovo, e prima di ogni chiamata al backend si chiede a Supabase la
+   sessione attuale (getSession la rinnova se è scaduta). */
+// Mai bloccare l'avvio dell'app per questo: se qualcosa non va, resta il comportamento di prima.
+try{
+  if(supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.onAuthStateChange === "function"){
+    supabaseClient.auth.onAuthStateChange((evento, sessione) => {
+      if(evento === "SIGNED_OUT") currentSession = null;
+      else if(sessione) currentSession = sessione;
+    });
+  }
+}catch(e){ console.warn("Rinnovo automatico della sessione non attivo:", e.message); }
+async function tokenValido(){
+  if(supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === "function"){
+    try{
+      const { data } = await supabaseClient.auth.getSession();
+      if(data && data.session) currentSession = data.session;
+    }catch(e){ /* rete assente: si prova con la sessione che c'è */ }
+  }
+  return currentSession ? currentSession.access_token : "";
+}
+
 /* ============ SINCRONIZZAZIONE COL DATABASE VERO (Supabase) ============
    Finché BACKEND_CONFIGURED è false, queste funzioni non vengono usate:
    l'app continua a funzionare con window.storage come prima (nessuna
@@ -4232,7 +4258,7 @@ async function analyzeMessage(msg, chat){
   try{
     const response = await fetch(ANALIZZA_MESSAGGIO_ENDPOINT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
       body: JSON.stringify({ conversation_id: chat.id })
     });
     const dati = await response.json();
@@ -4318,7 +4344,7 @@ async function decidiRichiestaCliente(chat, r, conferma){
   try{
     const response = await fetch(RISPONDI_RICHIESTA_ENDPOINT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
       body: JSON.stringify({
         conversation_id: chat.id, riferito_id: r.riferito_id, azione: r.azione,
         conferma, quando_nuovo_iso: r.quando_nuovo_iso, titolo_nuovo: r.titolo_nuovo
@@ -4533,7 +4559,7 @@ async function callAI(prompt, maxTokens){
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + currentSession.access_token
+      "Authorization": "Bearer " + (await tokenValido())
     },
     body: JSON.stringify({ prompt, maxTokens: maxTokens || 400 })
   });
@@ -4567,7 +4593,7 @@ async function chiediAssistente(messaggio, runId, extra){
   async function chiamaBackend(payload){
     const response = await fetch(ASSISTANT_ENDPOINT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
       body: JSON.stringify(payload)
     });
     const json = await response.json().catch(() => ({}));
@@ -7094,7 +7120,7 @@ document.getElementById("onboardingDocFotoInput").addEventListener("change", asy
     const { base64, mediaType } = await ridimensionaEConvertiInBase64(f);
     const response = await fetch(LEGGI_INTESTAZIONE_DA_FOTO_ENDPOINT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + currentSession.access_token },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
       body: JSON.stringify({ immagine_base64: base64, media_type: mediaType })
     });
     const json = await response.json().catch(() => ({}));
