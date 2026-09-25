@@ -134,6 +134,16 @@ senza sovrascrivere i dati già salvati, PDF con formato e intestazione.
 NODE_PATH=/opt/node22/lib/node_modules node eval/formato.test.js
 ```
 
+### `scheda.test.js` — scheda del documento, gira subito
+
+Invio (PDF, WhatsApp, Email, EON), modifica scritta che si applica subito,
+domanda di EON e risposta nello stesso filo, conferma Sì/No dentro la
+scheda, errore detto in chat. Backend dell'assistente simulato.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/scheda.test.js
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti
