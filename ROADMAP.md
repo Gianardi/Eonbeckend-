@@ -30,6 +30,8 @@ Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
 | **Privacy, termini, consenso GDPR** | [insieme] | Mi servono ragione sociale, P.IVA, sede, email. Io preparo testi e casella "accetto"; li fai controllare a legale/commercialista. |
 | **Dominio tuo** (es. eon.it) | [insieme] | Tu lo compri (~10–20 €/anno), io lo collego al posto di eonbeckend.vercel.app. |
 | **Avviso automatico degli errori** | [Claude] | Se qualcosa si rompe a un cliente lo so subito. |
+| **Compressione delle foto** (subito dopo il merge) | [Claude] | Come WhatsApp: da ~3 MB a ~300 KB per foto, a occhio uguali (lato lungo ~2000 px). Le foto di documenti da leggere (fatture, DURC) restano più nitide. Spazio ~10 volte meno, caricamento più veloce in cantiere. |
+| **Pannello di controllo di EON** | [Claude] | Per gestire 100–1000 clienti dal telefono e dal PC: utenti, chi paga, errori, costo AI, feedback arrivati. |
 | **Staging uguale a produzione** | [Claude] | Oggi lo schema di prova è diverso (niente cascata sul profilo, niente creazione automatica del profilo). |
 | **Scollegare il progetto Vercel doppio** (eonbeckend-mx2t) | [Andrea] | L'app usa solo "eonbeckend"; il doppione raddoppiava le pubblicazioni. |
 
@@ -46,6 +48,10 @@ Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
   pubblico generico.
 
 ---
+
+**Quando i clienti crescono (100+ paganti)**: una persona tecnica di
+fiducia reperibile per le emergenze, commercialista e legale per contratti
+e fatture; backup con ripristino a qualsiasi minuto (Supabase).
 
 ## 3. Una "vera app" sul telefono
 
