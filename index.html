@@ -4556,7 +4556,10 @@ async function callAI(prompt, maxTokens){
    confermare o correggere un orario proposto) — il messaggio viene
    mandato così com'è, senza il prompt di partenza, perché è una
    risposta a lei, non un comando nuovo da interpretare da zero. */
-async function chiediAssistente(messaggio, runId){
+/* extra: campi in più per il server, solo per un messaggio nuovo (es.
+   ricordo: le azioni del turno precedente, usate dal percorso rapido
+   degli appuntamenti per correggere subito "no, alle 11"). */
+async function chiediAssistente(messaggio, runId, extra){
   if(!BACKEND_CONFIGURED || !currentSession){
     throw new Error("l'assistente richiede un backend configurato e una sessione attiva");
   }
@@ -4587,7 +4590,7 @@ async function chiediAssistente(messaggio, runId){
     return risposta; // { stato:"concluso", runId, testo, azioni:[{tool, esito}] }
   }
 
-  return gestisci(runId ? { runId, messaggio } : { messaggio });
+  return gestisci(runId ? { runId, messaggio } : { messaggio, ...(extra || {}) });
 }
 
 /* ============ PERSISTENZA (salvataggio automatico) ============
@@ -9221,7 +9224,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     try{
       risposta = await chiediAssistente(
         inContinuazione ? testo : costruisciPrompt(testo) + notaContestoRecente(contestoRecente) + notaFocusCorrente(focusCorrente),
-        runIdDaContinuare || undefined
+        runIdDaContinuare || undefined,
+        contestoRecente ? { ricordo: contestoRecente } : undefined
       );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);

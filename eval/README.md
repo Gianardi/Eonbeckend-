@@ -81,6 +81,18 @@ flusso di lavoro normale: da eseguire dopo ogni modifica al router, al
 contesto delle correzioni, all'IntentFrame o al Current Focus, prima di
 aprire una PR — esattamente come `node --check` per la sintassi.
 
+### `percorso-rapido.test.mjs` — appuntamenti in una chiamata, gira subito
+
+Stesso sistema del test sopra (handler vero, database e AI simulati) per
+il percorso rapido degli appuntamenti: un appuntamento semplice con UNA
+sola chiamata piccola all'AI, "no alle 11" spostato senza conferma, gli
+omonimi chiesti e risolti dal codice, e soprattutto ogni caso dubbio
+passato al motore completo senza scrivere niente.
+
+```
+node eval/percorso-rapido.test.mjs
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti

@@ -472,22 +472,30 @@ function paroleNormalizzate(testo) {
    e qui si verifica che ci siano davvero. Restituisce il nome da cercare
    in anagrafica, oppure null se va bene quello dichiarato dal modello. */
 const PAROLE_NON_NOME = new Set(["per", "a", "al", "alla", "di", "del", "della", "da", "dal", "dalla", "il", "la", "lo", "signor", "signora", "sig"]);
-function nomeClienteDallaFrase(nomeNellaFrase, clienteDichiarato, testoUtente) {
-  // "per raspadori" -> "raspadori": l'AI a volte copia anche la preposizione
+/* Il nome detto nella frase, ripulito ("per raspadori" -> "Raspadori"):
+   "" se l'AI non ne ha copiato nessuno, null se le parole copiate NON
+   sono davvero nella frase (inventate o prese dal contesto). */
+function nomeDettoNellaFrase(nomeNellaFrase, testoUtente) {
+  // l'AI a volte copia anche la preposizione: "per raspadori"
   const paroleOriginali = eStringaNonVuota(nomeNellaFrase)
     ? nomeNellaFrase.trim().split(/\s+/).filter((p) => !PAROLE_NON_NOME.has(paroleNormalizzate(p)[0]))
     : [];
   const paroleNome = paroleNormalizzate(paroleOriginali.join(" "));
-  if (!paroleNome.length) return null; // nessun nome detto: vale il ricordo
+  if (!paroleNome.length) return "";
   const paroleTesto = new Set(paroleNormalizzate(testoUtente));
-  // Parole non presenti davvero nella frase: il modello le ha inventate o
-  // prese dal contesto, non le usiamo per decidere niente.
   if (!paroleNome.every((p) => paroleTesto.has(p))) return null;
+  return paroleOriginali.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+}
+function nomeClienteDallaFrase(nomeNellaFrase, clienteDichiarato, testoUtente) {
+  const detto = nomeDettoNellaFrase(nomeNellaFrase, testoUtente);
+  // "" = nessun nome detto: vale il ricordo. null = parole non nella frase:
+  // non le usiamo per decidere niente.
+  if (!detto) return null;
   // Il nome dichiarato contiene già tutte le parole dette ("Dini" ->
   // "Mirco Dini"): è una precisazione del modello, va bene così.
   const paroleDichiarate = new Set(paroleNormalizzate(clienteDichiarato));
-  if (paroleNome.every((p) => paroleDichiarate.has(p))) return null;
-  return paroleOriginali.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+  if (paroleNormalizzate(detto).every((p) => paroleDichiarate.has(p))) return null;
+  return detto;
 }
 function eNumero(v) { return typeof v === "number" && isFinite(v); }
 function eUuid(v) { return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); }
@@ -2913,6 +2921,197 @@ async function descriviProssimaAzione(pendente, ctx) {
   return `Confermi queste ${pendente.elementi.length} operazioni?\n` + singole.map((s) => "- " + s).join("\n");
 }
 
+/* ---------- Percorso rapido per gli appuntamenti (25/09/2026) ----------
+   Richiesta di Gianardi: "chiedi una cosa e te la fa", con la risposta
+   subito. Il motore completo (sotto) per segnare un appuntamento usava
+   2-3 chiamate all'AI con il prompt grande e tutti gli strumenti:
+   7-9 secondi. Qui invece UNA sola chiamata piccola (prompt corto, un
+   solo strumento, modello economico) che legge soltanto la frase — cosa,
+   quando, con chi — e il CODICE fa il resto: trova il cliente, segna
+   l'appuntamento. Stesso schema del percorso fisso di fatture/preventivi.
+
+   Casi coperti, e SOLO questi (tutto il resto va al motore completo,
+   esattamente come prima):
+   - un solo impegno con giorno e ora chiari ("Dini domani alle 10");
+   - la correzione dell'impegno appena segnato ("no, alle 11"): si
+     applica subito, senza pulsante di conferma — è l'appuntamento che
+     l'utente ha appena dettato, non uno qualsiasi del calendario;
+   - due o più clienti con lo stesso nome: la domanda "quale?" la fa il
+     codice, e la risposta ("Giampiero") la risolve il codice.
+   Qualunque dubbio (orario vago, più impegni, nome simile, AI che non
+   risponde, data strana) → null → motore completo di sempre. */
+const MODELLO_RAPIDO = "claude-haiku-4-5";
+const PREFISSO_RACCONTO = "Il professionista ti ha appena raccontato cosa deve fare:";
+const RIFERIMENTO_TEMPO_RAPIDO = /\b(oggi|domani|dopodomani|stasera|stamattina|stanotte|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|alle|ore|fra|tra)\b|\d{1,2}[:.]\d{2}|\d{1,2}\/\d{1,2}/i;
+// Richieste che non sono "segna un impegno": vanno sempre al motore completo, senza nemmeno provare.
+const ESCLUSI_RAPIDO = /fattur|preventiv|messaggi|scrivi|scrivere|manda|invia|foto|document|appunt[oi]\b|cancell|elimin|annull|disdic|cestino|\?/i;
+
+const STRUMENTO_LEGGI_IMPEGNO = {
+  name: "leggi_impegno",
+  description: "Riporta cosa chiede la frase del professionista.",
+  input_schema: {
+    type: "object",
+    properties: {
+      azione: {
+        type: "string",
+        enum: ["nuovo", "correggi_ultimo", "altro"],
+        description: "nuovo = la frase chiede di segnare UN SOLO impegno (appuntamento, telefonata, commissione, promemoria) con giorno E ora precisi, detti o calcolabili con certezza ('domani alle 10', 'lunedì ore 9', 'fra un'ora'). correggi_ultimo = SOLO se sotto c'è un ultimo impegno appena segnato e la frase ne cambia solo giorno/ora senza nominare nessun altro ('no alle 11', 'anzi dopodomani', 'meglio alle 9'). altro = tutto il resto: più impegni nella stessa frase, orario vago ('domani mattina', 'nel pomeriggio', 'più tardi', 'quando rientro'), nessun orario, un orario per prepararsi più uno per l'evento, condizioni ('se piove'), cose provvisorie ('da confermare'), spostare o cancellare altri impegni, domande, messaggi, documenti, qualunque dubbio.",
+      },
+      titolo: { type: "string", description: "Solo per 'nuovo': titolo breve e concreto, come lo direbbe l'utente (es. 'Appuntamento con Dini', 'Chiamare Rossi', 'Ritirare le piastrelle')." },
+      tipo: { type: "string", enum: ["incontro", "chiamata", "commissione"], description: "Solo per 'nuovo'." },
+      quando_iso: { type: "string", description: "Per 'nuovo' e 'correggi_ultimo': data e ora nel formato AAAA-MM-GGTHH:MM:00, ora locale, senza fuso orario. Per una correzione che dice solo l'ora ('no alle 11'), il giorno resta quello dell'ultimo impegno." },
+      nome_nella_frase: { type: "string", description: "Il nome della persona/cliente ESATTAMENTE come compare nella frase, copiato parola per parola. Vuoto se la frase non nomina nessuno." },
+    },
+    required: ["azione"],
+  },
+};
+
+function candidatoPercorsoRapido(testo) {
+  return eStringaNonVuota(testo) && testo.length <= 200 && RIFERIMENTO_TEMPO_RAPIDO.test(testo) && !ESCLUSI_RAPIDO.test(testo);
+}
+
+/* L'unico impegno scritto nell'ultimo turno (dal "ricordo" che manda il
+   frontend: le azioni visibili del turno precedente, stessa finestra di
+   3 minuti delle note di contesto). Se ce n'è più di uno, la correzione
+   rapida non sa quale toccare: null, decide il motore completo. */
+function ultimoImpegnoDalRicordo(ricordo) {
+  if (!Array.isArray(ricordo)) return null;
+  const ids = new Set(
+    ricordo.filter((a) => a && (a.tool === "crea_impegno" || a.tool === "sposta_impegno") && a.esito && eUuid(a.esito.id))
+      .map((a) => a.esito.id)
+  );
+  if (ids.size !== 1) return null;
+  const id = [...ids][0];
+  const voce = ricordo.find((a) => a && a.esito && a.esito.id === id);
+  return { id, titolo: voce.esito.titolo || "", cliente: voce.esito.cliente || "" };
+}
+
+async function leggiImpegnoConAI(testo, ultimo) {
+  const righe = [`Frase del professionista: "${testo}"`];
+  if (ultimo) righe.push(`Ultimo impegno appena segnato: "${ultimo.titolo}"${ultimo.cliente ? " con " + ultimo.cliente : ""}, il ${ultimo.quando}.`);
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: MODELLO_RAPIDO,
+        max_tokens: 300,
+        system: "Leggi la frase di un professionista italiano che parla alla sua app di lavoro e compila leggi_impegno. Non inventare niente: nel dubbio, azione 'altro'. " + dataOraCorrente(),
+        tools: [STRUMENTO_LEGGI_IMPEGNO],
+        tool_choice: { type: "tool", name: "leggi_impegno" },
+        messages: [{ role: "user", content: righe.join("\n") }],
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+  } catch (err) {
+    console.warn("Percorso rapido: AI non raggiunta, passo al motore completo:", err.message);
+    return null;
+  }
+  if (!r.ok) return null;
+  const data = await r.json().catch(() => null);
+  const blocco = data && Array.isArray(data.content) && data.content.find((b) => b.type === "tool_use" && b.name === "leggi_impegno");
+  return blocco ? blocco.input : null;
+}
+
+/* Data/ora nel formato che usa già il resto di EON ("2026-09-26T10:00:00",
+   ora locale senza fuso), non troppo nel passato né assurdamente lontana. */
+function quandoValido(q) {
+  if (typeof q !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(q) || !eIso(q)) return null;
+  const t = new Date(q).getTime();
+  const giorno = 24 * 60 * 60 * 1000;
+  if (t < Date.now() - giorno || t > Date.now() + 400 * giorno) return null;
+  return q.length === 16 ? q + ":00" : q;
+}
+
+/* Risposta a "quale dei due?": il candidato la cui parte di nome che lo
+   distingue dagli altri compare nella risposta ("Giampiero" tra Sara e
+   Giampiero Dini), oppure "il primo"/"la seconda". Solo se è uno solo. */
+function scegliCandidatoDaRisposta(candidati, risposta) {
+  if (!Array.isArray(candidati) || candidati.length < 2) return null;
+  const paroleRisposta = paroleNormalizzate(risposta);
+  const ordinali = [["primo", "prima"], ["secondo", "seconda"], ["terzo", "terza"], ["quarto", "quarta"]];
+  const perOrdine = ordinali.findIndex((o) => o.some((w) => paroleRisposta.includes(w)));
+  if (perOrdine >= 0 && perOrdine < candidati.length) return candidati[perOrdine];
+  const paroleDi = candidati.map((c) => paroleNormalizzate(c.nome));
+  const comuni = paroleDi.reduce((acc, p) => acc.filter((w) => p.includes(w)));
+  const trovati = candidati.filter((c, i) => {
+    const distintive = paroleDi[i].filter((w) => !comuni.includes(w));
+    return distintive.some((w) => paroleRisposta.some((r) => r === w || (w.length >= 5 && paroleSimili(r, w))));
+  });
+  return trovati.length === 1 ? trovati[0] : null;
+}
+
+async function creaImpegnoRapido(dati, cliente, user, ctx) {
+  const input = { titolo: dati.titolo, quando_iso: dati.quando_iso, tipo: dati.tipo };
+  if (cliente) input.cliente_id = cliente.id;
+  const esito = await TOOLS.crea_impegno.run(input, ctx);
+  await registraOperazione(user, "crea_impegno", input, esito, "auto");
+  return {
+    azioni: [{ tool: "crea_impegno", esito }],
+    payload: { stato: "concluso", testo: "Fatto.", azioni: [{ tool: "crea_impegno", esito }], ...(cliente ? { focus: { tipo: "cliente", riferimento: cliente.nome } } : {}) },
+  };
+}
+
+/* Restituisce { payload, azioni } se il percorso rapido ha gestito la
+   richiesta, null se va passata al motore completo. */
+async function provaPercorsoRapido(body, ctx, user) {
+  if (typeof body.messaggio !== "string" || !body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
+  const testo = ctx.testoUtente;
+  if (!candidatoPercorsoRapido(testo)) return null;
+
+  let ultimo = ultimoImpegnoDalRicordo(body.ricordo);
+  if (ultimo) {
+    const trovato = await trovaImpegno(ultimo.id, ctx).catch(() => null);
+    const quando = trovato && trovato.record.scheduled_at;
+    ultimo = quando ? { ...ultimo, quando: String(quando).slice(0, 16) } : null;
+  }
+
+  const letto = await leggiImpegnoConAI(testo, ultimo);
+  if (!letto || !["nuovo", "correggi_ultimo"].includes(letto.azione)) return null;
+  const quando = quandoValido(letto.quando_iso);
+  if (!quando) return null;
+  const nome = nomeDettoNellaFrase(letto.nome_nella_frase, testo);
+  if (nome === null) return null; // nome non presente nella frase: non ci fidiamo
+
+  if (letto.azione === "correggi_ultimo") {
+    if (!ultimo) return null;
+    // Nomina qualcuno che non c'entra con l'ultimo impegno: non è una correzione di quello.
+    if (nome) {
+      const paroleUltimo = new Set(paroleNormalizzate(ultimo.cliente + " " + ultimo.titolo));
+      if (!paroleNormalizzate(nome).every((p) => paroleUltimo.has(p))) return null;
+    }
+    const input = { id: ultimo.id, nuovo_quando_iso: quando };
+    const esito = await TOOLS.sposta_impegno.run(input, ctx);
+    await registraOperazione(user, "sposta_impegno", input, esito, "auto");
+    return { azioni: [{ tool: "sposta_impegno", esito }], payload: { stato: "concluso", testo: "Fatto.", azioni: [{ tool: "sposta_impegno", esito }] } };
+  }
+
+  if (!eStringaNonVuota(letto.titolo) || !TIPI_IMPEGNO.has(letto.tipo)) return null;
+  const dati = { titolo: letto.titolo.trim(), tipo: letto.tipo, quando_iso: quando };
+  if (!nome) return creaImpegnoRapido(dati, null, user, ctx);
+
+  const risolto = await risolviClienteDaNome(nome, ctx);
+  if (risolto.stato === "trovato") return creaImpegnoRapido(dati, { id: risolto.id, nome: risolto.nome }, user, ctx);
+  if (risolto.stato === "non_trovato") return creaImpegnoRapido(dati, null, user, ctx);
+  if (risolto.stato === "ambiguo" && risolto.candidati.length <= 4) {
+    const candidati = risolto.candidati.map((c) => ({ id: c.id, nome: c.nome }));
+    const domanda = `Ho trovato ${candidati.length} clienti con il nome ${nome}:\n` + candidati.map((c) => "- " + c.nome).join("\n") + (candidati.length === 2 ? "\n\nQuale dei due intendi?" : "\n\nQuale intendi?");
+    /* La conversazione resta aperta come quelle del motore completo
+       (stato in_attesa_risposta): la risposta la prova prima il codice
+       (vedi percorso rapido nel ramo di continuazione), e se non basta
+       il motore completo trova qui la cronologia per continuare. */
+    const salvato = await salvaRun(null, user, {
+      stato: "in_attesa_risposta",
+      messaggi: [{ role: "user", content: body.messaggio }, { role: "assistant", content: [{ type: "text", text: domanda }] }],
+      in_sospeso: { rapido: { ...dati, candidati } },
+      azioni: [],
+    });
+    return { azioni: [], payload: { stato: "concluso", runId: salvato.id, testo: domanda, azioni: [] } };
+  }
+  return null; // "simile" o troppi omonimi: chiede il motore completo, come sempre
+}
+
 async function handleAssistant(req, res, user, accessToken) {
   if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
   if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
@@ -3112,9 +3311,33 @@ async function handleAssistant(req, res, user, accessToken) {
     runReclamato = true;
     azioniEseguite = Array.isArray(run.azioni) ? run.azioni.slice() : [];
     messages = run.messaggi.concat([{ role: "user", content: body.messaggio }]);
+
+    /* Risposta a "quale dei due?" chiesto dal percorso rapido: se dice
+       chiaramente quale cliente, l'appuntamento lo segna il codice,
+       senza AI. Altrimenti prosegue il motore completo con la cronologia. */
+    const sospesoRapido = run.in_sospeso && run.in_sospeso.rapido;
+    const scelto = sospesoRapido && scegliCandidatoDaRisposta(sospesoRapido.candidati, body.messaggio);
+    if (scelto) {
+      const fatto = await creaImpegnoRapido(sospesoRapido, scelto, user, ctx);
+      azioniEseguite = fatto.azioni;
+      giriUsati = 0;
+      await salvaRun(runId, user, { stato: "concluso", messaggi: messages, in_sospeso: null, azioni: azioniEseguite });
+      return send(res, 200, fatto.payload);
+    }
   } else {
     if (!eStringaNonVuota(body.messaggio)) throw fail("Campo 'messaggio' mancante o vuoto");
     messages = [{ role: "user", content: body.messaggio }];
+
+    /* Percorso rapido per gli appuntamenti (vedi provaPercorsoRapido):
+       una sola chiamata piccola invece del motore completo. null = non
+       è un caso semplice, si prosegue qui sotto esattamente come prima. */
+    const rapido = await provaPercorsoRapido(body, ctx, user);
+    if (rapido) {
+      modelloUsato = MODELLO_RAPIDO;
+      giriUsati = 1;
+      azioniEseguite = rapido.azioni;
+      return send(res, 200, rapido.payload);
+    }
   }
 
   const schemi = Object.values(TOOLS).map((t) => t.schema);
