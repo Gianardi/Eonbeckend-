@@ -3485,6 +3485,15 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Card del cliente: solo il lavoro da fare (25/09/2026)
+
+Gianardi (screenshot con "Ultimo contatto: null", "In trattativa", "null"):
+sulla card del cliente solo il nome e una descrizione breve e concisa del
+lavoro (al massimo due righe). Tolti stato, ultimo contatto e il trattino
+del valore (il valore resta solo se c'è). Senza descrizione: "+ Scrivi cosa
+c'è da fare" apre la scheda. Nella scheda il campo "Note" diventa "Lavoro
+da fare". Test: 1 in clienti-chat.test.js.
+
 ### Impostazioni tutte a card (25/09/2026)
 
 Gianardi: "tutto stile card" — Account, Profilo, Sicurezza, Aiuto, Esci,

@@ -183,6 +183,13 @@ async function main() {
     await prepara();
     const nulle = await page.evaluate(() => { navigateTo("clienti"); renderClientArchive(); return document.getElementById("page-clienti").innerText.match(/null|undefined/g); });
     verifica("schede clienti: nessun \"null\"/\"undefined\"", !nulle, JSON.stringify(nulle));
+    const card = await page.evaluate(() => {
+      clients[0].desc = "Rifacimento bagno: piastrelle e sanitari"; clients[2].desc = "";
+      renderClientArchive();
+      const testo = document.getElementById("page-clienti").innerText;
+      return { ultimo: /Ultimo contatto/.test(testo), pill: document.querySelectorAll(".client-archive-card .pill").length, lavoro: [...document.querySelectorAll(".client-archive-card .client-lavoro")].map((e) => e.textContent.trim()) };
+    });
+    verifica("card cliente: niente stato né \"Ultimo contatto\", solo il lavoro da fare", !card.ultimo && card.pill === 0 && card.lavoro.includes("Rifacimento bagno: piastrelle e sanitari") && card.lavoro.includes("+ Scrivi cosa c'è da fare"), JSON.stringify(card));
 
     /* ---- Foto: la nota non diventa un cliente ---- */
     const note = await page.evaluate(() => ({
