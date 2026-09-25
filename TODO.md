@@ -3483,6 +3483,15 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
 
+### Scorri per eliminare (25/09/2026)
+
+Gianardi: "cancellare i messaggi scorrendo il dito". Nella lista Messaggi
+e dentro una chat: si scorre a sinistra, compare "Elimina" rosso, un tocco
+e va nel Cestino con "Annulla" per qualche secondo (niente domanda prima).
+Sulla chat va nel Cestino anche il cliente (un cliente, una chat). Tolta la
+piccola X accanto ai messaggi. Scroll verticale e tocco per aprire invariati.
+- Test: 9 in clienti-chat.test.js (28 in tutto), provato anche con tocco vero.
+
 ### "Mi serve fattura testolina" → la fattura si apre subito (25/09/2026)
 
 Caso reale: la frase è andata all'AI, che l'ha capita come "crea una
