@@ -227,8 +227,12 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
   sviluppatore (Apple 99 $/anno, Google 25 $ una volta).
 - **[Claude] Versione da computer**: oggi l'app è pensata solo per il
   telefono (colonna stretta su schermo largo).
-- **[Claude] Accesso con Face ID senza password** (passkey, 1-2 giorni): oggi
-  Face ID compila email e password salvate nel portachiavi dell'iPhone.
+- **[fatto 27/09] Accesso con Face ID senza password** (passkey, standard
+  delle banche): dopo il primo accesso EON propone "Entra con Face ID";
+  poi si entra guardando il telefono. Impostazioni → Face ID per attivarlo
+  o toglierlo. Le passkey valgono per il dominio su cui nascono: col
+  dominio nuovo (eon.it) andranno riattivate una volta (e aggiunto il
+  dominio a PASSKEY_ORIGINI).
 - **[Claude] Avvisi all'ora giusta**: promemoria che suonano anche ad app
   chiusa ("tra 15 minuti chiama Rossi").
 

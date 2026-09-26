@@ -1,3 +1,4 @@
+import { createHmac, createHash, createPublicKey, randomBytes, timingSafeEqual, verify as cryptoVerify } from "node:crypto";
 /**
  * ============================================================
  * EON — Backend completo (file unico)
@@ -2730,6 +2731,147 @@ async function handleAdmin(action, req, res, user) {
   throw fail("Richiesta non riconosciuta");
 }
 
+/* ------------------------------------------------------------
+   Accesso con Face ID / impronta — passkey (27/09/2026)
+   ------------------------------------------------------------
+   Standard WebAuthn, senza librerie esterne. Il telefono crea una coppia
+   di chiavi: quella segreta resta nel telefono, protetta da Face ID; la
+   pubblica viene salvata qui (tabella passkeys). Per entrare il telefono
+   firma una "sfida" del server; se la firma è giusta il server apre una
+   sessione Supabase per quell'utente (link magico generato e verificato
+   dal server stesso: nessuna email parte).
+   - Sfide senza tabella: numero casuale + ora + firma HMAC del server,
+     valide 5 minuti; per la registrazione legate all'utente.
+   - La stessa firma non si può usare due volte (ultima_sfida).
+   - Origini ammesse: l'app su Vercel + PASSKEY_ORIGINI (virgole), per
+     il dominio futuro. Le passkey valgono per il dominio su cui nascono. */
+const ORIGINI_PASSKEY = ["https://eonbeckend.vercel.app", ...String(process.env.PASSKEY_ORIGINI || "").split(",").map((s) => s.trim()).filter(Boolean)];
+const b64url = (buf) => Buffer.from(buf).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const daB64url = (s) => Buffer.from(String(s || "").replace(/-/g, "+").replace(/_/g, "/"), "base64");
+const segretoSfide = () => SERVICE_ROLE_KEY || "eon-sviluppo";
+
+function nuovaSfida(scopo, userId) {
+  const casuale = randomBytes(16);
+  const ora = Buffer.alloc(8); ora.writeBigUInt64BE(BigInt(Date.now()));
+  const firma = createHmac("sha256", segretoSfide()).update(Buffer.concat([casuale, ora, Buffer.from(scopo + ":" + (userId || ""))])).digest().subarray(0, 16);
+  return b64url(Buffer.concat([casuale, ora, firma]));
+}
+function sfidaValida(sfida, scopo, userId) {
+  const b = daB64url(sfida);
+  if (b.length !== 40) return false;
+  const casuale = b.subarray(0, 16), ora = b.subarray(16, 24), firma = b.subarray(24);
+  const attesa = createHmac("sha256", segretoSfide()).update(Buffer.concat([casuale, ora, Buffer.from(scopo + ":" + (userId || ""))])).digest().subarray(0, 16);
+  if (!timingSafeEqual(firma, attesa)) return false;
+  const eta = Date.now() - Number(ora.readBigUInt64BE());
+  return eta >= -60000 && eta <= 5 * 60000;
+}
+function origineAmmessa(req, origine) {
+  return ORIGINI_PASSKEY.includes(origine) ? new URL(origine).hostname : null;
+}
+function leggiDatiCliente(clientDataB64, tipo, scopo, userId) {
+  let dati;
+  try { dati = JSON.parse(daB64url(clientDataB64).toString("utf8")); } catch (e) { throw fail("Risposta del telefono non valida"); }
+  if (dati.type !== tipo) throw fail("Risposta del telefono non valida");
+  const rpId = origineAmmessa(null, dati.origin);
+  if (!rpId) throw fail("Origine non ammessa", 403);
+  if (!sfidaValida(dati.challenge, scopo, userId)) throw fail("Richiesta scaduta: riprova", 400);
+  return { dati, rpId };
+}
+function controllaDatiAutenticatore(authData, rpId) {
+  if (!authData || authData.length < 37) throw fail("Risposta del telefono non valida");
+  if (!authData.subarray(0, 32).equals(createHash("sha256").update(rpId).digest())) throw fail("Chiave di un altro sito", 403);
+  const flags = authData[32];
+  if (!(flags & 0x01) || !(flags & 0x04)) throw fail("Serve Face ID o l'impronta", 403);
+  return authData.readUInt32BE(33);
+}
+
+async function handlePasskey(action, req, res, user) {
+  const body = req.method === "POST" ? await readBody(req) : {};
+  const origine = req.headers.origin || "";
+
+  // 1. Registrazione (utente già dentro): opzioni per navigator.credentials.create
+  if (action === "passkey_opzioni_registrazione") {
+    const rpId = origineAmmessa(req, origine) || "eonbeckend.vercel.app";
+    const gia = await servizio(`passkeys?select=credential_id&user_id=eq.${user.id}`, { method: "GET" }).catch(() => []);
+    return send(res, 200, {
+      challenge: nuovaSfida("registra", user.id),
+      rp: { id: rpId, name: "EON" },
+      user: { id: b64url(Buffer.from(user.id)), name: user.email || "EON", displayName: user.email || "EON" },
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "required", requireResidentKey: true, userVerification: "required" },
+      attestation: "none",
+      timeout: 60000,
+      excludeCredentials: (Array.isArray(gia) ? gia : []).map((g) => ({ type: "public-key", id: g.credential_id })),
+    });
+  }
+
+  // 2. Registrazione: salva la chiave pubblica
+  if (action === "passkey_registra") {
+    const { rpId } = leggiDatiCliente(body.clientDataJSON, "webauthn.create", "registra", user.id);
+    if (body.authenticatorData) controllaDatiAutenticatore(daB64url(body.authenticatorData), rpId);
+    const alg = Number(body.alg);
+    if (![-7, -257].includes(alg)) throw fail("Tipo di chiave non supportato");
+    let spki;
+    try { spki = daB64url(body.publicKey); createPublicKey({ key: spki, format: "der", type: "spki" }); } catch (e) { throw fail("Chiave non valida"); }
+    const id = String(body.id || "");
+    if (!/^[A-Za-z0-9_-]{16,1024}$/.test(id)) throw fail("Chiave non valida");
+    await servizio("passkeys", { method: "POST", body: JSON.stringify({ user_id: user.id, credential_id: id, public_key: spki.toString("base64"), alg, dispositivo: taglia(String(req.headers["user-agent"] || ""), 200) }), headers: { Prefer: "return=minimal" } });
+    return send(res, 200, { ok: true });
+  }
+
+  // 3. Quante chiavi ha l'utente (per le Impostazioni) / toglierle tutte
+  if (action === "passkey_stato") {
+    const righe = await servizio(`passkeys?select=id,created_at,ultimo_uso,dispositivo&user_id=eq.${user.id}&order=created_at.desc`, { method: "GET" }).catch(() => []);
+    return send(res, 200, { chiavi: Array.isArray(righe) ? righe.length : 0 });
+  }
+  if (action === "passkey_disattiva") {
+    await servizio(`passkeys?user_id=eq.${user.id}`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
+    return send(res, 200, { ok: true });
+  }
+  throw fail("Richiesta non riconosciuta");
+}
+
+// 4. Accesso (senza login): la sfida, poi la verifica della firma e la sessione
+async function handlePasskeyAccesso(action, req, res) {
+  const origine = req.headers.origin || "";
+  if (action === "passkey_opzioni_accesso") {
+    const rpId = origineAmmessa(req, origine) || "eonbeckend.vercel.app";
+    return send(res, 200, { challenge: nuovaSfida("accedi"), rpId, userVerification: "required", timeout: 60000, allowCredentials: [] });
+  }
+  const body = await readBody(req);
+  const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "?";
+  if (troppeSegnalazioni("passkey:" + ip)) throw fail("Troppi tentativi: riprova tra un minuto", 429);
+  const { dati, rpId } = leggiDatiCliente(body.clientDataJSON, "webauthn.get", "accedi");
+  const id = String(body.id || "");
+  if (!/^[A-Za-z0-9_-]{16,1024}$/.test(id)) throw fail("Chiave non valida", 401);
+  const righe = await servizio(`passkeys?select=*&credential_id=eq.${encodeURIComponent(id)}&limit=1`, { method: "GET" });
+  const chiave = Array.isArray(righe) && righe[0];
+  if (!chiave) throw fail("Questa chiave non è più attiva: entra con email e password e riattiva Face ID", 401);
+  if (chiave.ultima_sfida && chiave.ultima_sfida === dati.challenge) throw fail("Richiesta già usata: riprova", 401);
+  const authData = daB64url(body.authenticatorData);
+  const contatore = controllaDatiAutenticatore(authData, rpId);
+  const firmato = Buffer.concat([authData, createHash("sha256").update(daB64url(body.clientDataJSON)).digest()]);
+  const chiavePubblica = createPublicKey({ key: Buffer.from(chiave.public_key, "base64"), format: "der", type: "spki" });
+  let buona = false;
+  try { buona = cryptoVerify("sha256", firmato, chiavePubblica, daB64url(body.signature)); } catch (e) { buona = false; }
+  if (!buona) throw fail("Face ID non riconosciuto", 401);
+  if (chiave.contatore > 0 && contatore <= chiave.contatore) throw fail("Chiave clonata o riusata", 401);
+  await servizio(`passkeys?id=eq.${chiave.id}`, { method: "PATCH", body: JSON.stringify({ contatore, ultima_sfida: dati.challenge, ultimo_uso: new Date().toISOString() }), headers: { Prefer: "return=minimal" } });
+
+  // Sessione per l'utente: link magico generato e verificato dal server (nessuna email)
+  const utente = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${chiave.user_id}`, { headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` } }).then((r) => r.ok ? r.json() : null).catch(() => null);
+  if (!utente || !utente.email) throw fail("Account non trovato", 401);
+  const link = await fetch(`${SUPABASE_URL}/auth/v1/admin/generate_link`, { method: "POST", headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ type: "magiclink", email: utente.email }) }).then((r) => r.ok ? r.json() : null).catch(() => null);
+  const tokenHash = link && (link.hashed_token || (link.properties && link.properties.hashed_token));
+  if (!tokenHash) throw fail("Accesso non riuscito: riprova con email e password", 502);
+  // "magiclink" è il tipo del link generato; "email" è il nome nuovo dello stesso controllo (per sicurezza provo tutti e due)
+  const verifica = (tipo) => fetch(`${SUPABASE_URL}/auth/v1/verify`, { method: "POST", headers: { apikey: ANON_KEY || SERVICE_ROLE_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ type: tipo, token_hash: tokenHash }) }).then((r) => r.ok ? r.json() : null).catch(() => null);
+  let sessione = await verifica("magiclink");
+  if (!sessione || !sessione.access_token) sessione = await verifica("email");
+  if (!sessione || !sessione.access_token || !sessione.refresh_token) throw fail("Accesso non riuscito: riprova con email e password", 502);
+  return send(res, 200, { access_token: sessione.access_token, refresh_token: sessione.refresh_token });
+}
+
 async function registraOperazione(user, tool, input, esito, stato) {
   await scriviRegistro("ai_audit_log", { owner_id: user.id, tool, input, esito, stato });
 }
@@ -5427,10 +5569,13 @@ export default async function handler(req, res) {
 
     // Errori dall'app: accettati anche senza login (vedi handleErroreApp)
     if (action === "errore_app") return await handleErroreApp(req, res);
+    // Entrare con Face ID: per definizione prima del login
+    if (action === "passkey_opzioni_accesso" || action === "passkey_accedi") return await handlePasskeyAccesso(action, req, res);
 
     const { user, accessToken } = await requireUser(req);
 
     if (action === "admin_stato" || action === "admin_riepilogo" || action === "admin_errori_visti") return await handleAdmin(action, req, res, user);
+    if (/^passkey_(opzioni_registrazione|registra|stato|disattiva)$/.test(action)) return await handlePasskey(action, req, res, user);
     if (action === "ai") return await handleAI(req, res);
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
     if (action === "descrivi_foto") return await handleDescriviFoto(req, res, user, accessToken);
