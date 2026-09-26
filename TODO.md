@@ -3836,3 +3836,12 @@ riconoscimento è innocuo, un riconoscimento sbagliato no).
 - Data e ora date all'AI ora nel fuso italiano (prima quello del server).
 - Prossimi: fatture e preventivi con cliente, importo e lavoro chiari;
   clienti nuovi; cancellazioni; omonimi con pulsanti; saluti e "fai la foto".
+
+### "Fai foto a pavimenti" (26/09/2026)
+Prima: EON chiedeva l'orario (l'AI l'aveva preso per un impegno). Ora
+(`provaFotoImmediata`, senza AI): scritta e inviata, la fotocamera si apre
+subito; la nota viene dalla frase ("Pavimenti") e, se nomina un cliente
+("fai foto al bagno di Rita Ambrosini"), la foto va nella sua scheda. A
+voce il telefono non apre la fotocamera da solo: card con "Scatta la foto".
+Con "crea", "cliente", "vedere", "manda"... → AI come prima. Test in
+`scheda-cliente.test.js`.

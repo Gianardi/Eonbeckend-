@@ -1744,6 +1744,10 @@
   .percorso-meta span{ flex:1; min-width:0; }
   .percorso-meta .percorso-freccia{ color:var(--faint); width:16px; height:16px; }
   .percorso-presto{ margin:0; font-size:11.5px; color:var(--faint); text-align:center; }
+  .foto-rapida-card{ display:flex; flex-direction:column; align-items:center; gap:12px; padding:8px 0 4px; }
+  .foto-rapida-btn{ display:flex; align-items:center; gap:10px; border:none; border-radius:18px; background:var(--text); color:#fff; font-family:'Manrope'; font-weight:800; font-size:17px; padding:18px 26px; cursor:pointer; }
+  .foto-rapida-btn svg{ width:24px; height:24px; }
+  .foto-rapida-nota{ margin:0; font-size:14px; color:var(--muted); }
   /* Scheda del cliente (26/09/2026) */
   .scheda-cliente{ display:flex; flex-direction:column; gap:14px; }
   .sc-testa{ display:flex; gap:12px; align-items:center; }
@@ -2713,6 +2717,7 @@
              scheda della foto detti o scrivi la nota. -->
         <input type="file" id="cantiereAppuntiFotoInput" accept="image/*" style="display:none;">
         <input type="file" id="schedaClienteFotoInput" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="fotoRapidaInput" accept="image/*" capture="environment" style="display:none;">
         <button type="button" class="appunti-foto-btn" id="cantiereAppuntiFotoBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           <span id="cantiereAppuntiFotoTesto">Scatta una foto con appunto</span>
@@ -9501,6 +9506,9 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
     if(!creato) throw new Error("scrittura non riuscita");
     const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"" };
     cantiereFoto.push(nuovaFoto);
+    // Nota già detta nella frase ("fai foto a pavimenti" → "Pavimenti")
+    const notaDetta = opzioni && opzioni.nota ? String(opzioni.nota).trim() : "";
+    if(notaDetta){ nuovaFoto.nota = notaDetta; await dbUpdate("cantiere_foto", creato.id, { nota: notaDetta }); }
     descriviFoto(nuovaFoto); // in sottofondo: EON guarda la foto e ne scrive una descrizione
     if(daAppunti){
       /* Da Appunti: niente "a quale cliente?", si apre subito la scheda
@@ -9518,6 +9526,11 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
       renderCantiereFoto();
       const clienteFoto = clients.find(c => c.id === clienteIdForzato);
       mostraSchedaFoto(nuovaFoto, clienteFoto ? clienteFoto.name : null, { appenaScattata: true });
+    } else if(notaDetta){
+      // Già sappiamo cos'è: niente domanda "a chi si riferisce", si apre la sua scheda
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      mostraSchedaFoto(nuovaFoto, null, { appenaScattata: true });
     } else {
       aggiornaCantiereSottotitoli();
       renderCantiereFoto();
@@ -10231,6 +10244,52 @@ function provaPercorso(testo){
   return true;
 }
 
+/* "Fai foto a pavimenti", "scatta foto", "fammi la foto al bagno di Rossi"
+   (26/09/2026): si apre subito la fotocamera, senza AI. La nota ("Pavimenti")
+   e l'eventuale cliente vengono dalla frase. Scritta e inviata col tasto, la
+   fotocamera si apre direttamente; a voce il telefono vuole un tocco, quindi
+   c'è una card con "Scatta la foto". Frasi con "crea", "cliente", "vedere"...
+   vanno all'AI come prima. */
+const TRIGGER_FOTO_RAPIDA = /^(?:mi\s+)?(?:fai|fammi|fare|scatta|scattami|scatto|prendi|fotografa|fotografami)\s+(?:(?:una|la|le|delle|un'?|qualche)\s+)?(?:foto|fotografia|fotografie)?\b\s*(.*)$/;
+let fotoRapidaDaSalvare = null; // { clienteId, nota } per il prossimo scatto
+function capisciFotoRapida(testo){
+  const t = String(testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  if(!/\bfot/.test(t) || /\b(vedere|mostra|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|recupera)\b/.test(t)) return null;
+  const m = t.match(TRIGGER_FOTO_RAPIDA);
+  if(!m) return null;
+  let resto = (m[1] || "").replace(/^(?:a|al|alla|allo|ai|agli|alle|del|della|dello|dei|delle|di|per|sul|sulla|sui|sulle|nel|nella|in)\s+/, "").trim();
+  if(/\d/.test(resto)) return null; // orari, importi: decide l'AI
+  const parole = resto.split(/\s+/).filter(Boolean);
+  if(parole.length > 6) return null;
+  const cliente = parole.length ? trovaClienteDaParole(parole) : null;
+  const paroleCliente = cliente ? cliente.name.toLowerCase().split(/\s+/) : [];
+  const GENERICHE = /^(cantiere|lavoro|questo|questa|qui|qua|a|al|alla|di|del|della|per|e|il|la|lo|le|i|gli)$/;
+  const notaParole = parole.filter(p => !paroleCliente.includes(p) && !GENERICHE.test(p));
+  const nota = notaParole.join(" ");
+  return { clienteId: cliente ? cliente.id : null, clienteNome: cliente ? cliente.name : null, nota: nota ? nota.charAt(0).toUpperCase() + nota.slice(1) : "" };
+}
+function provaFotoImmediata(testo, viaVoce){
+  const foto = capisciFotoRapida(testo);
+  if(!foto) return false;
+  fotoRapidaDaSalvare = foto;
+  const input = document.getElementById("fotoRapidaInput");
+  if(!viaVoce){ input.click(); return true; } // scritta e inviata col tasto: fotocamera subito
+  const corpo = document.createElement("div");
+  corpo.className = "foto-rapida-card";
+  corpo.innerHTML = `<button type="button" class="foto-rapida-btn" id="fotoRapidaScatta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span>Scatta la foto</span></button>
+    ${foto.nota || foto.clienteNome ? `<p class="foto-rapida-nota">${escapeHtml([foto.nota, foto.clienteNome ? "per " + foto.clienteNome : ""].filter(Boolean).join(" · "))}</p>` : ""}`;
+  corpo.querySelector("#fotoRapidaScatta").addEventListener("click", () => input.click());
+  apriRisorsaCard("Foto", corpo);
+  return true;
+}
+document.getElementById("fotoRapidaInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  const dati = fotoRapidaDaSalvare || {};
+  fotoRapidaDaSalvare = null;
+  e.target.value = "";
+  if(f){ chiudiRisorsaCard(); caricaCantiereFoto(f, dati.clienteId || null, { nota: dati.nota }); }
+});
+
 function provaRisorsaImmediata(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return false;
@@ -10531,6 +10590,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
         return;
       }
+    }
+
+    /* "Fai foto a pavimenti": fotocamera subito (prima di ogni attesa,
+       così il tocco sul tasto vale ancora per aprirla) */
+    if(!inContinuazione && provaFotoImmediata(testo, viaVoce)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
     }
 
     /* Il nome di un cliente registrato, da solo ("Rita Ambrosini"): si
