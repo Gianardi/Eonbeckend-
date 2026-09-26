@@ -97,6 +97,12 @@ pagina cliente chiusi e la professione bloccata in produzione.
   risponde e non li conserva come archivio).
 - **[Claude] Costo AI per cliente**: misurato dai registri, per fare il
   prezzo giusto.
+- **Prezzo — ipotesi, non decisione** (26/09): il costo basso (AI 1-2 €
+  a cliente con migliaia di clienti e modello nostro) è un **vantaggio**,
+  non il prezzo. Piano base 25-35 € (i gestionali per artigiani costano già
+  20-50 €); eventuale piano "Lite" a ~9 € come porta d'ingresso. Costi per
+  cliente oltre all'AI: server/database ~0,5 €, spazio ~0,3 €, Stripe ~0,4 €,
+  SdI/WhatsApp/email ~0,5-1 € (stime). Si decide coi dati dei primi artigiani.
 - **[Andrea] Piano Free "Organizza la giornata"** con pubblicità
   personalizzata (deciso il 17/09): da progettare quando si apre al
   pubblico generico.
@@ -350,6 +356,16 @@ dall'AI scende piano piano, **la qualità non scende mai**.
   centinaia di utenti (stima: centinaia–migliaia di € per addestrarlo,
   centinaia–1.000+ €/mese di server). Da verificare prima: le regole di
   Anthropic sull'uso delle risposte di Claude per addestrare altri modelli.
+- **Come funzionerebbe il modello nostro** (26/09): modello aperto (Llama
+  di Meta, uso commerciale gratuito; o Mistral, europeo) specializzato con
+  gli esempi confermati dagli utenti; gira su un server affittato (a ore
+  ~0,5-1 €/h, dedicato ~200-1.000+ €/mese, o "a richiesta"; meglio europeo:
+  Hetzner, OVH, Scaleway) oppure da un fornitore a consumo (Together, Groq,
+  Fireworks). Tre livelli: codice → modello nostro → Claude, ognuno passa
+  al successivo se non è sicuro. Ri-addestrato ogni tanto, e messo online
+  solo se passa i test. Conviene con molti clienti (costo fisso che si
+  divide): stima AI per cliente ~15 € con 50 clienti, ~3 € con 500, ~1,5 €
+  con 5.000. Il conto vero si fa coi token registrati.
 - **Curva attesa** (stima): ~90% con AI all'inizio → ~50% dopo la fase 1
   → ~30% dopo l'apprendimento; il 20–30% finale (frasi nuove, domande
   tecniche, testi, foto) resta all'AI o al modello nostro.
