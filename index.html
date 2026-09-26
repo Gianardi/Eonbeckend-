@@ -15029,13 +15029,20 @@ async function attivaFaceId(){
   const r = await fetch(PASSKEY_API + "passkey_opzioni_registrazione", { headers: { Authorization: "Bearer " + token } });
   if(!r.ok) throw new Error("Il server non risponde, riprova");
   const o = await r.json();
-  const cred = await navigator.credentials.create({ publicKey: {
+  let cred;
+  try{
+    cred = await navigator.credentials.create({ publicKey: {
     challenge: daB64u(o.challenge), rp: o.rp,
     user: { id: daB64u(o.user.id), name: o.user.name, displayName: o.user.displayName },
     pubKeyCredParams: o.pubKeyCredParams, authenticatorSelection: o.authenticatorSelection,
     attestation: o.attestation, timeout: o.timeout,
     excludeCredentials: (o.excludeCredentials || []).map((c) => ({ type: "public-key", id: daB64u(c.id) })),
   } });
+  }catch(err){
+    // Il telefono ha già una chiave per EON (attivata prima, memoria del telefono cancellata): va bene così
+    if(err && err.name === "InvalidStateError"){ scriviLocale("eon-passkey", "1"); return; }
+    throw err;
+  }
   const risposta = cred.response;
   if(typeof risposta.getPublicKey !== "function") throw new Error("Questo telefono non supporta ancora l'accesso con " + nomeBiometria());
   const s = await fetch(PASSKEY_API + "passkey_registra", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({
@@ -15073,7 +15080,9 @@ function messaggioFaceId(err){
 async function aggiornaPulsanteFaceId(){
   const b = document.getElementById("obFaceIdBtn");
   if(!b) return;
-  const ok = obAuthMode === "login" && BACKEND_CONFIGURED && await passkeySupportata();
+  // Solo se Face ID è già stato attivato su QUESTO telefono (27/09: prima compariva
+  // anche prima di attivarlo, e l'iPhone mostrava "nessuna passkey salvata")
+  const ok = obAuthMode === "login" && BACKEND_CONFIGURED && !!leggiLocale("eon-passkey") && await passkeySupportata();
   b.hidden = !ok;
   document.getElementById("obFaceIdTesto").textContent = "Entra con " + nomeBiometria();
 }
