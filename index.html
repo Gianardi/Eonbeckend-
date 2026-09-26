@@ -4558,14 +4558,14 @@ async function loadUserDataFromDB(){
 
   clients.length = 0; dbClients.forEach(c => clients.push(mappaCliente(c)));
   opportunities.length = 0; dbOpps.forEach(o => opportunities.push({
-    id:o.id, name:o.name, client:o.client_name, value:Number(o.value)||0, probability:o.probability, deadline:o.deadline, stage:o.stage
+    id:o.id, name:o.name, client:o.client_name, clientId:o.client_id || null, value:Number(o.value)||0, probability:o.probability, deadline:o.deadline, stage:o.stage
   }));
   employees.length = 0; dbEmployees.forEach(e => employees.push({ id:e.id, name:e.name, role:e.role, color:e.color }));
   payments.length = 0; dbPayments.forEach(x => payments.push({
     id:x.id, supplier:x.supplier, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status, created:x.created_at
   }));
   incomes.length = 0; dbIncomes.forEach(x => incomes.push({
-    id:x.id, client:x.client_name, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status, created:x.created_at
+    id:x.id, client:x.client_name, clientId:x.client_id || null, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status, created:x.created_at
   }));
   tasks.length = 0; dbTasks.forEach(t => tasks.push(mappaImpegno(t)));
   goals.length = 0; dbGoals.forEach(g => goals.push({
@@ -4967,24 +4967,39 @@ async function impostaArchivioClienteEChat(cliente, chat, archiviato){
    cestino anche entrate, trattative, foto e appunti; ripristinato → tornano;
    rinominato → entrate e trattative seguono il nome. Qui si fa lo stesso
    sui dati già aperti nell'app, così lo schermo cambia subito. */
+/* Entrate e trattative hanno anche l'id del cliente (27/09/2026,
+   supabase/entrate_cliente_id.sql): si usa quello; il nome solo per le
+   righe vecchie senza id, e mai se ci sono due clienti con quel nome. */
+function clienteIdDaNome(nome){
+  const chiave = nomeChiave(nome);
+  const trovati = chiave ? clients.filter(c => nomeChiave(c.name) === chiave) : [];
+  return trovati.length === 1 && trovati[0].id ? trovati[0].id : null;
+}
+function eDelCliente(x, cliente, chiaveSenzaOmonimi){
+  if(x.clientId) return !!cliente.id && x.clientId === cliente.id;
+  return !!chiaveSenzaOmonimi && nomeChiave(x.client) === chiaveSenzaOmonimi;
+}
 function staccaDatiDelCliente(cliente){
   const chiave = nomeChiave(cliente.name);
   const omonimo = clients.some(c => c !== cliente && nomeChiave(c.name) === chiave);
+  const chiaveSenzaOmonimi = omonimo ? "" : chiave;
   const togli = (arr, via) => { for(let i = arr.length - 1; i >= 0; i--) if(via(arr[i])) arr.splice(i, 1); };
-  if(!omonimo && chiave){
-    togli(incomes, x => nomeChiave(x.client) === chiave);
-    togli(opportunities, x => nomeChiave(x.client) === chiave);
-  }
+  togli(incomes, x => eDelCliente(x, cliente, chiaveSenzaOmonimi));
+  togli(opportunities, x => eDelCliente(x, cliente, chiaveSenzaOmonimi));
   if(cliente.id){
     togli(cantiereFoto, f => f.clientId === cliente.id);
     togli(cantiereAppunti, a => a.clientId === cliente.id);
   }
 }
-function rinominaDatiDelCliente(vecchioNome, nuovoNome){
+function rinominaDatiDelCliente(vecchioNome, nuovoNome, cliente){
   const chiave = nomeChiave(vecchioNome);
-  if(!chiave || clients.filter(c => nomeChiave(c.name) === chiave).length) return; // omonimo ancora vivo: non si sa di chi sono
-  incomes.forEach(x => { if(nomeChiave(x.client) === chiave) x.client = nuovoNome; });
-  opportunities.forEach(x => { if(nomeChiave(x.client) === chiave) x.client = nuovoNome; });
+  if(!chiave || chiave === nomeChiave(nuovoNome)) return;
+  const omonimo = clients.some(c => c !== cliente && nomeChiave(c.name) === chiave); // omonimo ancora vivo: le righe senza id non si sa di chi sono
+  const chiaveSenzaOmonimi = omonimo ? "" : chiave;
+  const tocca = x => cliente ? eDelCliente(x, cliente, chiaveSenzaOmonimi) : (!x.clientId && nomeChiave(x.client) === chiaveSenzaOmonimi);
+  [incomes, opportunities].forEach(arr => arr.forEach(x => {
+    if(tocca(x)){ x.client = nuovoNome; if(!x.clientId && cliente && cliente.id) x.clientId = cliente.id; }
+  }));
 }
 async function cestinaClienteEChat(cliente, chat){
   if(cliente){
@@ -4998,9 +5013,9 @@ async function cestinaClienteEChat(cliente, chat){
     if(isDbReady() && chat.id) await dbDelete("conversations", chat.id);
   }
 }
-async function rinominaChatDelCliente(vecchioNome, nuovoNome){
+async function rinominaChatDelCliente(vecchioNome, nuovoNome, cliente){
   if(nomeChiave(vecchioNome) === nomeChiave(nuovoNome) && vecchioNome === nuovoNome) return;
-  rinominaDatiDelCliente(vecchioNome, nuovoNome);
+  rinominaDatiDelCliente(vecchioNome, nuovoNome, cliente);
   const chat = chats.find(c => nomeChiave(c.name) === nomeChiave(vecchioNome));
   if(!chat) return;
   chat.name = nuovoNome;
@@ -6900,7 +6915,7 @@ const sheetForms = {
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
-      name: v.name, client: v.client || "", value: leggiImporto(v.value),
+      name: v.name, client: v.client || "", clientId: clienteIdDaNome(v.client), value: leggiImporto(v.value),
       probability: v.probability, deadline: v.deadline || "", stage: v.stage || ""
     }),
     array: () => opportunities,
@@ -6950,7 +6965,7 @@ const sheetForms = {
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
-      client: v.client, desc: v.desc || "", amount: leggiImporto(v.amount),
+      client: v.client, clientId: clienteIdDaNome(v.client), desc: v.desc || "", amount: leggiImporto(v.amount),
       due: v.due || "", status: v.status
     }),
     array: () => incomes,
@@ -7339,7 +7354,7 @@ document.getElementById("sheetSaveBtn").addEventListener("click", async () => {
       Object.keys(updated).forEach(k => { if(updated[k] !== undefined) item[k] = updated[k]; });
       if(isDbReady() && item.id) await dbUpdate(form.table, item.id, form.toDb(values));
       // Cliente rinominato: la sua chat prende il nome nuovo (un cliente, una chat)
-      if(sheetState.form === "cliente" && nomePrima && nomePrima !== item.name) await rinominaChatDelCliente(nomePrima, item.name);
+      if(sheetState.form === "cliente" && nomePrima && nomePrima !== item.name) await rinominaChatDelCliente(nomePrima, item.name, item);
       appenaCreato = item;
     } else {
       let saved = null;
@@ -13751,14 +13766,18 @@ document.getElementById("docInvia").addEventListener("click", async () => {
 
     /* La fattura diventa anche un'entrata attesa */
     if(docTipo === "fattura"){
+      const clienteFattura = clienteDellaChat(chat);
       const entrata = {
-        client: chat.name, desc: riassunto.slice(0,60),
-        amount: t.totale, date: dati.data, status: "attesa"
+        client: chat.name, clientId: clienteFattura && clienteFattura.id ? clienteFattura.id : null, desc: riassunto.slice(0,60),
+        amount: t.totale, due: "", created: new Date().toISOString(), status: "attesa"
       };
       if(isDbReady()){
+        /* Nessuna colonna "date" in incomes: prima l'inserimento falliva e
+           la fattura non diventava un'entrata (27/09/2026). Come il server:
+           senza scadenza, conta dalla data di creazione. */
         const saved = await dbInsert("incomes", {
-          client_name: chat.name, description: riassunto.slice(0,60),
-          amount: t.totale, date: dati.data, status: "attesa"
+          client_name: chat.name, client_id: entrata.clientId, description: riassunto.slice(0,60),
+          amount: t.totale, due_date: null, status: "attesa"
         });
         if(saved) entrata.id = saved.id;
       }

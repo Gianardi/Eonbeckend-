@@ -130,6 +130,21 @@ async function main() {
     // Omonimi: due "Conti", ne tolgo uno → l'entrata resta (non si sa di chi è)
     const omonimo = await page.evaluate(async () => { clients.push({ id: "c2", name: "conti", status: "attivo", value: 0, archived: false }); await cestinaClienteEChat(clients.find((c) => c.id === "c2"), null); return incomes.filter((x) => x.client === "Conti").length; });
     verifica("due clienti con lo stesso nome: toglierne uno non tocca le entrate", omonimo === 1, String(omonimo));
+    // Omonimi con l'id: due "Neri", ognuno con la sua entrata → tolgo il primo, resta solo quella del secondo
+    const perId = await page.evaluate(async () => {
+      clients.push({ id: "n1", name: "Neri", status: "attivo", value: 0, archived: false }, { id: "n2", name: "Neri", status: "attivo", value: 0, archived: false });
+      incomes.push({ client: "Neri", clientId: "n1", amount: 1, status: "attesa" }, { client: "Neri", clientId: "n2", amount: 2, status: "attesa" });
+      await cestinaClienteEChat(clients.find((c) => c.id === "n1"), null);
+      const rimaste = incomes.filter((x) => x.client === "Neri").map((x) => x.clientId).join(",");
+      // rinomino il secondo: cambia solo la sua entrata
+      const n2 = clients.find((c) => c.id === "n2"); n2.name = "Neri Mario"; await rinominaChatDelCliente("Neri", "Neri Mario", n2);
+      const rinominate = incomes.filter((x) => x.client === "Neri Mario").map((x) => x.clientId).join(",");
+      await cestinaClienteEChat(n2, null);
+      return { rimaste, rinominate, dopo: incomes.filter((x) => /^Neri/.test(x.client)).length };
+    });
+    verifica("due clienti con lo stesso nome ma entrate col loro id: toglierne uno toglie solo la sua", perId.rimaste === "n2" && perId.rinominate === "n2" && perId.dopo === 0, JSON.stringify(perId));
+    verifica("entrata nuova dal modulo: prende l'id del cliente se il nome è di uno solo", await page.evaluate(() => clienteIdDaNome("rita bianchi") === "a" && clienteIdDaNome("Nessuno") === null));
+
     // rimetto Dini com'era per i conti che seguono
     await page.evaluate(() => {
       clients.push({ id: "b", name: "Dini", status: "trattativa", value: 0, archived: false });

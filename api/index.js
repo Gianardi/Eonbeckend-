@@ -1821,7 +1821,7 @@ const TOOLS = {
             "incomes",
             {
               method: "POST",
-              body: JSON.stringify({ owner_id: ctx.user.id, client_name: cliente.name, description: riassunto.slice(0, 60), amount: totale, due_date: null, status: "attesa" }),
+              body: JSON.stringify({ owner_id: ctx.user.id, client_name: cliente.name, client_id: cliente.id || null, description: riassunto.slice(0, 60), amount: totale, due_date: null, status: "attesa" }),
               headers: { Prefer: "return=representation" },
             },
             ctx.accessToken

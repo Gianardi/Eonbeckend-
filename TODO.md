@@ -4061,5 +4061,31 @@ rimosso: vorrei una connessione totale tra i diversi spazi."
   eliminati. Le fatture dei clienti archiviati contano ancora nelle entrate
   (Michele soda studio 2×€366, Tommaso Greti €1.830): un cliente finito
   resta un incasso vero. Se Andrea vuole diversamente, si cambia.
-- Da fare più avanti: entrate e trattative sono legate al cliente solo dal
-  nome; il giusto è un collegamento per id (client_id), come foto e appunti.
+- ~~Da fare più avanti: entrate e trattative legate al cliente per id~~ →
+  fatto, vedi sotto.
+
+### Entrate e trattative legate al cliente vero (27/09/2026)
+
+Prima un'entrata sapeva solo il nome del cliente: con due omonimi non si
+sapeva di chi fosse. Ora (`supabase/entrate_cliente_id.sql`, staging +
+produzione, provato su entrambi con prove annullate):
+- colonna `client_id` su `incomes` e `opportunities` (solo aggiunta);
+- il database la riempie da solo (trigger `entrata_trova_cliente`): nome di
+  UN solo cliente vivo → collegata; due omonimi → senza id, come prima;
+  nome cambiato sull'entrata → ricollegata; id di un cliente di un altro
+  utente → scartato. L'app e il server non devono cambiare nulla;
+- cliente nuovo → si prende le entrate già scritte col suo nome senza
+  cliente (`cliente_nuovo_prende_entrate`);
+- `cliente_collega_dati` (cestino / ripristino / rinomina / elimina per
+  sempre) usa prima l'id, poi il nome solo per le righe vecchie senza id;
+- righe esistenti collegate: in produzione le 4 entrate vive (Michele soda
+  studio ×2, Tommaso Greti, MD via Roma) hanno il loro cliente; le 3 nel
+  cestino di clienti che non esistono più restano senza;
+- app: `clientId` in memoria, `clienteIdDaNome`, `eDelCliente`; il server
+  passa `client_id` quando crea l'entrata di una fattura.
+- **Bug trovato e corretto**: la fattura fatta dalla chat del cliente
+  (index.html, "La fattura diventa anche un'entrata attesa") scriveva una
+  colonna `date` che non esiste → l'entrata non veniva mai salvata nel
+  database (compariva solo fino alla riapertura). Ora `due_date: null`,
+  come il server.
+- Test: `eval/azienda.test.js` (23).
