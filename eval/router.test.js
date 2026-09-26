@@ -405,7 +405,8 @@ async function main() {
         focus: { tipo: "foto", riferimento: "cantiere Trani" },
       });
       // Turno 3: nessun focus nella risposta -> deve restare quello del turno 2 (niente scadenza a tempo).
-      await invia("grazie", { stato: "concluso", testo: "Prego.", azioni: [] });
+      // ("grazie" dal 27/09 ha la risposta senza AI: qui serve una frase che arrivi al server)
+      await invia("e quelle di ieri", { stato: "concluso", testo: "Eccole.", azioni: [] });
       // Turno 4: un NUOVO focus esplicito e incompatibile -> sostituisce quello precedente.
       // Frase scelta apposta per NON iniziare con un verbo della fase 1c del
       // Router (provaRisorsaImmediata, es. "fammi vedere"/"dammi"): "Mario

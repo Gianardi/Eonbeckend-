@@ -1391,6 +1391,10 @@
   .chat-window-name{ font-size:15px; font-weight:800; color:var(--text); }
   .chat-window-status{ font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
+  /* Scelta tra clienti con lo stesso nome: pulsanti sotto la domanda di EON */
+  .scheda-scelte{ display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 6px; }
+  .scheda-scelta{ border:1px solid rgba(59,111,255,.35); background:var(--indigo-soft); color:var(--indigo); border-radius:999px; padding:9px 16px; font:inherit; font-size:14.5px; font-weight:700; cursor:pointer; }
+
   /* ===== Annullare impegni: conferma (27/09/2026) ===== */
   .annulla-lista{ display:flex; flex-direction:column; margin-bottom:14px; }
   .annulla-riga{ display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid var(--border); cursor:pointer; }
@@ -10586,6 +10590,28 @@ function provaAnnullaImmediato(testo, viaVoce){
   return true;
 }
 
+/* ===== Saluti senza AI (Meno AI, 27/09/2026) =====
+   "Ciao", "grazie", "chi sei": risposta subito, solo se la frase è SOLO
+   questo ("Ciao, domani alle 11 Fregoli" va avanti come sempre). */
+function rispostaSaluto(testo){
+  const n = String(testo || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z\s]/g, " ").replace(/\s+/g, " ").trim()
+    .replace(/\b(eon|ehi|hey|ei)\b/g, "").replace(/\s+/g, " ").trim();
+  const nome = profiloUtente && profiloUtente.full_name ? profiloUtente.full_name.trim().split(/\s+/)[0] : "";
+  const conNome = nome ? ", " + nome.charAt(0).toUpperCase() + nome.slice(1) : "";
+  const cosa = "Dimmi cosa ti serve: un appuntamento, un preventivo, una fattura, una foto o un appunto.";
+  if(/^(ciao|buongiorno|buon giorno|buondi|buonasera|buona sera|buon pomeriggio|salve|hello|hola)?\s*(come stai|come va|tutto bene|tutto ok)$/.test(n))
+    return { titolo: "Ciao" + conNome, testo: "Tutto bene, grazie! " + cosa };
+  if(/^(ciao|buongiorno|buon giorno|buondi|buonasera|buona sera|buon pomeriggio|salve|hello|hola)$/.test(n)){
+    const saluto = /sera/.test(n) ? "Buonasera" : /pomeriggio/.test(n) ? "Buon pomeriggio" : /giorno|buondi/.test(n) ? "Buongiorno" : "Ciao";
+    return { titolo: saluto + conNome, testo: cosa };
+  }
+  if(/^(grazie|grazie mille|ok grazie|perfetto grazie|grazie tante|bravo|brava|bravissimo|bravissima|ottimo lavoro|sei grande)$/.test(n))
+    return { titolo: "Figurati" + conNome + "!", testo: "Sono qui quando ti serve." };
+  if(/^(chi sei|cosa sai fare|che cosa sai fare|cosa puoi fare|che cosa puoi fare|come funzioni|come funziona|aiuto|help|cosa fai)$/.test(n))
+    return { titolo: "Sono EON", testo: "Il tuo assistente di lavoro. Dimmelo a voce o scrivilo:\n- «Domani alle 9 sopralluogo da Rossi»\n- «Fattura da 500 per Bianchi per pitturazione»\n- «Fai foto al bagno di Rita»\n- «Cosa ho da fare domani?»\n- «Annulla gli appuntamenti di lunedì»" };
+  return null;
+}
+
 function provaLetturaLocale(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return null;
@@ -11248,6 +11274,18 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         const righeLettura = (lettura.testo || "").split("\n").filter(Boolean);
         mostraRispostaEON(testo, righeLettura.length > 1 ? righeLettura.map(r => "- " + r).join("\n") : lettura.testo, { titolo: lettura.titolo });
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
+        return;
+      }
+    }
+
+    /* "Ciao", "grazie", "chi sei": risposta subito, senza AI */
+    if(!inContinuazione){
+      const saluto = rispostaSaluto(testo);
+      if(saluto){
+        campo.value = "";
+        hint.textContent = TESTO_HINT_BASE;
+        mostraRispostaEON(testo, saluto.testo, { titolo: saluto.titolo });
+        if(viaVoce) parlaRisposta(saluto.titolo + ". " + saluto.testo.split("\n")[0]);
         return;
       }
     }
@@ -12050,6 +12088,18 @@ let conversazioneCard = null; // { chat, attesa, rispondi }
 function conversazioneCardAperta(){
   return !!(conversazioneCard && conversazioneCard.chat.isConnected && document.getElementById("risorsaOverlay").style.display === "flex");
 }
+/* I nomi di clienti elencati in una domanda di EON ("- Sara Dini"), solo se
+   sono 2-4 clienti veri dell'anagrafica e la risposta finisce con "?" */
+function sceltaTraClienti(testo){
+  const t = String(testo || "").trim();
+  if(!/\?\s*$/.test(t)) return [];
+  const righe = t.split("\n").map(r => r.trim()).filter(r => /^[-•*]\s+/.test(r))
+    .map(r => r.replace(/^[-•*]\s+/, "").replace(/\*\*/g, "").replace(/\s*\(.*\)\s*$/, "").replace(/[.,;:]+$/, "").trim());
+  if(righe.length < 2 || righe.length > 4) return [];
+  const nomi = righe.map(r => { const c = clients.find(x => nomeChiave(x.name) === nomeChiave(r)); return c ? c.name : null; });
+  return nomi.every(Boolean) && new Set(nomi.map(nomeChiave)).size === nomi.length ? nomi : [];
+}
+
 function bollaConversazione(chi, testo){
   if(!conversazioneCardAperta()) return null;
   if(conversazioneCard.attesa){ conversazioneCard.attesa.remove(); conversazioneCard.attesa = null; }
@@ -12057,6 +12107,20 @@ function bollaConversazione(chi, testo){
   b.className = "scheda-bolla " + chi;
   if(chi === "eon") b.appendChild(formattaRispostaEON(testo)); else b.textContent = testo;
   conversazioneCard.chat.appendChild(b);
+  /* "Quale dei due intendi? - Sara Dini - Giampiero Dini": un pulsante
+     per ogni cliente, invece di doverlo riscrivere (Meno AI, 27/09/2026) */
+  const scelte = chi === "eon" ? sceltaTraClienti(testo) : [];
+  if(scelte.length){
+    const riga = document.createElement("div");
+    riga.className = "scheda-scelte";
+    scelte.forEach(nome => {
+      const bt = document.createElement("button");
+      bt.type = "button"; bt.className = "scheda-scelta"; bt.textContent = nome;
+      bt.addEventListener("click", () => { riga.remove(); if(conversazioneCard && conversazioneCard.manda) conversazioneCard.manda(nome); });
+      riga.appendChild(bt);
+    });
+    conversazioneCard.chat.appendChild(riga);
+  }
   b.scrollIntoView({ block: "end", behavior: "smooth" });
   return b;
 }
@@ -12095,7 +12159,7 @@ function apriConversazioneCard(domanda, testo, rispondi){
   mic.setAttribute("aria-label", "Rispondi a voce");
   piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
   apriRisorsaCard(domanda ? titoloDallaDomanda(domanda) : "EON", corpo, piede);
-  conversazioneCard = { chat: corpo, attesa: null, rispondi };
+  conversazioneCard = { chat: corpo, attesa: null, rispondi, manda };
   if(domanda) bollaConversazione("me", domanda);
   bollaConversazione("eon", testo);
 }
