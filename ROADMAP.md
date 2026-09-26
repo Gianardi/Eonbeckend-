@@ -566,6 +566,23 @@ memoria del lavoro difficilmente cambia (pochi clienti persi).
 
 ---
 
+## Idea commerciale: foto → prezzi e acquisto (Andrea, 27/09/2026)
+
+Dalla foto con la descrizione EON riconosce l'oggetto (es. "rubinetto
+monocomando Grohe") e offre "Cerca il nuovo" / "Cerca l'usato": fase 1 apre
+Amazon, ManoMano, Subito già cercati (link di affiliazione → commissione
+per EON, pilastro *soldi*); fase 2 prezzi veri dalle API dei negozi (eBay
+Browse, Amazon PA-API), mai prezzi inventati dall'AI. Da decidere quando.
+Serve: iscrizione ai programmi di affiliazione [Andrea].
+
+## Importare i clienti e prenderli dalla rubrica
+
+Fatto (27/09): import da file (.vcf della rubrica, Excel/CSV del programma
+delle fatture). Più avanti: pulsante "Prendi dalla rubrica" con l'app
+sull'App Store (su iPhone da Safari Apple non lo permette); allineamento
+automatico con Fatture in Cloud (strada B). Non si può: leggere i contatti
+di WhatsApp, prendere dati "da internet".
+
 ## Fatto il 27/09/2026 (sera, prove di Andrea)
 
 Azioni dirette senza AI (password, email, profilo, Face ID, feedback,
@@ -574,7 +591,9 @@ doppi, stesso nome = stesso cliente, archiviato → riattivato · 39 clienti
 di Andrea di nuovo attivi · "Caldaia Baudi venerdì ore 15" crea il cliente
 con il lavoro · appunti di un cliente sulla sua scheda e sul suo
 appuntamento · "Di' a Rita che ci vediamo…" → appuntamento da confermare +
-messaggio; sì/no di Rita lo conferma o lo toglie.
+messaggio; sì/no di Rita lo conferma o lo toglie · appunti cancellabili a
+voce · scorri per eliminare preventivi e fatture · importa clienti dalla
+rubrica o da Excel.
 
 ## Fatto il 27/09/2026
 
