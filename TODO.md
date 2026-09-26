@@ -4236,3 +4236,12 @@ Rossi" non è un invio (è un documento nuovo). Anche l'Email dalla scheda del
 documento ora ha l'indirizzo del cliente.
 Test: `eval/invio-privacy.test.js` (19); aggiornati account, faceid,
 impostazioni.
+
+### Da fare: ogni artigiano rinomina le sue cartelle (Andrea, 27/09/2026)
+
+Idea nata parlando dei tester ("vorrei che questa cartella si chiamasse
+così"): tenendo premuto sul titolo di una cartella/sezione, l'artigiano la
+rinomina solo per sé (salvato nel profilo, sopra i nomi della professione in
+`professionData`). Così i cambi di nome non passano da noi. Lavoro piccolo.
+Regola per le richieste dei tester: si fa quando la chiedono in tanti della
+stessa professione o se rafforza un pilastro; i feedback arrivano in Admin.
