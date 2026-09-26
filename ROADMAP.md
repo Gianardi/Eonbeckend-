@@ -268,6 +268,24 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
   4. **Accesso del commercialista** a EON per controllare e correggere.
   Serve: società/P.IVA, contratti con i servizi (costi da verificare),
   privacy in regola.
+  **Approfondimento (27/09)**:
+  - *Fatturazione elettronica, due strade.* (A) EON fa e manda la fattura
+    da solo tramite un servizio "ponte" verso lo SdI (es. Openapi,
+    Invoicetronic, A-Cube): pochi centesimi a fattura (Openapi: invio da
+    €0,015–0,07, conservazione €0,035), ricezione delle fatture dei
+    fornitori inclusa; ma EON deve produrre l'XML giusto per ogni caso
+    (forfettario, bollo, ritenuta, split payment…) e serve la
+    conservazione per 10 anni. (B) EON si collega al programma che
+    l'artigiano usa già (es. Fatture in Cloud, API incluse nella
+    licenza): meno responsabilità, ma solo per chi ce l'ha e lo paga.
+    Consiglio: (A), perché EON fa tutto; (B) come alternativa per chi ha
+    già un programma o un commercialista che lo usa. Prima prova
+    nell'ambiente di test dello SdI.
+  - *Banca.* Tramite un fornitore autorizzato (Tink, Salt Edge, Yapily,
+    Enable Banking…; GoCardless Bank Account Data ha chiuso). Prezzo per
+    conto collegato al mese, solo su preventivo, di solito con un minimo
+    mensile. Consenso da rinnovare ogni 180 giorni. EON abbina i
+    movimenti alle fatture aperte e chiede quando non è sicuro.
 - **Chiamate → rubrica**: tutti i clienti col telefono, un tocco e chiami.
 - **Cresci**: oggi "Lavori in corso", da decidere cosa diventa.
 - **Pagamenti a colpo d'occhio**: gli incassi in calendario con un colore
