@@ -578,7 +578,10 @@ Serve: iscrizione ai programmi di affiliazione [Andrea].
 ## Importare i clienti e prenderli dalla rubrica
 
 Fatto (27/09): import da file (.vcf della rubrica, Excel/CSV del programma
-delle fatture). Più avanti: pulsante "Prendi dalla rubrica" con l'app
+delle fatture). **Da fare** [Claude, ~1 ora]: pulsante "Scegli dalla
+rubrica" dove il telefono lo permette (oggi Android con Chrome: Contact
+Picker API), stessa scelta con le caselle e niente doppioni; da provare su
+un Android vero. Più avanti: pulsante "Prendi dalla rubrica" con l'app
 sull'App Store (su iPhone da Safari Apple non lo permette); allineamento
 automatico con Fatture in Cloud (strada B). Non si può: leggere i contatti
 di WhatsApp, prendere dati "da internet".

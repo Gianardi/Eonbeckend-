@@ -4182,3 +4182,13 @@ Frasi vere dai registri (`ai_request_log`, `ai_audit_log`):
   Non provato su un iPhone vero (il percorso di esportazione dei Contatti
   è quello di iOS 16+).
 - Test: `eval/appunti-documenti-import.test.js` (26).
+
+### Da fare: "Scegli dalla rubrica" su Android (deciso con Andrea, 27/09/2026)
+
+Andrea: "non c'è un modo di selezionare direttamente dalla rubrica?". Su
+iPhone da Safari no (Apple non lo permette alle app web; arriva con l'app
+sull'App Store). Su Android con Chrome sì: `navigator.contacts.select(["name",
+"tel", "email"], { multiple: true })`. Da fare: pulsante nella card "Importa
+clienti" visibile solo se `"contacts" in navigator`, poi la stessa lista con
+le caselle (`preparaContatti` / `importaContattiScelti`). Stima: ~1 ora con i
+test (Android simulato); da provare su un Android vero (socio o artigiano).
