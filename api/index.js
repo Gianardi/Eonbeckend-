@@ -3472,11 +3472,136 @@ async function provaPercorsoRapidoCliente(body, ctx, user) {
   return { azioni: [{ tool: "crea_cliente", esito }], payload: { stato: "concluso", testo: "Fatto.", azioni: [{ tool: "crea_cliente", esito }], focus: { tipo: "cliente", riferimento: esito.nome } } };
 }
 
+/* ---------- Meno AI, punto 2: fatture e preventivi chiari (27/09/2026) ----------
+   "Fattura da 1500 per Tommaso Greti per fognatura", "Mi fai preventivo
+   Lombardi per finestre 1200 €": se la frase dice UN tipo (fattura o
+   preventivo), UN importo e il nome COMPLETO di UN cliente già in
+   anagrafica, il resto è il lavoro e il documento lo scrive il codice,
+   senza AI (prima: 2-8 giri, 4-20 secondi). Tutto il resto → come prima:
+   cliente nuovo o detto a metà, due importi, IVA inclusa, acconti,
+   quantità, "mandalo", date, domande. Un riconoscimento mancato è
+   innocuo; uno sbagliato no. */
+const BLOCCA_DOC_RAPIDO = /\b(manda\w*|invia\w*|spedisc\w*|whatsapp|e-?mail|pdf|modific\w*|corregg\w*|aggiung\w*|togli\w*|spost\w*|elimin\w*|cancell\w*|annull\w*|recuper\w*|trov\w*|cerc\w*|dammi|mostr\w*|apri|vedi|vedere|ultim[oaie]|precedent\w*|stess[oaie]|copia|duplic\w*|scont\w*|accont\w*|anticip\w*|saldo|rat[ae]|inclus[ao]|ivat[oa]|compres[ao]|comprensiv\w*|lordo|netto|esente|senza|ritenuta|bollo|split|reverse|cadaun[oa]|ciascun[oa]|ognun[oa]|metr[oi]|mq|m2|ore|ora|giorn[oi]|pezz[oi]|pz|mila|mille|k|oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|alle|entro|scadenza|favore|grazie|ciao|poi|dopo|anche|oppure|o)\b/i;
+const INIZIO_DOC_RAPIDO = new Set(["mi", "me", "ci", "crea", "crei", "creami", "creare", "fai", "fammi", "fare", "faresti", "prepara", "preparami", "prepari", "preparare", "emetti", "emettere", "scrivi", "scrivimi", "nuova", "nuovo", "un", "una", "uno", "altra", "altro", "la", "il", "lo"]);
+const PRIMA_DEL_CLIENTE = new Set(["per", "a", "ad", "al", "alla", "allo", "ai", "agli", "di", "del", "della", "dello", "dal", "dalla", "da", "con", "x", "cliente", "sig", "signor", "signora"]);
+const BORDI_LAVORO = new Set(["per", "a", "ad", "al", "alla", "allo", "ai", "agli", "di", "da", "del", "della", "dello", "e", "il", "la", "lo", "i", "gli", "le", "un", "una", "uno", "con", "x"]);
+
+/* "1.500" → 1500, "35.090" → 35090, "1500,50" → 1500.5; "150.5" o "1.2"
+   (virgola o migliaia?) → null, decide l'AI */
+function importoItaliano(s) {
+  const t = String(s).replace(/[.,]$/, "");
+  let n = null;
+  if (/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(t)) n = Number(t.replace(/\./g, "").replace(",", "."));
+  else if (/^\d+(,\d{1,2})?$/.test(t)) n = Number(t.replace(",", "."));
+  return n > 0 && n <= 10000000 ? n : null;
+}
+
+/* Legge la frase; clienti = [{id, name}] dell'anagrafica. Restituisce
+   { tipo, cliente, importo, lavoro } oppure null (decide l'AI). */
+function leggiDocumentoSenzaAI(testo, clienti) {
+  if (!eStringaNonVuota(testo) || testo.length > 200) return null;
+  const frase = testo.trim().replace(/\?+$/, "").trim();
+  if (/[?!;:"]/.test(frase) || BLOCCA_DOC_RAPIDO.test(frase.normalize("NFD").replace(/[̀-ͯ]/g, ""))) return null;
+  const fatture = (frase.match(/\bfattur[ae]\b/gi) || []).length;
+  const preventivi = (frase.match(/\bpreventiv[oi]\b/gi) || []).length;
+  if (fatture + preventivi !== 1) return null;
+  const tipo = fatture ? "fattura" : "preventivo";
+  const numeri = frase.match(/\d[\d.,]*/g) || [];
+  if (numeri.length !== 1) return null;
+  const importo = importoItaliano(numeri[0]);
+  if (importo === null) return null;
+
+  // Parole con il loro ruolo: T = tipo, N = importo, E = euro/IVA, P = parola
+  const parole = frase.split(/\s+/).map((orig) => {
+    const norma = orig.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
+    return { orig, norma };
+  }).filter((p) => p.norma || /[€+]/.test(p.orig));
+  parole.forEach((p, i) => {
+    if (/^(fattur[ae]|preventiv[oi])$/.test(p.norma)) p.ruolo = "T";
+    else if (/\d/.test(p.norma)) p.ruolo = "N";
+    else if (/^(euro|eur|iva|esclusa|escluso)$/.test(p.norma) || !p.norma) p.ruolo = "E";
+    else if ((p.norma === "piu") && parole[i + 1] && parole[i + 1].norma === "iva") p.ruolo = "E";
+    else p.ruolo = "P";
+  });
+  // Via le parole d'apertura ("mi fai una", "crea")
+  for (const p of parole) {
+    if (p.ruolo === "T") continue;
+    if (p.ruolo === "P" && INIZIO_DOC_RAPIDO.has(p.norma)) { p.ruolo = "X"; continue; }
+    break;
+  }
+
+  // Il cliente: il nome COMPLETO di uno solo in anagrafica, parole vicine in qualunque ordine
+  const trovati = [];
+  (clienti || []).forEach((c) => {
+    const nome = paroleNormalizzate(c.name).filter((w) => w.length >= 2);
+    if (!nome.length) return;
+    const chiave = [...nome].sort().join(" ");
+    for (let i = 0; i + nome.length <= parole.length; i++) {
+      const finestra = parole.slice(i, i + nome.length);
+      if (finestra.some((p) => p.ruolo !== "P")) continue;
+      if (finestra.map((p) => p.norma).sort().join(" ") === chiave) { trovati.push({ c, i, n: nome.length, parole: nome }); break; }
+    }
+  });
+  if (!trovati.length) return null;
+  const lungo = Math.max(...trovati.map((t) => t.n));
+  const migliori = trovati.filter((t) => t.n === lungo);
+  if (new Set(migliori.map((t) => t.c.id)).size !== 1) return null; // due clienti con lo stesso nome
+  const scelto = migliori[0];
+  // Un altro cliente nominato altrove nella frase → non è chiaro
+  if (trovati.some((t) => t.c.id !== scelto.c.id && (t.i + t.n <= scelto.i || t.i >= scelto.i + scelto.n))) return null;
+  // Il nome detto è anche parte del nome di un altro cliente ("Dini" e "Giampiero Dini") → chiede l'AI
+  if ((clienti || []).some((c) => c.id !== scelto.c.id && scelto.parole.every((w) => paroleNormalizzate(c.name).includes(w)))) return null;
+  for (let k = scelto.i; k < scelto.i + scelto.n; k++) parole[k].ruolo = "C";
+  for (let k = scelto.i - 1; k >= 0 && parole[k].ruolo === "P" && PRIMA_DEL_CLIENTE.has(parole[k].norma); k--) parole[k].ruolo = "X";
+  parole.forEach((p, i) => {
+    const dopo = parole[i + 1];
+    if (p.ruolo === "P" && ["da", "di", "a", "per"].includes(p.norma) && dopo && dopo.ruolo === "N") p.ruolo = "X";
+  });
+
+  // Il lavoro: quello che resta, senza preposizioni ai bordi
+  let lavoro = parole.filter((p) => p.ruolo === "P");
+  const togliBordi = () => {
+    while (lavoro.length && BORDI_LAVORO.has(lavoro[0].norma)) lavoro.shift();
+    while (lavoro.length && BORDI_LAVORO.has(lavoro[lavoro.length - 1].norma)) lavoro.pop();
+  };
+  togliBordi();
+  if (!lavoro.length || lavoro.length > 12 || !lavoro.some((p) => p.norma.length >= 3)) return null;
+  // Il lavoro deve stare tutto insieme nella frase (niente pezzi sparsi tra nome e importo)
+  const posizioni = lavoro.map((p) => parole.indexOf(p));
+  const tra = parole.slice(posizioni[0], posizioni[posizioni.length - 1] + 1).filter((p) => p.ruolo === "C");
+  if (tra.length) return null;
+  let testoLavoro = lavoro.map((p) => p.orig).join(" ").replace(/^[,.\s]+|[,.\s]+$/g, "");
+  testoLavoro = testoLavoro.charAt(0).toUpperCase() + testoLavoro.slice(1);
+  return { tipo, cliente: { id: scelto.c.id, nome: scelto.c.name }, importo, lavoro: testoLavoro };
+}
+
+async function provaPercorsoRapidoDocumento(body, ctx, user) {
+  if (!body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
+  const testo = ctx.testoUtente;
+  if (!/fattur|preventiv/i.test(testo || "") || !/\d/.test(testo || "")) return null;
+  const clienti = await db(`clients?select=id,name&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken).catch(() => null);
+  const letto = leggiDocumentoSenzaAI(testo, Array.isArray(clienti) ? clienti : []);
+  if (!letto) return null;
+  const input = { cliente_id: letto.cliente.id, tipo: letto.tipo, voci: [{ descrizione: letto.lavoro, quantita: 1, prezzo: letto.importo }] };
+  let esito;
+  try {
+    esito = await TOOLS.crea_preventivo_o_fattura.run(input, ctx);
+  } catch (err) {
+    await registraOperazione(user, "crea_preventivo_o_fattura", input, { errore: err.message }, "errore");
+    return null; // qualcosa non va: il motore completo spiega o chiede, come prima
+  }
+  await registraOperazione(user, "crea_preventivo_o_fattura", input, esito, "auto");
+  ctx.lettoSenzaAI = true;
+  const totaleTesto = Number(esito.totale).toLocaleString("it-IT", { maximumFractionDigits: 2 });
+  const azioni = [{ tool: "crea_preventivo_o_fattura", esito }];
+  return { azioni, payload: { stato: "concluso", testo: `${esito.titolo} per ${esito.cliente}: €${totaleTesto}`, azioni } };
+}
+
 /* Restituisce { payload, azioni } se un percorso rapido ha gestito la
    richiesta, null se va passata al motore completo. */
 async function provaPercorsoRapido(body, ctx, user) {
   if (typeof body.messaggio !== "string") return null;
-  return (await provaPercorsoRapidoCliente(body, ctx, user)) || (await provaPercorsoRapidoImpegno(body, ctx, user));
+  return (await provaPercorsoRapidoDocumento(body, ctx, user)) || (await provaPercorsoRapidoCliente(body, ctx, user)) || (await provaPercorsoRapidoImpegno(body, ctx, user));
 }
 
 async function handleAssistant(req, res, user, accessToken) {

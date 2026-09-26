@@ -3901,3 +3901,20 @@ Banking, sola lettura, tramite un fornitore autorizzato: EON non vede mai
 le credenziali; consenso da rinnovare periodicamente) → accesso del
 commercialista. Nota importante: le fatture PDF di EON oggi non sono
 fatture fiscali valide.
+
+### Meno AI, fase 1 — punto 2 fatto: fatture e preventivi chiari (27/09/2026)
+`leggiDocumentoSenzaAI` + `provaPercorsoRapidoDocumento` (api/index.js),
+prima di tutti gli altri percorsi rapidi. Il codice scrive il documento,
+zero AI, se la frase (dalla Home) ha: UN tipo (fattura o preventivo), UN
+importo ("1.500", "35.090", "1.250,50", "+ IVA"/"più iva" = come sempre
+IVA esclusa), il nome COMPLETO di UN cliente già in anagrafica (parole in
+qualunque ordine: "liberano Piero"), e il lavoro (quello che resta).
+Prima: 2-8 giri di AI, 4-20 secondi. Nel dubbio → AI come prima: cliente
+nuovo o detto a metà ("Lombardi" per "Mario Lombardi"), nome che è anche
+parte di un altro cliente ("Dini" e "Giampiero Dini"), due numeri, IVA
+inclusa, acconti, sconti, quantità/ore/metri, "mila", date, "mandala",
+modifiche, niente lavoro, "1.5". Test `eval/meno-ai-documenti.test.mjs`
+(37, con le 18 frasi vere di settembre); `percorso-documento.test.mjs`
+aggiornato (il caso "Claudia Spori" ora lo legge il codice).
+Non provato dal vivo: Vercel pubblica solo main.
+Prossimi: clienti nuovi; cancellazioni; omonimi con pulsanti; saluti.

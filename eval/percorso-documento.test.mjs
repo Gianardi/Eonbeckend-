@@ -209,7 +209,8 @@ await scenario(
     () => usaStrumento("crea_preventivo_o_fattura", { cliente_id: "x", tipo: "preventivo", voci: [{ descrizione: "Pitturazione bagno", prezzo: 200 }] }),
   ],
   (r, { cliente }) => {
-    verifica("stato concluso con 2 chiamate", r.corpo.stato === "concluso" && chiamateAI.length === 2, `${r.corpo.stato}, ${chiamateAI.length} chiamate`);
+    // Dal 27/09 (meno AI, punto 2): cliente già in anagrafica con nome completo, importo e lavoro → lo scrive il codice
+    verifica("stato concluso, letto dal codice (0 chiamate all'AI)", r.corpo.stato === "concluso" && chiamateAI.length === 0, `${r.corpo.stato}, ${chiamateAI.length} chiamate`);
     verifica("nessun cliente doppione creato", tabelle.clients.length === 1);
     verifica("documento sul cliente esistente", documenti().length === 1 && datiDoc(documenti()[0]).cliente === "Claudia Spori");
     verifica("è un preventivo, e non genera entrate attese", datiDoc(documenti()[0]).tipo === "preventivo" && tabelle.incomes.length === 0);
@@ -254,9 +255,9 @@ await scenario(
 await scenario(
   "Percorso libero con oggetto 'risorsa': crea_preventivo_o_fattura non deve più essere bloccato",
   () => ({ cliente: aggiungiCliente("Walter Tesi") }),
-  "Preventivo facciata e tetto da 150.000 per Walter Tesi",
+  "Preventivo facciata e tetto da 150.000 per Tesi", // solo il cognome: il codice non lo legge da solo, decide l'AI
   [
-    interpreta({ entita: { tipo: "preventivo", cliente_di_riferimento: "Walter Tesi" } }), // documento_completo non dichiarato → percorso libero
+    interpreta({ entita: { tipo: "preventivo", cliente_di_riferimento: "Tesi" } }), // documento_completo non dichiarato → percorso libero
     (corpo) => usaStrumento("crea_preventivo_o_fattura", { cliente_id: clienteRisoltoDa(corpo).id, tipo: "preventivo", voci: [{ descrizione: "Facciata e tetto", prezzo: 150000 }] }),
     () => rispondiTesto("Fatto, preventivo per Walter Tesi da 150.000 € + IVA."),
   ],
@@ -271,8 +272,8 @@ await scenario(
 /* 6 — la compilazione forzata fallisce: si torna al percorso libero, mai un secondo tentativo forzato */
 await scenario(
   "Compilazione forzata non valida → ritorno al percorso libero",
-  () => ({ cliente: aggiungiCliente("Bianchi") }),
-  "Fattura a Bianchi da 500 per pitturazione muri",
+  () => ({ cliente: aggiungiCliente("Mario Bianchi") }),
+  "Fattura a Bianchi da 500 per pitturazione muri", // solo il cognome: decide l'AI (percorso fisso)
   [
     interpreta({ entita: { tipo: "fattura", cliente_di_riferimento: "Bianchi" }, documento_completo: true }),
     () => usaStrumento("crea_preventivo_o_fattura", { cliente_id: "x", tipo: "fattura", voci: [] }), // non valido: nessuna voce
