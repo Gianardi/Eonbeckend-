@@ -3429,14 +3429,93 @@ function ultimoClienteCreatoDalRicordo(ricordo) {
 
 const cifre = (t) => String(t || "").replace(/\D/g, "");
 
+/* ---------- Meno AI, punto 4: clienti nuovi letti dal codice (27/09/2026) ----------
+   "Aggiungi Andrea Gianardi 3476364421", "Luca Ferretti 333 4455667 bagno",
+   "Franco Bake 33325 17133 impianto elettrico" (pagina Clienti), "non Bake
+   ma Bike": nome (1-3 parole), telefono, lavoro li separa il codice. Senza
+   telefono solo con "aggiungi …" esplicito e un nome di 2-3 parole. Nel
+   dubbio → la piccola AI come prima (o il motore completo). */
+const INIZIO_CLIENTE = new Set(["aggiungi", "aggiungimi", "aggiungere", "inserisci", "inseriscimi", "crea", "creami", "salva", "salvami", "registra", "nuovo", "nuova", "il", "un", "una", "cliente", "contatto", "mi", "in", "anagrafica", "rubrica", "ai", "clienti", "tra", "i"]);
+const PRIMA_DEL_TELEFONO = new Set(["tel", "telefono", "cell", "cellulare", "numero", "n", "num", "nr", "cel"]);
+const NON_NOME_CLIENTE = new Set(["di", "da", "a", "al", "alla", "per", "con", "e", "il", "la", "lo", "le", "gli", "un", "una", "in", "su", "che", "mi", "ti", "ci", "si", "ma", "non", "anche", "poi", "cliente", "clienti", "nuovo", "nuova", "aggiungi", "telefono", "numero", "lavoro", "lavori", "via", "piazza", "corso", "viale", "casa", "bagno", "cucina", "tetto", "impianto", "anagrafica", "rubrica", "contatto", "latte", "pane", "lista", "spesa", "chiama", "chiamare", "chiamo", "richiama", "richiamare", "telefona", "telefonare", "senti", "sentire", "scrivi", "scrivere", "manda", "mandare", "segna", "segnami", "ricorda", "ricordami", "fissa", "contatta", "contattare", "vedi", "vedere", "vai", "passa", "passare", "incontro", "appuntamento", "sopralluogo", "dottore", "signor", "signora", "sig"]);
+const maiuscoleNome = (p) => p.toLowerCase().split(/([' -])/).map((x) => x.charAt(0).toUpperCase() + x.slice(1)).join("");
+
+function leggiClienteSenzaAI(testo, daPaginaClienti, ultimo) {
+  if (!eStringaNonVuota(testo) || testo.length > 200) return null;
+  const frase = testo.trim().replace(/[.!]+$/, "").trim();
+
+  // "non Bake ma Bike": corregge una parola del nome del cliente appena aggiunto
+  const corr = frase.match(/^non\s+([^\s\d]+)\s+ma\s+([^\s\d]+)$/i);
+  if (corr) {
+    if (!ultimo) return null;
+    const vecchia = paroleNormalizzate(corr[1])[0], parole = ultimo.nome.trim().split(/\s+/);
+    const i = parole.findIndex((p) => paroleNormalizzate(p)[0] === vecchia);
+    if (i < 0 || paroleNormalizzate(corr[2])[0] === vecchia) return null;
+    parole[i] = maiuscoleNome(corr[2]);
+    return { azione: "correggi_nome_ultimo", nome: parole.join(" ") };
+  }
+  if (/[?;:"()]/.test(frase)) return null;
+
+  const token = frase.split(/\s+/).map((t) => t.replace(/[,.]+$/, "")).filter(Boolean);
+  let verbo = false, parolaCliente = false;
+  while (token.length && INIZIO_CLIENTE.has(paroleNormalizzate(token[0])[0] || "")) {
+    const w = paroleNormalizzate(token[0])[0];
+    if (/^(aggiung|inserisc|crea|salva|registra)/.test(w)) verbo = true;
+    if (w === "cliente" || w === "contatto") parolaCliente = true;
+    token.shift();
+  }
+  // Il telefono: cifre di fila (anche a gruppi), 8-13 in tutto
+  const eNumero = (t) => /^\+?\d[\d./-]*$/.test(t);
+  const inizio = token.findIndex(eNumero);
+  let nome, telefono = "", lavoro = [];
+  if (inizio >= 0) {
+    let fine = inizio;
+    while (fine < token.length && eNumero(token[fine])) fine++;
+    telefono = token.slice(inizio, fine).join(" ");
+    const cifreTel = telefono.replace(/\D/g, "");
+    if (cifreTel.length < 8 || cifreTel.length > 13) return null;
+    nome = token.slice(0, inizio);
+    while (nome.length && PRIMA_DEL_TELEFONO.has(paroleNormalizzate(nome[nome.length - 1])[0] || "")) nome.pop();
+    lavoro = token.slice(fine);
+    if (lavoro.some((t) => /\d/.test(t)) || lavoro.length > 10) return null;
+  } else {
+    if (token.some((t) => /\d/.test(t))) return null;
+    nome = token;
+    const bastano = daPaginaClienti ? nome.length >= 1 : verbo && (nome.length >= 2 || (nome.length === 1 && parolaCliente));
+    if (!bastano) return null;
+  }
+  if (!nome.length || nome.length > 3) return null;
+  if (!nome.every((p) => /^[A-Za-zÀ-ÿ'’-]{2,}$/.test(p) && !NON_NOME_CLIENTE.has(paroleNormalizzate(p)[0] || ""))) return null;
+  while (lavoro.length > 1 && ["per", "di", "e", "a"].includes(paroleNormalizzate(lavoro[0])[0])) lavoro.shift();
+  const testoLavoro = lavoro.join(" ").trim();
+  return {
+    azione: "nuovo",
+    nome: nome.map(maiuscoleNome).join(" "),
+    telefono,
+    lavoro: testoLavoro ? testoLavoro.charAt(0).toUpperCase() + testoLavoro.slice(1) : "",
+  };
+}
+
 async function provaPercorsoRapidoCliente(body, ctx, user) {
   const testo = ctx.testoUtente;
-  if (!candidatoClienteRapido(body, testo)) return null;
+  const candidato = candidatoClienteRapido(body, testo);
+  /* "Aggiungi Luca Liverani" dalla Home (senza la parola "cliente" né un
+     telefono): solo il codice, mai la piccola AI — se non è chiarissimo
+     decide il motore completo come prima. */
+  const soloCodice = !candidato && body.messaggio.startsWith(PREFISSO_RACCONTO) && eStringaNonVuota(testo) && testo.length <= 200
+    && /^\s*(aggiungi|aggiungimi|inserisci)\b/i.test(testo) && !TEMPO_PRECISO.test(testo) && !ESCLUSI_RAPIDO.test(testo);
+  if (!candidato && !soloCodice) return null;
   const ultimo = ultimoClienteCreatoDalRicordo(body.ricordo);
-  const righe = [`Frase del professionista: "${testo}"`];
-  if (ultimo) righe.push(`Cliente appena aggiunto: "${ultimo.nome}".`);
-  const letto = await chiamaAIRapida(STRUMENTO_LEGGI_CLIENTE, righe.join("\n"), ctx.consumo);
+  const dalCodice = leggiClienteSenzaAI(testo, body.messaggio.startsWith(PREFISSO_PAGINA_CLIENTI), ultimo);
+  if (!dalCodice && soloCodice) return null;
+  let letto = dalCodice;
+  if (!letto) {
+    const righe = [`Frase del professionista: "${testo}"`];
+    if (ultimo) righe.push(`Cliente appena aggiunto: "${ultimo.nome}".`);
+    letto = await chiamaAIRapida(STRUMENTO_LEGGI_CLIENTE, righe.join("\n"), ctx.consumo);
+  }
   if (!letto || !eStringaNonVuota(letto.nome)) return null;
+  ctx.lettoSenzaAI = !!dalCodice; // per il registro: letto dal codice, 0 chiamate all'AI
 
   if (letto.azione === "correggi_nome_ultimo") {
     if (!ultimo) return null;

@@ -3934,3 +3934,24 @@ Nel dubbio → AI: frase vaga ("annulla gli appuntamenti"), nome che non
 trova, "mattina/pomeriggio", altre azioni nella stessa frase, giorno della
 settimana uguale a oggi. Test `eval/annulla.test.js` (18).
 Prossimi: clienti nuovi senza AI; omonimi con pulsanti; saluti.
+
+### Meno AI, fase 1 — punto 4 fatto: clienti nuovi, omonimi, saluti (27/09/2026)
+- **Clienti nuovi dal codice** (`leggiClienteSenzaAI`, api/index.js, prima
+  della piccola AI in `provaPercorsoRapidoCliente`): nome 1-3 parole,
+  telefono (8-13 cifre, anche a gruppi, anche dopo "tel"), lavoro dopo il
+  telefono. Senza telefono: dalla pagina Clienti basta il nome; dalla Home
+  solo "aggiungi …" con 2-3 parole ("aggiungi Luca Liverani", prima 7,5 s
+  di Sonnet) o "aggiungi il cliente Rossi". "non Bake ma bike" corretto dal
+  codice. Nome già in anagrafica o simile → motore completo come prima.
+  Parole che non sono nomi (chiama, latte, via, appunto…) → AI. Test
+  `eval/meno-ai-clienti.test.mjs` (21); `percorso-rapido.test.mjs`
+  aggiornato (ora zero chiamate dove prima una piccola).
+- **Omonimi con pulsanti** (index.html, `sceltaTraClienti` in
+  `bollaConversazione`): quando EON chiede "quale dei due?" con un elenco
+  "- Nome" di 2-4 clienti veri, sotto compaiono i pulsanti; un tocco manda
+  il nome come risposta (il percorso rapido la risolve già dal codice).
+  Vale anche per le domande del motore completo.
+- **Saluti senza AI** (`rispostaSaluto`): "ciao", "buongiorno", "come
+  stai", "grazie", "chi sei / cosa sai fare" → risposta subito col nome,
+  solo se la frase è SOLO quello. Test `eval/saluti-scelte.test.js` (11).
+Fase 1 di "meno AI" completata. Non provato dal vivo (Vercel = main).

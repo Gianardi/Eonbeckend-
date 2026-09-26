@@ -359,11 +359,12 @@ await scenario(
   ],
   ([r1, r2], [ai1, ai2]) => {
     const franco = tabelle.clients.find((c) => c.phone === "33325 17133");
-    verifica("creato con una sola chiamata piccola", ai1.length === 1 && ai1[0].tools.length === 1 && r1.corpo.stato === "concluso", `${ai1.length} ${r1.corpo.stato}`);
+    // Dal 27/09 (meno AI, punto 4) nome, telefono e lavoro li separa il codice: zero chiamate
+    verifica("creato dal codice, zero chiamate all'AI", ai1.length === 0 && r1.corpo.stato === "concluso", `${ai1.length} ${r1.corpo.stato}`);
     verifica("telefono e lavoro salvati", franco && franco.description === "Impianto elettrico", JSON.stringify(franco));
     verifica("azioni per l'app: crea_cliente", JSON.stringify(strumentiAzioni(r1)) === '["crea_cliente"]');
     verifica("un cliente, una chat: la chat c'è ed è stata rinominata con lui", tabelle.conversations.length === 1 && tabelle.conversations[0].contact_name === "Franco Bike", tabelle.conversations.map((c) => c.contact_name).join(", "));
-    verifica("correzione con una sola chiamata", ai2.length === 1 && r2.corpo.stato === "concluso");
+    verifica("correzione \"non Bake ma bike\" dal codice, zero chiamate", ai2.length === 0 && r2.corpo.stato === "concluso");
     verifica("nome corretto in Franco Bike, nessun doppione", franco && franco.name === "Franco Bike" && tabelle.clients.length === 2, tabelle.clients.map((c) => c.name).join(", "));
     verifica("azioni per l'app: aggiorna_cliente", JSON.stringify(strumentiAzioni(r2)) === '["aggiorna_cliente"]');
   }
@@ -384,18 +385,18 @@ await scenario(
 await scenario(
   "Cliente con lo stesso nome già in anagrafica → motore completo, nessun doppione",
   () => ({ c: aggiungiCliente("Mario Rossi") }),
-  [{ body: daClienti("Mario Rossi 345 9012394"), copione: [leggiC({ azione: "nuovo", nome: "Mario Rossi", telefono: "345 9012394" }), ...motore] }],
+  [{ body: daClienti("Mario Rossi 345 9012394"), copione: [...motore] }], // letto dal codice, poi: esiste già
   ([r], [ai]) => {
-    verifica("motore completo, nessun cliente creato", ai.length === 3 && eMotoreCompleto(ai[1]) && tabelle.clients.length === 1, `${ai.length} ${tabelle.clients.length}`);
+    verifica("motore completo, nessun cliente creato", ai.length === 2 && eMotoreCompleto(ai[0]) && tabelle.clients.length === 1, `${ai.length} ${tabelle.clients.length}`);
   }
 );
 
 await scenario(
   "Nome simile a un cliente (\"Fabri\" / \"Fabbri\") → motore completo",
   () => ({ c: aggiungiCliente("Fabbri") }),
-  [{ body: daClienti("Fabri 333 1234567"), copione: [leggiC({ azione: "nuovo", nome: "Fabri", telefono: "333 1234567" }), ...motore] }],
+  [{ body: daClienti("Fabri 333 1234567"), copione: [...motore] }], // letto dal codice, poi: simile a Fabbri
   ([r], [ai]) => {
-    verifica("motore completo, nessun cliente creato", ai.length === 3 && tabelle.clients.length === 1);
+    verifica("motore completo, nessun cliente creato", ai.length === 2 && eMotoreCompleto(ai[0]) && tabelle.clients.length === 1);
   }
 );
 
@@ -422,7 +423,8 @@ await scenario(
   null,
   [
     { body: daClienti("Franco Bake 333 2517133"), copione: [leggiC({ azione: "nuovo", nome: "Franco Bake", telefono: "333 2517133" })] },
-    { body: (prec) => daClienti("Non Bake ma bike", { ricordo: prec[0].corpo.azioni }),
+    // "Rossi" non è nel nome: il codice non lo legge, la piccola AI inventa "Luca Verdi" → scartato
+    { body: (prec) => daClienti("Non Rossi ma Bianchi", { ricordo: prec[0].corpo.azioni }),
       copione: [leggiC({ azione: "correggi_nome_ultimo", nome: "Luca Verdi" }), ...motore] },
   ],
   ([r1, r2], [ai1, ai2]) => {
@@ -445,7 +447,7 @@ await scenario(
   null,
   [{ body: nuovo("Luca Ferretti 333 4455667 bagno"), copione: [leggiC({ azione: "nuovo", nome: "Luca Ferretti", telefono: "333 4455667", lavoro: "bagno" })] }],
   ([r], [ai]) => {
-    verifica("una chiamata piccola, cliente creato", ai.length === 1 && forzato(ai[0]) === "leggi_cliente" && tabelle.clients.length === 1 && tabelle.clients[0].name === "Luca Ferretti", `${ai.length} ${tabelle.clients.map((c) => c.name)}`);
+    verifica("letto dal codice (zero chiamate), cliente creato", ai.length === 0 && tabelle.clients.length === 1 && tabelle.clients[0].name === "Luca Ferretti", `${ai.length} ${tabelle.clients.map((c) => c.name)}`);
     verifica("telefono e lavoro salvati", tabelle.clients[0] && tabelle.clients[0].phone === "333 4455667" && tabelle.clients[0].description === "Bagno");
     verifica("nessun appuntamento inventato", tabelle.tasks.length === 0 && appuntamenti().length === 0);
   }
