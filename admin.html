@@ -94,6 +94,15 @@
   .utente-numeri b{ display:block; font-family:'Manrope'; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; }
   .utente-numeri span{ font-size:11px; color:var(--muted); }
 
+  .accesso{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:20px 18px; display:flex; flex-direction:column; gap:12px; max-width:420px; margin:20px auto 0; }
+  .accesso h2{ margin:0; font-family:'Manrope'; font-size:22px; font-weight:800; }
+  .accesso p{ margin:-6px 0 4px; font-size:13.5px; color:var(--muted); }
+  .accesso label{ display:flex; flex-direction:column; gap:6px; font-size:13px; font-weight:600; color:var(--muted); }
+  .accesso input{ border:1px solid var(--border-strong); border-radius:12px; padding:12px 13px; font:inherit; font-size:16px; color:var(--text); background:var(--bg); }
+  .accesso input:focus{ outline:none; border-color:var(--indigo); }
+  .accesso-errore{ min-height:18px; font-size:13px; font-weight:600; color:var(--coral); }
+  .bottone.grande{ padding:13px; font-size:15px; }
+  .accesso-link{ text-align:center; font-size:13px; color:var(--indigo); text-decoration:none; }
   .messaggio-stato{ text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; line-height:1.55; }
   .messaggio-stato h2{ font-family:'Manrope'; color:var(--text); font-size:20px; margin:0 0 8px; }
   .messaggio-stato a{ display:inline-block; margin-top:14px; background:var(--text); color:#fff; text-decoration:none; padding:11px 18px; border-radius:999px; font-weight:700; }
@@ -142,12 +151,38 @@ function statoPagina(titolo, testo, link){
   $("contenuto").innerHTML = `<div class="messaggio-stato"><h2>${esc(titolo)}</h2>${esc(testo)}${link ? `<br><a href="/">Apri EON</a>` : ""}</div>`;
 }
 
+/* Accesso direttamente qui (27/09/2026): sull'iPhone l'icona "EON Admin"
+   nella schermata Home ha una memoria sua e non vede l'accesso fatto in EON.
+   Si entra una volta (Face ID compila email e password salvate) e poi la
+   pagina resta collegata. */
+function mostraAccesso(errore){
+  $("sotto").textContent = "";
+  $("contenuto").innerHTML = `
+    <form class="accesso" id="accesso" autocomplete="on">
+      <h2>Entra</h2>
+      <p>Con lo stesso account di EON.</p>
+      <label>Email<input type="email" id="accEmail" autocomplete="username" inputmode="email" required></label>
+      <label>Password<input type="password" id="accPassword" autocomplete="current-password" required></label>
+      <div class="accesso-errore" id="accErrore">${errore ? esc(errore) : ""}</div>
+      <button type="submit" class="bottone grande" id="accEntra">Entra</button>
+      <a class="accesso-link" href="/">Password dimenticata? Recuperala da EON</a>
+    </form>`;
+  $("accesso").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const bt = $("accEntra");
+    bt.disabled = true; bt.textContent = "Entro…";
+    const { error } = await client.auth.signInWithPassword({ email: $("accEmail").value.trim(), password: $("accPassword").value });
+    if(error){ mostraAccesso(/invalid/i.test(error.message) ? "Email o password sbagliate." : "Accesso non riuscito: " + error.message); return; }
+    carica();
+  });
+}
+
 async function carica(){
   $("sotto").textContent = "Carico…";
   if(!client){ statoPagina("Connessione assente", "Non riesco a raggiungere EON. Controlla la rete e riprova."); return; }
   const { data } = await client.auth.getSession();
   const sessione = data && data.session;
-  if(!sessione){ statoPagina("Entra prima in EON", "Apri EON con il tuo account, poi torna su questa pagina.", true); return; }
+  if(!sessione){ mostraAccesso(); return; }
   token = sessione.access_token;
   let r;
   try{
@@ -251,6 +286,9 @@ function disegna(){
     b.addEventListener("focus", () => mostra(b));
   });
   grafico.addEventListener("mouseleave", () => { sugg.hidden = true; });
+
+  $("contenuto").insertAdjacentHTML("beforeend", '<p style="text-align:center;margin:18px 0 0;"><button type="button" class="aggiorna" id="esci">Esci da EON Admin</button></p>');
+  $("esci").addEventListener("click", async () => { await client.auth.signOut(); mostraAccesso(); });
 
   const visto = $("visti");
   if(visto) visto.addEventListener("click", async () => {
