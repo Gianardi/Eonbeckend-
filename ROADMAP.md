@@ -287,6 +287,19 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
     (invio diretto allo SdI tramite servizio ponte), da valutare più
     avanti come ricavo in più. Prima di farla: prove nell'ambiente di
     test dello SdI.
+    **Valutazione (27/09, voto 8/10) — cosa tenere d'occhio:**
+    1. Verificare che "tutti hanno già un servizio" sia vero: molti
+       piccoli artigiani fanno fare tutto al commercialista o usano il
+       sito gratuito dell'Agenzia delle Entrate (niente collegamento
+       possibile). Per loro serve almeno "mando i dati al commercialista".
+    2. Ogni collegamento costa lavoro: farne 1-2, i più usati.
+    3. Dipendenza: se Fatture in Cloud cambia regole o fa un suo
+       assistente AI, dipendiamo da loro → i dati restano anche in EON.
+    4. Il valore della strada (A) non è il guadagno sulla singola fattura
+       (minimo) ma poter dire "con EON non paghi più il programma delle
+       fatture" (100-250 € l'anno risparmiati): argomento di vendita.
+    **Domande ai primi 10 artigiani:** "Con che programma fai le
+    fatture?" e "Le fai tu o il commercialista?".
   - *Banca.* Tramite un fornitore autorizzato (Tink, Salt Edge, Yapily,
     Enable Banking…; GoCardless Bank Account Data ha chiuso). Prezzo per
     conto collegato al mese, solo su preventivo, di solito con un minimo
