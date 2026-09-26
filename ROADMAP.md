@@ -256,6 +256,34 @@ Obiettivo: EON fa da solo tutto quello che può, l'AI resta solo per i casi
 difficili. Meno costi, risposte più veloci. Traguardo realistico: **60–70%
 delle richieste senza AI** (stima, da confermare coi dati veri).
 
+**Il percorso deciso con Andrea (26/09/2026)** — principio: la dipendenza
+dall'AI scende piano piano, **la qualità non scende mai**.
+
+- **Fase 1 — adesso**: misurare (token e tipo di ogni richiesta) e
+  analizzare cosa EON può già fare scritto nel codice, senza AI e senza
+  perdere qualità né velocità; poi farlo (passi 0–2 qui sotto). Prima del
+  lancio: la base del pannello EON Admin, così il monitoraggio c'è dal
+  primo cliente, e il consenso nella privacy per usare i dati (anonimi)
+  per migliorare EON.
+- **Fase 2 — lancio a 10 → 20 → 50 → 100 clienti**: parte l'apprendimento
+  (passo 3). Le situazioni passano una alla volta a EON solo quando hanno
+  dimostrato di essere fatte bene quanto dall'AI.
+- **Sempre, in EON Admin**: la percentuale di richieste fatte da EON e
+  quelle fatte dall'AI, e lo stato di ogni situazione (la fa EON / la fa
+  l'AI / quanto le manca per passare a EON). Vedi 5c.
+- **Fase finale — il modello nostro**: prendere un modello AI aperto (es.
+  Llama, Mistral), specializzarlo sul lavoro di EON coi dati di EON
+  (azioni confermate e correzioni degli utenti) e farlo girare sui nostri
+  server. Fa la routine, Claude resta per i casi difficili. Conviene con
+  centinaia di utenti (stima: centinaia–migliaia di € per addestrarlo,
+  centinaia–1.000+ €/mese di server). Da verificare prima: le regole di
+  Anthropic sull'uso delle risposte di Claude per addestrare altri modelli.
+- **Curva attesa** (stima): ~90% con AI all'inizio → ~50% dopo la fase 1
+  → ~30% dopo l'apprendimento; il 20–30% finale (frasi nuove, domande
+  tecniche, testi, foto) resta all'AI o al modello nostro.
+
+I passi tecnici:
+
 1. **Passo 0 — Misurare** [Claude]: salvare i token veri di ogni richiesta
    e il "tipo" di richiesta (spostare appuntamento, nuovo cliente, domanda
    tecnica…). Senza questo ogni cifra resta una stima.
