@@ -76,7 +76,7 @@ pagina cliente chiusi e la professione bloccata in produzione.
 | **Vercel Pro** (~20 $/mese) | [Andrea] | Il piano gratuito vieta l'uso commerciale e ha il limite di pubblicazioni che ci ha bloccato il 25/09. |
 | **Supabase Pro** (~25 $/mese) | [Andrea] | Backup giornalieri, nessuna pausa del progetto. |
 | **Servizio email vero** (es. Resend) | [insieme] | Oggi Supabase manda email solo a noi del team. Poi: email in italiano e **conferma email obbligatoria** accesa. |
-| **Privacy, termini, consenso GDPR** | [insieme] | Per la prova: a nome di Andrea (persona fisica). Per vendere: con la società. Io preparo testi e casella "accetto"; li fai controllare a legale/commercialista. |
+| **Privacy, termini, consenso GDPR** | [insieme] | **Fatto per la prova (27/09)**: /privacy, /termini (con accordo art. 28), casella "Accetto", registro dei trattamenti. Da fare: controllo di un legale, poi versione con la società; storage privato per le foto. |
 | **Dominio tuo** (es. eon.it) | [insieme] | Tu lo compri (~10–20 €/anno), io lo collego al posto di eonbeckend.vercel.app. |
 | **Avviso automatico degli errori** | [Claude] | **Fatto (27/09)**: ogni errore dell'app e del server va nel pannello Admin (`/admin`, pagina a parte, non dentro l'app). Notifica sul telefono anche ad app chiusa: basta impostare `AVVISO_ERRORI_URL` su Vercel (es. un canale ntfy.sh) [Andrea]. |
 | **Compressione delle foto** (subito dopo il merge) | [Claude] | Come WhatsApp: da ~3 MB a ~300 KB per foto, a occhio uguali (lato lungo ~2000 px). Le foto di documenti da leggere (fatture, DURC) restano più nitide. Spazio ~10 volte meno, caricamento più veloce in cantiere. |
@@ -566,6 +566,15 @@ memoria del lavoro difficilmente cambia (pochi clienti persi).
 
 ---
 
+## Fatto il 27/09/2026 (notte)
+
+Privacy per la prova: informativa (/privacy), termini con accordo art. 28
+(/termini), riga privacy sulla pagina del cliente, registro dei trattamenti
+(docs/), casella "Accetto" e card per chi c'era già, pulizia automatica dei
+registri · "Invia il preventivo a Rossi" con un comando (WhatsApp/Mail
+pronti). **Da fare**: storage privato per foto e documenti (oggi indirizzi
+pubblici lunghi e casuali); controllo di un legale; DPA dei fornitori.
+
 ## Idea commerciale: foto → prezzi e acquisto (Andrea, 27/09/2026)
 
 Dalla foto con la descrizione EON riconosce l'oggetto (es. "rubinetto
@@ -578,7 +587,10 @@ Serve: iscrizione ai programmi di affiliazione [Andrea].
 ## Importare i clienti e prenderli dalla rubrica
 
 Fatto (27/09): import da file (.vcf della rubrica, Excel/CSV del programma
-delle fatture). Più avanti: pulsante "Prendi dalla rubrica" con l'app
+delle fatture). **Da fare** [Claude, ~1 ora]: pulsante "Scegli dalla
+rubrica" dove il telefono lo permette (oggi Android con Chrome: Contact
+Picker API), stessa scelta con le caselle e niente doppioni; da provare su
+un Android vero. Più avanti: pulsante "Prendi dalla rubrica" con l'app
 sull'App Store (su iPhone da Safari Apple non lo permette); allineamento
 automatico con Fatture in Cloud (strada B). Non si può: leggere i contatti
 di WhatsApp, prendere dati "da internet".

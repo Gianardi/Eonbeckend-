@@ -987,6 +987,11 @@
     font-size:13.5px; border-radius:14px;
   }
   .add-btn svg{ width:16px; height:16px; }
+  .ob-accetto{ display:flex; align-items:flex-start; gap:10px; margin-top:4px; font-size:12.5px; line-height:1.5; color:var(--muted); cursor:pointer; }
+  .ob-accetto input{ width:20px; height:20px; flex:none; margin-top:1px; accent-color:var(--indigo); }
+  .ob-accetto a{ color:var(--text); font-weight:700; }
+  .termini-card{ display:flex; flex-direction:column; gap:12px; }
+  .termini-card p{ margin:0; font-size:14px; line-height:1.55; color:var(--muted); }
   .importa-clienti-btn{ background:var(--card); color:var(--text); border:1px solid var(--border); box-shadow:none; margin-top:-4px; }
   .importa-card{ display:flex; flex-direction:column; gap:10px; }
   .importa-riepilogo{ font-size:13px; color:var(--muted); line-height:1.5; }
@@ -2690,6 +2695,10 @@
           <input type="password" id="obPassword" name="password" autocomplete="new-password" placeholder="Almeno 8 caratteri">
         </div>
         <button type="button" class="ob-link-piccolo" id="obPasswordDimenticata" style="display:none;">Password dimenticata?</button>
+        <label class="ob-accetto" id="obAccettoRow">
+          <input type="checkbox" id="obAccetto">
+          <span>Ho letto e accetto i <a href="/termini" target="_blank" rel="noopener">Termini d'uso</a> (con l'accordo sul trattamento dei dati dei miei clienti) e l'<a href="/privacy" target="_blank" rel="noopener">Informativa privacy</a>.</span>
+        </label>
       </div>
         <button type="submit" aria-hidden="true" tabindex="-1" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;"></button>
       </form>
@@ -9312,6 +9321,11 @@ function collegaHubRacconta(){
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
     }
+    if(provaInvioDocumento(testo, chiudiHubAI)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      return;
+    }
     if(provaCancellaAppunto(testo)){
       campo.value = "";
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
@@ -11883,6 +11897,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       hint.textContent = TESTO_HINT_BASE;
       return;
     }
+    /* "Invia il preventivo a Rossi": WhatsApp o Mail già pronti, senza AI.
+       Subito, prima di ogni attesa: così il tocco su Invia vale ancora per
+       aprire l'altra app. */
+    if(!inContinuazione && provaInvioDocumento(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
+    }
 
     /* Stesso principio, per le piccole domande di lettura rispondibili
        dai dati già in memoria (es. "appuntamenti di oggi"): anche qui
@@ -13737,6 +13759,87 @@ function numeroWhatsApp(telefono){
   if(n.length <= 10 && n.startsWith("3")) n = "39" + n; // cellulare italiano senza prefisso
   return n;
 }
+function mailtoDocumento(d, cliente){
+  const oggetto = (d.tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + d.numero;
+  const a = cliente && cliente.email ? encodeURIComponent(cliente.email).replace(/%40/g, "@") : "";
+  return "mailto:" + a + "?subject=" + encodeURIComponent(oggetto) + "&body=" + encodeURIComponent(testoInvioDocumento(d));
+}
+
+/* ===== "Invia il preventivo a Rossi" con un solo comando (27/09/2026) =====
+   Andrea: "invio automatico con un solo comando: invia preventivo X a
+   cliente Y". Senza AI, con i documenti già nell'app:
+   - trova il documento: l'ultimo di quel cliente, o il numero detto
+     ("la fattura 3 a Rossi");
+   - canale: quello detto ("su WhatsApp", "per email"), altrimenti WhatsApp
+     se il cliente ha il telefono, l'email se ha l'email, se no la chat EON;
+   - apre WhatsApp o la Mail con il messaggio già scritto e il numero o
+     l'indirizzo del cliente: resta solo "Invia" (il telefono non permette
+     a un'app di mandare al posto tuo). Sempre una card con gli altri modi
+     (PDF, WhatsApp, Email, EON) se preferisci un altro canale. */
+const VERBO_INVIO = "(?:mi\\s+)?(?:invia|inviare|invialo|inviala|manda|mandare|mandalo|mandala|mandagli|mandale|spedisci|spedire|gira|girare|inoltra|inoltrare)";
+const CANALE_INVIO = "(?:\\s+(?:su|con|per|via|tramite|in|col)\\s+(whatsapp|whats app|wa|email|e mail|mail|posta|eon|chat))?";
+function capisciInvioDocumento(testo){
+  const n = normalizzaComando(testo);
+  let m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:(?:il|la|l|lo|un|una)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:a|al|alla|allo|ad|per|di|del|della|dello)\\s+(.+?))?" + CANALE_INVIO + "$"));
+  let tipo, numero, nome, canale;
+  if(m){ [, , tipo, numero, nome, canale] = m; }
+  else {
+    m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:a|al|alla|allo|ad)\\s+(.+?)\\s+(?:(?:il|la|l|lo)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?" + CANALE_INVIO + "$"));
+    if(!m) return null;
+    [, nome, , tipo, numero, canale] = m;
+  }
+  if(nome && /\d/.test(nome)) return null; // "manda la fattura da 500 a Rossi": è un documento nuovo, decide chi lo crea
+  const parole = (nome || "").split(" ").filter(p => p && !/^(il|la|lo|i|gli|le|sig|signor|signora|cliente)$/.test(p));
+  if(!nome && !numero) return null;
+  const c = canale ? (/whats|^wa$/.test(canale) ? "whatsapp" : /mail|posta/.test(canale) ? "email" : "eon") : "";
+  return { tipo, numero: numero ? parseInt(numero, 10) : null, parole, canale: c };
+}
+function documentoDaInviare(r){
+  const nomeDi = d => normalizzaComando(d.dati.cliente || d.clienteChat || "").split(" ").filter(Boolean);
+  return documentiVeri().filter(d => d.dati.tipo === r.tipo)
+    .filter(d => !r.numero || parseInt(d.dati.numero, 10) === r.numero)
+    .find(d => r.parole.every(p => nomeDi(d).includes(p))) || null; // documentiVeri: dal più recente
+}
+function provaInvioDocumento(testo, primaDiAprire){
+  const r = capisciInvioDocumento(testo);
+  if(!r) return false;
+  if(typeof primaDiAprire === "function") primaDiAprire();
+  const d = documentoDaInviare(r);
+  const cosa = r.tipo === "fattura" ? "fattura" : "preventivo";
+  if(!d){
+    const chi = r.parole.length ? " per " + r.parole.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ") : "";
+    mostraRispostaEON(testo, "Non trovo " + (r.tipo === "fattura" ? "una fattura" : "un preventivo") + (r.numero ? " n. " + r.numero : "") + chi + ". Se vuoi, fallo prima: «" + cosa + " da 500 per" + (chi ? chi.slice(4) : " Rossi") + "».", { titolo: "Documento non trovato" });
+    return true;
+  }
+  const nomeCliente = d.dati.cliente || d.clienteChat;
+  const cliente = clients.find(c => nomeChiave(c.name) === nomeChiave(d.clienteChat)) || clients.find(c => nomeChiave(c.name) === nomeChiave(nomeCliente)) || null;
+  const canale = r.canale || (cliente && cliente.phone ? "whatsapp" : cliente && cliente.email ? "email" : "eon");
+  let esito;
+  if(canale === "whatsapp"){
+    const numero = numeroWhatsApp(cliente && cliente.phone);
+    const aperta = window.open("https://wa.me/" + numero + "?text=" + encodeURIComponent(testoInvioDocumento(d.dati)), "_blank");
+    esito = !aperta ? "Tocca WhatsApp qui sotto per aprirlo con il messaggio pronto."
+      : numero ? "Ho aperto WhatsApp con il messaggio pronto per " + nomeCliente + ": tocca Invia."
+      : nomeCliente + " non ha il numero in EON: in WhatsApp scegli tu il contatto, il messaggio è pronto.";
+  } else if(canale === "email"){
+    apriLinkEsterno(mailtoDocumento(d.dati, cliente));
+    esito = cliente && cliente.email ? "Ho aperto la Mail con l'email pronta per " + cliente.email + ": tocca Invia."
+      : nomeCliente + " non ha l'email in EON: scrivi tu l'indirizzo, il resto è pronto.";
+  } else {
+    inviaRisorsaEonInterna(d.clienteChat, "Le ho mandato " + (r.tipo === "fattura" ? "la fattura" : "il preventivo") + " n. " + d.dati.numero + " (totale €" + Number(d.dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 }) + "): lo trova qui in chat.");
+    return true;
+  }
+  // Card: cosa è partito, e gli altri modi (PDF da allegare, Email, EON)
+  const corpo = document.createElement("div");
+  corpo.className = "termini-card";
+  const p = document.createElement("p");
+  p.textContent = esito + " Per allegare il PDF tocca PDF.";
+  corpo.appendChild(p);
+  corpo.appendChild(creaRigaInvioDocumento(() => d.dati, d.clienteChat));
+  apriRisorsaCard((r.tipo === "fattura" ? "Fattura " : "Preventivo ") + d.dati.numero + " · " + nomeCliente, corpo);
+  return true;
+}
+
 function creaRigaInvioDocumento(getDati, clienteNome){
   const riga = document.createElement("div");
   riga.className = "scheda-invio";
@@ -13749,8 +13852,7 @@ function creaRigaInvioDocumento(getDati, clienteNome){
     } },
     { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', azione: () => {
       const d = getDati();
-      const oggetto = (d.tipo === "fattura" ? "Fattura" : "Preventivo") + " n. " + d.numero;
-      window.location.href = "mailto:?subject=" + encodeURIComponent(oggetto) + "&body=" + encodeURIComponent(testoInvioDocumento(d));
+      window.location.href = mailtoDocumento(d, cliente);
     } },
     { nome: "EON", icona: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', azione: () => {
       const d = getDati();
@@ -15007,6 +15109,7 @@ function setObAuthMode(mode){
   document.getElementById("obTabLogin").classList.toggle("active", mode === "login");
   document.getElementById("obNameRow").style.display = mode === "signup" ? "flex" : "none";
   document.getElementById("obBusinessRow").style.display = mode === "signup" ? "flex" : "none";
+  document.getElementById("obAccettoRow").style.display = mode === "signup" ? "flex" : "none";
   document.getElementById("obAuthLabel").textContent = mode === "signup" ? "Ultimo passo: crea il tuo account" : "Bentornato: accedi al tuo account";
   document.getElementById("obFinishBtn").childNodes[0].textContent = mode === "signup" ? "Inizia a usare EON " : "Accedi ";
   document.getElementById("obAuthError").style.display = "none";
@@ -15075,11 +15178,13 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       const businessName = document.getElementById("obBusinessName").value.trim();
       if(!name){ throw new Error("Inserisci il tuo nome."); }
       if(password.length < 8){ throw new Error("La password deve avere almeno 8 caratteri."); }
+      if(!document.getElementById("obAccetto").checked){ throw new Error("Per creare l'account spunta la casella: accetti i Termini d'uso e l'Informativa privacy."); }
+      const accettatiIl = new Date().toISOString();
 
       const { data, error } = await supabaseClient.auth.signUp({
         email, password,
         options: {
-          data: { full_name: name, business_name: businessName, profession: obSelectedProfession },
+          data: { full_name: name, business_name: businessName, profession: obSelectedProfession, termini_versione: TERMINI_VERSIONE, termini_accettati_il: accettatiIl },
           emailRedirectTo: indirizzoApp()
         }
       });
@@ -15097,7 +15202,8 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       // aggiungiamo anche business_name e ribadiamo profession per sicurezza)
       if(data.user){
         const { error: profErr } = await supabaseClient.from("profiles").update({
-          full_name: name, business_name: businessName, profession: obSelectedProfession
+          full_name: name, business_name: businessName, profession: obSelectedProfession,
+          termini_versione: TERMINI_VERSIONE, termini_accettati_il: accettatiIl
         }).eq("id", data.user.id);
         if(profErr) throw profErr;
         ricordaProfilo({ full_name: name, business_name: businessName, profession: obSelectedProfession }, email);
@@ -15124,6 +15230,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       if(profile){
         obSelectedProfession = profile.profession;
         ricordaProfilo(profile, data.user.email);
+        controllaTerminiAccettati(profile, data.user);
         const firstName = (profile.full_name || "Marco").split(" ")[0];
         pageMeta.home.title = "Buongiorno, " + firstName;
         document.getElementById("pageTitle").textContent = pageMeta.home.title;
@@ -15287,6 +15394,7 @@ async function initApp(){
       if(profile){
         document.getElementById("onboardingScreen").classList.add("hidden");
         ricordaProfilo(profile, data.session.user.email);
+        controllaTerminiAccettati(profile, data.session.user);
         const firstName = (profile.full_name || "Marco").split(" ")[0];
         pageMeta.home.title = "Buongiorno, " + firstName;
         document.getElementById("pageTitle").textContent = pageMeta.home.title;
@@ -15462,6 +15570,40 @@ document.getElementById("topbarImpostazioni").addEventListener("click", () => {
   if(apri) apri();
 });
 
+/* ---- Termini d'uso e privacy accettati (27/09/2026) ----
+   Chi si registra spunta la casella; chi c'era già vede una volta la card
+   "Termini e privacy". Si salva data e versione nel profilo; se i testi
+   cambiano (nuova TERMINI_VERSIONE) la card torna. */
+var TERMINI_VERSIONE = "1.0";
+async function salvaTerminiAccettati(){
+  if(!isDbReady()) return false;
+  const { error } = await supabaseClient.from("profiles").update({ termini_versione: TERMINI_VERSIONE, termini_accettati_il: new Date().toISOString() }).eq("id", currentSession.user.id);
+  return !error;
+}
+function controllaTerminiAccettati(profilo, utente){
+  if(!profilo || !isDbReady() || profilo.termini_versione === TERMINI_VERSIONE) return;
+  // Accettati alla registrazione con la conferma via email: sono nei dati dell'account
+  const meta = utente && utente.user_metadata;
+  if(meta && meta.termini_versione === TERMINI_VERSIONE){ salvaTerminiAccettati(); return; }
+  setTimeout(() => {
+    const corpo = document.createElement("div");
+    corpo.className = "termini-card";
+    corpo.innerHTML = `<p>Per continuare a usare EON durante la prova gratuita, leggi e accetta i testi: spiegano quali dati trattiamo, dove stanno e le regole per i dati dei tuoi clienti.</p>
+      <p><a href="/termini" target="_blank" rel="noopener">Termini d'uso</a> · <a href="/privacy" target="_blank" rel="noopener">Informativa privacy</a></p>
+      <label class="ob-accetto"><input type="checkbox" id="terminiSpunta"><span>Ho letto e accetto i Termini d'uso (con l'accordo sul trattamento dei dati dei miei clienti) e l'Informativa privacy.</span></label>
+      <button type="button" class="importa-vai" id="terminiAccetto" disabled>Accetto</button>
+      <div class="imp-esito" id="terminiEsito"></div>`;
+    const b = corpo.querySelector("#terminiAccetto");
+    corpo.querySelector("#terminiSpunta").addEventListener("change", (e) => { b.disabled = !e.target.checked; });
+    b.addEventListener("click", async () => {
+      b.disabled = true;
+      if(await salvaTerminiAccettati()){ chiudiRisorsaCard(); showAIToast("Grazie", "Termini e privacy accettati."); }
+      else { esitoImp("terminiEsito", "Non salvato: controlla la connessione e riprova.", false); b.disabled = false; }
+    });
+    apriRisorsaCard("Termini e privacy", corpo);
+  }, 900);
+}
+
 /* ---- Impostazioni: account e voci a card (25/09/2026) ---- */
 let profiloUtente = null;
 const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
@@ -15580,6 +15722,10 @@ suTocco("impVoceAiuto", () => {
         <div class="module-icon" style="background:var(--ink-3, #64748b);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div>
         <div class="azienda-link-card-body"><div class="module-title">Registro AI</div><div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div></div>
       </button>
+      <a class="azienda-link-card imp-aiuto-voce" href="/privacy" target="_blank" rel="noopener" style="text-decoration:none; color:inherit;">
+        <div class="module-icon" style="background:var(--ink-3, #64748b);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/></svg></div>
+        <div class="azienda-link-card-body"><div class="module-title">Privacy e termini</div><div class="module-sub">Quali dati tratta EON e le regole d'uso</div></div>
+      </a>
       <button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="installa">
         <div class="module-icon" style="background:var(--indigo);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
         <div class="azienda-link-card-body"><div class="module-title">Metti EON sulla Home</div><div class="module-sub">Si apre come un'app, con la sua icona</div></div>

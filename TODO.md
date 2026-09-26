@@ -4182,3 +4182,57 @@ Frasi vere dai registri (`ai_request_log`, `ai_audit_log`):
   Non provato su un iPhone vero (il percorso di esportazione dei Contatti
   è quello di iOS 16+).
 - Test: `eval/appunti-documenti-import.test.js` (26).
+
+### Da fare: "Scegli dalla rubrica" su Android (deciso con Andrea, 27/09/2026)
+
+Andrea: "non c'è un modo di selezionare direttamente dalla rubrica?". Su
+iPhone da Safari no (Apple non lo permette alle app web; arriva con l'app
+sull'App Store). Su Android con Chrome sì: `navigator.contacts.select(["name",
+"tel", "email"], { multiple: true })`. Da fare: pulsante nella card "Importa
+clienti" visibile solo se `"contacts" in navigator`, poi la stessa lista con
+le caselle (`preparaContatti` / `importaContattiScelti`). Stima: ~1 ora con i
+test (Android simulato); da provare su un Android vero (socio o artigiano).
+
+### Privacy per la prova gratuita + "Invia il preventivo a…" (27/09/2026)
+
+**Privacy** (a nome di Andrea, persona fisica; da far controllare a un legale
+prima di vendere):
+- `privacy.html` (/privacy): titolare, due ruoli (EON titolare dei dati
+  dell'utente, responsabile per i dati dei suoi clienti), dati trattati,
+  basi giuridiche, fornitori veri con il luogo (Supabase e Vercel a Londra,
+  Anthropic e OpenAI negli USA, MET Norway/OpenStreetMap, Google Fonts,
+  jsDelivr), conservazione (registri 12 mesi), sicurezza, diritti, sezione
+  per i clienti finali (#clienti).
+- `termini.html` (/termini): prova gratuita, AI da controllare, EON non è
+  fatturazione elettronica SdI, tasse = stima, responsabilità, **accordo
+  art. 28** (#accordo) per i dati dei clienti degli artigiani, legge italiana.
+- `cliente.html`: riga "I tuoi dati li gestisce il professionista…" con il
+  link alla sezione per i clienti.
+- `docs/registro-trattamenti.md`: registro interno (art. 30), sub-responsabili,
+  misure di sicurezza, cosa fare in caso di violazione.
+- **Casella "Accetto"** alla registrazione (obbligatoria) e card "Termini e
+  privacy" una volta per chi c'era già; salvate data e versione
+  (`supabase/termini_accettati.sql`, staging + produzione:
+  `profiles.termini_accettati_il`, `termini_versione`; `TERMINI_VERSIONE` in
+  index.html). Impostazioni → Aiuto → "Privacy e termini".
+- **Pulizia automatica** (`supabase/pulizia_registri.sql`, pg_cron, staging +
+  produzione, ogni notte alle 03:17 UTC): ai_request_log, ai_audit_log,
+  app_errori oltre 12 mesi; ai_runs oltre 30 giorni; feedback oltre 24 mesi.
+- **Da fare** (trovato scrivendo l'informativa): foto e documenti nello
+  storage hanno indirizzi pubblici (lunghi e casuali, ma chi ha il link li
+  apre) → storage privato con link firmati. Poi: DPA dei fornitori a nome
+  della società; valutare di ospitare in EON caratteri e libreria Supabase.
+
+**"Invia il preventivo a Rossi" con un comando** (index.html,
+`provaInvioDocumento`, senza AI, prima di ogni attesa così il tocco vale per
+aprire l'altra app): trova il documento (l'ultimo del cliente o il numero
+detto: "la fattura 3 a Rossi"), canale detto ("su WhatsApp", "per email") o
+automatico (WhatsApp se c'è il telefono, poi email, poi chat EON); apre
+WhatsApp con numero e messaggio pronti o la Mail con indirizzo, oggetto e
+testo; card con gli altri modi (PDF, WhatsApp, Email, EON). Resta un tocco su
+"Invia": nessuna app può mandare al posto dell'utente. Il PDF non va dentro
+WhatsApp da solo (si allega con il tasto PDF). "Manda la fattura da 500 a
+Rossi" non è un invio (è un documento nuovo). Anche l'Email dalla scheda del
+documento ora ha l'indirizzo del cliente.
+Test: `eval/invio-privacy.test.js` (19); aggiornati account, faceid,
+impostazioni.

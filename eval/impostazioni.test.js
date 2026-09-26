@@ -34,7 +34,7 @@ async function main() {
           select: () => q, not: () => q, is: () => q, order: () => q, limit: () => q, in: () => q,
           eq: () => q,
           update: (patch) => ({ eq: async () => { window.__chiamate.push({ tabella, patch }); return { error: null }; } }),
-          single: async () => ({ data: tabella === "profiles" && !uscito() ? { id: "u1", full_name: "Andrea Gianardi", business_name: "Gianardi Costruzioni", profession: "edile" } : null, error: null }),
+          single: async () => ({ data: tabella === "profiles" && !uscito() ? { id: "u1", full_name: "Andrea Gianardi", business_name: "Gianardi Costruzioni", profession: "edile", termini_versione: "1.0" } : null, error: null }),
           then: (ok) => ok({ data: [], error: null }),
         };
         return q;
@@ -109,7 +109,7 @@ async function main() {
     await page.evaluate(() => chiudiRisorsaCard());
     await page.click("#impVoceAiuto");
     const aiuto = await page.evaluate(() => ({ titolo: document.getElementById("risorsaTitolo").textContent, voci: [...document.querySelectorAll("#risorsaCorpo .module-title")].map((e) => e.textContent) }));
-    verifica("Aiuto: Manda un feedback, Registro AI, Metti EON sulla Home", aiuto.titolo === "Aiuto" && JSON.stringify(aiuto.voci) === '["Manda un feedback","Registro AI","Metti EON sulla Home"]', JSON.stringify(aiuto));
+    verifica("Aiuto: Manda un feedback, Registro AI, Privacy e termini, Metti EON sulla Home", aiuto.titolo === "Aiuto" && JSON.stringify(aiuto.voci) === '["Manda un feedback","Registro AI","Privacy e termini","Metti EON sulla Home"]', JSON.stringify(aiuto));
     await page.click('#risorsaCorpo [data-azione="installa"]');
     const installa = await page.evaluate(() => ({ titolo: document.getElementById("risorsaTitolo").textContent, passi: document.querySelectorAll("#risorsaCorpo .imp-installa-passi li").length, icona: document.querySelector("#risorsaCorpo .imp-installa img").getAttribute("src") }));
     verifica("\"Metti EON sulla Home\": i passi per il telefono, con l'icona", installa.titolo === "Metti EON sulla Home" && installa.passi === 3 && installa.icona === "/icone/apple-touch-icon.png", JSON.stringify(installa));

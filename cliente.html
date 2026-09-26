@@ -261,6 +261,8 @@
   .gate-logo .o svg{ width:16px; height:16px; }
   .gate-text{ font-size:13.5px; color:var(--muted); line-height:1.6; max-width:300px; }
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
+  .privacy-cliente{ margin:22px 4px 8px; font-size:12px; line-height:1.5; color:var(--muted); }
+  .privacy-cliente a{ color:inherit; font-weight:700; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -306,6 +308,8 @@
 
       <div class="section-title">Documenti e aggiornamenti</div>
       <div id="docList"></div>
+      <!-- Privacy per il cliente finale (27/09/2026): chi tratta i suoi dati -->
+      <p class="privacy-cliente">I tuoi dati li gestisce il professionista che ti ha mandato questo link; EON è lo strumento che usa. Il link è personale: non inoltrarlo. <a href="/privacy#clienti" target="_blank" rel="noopener">Privacy</a></p>
     </div>
   </div>
 
