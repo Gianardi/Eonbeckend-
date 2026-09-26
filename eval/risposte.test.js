@@ -88,7 +88,26 @@ async function main() {
     await page.waitForFunction(() => /segnato con Giampiero/.test(document.getElementById("risorsaCorpo").innerText), null, { timeout: 4000 });
     const ultima = richieste.at(-1);
     verifica("la risposta scritta nella card continua la stessa conversazione", ultima.runId === "r2" && ultima.messaggio === "giampiero", JSON.stringify(ultima));
-    verifica("la seconda card ha titolo EON (non \"Giampiero\")", (await leggiCard()).titolo === "EON");
+    const conv = await page.evaluate(() => ({ titolo: document.getElementById("risorsaTitolo").textContent, bolle: [...document.querySelectorAll("#risorsaCorpo .scheda-bolla")].map((b) => b.className.replace("scheda-bolla ", "") + ":" + b.innerText.trim()) }));
+    verifica("la conversazione resta nella STESSA card: richiesta, domanda, risposta, esito", conv.titolo === "Appuntamento con dini domani alle 10" && JSON.stringify(conv.bolle) === JSON.stringify(["me:appuntamento con dini domani alle 10", "eon:Ci sono due Dini: Giampiero Dini e Sara Dini. Quale intendi?", "me:giampiero", "eon:Ok, segnato con Giampiero Dini alle 10."]), JSON.stringify(conv));
+    await page.click("#risorsaChiudi");
+
+    // Preventivo: EON chiede le voci, si risponde nella card, il preventivo si apre lì
+    risposte = [
+      { stato: "in_attesa_risposta", runId: "r3", testo: "Ok, te lo preparo: mi dai le voci e i prezzi del preventivo?", azioni: [] },
+      { stato: "in_attesa_risposta", runId: "r3", testo: "IVA al 22%?", azioni: [] },
+      { stato: "concluso", runId: "r3", testo: "", azioni: [{ tool: "crea_preventivo_o_fattura", esito: { id: "m9", titolo: "Preventivo n. 7", totale: 366, cliente: "Lorenzo Guaschina", dati: { tipo: "preventivo", numero: "7", cliente: "Lorenzo Guaschina", voci: [{ desc: "Porta", qta: 1, prezzo: 300 }], aliquota: 22, imponibile: 300, iva: 66, totale: 366 } } }] },
+    ];
+    await chiedi("mi crei preventivo a LORENZO GUASCHINA");
+    const p1 = await leggiCard();
+    verifica("preventivo: la domanda sulle voci è nella card, con la barra", /voci e i prezzi/.test(p1.testo) && p1.barra, JSON.stringify(p1));
+    await page.fill("#risorsaPiede .scheda-campo", "porta 300 euro");
+    await page.press("#risorsaPiede .scheda-campo", "Enter");
+    await page.waitForFunction(() => /IVA al 22%/.test(document.getElementById("risorsaCorpo").innerText), null, { timeout: 4000 });
+    await page.fill("#risorsaPiede .scheda-campo", "sì");
+    await page.press("#risorsaPiede .scheda-campo", "Enter");
+    await page.waitForFunction(() => /Preventivo n\. 7/.test(document.getElementById("risorsaCorpo").innerText), null, { timeout: 4000 });
+    verifica("\"sì\" (2 lettere) vale come risposta, e alla fine il preventivo si apre nella card", richieste.at(-1).messaggio === "sì" && richieste.at(-1).runId === "r3");
     await page.click("#risorsaChiudi");
 
     // Domanda letta dai dati già in memoria (senza AI): stessa card

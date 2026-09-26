@@ -10242,9 +10242,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
   async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
-    if(testo.length < 3 || inCorso) return;
-
     const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+    // "sì", "no", "ok" sono risposte valide a una domanda di EON
+    if(!testo || inCorso || testo.length < 2 || (testo.length < 3 && !inContinuazione)) return;
 
     /* Router: se non stiamo rispondendo a una domanda aperta di EON (in
        quel caso la frase è una risposta a lei, non un comando nuovo — non
@@ -10341,7 +10341,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        lettura in fondo, non una per ogni azione. */
     const daDire = [];
     function mostra(title, text){
-      showAIToast(title, text);
+      /* Se stiamo parlando dentro la card, l'esito resta lì */
+      if(conversazioneCardAperta()) bollaConversazione("eon", title + (text ? "\n" + text : ""));
+      else showAIToast(title, text);
       daDire.push(title + (text ? ": " + text.replace(/\n+/g, ". ") : ""));
     }
 
@@ -10359,6 +10361,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       console.warn("Assistente non riuscito:", err.message);
       if(eImpegnoInArrivo) rimuoviImpegniInConferma();
       hint.textContent = "AI non raggiunta: " + err.message + " — riprova";
+      bollaConversazione("eon", "Non sono riuscita a raggiungere EON: riprova tra poco.");
       if(viaVoce) parlaRisposta("Non sono riuscita a raggiungere l'assistente, riprova tra poco.");
       send.disabled = false;
       mic.disabled = false;
@@ -10458,8 +10461,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
            la domanda). Per una domanda aperta la card ha in fondo la
            barra per rispondere, quindi non nasconde più il modo di
            rispondere (il problema del 23/09 descritto sopra). */
-        mostraRispostaEON(inContinuazione ? "" : testo, testoRisp,
-          eDomandaAperta ? { rispondi: (t) => { campo.value = t; send.click(); } } : undefined);
+        mostraRispostaEON(inContinuazione ? "" : testo, testoRisp, {
+          continua: inContinuazione,
+          rispondi: eDomandaAperta ? (t) => { campo.value = t; send.click(); } : undefined,
+        });
       }
       if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
@@ -10557,6 +10562,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       }
     });
 
+    // Nella card che aspettava ("Un attimo…") non resta mai l'attesa appesa
+    if(conversazioneCardAperta() && conversazioneCard.attesa) bollaConversazione("eon", "Fatto.");
     if(viaVoce) parlaRisposta(daDire.join(". "));
   }
 
@@ -11032,8 +11039,79 @@ function formattaRispostaEON(testo){
 /* opzioni.rispondi: EON ha fatto una domanda — in fondo alla card la
    barra per rispondere (scrivendo o a voce), così la card non nasconde
    mai il modo di rispondere. */
+/* Conversazione dentro la card (26/09/2026, Gianardi: "la possibilità di
+   interagire direttamente nella card, come quando crei fatture e
+   preventivi"). Quando EON fa una domanda ("mi dai le voci e i prezzi?")
+   la card diventa una piccola chat: la tua richiesta, la domanda di EON e
+   in fondo la barra per rispondere. La risposta resta nella stessa card
+   (non si chiude e riapre), finché EON non ha finito. */
+let conversazioneCard = null; // { chat, attesa, rispondi }
+
+function conversazioneCardAperta(){
+  return !!(conversazioneCard && conversazioneCard.chat.isConnected && document.getElementById("risorsaOverlay").style.display === "flex");
+}
+function bollaConversazione(chi, testo){
+  if(!conversazioneCardAperta()) return null;
+  if(conversazioneCard.attesa){ conversazioneCard.attesa.remove(); conversazioneCard.attesa = null; }
+  const b = document.createElement("div");
+  b.className = "scheda-bolla " + chi;
+  if(chi === "eon") b.appendChild(formattaRispostaEON(testo)); else b.textContent = testo;
+  conversazioneCard.chat.appendChild(b);
+  b.scrollIntoView({ block: "end", behavior: "smooth" });
+  return b;
+}
+
+function apriConversazioneCard(domanda, testo, rispondi){
+  const corpo = document.createElement("div");
+  corpo.className = "scheda-chat conversazione-card";
+  const piede = document.createElement("div");
+  piede.className = "scheda-composer";
+  const campo = document.createElement("textarea");
+  campo.rows = 1;
+  campo.className = "scheda-campo";
+  campo.id = "conversazioneCardCampo";
+  campo.placeholder = "Rispondi a EON…";
+  const invia = document.createElement("button");
+  invia.type = "button";
+  invia.className = "scheda-invia";
+  invia.setAttribute("aria-label", "Invia la risposta");
+  invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const manda = (t) => {
+    t = String(t || "").trim();
+    if(!t || !conversazioneCard || conversazioneCard.attesa) return;
+    campo.value = "";
+    bollaConversazione("me", t);
+    const attesa = document.createElement("div");
+    attesa.className = "scheda-bolla eon attesa";
+    attesa.textContent = "Un attimo…";
+    corpo.appendChild(attesa);
+    conversazioneCard.attesa = attesa;
+    conversazioneCard.rispondi(t);
+  };
+  invia.addEventListener("click", () => manda(campo.value));
+  campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(campo.value); } });
+  const mic = creaMicRapido((t) => manda(t));
+  mic.classList.add("scheda-mic");
+  mic.setAttribute("aria-label", "Rispondi a voce");
+  piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
+  apriRisorsaCard(domanda ? titoloDallaDomanda(domanda) : "EON", corpo, piede);
+  conversazioneCard = { chat: corpo, attesa: null, rispondi };
+  if(domanda) bollaConversazione("me", domanda);
+  bollaConversazione("eon", testo);
+}
+
 function mostraRispostaEON(domanda, testo, opzioni){
   opzioni = opzioni || {};
+  /* Seguito di una conversazione già aperta nella card: si aggiunge lì */
+  if(opzioni.continua && conversazioneCardAperta()){
+    if(opzioni.rispondi) conversazioneCard.rispondi = opzioni.rispondi;
+    bollaConversazione("eon", testo);
+    return;
+  }
+  if(opzioni.rispondi && !opzioni.titolo){
+    apriConversazioneCard(domanda, testo, opzioni.rispondi);
+    return;
+  }
   let piede = null;
   if(opzioni.rispondi){
     piede = document.createElement("div");
