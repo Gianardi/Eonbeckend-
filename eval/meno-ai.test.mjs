@@ -111,7 +111,7 @@ const casi = [
   ["Domani mattina chiamo Rossi", [], null], // senza ora
   ["chiamare Rossi domani alle 3", [], null], // alle 3 di notte o di pomeriggio?
   ["Appuntamento con Raspadori domani alle 10 per il bagno", [], null], // "per il bagno"
-  ["Appuntamento Raspadori bagno domani alle 10", ["Raspadori"], null], // "Raspadori bagno" non è un cliente
+  ["Appuntamento Raspadori bagno domani alle 10", ["Raspadori"], { titolo: "Da Raspadori per bagno", quando: `${D1}T10:00:00` }], // 27/09: lavoro ("bagno") + cliente Raspadori, dal codice
   ["domani alle 10 e alle 12 riunione", [], null], // due orari
   ["Fra un ora incontro con Giulia", [], null],
 ];

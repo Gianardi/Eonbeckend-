@@ -4089,3 +4089,62 @@ produzione, provato su entrambi con prove annullate):
   database (compariva solo fino alla riapertura). Ora `due_date: null`,
   come il server.
 - Test: `eval/azienda.test.js` (23).
+
+### Prove di Andrea del 26/09 sera: azioni dirette, anagrafica, "di' a…", lavori e appunti (27/09/2026)
+
+Frasi vere dai registri (`ai_request_log`, `ai_audit_log`):
+- **"Voglio cambiare password"** → AI (Sonnet, 8 s) che rispondeva "vai nelle
+  impostazioni". Ora **azioni dirette senza AI** (index.html,
+  `capisciAzioneDiretta` / `provaAzioneDiretta`, dopo la navigazione, in
+  entrambi i campi): cambia password → Sicurezza; cambia email → Account
+  (nuovo: **cambio email** con link di conferma di Supabase); nome
+  dell'attività → Profilo; Face ID; metti EON sulla Home; esci; manda un
+  feedback / "dovreste aggiungere…" / "sarebbe bello…" → feedback già
+  scritto; assegna un compito (a Marco di…) → Assegna Compiti con la persona
+  scelta e il compito scritto. Parole ammesse precise: "cambia l'email di
+  Rossi" (dato di un cliente) va all'AI come prima.
+  Test: `eval/azioni-dirette.test.js` (27).
+- **Anagrafica / "esiste già"**: tutti i 39 clienti di Andrea erano
+  **archiviati** (la pagina Clienti sembrava vuota; c'è solo la scritta
+  piccola "Mostra i clienti archiviati"). Rita Ambrosini (archiviata dal
+  04/08) → "esiste già in anagrafica", poi una seconda Rita (nata anche lei
+  archiviata: causa non trovata nel codice del server, probabilmente un
+  tocco su "Archivia"), poi "quale delle due?". Fatto: 39 clienti e 16 chat
+  riattivati (produzione), la Rita doppia (vuota) nel Cestino.
+  **Mai doppioni** (api/index.js): `crea_cliente` non crea un secondo
+  cliente con lo stesso nome (anche archiviato): usa quello, lo riattiva
+  (`riattivaCliente`, anche la chat) e lo dice; `trova_o_crea_cliente`
+  idem; **stesso nome = stesso cliente** (`unoPerNome`: il più vecchio
+  attivo) in `risolviClienteDaNome`, `cerca_cliente`, `trova_o_crea`;
+  "Rita Ambrosini aggiungi clienti" / "… nuovo cliente" letti dal codice.
+  App: "È già tra i tuoi clienti" / "Era archiviato: rimesso tra i clienti".
+  Test in `eval/meno-ai-clienti.test.mjs`.
+- **"Caldaia Baudi venerdì ore 15"** → segnato ma senza cliente. Ora
+  (`separaLavoroENome`, `LAVORI_NOTI`): lavoro dell'elenco + nome con la
+  maiuscola (anche "Baudi caldaia") → cliente creato con il lavoro
+  ("Caldaia") e appuntamento nella sua chat, senza AI; avviso "Nuovo
+  cliente: Baudi" con **Annulla** (toglie il cliente, l'appuntamento
+  resta). Cliente archiviato a cui segni un lavoro → torna attivo. Anche
+  l'AI: `crea_impegno.cliente_id` dice di collegare/creare il cliente per
+  ogni lavoro. Dati di Andrea: cliente Baudi creato, appuntamento spostato
+  nella sua chat con la nota. Test in `eval/appuntamento-cliente.test.mjs`.
+- **"Per la caldaia di Baudi ricordarsi sportello 12 e attrezzi"** →
+  finiva negli appunti generali. Ora (`provaAppuntoCliente`, senza AI):
+  parola da appunto + UN cliente nominato + nessun giorno/ora → appunto
+  nella scheda del cliente (`client_id`) e nota sul suo **prossimo
+  appuntamento** ("Da Baudi per caldaia · ricordarsi sportello 12 e
+  attrezzi"). `crea_appunto` ha `cliente_id` anche per l'AI. Nell'app
+  l'appunto veloce non scatta se la frase nomina un cliente. Test:
+  `eval/appunto-cliente.test.mjs`.
+- **"Di' a Rita Ambrosini che ci vediamo lunedì alle 11"** → chiedeva
+  "quale delle due" e segnava solo l'appuntamento. Ora
+  (`provaDilloAlCliente`, senza AI): appuntamento "(da confermare)" + messaggio
+  nella chat di Rita ("Ciao Rita, ci vediamo lunedì alle 11 (lun 28 set,
+  11:00). Mi confermi?"). La risposta di Rita dalla sua pagina la legge il
+  database (`supabase/conferma_appuntamento.sql`, staging + produzione,
+  provato con 10 risposte): sì/ok/va bene/perfetto/👍 → confermato; no/non
+  posso/purtroppo → tolto dal calendario; "sì ma meglio giovedì" → non si
+  tocca, decide Andrea. Senza giorno e ora → solo il messaggio.
+  Limite: Rita vede il messaggio solo se ha il link della sua pagina
+  (WhatsApp non ancora collegato). La nuova data fissata in chat la segna
+  Andrea (per ora non la legge il codice).

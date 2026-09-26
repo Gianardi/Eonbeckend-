@@ -592,30 +592,62 @@ function nomeSomigliaA(paroleCercate, paroleCandidato) {
    presente in cerca_cliente/trova_o_crea_cliente invece di
    condividerla, per non rischiare di alterare il comportamento di due
    tool già in uso solo per introdurne uno nuovo. */
+/* Andrea (27/09/2026): "se ci sono due Rita Ambrosini significa che è lo
+   stesso cliente, non bisogna segnarne due". Più clienti con lo STESSO nome
+   (identico, senza badare a maiuscole e spazi: non "simile") sono la stessa
+   persona: si usa quello attivo più vecchio, senza chiedere "quale dei due".
+   Nomi diversi che contengono la stessa parola ("Sara Dini" e "Giampiero
+   Dini") restano due clienti: lì si chiede, come prima. */
+const chiaveNomeCliente = (n) => String(n || "").trim().toLowerCase().replace(/\s+/g, " ");
+function preferitoTraOmonimi(a, b) {
+  return (!!a.is_archived - !!b.is_archived) || String(a.created_at || "").localeCompare(String(b.created_at || ""));
+}
+function unoPerNome(lista) {
+  const perNome = new Map();
+  for (const c of lista) {
+    const k = chiaveNomeCliente(c.name);
+    const gia = perNome.get(k);
+    if (!gia || preferitoTraOmonimi(c, gia) < 0) perNome.set(k, c);
+  }
+  return lista.filter((c) => perNome.get(chiaveNomeCliente(c.name)) === c);
+}
+
+/* Un cliente archiviato che torna a lavorare (lo si aggiunge di nuovo, o
+   gli si segna un lavoro): torna tra i clienti attivi, con la sua chat,
+   invece di crearne un doppione. */
+async function riattivaCliente(cliente, ctx) {
+  if (!cliente || !cliente.is_archived) return false;
+  await db(`clients?id=eq.${cliente.id}`, { method: "PATCH", body: JSON.stringify({ is_archived: false }) }, ctx.accessToken);
+  try {
+    await db(`conversations?${filtroNomeConversazione(cliente.name)}&deleted_at=is.null&is_archived=eq.true`, { method: "PATCH", body: JSON.stringify({ is_archived: false }) }, ctx.accessToken);
+  } catch (err) { console.warn("Cliente riattivato ma la chat no:", err.message); }
+  return true;
+}
+
 async function risolviClienteDaNome(nomeCercato, ctx) {
   const nome = nomeCercato.trim();
   const parole = nome.toLowerCase().split(/\s+/).filter(Boolean);
-  const tutti = await db(`clients?select=id,name,phone&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+  const tutti = await db(`clients?select=id,name,phone,is_archived,created_at&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
   const lista = Array.isArray(tutti) ? tutti : [];
 
-  let candidati = lista.filter((c) => c.name.trim().toLowerCase() === nome.toLowerCase());
+  let candidati = unoPerNome(lista.filter((c) => chiaveNomeCliente(c.name) === chiaveNomeCliente(nome)));
   if (candidati.length === 0) {
-    candidati = lista.filter((c) => {
+    candidati = unoPerNome(lista.filter((c) => {
       const basso = c.name.toLowerCase();
       return parole.every((p) => basso.includes(p));
-    });
+    }));
   }
-  if (candidati.length === 1) return { stato: "trovato", id: candidati[0].id, nome: candidati[0].name, telefono: candidati[0].phone || null };
+  if (candidati.length === 1) return { stato: "trovato", id: candidati[0].id, nome: candidati[0].name, telefono: candidati[0].phone || null, archiviato: !!candidati[0].is_archived };
   if (candidati.length > 1) return { stato: "ambiguo", candidati: candidati.map((c) => ({ id: c.id, nome: c.name, telefono: c.phone || null })) };
 
   /* Nessuna corrispondenza esatta/per parola: un'unica corrispondenza
      "simile" (dettatura imprecisa) non è mai trattata come certa —
      stato distinto da "trovato", perché chi la riceve deve chiedere
      conferma invece di usarla direttamente. */
-  const simili = lista.filter((c) => {
+  const simili = unoPerNome(lista.filter((c) => {
     const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
     return nomeSomigliaA(parole, paroleCliente);
-  });
+  }));
   if (simili.length === 1) return { stato: "simile", id: simili[0].id, nome: simili[0].name, telefono: simili[0].phone || null };
   if (simili.length > 1) return { stato: "ambiguo", candidati: simili.map((c) => ({ id: c.id, nome: c.name, telefono: c.phone || null })) };
 
@@ -917,8 +949,8 @@ const TOOLS = {
       if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
       const nome = input.nome.trim();
       const q = encodeURIComponent(nome);
-      let righe = await db(`clients?select=id,name,phone,value,status&name=ilike.*${q}*&deleted_at=is.null&limit=5`, { method: "GET" }, ctx.accessToken);
-      righe = Array.isArray(righe) ? righe : [];
+      let righe = await db(`clients?select=id,name,phone,value,status,is_archived,created_at&name=ilike.*${q}*&deleted_at=is.null&limit=10`, { method: "GET" }, ctx.accessToken);
+      righe = unoPerNome(Array.isArray(righe) ? righe : []).slice(0, 5);
 
       /* Se la ricerca esatta non trova nulla, proviamo a tollerare
          piccoli errori di dettatura (es. "Fabri" per "Fabbri") prima
@@ -926,8 +958,8 @@ const TOOLS = {
          rischia di crearne uno nuovo per un cliente che c'è già. */
       if (righe.length === 0) {
         const parole = nome.toLowerCase().split(/\s+/).filter(Boolean);
-        const tutti = await db(`clients?select=id,name,phone,value,status&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
-        righe = (Array.isArray(tutti) ? tutti : [])
+        const tutti = await db(`clients?select=id,name,phone,value,status,is_archived,created_at&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+        righe = unoPerNome(Array.isArray(tutti) ? tutti : [])
           .filter((c) => {
             const paroleCliente = c.name.toLowerCase().split(/\s+/).filter(Boolean);
             return nomeSomigliaA(parole, paroleCliente);
@@ -1139,10 +1171,10 @@ const TOOLS = {
          avrebbe mancato "Mario Rossi" quando l'utente detta "Rossi
          Mario" — capita spesso, l'anagrafica lo salva in ordine
          naturale ma chi parla spesso dice prima il cognome. */
-      const tutti = await db(`clients?select=id,name&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
-      const lista = Array.isArray(tutti) ? tutti : [];
+      const tutti = await db(`clients?select=id,name,is_archived,created_at&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+      const lista = unoPerNome(Array.isArray(tutti) ? tutti : []);
 
-      let candidati = lista.filter((c) => c.name.trim().toLowerCase() === nome.toLowerCase());
+      let candidati = lista.filter((c) => chiaveNomeCliente(c.name) === chiaveNomeCliente(nome));
       if (candidati.length === 0) {
         candidati = lista.filter((c) => {
           const basso = c.name.toLowerCase();
@@ -1174,7 +1206,8 @@ const TOOLS = {
       }
 
       if (candidati.length === 1) {
-        return { id: candidati[0].id, nome: candidati[0].name, creato: false };
+        const riattivato = await riattivaCliente(candidati[0], ctx);
+        return { id: candidati[0].id, nome: candidati[0].name, creato: false, ...(riattivato ? { riattivato: true } : {}) };
       }
       if (candidati.length > 1) {
         /* Meglio fermarsi con un errore chiaro (che l'assistente può
@@ -1197,23 +1230,46 @@ const TOOLS = {
     categoria: "azione",
     schema: {
       name: "crea_appunto",
-      description: "Aggiunge un appunto libero del cantiere: una nota rapida senza data né scadenza. Usalo quando l'utente dice esplicitamente di segnargli/annotargli qualcosa negli appunti (es. \"segnami in appunti che devo vedere il costo del materiale\"). Non usarlo per cose con un orario o una scadenza: quelle sono impegni, usa crea_impegno.",
+      description: "Aggiunge un appunto: una nota rapida senza data né scadenza. Usalo quando l'utente dice di segnargli/annotargli/ricordargli qualcosa (es. \"segnami in appunti che devo vedere il costo del materiale\"). Se l'appunto riguarda un cliente o un suo lavoro (es. \"per la caldaia di Baudi ricordarsi sportello 12 e attrezzi\"), passa cliente_id: l'appunto va nella scheda del cliente e sul suo prossimo appuntamento in calendario, non negli appunti generali. Non usarlo per cose con un orario o una scadenza: quelle sono impegni, usa crea_impegno.",
       input_schema: {
         type: "object",
-        properties: { testo: { type: "string", description: "Il testo dell'appunto, come lo direbbe l'utente" } },
+        properties: {
+          testo: { type: "string", description: "Il testo dell'appunto, come lo direbbe l'utente" },
+          cliente_id: { type: "string", description: "Id del cliente a cui si riferisce l'appunto, se ne nomina uno (trovato con cerca_cliente o da cliente_risolto). Vuoto per un appunto generale." },
+        },
         required: ["testo"],
       },
     },
     async run(input, ctx) {
       if (!eStringaNonVuota(input.testo)) throw fail("Parametro 'testo' mancante o vuoto");
       const testo = input.testo.trim();
+      let cliente = null;
+      if (input.cliente_id) {
+        cliente = await trovaProprio("clients", input.cliente_id, ctx);
+        if (!cliente) throw fail("Cliente non trovato", 404);
+      }
       const creati = await db(
         "cantiere_appunti",
-        { method: "POST", body: JSON.stringify({ owner_id: ctx.user.id, testo }), headers: { Prefer: "return=representation" } },
+        { method: "POST", body: JSON.stringify({ owner_id: ctx.user.id, testo, ...(cliente ? { client_id: cliente.id } : {}) }), headers: { Prefer: "return=representation" } },
         ctx.accessToken
       );
       const a = Array.isArray(creati) ? creati[0] : creati;
-      return { id: a.id, testo: a.testo };
+      if (!cliente) return { id: a.id, testo: a.testo };
+      /* Anche sul suo prossimo appuntamento in calendario: la nota nel titolo
+         ("Da Baudi per caldaia · ricordarsi sportello 12 e attrezzi"), così
+         la vede quando guarda l'agenda. Se non riesce, l'appunto resta. */
+      let appuntamento = null;
+      try {
+        const prossimo = await prossimoAppuntamentoDelCliente(cliente.name, ctx);
+        if (prossimo) {
+          const nota = notaPerAppuntamento(testo);
+          const giaDentro = normalizzaFraseImpegno(prossimo.title || "").includes(normalizzaFraseImpegno(nota));
+          const titolo = giaDentro ? prossimo.title : `${prossimo.title || "Appuntamento"} · ${nota.charAt(0).toLowerCase() + nota.slice(1)}`.slice(0, 200);
+          if (!giaDentro) await db(`messages?id=eq.${prossimo.id}`, { method: "PATCH", body: JSON.stringify({ title: titolo }) }, ctx.accessToken);
+          appuntamento = { id: prossimo.id, titolo, quando_visualizzato: formattaQuando(String(prossimo.scheduled_at).slice(0, 19)) };
+        }
+      } catch (err) { console.warn("Appunto salvato, appuntamento non aggiornato:", err.message); }
+      return { id: a.id, testo: a.testo, cliente: cliente.name, client_id: cliente.id, ...(appuntamento ? { appuntamento } : {}) };
     },
   },
 
@@ -1285,7 +1341,7 @@ const TOOLS = {
     categoria: "azione",
     schema: {
       name: "crea_cliente",
-      description: "Aggiunge un nuovo cliente in anagrafica. Usalo solo quando l'utente chiede esplicitamente di aggiungere un cliente, non per un normale impegno che nomina una persona.",
+      description: "Aggiunge un nuovo cliente in anagrafica. Usalo solo quando l'utente chiede esplicitamente di aggiungere un cliente, non per un normale impegno che nomina una persona. Non crea mai un doppione: se c'è già un cliente con lo stesso nome (anche archiviato) restituisce quello con gia_esistente=true (e riattivato=true se era archiviato: ora è di nuovo tra i clienti attivi). Non chiedere all'utente se vuole un secondo cliente con lo stesso nome: è la stessa persona.",
       input_schema: {
         type: "object",
         properties: {
@@ -1299,6 +1355,19 @@ const TOOLS = {
     },
     async run(input, ctx) {
       if (!eStringaNonVuota(input.nome)) throw fail("Parametro 'nome' mancante o vuoto");
+      /* Mai due clienti con lo stesso nome (27/09/2026): se c'è già — anche
+         archiviato — si usa quello (archiviato → torna attivo), e si
+         aggiungono solo i dati che non aveva. */
+      const stessi = await db(`clients?select=id,name,phone,description,is_archived,created_at&deleted_at=is.null&${filtroNomeConversazione(input.nome).replace("contact_name=", "name=")}&limit=10`, { method: "GET" }, ctx.accessToken);
+      const esistente = unoPerNome((Array.isArray(stessi) ? stessi : []).filter((c) => chiaveNomeCliente(c.name) === chiaveNomeCliente(input.nome)))[0];
+      if (esistente) {
+        const patch = {};
+        if (eStringaNonVuota(input.telefono) && !eStringaNonVuota(esistente.phone)) patch.phone = input.telefono.trim();
+        if (eStringaNonVuota(input.note) && !eStringaNonVuota(esistente.description)) patch.description = input.note.trim();
+        if (Object.keys(patch).length) await db(`clients?id=eq.${esistente.id}`, { method: "PATCH", body: JSON.stringify(patch) }, ctx.accessToken);
+        const riattivato = await riattivaCliente(esistente, ctx);
+        return { id: esistente.id, nome: esistente.name, gia_esistente: true, ...(riattivato ? { riattivato: true } : {}) };
+      }
       const payload = { owner_id: ctx.user.id, name: input.nome.trim(), status: "trattativa" };
       if (eStringaNonVuota(input.telefono)) payload.phone = input.telefono.trim();
       if (eNumero(input.valore)) payload.value = input.valore;
@@ -1513,7 +1582,7 @@ const TOOLS = {
           titolo: { type: "string", description: "Titolo breve e concreto, come lo direbbe l'utente" },
           quando_iso: { type: "string", description: "Data e ora in formato ISO 8601. Se l'utente non dice quando, usa le 08:00 del primo giorno utile: non lasciare mai un impegno senza data." },
           tipo: { type: "string", enum: ["incontro", "chiamata", "commissione"] },
-          cliente_id: { type: "string", description: "Id del cliente collegato, se l'impegno riguarda una persona già in anagrafica (di solito già noto da cliente_risolto in interpreta_richiesta; altrimenti cercala prima con cerca_cliente)" },
+          cliente_id: { type: "string", description: "Id del cliente collegato. Ogni lavoro per una persona o ditta (es. \"Caldaia Baudi venerdì ore 15\") va collegato al suo cliente: se è già in anagrafica usa il suo id (di solito già noto da cliente_risolto in interpreta_richiesta); se non c'è, crealo prima con trova_o_crea_cliente e poi usa l'id restituito. Non serve per impegni personali o con fornitori, uffici, banca, medico." },
         },
         required: ["titolo", "quando_iso", "tipo"],
       },
@@ -3561,6 +3630,29 @@ const NON_NOME_APPUNTAMENTO_EXTRA = ["mia", "mio", "tua", "tuo", "sua", "suo", "
 const nonNomeApp = () => nonNomeAppuntamento || (nonNomeAppuntamento = new Set([...NON_NOME_CLIENTE, ...NON_NOME_APPUNTAMENTO_EXTRA]));
 const INIZIO_NOTA = /\b(portare|porta|portarsi|prendere|prendi|ricordati|ricordarsi|ricordami|serve|servono|attenzione|chiamare prima|chiamarlo prima|chiamarla prima)\b/i;
 
+/* "Caldaia Baudi venerdì ore 15" (Andrea, 27/09/2026): un lavoro e un nome,
+   senza "da" né "per". Il lavoro si riconosce da questo elenco (le cose che
+   un artigiano ripara, monta o controlla); il nome è scritto con la
+   maiuscola. Un lavoro fuori elenco → decide l'AI, come prima. */
+const LAVORI_NOTI = new Set(["caldaia", "caldaie", "boiler", "scaldabagno", "rubinetto", "rubinetti", "lavandino", "lavello", "lavabo", "doccia", "vasca", "wc", "water", "sanitari", "scarico", "scarichi", "tubo", "tubi", "tubatura", "tubature", "perdita", "perdite", "infiltrazione", "infiltrazioni", "bagno", "cucina", "tetto", "grondaia", "grondaie", "camino", "stufa", "termosifone", "termosifoni", "radiatore", "radiatori", "condizionatore", "condizionatori", "climatizzatore", "climatizzatori", "impianto", "quadro", "presa", "prese", "luce", "luci", "citofono", "antenna", "cancello", "serratura", "porta", "porte", "portone", "finestra", "finestre", "infissi", "serramenti", "persiane", "tapparelle", "tapparella", "zanzariere", "vetro", "vetri", "pavimento", "pavimenti", "piastrelle", "parquet", "muro", "muri", "intonaco", "cartongesso", "cappotto", "tinteggiatura", "imbiancatura", "pittura", "facciata", "giardino", "potatura", "siepe", "pompa", "autoclave", "fotovoltaico", "pannelli", "revisione", "manutenzione", "riparazione", "controllo", "montaggio", "installazione", "sostituzione", "pulizia", "spurgo", "fognatura", "preventivo", "misure", "consegna", "ritiro"]);
+function separaLavoroENome(parole, principale) {
+  if (parole.length < 2 || parole.length > 5) return null;
+  const maiuscola = (p) => /^[A-ZÀ-Ý]/.test(paroleOriginaliDelNome(principale, [p]));
+  // Lavoro prima: "caldaia Baudi", "revisione caldaia Simone Massari"
+  if (LAVORI_NOTI.has(parole[0])) {
+    const j = parole.findIndex((p, i) => i > 0 && maiuscola(p));
+    if (j > 0 && j <= 3 && parole.length - j <= 3 && parole.slice(j).every(maiuscola) && parole.slice(1, j).every((p) => !maiuscola(p))) {
+      return { lavoro: parole.slice(0, j), nome: parole.slice(j) };
+    }
+  }
+  // Nome prima: "Baudi caldaia"
+  const k = parole.findIndex((p, i) => i > 0 && LAVORI_NOTI.has(p));
+  if (k > 0 && k <= 3 && parole.length - k <= 3 && parole.slice(0, k).every(maiuscola) && parole.slice(k).every((p) => !maiuscola(p))) {
+    return { lavoro: parole.slice(k), nome: parole.slice(0, k) };
+  }
+  return null;
+}
+
 function leggiAppuntamentoDaCliente(testo, adesso) {
   if (!eStringaNonVuota(testo) || testo.length > 180) return null;
   let principale = testo.trim(), nota = "";
@@ -3579,8 +3671,13 @@ function leggiAppuntamentoDaCliente(testo, adesso) {
   const conMarcatore = resto.match(/^(?:a\s+)?(?:casa(?:\s+(?:di|del|della))?|da|dal|dalla|dal cliente|dalla cliente|presso|cliente)\s+(.+)$/);
   const parti = (conMarcatore ? conMarcatore[1] : resto).split(/\s+per\s+/);
   if (parti.length > 2) return null;
-  const paroleNome = parti[0].split(" ").filter(Boolean);
-  const lavoro = (parti[1] || "").trim();
+  let paroleNome = parti[0].split(" ").filter(Boolean);
+  let lavoro = (parti[1] || "").trim();
+  let lavoroSenzaPer = "";
+  if (!conMarcatore && !lavoro) {
+    const separati = separaLavoroENome(paroleNome, principale);
+    if (separati) { paroleNome = separati.nome; lavoro = lavoroSenzaPer = separati.lavoro.join(" "); }
+  }
   if (!paroleNome.length || paroleNome.length > 3) return null;
   if (!paroleNome.every((p) => p.length >= 2 && /^[a-z'-]+$/.test(p) && !nonNomeApp().has(p))) return null;
   if (!conMarcatore && !lavoro) return null; // "Domani ore 11 Rossi": nome da solo, lo legge già l'altro percorso
@@ -3590,7 +3687,7 @@ function leggiAppuntamentoDaCliente(testo, adesso) {
   const maiuscole = nomeOriginale.split(" ").every((p) => /^[A-ZÀ-Ý]/.test(p));
   if (!conMarcatore && !maiuscole) return null;
   const nome = nomeOriginale.split(" ").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
-  const lavoroOriginale = lavoro ? (principale.match(new RegExp("\\bper\\s+(.+?)(?:\\s+(?:alle ore|alle|ore|h)\\s+\\d.*)?$", "i")) || [])[1] || lavoro : "";
+  const lavoroOriginale = lavoroSenzaPer ? lavoroSenzaPer : lavoro ? (principale.match(new RegExp("\\bper\\s+(.+?)(?:\\s+(?:alle ore|alle|ore|h)\\s+\\d.*)?$", "i")) || [])[1] || lavoro : "";
   const lavoroPulito = lavoroOriginale.replace(/\s+(?:domani|oggi|dopodomani)\b.*$/i, "").trim().toLowerCase();
   const titolo = (chi) => (tipo ? tipo + " da " : "Da ") + chi + (lavoroPulito ? " per " + lavoroPulito : "") + (nota ? " · " + nota.charAt(0).toLowerCase() + nota.slice(1) : "");
   return { nome, maiuscole, lavoro: lavoroPulito, nota, titolo, quando_iso: `${letto.giornoIso}T${letto.ora}:00` };
@@ -3603,8 +3700,13 @@ async function provaAppuntamentoDaCliente(testo, user, ctx) {
   if (!risolto) return null;
   let cliente = null;
   const azioniCliente = [];
-  if (risolto.stato === "trovato") cliente = { id: risolto.id, nome: risolto.nome };
-  else if (risolto.stato === "non_trovato" && letto.maiuscole) {
+  if (risolto.stato === "trovato") {
+    cliente = { id: risolto.id, nome: risolto.nome };
+    // Un cliente archiviato a cui segni un lavoro torna tra gli attivi
+    if (risolto.archiviato && await riattivaCliente({ id: risolto.id, name: risolto.nome, is_archived: true }, ctx)) {
+      azioniCliente.push({ tool: "trova_o_crea_cliente", esito: { id: cliente.id, nome: cliente.nome, creato: false, riattivato: true } });
+    }
+  } else if (risolto.stato === "non_trovato" && letto.maiuscole) {
     const input = { nome: letto.nome };
     if (letto.lavoro) input.note = letto.lavoro.charAt(0).toUpperCase() + letto.lavoro.slice(1);
     const esito = await TOOLS.crea_cliente.run(input, ctx);
@@ -3775,8 +3877,14 @@ function leggiClienteSenzaAI(testo, daPaginaClienti, ultimo) {
   }
   if (/[?;:"()]/.test(frase)) return null;
 
-  const token = frase.split(/\s+/).map((t) => t.replace(/[,.]+$/, "")).filter(Boolean);
+  /* "Rita Ambrosini aggiungi clienti", "Rita Ambrosini nuovo cliente": il
+     comando alla fine invece che all'inizio (prova di Andrea, 27/09/2026) */
   let verbo = false, parolaCliente = false;
+  const coda = frase.match(/\s+(?:(?:aggiungi|aggiungila|aggiungilo|aggiungimi|inserisci|inseriscila|inseriscilo|mettila|mettilo|metti|salva|salvala|salvalo)\s+(?:(?:ai|tra i|fra i|nei|in|come|al|all)\s+)?(?:(?:un|una|nuovo|nuova)\s+)*(?:clienti|cliente|anagrafica|rubrica)|(?:è\s+)?(?:un\s+|una\s+)?(?:nuovo|nuova)\s+cliente)$/i);
+  const fraseSenzaCoda = coda ? frase.slice(0, coda.index).trim() : frase;
+  if (coda) { verbo = true; parolaCliente = true; }
+
+  const token = fraseSenzaCoda.split(/\s+/).map((t) => t.replace(/[,.]+$/, "")).filter(Boolean);
   while (token.length && INIZIO_CLIENTE.has(paroleNormalizzate(token[0])[0] || "")) {
     const w = paroleNormalizzate(token[0])[0];
     if (/^(aggiung|inserisc|crea|salva|registra)/.test(w)) verbo = true;
@@ -3860,14 +3968,21 @@ async function provaPercorsoRapidoCliente(body, ctx, user) {
   if (telefono && (cifre(telefono).length < 6 || !cifre(testo).includes(cifre(telefono)))) return null;
 
   const risolto = await risolviClienteDaNome(nome, ctx);
-  if (risolto.stato !== "non_trovato") return null; // esiste già, simile o omonimi: decide il motore completo
+  /* C'è già con lo stesso nome (anche archiviato): niente doppione e niente
+     AI — crea_cliente lo riconosce, lo rimette tra gli attivi e lo dice.
+     Simile o omonimi con nomi diversi: decide il motore completo. */
+  const stessoNome = risolto.stato === "trovato" && chiaveNomeCliente(risolto.nome) === chiaveNomeCliente(nome);
+  if (risolto.stato !== "non_trovato" && !stessoNome) return null;
+  // C'è già con un ALTRO telefono: aggiornarlo o no lo decide il motore completo (chiede)
+  if (stessoNome && telefono && risolto.telefono && cifre(risolto.telefono) !== cifre(telefono)) return null;
 
   const input = { nome };
   if (telefono) input.telefono = telefono;
   if (eStringaNonVuota(letto.lavoro)) input.note = letto.lavoro.trim().charAt(0).toUpperCase() + letto.lavoro.trim().slice(1);
   const esito = await TOOLS.crea_cliente.run(input, ctx);
   await registraOperazione(user, "crea_cliente", input, esito, "auto");
-  return { azioni: [{ tool: "crea_cliente", esito }], payload: { stato: "concluso", testo: "Fatto.", azioni: [{ tool: "crea_cliente", esito }], focus: { tipo: "cliente", riferimento: esito.nome } } };
+  const testoEsito = !esito.gia_esistente ? "Fatto." : esito.riattivato ? `${esito.nome} era archiviato: l'ho rimesso tra i tuoi clienti.` : `${esito.nome} è già tra i tuoi clienti.`;
+  return { azioni: [{ tool: "crea_cliente", esito }], payload: { stato: "concluso", testo: testoEsito, azioni: [{ tool: "crea_cliente", esito }], focus: { tipo: "cliente", riferimento: esito.nome } } };
 }
 
 /* ---------- Meno AI, punto 2: fatture e preventivi chiari (27/09/2026) ----------
@@ -3997,9 +4112,124 @@ async function provaPercorsoRapidoDocumento(body, ctx, user) {
 
 /* Restituisce { payload, azioni } se un percorso rapido ha gestito la
    richiesta, null se va passata al motore completo. */
+/* ---------- Appunto di un cliente, letto dal codice (27/09/2026) ----------
+   Andrea: "Per la caldaia di Baudi ricordarsi sportello 12 e attrezzi" →
+   l'appunto va nella scheda di Baudi e sul suo appuntamento in calendario,
+   non negli appunti generali (lì solo quello che non riguarda un cliente).
+   Serve: una parola da appunto (ricordarsi, portare, serve, nota…), nessun
+   giorno/ora (altrimenti è un appuntamento) e UN cliente in anagrafica
+   nominato nella frase (nome completo, o una parola del nome con la
+   maiuscola che è di un solo cliente). Altrimenti → come prima. */
+const PAROLA_APPUNTO = /\b(ricordarsi|ricordati|ricordami|ricorda|ricordarmi|portare|portarsi|porta|prendere|serve|servono|attenzione|nota|annota|appunta|appuntami|segna|segnami|segnare)\b/i;
+const TEMPO_IN_APPUNTO = /\b(oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|stasera|stamattina|settimana|mese|alle|ore\s+\d|\d{1,2}[:.]\d{2})\b/i;
+const CHIEDE_ALTRO = /\b(chiama\w*|telefona\w*|manda\w*|invia\w*|scrivi\w*|di'|dì|dici|dire|fattur\w*|preventiv\w*|elimin\w*|cancell\w*|annull\w*|spost\w*|foto|aggiungi\s+(?:il\s+)?cliente|pagat\w*|pagament\w*|incass\w*|accont\w*|sald[oi]|euro)\b|€/i;
+
+function clienteNominatoNellaFrase(testo, clienti) {
+  const parole = normalizzaFraseImpegno(testo).split(" ");
+  const insieme = new Set(parole);
+  const lista = unoPerNome(clienti);
+  // 1) nome completo nella frase (il più lungo vince: "Mario Rossi" prima di "Rossi")
+  const completi = lista.filter((c) => { const pn = normalizzaFraseImpegno(c.name).split(" ").filter(Boolean); return pn.length && pn.every((p) => insieme.has(p)); });
+  if (completi.length) {
+    const lunghezza = (c) => normalizzaFraseImpegno(c.name).split(" ").length;
+    const max = Math.max(...completi.map(lunghezza));
+    const migliori = completi.filter((c) => lunghezza(c) === max);
+    return migliori.length === 1 ? migliori[0] : null;
+  }
+  // 2) una parola con la maiuscola (non la prima della frase) che è di UN solo cliente
+  const originali = String(testo).split(/[\s,;!?.]+/).filter(Boolean);
+  const conMaiuscola = originali.slice(1).filter((o) => /^[A-ZÀ-Ý][a-zà-ÿ'’-]{2,}$/.test(o)).map((o) => normalizzaFraseImpegno(o));
+  const trovati = new Map();
+  for (const w of conMaiuscola) for (const c of lista) if (normalizzaFraseImpegno(c.name).split(" ").includes(w)) trovati.set(c.id, c);
+  return trovati.size === 1 ? [...trovati.values()][0] : null;
+}
+
+// Il prossimo appuntamento del cliente (da oggi in poi), o null
+async function prossimoAppuntamentoDelCliente(nome, ctx) {
+  const conv = await db(`conversations?select=id&${filtroNomeConversazione(nome)}&deleted_at=is.null&limit=5`, { method: "GET" }, ctx.accessToken);
+  const ids = (Array.isArray(conv) ? conv : []).map((c) => c.id).filter(eUuid);
+  if (!ids.length) return null;
+  const oggi = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const righe = await db(`messages?select=id,title,scheduled_at&conversation_id=in.(${ids.join(",")})&event_type=eq.appt&scheduled_at=gte.${oggi}T00:00:00&deleted_at=is.null&order=scheduled_at.asc&limit=1`, { method: "GET" }, ctx.accessToken);
+  return Array.isArray(righe) && righe.length ? righe[0] : null;
+}
+
+// La parte da ricordare, per il titolo dell'appuntamento: "ricordarsi sportello 12 e attrezzi"
+function notaPerAppuntamento(testo) {
+  const t = String(testo).trim().replace(/[.!]+$/, "");
+  const m = t.match(PAROLA_APPUNTO);
+  const nota = m ? t.slice(m.index) : t;
+  return nota.replace(/^(?:segna(?:mi|re)?|annota|appunta(?:mi)?|nota)\s+(?:che\s+)?/i, "").trim();
+}
+
+async function provaAppuntoCliente(body, ctx, user) {
+  const testo = ctx.testoUtente;
+  if (!body.messaggio.startsWith(PREFISSO_RACCONTO) || !eStringaNonVuota(testo) || testo.length > 200) return null;
+  if (!PAROLA_APPUNTO.test(testo) || TEMPO_IN_APPUNTO.test(testo) || CHIEDE_ALTRO.test(testo) || /\?/.test(testo)) return null;
+  const tutti = await db(`clients?select=id,name,is_archived,created_at&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+  const cliente = clienteNominatoNellaFrase(testo, Array.isArray(tutti) ? tutti : []);
+  if (!cliente) return null;
+  const testoAppunto = testo.trim().replace(/[.!]+$/, "");
+  const input = { testo: testoAppunto.charAt(0).toUpperCase() + testoAppunto.slice(1), cliente_id: cliente.id };
+  const esito = await TOOLS.crea_appunto.run(input, ctx);
+  await registraOperazione(user, "crea_appunto", input, esito, "auto");
+  ctx.lettoSenzaAI = true;
+  const testoRisposta = `Appunto su ${esito.cliente}` + (esito.appuntamento ? ` e sull'appuntamento di ${esito.appuntamento.quando_visualizzato}.` : ".");
+  return { azioni: [{ tool: "crea_appunto", esito }], payload: { stato: "concluso", testo: testoRisposta, azioni: [{ tool: "crea_appunto", esito }], focus: { tipo: "cliente", riferimento: esito.cliente } } };
+}
+
+/* ---------- "Di' a Rita che ci vediamo lunedì alle 11" (27/09/2026) ----------
+   Andrea: deve mandare il messaggio a Rita E segnare l'appuntamento; se lei
+   dice sì, ok; se dice no, l'appuntamento si toglie. Il codice:
+   - trova il cliente (stesso nome = stesso cliente, niente "quale delle due");
+   - se la frase ha giorno e ora: appuntamento "(da confermare)" nella sua chat;
+   - le scrive nella chat: "Ciao Rita, ci vediamo lunedì alle 11 (lun 28 set,
+     11:00). Mi confermi?";
+   - la risposta di Rita la legge il database (supabase/conferma_appuntamento.sql):
+     "sì/ok/va bene" → confermato; "no/non posso" → tolto dal calendario.
+   Cliente non trovato, simile o omonimi diversi → come prima (AI). */
+const DILLO_AL_CLIENTE = /^(?:di|dì|di'|dí|dici|dille|digli|scrivi|scrivile|scrivigli|avvisa|avvisala|avvisalo|manda un messaggio|mandale un messaggio|mandagli un messaggio)\s+(?:a\s+|ad\s+|al\s+|alla\s+)?(.+?)\s+che\s+(.+)$/i;
+const DA_CONFERMARE = " (da confermare)";
+
+async function provaDilloAlCliente(body, ctx, user) {
+  const testo = ctx.testoUtente;
+  if (!body.messaggio.startsWith(PREFISSO_RACCONTO) || !eStringaNonVuota(testo) || testo.length > 200) return null;
+  const m = testo.trim().replace(/[.!]+$/, "").match(DILLO_AL_CLIENTE);
+  if (!m) return null;
+  const nomeDetto = m[1].trim(), resto = m[2].trim();
+  if (nomeDetto.split(/\s+/).length > 3 || resto.length < 3 || /\?/.test(resto)) return null;
+  const risolto = await risolviClienteDaNome(nomeDetto, ctx);
+  if (risolto.stato !== "trovato") return null;
+  const cliente = { id: risolto.id, nome: risolto.nome };
+
+  const azioni = [];
+  const letto = estraiGiornoEOra(normalizzaFraseImpegno(resto), undefined);
+  let appuntamento = null;
+  if (letto && letto.giornoIso && letto.ora) {
+    const input = { titolo: `Appuntamento con ${cliente.nome}${DA_CONFERMARE}`, quando_iso: `${letto.giornoIso}T${letto.ora}:00`, tipo: "incontro", cliente_id: cliente.id };
+    const esito = await TOOLS.crea_impegno.run(input, ctx);
+    await registraOperazione(user, "crea_impegno", input, esito, "auto");
+    azioni.push({ tool: "crea_impegno", esito });
+    appuntamento = esito;
+  }
+  const primoNome = cliente.nome.split(/\s+/)[0];
+  const frase = resto.charAt(0).toLowerCase() + resto.slice(1);
+  const messaggio = `Ciao ${primoNome}, ${frase}` + (appuntamento ? ` (${appuntamento.quando_visualizzato}). Mi confermi?` : ".");
+  const inputMsg = { cliente_id: cliente.id, testo: messaggio };
+  const inviato = await TOOLS.manda_messaggio.run(inputMsg, ctx);
+  await registraOperazione(user, "manda_messaggio", inputMsg, inviato, "auto");
+  azioni.push({ tool: "manda_messaggio", esito: { ...inviato, testo: messaggio } });
+  ctx.lettoSenzaAI = true;
+  const risposta = appuntamento
+    ? `Segnato ${appuntamento.quando_visualizzato} con ${cliente.nome}, da confermare. Ho scritto: "${messaggio}" Se risponde sì lo confermo, se dice no lo tolgo.`
+    : `Scritto a ${cliente.nome}: "${messaggio}"`;
+  return { azioni, payload: { stato: "concluso", testo: risposta, azioni, focus: { tipo: "cliente", riferimento: cliente.nome } } };
+}
+
 async function provaPercorsoRapido(body, ctx, user) {
   if (typeof body.messaggio !== "string") return null;
-  return (await provaPercorsoRapidoDocumento(body, ctx, user)) || (await provaPercorsoRapidoCliente(body, ctx, user)) || (await provaPercorsoRapidoImpegno(body, ctx, user));
+  return (await provaPercorsoRapidoDocumento(body, ctx, user)) || (await provaPercorsoRapidoCliente(body, ctx, user))
+    || (await provaDilloAlCliente(body, ctx, user)) || (await provaAppuntoCliente(body, ctx, user)) || (await provaPercorsoRapidoImpegno(body, ctx, user));
 }
 
 async function handleAssistant(req, res, user, accessToken) {

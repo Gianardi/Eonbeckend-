@@ -4599,6 +4599,12 @@ async function loadUserDataFromDB(){
    restiamo sulla ricarica completa: sono azioni meno frequenti, con
    più stati collegati da tenere sincronizzati, dove il rischio di un
    aggiornamento mirato sbagliato pesa più del tempo risparmiato. */
+/* Mai doppioni (27/09/2026): "aggiungi Rita Ambrosini" quando c'è già →
+   si usa lei; se era archiviata torna tra i clienti attivi. */
+function titoloClienteAggiunto(esito){
+  if(!esito || !esito.gia_esistente) return "Cliente aggiunto";
+  return esito.riattivato ? "Era archiviato: rimesso tra i clienti" : "È già tra i tuoi clienti";
+}
 async function aggiornaDatiToccati(azioni){
   if(!isDbReady()){ await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]); return; }
 
@@ -4618,13 +4624,15 @@ async function aggiornaDatiToccati(azioni){
       } else {
         tasks.push({ id:a.esito.id, title:a.esito.titolo, owner:"user", status:"todo", time:a.esito.quando_visualizzato });
       }
-    } else if(a.tool === "crea_cliente" || a.tool === "aggiorna_cliente" || (a.tool === "trova_o_crea_cliente" && a.esito.creato)){
+    } else if(a.tool === "crea_cliente" || a.tool === "aggiorna_cliente" || (a.tool === "trova_o_crea_cliente" && (a.esito.creato || a.esito.riattivato))){
       idClientiDaAggiornare.add(a.esito.id);
+      if(a.esito.riattivato) toccaChat = true; // la sua chat torna tra le attive
     } else if(a.tool === "trova_o_crea_cliente" && !a.esito.creato){
       /* Ha solo trovato un cliente già esistente (es. per collegarci una
          foto): non ha scritto nulla, non c'è niente da riallineare. */
     } else if(a.tool === "crea_appunto"){
-      cantiereAppunti.push({ id:a.esito.id, testo:a.esito.testo, created:new Date().toISOString() });
+      cantiereAppunti.push({ id:a.esito.id, testo:a.esito.testo, created:new Date().toISOString(), clientId:a.esito.client_id || null });
+      if(a.esito.appuntamento) toccaChat = true; // la nota è anche nel titolo dell'appuntamento
     } else if(a.tool === "correggi_appunto"){
       const appunto = cantiereAppunti.find(x => x.id === a.esito.id);
       if(appunto) appunto.testo = a.esito.testo;
@@ -9273,6 +9281,13 @@ function collegaHubRacconta(){
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
     }
+    /* "Voglio cambiare password", "manda un feedback", "assegna un compito":
+       la schermata giusta, subito, senza AI */
+    if(provaAzioneDiretta(testo, chiudiHubAI)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      return;
+    }
     /* Fase 1c: stesso principio, per una richiesta di foto/documento/
        preventivo di un cliente riconoscibile con certezza. */
     if(provaRisorsaImmediata(testo)){
@@ -9447,13 +9462,13 @@ function collegaHubRacconta(){
       } else if(a.tool === "elimina_foto_cantiere"){
         showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
       } else if(a.tool === "crea_cliente"){
-        showAIToast("Cliente aggiunto", a.esito.nome);
+        showAIToast(titoloClienteAggiunto(a.esito), a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
         showAIToast("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
         showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
       } else if(a.tool === "crea_appunto"){
-        showAIToast("Appunto aggiunto", a.esito.testo);
+        showAIToast(a.esito.cliente ? "Appunto su " + escapeHtml(a.esito.cliente) : "Appunto aggiunto", a.esito.testo + (a.esito.appuntamento ? "\nAnche sull'appuntamento di " + a.esito.appuntamento.quando_visualizzato : ""));
       } else if(a.tool === "correggi_appunto"){
         showAIToast("Appunto corretto", a.esito.testo);
       } else if(a.tool === "crea_preventivo_o_fattura"){
@@ -9511,7 +9526,8 @@ document.getElementById("cambiaProfessioneOverlay").addEventListener("click", (e
   applyProfession(card.dataset.profession, true);
   showAIToast("Professione cambiata", "Etichette e sezioni aggiornate — i tuoi dati sono rimasti gli stessi.");
 });
-document.getElementById("feedbackCard").addEventListener("click", () => {
+document.getElementById("feedbackCard").addEventListener("click", () => apriFeedback(""));
+function apriFeedback(testoIniziale){
   const corpo = document.createElement("div");
   corpo.innerHTML = `
     <p class="module-sub" style="padding:0 2px 10px;">Cosa non va, cosa ti manca, cosa vorresti diverso: scrivilo qui, ci arriva direttamente.</p>
@@ -9519,6 +9535,9 @@ document.getElementById("feedbackCard").addEventListener("click", () => {
     <button class="feedback-invia-btn" id="feedbackInvia" type="button">Invia feedback</button>
   `;
   apriRisorsaCard("Manda un feedback", corpo);
+  const campoFeedback = document.getElementById("feedbackCampo");
+  if(testoIniziale){ campoFeedback.value = testoIniziale; }
+  campoFeedback.focus();
   document.getElementById("feedbackInvia").addEventListener("click", async () => {
     const campo = document.getElementById("feedbackCampo");
     const testo = campo.value.trim();
@@ -9538,7 +9557,7 @@ document.getElementById("feedbackCard").addEventListener("click", () => {
     chiudiRisorsaCard();
     showAIToast("Grazie!", "Il tuo feedback è arrivato.");
   });
-});
+}
 collegaHubRacconta();
 document.getElementById("aiHubChiudi").addEventListener("click", chiudiHubAI);
 document.getElementById("aiHubOverlay").addEventListener("click", (e) => {
@@ -10470,6 +10489,99 @@ function provaNavigazioneDiretta(testo){
   return false;
 }
 
+/* ============ AZIONI DIRETTE, SENZA AI (27/09/2026) ============
+   Andrea: "andare direttamente alla cosa da fare deve valere per tutto: se
+   chiedo cambiamo email mi porta subito lì; assegna un compito, manda un
+   feedback, dovreste aggiungere questo: direttamente lì, senza AI".
+   Prima "Voglio cambiare password" andava all'AI (8 secondi) che
+   rispondeva "vai nelle impostazioni". Ora si apre la schermata giusta.
+   Stesso principio del Router: frasi riconosciute con parole ammesse
+   precise; qualsiasi altra parola (es. "cambia l'email di Rossi", che è
+   il dato di un cliente) → la frase va all'AI come sempre. */
+function normalizzaComando(t){
+  return String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[’']/g, " ").replace(/[.!?,;:]+/g, " ").replace(/\s+/g, " ").trim();
+}
+const PAROLE_RICHIESTA_ACCOUNT = new Set(["voglio","vorrei","devo","posso","puoi","come","faccio","si","fa","a","ad","per","favore","eon","ehi","mi","me","la","il","lo","l","mia","mio","una","un","nuova","nuovo","di","del","dell","della","account","accesso","mettere","metti","impostare","imposta","cambiare","cambia","cambio","cambiami","modificare","modifica","aggiornare","aggiorna","reimpostare","reimposta","resettare","resetta","sostituire","ho","dimenticato","non","ricordo","piu","e","che","uso","usare","entrare","sistemare","sistema"]);
+function soloParoleAccount(n, chiavi){
+  return n.split(" ").every(p => PAROLE_RICHIESTA_ACCOUNT.has(p) || chiavi.includes(p) || /^(cambi|modific|aggiorn|reimpost|resett|sostitu|impost)\w*$/.test(p));
+}
+const VERBO_CAMBIO = /\b(cambi\w*|modific\w*|reimpost\w*|resett\w*|aggiorn\w*|nuov[ao]|dimenticat\w*|sostitui\w*|impost\w*|metter\w*|metti|sistem\w*)\b/;
+function apriVoceImpostazioni(id){
+  navigateTo("impostazioni");
+  const el = document.getElementById(id);
+  if(!el || el.hidden) return false;
+  el.click();
+  return true;
+}
+function capisciAzioneDiretta(testo){
+  const n = normalizzaComando(testo);
+  if(!n) return null;
+  const parole = n.split(" ");
+  // Password
+  if(/\bpassword\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 12 && soloParoleAccount(n, ["password","chiave"])) return { tipo: "password" };
+  // Email (la propria: "cambia l'email di Rossi" ha una parola in più → AI)
+  if(/\b(email|mail|posta)\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 12 && soloParoleAccount(n, ["email","mail","e","indirizzo","posta","elettronica"])) return { tipo: "email" };
+  // Nome / nome dell'attività
+  if(/\bnome\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 10 && soloParoleAccount(n, ["nome","attivita","ditta","azienda","impresa","societa","profilo","cognome","mio"])) return { tipo: "profilo" };
+  // Face ID
+  if(/\b(face ?id|impronta|riconoscimento facciale)\b/.test(n) && parole.length <= 8 && /^(attiva|attivare|attivami|disattiva|disattivare|togli|togliere|metti|mettere|voglio|vorrei|usa|usare|imposta|impostare|face)\b/.test(n)) return { tipo: "faceid" };
+  // EON sulla Home del telefono
+  if(/^(?:come (?:faccio a |si fa a )?)?(?:metti|mettere|metto|installa|installare|installo|aggiungi|aggiungere)\s+(?:l app\s+)?(?:eon\s+)?(?:l app\s+)?(?:sulla|nella|alla)\s+(?:schermata\s+)?home\b/.test(n) || /^(?:come (?:faccio a )?)?(?:installa|installare|installo)\s+(?:l app\s+)?eon$/.test(n)) return { tipo: "installa" };
+  // Esci
+  if(/^(?:esci|uscire|voglio uscire|fammi uscire|disconnettiti|disconnetti|logout)(?: dall account| da eon| dall app)?$/.test(n)) return { tipo: "esci" };
+  // Feedback, suggerimenti, "dovreste aggiungere…"
+  let m = n.match(/^(?:voglio |vorrei |devo )?(?:mandare|manda|mando|inviare|invia|lasciare|lascia|scrivere|scrivi|fare|fai|dare|dai)\s+(?:un |una |il |la )?(?:feedback|suggerimento|segnalazione)\b\s*(?:a eon\s*)?(?:che\s+|su\s+|per\s+)?(.*)$/);
+  if(m) return { tipo: "feedback", testo: pulisciTestoFeedback(testo, m[1]) };
+  if(/^(?:feedback|suggerimento|segnalazione|ho un suggerimento|ho un idea|idea per eon|dovreste|potreste|dovresti aggiungere|sarebbe (?:bello|utile|comodo)|mi piacerebbe (?:che|se)|vorrei che eon|voglio segnalare|vorrei segnalare)\b/.test(n)) return { tipo: "feedback", testo: String(testo || "").trim() };
+  // Assegna un compito
+  m = n.match(/^(?:voglio |vorrei |devo )?(?:(?:assegna|assegnare)\s+(?:un |il |dei |i )?(?:compito|compiti|ordine di lavoro|lavoro)|(?:dai|dare|manda|mandare)\s+(?:un |il |dei |i )?(?:compito|compiti|ordine di lavoro))(?:\s+(?:a|al|alla|ad)\s+(\S+))?\s*(.*)$/)
+    || n.match(/^(?:voglio |vorrei |devo )?(?:assegna|assegnare)\s+(?:a|al|alla|ad)\s+(\S+)\s*(.*)$/);
+  if(m) return { tipo: "compito", chi: m[1] || "", cosa: pulisciTestoCompito(m[2] || "") };
+  return null;
+}
+function pulisciTestoFeedback(originale, restoNormalizzato){
+  if(!restoNormalizzato) return "";
+  // il resto con maiuscole e accenti originali: "Manda un feedback: il calendario è lento" → "il calendario è lento"
+  const resto = String(originale || "").trim().replace(/^.*?\b(?:feedback|suggerimento|segnalazione)\b\s*(?:a eon\b\s*)?[:,\-–]?\s*(?:(?:che|su|per)\s+)?/i, "").trim();
+  return resto ? resto.charAt(0).toUpperCase() + resto.slice(1) : "";
+}
+function pulisciTestoCompito(resto){
+  return String(resto || "").replace(/^(?:di|da|che|per)\s+/, "").trim();
+}
+function provaAzioneDiretta(testo, primaDiAprire){
+  const a = capisciAzioneDiretta(testo);
+  if(!a) return false;
+  if(typeof primaDiAprire === "function") primaDiAprire();
+  if(a.tipo === "password"){
+    apriVoceImpostazioni("impVocePassword");
+    const c = document.getElementById("impCampoPassword"); if(c) c.focus();
+  } else if(a.tipo === "email"){
+    navigateTo("impostazioni"); apriAccount(true);
+  } else if(a.tipo === "profilo"){
+    apriVoceImpostazioni("impVoceProfilo");
+  } else if(a.tipo === "faceid"){
+    if(!apriVoceImpostazioni("impVoceFaceId")) showAIToast("Face ID", "Su questo telefono non si può usare: entra con email e password.");
+  } else if(a.tipo === "installa"){
+    mostraComeInstallare();
+  } else if(a.tipo === "esci"){
+    esciDallAccount();
+  } else if(a.tipo === "feedback"){
+    apriFeedback(a.testo);
+  } else if(a.tipo === "compito"){
+    navigateTo("assegna-compiti");
+    if(a.chi){
+      const chi = employees.find(e => normalizzaComando(e.name).split(" ").includes(a.chi) || normalizzaComando(e.name) === a.chi);
+      if(chi && !selectedEmployees.includes(chi.name)){ selectedEmployees.push(chi.name); renderEmployeeChips(); updateAssignPreview(); }
+      else if(!chi){ const cerca = document.getElementById("empSearchInput"); cerca.value = a.chi; renderEmployeeChips(); }
+    }
+    const campo = document.getElementById("taskAssignTitle");
+    if(a.cosa){ campo.value = a.cosa.charAt(0).toUpperCase() + a.cosa.slice(1); updateAssignPreview(); }
+    campo.focus();
+  }
+  return true;
+}
+
 /* Fase 1b del Router (vedi TODO.md, sezione "EON BRAIN"): piccole
    richieste di LETTURA rispondibili filtrando i dati già caricati nel
    browser (tasks/clients/chats), senza nessuna chiamata di rete. Stesso
@@ -11210,9 +11322,19 @@ function estraiAppunti(testo){
 }
 const RIFERIMENTO_TEMPO = /\b(oggi|domani|dopodomani|lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica|\d{1,2}[:.]\d{2}|ore\s+\d{1,2}\b|\d{1,2}\/\d{1,2})\b/i;
 
+/* Un appunto che nomina un cliente ("per Baudi ricordarsi lo sportello") non
+   è generale: lo salva il server nella scheda del cliente e sul suo
+   prossimo appuntamento (27/09/2026). */
+function nominaUnCliente(testo){
+  const parole = new Set(normalizzaComando(testo).split(" "));
+  if(clients.some(c => { const pn = normalizzaComando(c.name).split(" ").filter(Boolean); return pn.length && pn.every(p => parole.has(p)); })) return true;
+  const maiuscole = String(testo || "").split(/[\s,;!?.]+/).filter(Boolean).slice(1).filter(o => /^[A-ZÀ-Ý][a-zà-ÿ'’-]{2,}$/.test(o)).map(normalizzaComando);
+  return maiuscole.some(w => clients.some(c => normalizzaComando(c.name).split(" ").includes(w)));
+}
 async function provaAppuntoImmediato(testo){
   const appunti = estraiAppunti(testo); // null se non è un appunto, o se ha un orario/data (resta all'AI: potrebbe essere un impegno)
   if(!appunti) return false;
+  if(nominaUnCliente(testo)) return false;
 
   if(!isDbReady()) return false; // senza connessione l'AI non potrebbe farlo comunque: lascia il percorso normale spiegare perché
   const salvati = [];
@@ -11363,6 +11485,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        cambiare pagina nell'app già caricata. Se riconosciuto, ci fermiamo
        qui — zero chiamata all'AI. */
     if(!inContinuazione && provaNavigazioneDiretta(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
+    }
+    /* "Voglio cambiare password", "manda un feedback", "assegna un compito",
+       "dovreste aggiungere…": la schermata giusta, subito, senza AI */
+    if(!inContinuazione && provaAzioneDiretta(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
       return;
@@ -11633,7 +11762,19 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       /* Breve, come vuole Andrea (26/09/2026): "Ok, segnato lunedì ore 09:00".
          Con più impegni, uno per riga: "lunedì ore 09:00 · Chiamare Walter". */
       const clienteNato = risultatiVisibili.find(a => a.tool === "trova_o_crea_cliente" && a.esito && a.esito.creato);
-      if(impegniCreati.length === 1) mostra("Ok, segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato), clienteNato ? "Nuovo cliente: " + clienteNato.esito.nome : "");
+      const daConfermare = impegniCreati.length === 1 && /\(da confermare\)$/.test(impegniCreati[0].esito.titolo || "");
+      if(impegniCreati.length === 1) mostra("Ok, segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato) + (daConfermare ? ", da confermare" : ""), clienteNato ? "Nuovo cliente: " + clienteNato.esito.nome : daConfermare ? "Se risponde sì lo confermo, se dice no lo tolgo." : "");
+      /* Il cliente nato con il lavoro ("Caldaia Baudi venerdì ore 15"): se
+         il nome non era un cliente, un tocco lo toglie (l'appuntamento resta) */
+      if(clienteNato){
+        const idNato = clienteNato.esito.id;
+        showAIToastConAnnulla("Nuovo cliente: " + escapeHtml(clienteNato.esito.nome), "Aggiunto ai clienti. Non è un cliente? Tocca Annulla.", async () => {
+          const c = clients.find(x => x.id === idNato);
+          if(c) clients.splice(clients.indexOf(c), 1);
+          if(isDbReady()) await dbDelete("clients", idNato);
+          ridisegnaClientiEChat();
+        });
+      }
       else mostra("Ok, segnati " + impegniCreati.length + " impegni", impegniCreati.map(a => quandoBreve(a.esito.quando_visualizzato) + " · " + a.esito.titolo).join("\n"));
     }
 
@@ -11671,15 +11812,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         const nuovo = clients.find(c => c.id === a.esito.id) || clients.find(c => nomeChiave(c.name) === nomeChiave(a.esito.nome));
         const vuoleFoto = /\bfot/i.test(testo);
         if(nuovo){
-          mostraSchedaCliente(nuovo, { messaggio: "Cliente aggiunto." + (vuoleFoto ? " Tocca \"Scatta foto\" per la foto." : ""), evidenziaFoto: vuoleFoto });
-          daDire.push("Cliente aggiunto: " + a.esito.nome);
-        } else mostra("Cliente aggiunto", a.esito.nome);
+          mostraSchedaCliente(nuovo, { messaggio: titoloClienteAggiunto(a.esito) + "." + (vuoleFoto ? " Tocca \"Scatta foto\" per la foto." : ""), evidenziaFoto: vuoleFoto });
+          daDire.push(titoloClienteAggiunto(a.esito) + ": " + a.esito.nome);
+        } else mostra(titoloClienteAggiunto(a.esito), a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
         mostra("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
-        mostra("Messaggio inviato", "A " + a.esito.inviato_a);
+        mostra("Messaggio inviato", "A " + a.esito.inviato_a + (a.esito.testo ? ": “" + a.esito.testo + "”" : ""));
       } else if(a.tool === "crea_appunto"){
-        mostra("Appunto aggiunto", a.esito.testo);
+        if(a.esito.cliente) mostra("Appunto su " + a.esito.cliente, a.esito.testo + (a.esito.appuntamento ? "\nAnche sull'appuntamento di " + quandoBreve(a.esito.appuntamento.quando_visualizzato) : ""));
+        else mostra("Appunto aggiunto", a.esito.testo);
       } else if(a.tool === "correggi_appunto"){
         mostra("Appunto corretto", a.esito.testo);
       } else if(a.tool === "crea_preventivo_o_fattura"){
@@ -14920,7 +15062,7 @@ function suTocco(id, fn){
   el.addEventListener("keydown", (e) => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); fn(); } });
 }
 
-suTocco("impVoceAccount", () => {
+function apriAccount(suEmail){
   const d = datiAccount();
   const iniziali = (d.nome.split(/\s+/).map(w => w[0] || "").join("").slice(0, 2) || "–").toUpperCase();
   const corpo = schedaImpostazione("Account", `
@@ -14933,13 +15075,34 @@ suTocco("impVoceAccount", () => {
       </div>
     </div>
     <div class="imp-riga"><span>Professione</span><b id="impProfessione"></b></div>
-    <div class="imp-nota">La professione è legata al tuo account: si sceglie alla registrazione e non si cambia.</div>`);
+    <div class="imp-nota">La professione è legata al tuo account: si sceglie alla registrazione e non si cambia.</div>
+    <label class="imp-campo"><span>Cambia email</span><input id="impCampoEmail" type="email" autocomplete="email" inputmode="email" placeholder="La nuova email"></label>
+    <button type="button" class="imp-btn" id="impCambiaEmail">Cambia email</button>
+    <div class="imp-esito" id="impEsitoEmail"></div>`);
   corpo.querySelector("#impAvatar").textContent = iniziali;
   corpo.querySelector("#impNome").textContent = d.nome;
   corpo.querySelector("#impAttivita").textContent = d.business_name || "";
   corpo.querySelector("#impEmail").textContent = d.email || "";
   corpo.querySelector("#impProfessione").textContent = d.professione;
-});
+  /* Cambio email (27/09/2026): Supabase manda un link di conferma; finché
+     non lo tocchi resta valida quella di prima. */
+  corpo.querySelector("#impCambiaEmail").addEventListener("click", async () => {
+    const campo = corpo.querySelector("#impCampoEmail");
+    const email = campo.value.trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return esitoImp("impEsitoEmail", "Scrivi un'email valida.", false);
+    if(email === String(d.email || "").toLowerCase()) return esitoImp("impEsitoEmail", "È già la tua email.", false);
+    if(!isDbReady()) return esitoImp("impEsitoEmail", "Serve la connessione per cambiarla.", false);
+    const b = corpo.querySelector("#impCambiaEmail");
+    b.disabled = true;
+    const { error } = await supabaseClient.auth.updateUser({ email }, { emailRedirectTo: indirizzoApp() });
+    b.disabled = false;
+    if(error) return esitoImp("impEsitoEmail", "Non cambiata: " + messaggioErroreAccesso(error), false);
+    campo.value = "";
+    esitoImp("impEsitoEmail", "Controlla la posta di " + email + " e tocca il link di conferma. Fino ad allora resta valida quella di prima.", true);
+  });
+  if(suEmail) corpo.querySelector("#impCampoEmail").focus();
+}
+suTocco("impVoceAccount", () => apriAccount(false));
 
 /* EON sulla Home del telefono, prima dell'App Store (26/09/2026): da
    Safari o Chrome si aggiunge alla Home e si apre a schermo intero, con

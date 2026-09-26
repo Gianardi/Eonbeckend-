@@ -382,12 +382,23 @@ await scenario(
   }
 );
 
+/* 27/09/2026: mai doppioni — con lo stesso nome si usa quello che c'è
+   (e gli si aggiunge il telefono se non l'aveva), senza AI. */
 await scenario(
-  "Cliente con lo stesso nome già in anagrafica → motore completo, nessun doppione",
+  "Cliente con lo stesso nome già in anagrafica, senza telefono → nessun doppione, telefono aggiunto, senza AI",
   () => ({ c: aggiungiCliente("Mario Rossi") }),
-  [{ body: daClienti("Mario Rossi 345 9012394"), copione: [...motore] }], // letto dal codice, poi: esiste già
+  [{ body: daClienti("Mario Rossi 345 9012394"), copione: [] }],
   ([r], [ai]) => {
-    verifica("motore completo, nessun cliente creato", ai.length === 2 && eMotoreCompleto(ai[0]) && tabelle.clients.length === 1, `${ai.length} ${tabelle.clients.length}`);
+    verifica("nessuna AI, nessun cliente creato, telefono aggiunto", ai.length === 0 && tabelle.clients.length === 1 && tabelle.clients[0].phone === "345 9012394" && /già tra i tuoi clienti/.test(r.corpo.testo), `${ai.length} ${tabelle.clients.length} ${tabelle.clients[0].phone} ${r.corpo.testo}`);
+  }
+);
+
+await scenario(
+  "Cliente con lo stesso nome ma un ALTRO telefono → motore completo, nessun doppione",
+  () => { const c = aggiungiCliente("Mario Rossi"); c.phone = "333 1111111"; return { c }; },
+  [{ body: daClienti("Mario Rossi 345 9012394"), copione: [...motore] }],
+  ([r], [ai]) => {
+    verifica("motore completo, nessun cliente creato, telefono non toccato", ai.length === 2 && eMotoreCompleto(ai[0]) && tabelle.clients.length === 1 && tabelle.clients[0].phone === "333 1111111", `${ai.length} ${tabelle.clients.length}`);
   }
 );
 
