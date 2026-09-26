@@ -5,7 +5,7 @@ in ordine. Il dettaglio tecnico di ogni punto è in `TODO.md`.
 
 **In breve**
 - I tre pilastri: tempo, memoria, soldi.
-- 0 · Pubblicare il pacchetto #97.
+- **0 · Adesso, in quest'ordine** (deciso con Andrea il 26/09).
 - 1 · Obbligatori prima di vendere.
 - 2 · Per incassare (abbonamento, costi).
 - 2b · **EON Memory**, "l'iCloud del lavoro" + analisi di costi e spazio.
@@ -44,15 +44,28 @@ pilastri, altrimenti non si fa.
 
 ---
 
-## 0. Domani mattina — pubblicare il pacchetto
+## 0. Adesso, in quest'ordine (deciso con Andrea, 26/09/2026)
 
-1. **[Andrea]** Merge del pacchetto unico (PR #97).
-2. **[Claude]** Controllo che la pubblicazione su Vercel sia andata.
-3. **[Claude]** Chiudo i vecchi accessi della pagina cliente
-   (`supabase/portale_chiudi_accessi.sql`) e blocco il cambio di
-   professione (`supabase/profilo_professione_fissa.sql`).
-4. **[Andrea]** 5 minuti di prova sul telefono: Esci e rientra, scorri tra
-   le pagine, foto in Appunti, "cosa ho da fare domani?", Impostazioni.
+1. **[Claude]** Sistemare i problemi trovati da Andrea nei test del 26/09.
+2. **[Andrea]** Scegliere la scritta in alto nella Home (A, B o C).
+3. **[Claude] Meno AI, fase 1** (vedi 5b):
+   - misurare: costo e tipo di ogni richiesta nei registri;
+   - analizzare: elenco di tutto quello che EON fa, in tre gruppi (senza
+     AI / AI piccola / AI completa), partendo dalle frasi vere di Andrea
+     nei registri — ad Andrea con il risparmio stimato;
+   - fare: spostare nel codice il primo gruppo, con i test, senza toccare
+     la qualità.
+4. **[Claude]** Avviso automatico degli errori.
+5. Poi la sezione 1 (prima di vendere) e i primi 5 artigiani (sezione 6).
+
+**Privacy e società** (26/09): per la prova gratuita con i primi artigiani
+basta Andrea come persona fisica titolare del trattamento (informativa e
+consenso a suo nome). Per vendere gli abbonamenti serve la società (o una
+partita IVA) prima di Stripe; allora l'informativa si aggiorna. Testi da
+far controllare a un legale.
+
+Pubblicati: pacchetto #97 (25/09) e #70 (26/09), con gli accessi della
+pagina cliente chiusi e la professione bloccata in produzione.
 
 ---
 
@@ -63,7 +76,7 @@ pilastri, altrimenti non si fa.
 | **Vercel Pro** (~20 $/mese) | [Andrea] | Il piano gratuito vieta l'uso commerciale e ha il limite di pubblicazioni che ci ha bloccato il 25/09. |
 | **Supabase Pro** (~25 $/mese) | [Andrea] | Backup giornalieri, nessuna pausa del progetto. |
 | **Servizio email vero** (es. Resend) | [insieme] | Oggi Supabase manda email solo a noi del team. Poi: email in italiano e **conferma email obbligatoria** accesa. |
-| **Privacy, termini, consenso GDPR** | [insieme] | Mi servono ragione sociale, P.IVA, sede, email. Io preparo testi e casella "accetto"; li fai controllare a legale/commercialista. |
+| **Privacy, termini, consenso GDPR** | [insieme] | Per la prova: a nome di Andrea (persona fisica). Per vendere: con la società. Io preparo testi e casella "accetto"; li fai controllare a legale/commercialista. |
 | **Dominio tuo** (es. eon.it) | [insieme] | Tu lo compri (~10–20 €/anno), io lo collego al posto di eonbeckend.vercel.app. |
 | **Avviso automatico degli errori** | [Claude] | Se qualcosa si rompe a un cliente lo so subito. |
 | **Compressione delle foto** (subito dopo il merge) | [Claude] | Come WhatsApp: da ~3 MB a ~300 KB per foto, a occhio uguali (lato lungo ~2000 px). Le foto di documenti da leggere (fatture, DURC) restano più nitide. Spazio ~10 volte meno, caricamento più veloce in cantiere. |
