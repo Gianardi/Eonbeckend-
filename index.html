@@ -9208,6 +9208,16 @@ function renderCantiereDocumenti(){
     titolo.className = "module-title";
     titolo.textContent = d.nome;
     body.appendChild(titolo);
+    if(d.inCaricamento){
+      const sotto = document.createElement("div");
+      sotto.className = "module-sub";
+      sotto.textContent = "Sto caricando…";
+      body.appendChild(sotto);
+      card.style.opacity = ".7";
+      card.appendChild(icon); card.appendChild(body);
+      wrap.appendChild(card);
+      return;
+    }
 
     const elimina = document.createElement("button");
     elimina.className = "cantiere-appunto-elimina";
@@ -9222,33 +9232,72 @@ function renderCantiereDocumenti(){
   });
 }
 
+/* Il documento compare SUBITO in elenco (26/09/2026, Gianardi: "il
+   caricamento dovrebbe essere immediato"): si vede con "Sto caricando…"
+   mentre il file sale in sottofondo; le foto dei documenti prima si
+   alleggeriscono (leggibili, ma molto più piccole). Se il caricamento
+   non riesce, la riga sparisce e lo si dice. */
 async function caricaCantiereDocumento(file){
   if(!isDbReady()){
     showAILanding("Non collegato", "Per caricare documenti serve la connessione al database.");
     return;
   }
-  const btn = document.getElementById("cantiereDocumentiCaricaBtn");
-  const sub = document.getElementById("cantiereDocumentiCaricaSub");
-  btn.disabled = true;
-  sub.textContent = "Sto caricando " + file.name + "…";
+  const provvisorio = { id:"caricamento-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7), url:URL.createObjectURL(file), nome:file.name, tipo:file.type, created:new Date().toISOString(), inCaricamento:true };
+  cantiereDocumenti.push(provvisorio);
+  aggiornaCantiereSottotitoli();
+  renderCantiereDocumenti();
+  document.getElementById("cantiereDocumentiInput").value = "";
   try{
-    const percorso = currentSession.user.id + "/cantiere/documenti/" + nomeFileSicuro(file.name);
+    const daCaricare = await comprimiImmagine(file, { lato: 2400, qualita: 0.85 });
+    const percorso = currentSession.user.id + "/cantiere/documenti/" + nomeFileSicuro(daCaricare.name);
     const { error: upErr } = await supabaseClient.storage
-      .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
+      .from("eon-files").upload(percorso, daCaricare, { contentType:daCaricare.type, upsert:false });
     if(upErr) throw upErr;
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
-    const creato = await dbInsert("cantiere_documenti", { url:pub.publicUrl, nome:file.name, tipo:file.type });
+    const creato = await dbInsert("cantiere_documenti", { url:pub.publicUrl, nome:file.name, tipo:daCaricare.type });
     if(!creato) throw new Error("scrittura non riuscita");
-    cantiereDocumenti.push({ id:creato.id, url:creato.url, nome:creato.nome, tipo:creato.tipo, created:creato.created_at });
-    aggiornaCantiereSottotitoli();
+    URL.revokeObjectURL(provvisorio.url);
+    Object.assign(provvisorio, { id:creato.id, url:creato.url, nome:creato.nome, tipo:creato.tipo, created:creato.created_at, inCaricamento:false });
     renderCantiereDocumenti();
   }catch(err){
     console.error("Caricamento documento non riuscito:", err);
+    const idx = cantiereDocumenti.indexOf(provvisorio);
+    if(idx > -1) cantiereDocumenti.splice(idx, 1);
+    aggiornaCantiereSottotitoli();
+    renderCantiereDocumenti();
     showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare " + file.name + ": " + (err.message || "riprova."));
-  }finally{
-    btn.disabled = false;
-    sub.textContent = "Si aggiunge subito all'elenco qui sotto";
-    document.getElementById("cantiereDocumentiInput").value = "";
+  }
+}
+
+/* Foto più leggere prima di caricarle, come WhatsApp: lato lungo al massimo
+   ~2000 px, JPEG. A occhio uguali, ~10 volte più piccole: si caricano
+   prima in cantiere e occupano meno spazio. Se qualcosa non va, si carica
+   l'originale (mai perdere una foto per colpa della compressione). */
+async function comprimiImmagine(file, opzioni){
+  const lato = (opzioni && opzioni.lato) || 2000;
+  const qualita = (opzioni && opzioni.qualita) || 0.8;
+  if(!file || !/^image\/(jpeg|jpg|png|webp|heic|heif)$/i.test(file.type || "") || file.size < 350 * 1024) return file;
+  try{
+    const immagine = await new Promise((ok, ko) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => { URL.revokeObjectURL(url); ok(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); ko(new Error("immagine non leggibile")); };
+      img.src = url;
+    });
+    const w0 = immagine.naturalWidth, h0 = immagine.naturalHeight;
+    if(!w0 || !h0) return file;
+    const scala = Math.min(1, lato / Math.max(w0, h0));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(w0 * scala); canvas.height = Math.round(h0 * scala);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height); // PNG trasparenti: fondo bianco
+    ctx.drawImage(immagine, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(ok => canvas.toBlob(ok, "image/jpeg", qualita));
+    if(!blob || blob.size >= file.size) return file;
+    return new File([blob], String(file.name || "foto").replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  }catch(err){
+    return file;
   }
 }
 
@@ -9380,6 +9429,7 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
   btn.disabled = true;
   sub.textContent = "Sto caricando…";
   try{
+    file = await comprimiImmagine(file);
     const percorso = currentSession.user.id + (daAppunti ? "/cantiere/appunti/" : "/cantiere/foto/") + nomeFileSicuro(file.name);
     const { error: upErr } = await supabaseClient.storage
       .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
@@ -9696,7 +9746,15 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "calendario": ["calendario", "agenda", "appuntamenti", "gli appuntamenti"],
   "chat": ["chat", "conversazioni", "messaggi", "la chat", "le chat"],
   "cestino": ["cestino"],
-  "documenti-impresa": ["documenti impresa", "documenti dell'impresa", "documenti azienda"],
+  "documenti-impresa": ["documenti impresa", "documenti dell'impresa", "documenti azienda", "documenti aziendali", "documenti dell'azienda", "i documenti dell'impresa", "i documenti dell'azienda"],
+  "cantiere-documenti": ["documenti", "i documenti", "i miei documenti"],
+  "carta-intestata": ["carta intestata", "la carta intestata", "la mia carta intestata"],
+  "crea-lettera": ["lettera", "la lettera"],
+  "crea-cartello": ["cartello", "il cartello", "cartello fine lavori", "il cartello fine lavori", "cartello di fine lavori"],
+  "cantiere-appunti": ["appunti", "gli appunti", "i miei appunti", "note", "le note"],
+  "cantiere-foto": ["foto", "le foto", "foto cantiere", "le foto del cantiere", "foto del cantiere", "galleria"],
+  "cantiere-cliente": ["cliente cantiere"],
+  "impostazioni": ["impostazioni", "le impostazioni"],
   "fatture-preventivi": ["fatture", "preventivi", "fatture e preventivi", "preventivi e fatture", "le fatture", "i preventivi", "le mie fatture", "i miei preventivi"],
   "pagamenti": ["pagamenti"],
   "entrate": ["entrate"],
@@ -9712,7 +9770,7 @@ const PAGINE_NAVIGABILI_A_VOCE = {
    L'eventuale articolo resta nel resto della frase, e viene provato
    prima così com'è (per i sinonimi che lo includono per intero) e solo
    come ripiego senza — vedi provaNavigazioneDiretta. */
-const APERTURA_NAVIGAZIONE = /^(?:apri|mostrami|mostra)\s+|^(?:vai|portami)\s+(?:a|al|ai|alla|allo|agli|alle|in)\s+/;
+const APERTURA_NAVIGAZIONE = /^(?:apri|aprimi|mostrami|mostra|dammi|mi dai|mi apri|mi mostri|fammi vedere|voglio vedere|mi serve|mi servono)\s+|^(?:vai|portami)\s+(?:a|al|ai|alla|allo|agli|alle|in|su|sulla|sulle|sui)\s+/;
 
 function provaNavigazioneDiretta(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
@@ -9850,6 +9908,67 @@ function mostraFotoTrovate(elenco, parole, clienteNome){
     return true;
   }
   mostraRisorsaFoto(trovate.slice(0, 10).map(f => ({ id: f.id, url: f.url, quando: f.created, nota: f.nota, descrizione: f.descrizione })), clienteNome);
+  return true;
+}
+
+/* Documenti dell'impresa ritrovati per nome, senza AI (26/09/2026,
+   Gianardi: "se chiedo il DURC deve darmelo, cercandolo direttamente").
+   Stesso principio di fatture e preventivi: si cerca nei documenti già in
+   memoria; uno solo → si apre, più di uno → elenco, nessuno → decide
+   l'AI come prima. */
+const PAROLE_VUOTE_DOC_IMPRESA = /^(il|lo|la|i|gli|le|l|d|dell|all|dall|nell|sull|un|una|uno|di|del|della|dello|dei|delle|mio|mia|miei|mie|nostro|nostra|documento|documenti|file|copia|pdf|impresa|azienda|aziendale|ditta|per|me|favore|per favore)$/;
+const TRIGGER_DOC_IMPRESA = /^(?:mi\s+(?:dai|mandi|trovi|mostri|apri|serve|servirebbe|servono)|dammi|mandami|trovami|mostrami|mostra|apri|aprimi|cerca|cercami|trova|fammi vedere|voglio vedere|vorrei vedere|vorrei|dov'è|dov'e|dove è|dove ho messo|ho bisogno (?:del|della|dei|delle|di))\s+(.+)$/;
+const nomeDocumentoPulito = n => String(n || "").replace(/\.[a-z0-9]{2,5}$/i, "").replace(/[_\-.]+/g, " ").replace(/\s+/g, " ").trim();
+
+function cercaDocumentiImpresa(testoRichiesta){
+  const parole = String(testoRichiesta || "").toLowerCase().replace(/[.,!?;:'"’]+/g, " ").split(/\s+/).filter(p => p && !PAROLE_VUOTE_DOC_IMPRESA.test(p));
+  if(!parole.length) return [];
+  return cantiereDocumenti.filter(d => {
+    const nome = nomeDocumentoPulito(d.nome).toLowerCase();
+    return parole.every(p => nome.includes(p));
+  });
+}
+
+function mostraDocumentoImpresa(d){
+  const corpo = document.createElement("div");
+  corpo.className = "scheda-doc";
+  if(/^image\//.test(d.tipo || "") || /\.(jpe?g|png|webp|gif|heic)$/i.test(d.url || "")){
+    const img = document.createElement("img");
+    img.className = "scheda-foto-img"; img.src = d.url; img.alt = d.nome;
+    img.addEventListener("click", () => window.open(d.url, "_blank"));
+    corpo.appendChild(img);
+  } else {
+    corpo.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => window.open(d.url, "_blank")));
+  }
+  const riga = document.createElement("div");
+  riga.className = "risorsa-riga-btn";
+  const apri = document.createElement("button");
+  apri.type = "button"; apri.className = "doc-btn-secondario"; apri.textContent = "Apri";
+  apri.addEventListener("click", () => window.open(d.url, "_blank"));
+  riga.appendChild(apri);
+  const condividi = document.createElement("button");
+  condividi.type = "button"; condividi.className = "doc-btn-secondario"; condividi.textContent = "Invia";
+  condividi.addEventListener("click", async () => {
+    const titolo = nomeDocumentoPulito(d.nome);
+    if(navigator.share){ try{ await navigator.share({ title: titolo, text: titolo + ": " + d.url }); return; }catch(e){ return; } }
+    try{ await navigator.clipboard.writeText(d.url); showAIToast("Link copiato", "Incollalo su WhatsApp o nell'email."); }catch(e){ showAILanding(titolo, d.url); }
+  });
+  riga.appendChild(condividi);
+  corpo.appendChild(riga);
+  apriRisorsaCard(nomeDocumentoPulito(d.nome), corpo);
+}
+
+function provaDocumentoImpresa(testo){
+  const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  if(!t || !cantiereDocumenti.length) return false;
+  const m = t.match(TRIGGER_DOC_IMPRESA);
+  if(!m) return false;
+  // Una richiesta di FARE qualcosa non si intercetta mai qui
+  if(/\b(crea|creami|fai|fammi un|fammi una|prepara|preparami|nuov[oa]|carica)\b/.test(m[1])) return false;
+  const trovati = cercaDocumentiImpresa(m[1]);
+  if(!trovati.length) return false;
+  if(trovati.length === 1) mostraDocumentoImpresa(trovati[0]);
+  else mostraRisorsaDocumenti(trovati.slice().reverse().map(d => ({ id: d.id, tipo: "allegato", titolo: nomeDocumentoPulito(d.nome), url: d.url, quando: d.created })), null);
   return true;
 }
 
@@ -10160,6 +10279,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaSchedaCliente(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      return;
+    }
+
+    /* Un documento dell'impresa chiamato per nome ("mi dai il DURC"). */
+    if(!inContinuazione && provaDocumentoImpresa(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      if(viaVoce) parlaRisposta("Ecco il documento");
       return;
     }
 
