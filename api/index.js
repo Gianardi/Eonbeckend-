@@ -2926,7 +2926,9 @@ function testoDiRisposta(data) {
 
 function dataOraCorrente() {
   const oggi = new Date();
-  return `Oggi è ${oggi.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ora ${oggi.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}.`;
+  /* Ora italiana, non quella del server (su Vercel è UTC: fino al 26/09
+     "fra un'ora" e le richieste dopo mezzanotte potevano sbagliare di 1-2 ore). */
+  return `Oggi è ${oggi.toLocaleDateString("it-IT", { timeZone: "Europe/Rome", weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ora ${oggi.toLocaleTimeString("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" })}.`;
 }
 
 /* L'IntentFrame (cosa Claude ha capito che l'utente vuole ottenere,
@@ -3107,7 +3109,7 @@ function ultimoImpegnoDalRicordo(ricordo) {
 /* Una chiamata piccola all'AI: prompt corto, un solo strumento forzato.
    Restituisce l'input compilato, o null per qualunque problema (il
    chiamante allora passa al motore completo). */
-async function chiamaAIRapida(strumento, testoUtente) {
+async function chiamaAIRapida(strumento, testoUtente, consumo) {
   let r;
   try {
     r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -3129,14 +3131,141 @@ async function chiamaAIRapida(strumento, testoUtente) {
   }
   if (!r.ok) return null;
   const data = await r.json().catch(() => null);
+  if (consumo && data) sommaConsumo(consumo, MODELLO_RAPIDO, data.usage);
   const blocco = data && Array.isArray(data.content) && data.content.find((b) => b.type === "tool_use" && b.name === strumento.name);
   return blocco ? blocco.input : null;
 }
 
-async function leggiImpegnoConAI(testo, ultimo) {
+async function leggiImpegnoConAI(testo, ultimo, consumo) {
   const righe = [`Frase del professionista: "${testo}"`];
   if (ultimo) righe.push(`Ultimo impegno appena segnato: "${ultimo.titolo}"${ultimo.cliente ? " con " + ultimo.cliente : ""}, il ${ultimo.quando}.`);
-  return chiamaAIRapida(STRUMENTO_LEGGI_IMPEGNO, righe.join("\n"));
+  return chiamaAIRapida(STRUMENTO_LEGGI_IMPEGNO, righe.join("\n"), consumo);
+}
+
+/* ---------- Meno AI, fase 1 (26/09/2026): appuntamenti letti dal CODICE ----------
+   Prima di chiedere alla piccola AI (leggiImpegnoConAI) proviamo a leggere
+   la frase da soli. Solo le frasi CHIARISSIME, quelle che Andrea usa di
+   più ("Chiamata Valter lunedì alle 9", "Segna Dini domani alle 10",
+   "no alle 11"): un giorno (oggi, domani, dopodomani, un giorno della
+   settimana), un'ora precisa, al massimo un nome. Tutto il resto — orari
+   vaghi o dalle 1 alle 7 senza "di mattina/di pomeriggio", più impegni,
+   luoghi, parole in più, date scritte — restituisce null e decide la
+   piccola AI esattamente come prima. Stesso formato di leggi_impegno,
+   quindi dopo valgono gli stessi identici controlli. */
+const GIORNI_SETTIMANA_IT = ["domenica", "lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato"];
+const PAROLE_VAGHE = /\b(mattinata|serata|notte|stanotte|verso|circa|tipo|dopo|prima|entro|fino|dalle|tra le|fra le|forse|magari|se|quando|appena|poi|anche|oppure|settimana|mese|prossimo|prossima|scorso|scorsa|ieri|mezzogiorno|mezzanotte|mezza|mezzo|meno|quarto)\b/;
+const VERBI_INIZIALI = /^(?:(?:mi\s+)?(?:segna(?:mi)?|segni|metti(?:mi)?|metti|fissa(?:mi)?|fissi|aggiungi(?:mi)?|aggiungi|inserisci(?:mi)?|ricordami(?:\s+di)?|ricorda(?:mi)?(?:\s+di)?|programma(?:mi)?|prenota(?:mi)?|crea(?:mi)?|devo|ho|c'e|c e))\s+/;
+const PAROLE_INCONTRO = { appuntamento: "Appuntamento", incontro: "Incontro", sopralluogo: "Sopralluogo", riunione: "Riunione", visita: "Visita", colazione: "Colazione", pranzo: "Pranzo", cena: "Cena", caffe: "Caffè" };
+const PAROLE_CHIAMATA = /^(chiamata|chiamare|chiama|telefonata|telefonare|telefona|richiamare|richiama|sentire)$/;
+// Parole che possono stare intorno al nome ("con Dini", "da Rossi"); qualunque altra parola ("per", "di", "e"...) vuol dire che c'è altro: decide l'AI
+const PAROLE_RIEMPITIVE = new Set(["un", "una", "uno", "l", "lo", "la", "il", "con", "a", "da", "al", "dal", "dalla", "alla"]);
+
+/* Adesso a Roma: { anno, mese (1-12), giorno, giornoSettimana (0=domenica) } */
+function oggiARoma(ora) {
+  const parti = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short" }).formatToParts(ora || new Date()).map((p) => [p.type, p.value]));
+  const settimana = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[parti.weekday];
+  return { anno: Number(parti.year), mese: Number(parti.month), giorno: Number(parti.day), giornoSettimana: settimana };
+}
+function dataPiuGiorni(base, n) {
+  const d = new Date(Date.UTC(base.anno, base.mese - 1, base.giorno + n));
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+/* Frase → { resto (parole rimaste), giornoIso | null, ora "HH:MM" | null } oppure null se non è chiara */
+function estraiGiornoEOra(normalizzata, adesso) {
+  let t = " " + normalizzata + " ";
+  const oggi = oggiARoma(adesso);
+  let giornoIso = null;
+  const giorni = [];
+  /* Parte del giorno: "domattina", "stasera", "domani pomeriggio alle 3" */
+  const fasce = [];
+  t = t.replace(/\b(domattina)\b/g, () => { giorni.push("domani"); fasce.push("mattina"); return " "; });
+  t = t.replace(/\b(stamattina|stamani)\b/g, () => { giorni.push("oggi"); fasce.push("mattina"); return " "; });
+  t = t.replace(/\b(stasera)\b/g, () => { giorni.push("oggi"); fasce.push("sera"); return " "; });
+  t = t.replace(/\b(?:di |del |nel |in )?(mattina|pomeriggio|sera)\b/g, (m, f) => { fasce.push(f); return " "; });
+  if (fasce.length > 1) return null;
+  t = t.replace(/\b(oggi|domani|dopodomani)\b/g, (m) => { giorni.push(m); return " "; });
+  t = t.replace(/\b(lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b/g, (m) => { giorni.push(m); return " "; });
+  if (giorni.length > 1) return null;
+  if (giorni.length === 1) {
+    const g = giorni[0];
+    if (g === "oggi") giornoIso = dataPiuGiorni(oggi, 0);
+    else if (g === "domani") giornoIso = dataPiuGiorni(oggi, 1);
+    else if (g === "dopodomani") giornoIso = dataPiuGiorni(oggi, 2);
+    else {
+      const diff = (GIORNI_SETTIMANA_IT.indexOf(g) - oggi.giornoSettimana + 7) % 7;
+      if (diff === 0) return null; // "lunedì" detto di lunedì: oggi o fra una settimana? decide l'AI
+      giornoIso = dataPiuGiorni(oggi, diff);
+    }
+  }
+  const ore = [];
+  t = t.replace(/\b(?:alle ore|alle|ore|h)\s+(\d{1,2})(?:[:.](\d{2}))?\b|\b(\d{1,2})[:.](\d{2})\b/g, (m, h1, m1, h2, m2) => {
+    ore.push({ h: Number(h1 != null ? h1 : h2), m: Number((h1 != null ? m1 : m2) || 0) });
+    return " ";
+  });
+  if (ore.length > 1) return null;
+  let ora = null;
+  if (ore.length === 1) {
+    let { h, m } = ore[0];
+    if (m > 59 || h > 23) return null;
+    const fascia = fasce[0];
+    if (fascia === "mattina") { if (h < 5 || h > 12) return null; }
+    else if (fascia === "pomeriggio") { if (h >= 1 && h <= 7) h += 12; else if (h < 12 || h > 19) return null; }
+    else if (fascia === "sera") { if (h >= 5 && h <= 11) h += 12; else if (h < 17) return null; }
+    else if (h < 8) return null; // "alle 3" senza dire mattina/pomeriggio: decide l'AI
+    ora = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  } else if (fasce.length) return null; // "domani mattina" senza ora: vago, decide l'AI
+  if (/\d/.test(t)) return null; // altri numeri (date scritte, indirizzi, importi): decide l'AI
+  return { resto: t.replace(/\s+/g, " ").trim(), giornoIso, ora };
+}
+
+function normalizzaFraseImpegno(testo) {
+  return String(testo || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[’']/g, " ").replace(/[,;!?]+/g, " ").replace(/\.(?!\d)/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/* Le parole del nome come compaiono nella frase originale (per nome_nella_frase) */
+function paroleOriginaliDelNome(testo, paroleNome) {
+  const originali = String(testo).split(/[\s,;!?]+/).filter(Boolean);
+  return paroleNome.map((p) => originali.find((o) => normalizzaFraseImpegno(o) === p) || p).join(" ");
+}
+
+function leggiImpegnoSenzaAI(testo, ultimo, adesso) {
+  if (!eStringaNonVuota(testo) || testo.length > 120) return null;
+  const n = normalizzaFraseImpegno(testo);
+  if (PAROLE_VAGHE.test(n)) return null;
+
+  // Correzione dell'ultimo impegno: "no alle 11", "anzi no fai alle 10", "meglio alle 9", "spostalo a domani alle 9"
+  const correzione = n.match(/^(?:no|anzi|anzi no|no anzi|meglio|facciamo|fai|fallo|mettilo|spostalo|sposta)(?:\s+(?:no|anzi|fai|facciamo|fallo|mettilo|spostalo|meglio|a|per))*\s+(.+)$/);
+  if (correzione && ultimo) {
+    const letto = estraiGiornoEOra(correzione[1], adesso);
+    if (!letto || !letto.ora || letto.resto) return null; // altre parole (un nome, un posto): decide l'AI
+    const giorno = letto.giornoIso || String(ultimo.quando || "").slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(giorno)) return null;
+    return { azione: "correggi_ultimo", quando_iso: `${giorno}T${letto.ora}:00`, nome_nella_frase: "" };
+  }
+  if (correzione) return null;
+
+  // Nuovo impegno: [verbo] [tipo] [con] Nome giorno ora — in qualunque ordine
+  const letto = estraiGiornoEOra(n.replace(VERBI_INIZIALI, ""), adesso);
+  if (!letto || !letto.giornoIso || !letto.ora) return null;
+  let parole = letto.resto.split(" ").filter(Boolean);
+  let tipo = "incontro", titoloBase = null;
+  const idxChiamata = parole.findIndex((p) => PAROLE_CHIAMATA.test(p));
+  const idxIncontro = parole.findIndex((p) => PAROLE_INCONTRO[p]);
+  if (idxChiamata >= 0 && idxIncontro >= 0) return null;
+  if (idxChiamata >= 0) { tipo = "chiamata"; parole.splice(idxChiamata, 1); }
+  else if (idxIncontro >= 0) { titoloBase = PAROLE_INCONTRO[parole[idxIncontro]]; parole.splice(idxIncontro, 1); }
+  parole = parole.filter((p) => !PAROLE_RIEMPITIVE.has(p));
+  // Resta solo il nome: 1-3 parole di lettere, nient'altro
+  if (!parole.length || parole.length > 3 || !parole.every((p) => /^[a-z]{2,}$/.test(p))) return null;
+  if (parole.some((p) => PAROLE_NON_NOME.has(p) || /^(per|di|e|del|della|sul|sulla|in|nel|nella|su)$/.test(p))) return null;
+  const nomeOriginale = paroleOriginaliDelNome(testo, parole);
+  const nomeBello = nomeOriginale.split(" ").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+  const titolo = tipo === "chiamata" ? `Chiamare ${nomeBello}` : `${titoloBase || "Appuntamento"} con ${nomeBello}`;
+  /* Un nome di più parole ("Claudia Spori") vale solo se è un cliente in
+     anagrafica: "Raspadori bagno" non è un nome. Lo verifica il chiamante. */
+  return { azione: "nuovo", titolo, tipo, quando_iso: `${letto.giornoIso}T${letto.ora}:00`, nome_nella_frase: nomeOriginale, _senzaAI: true, _nomeDaVerificare: parole.length > 1 };
 }
 
 /* Data/ora nel formato che usa già il resto di EON ("2026-09-26T10:00:00",
@@ -3191,8 +3320,17 @@ async function provaPercorsoRapidoImpegno(body, ctx, user) {
     ultimo = quando ? { ...ultimo, quando: String(quando).slice(0, 16) } : null;
   }
 
-  const letto = await leggiImpegnoConAI(testo, ultimo);
+  // Prima il codice (zero AI); solo se la frase non è chiarissima, la piccola AI come prima
+  let lettoDalCodice = leggiImpegnoSenzaAI(testo, ultimo);
+  if (lettoDalCodice && lettoDalCodice._nomeDaVerificare) {
+    const verifica = await risolviClienteDaNome(lettoDalCodice.nome_nella_frase, ctx).catch(() => null);
+    const uguale = verifica && verifica.stato === "trovato"
+      && paroleNormalizzate(verifica.nome).sort().join(" ") === paroleNormalizzate(lettoDalCodice.nome_nella_frase).sort().join(" ");
+    if (!uguale) lettoDalCodice = null; // non è un cliente conosciuto con quel nome esatto: legge la piccola AI
+  }
+  const letto = lettoDalCodice || await leggiImpegnoConAI(testo, ultimo, ctx.consumo);
   if (!letto || !["nuovo", "correggi_ultimo"].includes(letto.azione)) return null;
+  ctx.lettoSenzaAI = !!lettoDalCodice; // per il registro: questa richiesta non ha usato l'AI
   const quando = quandoValido(letto.quando_iso);
   if (!quando) return null;
   const nome = nomeDettoNellaFrase(letto.nome_nella_frase, testo);
@@ -3297,7 +3435,7 @@ async function provaPercorsoRapidoCliente(body, ctx, user) {
   const ultimo = ultimoClienteCreatoDalRicordo(body.ricordo);
   const righe = [`Frase del professionista: "${testo}"`];
   if (ultimo) righe.push(`Cliente appena aggiunto: "${ultimo.nome}".`);
-  const letto = await chiamaAIRapida(STRUMENTO_LEGGI_CLIENTE, righe.join("\n"));
+  const letto = await chiamaAIRapida(STRUMENTO_LEGGI_CLIENTE, righe.join("\n"), ctx.consumo);
   if (!letto || !eStringaNonVuota(letto.nome)) return null;
 
   if (letto.azione === "correggi_nome_ultimo") {
@@ -3375,6 +3513,7 @@ async function handleAssistant(req, res, user, accessToken) {
   let modelloUsato = null; // impostato dentro proseguiAssistente() appena si sceglie/ripiega su un modello — resta null se il turno non ha chiamato nessun modello (es. conferma con salto del giro finale)
   let giriUsati = 0;
   const consumo = nuovoConsumo(); // token e costo veri di questo turno (tutti i giri)
+  ctx.consumo = consumo; // anche le chiamate piccole dei percorsi rapidi finiscono nel conto
 
   const inizioTurno = Date.now();
   const tipoTurno = runId ? (typeof body.conferma === "boolean" ? "conferma" : "continuazione") : "nuovo";
@@ -3570,8 +3709,9 @@ async function handleAssistant(req, res, user, accessToken) {
        è un caso semplice, si prosegue qui sotto esattamente come prima. */
     const rapido = await provaPercorsoRapido(body, ctx, user);
     if (rapido) {
-      modelloUsato = MODELLO_RAPIDO;
-      giriUsati = 1;
+      // Letto dal codice: nessuna AI usata (registro: modello "codice", 0 giri)
+      modelloUsato = ctx.lettoSenzaAI ? "codice" : MODELLO_RAPIDO;
+      giriUsati = ctx.lettoSenzaAI ? 0 : 1;
       azioniEseguite = rapido.azioni;
       return send(res, 200, rapido.payload);
     }
