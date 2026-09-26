@@ -64,9 +64,10 @@ async function main() {
 
     // La risposta della foto di Gianardi
     risposte = [{ stato: "concluso", runId: "r1", testo: RISPOSTA_DOMANI, azioni: [{ tool: "elenca_appuntamenti", esito: {} }] }];
-    await chiedi("cosa ho da fare domani");
+    // (una risposta dell'AI: "cosa ho da fare domani" da solo ora lo legge il codice, vedi sotto)
+    await chiedi("com'è la mia giornata domani, è pesante?");
     const c1 = await leggiCard();
-    verifica("si apre la card bianca, titolo = la domanda", c1.titolo === "Cosa ho da fare domani?", c1.titolo);
+    verifica("si apre la card bianca, titolo = la domanda", c1.titolo === "Com'è la mia giornata domani, è pesante?", c1.titolo);
     verifica("niente asterischi del markdown", !c1.testo.includes("*"), c1.testo);
     verifica("gli orari in colonna, nell'ordine", JSON.stringify(c1.ore) === '["08:00","09:00","10:00","11:00","12:00","15:00"]', JSON.stringify(c1.ore));
     verifica("accanto all'ora solo l'impegno (senza trattino davanti)", c1.voci[0] === "Inviare fattura n. 3/2026 al cliente Fabbri" && c1.voci[4] === "Riunione e sopralluogo - lavori alla pianta", JSON.stringify(c1.voci));
@@ -116,6 +117,29 @@ async function main() {
     await chiedi("appuntamenti di oggi");
     const c3 = await leggiCard();
     verifica("\"appuntamenti di oggi\": card bianca, senza chiamare l'AI", c3.titolo === "2 impegni oggi" && c3.voci.length === 2 && richieste.length === primaLocale, JSON.stringify(c3));
+    await page.click("#risorsaChiudi");
+
+    // Meno AI (26/09): "cosa ho da fare domani" e il programma di un giorno, dal calendario in memoria
+    await page.evaluate(() => {
+      tasks.length = 0;
+      tasks.push({ id: "t3", title: "Chiamare Valter", status: "todo", time: "Domani, 16:00" }, { id: "t4", title: "Fatto già", status: "done", time: "Domani, 11:00" });
+      chats.length = 0;
+      chats.push({ id: "v1", name: "Giampiero Dini", isClient: true, archived: false, unread: 0, messages: [{ id: "m1", eventType: "appt", title: "Appuntamento con Dini", text: "Domani, 09:00" }] });
+      navigateTo("home");
+    });
+    const primaDomani = richieste.length;
+    await chiedi("Cosa ho da fare domani?");
+    const c4 = await leggiCard();
+    verifica("\"Cosa ho da fare domani?\": impegni e appuntamenti dei clienti, in ordine di ora, senza AI", c4.titolo === "2 impegni domani" && JSON.stringify(c4.ore) === '["09:00","16:00"]' && /Dini/.test(c4.voci[0]) && c4.voci[1] === "Chiamare Valter" && richieste.length === primaDomani, JSON.stringify(c4));
+    await page.click("#risorsaChiudi");
+    await page.evaluate(() => navigateTo("home"));
+    await chiedi("Mi dici programma di domani?");
+    verifica("\"Mi dici programma di domani?\": stessa lettura, senza AI", (await leggiCard()).titolo === "2 impegni domani" && richieste.length === primaDomani);
+    await page.click("#risorsaChiudi");
+    await page.evaluate(() => navigateTo("home"));
+    risposte = [{ stato: "concluso", runId: "r9", testo: "Inizia dal sopralluogo.", azioni: [] }];
+    await chiedi("cosa mi consigli di fare domani");
+    verifica("\"cosa mi consigli di fare domani\": è un parere, decide l'AI", richieste.length === primaDomani + 1);
     verifica("nessun errore nella pagina", errori.length === 0, errori.join(" | "));
   } finally {
     await browser.close();

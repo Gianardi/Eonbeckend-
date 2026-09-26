@@ -3814,3 +3814,25 @@ confermare con i token veri che si registrano da oggi).
 6. saluti e "fai la foto".
 Ogni punto con i suoi test; nel dubbio la frase va all'AI (un mancato
 riconoscimento è innocuo, un riconoscimento sbagliato no).
+
+### Meno AI, fase 1 — punto 1 fatto (26/09/2026)
+- **Appuntamenti letti dal codice** (`leggiImpegnoSenzaAI` in api/index.js,
+  prima della piccola AI in `provaPercorsoRapidoImpegno`): giorno (oggi,
+  domani, dopodomani, giorno della settimana, domattina, stasera), ora
+  precisa (anche "pomeriggio alle 3" → 15:00, "stasera alle 8" → 20:00),
+  un nome; titoli come quelli della piccola AI ("Chiamare Valter",
+  "Appuntamento con Dini", "Sopralluogo con Rossi"). Correzioni "no alle
+  11", "anzi no fai alle 10", "no dopodomani alle 9". Nel dubbio → piccola
+  AI come prima: orari vaghi, ore 1-7 senza mattina/pomeriggio, parole in
+  più ("per il bagno"), luoghi, due orari, "prossimo", nome di più parole
+  che non è un cliente in anagrafica, giorno della settimana uguale a oggi.
+  Registro: modello "codice", 0 giri, costo 0. Test `eval/meno-ai.test.mjs`
+  (28, con le frasi vere dei registri).
+- **"Cosa ho da fare domani?"** e il programma di un giorno ("programma di
+  domani", "impegni di lunedì", "cosa ho oggi") letti dal calendario in
+  memoria, senza AI, con impegni e appuntamenti dei clienti in ordine di
+  ora. Con altre parole ("cosa mi consigli di fare domani") → AI. Test in
+  `risposte.test.js`.
+- Data e ora date all'AI ora nel fuso italiano (prima quello del server).
+- Prossimi: fatture e preventivi con cliente, importo e lavoro chiari;
+  clienti nuovi; cancellazioni; omonimi con pulsanti; saluti e "fai la foto".
