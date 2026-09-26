@@ -3971,8 +3971,9 @@ Fase 1 di "meno AI" completata. Non provato dal vivo (Vercel = main).
   è in `eon_admin` (gli altri: 403).
 - **App**: errori JS, promesse rifiutate e `console.error` segnalati da soli
   (max 15 per sessione, una volta per errore, niente errori di rete né dal
-  computer di prova). Per l'amministratore: voce "EON Admin" nel Menu con il
-  numero di errori nuovi, e avviso all'apertura.
+  computer di prova). Il pannello NON è nell'app (Andrea, 27/09: "non
+  dovrebbe esserci, così lo vedono i clienti"): solo la pagina `/admin`,
+  da mettere sulla Home del telefono come icona a parte.
 - **admin.html** (`/admin`): errori nuovi, utenti e attivi, richieste,
   costo AI del mese, % senza AI, attesa media; grafico 14 giorni; errori
   (nuovo, ×N, dettagli tecnici, "Segna come visti"); errori dell'AI;
