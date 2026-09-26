@@ -1395,10 +1395,6 @@
   .scheda-scelte{ display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 6px; }
   .scheda-scelta{ border:1px solid rgba(59,111,255,.35); background:var(--indigo-soft); color:var(--indigo); border-radius:999px; padding:9px 16px; font:inherit; font-size:14.5px; font-weight:700; cursor:pointer; }
 
-  .menu-admin-badge{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:6px; border-radius:10px; background:var(--coral); color:#fff; font-size:11.5px; font-weight:800; vertical-align:2px; }
-  .menu-admin-badge[hidden], #menuAdmin[hidden]{ display:none; }
-  a.azienda-link-card{ text-decoration:none; color:inherit; }
-
   /* ===== Annullare impegni: conferma (27/09/2026) ===== */
   .annulla-lista{ display:flex; flex-direction:column; margin-bottom:14px; }
   .annulla-riga{ display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid var(--border); cursor:pointer; }
@@ -3596,17 +3592,6 @@
         </div>
         <!-- Impostazioni (25/09/2026, Gianardi: pulizia del Menu). Tolti
              "EON AI" (superato dal microfono in Home) e "Cambia professione". -->
-        <!-- EON Admin (27/09/2026): visibile solo all'amministratore (vedi controllaAdmin) -->
-        <a class="azienda-link-card" href="/admin.html" id="menuAdmin" hidden>
-          <div class="module-icon" style="background:var(--text);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">EON Admin <span class="menu-admin-badge" id="menuAdminBadge" hidden></span></div>
-            <div class="module-sub">Utenti, errori, costo dell'AI</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </a>
         <div class="azienda-link-card" data-page="impostazioni" id="menuImpostazioni">
           <div class="module-icon" style="background:var(--ink-3, #64748b);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
@@ -14803,44 +14788,8 @@ const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvoc
 function ricordaProfilo(profilo, email){
   profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
   aggiornaAvatarHome();
-  controllaAdmin();
 }
 
-/* EON Admin: se sei l'amministratore compare la voce nel Menu, e se ci sono
-   errori nuovi te lo dice subito (una volta per apertura dell'app). */
-var adminControllato = false; // var: ricordaProfilo può arrivare prima di questa riga
-async function controllaAdmin(){
-  if(adminControllato || !currentSession || !currentSession.access_token) return;
-  adminControllato = true;
-  try{
-    const r = await fetch("https://eonbeckend.vercel.app/api?action=admin_stato", { headers: { Authorization: "Bearer " + currentSession.access_token } });
-    if(!r.ok) return;
-    const stato = await r.json();
-    if(!stato.admin) return;
-    document.getElementById("menuAdmin").hidden = false;
-    const badge = document.getElementById("menuAdminBadge");
-    if(stato.errori_nuovi > 0){
-      badge.hidden = false;
-      badge.textContent = stato.errori_nuovi;
-      showAIToastConAzione(stato.errori_nuovi === 1 ? "1 errore nuovo in EON" : stato.errori_nuovi + " errori nuovi in EON", "Guardali nel pannello EON Admin.", "Apri", () => { window.location.href = "/admin.html"; });
-    }
-  }catch(e){ adminControllato = false; }
-}
-function showAIToastConAzione(titolo, testo, etichetta, azione){
-  const container = document.getElementById("aiToastContainer");
-  const toast = document.createElement("div");
-  toast.className = "ai-toast decisione";
-  toast.innerHTML = `
-    <div class="ai-toast-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
-    <div class="ai-toast-body">
-      <div class="ai-toast-title">${escapeHtml(titolo)}</div>
-      <div class="ai-toast-text">${escapeHtml(testo)}</div>
-      <div class="ai-toast-actions"><button class="ai-toast-yes">${escapeHtml(etichetta)}</button></div>
-    </div>`;
-  toast.querySelector(".ai-toast-yes").addEventListener("click", () => { toast.remove(); azione(); });
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 12000);
-}
 function datiAccount(){
   const p = profiloUtente || { full_name:"", business_name:"", profession: currentProfession, email:"" };
   return { ...p, nome: p.full_name || "Il tuo account", professione: NOMI_PROFESSIONE[p.profession] || p.profession || "—" };

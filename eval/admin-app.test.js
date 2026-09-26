@@ -1,8 +1,7 @@
 /* Avviso automatico degli errori ed EON Admin (27/09/2026), lato app:
    - un errore dell'app parte da solo verso il server (una volta sola per
      errore; gli errori di rete no);
-   - all'amministratore compare "EON Admin" nel Menu, col numero di errori
-     nuovi e un avviso; agli altri no;
+   - nell'app non c'è nessuna traccia del pannello (è una pagina a parte);
    - admin.html mostra numeri, grafico, errori e utenti; "Segna come visti";
      pagina riservata e "entra prima in EON".
    Uso: NODE_PATH=/opt/node22/lib/node_modules node eval/admin-app.test.js */
@@ -45,7 +44,6 @@ async function main() {
     /* ---------- L'app: segnalazione errori e voce del Menu ---------- */
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const errori = [], segnalati = [];
-    let stato = { admin: false };
     page.on("pageerror", (e) => errori.push(e.message));
     await page.addInitScript(() => {
       window.__segnalaErroriInLocale = true;
@@ -53,7 +51,6 @@ async function main() {
       window.supabase = { createClient: () => ({ from: catena, channel: () => ({ on() { return this; }, subscribe() { return this; } }), auth: { getSession: async () => ({ data: { session: null } }), onAuthStateChange: () => ({}) } }) };
     });
     await page.route("https://eonbeckend.vercel.app/api?action=errore_app", (route) => { segnalati.push({ corpo: JSON.parse(route.request().postData()), auth: route.request().headers().authorization }); route.fulfill({ status: 200, contentType: "application/json", body: "{\"ok\":true}" }); });
-    await page.route("https://eonbeckend.vercel.app/api?action=admin_stato", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(stato) }));
     await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: "networkidle" });
     await page.evaluate(() => { document.getElementById("onboardingScreen").style.display = "none"; currentSession = { access_token: "tok", user: { id: "u1" } }; });
 
@@ -65,18 +62,12 @@ async function main() {
     await page.waitForTimeout(300);
     verifica("console.error di un problema vero: segnalato; errore di rete: no", segnalati.length === 2 && /Errore aggiornamento tasks: permission denied/.test(segnalati[1].corpo.messaggio), JSON.stringify(segnalati.map((s) => s.corpo.messaggio)));
 
-    // Utente normale: niente voce Admin
-    await page.evaluate(() => { adminControllato = false; ricordaProfilo({ full_name: "Mario" }, "mario@esempio.it"); });
+    // L'app non ha nessuna traccia del pannello (27/09, Andrea: "non dovrebbe esserci, lo vedono i clienti")
+    const chiamateAdmin = [];
+    page.on("request", (rq) => { if (/action=admin_/.test(rq.url())) chiamateAdmin.push(rq.url()); });
+    await page.evaluate(() => { ricordaProfilo({ full_name: "Andrea Gianardi" }, "gianardiadvisor@icloud.com"); navigateTo("gestisci-azienda"); });
     await page.waitForTimeout(300);
-    verifica("utente normale: niente \"EON Admin\" nel Menu", await page.evaluate(() => document.getElementById("menuAdmin").hidden));
-    // Amministratore con 2 errori nuovi
-    stato = { admin: true, errori_nuovi: 2 };
-    await page.evaluate(() => { adminControllato = false; document.getElementById("aiToastContainer").innerHTML = ""; ricordaProfilo({ full_name: "Andrea Gianardi" }, "gianardiadvisor@icloud.com"); navigateTo("gestisci-azienda"); });
-    await page.waitForTimeout(300);
-    const menu = await page.evaluate(() => ({ visibile: !document.getElementById("menuAdmin").hidden && document.getElementById("menuAdmin").offsetHeight > 0, badge: document.getElementById("menuAdminBadge").hidden ? "" : document.getElementById("menuAdminBadge").textContent, link: document.getElementById("menuAdmin").getAttribute("href"), toast: document.getElementById("aiToastContainer").textContent }));
-    verifica("Andrea: \"EON Admin\" nel Menu con il numero 2", menu.visibile && menu.badge === "2" && menu.link === "/admin.html", JSON.stringify(menu));
-    verifica("e l'avviso \"2 errori nuovi in EON\"", /2 errori nuovi in EON/.test(menu.toast), menu.toast);
-    await page.screenshot({ path: path.join("/tmp/claude-0/-home-user-Eonbeckend-/a214508f-fe40-53a1-9997-31bf11910511/scratchpad/shots", "menu-admin.png") }).catch(() => {});
+    verifica("nell'app niente \"EON Admin\": né voce nel Menu né richieste al pannello", await page.evaluate(() => !document.getElementById("menuAdmin") && !/EON Admin/.test(document.getElementById("page-gestisci-azienda").textContent)) && chiamateAdmin.length === 0, JSON.stringify(chiamateAdmin));
     verifica("nessun errore nella pagina dell'app (a parte quelli di prova)", errori.every((e) => /Prova:/.test(e)), JSON.stringify(errori));
 
     /* ---------- admin.html ---------- */
