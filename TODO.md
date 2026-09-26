@@ -3772,12 +3772,12 @@ worker (per non rischiare versioni vecchie in cache).
 
 ### Scritta in alto nella Home (26/09/2026)
 Mandate 3 ipotesi (A, B, C) e poi altre 4 ispirate alle grandi app (D Apple,
-E Google, F banche, G Things/Todoist). Scelta **G**: marchio EON a sinistra
-(la "O" resta il tasto "organizza la giornata"), iniziali dell'account a
-destra che aprono le Impostazioni, sotto "Oggi", la data e un'etichetta
-"N impegni" (stesso conteggio del riquadro Calendario) che apre il
-calendario. Tolti il vecchio "SABATO 26 SETTEMBRE · EON" e "Buongiorno /
-Cosa facciamo oggi". Test in `impostazioni.test.js`.
+E Google, F banche, G Things/Todoist), poi due mix. Scelta finale: **Mix 2**
+(la G col saluto della D): marchio EON a sinistra (la "O" resta il tasto
+"organizza la giornata"), iniziali dell'account a destra che aprono le
+Impostazioni, sotto "Buongiorno, Andrea" (Buon pomeriggio / Buonasera
+secondo l'ora), la data e l'etichetta "N impegni" (stesso conteggio del
+riquadro Calendario) che apre il calendario. Test in `impostazioni.test.js`.
 
 ## Meno AI, fase 1 — analisi delle richieste vere di settembre (26/09/2026)
 
