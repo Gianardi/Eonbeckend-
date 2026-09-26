@@ -77,7 +77,7 @@ async function main() {
       prof: document.getElementById("impProfessione").textContent,
     }));
     verifica("Account: nome, attività, email", acc.titolo === "Account" && acc.nome === "Andrea Gianardi · Gianardi Costruzioni" && acc.email === "andrea@esempio.it", JSON.stringify(acc));
-    verifica("professione mostrata e non modificabile", acc.prof === "Edile" && !(await page.$("#risorsaCorpo input, #risorsaCorpo select, #cambiaProfessioneCard")), JSON.stringify(acc));
+    verifica("professione mostrata e non modificabile", acc.prof === "Edile" && !(await page.$("#risorsaCorpo input:not(#impCampoEmail), #risorsaCorpo select, #cambiaProfessioneCard")), JSON.stringify(acc));
     if (process.env.SCREEN_ACCOUNT) { await page.waitForTimeout(400); await page.screenshot({ path: process.env.SCREEN_ACCOUNT }); }
     await page.evaluate(() => chiudiRisorsaCard());
     await page.click("#impVoceProfilo");

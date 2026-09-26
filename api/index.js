@@ -3973,6 +3973,8 @@ async function provaPercorsoRapidoCliente(body, ctx, user) {
      Simile o omonimi con nomi diversi: decide il motore completo. */
   const stessoNome = risolto.stato === "trovato" && chiaveNomeCliente(risolto.nome) === chiaveNomeCliente(nome);
   if (risolto.stato !== "non_trovato" && !stessoNome) return null;
+  // C'è già con un ALTRO telefono: aggiornarlo o no lo decide il motore completo (chiede)
+  if (stessoNome && telefono && risolto.telefono && cifre(risolto.telefono) !== cifre(telefono)) return null;
 
   const input = { nome };
   if (telefono) input.telefono = telefono;
