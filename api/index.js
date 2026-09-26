@@ -2634,6 +2634,102 @@ async function scriviRegistro(tabella, riga, timeoutMs) {
   }
 }
 
+/* ------------------------------------------------------------
+   Avviso automatico degli errori ed EON Admin (27/09/2026)
+   ------------------------------------------------------------
+   - L'app manda qui i suoi errori (action=errore_app, anche senza
+     login: un errore può capitare proprio sulla pagina di accesso).
+     Lo stesso errore della stessa persona entro un'ora non crea
+     righe nuove: aumenta il conteggio.
+   - Gli errori 500 del server finiscono nella stessa tabella.
+   - Se è impostata AVVISO_ERRORI_URL (per esempio un canale ntfy.sh),
+     ogni errore NUOVO manda anche una notifica al telefono.
+   - Il pannello (admin.html) legge tutto con action=admin_riepilogo,
+     solo per chi è nella tabella eon_admin. Scrive e legge solo il
+     server, con la chiave di servizio. */
+async function servizio(percorso, opzioni) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${percorso}`, {
+    ...(opzioni || {}),
+    headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json", ...((opzioni && opzioni.headers) || {}) },
+  });
+  if (!r.ok) throw fail(`Database: ${r.status}`, 502);
+  const testo = await r.text();
+  return testo ? JSON.parse(testo) : null;
+}
+const taglia = (v, n) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : null);
+
+// Limite per istanza: al massimo 30 segnalazioni al minuto dallo stesso indirizzo
+const segnalazioniRecenti = new Map();
+function troppeSegnalazioni(chi) {
+  const adesso = Date.now();
+  const lista = (segnalazioniRecenti.get(chi) || []).filter((t) => adesso - t < 60000);
+  lista.push(adesso);
+  segnalazioniRecenti.set(chi, lista);
+  if (segnalazioniRecenti.size > 5000) segnalazioniRecenti.clear();
+  return lista.length > 30;
+}
+
+async function registraErrore(e) {
+  if (!SERVICE_ROLE_KEY || !e || !e.messaggio) return;
+  try {
+    const unOraFa = new Date(Date.now() - 3600000).toISOString();
+    const chi = e.owner_id ? `owner_id=eq.${e.owner_id}` : "owner_id=is.null";
+    const uguali = await servizio(`app_errori?select=id,conteggio&messaggio=eq.${encodeURIComponent(e.messaggio)}&${chi}&origine=eq.${e.origine}&ultima_volta=gt.${encodeURIComponent(unOraFa)}&limit=1`, { method: "GET" });
+    if (Array.isArray(uguali) && uguali.length) {
+      await servizio(`app_errori?id=eq.${uguali[0].id}`, { method: "PATCH", body: JSON.stringify({ conteggio: (uguali[0].conteggio || 1) + 1, ultima_volta: new Date().toISOString(), dettaglio: e.dettaglio }), headers: { Prefer: "return=minimal" } });
+      return;
+    }
+    await servizio("app_errori", { method: "POST", body: JSON.stringify(e), headers: { Prefer: "return=minimal" } });
+    const avviso = process.env.AVVISO_ERRORI_URL;
+    if (avviso) {
+      await fetch(avviso, { method: "POST", body: `EON: ${e.messaggio}${e.pagina ? " (" + e.pagina + ")" : ""}`.slice(0, 300), headers: { Title: "Errore in EON", Tags: "warning" }, signal: AbortSignal.timeout(3000) }).catch(() => {});
+    }
+  } catch (err) {
+    console.error("Errore non registrato:", err.message);
+  }
+}
+
+async function handleErroreApp(req, res) {
+  const body = await readBody(req);
+  const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "?";
+  if (troppeSegnalazioni(ip)) return send(res, 200, { ok: true, ignorato: true });
+  let owner = null;
+  try { owner = (await requireUser(req)).user.id; } catch (err) { /* anche senza login */ }
+  const messaggio = taglia(body.messaggio, 300);
+  if (!messaggio) throw fail("Campo 'messaggio' mancante");
+  await registraErrore({
+    owner_id: owner, origine: "app", messaggio,
+    dettaglio: taglia(body.dettaglio, 2000), pagina: taglia(body.pagina, 80), versione: taglia(body.versione, 40),
+    dispositivo: taglia(String(req.headers["user-agent"] || ""), 200),
+  });
+  return send(res, 200, { ok: true });
+}
+
+async function eAdmin(user) {
+  if (!SERVICE_ROLE_KEY) return null;
+  const righe = await servizio(`eon_admin?select=user_id,errori_visti_fino&user_id=eq.${user.id}&limit=1`, { method: "GET" });
+  return Array.isArray(righe) && righe[0] ? righe[0] : null;
+}
+
+async function handleAdmin(action, req, res, user) {
+  const admin = await eAdmin(user).catch(() => null);
+  if (action === "admin_stato") {
+    if (!admin) return send(res, 200, { admin: false });
+    const nuovi = await servizio(`app_errori?select=id&ultima_volta=gt.${encodeURIComponent(admin.errori_visti_fino)}&limit=100`, { method: "GET" }).catch(() => []);
+    return send(res, 200, { admin: true, errori_nuovi: Array.isArray(nuovi) ? nuovi.length : 0 });
+  }
+  if (!admin) throw fail("Pagina riservata", 403);
+  if (action === "admin_riepilogo") {
+    const dati = await servizio("rpc/admin_riepilogo", { method: "POST", body: JSON.stringify({ p_admin: user.id }) });
+    return send(res, 200, dati || {});
+  }
+  if (action === "admin_errori_visti") {
+    await servizio(`eon_admin?user_id=eq.${user.id}`, { method: "PATCH", body: JSON.stringify({ errori_visti_fino: new Date().toISOString() }), headers: { Prefer: "return=minimal" } });
+    return send(res, 200, { ok: true });
+  }
+  throw fail("Richiesta non riconosciuta");
+}
+
 async function registraOperazione(user, tool, input, esito, stato) {
   await scriviRegistro("ai_audit_log", { owner_id: user.id, tool, input, esito, stato });
 }
@@ -5329,8 +5425,12 @@ export default async function handler(req, res) {
       });
     }
 
+    // Errori dall'app: accettati anche senza login (vedi handleErroreApp)
+    if (action === "errore_app") return await handleErroreApp(req, res);
+
     const { user, accessToken } = await requireUser(req);
 
+    if (action === "admin_stato" || action === "admin_riepilogo" || action === "admin_errori_visti") return await handleAdmin(action, req, res, user);
     if (action === "ai") return await handleAI(req, res);
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
     if (action === "descrivi_foto") return await handleDescriviFoto(req, res, user, accessToken);
@@ -5346,7 +5446,13 @@ export default async function handler(req, res) {
     throw fail("Richiesta non riconosciuta: usa ?action= oppure ?resource=");
   } catch (err) {
     const status = err.status || 500;
-    if (status >= 500) console.error("[EON API]", err);
+    if (status >= 500) {
+      console.error("[EON API]", err);
+      // Avviso automatico: anche gli errori del server finiscono nel pannello
+      let azione = "";
+      try { azione = new URL(req.url, "http://localhost").searchParams.get("action") || ""; } catch (e) { /* url strano */ }
+      await registraErrore({ origine: "server", messaggio: String(err.message || "Errore interno").slice(0, 300), dettaglio: String(err.stack || "").slice(0, 2000), pagina: azione ? "api:" + azione : "api" });
+    }
     send(res, status, { error: err.message || "Errore interno del server" });
   }
 }
