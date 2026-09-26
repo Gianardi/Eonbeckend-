@@ -209,8 +209,17 @@
 
   .topbar{ padding-top:2px;
     display:flex; align-items:center; justify-content:center;
-    text-align:center; margin-bottom:16px;
+    text-align:center; margin-bottom:16px; position:relative;
   }
+  .topbar-imp{
+    position:absolute; right:0; top:50%; transform:translateY(-50%);
+    width:40px; height:40px; border-radius:12px; border:1px solid var(--border);
+    background:var(--card); color:var(--text); box-shadow:var(--shadow-sm);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .topbar.sola .topbar-imp{ top:calc(50% + 6px); }
+  .topbar-imp[hidden]{ display:none; }
+  .topbar-imp svg{ width:20px; height:20px; }
   .topbar.sola{ padding-top:14px; margin-bottom:14px; }
   .topbar h1{
     font-size:21px; font-weight:900; letter-spacing:-.02em; margin:0;
@@ -291,6 +300,16 @@
   .ob-back svg{ width:14px; height:14px; }
   .ob-form{ display:flex; flex-direction:column; gap:14px; margin-top:8px; margin-bottom:20px; }
   .ob-auth-toggle{ display:flex; gap:6px; margin:14px 0 4px; background:rgba(20,23,29,.04); border-radius:12px; padding:4px; }
+  .ob-link-accedi{ display:block; margin:16px auto 0; background:none; border:none; font:inherit; font-size:14px; color:var(--muted); cursor:pointer; padding:8px; }
+  .ob-link-accedi b{ color:var(--indigo); }
+  .ob-link-piccolo{ background:none; border:none; font:inherit; font-size:13px; font-weight:700; color:var(--indigo); cursor:pointer; padding:6px 0; align-self:flex-end; }
+  .ob-auth-info{ margin-top:10px; padding:10px 12px; border-radius:12px; background:var(--indigo-soft); color:var(--text); font-size:13px; line-height:1.45; }
+  .ob-controlla-email{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:18px 8px; }
+  .ob-controlla-email-ico{ width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); }
+  .ob-controlla-email-ico svg{ width:26px; height:26px; }
+  .ob-controlla-email b{ font-family:'Manrope'; font-size:18px; }
+  .ob-controlla-email p{ margin:0; font-size:14px; color:var(--muted); line-height:1.5; max-width:32ch; }
+  .ob-controlla-email .ob-link-piccolo{ align-self:center; }
   .ob-auth-tab{ flex:1; text-align:center; padding:9px; border-radius:9px; font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer; }
   .ob-auth-tab.active{ background:var(--card); color:var(--text); box-shadow:var(--shadow-sm); }
   .ob-auth-error{ background:var(--coral-soft); color:var(--coral); font-size:12px; font-weight:600; padding:10px 12px; border-radius:10px; margin-bottom:14px; }
@@ -555,6 +574,16 @@
   .cantiere-appunto-data{ font-size:10.5px; color:var(--faint); margin-top:4px; }
   .cantiere-appunto-elimina{ flex:none; width:26px; height:26px; border-radius:8px; border:none; background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--faint); }
   .cantiere-appunto-elimina svg{ width:14px; height:14px; }
+  .appunti-foto-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; margin:14px auto 0;
+    padding:10px 18px; border-radius:22px; border:1px solid var(--border-strong); background:var(--card);
+    font:inherit; font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; box-shadow:var(--shadow-sm);
+  }
+  .appunti-foto-btn svg{ width:18px; height:18px; color:var(--indigo); }
+  .appunti-foto-btn:disabled{ opacity:.6; cursor:default; }
+  .cantiere-appunto-foto{ flex:none; width:56px; height:56px; border-radius:10px; object-fit:cover; background:#F1F2F6; }
+  .cantiere-appunto-testo.vuoto{ color:var(--muted); }
+  .cantiere-appunto-descrizione{ font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.4; }
 
   .task-list{ padding:4px 0 6px; display:flex; flex-direction:column; gap:8px; }
   .task-list.manual{ padding-bottom:4px; }
@@ -683,56 +712,71 @@
     background:rgba(20,30,60,.05); font-size:11px; color:var(--faint); font-weight:700;
   }
 
-  .cal-giorno{
-    display:flex; align-items:center; gap:9px; margin:18px 0 9px;
-    font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.09em;
-    color:var(--faint);
+  /* Calendario rifatto il 25/09/2026: settimana in alto, un colore per
+     tipo di impegno (pallino + nome), ora su una riga, niente doppioni
+     ("DA FARE" / "da fare", titolo ripetuto sotto). */
+  .cal-settimana{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:6px; margin:2px 0 14px; }
+  .cal-sett-giorno{
+    display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 8px;
+    border-radius:14px; border:1px solid var(--border); background:var(--card); box-shadow:var(--shadow-sm);
+    font:inherit; color:var(--text); cursor:pointer;
   }
-  .cal-giorno:first-child{ margin-top:2px; }
-  .cal-giorno i{
-    font-style:normal; font-size:9.5px; background:rgba(20,30,60,.06);
-    color:var(--muted); border-radius:20px; padding:2px 7px; font-weight:800;
-  }
-  .cal-giorno::after{ content:""; flex:1; height:1px; background:var(--border); }
-  .cal-giorno.oggi{ color:var(--text); }
-  .cal-giorno.oggi i{ background:var(--text); color:#fff; }
-  .cal-giorno.oggi::after{ background:var(--border-strong); }
+  .cal-sett-giorno:disabled{ cursor:default; background:transparent; box-shadow:none; color:var(--faint); }
+  .cal-sett-nome{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+  .cal-sett-giorno:disabled .cal-sett-nome{ color:var(--faint); }
+  .cal-sett-num{ font-family:'Manrope'; font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.1; }
+  .cal-sett-punti{ display:flex; gap:3px; height:5px; }
+  .cal-sett-punti i{ width:5px; height:5px; border-radius:50%; background:var(--indigo); }
+  .cal-sett-giorno.oggi{ background:var(--text); border-color:var(--text); color:#fff; }
+  .cal-sett-giorno.oggi .cal-sett-nome{ color:rgba(255,255,255,.72); }
+  .cal-sett-giorno.oggi .cal-sett-punti i{ background:#fff; }
+  .cal-riepilogo{ font-size:13px; color:var(--muted); margin:0 2px 4px; }
+  .cal-riepilogo b{ color:var(--text); font-variant-numeric:tabular-nums; }
 
-  /* Semplificato il 23/09/2026 (Gianardi: "pulizia visiva" come base
-     della "pulizia mentale" — il calendario era troppo affollato).
-     Prima OGNI riga portava un bordo spesso 2px + un'ombra marcata,
-     identici per un impegno qualunque e per quello di oggi: tutto
-     "urlava" alla stessa intensità, quindi in pratica niente si
-     distingueva davvero. Ora il bordo è sottile e uniforme (il
-     rilievo vero è riservato a "oggi", l'unico caso che conta
-     visivamente di più), e i pulsanti Scrivi/Chiama/Elimina — che da
-     soli raddoppiavano l'altezza di ogni riga — si vedono solo
-     toccando la riga (progressive disclosure), non sempre. */
-  .cal-voce{
-    display:flex; align-items:center; gap:14px; cursor:pointer;
-    padding:13px 16px; margin-bottom:8px; border-radius:16px;
-    background:var(--card); border:1px solid var(--border);
-    flex-wrap:wrap;
+  .cal-giorno{
+    display:flex; align-items:baseline; gap:8px; margin:22px 2px 10px; scroll-margin-top:80px;
   }
-  .cal-voce.oggi{ border-color:var(--text); box-shadow:0 4px 14px rgba(14,20,36,.1); }
-  .cal-ora-blocco{ flex:none; width:44px; text-align:center; }
-  .cal-ora-hh{ font-family:'Manrope'; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.1; color:var(--text); }
-  .cal-ora-mm{ font-size:11px; font-weight:700; color:var(--faint); margin-top:1px; }
-  .cal-divider{ width:1.5px; align-self:stretch; background:var(--border); flex:none; }
-  .cal-corpo{ display:block; flex:1; min-width:0; }
-  .cal-testo{ min-width:0; }
-  .cal-nome{ font-size:14.5px; font-weight:700; color:var(--text); line-height:1.3; }
-  .cal-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-top:3px; color:var(--muted); }
-  .cal-label.urgente{ color:var(--text); }
-  .cal-sotto{ font-size:11px; color:var(--muted); margin-top:2px; }
-  .cal-azioni{ display:none; gap:7px; width:100%; margin-top:11px; padding-left:74px; }
+  .cal-giorno-nome{ font-family:'Manrope'; font-size:16px; font-weight:800; color:var(--text); }
+  .cal-giorno-nome::first-letter{ text-transform:uppercase; }
+  .cal-giorno-data{ font-size:12.5px; color:var(--muted); }
+  .cal-giorno i{
+    margin-left:auto; font-style:normal; font-size:11px; font-weight:800; font-variant-numeric:tabular-nums;
+    color:var(--muted); background:rgba(20,30,60,.06); border-radius:20px; padding:2px 8px;
+  }
+  .cal-giorno.oggi i{ background:var(--text); color:#fff; }
+
+  #calendarList .scorri-wrap{ margin-bottom:8px; border-radius:16px; }
+  .cal-voce{
+    --tipo:var(--indigo);
+    display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; cursor:pointer;
+    padding:14px 16px; border-radius:16px;
+    background:var(--card); border:1px solid var(--border);
+  }
+  .cal-voce.tipo-todo{ --tipo:#B87E00; }
+  .cal-voce.tipo-attesa{ --tipo:var(--violet); }
+  .cal-voce.tipo-visit{ --tipo:#009E85; }
+  .cal-voce.oggi{ border-color:var(--border-strong); }
+  .cal-ora{
+    flex:none; width:48px; padding-top:1px;
+    font-family:'Manrope'; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--text);
+  }
+  .cal-ora.vuota{ color:var(--faint); }
+  .cal-voce.oggi .cal-ora{ color:var(--indigo); }
+  .cal-corpo{ flex:1; min-width:0; }
+  .cal-nome{ font-size:15px; font-weight:700; color:var(--text); line-height:1.35; overflow-wrap:anywhere; }
+  .cal-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin-top:5px; font-size:12.5px; color:var(--muted); }
+  .cal-tipo{ display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--tipo); }
+  .cal-tipo i{ width:7px; height:7px; border-radius:50%; background:var(--tipo); flex:none; }
+  .cal-sotto::before{ content:"·"; margin-right:8px; color:var(--faint); }
+  .cal-azioni{ display:none; gap:7px; width:100%; margin-top:4px; padding-left:62px; }
   .cal-voce.aperta .cal-azioni{ display:flex; }
   .cal-btn{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
     padding:8px; border-radius:10px; cursor:pointer; font-family:inherit;
-    font-size:11.5px; font-weight:700; border:1.5px solid var(--text); background:var(--card); color:var(--text);
+    font-size:12px; font-weight:700; border:1px solid var(--border-strong); background:var(--card); color:var(--text);
   }
-  .cal-btn svg{ width:13px; height:13px; }
+  .cal-btn.cal-elimina{ flex:none; width:40px; color:var(--coral); }
+  .cal-btn svg{ width:14px; height:14px; }
 
   .list-row{
     display:flex; align-items:center; gap:10px;
@@ -763,6 +807,9 @@
   .client-search-row .search{ padding:11px 14px; border-radius:13px; font-size:13px; }
   .client-search-row .icon-btn{ width:42px; height:42px; border-radius:13px; }
   .client-search-row .icon-btn svg{ width:18px; height:18px; }
+  /* Descrizione breve del lavoro, al massimo due righe */
+  .client-lavoro{ font-size:13.5px; line-height:1.4; color:var(--muted); margin-top:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+  .client-lavoro.vuoto{ display:inline-block; background:none; border:none; padding:0; font:inherit; font-size:13px; font-weight:700; color:var(--indigo); cursor:pointer; text-align:left; }
   .client-archive-card{
     padding:14px 14px; border-radius:14px; border:1px solid var(--border);
     margin:6px 6px; transition:background .12s, border-color .12s;
@@ -1209,6 +1256,37 @@
   .goal-del-mini:hover{ color:var(--coral); background:var(--coral-soft); }
   .goal-del-mini svg{ width:13px; height:13px; }
   .azienda-list{ display:flex; flex-direction:column; gap:10px; }
+  /* Impostazioni (25/09/2026) */
+  .imp-card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:12px; }
+  .imp-account{ display:flex; align-items:center; gap:12px; }
+  .imp-avatar{ width:46px; height:46px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); font-family:'Manrope'; font-weight:800; font-size:16px; }
+  .imp-nome{ font-size:16px; font-weight:800; color:var(--text); }
+  .imp-attivita{ font-size:13.5px; font-weight:600; color:var(--text); }
+  .imp-attivita:empty{ display:none; }
+  .imp-email{ font-size:13px; color:var(--muted); overflow-wrap:anywhere; }
+  .imp-riga{ display:flex; justify-content:space-between; gap:12px; font-size:14px; color:var(--muted); padding-top:12px; border-top:1px solid var(--border); }
+  .imp-riga b{ color:var(--text); }
+  .imp-campo{ display:flex; flex-direction:column; gap:5px; font-size:12.5px; font-weight:700; color:var(--muted); }
+  .imp-campo input{ font:inherit; font-size:15px; font-weight:500; color:var(--text); padding:11px 12px; border:1px solid var(--border-strong); border-radius:12px; background:#F7F8FA; }
+  .imp-campo input:focus{ outline:none; border-color:var(--indigo); background:var(--card); }
+  .imp-btn{ align-self:flex-start; padding:10px 20px; border-radius:12px; border:none; background:var(--text); color:#fff; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+  .imp-btn:disabled{ opacity:.5; }
+  .imp-btn-pericolo{ background:var(--coral); }
+  .imp-esito{ font-size:13px; color:var(--muted); }
+  .imp-esito:empty{ display:none; }
+  .imp-esito.ok{ color:#12894F; }
+  .imp-esito.errore{ color:var(--coral); }
+  .imp-form{ display:flex; flex-direction:column; gap:14px; padding:2px 2px 6px; }
+  .imp-avviso{ font-size:14px; line-height:1.5; color:var(--text); background:var(--coral-soft); border-radius:12px; padding:12px 14px; }
+  .imp-voce-pericolo .module-title{ color:var(--coral); }
+  .imp-aiuto-voce{ width:100%; text-align:left; font:inherit; color:inherit; }
+  .imp-nota{ font-size:12.5px; color:var(--muted); line-height:1.45; }
+  /* Scorrimento tra le pagine principali: la pagina nuova entra dal lato giusto */
+  @keyframes entra-da-destra{ from{ transform:translateX(28px); opacity:.35; } to{ transform:none; opacity:1; } }
+  @keyframes entra-da-sinistra{ from{ transform:translateX(-28px); opacity:.35; } to{ transform:none; opacity:1; } }
+  .page.entra-destra{ animation:entra-da-destra .22s ease-out; }
+  .page.entra-sinistra{ animation:entra-da-sinistra .22s ease-out; }
+  @media (prefers-reduced-motion: reduce){ .page.entra-destra, .page.entra-sinistra{ animation:none; } }
   .lavori-in-corso{
     margin:24px 0; padding:32px 22px; text-align:center;
     background:var(--card); border:1.5px dashed var(--border-strong); border-radius:18px;
@@ -1554,6 +1632,15 @@
   .risorsa-canale.disabilitato{ opacity:.45; cursor:default; }
   .risorsa-canale.disabilitato svg{ color:var(--muted); }
   .risorsa-vuoto{ color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
+  /* Risposte di EON nella card bianca: paragrafi, elenchi, orari in colonna */
+  .eon-risposta{ display:flex; flex-direction:column; gap:12px; font-size:15px; line-height:1.55; color:var(--text); padding:2px 2px 6px; }
+  .eon-risposta p{ margin:0; overflow-wrap:anywhere; }
+  .eon-lista{ display:flex; flex-direction:column; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .eon-voce{ display:flex; align-items:baseline; gap:12px; padding:11px 14px; }
+  .eon-voce + .eon-voce{ border-top:1px solid var(--border); }
+  .eon-ora{ flex:none; width:46px; font-family:'Manrope'; font-weight:800; font-variant-numeric:tabular-nums; color:var(--indigo); }
+  .eon-punto{ flex:none; width:6px; height:6px; border-radius:50%; background:var(--indigo); transform:translateY(-2px); }
+  .eon-voce-testo{ min-width:0; overflow-wrap:anywhere; }
   .risorsa-testo-discorsivo{ font-size:14px; line-height:1.6; color:var(--text); white-space:pre-line; padding:4px 2px; }
   .risorsa-mic-rapido{
     width:38px; height:38px; flex:none; border-radius:50%; border:1px solid var(--border);
@@ -2186,6 +2273,7 @@
         Continua
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
+      <button type="button" class="ob-link-accedi" id="obVaiAccedi">Hai già un account? <b>Accedi</b></button>
     </div>
 
     <!-- STEP 1: scelta professione specifica -->
@@ -2259,26 +2347,44 @@
         <div class="ob-auth-tab" data-mode="login" id="obTabLogin">Ho già un account</div>
       </div>
 
+      <!-- Un <form> vero (25/09/2026): così l'iPhone propone di salvare
+           email e password nel portachiavi e al prossimo accesso le
+           compila da solo con Face ID. -->
+      <form id="obFormAccesso" autocomplete="on">
       <div class="ob-form">
         <div class="form-row" id="obNameRow">
           <label>Il tuo nome</label>
-          <input type="text" id="obName" placeholder="Es. Marco Rossi">
+          <input type="text" id="obName" name="name" autocomplete="name" placeholder="Es. Marco Rossi">
         </div>
         <div class="form-row" id="obBusinessRow">
           <label>Nome attività / studio</label>
-          <input type="text" id="obBusinessName" placeholder="Es. Bianchi Costruzioni S.r.l.">
+          <input type="text" id="obBusinessName" name="organization" autocomplete="organization" placeholder="Es. Bianchi Costruzioni S.r.l.">
         </div>
         <div class="form-row">
           <label>Email</label>
-          <input type="email" id="obEmail" placeholder="nome@esempio.it">
+          <input type="email" id="obEmail" name="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@esempio.it">
         </div>
         <div class="form-row">
           <label>Password</label>
-          <input type="password" id="obPassword" placeholder="Almeno 6 caratteri">
+          <input type="password" id="obPassword" name="password" autocomplete="new-password" placeholder="Almeno 8 caratteri">
         </div>
+        <button type="button" class="ob-link-piccolo" id="obPasswordDimenticata" style="display:none;">Password dimenticata?</button>
       </div>
+        <button type="submit" aria-hidden="true" tabindex="-1" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;"></button>
+      </form>
 
       <div class="ob-auth-error" id="obAuthError" style="display:none;"></div>
+      <div class="ob-auth-info" id="obAuthInfo" style="display:none;"></div>
+      <!-- Conferma email attiva: l'account è creato, si entra dal link nell'email -->
+      <div class="ob-controlla-email" id="obControllaEmail" style="display:none;">
+        <div class="ob-controlla-email-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/></svg>
+        </div>
+        <b>Controlla la tua email</b>
+        <p>Ti abbiamo mandato un link a <span id="obControllaEmailIndirizzo"></span>. Toccalo per attivare l'account: si apre EON e sei dentro.</p>
+        <button type="button" class="ob-link-piccolo" id="obRimandaEmail">Non è arrivata? Rimandala</button>
+        <button type="button" class="ob-link-piccolo" id="obHoConfermato">Ho confermato: accedi</button>
+      </div>
       <div class="ob-auth-note" id="obAuthNote">
         Il backend non è ancora collegato: questo passaggio userà il salvataggio locale finché non configuri Supabase (vedi guida).
       </div>
@@ -2369,6 +2475,11 @@
         <h1 id="pageTitle">Buongiorno, Marco</h1>
         <div class="sub" id="pageSub">—</div>
       </div>
+      <!-- Impostazioni della sezione, in alto a destra come nelle app
+           grandi (25/09/2026): compare solo dove una sezione ne ha. -->
+      <button type="button" class="topbar-imp" id="topbarImpostazioni" aria-label="Impostazioni della sezione" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
     </div>
 
     <!-- ==================== PAGINA: HOME ==================== -->
@@ -2494,6 +2605,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
+        <!-- Foto negli appunti (25/09/2026, Gianardi): scatti, e nella
+             scheda della foto detti o scrivi la nota. -->
+        <input type="file" id="cantiereAppuntiFotoInput" accept="image/*" style="display:none;">
+        <button type="button" class="appunti-foto-btn" id="cantiereAppuntiFotoBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span id="cantiereAppuntiFotoTesto">Scatta una foto con appunto</span>
+        </button>
         <button type="button" id="cantiereAppuntiAnnullaModifica" style="display:none; margin-top:8px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer; text-decoration:underline; padding:4px;">Annulla modifica</button>
       </div>
 
@@ -2646,7 +2764,10 @@
           </button>
         </div>
       </div>
-      <div class="card-panel">
+      <!-- Il formato ora si cambia dall'ingranaggio in alto a destra
+           (25/09/2026); questo riquadro resta nascosto perché i suoi
+           comandi (galleria, foto) sono richiamati da lì. -->
+      <div class="card-panel" hidden>
         <div class="card-header"><h2>Formato dei documenti</h2></div>
         <p class="module-sub" style="padding:0 16px 4px;" id="formatoAttualeTesto">Modello Classico</p>
         <div class="form-panel" style="display:flex; flex-direction:column; gap:10px;">
@@ -2824,14 +2945,16 @@
     </div>
 
     <!-- ==================== PAGINA: CALENDARIO ==================== -->
+    <!-- Rifatto il 25/09/2026 (Gianardi: "non c'è il tasto per tornare
+         indietro; rendilo più bello, più chiaro e più armonioso"). -->
     <div class="page" id="page-calendario">
-      <div class="card-panel">
-        <div class="card-header">
-          <h2>I tuoi prossimi impegni</h2>
-          <span class="count" id="calendarCount">0</span>
-        </div>
-        <div id="calendarList" style="padding:8px 0 16px;"></div>
+      <div class="back-link" id="calIndietro" role="button" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Indietro
       </div>
+      <div class="cal-settimana" id="calSettimana"></div>
+      <div class="cal-riepilogo"><b id="calendarCount">0</b> <span id="calendarCountTesto">impegni in arrivo</span></div>
+      <div id="calendarList"></div>
     </div>
 
     <!-- ==================== PAGINA: CHIAMATE ==================== -->
@@ -3143,16 +3266,6 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="azienda-link-card" id="cardEonAI">
-          <div class="module-icon" style="background:var(--violet);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">EON AI</div>
-            <div class="module-sub">Organizza la giornata, strategia trattative e altro</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
         <div class="azienda-link-card" data-page="assegna-compiti">
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
@@ -3185,33 +3298,15 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="azienda-link-card" data-page="ai-request-log">
+        <!-- Impostazioni (25/09/2026, Gianardi: pulizia del Menu). Tolti
+             "EON AI" (superato dal microfono in Home) e "Cambia professione". -->
+        <div class="azienda-link-card" data-page="impostazioni" id="menuImpostazioni">
           <div class="module-icon" style="background:var(--ink-3, #64748b);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
           </div>
           <div class="azienda-link-card-body">
-            <div class="module-title">Registro AI</div>
-            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" id="cambiaProfessioneCard">
-          <div class="module-icon" style="background:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Cambia professione</div>
-            <div class="module-sub">Passa a un'altra sezione — Edile, Idraulico, Avvocato, Amministratore</div>
-          </div>
-          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </div>
-        <div class="azienda-link-card" id="feedbackCard">
-          <div class="module-icon" style="background:var(--teal);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
-          </div>
-          <div class="azienda-link-card-body">
-            <div class="module-title">Manda un feedback</div>
-            <div class="module-sub">Dicci cosa non va o cosa vorresti — ci arriva direttamente</div>
+            <div class="module-title">Impostazioni</div>
+            <div class="module-sub">Account, password, esci</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -3269,11 +3364,108 @@
       </div>
     </div>
 
-    <!-- ===== Sotto-pagina: Registro AI ===== -->
-    <div class="page" id="page-ai-request-log">
+    <!-- ===== Sotto-pagina: Impostazioni ===== -->
+    <div class="page" id="page-impostazioni">
       <div class="back-link" data-page="gestisci-azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Torna al Menu
+      </div>
+
+      <!-- Impostazioni: sei voci a card (25/09/2026, Gianardi): Account,
+           Profilo, Sicurezza, Aiuto, Esci, Elimina. Ognuna apre la sua scheda. -->
+      <div class="azienda-list">
+        <div class="azienda-link-card" id="impVoceAccount" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6 6 0 0 1 11 0"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Account</div>
+            <div class="module-sub" id="impAccountSotto">Email e professione</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVoceProfilo" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Profilo</div>
+            <div class="module-sub">Nome e nome dell'attività</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVocePassword" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Sicurezza</div>
+            <div class="module-sub">Cambia la password di accesso</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVoceAiuto" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--violet);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5v.01"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Aiuto</div>
+            <div class="module-sub">Manda un feedback, registro dell'assistente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impEsci" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Esci</div>
+            <div class="module-sub">Torni alla schermata iniziale</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card imp-voce-pericolo" id="impVoceElimina" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--coral);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Elimina account</div>
+            <div class="module-sub">Cancella per sempre account e dati</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+      <!-- Le due voci di "Aiuto": restano qui nascoste (hanno già i loro
+           comandi), la scheda Aiuto le richiama. -->
+      <div hidden id="impVociAiuto">
+        <div class="azienda-link-card" id="feedbackCard">
+          <div class="module-icon" style="background:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Manda un feedback</div>
+            <div class="module-sub">Dicci cosa non va o cosa vorresti — ci arriva direttamente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" data-page="ai-request-log">
+          <div class="module-icon" style="background:var(--ink-3, #64748b);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Registro AI</div>
+            <div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Sotto-pagina: Registro AI ===== -->
+    <div class="page" id="page-ai-request-log">
+      <div class="back-link" data-page="impostazioni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna alle Impostazioni
       </div>
       <div class="card-panel">
         <div class="card-header"><h2>Registro AI</h2></div>
@@ -3748,6 +3940,9 @@ const RISPONDI_RICHIESTA_ENDPOINT_URL = "https://eonbeckend.vercel.app/api?actio
    E la libreria Supabase si e' caricata davvero. Se la rete e' lenta o
    assente, l'app ripiega sul salvataggio locale invece di andare in errore. */
 const BACKEND_CONFIGURED_VALUES = !SUPABASE_URL.startsWith("INCOLLA") && !SUPABASE_ANON_KEY.startsWith("INCOLLA");
+/* Link "scegli una nuova password" dall'email: va letto prima che la
+   libreria di Supabase pulisca l'indirizzo (25/09/2026). */
+const ARRIVO_DA_RECUPERO_PASSWORD = /type=recovery/.test(window.location.hash || "");
 const supabaseClient = (BACKEND_CONFIGURED_VALUES && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
@@ -3771,6 +3966,7 @@ try{
     supabaseClient.auth.onAuthStateChange((evento, sessione) => {
       if(evento === "SIGNED_OUT") currentSession = null;
       else if(sessione) currentSession = sessione;
+      if(evento === "PASSWORD_RECOVERY") setTimeout(() => apriNuovaPassword(), 0);
     });
   }
 }catch(e){ console.warn("Rinnovo automatico della sessione non attivo:", e.message); }
@@ -3910,27 +4106,6 @@ async function dbEliminaPerSempre(table, id){
 /* Quando un utente nuovo si iscrive, gli diamo gli stessi dati di esempio
    che vedeva in modalità demo, ma stavolta scritti davvero nel suo database
    personale — così parte con qualcosa di concreto da vedere e modificare. */
-async function seedUserData(profession){
-  const p = professionData[profession];
-  await dbInsertMany("clients", p.clients.map(c => ({
-    name:c.name, status:c.status, value:c.value, description:c.desc, last_contact:c.last, color:c.color
-  })));
-  await dbInsertMany("opportunities", p.opportunities.map(o => ({
-    name:o.name, client_name:o.client, value:o.value, probability:o.probability, deadline:o.deadline || null, stage:o.stage
-  })));
-  await dbInsertMany("employees", (p.employees || []).map(e => ({
-    name:e.name, role:e.role, color:e.color
-  })));
-  await dbInsertMany("payments", (p.payments || []).map(x => ({
-    supplier:x.supplier, description:x.desc, amount:x.amount, due_date:null, status:x.status
-  })));
-  await dbInsertMany("incomes", (p.incomes || []).map(x => ({
-    client_name:x.client, description:x.desc, amount:x.amount, due_date:null, status:x.status
-  })));
-  await dbInsertMany("tasks", tasks.map(t => ({
-    title:t.title, owner_type:t.owner, status:t.status, time:t.time
-  })));
-}
 
 /* Trasformano una riga grezza del database nella forma usata dagli
    array in memoria: condivise tra loadUserDataFromDB() (ricarica tutta
@@ -5356,6 +5531,38 @@ const ETICHETTE_CALENDARIO = {
   attesa:{ testo:"In sospeso" },
   todo:{ testo:"Da fare" }
 };
+function chiaveGiornoCal(d){ return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+
+/* Impegno nel cestino con "Annulla" (niente domanda prima), da tasto o scorrimento. */
+async function eliminaVoceCalendario(it){
+  let rimetti = () => {};
+  if(it.tabella === "messages"){
+    const chat = chats.find(c => c.messages.some(m => m.id === it.id));
+    if(chat){
+      const idx = chat.messages.findIndex(m => m.id === it.id);
+      const [msg] = chat.messages.splice(idx, 1);
+      rimetti = () => chat.messages.splice(Math.min(idx, chat.messages.length), 0, msg);
+    }
+  } else {
+    const idx = tasks.findIndex(t => t.id === it.id);
+    if(idx > -1){
+      const [t] = tasks.splice(idx, 1);
+      rimetti = () => tasks.splice(Math.min(idx, tasks.length), 0, t);
+    }
+  }
+  const ridisegna = () => {
+    renderCalendar(); renderTasks(); renderRing(); renderDifficulty();
+    if(it.tabella === "messages") renderChatWindow();
+  };
+  ridisegna();
+  if(isDbReady()) await dbDelete(it.tabella, it.id);
+  showAIToastConAnnulla("Impegno nel cestino", escapeHtml(it.title), async () => {
+    rimetti();
+    if(isDbReady()) await dbRestore(it.tabella, it.id);
+    ridisegna();
+  });
+}
+
 function renderCalendar(){
   const wrap = document.getElementById("calendarList");
   if(!wrap) return;
@@ -5453,6 +5660,31 @@ function renderCalendar(){
     g.voci.push(it);
   });
 
+  /* La settimana in alto: un tocco su un giorno porta ai suoi impegni */
+  const striscia = document.getElementById("calSettimana");
+  if(striscia){
+    striscia.innerHTML = "";
+    const NOMI_GIORNO = ["dom","lun","mar","mer","gio","ven","sab"];
+    for(let i = 0; i < 7; i++){
+      const d = new Date(inizioOggi); d.setDate(d.getDate() + i);
+      const quanti = items.filter(it => it._data && chiaveGiornoCal(it._data) === chiaveGiornoCal(d)).length;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "cal-sett-giorno" + (i === 0 ? " oggi" : "");
+      b.disabled = !quanti;
+      b.setAttribute("aria-label", d.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" }) + ": " + (quanti ? quanti + (quanti === 1 ? " impegno" : " impegni") : "nessun impegno"));
+      b.innerHTML = `<span class="cal-sett-nome">${i === 0 ? "oggi" : NOMI_GIORNO[d.getDay()]}</span><span class="cal-sett-num">${d.getDate()}</span><span class="cal-sett-punti">${"<i></i>".repeat(Math.min(quanti, 3))}</span>`;
+      b.addEventListener("click", () => {
+        const g = document.getElementById("cal-g-" + chiaveGiornoCal(d));
+        if(g) g.scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+      striscia.appendChild(b);
+    }
+  }
+  const testoConteggio = n => (n === 1 ? "impegno in arrivo" : "impegni in arrivo");
+  const elTestoConteggio = document.getElementById("calendarCountTesto");
+  if(elTestoConteggio) elTestoConteggio.textContent = testoConteggio(items.length);
+
   if(items.length === 0){
     wrap.innerHTML = `<div class="cal-vuoto">
       <b>Nessun impegno in arrivo</b>
@@ -5469,28 +5701,31 @@ function renderCalendar(){
   gruppi.forEach(g => {
     const intest = document.createElement("div");
     intest.className = "cal-giorno" + (g.oggi ? " oggi" : "");
-    intest.innerHTML = `<span>${g.et}</span><i>${g.voci.length}</i>`;
+    const d0 = g.voci[0]._data;
+    if(d0) intest.id = "cal-g-" + chiaveGiornoCal(d0);
+    const dataEstesa = (d0 && (g.et === "Oggi" || g.et === "Domani")) ? d0.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" }) : "";
+    intest.innerHTML = `<span class="cal-giorno-nome">${g.et}</span>${dataEstesa ? `<span class="cal-giorno-data">${dataEstesa}</span>` : ""}<i>${g.voci.length}</i>`;
     wrap.appendChild(intest);
 
     g.voci.forEach(it => {
       const row = document.createElement("div");
-      row.className = "cal-voce" + (g.oggi ? " oggi" : "");
+      const tipo = ETICHETTE_CALENDARIO[it.icon] ? it.icon : "appt";
+      row.className = "cal-voce tipo-" + tipo + (g.oggi ? " oggi" : "");
       const cliente = it.contatto ? clients.find(c => nomeChiave(c.name) === nomeChiave(it.contatto)) : null;
       const ora = estraiOra(it.when);
-      const [oraHH, oraMM] = ora ? ora.split(":") : ["—", ""];
-      const et = ETICHETTE_CALENDARIO[it.icon] || ETICHETTE_CALENDARIO.appt;
+      const et = ETICHETTE_CALENDARIO[tipo];
+      /* Sotto il titolo solo quello che aggiunge qualcosa: mai "da fare"
+         (lo dice già il tipo), mai il nome già scritto nel titolo. */
+      const sotto = String(it.sub || "").trim();
+      const sottoUtile = sotto && nomeChiave(sotto) !== "da fare" && !nomeChiave(it.title).includes(nomeChiave(sotto)) ? sotto : "";
 
       row.innerHTML = `
-        <div class="cal-ora-blocco">
-          <div class="cal-ora-hh">${oraHH}</div>
-          <div class="cal-ora-mm">${oraMM}</div>
-        </div>
-        <div class="cal-divider"></div>
+        <div class="cal-ora${ora ? "" : " vuota"}">${ora || "—"}</div>
         <div class="cal-corpo">
-          <div class="cal-testo">
-            <div class="cal-nome">${it.title}</div>
-            <div class="cal-label${it.urgent ? ' urgente' : ''}">${et.testo}${it.urgent ? ' · Urgente' : ''}</div>
-            <div class="cal-sotto">${it.sub}</div>
+          <div class="cal-nome">${escapeHtml(it.title)}</div>
+          <div class="cal-meta">
+            <span class="cal-tipo"><i></i>${et.testo}${it.urgent ? " · urgente" : ""}</span>
+            ${sottoUtile ? `<span class="cal-sotto">${escapeHtml(sottoUtile)}</span>` : ""}
           </div>
         </div>
         ${(it.contatto || it.id) ? `
@@ -5544,25 +5779,13 @@ function renderCalendar(){
       });
 
       const bElimina = row.querySelector(".cal-elimina");
-      if(bElimina) bElimina.addEventListener("click", async (e) => {
+      if(bElimina) bElimina.addEventListener("click", (e) => {
         e.stopPropagation();
-        if(!confirm('Spostare "' + it.title + '" nel cestino?')) return;
-        if(it.tabella === "messages"){
-          const chat = chats.find(c => c.name === it.contatto);
-          if(chat){
-            const idx = chat.messages.findIndex(m => m.id === it.id);
-            if(idx > -1) chat.messages.splice(idx, 1);
-          }
-        } else {
-          const idx = tasks.findIndex(t => t.id === it.id);
-          if(idx > -1) tasks.splice(idx, 1);
-        }
-        if(isDbReady()) await dbDelete(it.tabella, it.id);
-        renderCalendar(); renderTasks(); renderRing(); renderDifficulty();
-        if(it.tabella === "messages") renderChatWindow();
+        eliminaVoceCalendario(it);
       });
 
-      wrap.appendChild(row);
+      // Anche qui si elimina scorrendo a sinistra, come in Messaggi
+      wrap.appendChild(it.id ? rendiScorrevole(row, () => eliminaVoceCalendario(it)) : row);
     });
   });
 
@@ -5972,18 +6195,19 @@ function buildClientCard(c){
   card.className = "client-archive-card";
   const initials = c.name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
   card.innerHTML = `
+    <!-- Card del cliente (25/09/2026, Gianardi): solo nome e, sotto, una
+         descrizione breve del lavoro da fare. Tolti stato, "Ultimo
+         contatto" e i trattini: lo stato si vede già dalla sezione. -->
     <div class="client-archive-head">
-      <div class="row-avatar" style="background:${coloreCliente(c)};">${initials}</div>
+      <div class="row-avatar" style="background:${coloreCliente(c)};">${escapeHtml(initials)}</div>
       <div style="flex:1;min-width:0;">
-        <div class="row-name">${c.name}</div>
-        <div class="row-meta">
-          <span class="pill ${c.status}">${clientStatusLabel[c.status]}</span>
-          ${c.last ? "<span>Ultimo contatto: " + c.last + "</span>" : ""}
-        </div>
+        <div class="row-name">${escapeHtml(c.name)}</div>
+        ${c.desc && c.desc.trim()
+          ? '<div class="client-lavoro">' + escapeHtml(c.desc.trim()) + '</div>'
+          : '<button type="button" class="client-lavoro vuoto">+ Scrivi cosa c\'è da fare</button>'}
       </div>
-      <div class="row-value">${c.value > 0 ? "€" + c.value.toLocaleString("it-IT") : "—"}</div>
+      ${c.value > 0 ? '<div class="row-value">€' + c.value.toLocaleString("it-IT") + '</div>' : ""}
     </div>
-    ${c.desc ? '<p class="client-archive-desc">' + c.desc + "</p>" : ""}
     <div class="client-archive-foot">
       <div class="row-action-btn" title="Invia email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/></svg></div>
       <div class="row-action-btn" title="Chiama"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg></div>
@@ -6003,6 +6227,12 @@ function buildClientCard(c){
   card.querySelector(".client-edit-btn").addEventListener("click", (e) => {
     e.stopPropagation();
     openSheet("cliente", c);
+  });
+  const aggiungiLavoro = card.querySelector(".client-lavoro.vuoto");
+  if(aggiungiLavoro) aggiungiLavoro.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openSheet("cliente", c);
+    setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="desc"]'); if(d) d.focus(); }, 50);
   });
   card.querySelector(".client-chat-btn").addEventListener("click", async (e) => {
     e.stopPropagation();
@@ -6177,7 +6407,7 @@ const sheetForms = {
       ], default:"attivo" },
       { key:"value", label:"Valore (€)", type:"text", inputmode:"decimal", placeholder:"Es. 15.000" },
       { key:"phone", label:"Telefono", type:"text", inputmode:"tel", placeholder:"Es. 335 1234567" },
-      { key:"desc", label:"Note", type:"textarea", placeholder:"Cosa devi ricordare su questo cliente..." },
+      { key:"desc", label:"Lavoro da fare", type:"textarea", placeholder:"Es. Rifacimento bagno: piastrelle e sanitari" },
     ],
     table: "clients",
     toDb: v => ({
@@ -8546,15 +8776,13 @@ function collegaHubRacconta(){
   }
 }
 
-function apriHubAI(){ document.getElementById("aiHubOverlay").style.display = "flex"; }
 function chiudiHubAI(){ document.getElementById("aiHubOverlay").style.display = "none"; }
 
-document.getElementById("cardEonAI").addEventListener("click", apriHubAI);
 document.getElementById("laTuaAziendaCard").addEventListener("click", () => {
   const box = document.getElementById("cruscottoAziendaBox");
   box.style.display = box.style.display === "none" ? "grid" : "none";
 });
-document.getElementById("cambiaProfessioneCard").addEventListener("click", () => {
+document.getElementById("cambiaProfessioneCard")?.addEventListener("click", () => { // voce tolta dal Menu il 25/09/2026
   document.querySelectorAll("#cambiaProfessioneCards .ob-card").forEach(c => {
     c.classList.toggle("selected", c.dataset.profession === currentProfession);
   });
@@ -8621,7 +8849,8 @@ function aggiornaCantiereSottotitoli(){
   }
 
   const subAppunti = document.getElementById("cantiereAppuntiSub");
-  if(subAppunti) subAppunti.textContent = cantiereAppunti.length === 0 ? "Nessun appunto" : (cantiereAppunti.length === 1 ? "1 appunto" : cantiereAppunti.length + " appunti");
+  const nAppunti = cantiereAppunti.length + cantiereFoto.filter(eFotoDiAppunti).length;
+  if(subAppunti) subAppunti.textContent = nAppunti === 0 ? "Nessun appunto" : (nAppunti === 1 ? "1 appunto" : nAppunti + " appunti");
 
   const subDocumenti = document.getElementById("cantiereDocumentiSub");
   if(subDocumenti) subDocumenti.textContent = cantiereDocumenti.length === 0 ? "Nessun documento" : (cantiereDocumenti.length === 1 ? "1 documento" : cantiereDocumenti.length + " documenti");
@@ -8650,15 +8879,62 @@ function renderCantiereClienteCruscotto(){
 /* ---- Appunti cantiere: microfono che detta nel campo (nessun
    collegamento all'assistente AI: qui è solo dettatura, come chiesto:
    "prendere solo appunti", non chiedere all'AI di organizzarli). ---- */
+/* Le foto scattate da Appunti stanno nella stessa cartella delle foto
+   del cantiere, ma in "appunti/": così compaiono qui, tra gli appunti,
+   e restano anche nella galleria Foto. */
+const eFotoDiAppunti = f => /\/cantiere\/appunti\//.test(f.url || "");
+
+function rigaFotoAppunto(f){
+  const riga = document.createElement("div");
+  riga.className = "cantiere-appunto";
+  const img = document.createElement("img");
+  img.className = "cantiere-appunto-foto";
+  img.src = f.url; img.alt = f.nota || "Foto"; img.loading = "lazy";
+  const corpo = document.createElement("div");
+  corpo.style.cssText = "flex:1; min-width:0; cursor:pointer;";
+  const testoEl = document.createElement("div");
+  testoEl.className = "cantiere-appunto-testo" + (f.nota ? "" : " vuoto");
+  testoEl.textContent = f.nota || "Tocca per aggiungere una nota";
+  corpo.appendChild(testoEl);
+  if(f.descrizione){
+    const d = document.createElement("div");
+    d.className = "cantiere-appunto-descrizione";
+    d.textContent = "EON: " + f.descrizione;
+    corpo.appendChild(d);
+  }
+  const dataEl = document.createElement("div");
+  dataEl.className = "cantiere-appunto-data";
+  dataEl.textContent = f.created ? new Date(f.created).toLocaleDateString("it-IT", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" }) : "";
+  corpo.appendChild(dataEl);
+  const apri = () => { const cl = f.clientId ? clients.find(c => c.id === f.clientId) : null; mostraSchedaFoto(f, cl ? cl.name : null); };
+  img.addEventListener("click", apri);
+  corpo.addEventListener("click", apri);
+  const elimina = document.createElement("button");
+  elimina.className = "cantiere-appunto-elimina";
+  elimina.type = "button";
+  elimina.setAttribute("aria-label", "Elimina foto");
+  elimina.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+  elimina.addEventListener("click", async () => { await eliminaCantiereFoto(f.id); renderCantiereAppunti(); });
+  riga.appendChild(img); riga.appendChild(corpo); riga.appendChild(elimina);
+  return riga;
+}
+
 function renderCantiereAppunti(){
   const wrap = document.getElementById("cantiereAppuntiLista");
-  document.getElementById("cantiereAppuntiCount").textContent = cantiereAppunti.length;
+  const fotoAppunti = cantiereFoto.filter(eFotoDiAppunti);
+  document.getElementById("cantiereAppuntiCount").textContent = cantiereAppunti.length + fotoAppunti.length;
   wrap.innerHTML = "";
-  if(cantiereAppunti.length === 0){
+  if(cantiereAppunti.length === 0 && fotoAppunti.length === 0){
     wrap.innerHTML = '<div class="empty-hint" style="padding:16px;">Ancora nessun appunto per questo cantiere.</div>';
     return;
   }
-  cantiereAppunti.slice().reverse().forEach(a => {
+  const tutti = cantiereAppunti.map((a, i) => ({ tipo:"testo", a, quando: a.created || "", i }))
+    .concat(fotoAppunti.map((f, i) => ({ tipo:"foto", f, quando: f.created || "", i })));
+  // Il più recente in cima (a parità di data, l'ultimo aggiunto)
+  tutti.sort((x, y) => (y.quando > x.quando) - (y.quando < x.quando) || y.i - x.i);
+  tutti.forEach(v => {
+    if(v.tipo === "foto"){ wrap.appendChild(rigaFotoAppunto(v.f)); return; }
+    const a = v.a;
     const riga = document.createElement("div");
     riga.className = "cantiere-appunto";
 
@@ -9046,17 +9322,19 @@ function renderCantiereFoto(){
   }
 }
 
-async function caricaCantiereFoto(file, clienteIdForzato){
+async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
+  const daAppunti = !!(opzioni && opzioni.daAppunti);
   if(!isDbReady()){
     showAILanding("Non collegato", "Per caricare foto serve la connessione al database.");
     return;
   }
-  const btn = document.getElementById("cantiereFotoScattaBtn");
-  const sub = document.getElementById("cantiereFotoCaricaSub");
+  const btn = document.getElementById(daAppunti ? "cantiereAppuntiFotoBtn" : "cantiereFotoScattaBtn");
+  const sub = document.getElementById(daAppunti ? "cantiereAppuntiFotoTesto" : "cantiereFotoCaricaSub");
+  const subPrima = sub.textContent;
   btn.disabled = true;
   sub.textContent = "Sto caricando…";
   try{
-    const percorso = currentSession.user.id + "/cantiere/foto/" + nomeFileSicuro(file.name);
+    const percorso = currentSession.user.id + (daAppunti ? "/cantiere/appunti/" : "/cantiere/foto/") + nomeFileSicuro(file.name);
     const { error: upErr } = await supabaseClient.storage
       .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
     if(upErr) throw upErr;
@@ -9066,7 +9344,14 @@ async function caricaCantiereFoto(file, clienteIdForzato){
     const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"" };
     cantiereFoto.push(nuovaFoto);
     descriviFoto(nuovaFoto); // in sottofondo: EON guarda la foto e ne scrive una descrizione
-    if(clienteIdForzato){
+    if(daAppunti){
+      /* Da Appunti: niente "a quale cliente?", si apre subito la scheda
+         della foto per dettare o scrivere la nota. */
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      renderCantiereAppunti();
+      mostraSchedaFoto(nuovaFoto, null, { appenaScattata: true });
+    } else if(clienteIdForzato){
       /* Foto aggiunta dal "+" dentro la card di un cliente già noto:
          nessun bisogno di richiedere di nuovo a chi si riferisce. */
       nuovaFoto.clientId = clienteIdForzato;
@@ -9085,8 +9370,9 @@ async function caricaCantiereFoto(file, clienteIdForzato){
     showAILanding("Caricamento non riuscito", "Non sono riuscita a caricare la foto: " + (err.message || "riprova."));
   }finally{
     btn.disabled = false;
-    sub.textContent = "Si aggiunge subito qui sotto";
+    sub.textContent = subPrima;
     document.getElementById("cantiereFotoInput").value = "";
+    document.getElementById("cantiereAppuntiFotoInput").value = "";
   }
 }
 
@@ -9096,9 +9382,15 @@ async function eliminaCantiereFoto(id){
   cantiereFoto.splice(idx, 1);
   aggiornaCantiereSottotitoli();
   renderCantiereFoto();
+  renderCantiereAppunti();
   if(isDbReady()) await dbDelete("cantiere_foto", id);
 }
 
+document.getElementById("cantiereAppuntiFotoBtn").addEventListener("click", () => document.getElementById("cantiereAppuntiFotoInput").click());
+document.getElementById("cantiereAppuntiFotoInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) caricaCantiereFoto(f, null, { daAppunti: true });
+});
 document.getElementById("cantiereFotoScattaBtn").addEventListener("click", () => { clienteIdPerProssimaFoto = null; document.getElementById("cantiereFotoInput").click(); });
 document.getElementById("cantiereFotoInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
@@ -9473,13 +9765,6 @@ function provaLetturaLocale(testo){
    mostraRisorsaDocumenti) se riconosciuta. */
 const TRIGGER_RISORSA = /^(?:(?:mi serve|mi servirebbe|mi servono|ho bisogno (?:del|della|dei|delle|di)|dammi|mandami|fammi vedere|mi fai vedere|fai vedere|voglio vedere|vorrei vedere|vorrei|mostrami|mostra|recupera|cerca|trova|apri)\s+)?(?:il|la|lo|i|gli|le|l')?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|dello|dei|per|a)?\s*(.+)$/;
 
-/* Sopra questa lunghezza una risposta solo conversazionale (nessuna
-   azione eseguita) si considera "discorsiva" — una spiegazione, un
-   parere, un consiglio — e va mostrata nella scheda grande e
-   chiudibile invece che nel toast, che sparirebbe da solo dopo 8
-   secondi prima di fare in tempo a leggerla. */
-const SOGLIA_RISPOSTA_DISCORSIVA = 180;
-
 /* Prima tra i clienti attivi; se nessuno corrisponde, anche tra gli
    archiviati (25/09/2026: "mi serve fattura testolina" finiva all'AI —
    e veniva capita come "crea una fattura" — solo perché Testolina era
@@ -9817,7 +10102,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(lettura){
         campo.value = "";
         hint.textContent = TESTO_HINT_BASE;
-        showAIToast(lettura.titolo, lettura.testo);
+        const righeLettura = (lettura.testo || "").split("\n").filter(Boolean);
+        mostraRispostaEON(testo, righeLettura.length > 1 ? righeLettura.map(r => "- " + r).join("\n") : lettura.testo, { titolo: lettura.titolo });
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\n+/g, ". ") : ""));
         return;
       }
@@ -9987,14 +10273,12 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
            con un punto di domanda. Una domanda aperta resta sempre nel
            toast, qualunque sia la sua lunghezza: la priorità è tenere
            visibile il modo di rispondere, non la leggibilità. */
-        if(!eDomandaAperta && azioni.length === 0 && testoRisp.length > SOGLIA_RISPOSTA_DISCORSIVA){
-          const corpo = document.createElement("div");
-          corpo.className = "risorsa-testo-discorsivo";
-          corpo.textContent = testoRisp;
-          apriRisorsaCard("EON", corpo);
-        } else {
-          showAIToast(azioni.length === 0 ? "" : "Fatto", testoRisp);
-        }
+        /* 25/09/2026: ora OGNI risposta va nella card bianca (titolo =
+           la domanda). Per una domanda aperta la card ha in fondo la
+           barra per rispondere, quindi non nasconde più il modo di
+           rispondere (il problema del 23/09 descritto sopra). */
+        mostraRispostaEON(inContinuazione ? "" : testo, testoRisp,
+          eDomandaAperta ? { rispondi: (t) => { campo.value = t; send.click(); } } : undefined);
       }
       if(viaVoce) parlaRisposta(daDire.join(". "));
       return;
@@ -10515,6 +10799,76 @@ function apriMedia(url, tipo){
    cliente; Email e WhatsApp sono già in struttura ma disabilitati
    finché non costruiamo il Communication Hub multicanale (TODO.md).
    ============================================================ */
+/* Le risposte di EON nella card bianca con titolo e X, come "Cosa devo
+   fare oggi" in Home (25/09/2026, Gianardi: "adottiamo quello stile tutte
+   le volte che EON ci risponde"), invece del riquadro "Fatto" con gli
+   asterischi del markdown a vista. */
+function titoloDallaDomanda(domanda){
+  let t = String(domanda || "").trim().replace(/\s+/g, " ");
+  if(!t || t.length > 48) return "EON";
+  t = t.charAt(0).toUpperCase() + t.slice(1);
+  if(!/[.!?]$/.test(t) && /^(cosa|che|chi|quando|dove|come|quant[oiae]|qual[ei]?|perch[eé]|ho|hai|c'è|ci sono)\b/i.test(t)) t += "?";
+  return t;
+}
+function formattaRispostaEON(testo){
+  const corpo = document.createElement("div");
+  corpo.className = "eon-risposta";
+  const inline = (x) => escapeHtml(x).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*\*/g, "");
+  let lista = null;
+  String(testo || "").split("\n").forEach(riga => {
+    const r = riga.trim();
+    if(!r){ lista = null; return; }
+    const voce = r.match(/^(?:[-•*]|\d+[.)])\s+(.*)$/);
+    if(!voce){
+      lista = null;
+      const p = document.createElement("p");
+      p.innerHTML = inline(r);
+      corpo.appendChild(p);
+      return;
+    }
+    if(!lista){ lista = document.createElement("div"); lista.className = "eon-lista"; corpo.appendChild(lista); }
+    const el = document.createElement("div");
+    const orario = voce[1].match(/^\**\s*(\d{1,2})[:.](\d{2})\s*\**\s*(?:[–—:-]\s*)?(.*)$/);
+    if(orario){
+      el.className = "eon-voce con-ora";
+      el.innerHTML = `<span class="eon-ora">${orario[1].padStart(2, "0")}:${orario[2]}</span><span class="eon-voce-testo">${inline(orario[3])}</span>`;
+    } else {
+      el.className = "eon-voce";
+      el.innerHTML = `<span class="eon-punto"></span><span class="eon-voce-testo">${inline(voce[1])}</span>`;
+    }
+    lista.appendChild(el);
+  });
+  return corpo;
+}
+/* opzioni.rispondi: EON ha fatto una domanda — in fondo alla card la
+   barra per rispondere (scrivendo o a voce), così la card non nasconde
+   mai il modo di rispondere. */
+function mostraRispostaEON(domanda, testo, opzioni){
+  opzioni = opzioni || {};
+  let piede = null;
+  if(opzioni.rispondi){
+    piede = document.createElement("div");
+    piede.className = "scheda-composer";
+    const campo = document.createElement("textarea");
+    campo.rows = 1;
+    campo.className = "scheda-campo";
+    campo.placeholder = "Rispondi a EON…";
+    const invia = document.createElement("button");
+    invia.type = "button";
+    invia.className = "scheda-invia";
+    invia.setAttribute("aria-label", "Invia la risposta");
+    invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    const manda = (t) => { t = String(t || "").trim(); if(!t) return; chiudiRisorsaCard(); opzioni.rispondi(t); };
+    invia.addEventListener("click", () => manda(campo.value));
+    campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(campo.value); } });
+    const mic = creaMicRapido((t) => manda(t));
+    mic.classList.add("scheda-mic");
+    mic.setAttribute("aria-label", "Rispondi a voce");
+    piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
+  }
+  apriRisorsaCard(opzioni.titolo || titoloDallaDomanda(domanda), formattaRispostaEON(testo), piede);
+}
+
 function apriRisorsaCard(titolo, corpoEl, piedeEl){
   document.getElementById("risorsaTitolo").textContent = titolo;
   const corpo = document.getElementById("risorsaCorpo");
@@ -10686,6 +11040,7 @@ function descriviFoto(foto){
       foto.descrizione = json.descrizione;
       const inMemoria = cantiereFoto.find(f => f.id === foto.id);
       if(inMemoria) inMemoria.descrizione = json.descrizione;
+      if(document.getElementById("page-cantiere-appunti").classList.contains("visible")) renderCantiereAppunti();
       return json.descrizione;
     }catch(err){
       console.warn("Descrizione automatica della foto non riuscita:", err.message);
@@ -10783,6 +11138,7 @@ function mostraSchedaFoto(foto, clienteNome, opzioni){
     notaEl.classList.add("salvata");
     setTimeout(() => notaEl.classList.remove("salvata"), 900);
     if(document.getElementById("page-cantiere-foto").classList.contains("visible")) renderCantiereFoto();
+    if(document.getElementById("page-cantiere-appunti").classList.contains("visible")) renderCantiereAppunti();
   }
   salva.addEventListener("click", () => salvaNota(campo.value, stato.correzione));
   campo.addEventListener("keydown", (e) => {
@@ -12016,6 +12372,7 @@ const pageMeta = {
   chiamate: { title:"Chiamate", sub:null },
   revisioni: { title:"Revisioni Portafoglio", sub:null },
   cestino: { title:"Cestino", sub:null },
+  impostazioni: { title:"Impostazioni", sub:null },
   "cantiere-cliente": { title:"Cliente cantiere", sub:null },
   "cantiere-appunti": { title:"Appunti", sub:null },
   "cantiere-documenti": { title:"Documenti", sub:null },
@@ -12036,12 +12393,14 @@ const tabForPage = {
   "crea-fattura":"azienda", "crea-preventivo":"azienda", regalo:"azienda", business:"azienda",
   "assemblee":"azienda", "udienze":"azienda", "revisioni":"azienda",
   calendario:"home", chiamate:"home",
-  cestino:"azienda", "ai-request-log":"azienda",
+  cestino:"azienda", "ai-request-log":"azienda", impostazioni:"azienda",
   "cantiere-cliente":"home", "cantiere-appunti":"home", "cantiere-documenti":"home", "cantiere-foto":"home",
   "documenti-impresa":"home", "fatture-preventivi":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
 };
 
+var paginaAttuale = "home", paginaPrecedente = "home"; // var: navigateTo può partire prima di questa riga
 function navigateTo(page){
+  if(page !== paginaAttuale){ paginaPrecedente = paginaAttuale; paginaAttuale = page; }
   document.querySelectorAll(".page").forEach(p => p.classList.remove("visible"));
   const target = document.getElementById("page-" + page);
   if(target) target.classList.add("visible");
@@ -12082,6 +12441,9 @@ function navigateTo(page){
   }
 
   if(page === "cestino") renderCestino();
+  const btnImpSezione = document.getElementById("topbarImpostazioni");
+  if(btnImpSezione) btnImpSezione.hidden = !(IMPOSTAZIONI_SEZIONE && IMPOSTAZIONI_SEZIONE[page]);
+  if(page === "impostazioni") disegnaImpostazioni();
   if(page === "ai-request-log") renderAiRequestLog();
   if(page === "cantiere-cliente") renderCantiereClienteCruscotto();
   if(page === "cantiere-appunti") renderCantiereAppunti();
@@ -12281,8 +12643,18 @@ document.getElementById("obContinueBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.add("visible");
 });
 
+/* Chi ha già un account non sceglie di nuovo la professione: è legata al
+   suo account e arriva dal profilo quando accede (25/09/2026). */
+let obSoloAccesso = false;
+document.getElementById("obVaiAccedi").addEventListener("click", () => {
+  obSoloAccesso = true;
+  setObAuthMode("login");
+  document.getElementById("obStep0").classList.remove("visible");
+  document.getElementById("obStep2").classList.add("visible");
+});
 document.getElementById("obBackBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.remove("visible");
+  if(obSoloAccesso){ obSoloAccesso = false; setObAuthMode("signup"); document.getElementById("obStep0").classList.add("visible"); return; }
   if(obSelectedType === "generico"){
     document.getElementById("obStep0").classList.add("visible");
   } else {
@@ -12301,9 +12673,27 @@ function setObAuthMode(mode){
   document.getElementById("obAuthLabel").textContent = mode === "signup" ? "Ultimo passo: crea il tuo account" : "Bentornato: accedi al tuo account";
   document.getElementById("obFinishBtn").childNodes[0].textContent = mode === "signup" ? "Inizia a usare EON " : "Accedi ";
   document.getElementById("obAuthError").style.display = "none";
+  document.getElementById("obAuthInfo").style.display = "none";
+  document.getElementById("obPasswordDimenticata").style.display = mode === "login" ? "block" : "none";
+  document.getElementById("obPassword").setAttribute("autocomplete", mode === "login" ? "current-password" : "new-password");
 }
-document.getElementById("obTabSignup").addEventListener("click", () => setObAuthMode("signup"));
+document.getElementById("obTabSignup").addEventListener("click", () => {
+  if(obSoloAccesso && !obSelectedProfession){
+    // Per creare un account serve prima scegliere il lavoro
+    obSoloAccesso = false;
+    setObAuthMode("signup");
+    document.getElementById("obStep2").classList.remove("visible");
+    document.getElementById("obStep0").classList.add("visible");
+    return;
+  }
+  setObAuthMode("signup");
+});
 document.getElementById("obTabLogin").addEventListener("click", () => setObAuthMode("login"));
+/* Invio sulla tastiera = tasto Accedi / Inizia */
+document.getElementById("obFormAccesso").addEventListener("submit", (e) => {
+  e.preventDefault();
+  document.getElementById("obFinishBtn").click();
+});
 
 /* Se il backend non è ancora collegato, lo diciamo chiaramente invece di
    far finta che l'account sia vero. */
@@ -12346,12 +12736,22 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       const name = document.getElementById("obName").value.trim();
       const businessName = document.getElementById("obBusinessName").value.trim();
       if(!name){ throw new Error("Inserisci il tuo nome."); }
+      if(password.length < 8){ throw new Error("La password deve avere almeno 8 caratteri."); }
 
       const { data, error } = await supabaseClient.auth.signUp({
         email, password,
-        options: { data: { full_name: name, profession: obSelectedProfession } }
+        options: {
+          data: { full_name: name, business_name: businessName, profession: obSelectedProfession },
+          emailRedirectTo: indirizzoApp()
+        }
       });
       if(error) throw error;
+      /* Con la conferma email attiva l'account esiste ma non c'è ancora una
+         sessione: si entra toccando il link nell'email. */
+      if(!data.session){
+        mostraControllaEmail(email);
+        return;
+      }
       currentSession = data.session;
 
       // Aggiorna il profilo creato automaticamente con professione e nome attività
@@ -12362,11 +12762,13 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
           full_name: name, business_name: businessName, profession: obSelectedProfession
         }).eq("id", data.user.id);
         if(profErr) throw profErr;
+        ricordaProfilo({ full_name: name, business_name: businessName, profession: obSelectedProfession }, email);
 
-        // Prepara i dati iniziali veri nel database (le stesse informazioni
-        // che vedevi in demo, ma stavolta scritte davvero, sue e sue soltanto)
-        await seedUserData(obSelectedProfession);
+        /* Un account nuovo parte vuoto (25/09/2026): prima ci venivano
+           scritti clienti, pagamenti e impegni di esempio, finti ma nel suo
+           account vero (da qui i "Mario Rossi"). */
         await loadUserDataFromDB();
+        benvenutoDaMostrare = true;
       await loadChatsFromDB();
       subscribeToMessages();
       }
@@ -12383,6 +12785,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.user.id).single());
       if(profile){
         obSelectedProfession = profile.profession;
+        ricordaProfilo(profile, data.user.email);
         const firstName = (profile.full_name || "Marco").split(" ")[0];
         pageMeta.home.title = "Buongiorno, " + firstName;
         document.getElementById("pageTitle").textContent = pageMeta.home.title;
@@ -12392,20 +12795,115 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       subscribeToMessages();
     }
 
-    await applyProfession(obSelectedProfession, true);
+    await applyProfession(obSelectedProfession || "artigiano", true);
     renderPayments(); renderIncomes();
     document.getElementById("onboardingScreen").classList.add("hidden");
+    if(benvenutoDaMostrare){ benvenutoDaMostrare = false; mostraBenvenuto(); }
 
   }catch(err){
     console.error("Errore autenticazione:", err);
-    errorBox.textContent = err.message === "Invalid login credentials"
-      ? "Email o password non corrette."
-      : (err.message || "Qualcosa è andato storto, riprova.");
+    errorBox.textContent = messaggioErroreAccesso(err);
     errorBox.style.display = "block";
   } finally {
     btn.disabled = false;
   }
 });
+
+/* ---- Account come nelle app grandi (25/09/2026) ---- */
+let benvenutoDaMostrare = false;
+function indirizzoApp(){ return window.location.origin + window.location.pathname; }
+function messaggioErroreAccesso(err){
+  const m = (err && err.message) || "";
+  if(m === "Invalid login credentials") return "Email o password non corrette.";
+  if(/email not confirmed/i.test(m)) return "Devi prima confermare l'email: tocca il link che ti abbiamo mandato. Non è arrivata? Usa \"Password dimenticata?\" o registrati di nuovo con la stessa email.";
+  if(/already registered|already been registered/i.test(m)) return "C'è già un account con questa email: accedi, oppure usa \"Password dimenticata?\".";
+  if(/password should be at least|weak password/i.test(m)) return "Password troppo debole: usa almeno 8 caratteri.";
+  if(/rate limit|too many/i.test(m)) return "Troppi tentativi: aspetta qualche minuto e riprova.";
+  if(/invalid email|unable to validate email/i.test(m)) return "Controlla l'indirizzo email.";
+  return m || "Qualcosa è andato storto, riprova.";
+}
+function infoAccesso(testo){
+  const el = document.getElementById("obAuthInfo");
+  el.textContent = testo;
+  el.style.display = testo ? "block" : "none";
+  document.getElementById("obAuthError").style.display = "none";
+}
+function mostraControllaEmail(email){
+  document.querySelector("#obStep2 .ob-form").style.display = "none";
+  document.querySelector("#obStep2 .ob-auth-toggle").style.display = "none";
+  document.getElementById("obFinishBtn").style.display = "none";
+  document.getElementById("obAuthLabel").style.display = "none";
+  document.getElementById("obControllaEmailIndirizzo").textContent = email;
+  document.getElementById("obControllaEmail").style.display = "flex";
+}
+function nascondiControllaEmail(){
+  document.querySelector("#obStep2 .ob-form").style.display = "";
+  document.querySelector("#obStep2 .ob-auth-toggle").style.display = "";
+  document.getElementById("obFinishBtn").style.display = "";
+  document.getElementById("obAuthLabel").style.display = "";
+  document.getElementById("obControllaEmail").style.display = "none";
+}
+document.getElementById("obRimandaEmail").addEventListener("click", async () => {
+  const email = document.getElementById("obControllaEmailIndirizzo").textContent;
+  const { error } = await supabaseClient.auth.resend({ type: "signup", email, options: { emailRedirectTo: indirizzoApp() } });
+  document.getElementById("obRimandaEmail").textContent = error ? messaggioErroreAccesso(error) : "Email rimandata ✓";
+});
+document.getElementById("obHoConfermato").addEventListener("click", () => {
+  nascondiControllaEmail();
+  setObAuthMode("login");
+});
+document.getElementById("obPasswordDimenticata").addEventListener("click", async () => {
+  const email = document.getElementById("obEmail").value.trim();
+  if(!email){ infoAccesso("Scrivi qui sopra la tua email, poi tocca di nuovo \"Password dimenticata?\"."); return; }
+  if(!BACKEND_CONFIGURED || !supabaseClient){ infoAccesso("Serve la connessione per recuperare la password."); return; }
+  const b = document.getElementById("obPasswordDimenticata");
+  b.disabled = true;
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: indirizzoApp() });
+  b.disabled = false;
+  /* Come le app grandi: stesso messaggio che l'email esista o no, così
+     nessuno può scoprire chi è registrato. */
+  if(error && /rate limit|too many/i.test(error.message)) infoAccesso(messaggioErroreAccesso(error));
+  else infoAccesso("Se c'è un account con " + email + ", ti abbiamo mandato un'email con il link per scegliere una nuova password.");
+});
+
+/* Link "scegli una nuova password" aperto dall'email */
+let nuovaPasswordAperta = false;
+function apriNuovaPassword(){
+  if(nuovaPasswordAperta) return;
+  nuovaPasswordAperta = true;
+  const corpo = document.createElement("div");
+  corpo.className = "imp-card";
+  corpo.style.boxShadow = "none"; corpo.style.border = "none"; corpo.style.padding = "0";
+  corpo.innerHTML = `
+    <label class="imp-campo"><span>Nuova password</span><input id="recPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
+    <button type="button" class="imp-btn" id="recSalva">Salva la nuova password</button>
+    <div class="imp-esito" id="recEsito"></div>`;
+  apriRisorsaCard("Scegli una nuova password", corpo);
+  corpo.querySelector("#recSalva").addEventListener("click", async () => {
+    const pw = corpo.querySelector("#recPassword").value;
+    const esito = corpo.querySelector("#recEsito");
+    if(pw.length < 8){ esito.textContent = "La password deve avere almeno 8 caratteri."; esito.className = "imp-esito errore"; return; }
+    const { error } = await supabaseClient.auth.updateUser({ password: pw });
+    if(error){ esito.textContent = messaggioErroreAccesso(error); esito.className = "imp-esito errore"; return; }
+    nuovaPasswordAperta = false;
+    try{ history.replaceState(null, "", indirizzoApp()); }catch(e){}
+    chiudiRisorsaCard();
+    showAIToast("Password aggiornata", "Da ora entri con la nuova password.");
+  });
+}
+
+/* Primo ingresso dopo la registrazione: tre cose per partire */
+function mostraBenvenuto(){
+  mostraRispostaEON("", [
+    "Il tuo EON è pronto e vuoto: dentro ci sarà solo il tuo lavoro.",
+    "",
+    "- Tocca il microfono e parla: \"Domani alle 10 sopralluogo da Rossi\"",
+    "- Aggiungi il primo cliente: \"Nuovo cliente Mario Bianchi, 333 1234567\"",
+    "- Fai una foto del cantiere e dettaci la nota",
+    "",
+    "Le impostazioni e il tasto Esci sono in Menu → Impostazioni."
+  ].join("\n"), { titolo: "Benvenuto in EON" });
+}
 
 async function loadOnboarding(){
   if(!STORAGE_AVAILABLE) return null;
@@ -12429,6 +12927,7 @@ async function initApp(){
       const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single());
       if(profile){
         document.getElementById("onboardingScreen").classList.add("hidden");
+        ricordaProfilo(profile, data.session.user.email);
         const firstName = (profile.full_name || "Marco").split(" ")[0];
         pageMeta.home.title = "Buongiorno, " + firstName;
         document.getElementById("pageTitle").textContent = pageMeta.home.title;
@@ -12519,7 +13018,264 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 window.addEventListener("pageshow", (e) => { if(e.persisted) controllaNuovaVersione(); });
 controllaNuovaVersione(); // la versione con cui l'app è partita
 
-initApp();
+/* Scorrere col dito tra le pagine principali (25/09/2026, Gianardi):
+   Home ⇄ Clienti ⇄ Cresci ⇄ Menu, nell'ordine della barra in basso.
+   Solo sulle quattro pagine della barra; mai partendo da un campo di
+   testo, da una riga che si elimina scorrendo, da una striscia che scorre
+   in orizzontale o dal bordo dello schermo (lì iPhone usa il suo "indietro"). */
+(function(){
+  const ORDINE = ["home", "clienti", "cresci", "gestisci-azienda"];
+  const BORDO = 24;
+  let inizio = null;
+  function siPuoPartireDa(el, pagina){
+    for(let n = el; n && n !== pagina; n = n.parentElement){
+      if(n.matches("input, textarea, select, button.home-hero-mic, [contenteditable], .scorri-wrap, .home-hero-textwrap")) return false;
+      const st = getComputedStyle(n);
+      if(/(auto|scroll)/.test(st.overflowX) && n.scrollWidth > n.clientWidth + 2) return false;
+    }
+    return true;
+  }
+  document.addEventListener("touchstart", (e) => {
+    inizio = null;
+    if(e.touches.length !== 1) return;
+    const pagina = document.querySelector(".page.visible");
+    if(!pagina || !ORDINE.includes(pagina.id.replace(/^page-/, ""))) return;
+    if(!pagina.contains(e.target) || !siPuoPartireDa(e.target, pagina)) return;
+    const t = e.touches[0];
+    if(t.clientX < BORDO || t.clientX > window.innerWidth - BORDO) return;
+    inizio = { x: t.clientX, y: t.clientY, quando: Date.now(), pagina: pagina.id.replace(/^page-/, "") };
+  }, { passive: true });
+  document.addEventListener("touchend", (e) => {
+    if(!inizio || !e.changedTouches.length) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - inizio.x, dy = t.clientY - inizio.y;
+    const da = inizio; inizio = null;
+    if(Date.now() - da.quando > 700) return;               // gesto lento: stava leggendo, non sfogliando
+    if(Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return; // corto o in verticale: è uno scroll
+    const i = ORDINE.indexOf(da.pagina);
+    const j = i + (dx < 0 ? 1 : -1);
+    if(j < 0 || j >= ORDINE.length) return;
+    navigateTo(ORDINE[j]);
+    const nuova = document.getElementById("page-" + ORDINE[j]);
+    if(nuova){
+      nuova.classList.remove("entra-destra", "entra-sinistra");
+      void nuova.offsetWidth; // riparte l'animazione
+      nuova.classList.add(dx < 0 ? "entra-destra" : "entra-sinistra");
+      nuova.addEventListener("animationend", () => nuova.classList.remove("entra-destra", "entra-sinistra"), { once: true });
+    }
+  }, { passive: true });
+  document.addEventListener("touchcancel", () => { inizio = null; }, { passive: true });
+})();
+
+/* ---- Impostazioni di sezione: l'ingranaggio in alto a destra ----
+   Ogni sezione che ha delle impostazioni le apre da lì, in una scheda a
+   card (25/09/2026). Per aggiungerne una basta una riga qui sotto. */
+function voceImpostazioneHtml(azione, colore, icona, titolo, sotto){
+  return `<button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="${azione}">
+    <div class="module-icon" style="background:${colore};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icona}</svg></div>
+    <div class="azienda-link-card-body"><div class="module-title">${titolo}</div><div class="module-sub">${sotto}</div></div>
+    <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+  </button>`;
+}
+function apriImpostazioniDocumenti(){
+  const f = formatoAttuale();
+  const nomeModello = (MODELLI_DOCUMENTO[f.modello] || {}).nome || "Classico";
+  const corpo = schedaImpostazione("Impostazioni documenti", `<div class="azienda-list">
+    ${voceImpostazioneHtml("carta", "var(--indigo)", '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/>', "Carta intestata", "Nome, indirizzo, P.IVA e logo sui tuoi documenti")}
+    ${voceImpostazioneHtml("modello", "var(--violet)", '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>', "Formato", "Adesso: modello " + escapeHtml(nomeModello) + " — scegline un altro")}
+    ${voceImpostazioneHtml("foto", "var(--teal)", '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>', "Formato da una foto", "Usa l'aspetto di una tua fattura")}
+  </div>`);
+  corpo.querySelector('[data-azione="carta"]').addEventListener("click", () => { chiudiRisorsaCard(); navigateTo("carta-intestata"); });
+  corpo.querySelector('[data-azione="modello"]').addEventListener("click", () => apriGalleriaModelli());
+  corpo.querySelector('[data-azione="foto"]').addEventListener("click", () => { chiudiRisorsaCard(); document.getElementById("formatoFotoInput").click(); });
+}
+var IMPOSTAZIONI_SEZIONE = { // var: navigateTo può partire prima di questa riga
+  "cantiere-documenti": apriImpostazioniDocumenti,
+  "fatture-preventivi": apriImpostazioniDocumenti,
+  "documenti-impresa": apriImpostazioniDocumenti,
+  "carta-intestata": apriImpostazioniDocumenti,
+  "crea-lettera": apriImpostazioniDocumenti,
+  "crea-cartello": apriImpostazioniDocumenti,
+};
+document.getElementById("topbarImpostazioni").addEventListener("click", () => {
+  const apri = IMPOSTAZIONI_SEZIONE[paginaAttuale];
+  if(apri) apri();
+});
+
+/* ---- Impostazioni: account e voci a card (25/09/2026) ---- */
+let profiloUtente = null;
+const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
+function ricordaProfilo(profilo, email){
+  profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
+}
+function datiAccount(){
+  const p = profiloUtente || { full_name:"", business_name:"", profession: currentProfession, email:"" };
+  return { ...p, nome: p.full_name || "Il tuo account", professione: NOMI_PROFESSIONE[p.profession] || p.profession || "—" };
+}
+function disegnaImpostazioni(){
+  const d = datiAccount();
+  document.getElementById("impAccountSotto").textContent = [d.email, d.professione].filter(x => x && x !== "—").join(" · ") || "Email e professione";
+}
+function esitoImp(id, testo, ok){
+  const e = document.getElementById(id);
+  if(!e) return;
+  e.textContent = testo;
+  e.className = "imp-esito " + (ok ? "ok" : "errore");
+}
+function schedaImpostazione(titolo, html){
+  const corpo = document.createElement("div");
+  corpo.className = "imp-form";
+  corpo.innerHTML = html;
+  apriRisorsaCard(titolo, corpo);
+  return corpo;
+}
+/* Una voce a card si apre anche da tastiera (Invio / spazio) */
+function suTocco(id, fn){
+  const el = document.getElementById(id);
+  el.addEventListener("click", fn);
+  el.addEventListener("keydown", (e) => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); fn(); } });
+}
+
+suTocco("impVoceAccount", () => {
+  const d = datiAccount();
+  const iniziali = (d.nome.split(/\s+/).map(w => w[0] || "").join("").slice(0, 2) || "–").toUpperCase();
+  const corpo = schedaImpostazione("Account", `
+    <div class="imp-account">
+      <div class="imp-avatar" id="impAvatar"></div>
+      <div style="min-width:0;">
+        <div class="imp-nome" id="impNome"></div>
+        <div class="imp-attivita" id="impAttivita"></div>
+        <div class="imp-email" id="impEmail"></div>
+      </div>
+    </div>
+    <div class="imp-riga"><span>Professione</span><b id="impProfessione"></b></div>
+    <div class="imp-nota">La professione è legata al tuo account: si sceglie alla registrazione e non si cambia.</div>`);
+  corpo.querySelector("#impAvatar").textContent = iniziali;
+  corpo.querySelector("#impNome").textContent = d.nome;
+  corpo.querySelector("#impAttivita").textContent = d.business_name || "";
+  corpo.querySelector("#impEmail").textContent = d.email || "";
+  corpo.querySelector("#impProfessione").textContent = d.professione;
+});
+
+suTocco("impVoceAiuto", () => {
+  const corpo = schedaImpostazione("Aiuto", `
+    <div class="azienda-list">
+      <button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="feedback">
+        <div class="module-icon" style="background:var(--teal);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg></div>
+        <div class="azienda-link-card-body"><div class="module-title">Manda un feedback</div><div class="module-sub">Dicci cosa non va o cosa vorresti</div></div>
+      </button>
+      <button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="registro">
+        <div class="module-icon" style="background:var(--ink-3, #64748b);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div>
+        <div class="azienda-link-card-body"><div class="module-title">Registro AI</div><div class="module-sub">Cosa ha fatto l'assistente nelle ultime richieste</div></div>
+      </button>
+    </div>`);
+  corpo.querySelector('[data-azione="feedback"]').addEventListener("click", () => document.getElementById("feedbackCard").click());
+  corpo.querySelector('[data-azione="registro"]').addEventListener("click", () => { chiudiRisorsaCard(); navigateTo("ai-request-log"); });
+});
+
+suTocco("impVoceProfilo", () => {
+  const p = profiloUtente || { full_name:"", business_name:"" };
+  const corpo = schedaImpostazione("Profilo", `
+    <label class="imp-campo"><span>Nome e cognome</span><input id="impCampoNome" type="text" autocomplete="name"></label>
+    <label class="imp-campo"><span>Nome dell'attività</span><input id="impCampoAttivita" type="text" autocomplete="organization"></label>
+    <button type="button" class="imp-btn" id="impSalvaProfilo">Salva</button>
+    <div class="imp-esito" id="impEsitoProfilo"></div>`);
+  corpo.querySelector("#impCampoNome").value = p.full_name;
+  corpo.querySelector("#impCampoAttivita").value = p.business_name;
+  corpo.querySelector("#impSalvaProfilo").addEventListener("click", async () => {
+    const nome = corpo.querySelector("#impCampoNome").value.trim();
+    const attivita = corpo.querySelector("#impCampoAttivita").value.trim();
+    if(!nome) return esitoImp("impEsitoProfilo", "Scrivi il tuo nome.", false);
+    if(!isDbReady()) return esitoImp("impEsitoProfilo", "Serve la connessione per salvare.", false);
+    const b = corpo.querySelector("#impSalvaProfilo");
+    b.disabled = true;
+    const { error } = await supabaseClient.from("profiles").update({ full_name: nome, business_name: attivita }).eq("id", currentSession.user.id);
+    b.disabled = false;
+    if(error) return esitoImp("impEsitoProfilo", "Non salvato: " + error.message, false);
+    profiloUtente = { ...(profiloUtente || {}), full_name: nome, business_name: attivita };
+    pageMeta.home.title = "Buongiorno, " + nome.split(" ")[0];
+    disegnaImpostazioni();
+    esitoImp("impEsitoProfilo", "Salvato.", true);
+  });
+});
+
+suTocco("impVocePassword", () => {
+  const corpo = schedaImpostazione("Sicurezza", `
+    <label class="imp-campo"><span>Nuova password</span><input id="impCampoPassword" type="password" autocomplete="new-password" placeholder="Almeno 8 caratteri"></label>
+    <button type="button" class="imp-btn" id="impCambiaPassword">Cambia password</button>
+    <div class="imp-esito" id="impEsitoPassword"></div>`);
+  corpo.querySelector("#impCambiaPassword").addEventListener("click", async () => {
+    const campo = corpo.querySelector("#impCampoPassword");
+    const pw = campo.value;
+    if(pw.length < 8) return esitoImp("impEsitoPassword", "La password deve avere almeno 8 caratteri.", false);
+    if(!isDbReady()) return esitoImp("impEsitoPassword", "Serve la connessione per cambiarla.", false);
+    const b = corpo.querySelector("#impCambiaPassword");
+    b.disabled = true;
+    const { error } = await supabaseClient.auth.updateUser({ password: pw });
+    b.disabled = false;
+    campo.value = "";
+    if(error) return esitoImp("impEsitoPassword", "Non cambiata: " + messaggioErroreAccesso(error), false);
+    esitoImp("impEsitoPassword", "Password cambiata.", true);
+  });
+});
+
+/* Esci: chiude la sessione su questo telefono e torna alla schermata
+   iniziale (registrati / accedi). Si ricarica l'app da zero, così in
+   memoria non resta nulla dell'account appena chiuso. */
+async function esciDallAccount(){
+  if(!confirm("Vuoi uscire dal tuo account? Per rientrare ti serviranno email e password.")) return;
+  try{ if(supabaseClient && supabaseClient.auth) await supabaseClient.auth.signOut(); }
+  catch(e){ console.warn("Uscita non completa:", e.message); }
+  currentSession = null;
+  window.location.reload();
+}
+suTocco("impEsci", esciDallAccount);
+
+/* Elimina account: il server cancella file e account (con l'account se ne
+   vanno tutti i dati, collegati a lui nel database). */
+const ELIMINA_ACCOUNT_URL = "https://eonbeckend.vercel.app/api?action=elimina_account";
+suTocco("impVoceElimina", () => {
+  const corpo = schedaImpostazione("Elimina account", `
+    <div class="imp-avviso">Cancella <b>per sempre</b> il tuo account e tutti i tuoi dati: clienti, messaggi, foto, documenti, appuntamenti. Non si può annullare.</div>
+    <label class="imp-campo"><span>Per confermare scrivi ELIMINA</span><input id="impCampoElimina" type="text" autocomplete="off" autocapitalize="characters"></label>
+    <button type="button" class="imp-btn imp-btn-pericolo" id="impEliminaAccount" disabled>Elimina il mio account</button>
+    <div class="imp-esito" id="impEsitoElimina"></div>`);
+  const campo = corpo.querySelector("#impCampoElimina");
+  const b = corpo.querySelector("#impEliminaAccount");
+  campo.addEventListener("input", () => { b.disabled = campo.value.trim().toUpperCase() !== "ELIMINA"; });
+  b.addEventListener("click", async () => {
+    if(campo.value.trim().toUpperCase() !== "ELIMINA") return;
+    if(!isDbReady()) return esitoImp("impEsitoElimina", "Serve la connessione per eliminare l'account.", false);
+    b.disabled = true;
+    esitoImp("impEsitoElimina", "Sto eliminando tutto…", true);
+    try{
+      const r = await fetch(ELIMINA_ACCOUNT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
+        body: JSON.stringify({ conferma: "ELIMINA" })
+      });
+      const j = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(j.error || "eliminazione non riuscita");
+      try{ await supabaseClient.auth.signOut(); }catch(e){}
+      currentSession = null;
+      alert("Il tuo account è stato eliminato. Grazie per aver usato EON.");
+      window.location.reload();
+    }catch(err){
+      b.disabled = false;
+      esitoImp("impEsitoElimina", "Non eliminato: " + err.message, false);
+    }
+  });
+});
+
+/* Calendario: "Indietro" torna dove eri (di solito la Home) */
+(function(){
+  const b = document.getElementById("calIndietro");
+  const vai = () => navigateTo(paginaPrecedente && paginaPrecedente !== "calendario" ? paginaPrecedente : "home");
+  b.addEventListener("click", vai);
+  b.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); vai(); } });
+})();
+
+initApp().then(() => { if(ARRIVO_DA_RECUPERO_PASSWORD && currentSession) apriNuovaPassword(); });
 </script>
 </body>
 </html>

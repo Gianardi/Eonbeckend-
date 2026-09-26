@@ -35,7 +35,7 @@ async function main() {
       });
       window.supabase = { createClient: () => ({
         from: catena,
-        storage: { from: () => ({ upload: async () => ({ error: null }), getPublicUrl: () => ({ data: { publicUrl: "https://file.test/nuova.jpg" } }) }) },
+        storage: { from: () => ({ upload: async () => ({ error: null }), getPublicUrl: (percorso) => ({ data: { publicUrl: "https://file.test/" + percorso } }) }) },
         auth: { getSession: async () => ({ data: { session: { access_token: "t", user: { id: "u1" } } } }), onAuthStateChange: () => ({}) },
       }) };
       // Microfono finto: "detta" window.__dettato
@@ -142,6 +142,24 @@ async function main() {
     // Invio WhatsApp con nota e link
     const wa = await page.evaluate(() => { let url = null; window.open = (u) => { url = u; }; chiudiRisorsaCard(); mostraSchedaFoto(cantiereFoto.find((f) => f.id === "f1"), "Rossi"); document.querySelector('.scheda-invio-btn[data-canale="WhatsApp"]').click(); return url; });
     verifica("WhatsApp: al numero del cliente con la nota e il link della foto", wa && wa.startsWith("https://wa.me/393331234567?text=") && /Crepa/.test(decodeURIComponent(wa)) && /1\.jpg/.test(decodeURIComponent(wa)), wa);
+
+    // Appunti: il tasto per la foto, la nota nella sua scheda, la foto tra gli appunti
+    await page.evaluate(() => { chiudiRisorsaCard(); cantiereAppunti.length = 0; cantiereAppunti.push({ id: "a1", testo: "Comprare silicone", created: "2026-09-25T09:00:00Z" }); navigateTo("cantiere-appunti"); renderCantiereAppunti(); });
+    verifica("Appunti: c'è il tasto \"Scatta una foto con appunto\"", await page.evaluate(() => /Scatta una foto con appunto/.test(document.getElementById("cantiereAppuntiFotoBtn").textContent)));
+    const tagAperti = await page.evaluate(() => document.getElementById("cantiereFotoTagOverlay").style.display);
+    await page.setInputFiles("#cantiereAppuntiFotoInput", { name: "vetro.jpg", mimeType: "image/png", buffer: PNG });
+    await page.waitForFunction(() => document.getElementById("risorsaOverlay").style.display === "flex" && /Vuoi aggiungere una nota/.test((document.querySelector(".scheda-foto-nota") || {}).textContent || ""), null, { timeout: 3000 });
+    const dopoScattoAppunti = await page.evaluate(() => ({ url: cantiereFoto.at(-1).url, tag: document.getElementById("cantiereFotoTagOverlay").style.display, righe: document.querySelectorAll("#cantiereAppuntiLista .cantiere-appunto").length }));
+    verifica("foto da Appunti: salvata tra gli appunti, si apre subito la scheda per la nota (niente \"a quale cliente?\")", /\/cantiere\/appunti\//.test(dopoScattoAppunti.url) && dopoScattoAppunti.tag === tagAperti && dopoScattoAppunti.righe === 2, JSON.stringify(dopoScattoAppunti));
+    await page.fill("#risorsaPiede textarea", "Da cambiare e trovare modello uguale");
+    await page.press("#risorsaPiede textarea", "Enter");
+    await page.waitForFunction(() => /Da cambiare e trovare modello uguale/.test(document.getElementById("cantiereAppuntiLista").innerText), null, { timeout: 3000 });
+    const lista = await page.evaluate(() => ({ prima: document.querySelector("#cantiereAppuntiLista .cantiere-appunto").innerText, conta: document.getElementById("cantiereAppuntiCount").textContent, foto: !!document.querySelector("#cantiereAppuntiLista .cantiere-appunto-foto") }));
+    verifica("la nota scritta compare subito nell'elenco, con la miniatura, in cima", /Da cambiare e trovare modello uguale/.test(lista.prima) && lista.foto && lista.conta === "2", JSON.stringify(lista));
+    await page.evaluate(() => chiudiRisorsaCard());
+    await page.click("#cantiereAppuntiLista .cantiere-appunto-foto");
+    verifica("tocco sulla miniatura: si riapre la scheda della foto", await page.evaluate(() => document.getElementById("risorsaOverlay").style.display === "flex" && document.querySelector(".scheda-foto-nota").textContent === "Da cambiare e trovare modello uguale"));
+    verifica("la foto resta anche nella galleria Foto", await page.evaluate(() => { chiudiRisorsaCard(); navigateTo("cantiere-foto"); renderCantiereFoto(); return [...document.querySelectorAll("#cantiereFotoGrid img")].some((i) => /\/cantiere\/appunti\//.test(i.src)); }));
   } finally {
     await browser.close();
     server.kill();

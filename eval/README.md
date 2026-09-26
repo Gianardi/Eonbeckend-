@@ -147,7 +147,8 @@ NODE_PATH=/opt/node22/lib/node_modules node eval/scheda.test.js
 ### `foto.test.js` — nota sulle foto, gira subito
 
 Scheda della foto, nota scritta/dettata/corretta, segno in galleria, nota
-proposta dopo lo scatto, ricerca a voce per nota, invio WhatsApp.
+proposta dopo lo scatto, ricerca a voce per nota, invio WhatsApp, foto con
+appunto dalla pagina Appunti.
 
 ```
 NODE_PATH=/opt/node22/lib/node_modules node eval/foto.test.js
@@ -163,6 +164,55 @@ da una nota.
 
 ```
 NODE_PATH=/opt/node22/lib/node_modules node eval/clienti-chat.test.js
+```
+
+### `account.test.js` e `elimina-account.test.mjs` — registrazione e account, girano subito
+
+Account nuovo vuoto con benvenuto, conferma email, password dimenticata,
+nuova password dal link, elimina account (app); cancellazione di file e
+utente lato server, anche con storage o amministrazione che non rispondono.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/account.test.js
+node eval/elimina-account.test.mjs
+```
+
+### `impostazioni.test.js` e `portale.test.js` — account e pagina cliente, girano subito
+
+Impostazioni (account, profilo, password, Esci che torna alla schermata
+iniziale, "Hai già un account? Accedi"); pagina cliente che passa solo dalle
+funzioni sicure col codice del link (nessuna tabella letta direttamente).
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/impostazioni.test.js
+NODE_PATH=/opt/node22/lib/node_modules node eval/portale.test.js
+```
+
+### `scorri-pagine.test.js` — scorrere tra le pagine, gira subito
+
+Home ⇄ Clienti ⇄ Cresci ⇄ Menu col dito (tocchi veri simulati), e i casi in
+cui non deve cambiare pagina.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/scorri-pagine.test.js
+```
+
+### `risposte.test.js` — risposte di EON nella card, gira subito
+
+Titolo = domanda, orari in colonna, niente asterischi, domanda di EON con la
+barra per rispondere nella card, lettura senza AI nella stessa card.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/risposte.test.js
+```
+
+### `calendario.test.js` — calendario, gira subito
+
+Tasto Indietro, settimana in alto, righe senza doppioni, elimina scorrendo
+con Annulla, stato vuoto.
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/calendario.test.js
 ```
 
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita

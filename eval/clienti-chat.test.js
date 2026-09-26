@@ -82,6 +82,17 @@ async function main() {
       return { primo: primo && primo.id, chatAperta: document.getElementById("page-chat").classList.contains("visible") };
     });
     verifica("Menu: \"Messaggi\" è la prima voce e apre le chat", menu.primo === "menuMessaggi" && menu.chatAperta, JSON.stringify(menu));
+    const voci = await page.evaluate(() => {
+      navigateTo("gestisci-azienda");
+      const titoli = (sel) => [...document.querySelectorAll(sel + " .azienda-link-card .module-title")].map((e) => e.textContent.trim());
+      const menu = titoli("#page-gestisci-azienda > .azienda-list");
+      document.getElementById("menuImpostazioni").click();
+      return { menu, impostazioni: titoli("#page-impostazioni > .azienda-list"), aperta: document.getElementById("page-impostazioni").classList.contains("visible") };
+    });
+    verifica("Menu pulito: senza \"EON AI\" e \"Cambia professione\", con Impostazioni in fondo", !voci.menu.includes("EON AI") && !voci.menu.includes("Cambia professione") && voci.menu.at(-1) === "Impostazioni", JSON.stringify(voci.menu));
+    verifica("Impostazioni: Account, Profilo, Sicurezza, Aiuto, Esci, Elimina account", voci.aperta && JSON.stringify(voci.impostazioni) === '["Account","Profilo","Sicurezza","Aiuto","Esci","Elimina account"]', JSON.stringify(voci));
+    const registro = await page.evaluate(() => { document.querySelector('#page-impostazioni [data-page="ai-request-log"]').click(); const indietro = document.querySelector("#page-ai-request-log .back-link"); indietro.click(); return document.querySelector(".page.visible").id; });
+    verifica("dal Registro AI si torna alle Impostazioni", registro === "page-impostazioni", registro);
 
     const cresci = await page.evaluate(() => {
       navigateTo("cresci");
@@ -172,6 +183,13 @@ async function main() {
     await prepara();
     const nulle = await page.evaluate(() => { navigateTo("clienti"); renderClientArchive(); return document.getElementById("page-clienti").innerText.match(/null|undefined/g); });
     verifica("schede clienti: nessun \"null\"/\"undefined\"", !nulle, JSON.stringify(nulle));
+    const card = await page.evaluate(() => {
+      clients[0].desc = "Rifacimento bagno: piastrelle e sanitari"; clients[2].desc = "";
+      renderClientArchive();
+      const testo = document.getElementById("page-clienti").innerText;
+      return { ultimo: /Ultimo contatto/.test(testo), pill: document.querySelectorAll(".client-archive-card .pill").length, lavoro: [...document.querySelectorAll(".client-archive-card .client-lavoro")].map((e) => e.textContent.trim()) };
+    });
+    verifica("card cliente: niente stato né \"Ultimo contatto\", solo il lavoro da fare", !card.ultimo && card.pill === 0 && card.lavoro.includes("Rifacimento bagno: piastrelle e sanitari") && card.lavoro.includes("+ Scrivi cosa c'è da fare"), JSON.stringify(card));
 
     /* ---- Foto: la nota non diventa un cliente ---- */
     const note = await page.evaluate(() => ({

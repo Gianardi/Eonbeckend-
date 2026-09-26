@@ -1,5 +1,12 @@
 {
-  "regions": ["lhr1"],
+  "regions": [
+    "lhr1"
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "claude/*": false
+    }
+  },
   "functions": {
     "api/index.js": {
       "maxDuration": 60
@@ -9,13 +16,19 @@
     {
       "source": "/",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
       ]
     },
     {
       "source": "/index.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
       ]
     }
   ]

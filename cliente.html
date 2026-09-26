@@ -391,21 +391,21 @@ async function init(){
   }
 
   try{
-    /* Trova la conversazione dal codice privato del link */
-    const { data: convs, error: convErr } = await supabaseClient
-      .from("conversations").select("*").eq("access_code", accessCode).is("deleted_at", null).limit(1);
+    /* Sicurezza (25/09/2026): la pagina non legge più le tabelle. Una
+       funzione del database riceve il codice del link e restituisce SOLO
+       la conversazione con quel codice, il professionista e la scheda del
+       lavoro — mai i dati di altri clienti o di altri professionisti. */
+    const { data: aperta, error: convErr } = await supabaseClient.rpc("portale_apri", { p_codice: accessCode });
 
     if(convErr) throw convErr;
-    if(!convs || convs.length === 0){
+    if(!aperta || !aperta.conversazione){
       showGate("Questo link non è più valido. Chiedi al tuo referente di rimandartelo.");
       return;
     }
-    conversation = convs[0];
+    conversation = aperta.conversazione;
 
     /* Chi è il professionista */
-    const { data: profile } = await supabaseClient
-      .from("profiles").select("full_name, business_name, profession")
-      .eq("id", conversation.owner_id).single();
+    const profile = aperta.professionista;
 
     if(profile){
       const nome = profile.business_name || profile.full_name || "Il tuo referente";
@@ -417,11 +417,7 @@ async function init(){
     }
 
     /* La scheda di questo cliente, per lo stato del lavoro */
-    const { data: cls } = await supabaseClient
-      .from("clients").select("*")
-      .eq("owner_id", conversation.owner_id)
-      .eq("name", conversation.contact_name).is("deleted_at", null).limit(1);
-    clientInfo = cls && cls.length ? cls[0] : null;
+    clientInfo = aperta.cliente || null;
 
     await loadMessages();
     renderWork();
@@ -436,12 +432,20 @@ async function init(){
 }
 
 async function loadMessages(){
-  const { data } = await supabaseClient
-    .from("messages").select("*")
-    .eq("conversation_id", conversation.id)
-    .is("deleted_at", null)
-    .order("created_at", { ascending:true });
-  messages = data || [];
+  const { data } = await supabaseClient.rpc("portale_messaggi", { p_codice: accessCode });
+  messages = Array.isArray(data) ? data : [];
+}
+
+/* Un messaggio appena scritto dal cliente compare subito, senza aspettare */
+function aggiungiMessaggio(m){
+  if(!m || messages.some(x => x.id === m.id)) return;
+  messages.push(m);
+  renderMessages();
+}
+async function scriviNelPortale(campi){
+  const { data, error } = await supabaseClient.rpc("portale_scrivi", { p_codice: accessCode, ...campi });
+  if(!error) aggiungiMessaggio(data);
+  return { error };
 }
 
 /* ---- Scheda: il tuo lavoro ---- */
@@ -591,9 +595,7 @@ async function send(){
   if(!val || !conversation) return;
 
   input.value = "";
-  const { error } = await supabaseClient.from("messages").insert({
-    conversation_id: conversation.id, sender: "them", body: val
-  });
+  const { error } = await scriviNelPortale({ p_body: val });
 
   if(error){
     console.error("Errore invio:", error.message);
@@ -660,9 +662,8 @@ async function inviaAllegato(file){
     mostraCaricamento("Quasi fatto…", 85);
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
 
-    const { error: msgErr } = await supabaseClient.from("messages").insert({
-      conversation_id: conversation.id, sender: "them", body: "",
-      file_url: pub.publicUrl, file_name: file.name, file_type: file.type
+    const { error: msgErr } = await scriviNelPortale({
+      p_body: "", p_file_url: pub.publicUrl, p_file_name: file.name, p_file_type: file.type
     });
     if(msgErr) throw msgErr;
 
@@ -771,9 +772,8 @@ async function inviaVocale(blob, tipo, durata){
     mostraCaricamento("Quasi fatto…", 80);
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
 
-    const { error: msgErr } = await supabaseClient.from("messages").insert({
-      conversation_id: conversation.id, sender: "them", body: "",
-      file_url: pub.publicUrl, file_name: "Vocale " + formattaDurata(durata), file_type: tipo
+    const { error: msgErr } = await scriviNelPortale({
+      p_body: "", p_file_url: pub.publicUrl, p_file_name: "Vocale " + formattaDurata(durata), p_file_type: tipo
     });
     if(msgErr) throw msgErr;
 
@@ -791,19 +791,28 @@ document.getElementById("micBtn").addEventListener("click", () => {
   else avviaRegistrazione();
 });
 
-/* ---- Realtime: i messaggi arrivano subito ---- */
+/* ---- Messaggi nuovi: controllo ogni pochi secondi ----
+   Prima arrivavano in tempo reale leggendo la tabella, ma per farlo la
+   tabella doveva essere leggibile da chiunque (25/09/2026). Ora si chiede
+   ogni 4 secondi alla funzione sicura, solo mentre la pagina è aperta. */
+let controlloInCorso = false;
+async function controllaNuoviMessaggi(){
+  if(controlloInCorso || document.visibilityState !== "visible") return;
+  controlloInCorso = true;
+  try{
+    const { data } = await supabaseClient.rpc("portale_messaggi", { p_codice: accessCode });
+    if(!Array.isArray(data)) return;
+    const nuovi = data.filter(m => !messages.some(x => x.id === m.id));
+    if(!nuovi.length) return;
+    messages.push(...nuovi);
+    renderMessages();
+    if(nuovi.some(m => m.event_type)) renderWork();
+  }catch(e){ /* rete assente: si riprova al prossimo giro */ }
+  finally{ controlloInCorso = false; }
+}
 function subscribeRealtime(){
-  supabaseClient
-    .channel("cliente-" + conversation.id)
-    .on("postgres_changes",
-      { event:"INSERT", schema:"public", table:"messages", filter:"conversation_id=eq." + conversation.id },
-      (payload) => {
-        if(messages.some(m => m.id === payload.new.id)) return;
-        messages.push(payload.new);
-        renderMessages();
-        if(payload.new.event_type) renderWork();
-      })
-    .subscribe();
+  setInterval(controllaNuoviMessaggi, 4000);
+  document.addEventListener("visibilitychange", controllaNuoviMessaggi);
 }
 
 /* ---- Linguette ---- */

@@ -4642,6 +4642,70 @@ async function handleLeggiIntestazioneDaFoto(req, res) {
    dettaglio per cercare un pezzo uguale. Modello economico, una chiamata
    per foto; la foto la legge Anthropic direttamente dal link pubblico
    dello storage di EON (mai link esterni). */
+/* Elimina account (25/09/2026, come nelle app grandi e come chiede il
+   GDPR). Prima i file nello storage (non sono collegati al database),
+   poi l'utente: nel database tutto è collegato al suo profilo, e il
+   profilo all'utente, con cancellazione a cascata — clienti, chat,
+   messaggi, foto, documenti, appuntamenti se ne vanno insieme a lui. */
+async function storageServizio(percorso, options) {
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/${percorso}`, {
+    ...options,
+    headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json" },
+  });
+  const testo = await r.text();
+  let json = null;
+  try { json = testo ? JSON.parse(testo) : null; } catch { json = null; }
+  if (!r.ok) throw fail("Storage: " + ((json && (json.message || json.error)) || r.status), 502);
+  return json;
+}
+async function elencaFileStorage(prefisso, profondita = 0, trovati = []) {
+  if (profondita > 5 || trovati.length > 5000) return trovati;
+  const voci = await storageServizio("object/list/eon-files", {
+    method: "POST",
+    body: JSON.stringify({ prefix: prefisso, limit: 1000, offset: 0 }),
+  });
+  for (const v of Array.isArray(voci) ? voci : []) {
+    if (!v || !v.name) continue;
+    if (v.id === null) await elencaFileStorage(prefisso + v.name + "/", profondita + 1, trovati); // cartella
+    else trovati.push(prefisso + v.name);
+  }
+  return trovati;
+}
+async function handleEliminaAccount(req, res, user, accessToken) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  if (!SERVICE_ROLE_KEY) throw fail("SUPABASE_SERVICE_ROLE_KEY non impostata su Vercel", 500);
+  const body = await readBody(req);
+  if (!body || String(body.conferma || "").trim().toUpperCase() !== "ELIMINA") throw fail("Conferma mancante: scrivi ELIMINA", 400);
+  if (!eUuid(user.id)) throw fail("Utente non valido", 400);
+
+  // Cartelle dei file: la sua (<id>/...) e quelle delle sue chat coi clienti (clienti/<id chat>/...)
+  const conversazioni = await db("conversations?select=id", { method: "GET" }, accessToken);
+  const prefissi = [user.id + "/"].concat((Array.isArray(conversazioni) ? conversazioni : []).filter((c) => eUuid(c.id)).map((c) => "clienti/" + c.id + "/"));
+  let file = [];
+  let fileNonCancellati = false;
+  try {
+    for (const p of prefissi) await elencaFileStorage(p, 0, file);
+    for (let i = 0; i < file.length; i += 100) {
+      await storageServizio("object/eon-files", { method: "DELETE", body: JSON.stringify({ prefixes: file.slice(i, i + 100) }) });
+    }
+  } catch (err) {
+    // I file non devono impedire di cancellare l'account: lo segnaliamo nei log e nella risposta
+    console.error("Elimina account: file non cancellati del tutto", user.id, err.message);
+    fileNonCancellati = true;
+  }
+
+  const r = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${user.id}`, {
+    method: "DELETE",
+    headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+  });
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    console.error("Elimina account: utente non cancellato", user.id, r.status, t);
+    throw fail("Non sono riuscita a eliminare l'account, riprova tra poco", 502);
+  }
+  return send(res, 200, { eliminato: true, file: file.length, file_non_cancellati: fileNonCancellati });
+}
+
 async function handleDescriviFoto(req, res, user, accessToken) {
   if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
   if (!ANTHROPIC_API_KEY) throw fail("ANTHROPIC_API_KEY non impostata su Vercel", 500);
@@ -4750,6 +4814,7 @@ export default async function handler(req, res) {
     if (action === "ai") return await handleAI(req, res);
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
     if (action === "descrivi_foto") return await handleDescriviFoto(req, res, user, accessToken);
+    if (action === "elimina_account") return await handleEliminaAccount(req, res, user, accessToken);
     if (action === "analizza_messaggio") return await handleAnalizzaMessaggio(req, res, user, accessToken);
     if (action === "rispondi_richiesta_cliente") return await handleRispondiRichiestaCliente(req, res, user, accessToken);
     if (action === "transcribe") return await handleTranscribe(req, res);

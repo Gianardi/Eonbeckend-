@@ -1,5 +1,7 @@
 # Cose da fare in seguito
 
+> **La roadmap completa e in ordine è in [`ROADMAP.md`](ROADMAP.md)** (aggiornata al 25/09/2026). Qui sotto il dettaglio tecnico, voce per voce.
+
 Note di lavoro per interventi futuri, non urgenti. Ogni voce ha lo scopo e l'idea di base, da riprendere quando si decide di affrontarla.
 
 ## Velocità: rendere le azioni dell'AI immediate
@@ -3482,6 +3484,193 @@ cliente erano legati solo dal nome esatto (maiuscole comprese).
   "Porta da cambiare"; senza un nome non crea più un cliente (era nato
   "Da cambiare"), chiede a chi si riferisce.
 - Test: `eval/clienti-chat.test.js` (19) + 2 in percorso-rapido.test.mjs.
+
+### Accesso con Face ID (25/09/2026)
+
+Gianardi: "accesso con Face ID, è lunga o immediata?".
+- **Fatto (immediato)**: il modulo di accesso è un `<form>` vero con
+  `autocomplete` giusti (email = username, password = current-password in
+  accesso / new-password in registrazione): l'iPhone propone di salvare
+  email e password nel portachiavi e al prossimo accesso le compila con
+  Face ID. Invio sulla tastiera = Accedi. Test: 2 in account.test.js.
+- **Da fare (1-2 giorni)**: accesso senza password con passkey (WebAuthn),
+  come banche e Google — Supabase non lo offre pronto per l'accesso, va
+  costruito lato server con cura. Meglio insieme all'app per gli store.
+
+### Ingranaggio delle impostazioni in alto a destra (25/09/2026)
+
+Gianardi: "impostazioni piccole nelle singole sezioni, in alto a destra come
+le grandi app, non in fondo alla carta intestata". Nuovo pulsante
+`#topbarImpostazioni` nella barra del titolo, visibile solo nelle pagine
+che hanno impostazioni (`IMPOSTAZIONI_SEZIONE`: pagina → funzione; per
+aggiungere una sezione basta una riga). Documenti (hub, Fatture e
+preventivi, Documenti impresa, Carta intestata, Lettera, Cartello) →
+"Impostazioni documenti": Carta intestata, Formato (galleria modelli),
+Formato da una foto. Il riquadro "Formato" in fondo alla Carta intestata è
+nascosto. Test: 4 in formato.test.js.
+- Da fare poi: ingranaggio anche in altre sezioni (Calendario, Clienti,
+  Messaggi) quando avranno impostazioni proprie.
+
+### Card del cliente: solo il lavoro da fare (25/09/2026)
+
+Gianardi (screenshot con "Ultimo contatto: null", "In trattativa", "null"):
+sulla card del cliente solo il nome e una descrizione breve e concisa del
+lavoro (al massimo due righe). Tolti stato, ultimo contatto e il trattino
+del valore (il valore resta solo se c'è). Senza descrizione: "+ Scrivi cosa
+c'è da fare" apre la scheda. Nella scheda il campo "Note" diventa "Lavoro
+da fare". Test: 1 in clienti-chat.test.js.
+
+### Impostazioni tutte a card (25/09/2026)
+
+Gianardi: "tutto stile card" — Account, Profilo, Sicurezza, Aiuto, Esci,
+Elimina. Sei card come il Menu, ognuna apre la sua scheda (card bianca con
+titolo e X): Account (nome, attività, email, professione in sola lettura),
+Profilo (nome e attività), Sicurezza (password), Aiuto (Manda un feedback,
+Registro AI), Esci (conferma e torna alla schermata iniziale), Elimina
+account (scrivendo ELIMINA).
+
+### Account "come le app grandi" (25/09/2026)
+
+Gianardi: "fallo come se fosse un'app grande già usata".
+- **Account nuovo vuoto**: tolto `seedUserData` (scriveva clienti, pagamenti
+  e impegni finti nell'account vero). Al primo ingresso la card "Benvenuto in
+  EON" con tre cose per partire.
+- **Password** almeno 8 caratteri; errori di Supabase tradotti in italiano.
+- **Conferma email**: l'app la gestisce già ("Controlla la tua email",
+  "Rimandala", "Ho confermato: accedi"); il nome dell'attività viaggia nei
+  dati dell'account (`supabase/profilo_nome_attivita.sql`, in produzione).
+  L'interruttore "Confirm email" di Supabase è ancora SPENTO: accenderlo solo
+  dopo aver collegato un servizio email (SMTP), vedi sotto.
+- **Password dimenticata**: link sotto la password; messaggio uguale che
+  l'account esista o no; dal link dell'email si apre "Scegli una nuova
+  password".
+- **Elimina account** (Impostazioni, scrivendo ELIMINA): il server
+  (`action=elimina_account`) cancella i file nello storage (cartella
+  dell'utente e delle sue chat coi clienti) e poi l'utente; nel database
+  tutto è collegato al profilo con cancellazione a cascata (provato in
+  produzione dentro una transazione annullata: 5 dati → 0).
+- **Da fare prima di vendere**: servizio email vero (SMTP, es. Resend) — il
+  servizio di Supabase manda email solo agli indirizzi del team e poche
+  all'ora, quindi conferma email e password dimenticata oggi funzionano
+  solo per noi; testi delle email in italiano; privacy e termini con i dati
+  dell'azienda (servono ragione sociale, P.IVA, indirizzo, email); staging
+  ha lo schema diverso da produzione (profilo senza cascata, niente trigger
+  di registrazione): riallinearlo.
+- Test: `eval/account.test.js` (15), `eval/elimina-account.test.mjs` (7).
+
+### Account, Impostazioni ed Esci + pagina cliente sicura (25/09/2026)
+
+Gianardi: impostazioni come le altre app, logout, professione legata
+all'account, registrazione "da app commercializzabile".
+- **Impostazioni**: account (nome, attività, email, professione in sola
+  lettura), modifica nome/attività, cambio password (`auth.updateUser`),
+  Aiuto (feedback, registro AI), **Esci** (`signOut` + ricarica → schermata
+  iniziale). Test: `eval/impostazioni.test.js` (11).
+- **Prima schermata**: "Hai già un account? Accedi" porta dritto a email e
+  password; la professione arriva dal profilo, non si sceglie di nuovo.
+- **Professione fissa**: `supabase/profilo_professione_fissa.sql` (trigger:
+  solo il supporto con service_role la cambia). Provato su staging;
+  **in produzione DOPO il merge** (la versione online ha ancora "Cambia
+  professione").
+- **FALLA DI SICUREZZA trovata e chiusa**: la pagina cliente leggeva le
+  tabelle con policy aperte (`access_code IS NOT NULL`, `profiles: true`,
+  storage leggibile da tutti) e OGNI conversazione ha un codice → con la
+  chiave pubblica chiunque poteva leggere chat, clienti e profili di tutti
+  gli utenti ed elencare tutti i file. Ora cliente.html usa solo
+  `portale_apri` / `portale_messaggi` / `portale_scrivi` (security definer,
+  solo la conversazione del codice) e controlla i messaggi nuovi ogni 4 s.
+  `supabase/portale_sicuro.sql` applicato a staging e produzione (solo
+  aggiunte). **DOPO il merge** applicare `supabase/portale_chiudi_accessi.sql`
+  (toglie le policy aperte, storage solo nella propria cartella).
+  Test: `eval/portale.test.js` (8) + prove SQL come utente anonimo su staging.
+- **Da decidere**: dati finti di esempio scritti nell'account vero alla
+  registrazione (`seedUserData`: clienti, pagamenti, impegni — da qui i
+  "Mario Rossi"); conferma email (oggi spenta); password dimenticata;
+  eliminazione account; privacy/termini; abbonamento.
+
+### Da fare più avanti: "La tua azienda" e "Chiamate" (25/09/2026)
+
+Deciso con Gianardi: restano nel Menu, da sistemare dentro.
+- **La tua azienda** → diventa il cruscotto dell'impresa: entrate, uscite,
+  tasse, quanto resta. Oggi mostra solo 4 numeri sui clienti.
+- **Chiamate** → diventa la rubrica: tutti i clienti col telefono, un tocco
+  e si chiama (oggi mostra le chiamate da fare/programmate/recenti).
+
+### Pulizia del Menu (25/09/2026)
+
+Gianardi: togliere "EON AI" (superato dal microfono in Home) e "Cambia
+professione" (non serve), aggiungere Impostazioni. Menu ora: Messaggi, La
+tua azienda, Assegna compiti, Chiamate, Cestino, Impostazioni. Impostazioni
+(pagina nuova): Manda un feedback, Registro AI (da lì si torna alle
+Impostazioni). Il codice dell'hub AI e del cambio professione resta, solo
+senza più un punto d'accesso dal Menu.
+- Messaggi sarà il punto unico del futuro communication hub (EON, WhatsApp,
+  email nella chat del cliente giusto).
+- Test: 3 in clienti-chat.test.js (31 in tutto).
+
+### Scorrere col dito tra le pagine (25/09/2026)
+
+Gianardi: passare da Home a Clienti, Cresci, Menu (e indietro) scorrendo il
+dito. Dito verso sinistra = pagina dopo, verso destra = pagina prima,
+nell'ordine della barra in basso; la pagina nuova entra dal lato giusto.
+Solo sulle 4 pagine della barra. Non scatta: in verticale (scroll), gesto
+corto o lento, partendo da un campo di testo, dal microfono grande, da una
+riga che si elimina scorrendo, da una striscia che scorre di lato, o dal
+bordo dello schermo (lì c'è l'"indietro" di iPhone).
+- Test: `eval/scorri-pagine.test.js` (14), con tocchi veri simulati.
+
+### Foto negli Appunti (25/09/2026)
+
+Gianardi: "in Appunti mettere la possibilità di fare anche le foto" e "non
+vedo nessuna di queste funzioni" (nota e descrizione sulle foto). Verificato:
+nel database nessuna foto ha nota o descrizione, e Vercel bloccava le
+pubblicazioni già dalle 15:50 (anche #92): quelle funzioni non erano mai
+andate online, arrivano con il pacchetto unico.
+- Appunti: tasto "Scatta una foto con appunto" → foto salvata in
+  `cantiere/appunti/` (stessa tabella `cantiere_foto`, niente migrazione) →
+  si apre subito la scheda della foto per dettare o scrivere la nota.
+- L'elenco "Appunti salvati" mostra testi e foto insieme, il più recente in
+  cima: miniatura, nota, descrizione di EON, data. Tocco = scheda della foto.
+  La foto resta anche nella galleria Foto.
+- Test: 5 in foto.test.js (21 in tutto).
+
+### Risposte di EON nella card bianca (25/09/2026)
+
+Gianardi (due screenshot): "Cosa ho da fare domani?" rispondeva nel
+riquadro "Fatto" con gli asterischi del markdown a vista; vuole lo stile
+della card "Cosa devo fare oggi" della Home, sempre.
+- `mostraRispostaEON(domanda, testo, {rispondi, titolo})`: card con titolo =
+  la domanda, paragrafi, elenchi, orari in colonna ("08:00 | impegno"),
+  **grassetto** vero, niente asterischi.
+- Una domanda di EON ("Quale intendi?") ha in fondo alla card la barra per
+  rispondere (scritta o a voce): continua la stessa conversazione.
+- Anche le letture senza AI ("appuntamenti di oggi") usano la card.
+- Restano nel riquadro in basso solo le conferme delle azioni ("Segnato in
+  calendario", "Impegno eliminato · Annulla").
+- Test: `eval/risposte.test.js` (11).
+
+### Calendario rifatto (25/09/2026)
+
+Gianardi (screenshot): "non c'è il tasto per tornare indietro; rendilo più
+bello, più chiaro e più armonioso".
+- "Indietro" in alto: torna alla pagina da cui sei arrivato (navigateTo ora
+  ricorda `paginaPrecedente`), Home se non c'è.
+- Settimana in alto (oggi + 6 giorni) con i pallini degli impegni; un tocco
+  su un giorno porta ai suoi impegni.
+- Riga: ora su una riga ("08:00"), titolo, tipo con il suo colore
+  (Appuntamento blu, Da fare ambra, In sospeso viola, Da vedere verde) e il
+  cliente solo se aggiunge qualcosa: spariti "DA FARE / da fare" e il nome
+  ripetuto sotto sé stesso. Via il riquadro dentro il riquadro.
+- Elimina: scorrendo a sinistra o dal tasto, con "Annulla" (niente domanda).
+- Test: `eval/calendario.test.js` (14).
+### Vercel: pubblica solo main (25/09/2026)
+
+Il 25/09 Vercel ha bloccato la pubblicazione di #94 ("Deployment rate
+limited", piano Hobby: 100 al giorno). Causa: ogni push sui rami di lavoro
+`claude/*` creava un'anteprima, doppia perché al repo sono collegati due
+progetti (eonbeckend ed eonbeckend-mx2t). Ora `vercel.json` ha
+`git.deploymentEnabled: {"claude/*": false}`: si pubblica solo main. Da
+valutare con Gianardi se scollegare eonbeckend-mx2t (l'app usa eonbeckend).
 
 ### Scorri per eliminare (25/09/2026)
 
