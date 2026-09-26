@@ -254,6 +254,20 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
 - **Fisco per mestiere** (deciso 27/09 con Andrea): regime (forfettario/
   ordinario), IVA, contributi e coefficienti diversi per ogni professione.
   Si fa nel dettaglio **solo dopo l'ok di 10 artigiani/professionisti**.
+- **Conti veri ed esatti** (deciso 27/09, stesso momento: dopo i 10 sì,
+  con la società). In quest'ordine:
+  1. **Fatturazione elettronica (SdI)** tramite un servizio esterno:
+     oggi le fatture di EON sono PDF, validi da mandare al cliente ma
+     **non come fattura fiscale**. Collegati: fatture valide, entrate
+     vere, e le fatture dei fornitori arrivano da sole → uscite vere.
+  2. **Calcolo esatto per il forfettario** (percentuale, contributi,
+     acconti e saldo: "a giugno paghi X"). Per l'ordinario resta una
+     stima da far confermare al commercialista.
+  3. **Collegamento alla banca** (Open Banking, sola lettura): EON legge
+     i movimenti e segna da solo chi ha pagato e le spese.
+  4. **Accesso del commercialista** a EON per controllare e correggere.
+  Serve: società/P.IVA, contratti con i servizi (costi da verificare),
+  privacy in regola.
 - **Chiamate → rubrica**: tutti i clienti col telefono, un tocco e chiami.
 - **Cresci**: oggi "Lavori in corso", da decidere cosa diventa.
 - **Pagamenti a colpo d'occhio**: gli incassi in calendario con un colore

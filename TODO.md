@@ -3891,3 +3891,13 @@ tutti, da qui "36 in trattativa").
   profilo: su un altro telefono riparte da 30%.
 - Il fisco vero per regime/IVA/mestiere: dopo l'ok di 10 artigiani o
   professionisti (vedi ROADMAP). Test in `eval/azienda.test.js`.
+
+### Conti veri ed esatti — idea registrata (27/09/2026)
+Domanda di Gianardi: "c'è un modo per rendere il costo delle tasse reale
+ed esatto?". Risposta: sì, con dati veri + regole giuste; "al centesimo"
+solo il commercialista. Ordine deciso (in ROADMAP, dopo i 10 sì):
+fatturazione elettronica SdI → calcolo esatto forfettario → banca (Open
+Banking, sola lettura, tramite un fornitore autorizzato: EON non vede mai
+le credenziali; consenso da rinnovare periodicamente) → accesso del
+commercialista. Nota importante: le fatture PDF di EON oggi non sono
+fatture fiscali valide.
