@@ -96,6 +96,12 @@ const casi = [
   ["Sopralluogo dopodomani alle 8:30 a casa di Luca Bianchi per il bagno", [], { cliente: "Luca Bianchi", nuovo: true, lavoro: "Il bagno", titolo: "Sopralluogo da Luca Bianchi per il bagno", quando: `${D2}T08:30:00` }],
   ["Domani alle 9 da Walter", [], { cliente: "Walter", nuovo: true, lavoro: "", titolo: "Da Walter", quando: `${D1}T09:00:00` }],
   // Queste NO: decide l'AI
+  // "Caldaia Baudi venerdì ore 15" (Andrea, 27/09/2026): lavoro + nome, senza "da" né "per"
+  ["Caldaia Baudi domani ore 15", [], { cliente: "Baudi", nuovo: true, lavoro: "Caldaia", titolo: "Da Baudi per caldaia", quando: `${D1}T15:00:00` }],
+  ["Baudi caldaia dopodomani alle 15", [], { cliente: "Baudi", nuovo: true, lavoro: "Caldaia", titolo: "Da Baudi per caldaia", quando: `${D2}T15:00:00` }],
+  ["Revisione caldaia Simone Massari domani alle 11", ["Simone Massari"], { cliente: "Simone Massari", nuovo: false, titolo: "Da Simone Massari per revisione caldaia", quando: `${D1}T11:00:00` }],
+  ["Riunione Marco domani ore 15", [], "nessun_cliente"], // "riunione" non è un lavoro: impegno come sempre, nessun cliente
+  ["caldaia baudi domani ore 15", [], null], // nome senza maiuscola
   ["domani alle 10 casa rossi per rubinetto", [], null], // nome senza maiuscole e non in anagrafica
   ["Domani alle 10 casa mia per le chiavi", [], null],
   ["Domani casa Simone Massari per rubinetto", [], null], // senza ora
@@ -112,6 +118,8 @@ for (const [frase, clienti, atteso] of casi) {
   const a = appuntamenti(), nuovi = tabelle.clients.slice(prima);
   if (atteso === "vecchio") {
     verifica(`"${frase}": come sempre (impegno "Chiamare Walter", nessun cliente creato)`, chiamateAI.length === 0 && nuovi.length === 0 && tabelle.tasks.some((t) => t.title === "Chiamare Walter"), JSON.stringify({ ai: chiamateAI.length, nuovi, t: tabelle.tasks.map((t) => t.title) }));
+  } else if (atteso === "nessun_cliente") {
+    verifica(`"${frase}": impegno come sempre, nessun cliente creato`, nuovi.length === 0 && a.length === 0, JSON.stringify({ ai: chiamateAI.length, nuovi, t: tabelle.tasks.map((t) => t.title) }));
   } else if (atteso) {
     const c = nuovi[0] || {};
     const ok = chiamateAI.length === 0 && r.corpo.stato === "concluso" && a.length === 1 && a[0].titolo === atteso.titolo && a[0].quando === atteso.quando && a[0].chat === atteso.cliente

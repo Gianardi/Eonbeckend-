@@ -566,6 +566,16 @@ memoria del lavoro difficilmente cambia (pochi clienti persi).
 
 ---
 
+## Fatto il 27/09/2026 (sera, prove di Andrea)
+
+Azioni dirette senza AI (password, email, profilo, Face ID, feedback,
+"dovreste aggiungere…", assegna un compito) · cambio email · mai clienti
+doppi, stesso nome = stesso cliente, archiviato → riattivato · 39 clienti
+di Andrea di nuovo attivi · "Caldaia Baudi venerdì ore 15" crea il cliente
+con il lavoro · appunti di un cliente sulla sua scheda e sul suo
+appuntamento · "Di' a Rita che ci vediamo…" → appuntamento da confermare +
+messaggio; sì/no di Rita lo conferma o lo toglie.
+
 ## Fatto il 27/09/2026
 
 Appuntamenti "a casa di / da cliente" con giorno e ora letti senza AI, con

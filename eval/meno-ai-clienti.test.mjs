@@ -106,7 +106,6 @@ const casi = [
   [daHome("Chiama Rossi 333 1234567"), [], null],
   [daHome("Aggiungi Mario Rossi domani alle 10"), [], null],
   [daHome("aggiungi appunto comprare nastro"), [], null],
-  [daHome("Aggiungi Luca Liverani"), ["Luca Liverani"], null], // c'è già: nessun doppione
   [daHome("Mario Rossi bagno"), [], null],
   [daClienti("Quello del tetto di via Roma"), [], null],
   [daClienti("Rossi 333 1234567 via Roma 5"), [], null],
@@ -134,6 +133,38 @@ const r1 = await chiama({ messaggio: daClienti("Franco Bake 33325 17133 impianto
 chiamateAI = [];
 await chiama({ messaggio: daClienti("Non Bake ma bike"), ricordo: r1.corpo.azioni });
 verifica("\"non Bake ma bike\": Franco Bike, dal codice, nessun doppione", chiamateAI.length === 0 && tabelle.clients.length === 1 && tabelle.clients[0].name === "Franco Bike", JSON.stringify({ ai: chiamateAI.length, c: tabelle.clients.map((x) => x.name) }));
+/* Mai doppioni (27/09/2026, prova di Andrea): "Rita Ambrosini aggiungi
+   clienti" quando Rita c'è già ma archiviata → EON diceva "esiste già in
+   anagrafica" (8 secondi di AI) e poi ne creava una seconda. */
+databaseVuoto(); chiamateAI = [];
+tabelle.clients.push({ id: randomUUID(), owner_id: UTENTE.id, name: "Rita Ambrosini", phone: null, status: "attivo", is_archived: true, deleted_at: null, created_at: "2026-08-04T19:12:16Z" });
+tabelle.conversations.push({ id: randomUUID(), owner_id: UTENTE.id, contact_name: "Rita Ambrosini", is_archived: true, deleted_at: null });
+let r2 = await chiama({ messaggio: daHome("Rita Ambrosini aggiungi clienti") });
+verifica("\"Rita Ambrosini aggiungi clienti\" (archiviata): nessun doppione, torna attiva con la sua chat, senza AI",
+  chiamateAI.length === 0 && tabelle.clients.length === 1 && tabelle.clients[0].is_archived === false && tabelle.conversations[0].is_archived === false
+  && /era archiviato/.test(r2.corpo.testo) && r2.corpo.azioni[0].esito.riattivato === true,
+  JSON.stringify({ ai: chiamateAI.length, c: tabelle.clients.map((x) => [x.name, x.is_archived]), testo: r2.corpo.testo }));
+chiamateAI = [];
+r2 = await chiama({ messaggio: daHome("Aggiungi Rita Ambrosini") });
+verifica("\"Aggiungi Rita Ambrosini\" di nuovo: \"è già tra i tuoi clienti\", nessun doppione, senza AI",
+  chiamateAI.length === 0 && tabelle.clients.length === 1 && /già tra i tuoi clienti/.test(r2.corpo.testo), JSON.stringify({ ai: chiamateAI.length, n: tabelle.clients.length, testo: r2.corpo.testo }));
+databaseVuoto(); chiamateAI = [];
+await chiama({ messaggio: daHome("Rita Ambrosini nuovo cliente") });
+verifica("\"Rita Ambrosini nuovo cliente\" (non c'è): creata dal codice", chiamateAI.length === 0 && tabelle.clients.length === 1 && tabelle.clients[0].name === "Rita Ambrosini", JSON.stringify({ ai: chiamateAI.length, c: tabelle.clients.map((x) => x.name) }));
+
+/* Stesso nome = stesso cliente: con due "Rita Ambrosini" già salvate si usa
+   quella attiva più vecchia, senza chiedere "quale delle due". */
+databaseVuoto(); chiamateAI = [];
+const ritaVecchia = randomUUID();
+tabelle.clients.push({ id: randomUUID(), owner_id: UTENTE.id, name: "Rita Ambrosini", status: "trattativa", is_archived: true, deleted_at: null, created_at: "2026-09-26T20:39:50Z" });
+tabelle.clients.push({ id: ritaVecchia, owner_id: UTENTE.id, name: "rita ambrosini", status: "attivo", is_archived: false, deleted_at: null, created_at: "2026-08-04T19:12:16Z" });
+const r3 = await chiama({ messaggio: daHome("Domani alle 9 da Rita Ambrosini per rubinetto") });
+const appRita = tabelle.messages[0] || {};
+const convRita = tabelle.conversations.find((c) => c.id === appRita.conversation_id) || {};
+verifica("due clienti con lo stesso nome: niente \"quale delle due\", appuntamento a Rita (la più vecchia, attiva)",
+  !/quale/i.test(r3.corpo.testo || "") && tabelle.messages.length === 1 && /rita ambrosini/i.test(convRita.contact_name || "") && tabelle.clients.length === 2,
+  JSON.stringify({ testo: r3.corpo.testo, msg: tabelle.messages.length, conv: convRita.contact_name }));
+
 // Registro
 databaseVuoto(); chiamateAI = [];
 await chiama({ messaggio: daHome("Aggiungi Andrea Gianardi 3476364421") });
