@@ -3984,3 +3984,8 @@ Fase 1 di "meno AI" completata. Non provato dal vivo (Vercel = main).
 - Da fare [Andrea], facoltativo: notifica sul telefono ad app chiusa →
   installare l'app ntfy, scegliere un nome segreto per il canale e mettere
   `AVVISO_ERRORI_URL=https://ntfy.sh/<nome>` su Vercel.
+- Accesso dentro `/admin` (27/09): sull'iPhone l'icona "EON Admin" nella
+  schermata Home ha una memoria sua e non vede l'accesso fatto in EON (ad
+  Andrea chiedeva di entrare in EON). Ora la pagina ha il suo modulo "Entra"
+  (email e password, compilabili da Face ID) e resta collegata; "Esci" in
+  fondo. Test in `eval/admin-app.test.js` (17).

@@ -3,7 +3,7 @@
      errore; gli errori di rete no);
    - nell'app non c'è nessuna traccia del pannello (è una pagina a parte);
    - admin.html mostra numeri, grafico, errori e utenti; "Segna come visti";
-     pagina riservata e "entra prima in EON".
+     pagina riservata; accesso direttamente nella pagina (email e password).
    Uso: NODE_PATH=/opt/node22/lib/node_modules node eval/admin-app.test.js */
 
 const { chromium } = require("playwright");
@@ -74,7 +74,15 @@ async function main() {
     const apriAdmin = async (sessione, risposta) => {
       const p = await browser.newPage({ viewport: { width: 390, height: 844 } });
       const chiamate = [];
-      await p.addInitScript((s) => { window.supabase = { createClient: () => ({ auth: { getSession: async () => ({ data: { session: s } }) } }) }; }, sessione);
+      await p.addInitScript((s) => {
+        let attuale = s;
+        window.__accessi = [];
+        window.supabase = { createClient: () => ({ auth: {
+          getSession: async () => ({ data: { session: attuale } }),
+          signInWithPassword: async ({ email, password }) => { window.__accessi.push(email); if (password !== "giusta") return { error: { message: "Invalid login credentials" } }; attuale = { access_token: "tok" }; return { data: { session: attuale }, error: null }; },
+          signOut: async () => { attuale = null; return { error: null }; },
+        } }) };
+      }, sessione);
       await p.route("https://cdn.jsdelivr.net/**", (route) => route.fulfill({ status: 200, contentType: "application/javascript", body: "" }));
       await p.route("https://eonbeckend.vercel.app/api?action=*", (route) => {
         const azione = new URL(route.request().url()).searchParams.get("action");
@@ -89,8 +97,23 @@ async function main() {
       return { p, chiamate, errP };
     };
 
-    let a = await apriAdmin(null, {});
-    verifica("admin.html senza login: \"Entra prima in EON\"", /Entra prima in EON/.test(await a.p.textContent("#contenuto")) && a.chiamate.length === 0);
+    // Senza accesso: il modulo per entrare direttamente qui (l'icona sulla Home dell'iPhone non vede l'accesso di EON)
+    let a = await apriAdmin(null, { corpo: RIEPILOGO });
+    const modulo = await a.p.evaluate(() => ({ email: document.getElementById("accEmail") && document.getElementById("accEmail").getAttribute("autocomplete"), pw: document.getElementById("accPassword") && document.getElementById("accPassword").getAttribute("autocomplete") }));
+    verifica("admin.html senza accesso: modulo Entra (email e password compilabili da Face ID), nessun dato chiesto", modulo.email === "username" && modulo.pw === "current-password" && a.chiamate.length === 0, JSON.stringify(modulo));
+    await a.p.fill("#accEmail", "gianardiadvisor@icloud.com");
+    await a.p.fill("#accPassword", "sbagliata");
+    await a.p.click("#accEntra");
+    await a.p.waitForTimeout(250);
+    verifica("password sbagliata: \"Email o password sbagliate\"", /Email o password sbagliate/.test(await a.p.textContent("#accErrore")) && a.chiamate.length === 0);
+    await a.p.fill("#accEmail", "gianardiadvisor@icloud.com");
+    await a.p.fill("#accPassword", "giusta");
+    await a.p.click("#accEntra");
+    await a.p.waitForTimeout(400);
+    verifica("password giusta: entra e mostra il pannello", (await a.p.locator(".tile").count()) === 6 && a.chiamate.some((c) => c.azione === "admin_riepilogo" && c.auth === "Bearer tok"));
+    await a.p.click("#esci");
+    await a.p.waitForTimeout(250);
+    verifica("\"Esci\": torna al modulo di accesso", !!(await a.p.$("#accEmail")));
     await a.p.close();
 
     a = await apriAdmin({ access_token: "tok" }, { status: 403, corpo: { error: "Pagina riservata" } });
