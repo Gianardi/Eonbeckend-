@@ -1391,6 +1391,20 @@
   .chat-window-name{ font-size:15px; font-weight:800; color:var(--text); }
   .chat-window-status{ font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
+  /* ===== Annullare impegni: conferma (27/09/2026) ===== */
+  .annulla-lista{ display:flex; flex-direction:column; margin-bottom:14px; }
+  .annulla-riga{ display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .annulla-riga:last-child{ border-bottom:none; }
+  .annulla-riga input{ width:20px; height:20px; flex:none; accent-color:var(--coral); }
+  .annulla-testo{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .annulla-testo b{ font-size:15px; font-weight:700; color:var(--text); }
+  .annulla-testo span{ font-size:13px; color:var(--muted); }
+  .annulla-piede{ display:flex; gap:10px; }
+  .annulla-piede button{ flex:1; padding:13px; border-radius:14px; border:none; cursor:pointer; font:inherit; font-size:15px; font-weight:700; }
+  .annulla-no{ flex:0 0 auto !important; padding:13px 22px !important; background:var(--bg); color:var(--text); }
+  .annulla-si{ background:var(--coral); color:#fff; }
+  .annulla-si:disabled{ opacity:.5; cursor:default; }
+
   /* ===== La tua azienda (27/09/2026) ===== */
   .az-periodo{ display:flex; width:max-content; background:var(--card); border:1px solid var(--border); border-radius:999px; padding:3px; margin:0 0 14px; }
   .az-periodo button{ border:none; background:none; cursor:pointer; padding:7px 16px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; color:var(--muted); }
@@ -10401,6 +10415,177 @@ function quandoBreve(quandoVisualizzato){
   return giorno + (ora ? " ore " + ora : "");
 }
 
+/* ===== Annullare appuntamenti senza AI (Meno AI, punto 3 — 27/09/2026) =====
+   "Annulla appuntamenti di domani", "cancella la chiamata a Walter",
+   "disdici il sopralluogo di lunedì alle 10": EON cerca nel calendario già
+   in memoria, mostra cosa annullerebbe e aspetta il tocco su "Annulla".
+   Mai niente annullato senza conferma. Annullare fa quello che fa l'AI
+   (annulla_impegno): l'impegno resta nello storico segnato "annullato", e
+   il cliente nel portale vede l'appuntamento annullato. Nel dubbio → AI. */
+const VERBI_ANNULLA = new Set(["annulla","annullami","annullare","cancella","cancellami","cancellare","elimina","eliminami","eliminare","disdici","disdire","togli","toglimi","leva","levami","rimuovi"]);
+const OGGETTI_ANNULLA = /^(appuntament[oi]|impegn[oi]|chiamat[ae]|telefonat[ae]|sopralluog(?:o|hi)|incontr[oi]|riunion[ei])$/;
+const PAROLE_ANNULLA = new Set(["mi","l","lo","la","gli","i","le","il","un","una","tutti","tutte","tutto","di","del","della","dei","delle","per","con","a","al","alla","ai","da","miei","mio","mia","ho","che","segnato","segnati","segnata","segnate","in","calendario","programma","eon","ehi","ore","alle","e","quello","quelli","quella","quelle","previsto","previsti","prevista","previste"]);
+
+function capisciAnnullaImpegni(testo){
+  const n = String(testo || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’'?!.,;]/g, " ").replace(/\s+/g, " ").trim();
+  const parole = n.split(" ").filter(Boolean);
+  while(parole.length && (parole[0] === "ehi" || parole[0] === "eon")) parole.shift();
+  if(!parole.length || !VERBI_ANNULLA.has(parole[0])) return null;
+  let giorno = null, ora = null, oggetto = null;
+  const nome = [];
+  for(const p of parole.slice(1)){
+    if(VERBI_ANNULLA.has(p)) return null; // due azioni
+    if(OGGETTI_ANNULLA.test(p)){ oggetto = oggetto || p; continue; }
+    if(p === "oggi" || p === "domani" || p === "dopodomani" || GIORNI_LETTURA.includes(p)){ if(giorno && giorno !== p) return null; giorno = p; continue; }
+    const o = p.match(/^(\d{1,2})(?::(\d{2}))?$/);
+    if(o){ if(ora) return null; const h = +o[1]; if(h < 1 || h > 23) return null; ora = { h, m: o[2] ? +o[2] : null }; continue; }
+    if(/\d/.test(p)) return null;
+    if(PAROLE_ANNULLA.has(p)) continue;
+    if(p.length < 2) return null;
+    nome.push(p);
+  }
+  if(!oggetto || nome.length > 3) return null;
+  if(!giorno && !ora && !nome.length) return null; // "annulla gli appuntamenti": troppo vago
+  let data = null;
+  if(giorno){
+    const oggi = new Date(); oggi.setHours(0,0,0,0);
+    let diff;
+    if(giorno === "oggi") diff = 0; else if(giorno === "domani") diff = 1; else if(giorno === "dopodomani") diff = 2;
+    else { diff = (GIORNI_LETTURA.indexOf(giorno) - oggi.getDay() + 7) % 7; if(diff === 0) return null; }
+    data = new Date(oggi); data.setDate(data.getDate() + diff);
+  }
+  return { data, giorno, ora, nome, oggetto };
+}
+
+/* Gli impegni che corrispondono: stesse fonti del Calendario */
+function impegniDaAnnullare(richiesta){
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const norma = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim().split(" ");
+  const tipo = /^chiamat|^telefonat/.test(richiesta.oggetto) ? /chiam|telefon/i : /^sopralluog/.test(richiesta.oggetto) ? /sopralluog/i : /^riunion/.test(richiesta.oggetto) ? /riunion/i : null;
+  const va = (titolo, chi, quando) => {
+    const d = interpretaQuando(quando);
+    if(!d) return false;
+    if(richiesta.data ? d.getTime() !== richiesta.data.getTime() : d < oggi) return false;
+    if(tipo && !tipo.test(titolo)) return false;
+    if(richiesta.nome.length){ const parole = norma(titolo + " " + (chi || "")); if(!richiesta.nome.every(w => parole.includes(w))) return false; }
+    if(richiesta.ora){
+      const o = estraiOra(quando);
+      if(!o) return false;
+      const [h, m] = o.split(":").map(Number);
+      if(h !== richiesta.ora.h && h !== richiesta.ora.h + 12) return false;
+      if(richiesta.ora.m !== null && m !== richiesta.ora.m) return false;
+    }
+    return true;
+  };
+  const voci = [];
+  tasks.forEach(t => {
+    if(t.status === "done" || t.status === "annullato" || !t.time) return;
+    if(va(t.title, "", t.time)) voci.push({ fonte: "task", t, titolo: t.title, quando: t.time });
+  });
+  chats.forEach(c => c.messages.forEach(m => {
+    if(m.eventType !== "appt" || m.annullato) return;
+    const quando = m.text || m.time;
+    if(va(m.title || "Appuntamento", c.name, quando)) voci.push({ fonte: "appt", chat: c, m, titolo: (m.title || "Appuntamento") + (c.name && !String(m.title || "").includes(c.name) ? " — " + c.name : ""), quando });
+  }));
+  const chiave = v => { const d = interpretaQuando(v.quando); return (d ? d.getTime() : 0) + (estraiOra(v.quando) || "99"); };
+  return voci.sort((a, b) => chiave(a) < chiave(b) ? -1 : 1);
+}
+
+function ridisegnaImpegni(){
+  if(typeof renderCalendar === "function") renderCalendar();
+  if(typeof renderTasks === "function") renderTasks();
+  if(activeChatIndex !== null && typeof renderChatWindow === "function") renderChatWindow();
+}
+
+/* Annulla davvero (dopo la conferma), con "Annulla" per tornare indietro */
+async function annullaImpegniScelti(voci){
+  const precedenti = new Map();
+  const idAppt = voci.filter(v => v.fonte === "appt" && v.m.id).map(v => v.m.id);
+  if(isDbReady() && idAppt.length){
+    const { data } = await supabaseClient.from("messages").select("id,title,scheduled_at").in("id", idAppt);
+    (data || []).forEach(r => precedenti.set(r.id, { title: r.title, scheduled_at: r.scheduled_at }));
+  }
+  for(const v of voci){
+    if(v.fonte === "task"){
+      v.prima = v.t.status;
+      v.t.status = "annullato";
+      if(isDbReady() && v.t.id) await dbUpdate("tasks", v.t.id, { status: "annullato" });
+    } else {
+      v.m.annullato = true;
+      if(isDbReady() && v.m.id) await dbUpdate("messages", v.m.id, { title: "❌ " + (v.m.title || "Appuntamento") + " (annullato)", scheduled_at: null });
+    }
+  }
+  ridisegnaImpegni();
+  const quanti = voci.length === 1 ? "Ok, annullato" : "Ok, annullati " + voci.length + " impegni";
+  showAIToastConAnnulla(quanti, voci.map(v => escapeHtml(v.titolo) + " · " + escapeHtml(quandoBreve(v.quando))).join("<br>"), async () => {
+    for(const v of voci){
+      if(v.fonte === "task"){
+        v.t.status = v.prima || "todo";
+        if(isDbReady() && v.t.id) await dbUpdate("tasks", v.t.id, { status: v.t.status });
+      } else {
+        v.m.annullato = false;
+        const p = v.m.id && precedenti.get(v.m.id);
+        if(isDbReady() && p) await dbUpdate("messages", v.m.id, { title: p.title, scheduled_at: p.scheduled_at });
+      }
+    }
+    ridisegnaImpegni();
+  }, 10);
+}
+
+function provaAnnullaImmediato(testo, viaVoce){
+  const richiesta = capisciAnnullaImpegni(testo);
+  if(!richiesta) return false;
+  const voci = impegniDaAnnullare(richiesta);
+  if(!voci.length){
+    if(richiesta.nome.length) return false; // un nome che non trovo: forse l'ho letto male, decide l'AI
+    const quando = richiesta.giorno === "oggi" || richiesta.giorno === "domani" || richiesta.giorno === "dopodomani" ? richiesta.giorno
+      : richiesta.data ? richiesta.data.toLocaleDateString("it-IT", { weekday:"long", day:"numeric" }) : "";
+    mostraRispostaEON(testo, "Non hai niente in programma" + (quando ? " per " + quando : "") + ": niente da annullare.", { titolo: "Niente da annullare" });
+    if(viaVoce) parlaRisposta("Niente da annullare" + (quando ? " per " + quando : ""));
+    return true;
+  }
+  if(voci.length > 15) return false;
+
+  const corpo = document.createElement("div");
+  corpo.className = "annulla-card";
+  const lista = document.createElement("div");
+  lista.className = "annulla-lista";
+  voci.forEach((v, i) => {
+    const riga = document.createElement("label");
+    riga.className = "annulla-riga";
+    riga.innerHTML = `<input type="checkbox" checked data-i="${i}"><span class="annulla-testo"><b>${escapeHtml(v.titolo)}</b><span>${escapeHtml(quandoBreve(v.quando))}</span></span>`;
+    lista.appendChild(riga);
+  });
+  corpo.appendChild(lista);
+  const piede = document.createElement("div");
+  piede.className = "annulla-piede";
+  const si = document.createElement("button");
+  si.type = "button"; si.className = "annulla-si"; si.id = "annullaConferma";
+  const no = document.createElement("button");
+  no.type = "button"; no.className = "annulla-no"; no.textContent = "No";
+  const scelte = () => [...lista.querySelectorAll("input:checked")].map(c => voci[+c.dataset.i]);
+  const aggiorna = () => {
+    const k = scelte().length;
+    si.textContent = k === 0 ? "Scegli cosa annullare" : k === 1 ? "Annulla 1 impegno" : "Annulla " + k + " impegni";
+    si.disabled = k === 0;
+  };
+  lista.addEventListener("change", aggiorna);
+  aggiorna();
+  si.addEventListener("click", async () => {
+    const v = scelte();
+    if(!v.length) return;
+    si.disabled = true;
+    chiudiRisorsaCard();
+    await annullaImpegniScelti(v);
+  });
+  no.addEventListener("click", chiudiRisorsaCard);
+  piede.appendChild(no); piede.appendChild(si);
+  corpo.appendChild(piede);
+  apriRisorsaCard(voci.length === 1 ? "Annullo questo impegno?" : "Annullo questi " + voci.length + " impegni?", corpo);
+  if(viaVoce) parlaRisposta(voci.length === 1 ? "Annullo " + voci[0].titolo + "? Conferma col tasto." : "Annullo " + voci.length + " impegni? Conferma col tasto.");
+  return true;
+}
+
 function provaLetturaLocale(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return null;
@@ -11065,6 +11250,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
         return;
       }
+    }
+
+    /* "Annulla gli appuntamenti di domani": lista e conferma, senza AI */
+    if(!inContinuazione && provaAnnullaImmediato(testo, viaVoce)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
     }
 
     /* "Fai foto a pavimenti": fotocamera subito (prima di ogni attesa,

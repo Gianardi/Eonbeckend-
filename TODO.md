@@ -3918,3 +3918,19 @@ modifiche, niente lavoro, "1.5". Test `eval/meno-ai-documenti.test.mjs`
 aggiornato (il caso "Claudia Spori" ora lo legge il codice).
 Non provato dal vivo: Vercel pubblica solo main.
 Prossimi: clienti nuovi; cancellazioni; omonimi con pulsanti; saluti.
+
+### Meno AI, fase 1 — punto 3 fatto: annullare appuntamenti (27/09/2026)
+Dai registri: "Annulla appuntamenti di domani" / "lunedì" (5-8 s di AI).
+`provaAnnullaImmediato` (index.html, nel flusso della Home prima dell'AI):
+verbo (annulla, cancella, elimina, disdici, togli…) + cosa (appuntamenti,
+impegni, chiamata, sopralluogo, incontro, riunione) + giorno e/o nome e/o
+ora. Cerca nel calendario in memoria (stesse fonti del Calendario), mostra
+la lista con le spunte e "Annulla N impegni" / "No". Solo al tocco annulla,
+come fa l'AI (`annulla_impegno`): tasks → status "annullato"; appuntamenti
+dei clienti → "❌ … (annullato)" e senza data (il cliente lo vede nel
+portale). Avviso "Ok, annullati N impegni" con "Annulla" (rimette titolo e
+data originali). Niente in programma → "Niente da annullare", senza AI.
+Nel dubbio → AI: frase vaga ("annulla gli appuntamenti"), nome che non
+trova, "mattina/pomeriggio", altre azioni nella stessa frase, giorno della
+settimana uguale a oggi. Test `eval/annulla.test.js` (18).
+Prossimi: clienti nuovi senza AI; omonimi con pulsanti; saluti.
