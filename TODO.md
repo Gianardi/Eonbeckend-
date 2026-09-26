@@ -3771,9 +3771,13 @@ Impostazioni → Aiuto "Metti EON sulla Home" con i passi. Nessun service
 worker (per non rischiare versioni vecchie in cache).
 
 ### Scritta in alto nella Home (26/09/2026)
-Mandate 3 ipotesi ad Andrea (A logo a sinistra e data a destra, B data come
-un foglio di calendario, C tutto centrato), tutte con "Buongiorno, Andrea".
-In attesa della scelta.
+Mandate 3 ipotesi (A, B, C) e poi altre 4 ispirate alle grandi app (D Apple,
+E Google, F banche, G Things/Todoist). Scelta **G**: marchio EON a sinistra
+(la "O" resta il tasto "organizza la giornata"), iniziali dell'account a
+destra che aprono le Impostazioni, sotto "Oggi", la data e un'etichetta
+"N impegni" (stesso conteggio del riquadro Calendario) che apre il
+calendario. Tolti il vecchio "SABATO 26 SETTEMBRE · EON" e "Buongiorno /
+Cosa facciamo oggi". Test in `impostazioni.test.js`.
 
 ## Meno AI, fase 1 — analisi delle richieste vere di settembre (26/09/2026)
 

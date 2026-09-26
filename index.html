@@ -137,7 +137,7 @@
      data (un solo blocco compatto, non due elementi separati che si
      susseguono), e il titolo sotto resta l'elemento dominante della
      pagina, come dovrebbe essere ogni giorno che si apre l'app. */
-  .brand-hero{ display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 0 18px; }
+  .brand-hero{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 20px 0; }
   /* Il marchio e la ricerca generale stanno solo in Home: nelle altre
      sezioni ci sarebbero due barre di ricerca e due titoli. */
   .brand-hero.nascosto{ display:none; }
@@ -147,8 +147,8 @@
   }
   .brand-hero-wordmark{
     display:flex; align-items:center; justify-content:center; gap:2px;
-    font-family:'Manrope'; font-weight:800; font-size:14.5px; letter-spacing:-.01em;
-    color:var(--faint);
+    font-family:'Manrope'; font-weight:800; font-size:18px; letter-spacing:.02em;
+    color:var(--text);
   }
   .logo-o{ display:inline-flex; align-items:center; justify-content:center; }
   /* Un solo colore pieno (l'indaco già usato per le azioni primarie
@@ -157,8 +157,9 @@
      che riconoscibile — un marchio piccolo regge meglio un solo
      colore netto. */
   .brand-hero-wordmark .logo-o{
-    width:16px; height:16px; margin:0 1px; border-radius:50%;
+    width:17px; height:17px; margin:0 1px; border-radius:50%;
     background:var(--indigo); color:#fff;
+    animation:none; box-shadow:none;
   }
   .brand-hero-wordmark .logo-o svg{ width:60%; height:60%; }
   .ai-clock-btn{
@@ -355,6 +356,22 @@
     color:var(--text);
   }
   .home-hero-eyebrow{ position:relative; font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:3px; }
+  .brand-avatar{
+    width:38px; height:38px; border-radius:50%; border:none; flex:none; cursor:pointer;
+    background:linear-gradient(135deg,#5A87FF,#2E5FE8); color:#fff;
+    font-family:'Manrope'; font-weight:800; font-size:13.5px; letter-spacing:.02em;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand-avatar:active{ transform:scale(.95); }
+  .home-oggi-titolo{ font-family:'Manrope'; font-size:34px; font-weight:800; letter-spacing:-.02em; line-height:1.1; color:var(--text); }
+  .home-oggi-riga{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0 26px; }
+  #homeOggiData{ font-size:15px; font-weight:500; color:var(--muted); }
+  .home-oggi-pill{
+    display:inline-flex; align-items:center; gap:6px; border:none; cursor:pointer; font-family:inherit;
+    font-size:12.5px; font-weight:700; color:var(--indigo); background:var(--indigo-soft);
+    border-radius:999px; padding:5px 11px;
+  }
+  .home-oggi-pill svg{ width:14px; height:14px; }
   .home-hero-title{ position:relative; font-family:'Manrope'; font-size:22px; font-weight:900; letter-spacing:-.01em; margin-bottom:26px; }
   .home-hero-mic-wrap{ position:relative; display:flex; justify-content:center; margin-bottom:12px; }
   .home-hero-mic{
@@ -2537,8 +2554,11 @@
   </aside>
 
   <main>
+    <!-- Intestazione della Home (26/09/2026, scelta G di Andrea, stile
+         Things/Todoist): marchio a sinistra, iniziali a destra (aprono le
+         Impostazioni, come nelle app grandi); sotto "Oggi", la data e
+         quanti impegni ci sono. -->
     <div class="brand-hero" id="brandHero">
-      <div class="brand-data" id="brandData">&nbsp;</div>
       <div class="brand-hero-wordmark">
         <span>E</span>
         <button class="logo-o ai-clock-btn" id="aiClockBtn" title="Chiedi all'AI di organizzarti la giornata" aria-label="Organizza la giornata con l'AI">
@@ -2546,6 +2566,7 @@
         </button>
         <span>N</span>
       </div>
+      <button type="button" class="brand-avatar" id="brandAvatar" aria-label="Impostazioni">EON</button>
     </div>
 
     <div class="topbar" style="display:none;">
@@ -2564,8 +2585,11 @@
     <div class="page visible" id="page-home">
 
       <div class="home-hero">
-        <div class="home-hero-eyebrow">Buongiorno</div>
-        <div class="home-hero-title">Cosa facciamo oggi</div>
+        <div class="home-oggi-titolo">Oggi</div>
+        <div class="home-oggi-riga">
+          <span id="homeOggiData"></span>
+          <button type="button" class="home-oggi-pill" id="homeOggiPill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span id="homeOggiConta">Nessun impegno</span></button>
+        </div>
 
         <div class="home-hero-mic-wrap">
           <button class="home-hero-mic" id="homeHeroMic" aria-label="Tocca per parlare" type="button">
@@ -10903,6 +10927,9 @@ function aggiornaHomeHero(gruppiPerGiorno){
 
   sub.textContent = voci.length === 0 ? "Nessun impegno oggi"
     : (voci.length === 1 ? "1 impegno oggi" : voci.length + " impegni oggi");
+  // L'etichetta sotto "Oggi", in cima alla Home: stessi impegni
+  const conta = document.getElementById("homeOggiConta");
+  if(conta) conta.textContent = voci.length === 0 ? "Nessun impegno" : (voci.length === 1 ? "1 impegno" : voci.length + " impegni");
 
   if(voci.length === 0){
     lista.innerHTML = '<div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div>';
@@ -13328,6 +13355,21 @@ hiddenDateHolder.textContent = todayDateText;
 document.getElementById("pageSub").style.display = "none";
 const bd = document.getElementById("brandData");
 if(bd) bd.textContent = dataBreve;
+// Sotto "Oggi": "sabato 26 settembre"
+const homeOggiData = document.getElementById("homeOggiData");
+if(homeOggiData) homeOggiData.textContent = nowDate.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" });
+document.getElementById("homeOggiPill").addEventListener("click", () => navigateTo("calendario"));
+document.getElementById("brandAvatar").addEventListener("click", () => navigateTo("impostazioni"));
+/* Le iniziali in alto a destra: dal nome dell'account (o dell'attività) */
+function aggiornaAvatarHome(){
+  const el = document.getElementById("brandAvatar");
+  if(!el) return;
+  const p = (typeof profiloUtente !== "undefined" && profiloUtente) || {};
+  const nome = String(p.full_name || p.business_name || "").trim();
+  const iniziali = nome ? nome.split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() : "";
+  el.textContent = iniziali || "EON";
+  el.setAttribute("aria-label", "Impostazioni" + (nome ? " di " + nome : ""));
+}
 document.getElementById("oggiHeroDate").textContent = days[nowDate.getDay()].charAt(0).toUpperCase()+days[nowDate.getDay()].slice(1) + " " + nowDate.getDate() + " " + months[nowDate.getMonth()];
 document.body.appendChild(hiddenDateHolder);
 
@@ -13854,6 +13896,7 @@ let profiloUtente = null;
 const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
 function ricordaProfilo(profilo, email){
   profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
+  aggiornaAvatarHome();
 }
 function datiAccount(){
   const p = profiloUtente || { full_name:"", business_name:"", profession: currentProfession, email:"" };
@@ -13972,6 +14015,7 @@ suTocco("impVoceProfilo", () => {
     b.disabled = false;
     if(error) return esitoImp("impEsitoProfilo", "Non salvato: " + error.message, false);
     profiloUtente = { ...(profiloUtente || {}), full_name: nome, business_name: attivita };
+    aggiornaAvatarHome();
     pageMeta.home.title = "Buongiorno, " + nome.split(" ")[0];
     disegnaImpostazioni();
     esitoImp("impEsitoProfilo", "Salvato.", true);
