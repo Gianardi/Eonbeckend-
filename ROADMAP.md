@@ -268,6 +268,43 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
   4. **Accesso del commercialista** a EON per controllare e correggere.
   Serve: società/P.IVA, contratti con i servizi (costi da verificare),
   privacy in regola.
+  **Approfondimento (27/09)**:
+  - *Fatturazione elettronica, due strade.* (A) EON fa e manda la fattura
+    da solo tramite un servizio "ponte" verso lo SdI (es. Openapi,
+    Invoicetronic, A-Cube): pochi centesimi a fattura (Openapi: invio da
+    €0,015–0,07, conservazione €0,035), ricezione delle fatture dei
+    fornitori inclusa; ma EON deve produrre l'XML giusto per ogni caso
+    (forfettario, bollo, ritenuta, split payment…) e serve la
+    conservazione per 10 anni. (B) EON si collega al programma che
+    l'artigiano usa già (es. Fatture in Cloud, API incluse nella
+    licenza): meno responsabilità, ma solo per chi ce l'ha e lo paga.
+    **Decisione di Andrea (27/09): strada (B)**, perché gli artigiani
+    hanno già tutti un loro servizio di fatturazione: EON è partner, non
+    concorrente (e l'App Store di Fatture in Cloud può essere un canale
+    per trovare clienti). Ai primi artigiani si chiede quale usano, e si
+    parte dai più diffusi (Fatture in Cloud, Aruba…).
+    **Strada (A) = fonte di business futura**: EON autonomo sulle fatture
+    (invio diretto allo SdI tramite servizio ponte), da valutare più
+    avanti come ricavo in più. Prima di farla: prove nell'ambiente di
+    test dello SdI.
+    **Valutazione (27/09, voto 8/10) — cosa tenere d'occhio:**
+    1. Verificare che "tutti hanno già un servizio" sia vero: molti
+       piccoli artigiani fanno fare tutto al commercialista o usano il
+       sito gratuito dell'Agenzia delle Entrate (niente collegamento
+       possibile). Per loro serve almeno "mando i dati al commercialista".
+    2. Ogni collegamento costa lavoro: farne 1-2, i più usati.
+    3. Dipendenza: se Fatture in Cloud cambia regole o fa un suo
+       assistente AI, dipendiamo da loro → i dati restano anche in EON.
+    4. Il valore della strada (A) non è il guadagno sulla singola fattura
+       (minimo) ma poter dire "con EON non paghi più il programma delle
+       fatture" (100-250 € l'anno risparmiati): argomento di vendita.
+    **Domande ai primi 10 artigiani:** "Con che programma fai le
+    fatture?" e "Le fai tu o il commercialista?".
+  - *Banca.* Tramite un fornitore autorizzato (Tink, Salt Edge, Yapily,
+    Enable Banking…; GoCardless Bank Account Data ha chiuso). Prezzo per
+    conto collegato al mese, solo su preventivo, di solito con un minimo
+    mensile. Consenso da rinnovare ogni 180 giorni. EON abbina i
+    movimenti alle fatture aperte e chiede quando non è sicuro.
 - **Chiamate → rubrica**: tutti i clienti col telefono, un tocco e chiami.
 - **Cresci**: oggi "Lavori in corso", da decidere cosa diventa.
 - **Pagamenti a colpo d'occhio**: gli incassi in calendario con un colore
