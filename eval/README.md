@@ -230,8 +230,13 @@ che non esegue subito: per quelli si usa `stato_atteso:
 "in_attesa_conferma"`, altrimenti il controllo boccerebbe una richiesta
 di conferma corretta scambiandola per un'azione mancata),
 `testo_finisce_con_domanda` (per i casi in cui EON deve fermarsi a
-chiedere). Per il resto (la maggior parte: capire se una domanda suona
-naturale, se un rifiuto è onesto) serve una persona che legga.
+chiedere), `strumento_richiesto_se_conclude` (nato dal bug reale del
+23/09/2026: un preventivo dichiarato "creato" quando
+crea_preventivo_o_fattura non era mai stato chiamato — se il turno si
+conclude senza essere una domanda aperta, quello strumento DEVE
+comparire tra le azioni eseguite, altrimenti è un "fatto" finto). Per
+il resto (la maggior parte: capire se una domanda suona naturale, se un
+rifiuto è onesto) serve una persona che legga.
 
 **Eseguito la prima volta il 03/09/2026**, contro il primo ambiente di
 staging del progetto (vedi `TODO.md`, punto 2.1 del roadmap operativa).

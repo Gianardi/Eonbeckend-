@@ -1688,6 +1688,48 @@
   .scheda-foto-nota{ font-size:14.5px; line-height:1.5; color:var(--text); padding:2px 2px; white-space:pre-line; transition:background .3s; border-radius:8px; }
   .scheda-foto-nota.vuota{ color:var(--muted); font-size:13px; }
   .scheda-foto-nota.salvata{ background:#EAF7EF; }
+
+  /* Scheda del cliente (26/09/2026) */
+  .scheda-cliente{ display:flex; flex-direction:column; gap:14px; }
+  .sc-testa{ display:flex; gap:12px; align-items:center; }
+  .sc-avatar{ width:48px; height:48px; border-radius:15px; flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Manrope'; font-weight:800; font-size:16px; }
+  .sc-testa-testo{ min-width:0; flex:1; display:flex; flex-direction:column; gap:3px; }
+  .sc-stato{ font-size:12px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .sc-pallino{ width:8px; height:8px; border-radius:50%; background:var(--teal); flex:none; }
+  .sc-pallino.trattativa{ background:var(--amber); }
+  .sc-pallino.inattivo{ background:var(--faint); }
+  .sc-lavoro{ font-size:14.5px; line-height:1.4; color:var(--text); cursor:pointer; overflow-wrap:anywhere; }
+  .sc-lavoro.vuoto{ color:var(--indigo); font-weight:600; font-size:13.5px; }
+  .sc-contatti{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; }
+  .sc-contatto{ display:flex; flex-direction:column; align-items:center; gap:5px; padding:4px 0; border:none; background:none; font:inherit; font-size:11px; font-weight:700; color:var(--text); text-decoration:none; cursor:pointer; }
+  .sc-contatto-icona{ width:46px; height:46px; border-radius:50%; background:var(--indigo-soft); color:var(--indigo); display:flex; align-items:center; justify-content:center; }
+  .sc-contatto-icona svg{ width:20px; height:20px; }
+  .sc-contatto.wa .sc-contatto-icona{ background:rgba(31,168,85,.12); color:#1FA855; }
+  .sc-contatto.manca{ color:var(--faint); }
+  .sc-contatto.manca .sc-contatto-icona{ background:#F1F2F6; color:var(--faint); }
+  .sc-azioni{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+  .sc-azione{ display:flex; align-items:center; gap:10px; padding:11px; border:1px solid var(--border); border-radius:14px; background:var(--card); font:inherit; text-align:left; cursor:pointer; min-width:0; }
+  .sc-azione-icona{ width:34px; height:34px; border-radius:11px; background:var(--text); color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
+  .sc-azione-icona svg{ width:17px; height:17px; }
+  .sc-azione-testo{ display:flex; flex-direction:column; min-width:0; }
+  .sc-azione-testo b{ font-family:'Manrope'; font-size:13.5px; font-weight:800; color:var(--text); }
+  .sc-azione-testo small{ font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sc-azione.evidenziata{ border-color:var(--indigo); box-shadow:0 0 0 3px var(--indigo-soft); }
+  .sc-azione.evidenziata .sc-azione-icona{ background:var(--indigo); }
+  .sc-lista{ display:flex; flex-direction:column; border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:-6px; }
+  .sc-riga{ display:flex; align-items:baseline; gap:10px; padding:10px 13px; font-size:13.5px; }
+  .sc-riga + .sc-riga{ border-top:1px solid var(--border); }
+  .sc-riga-punto{ width:6px; height:6px; border-radius:50%; background:var(--indigo); flex:none; transform:translateY(-2px); }
+  .sc-riga-punto.appunto{ background:var(--amber); }
+  .sc-riga-testo{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .sc-riga-quando{ flex:none; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .sc-vuoto{ padding:11px 13px; font-size:12.5px; color:var(--muted); }
+  .sc-foto{ display:flex; gap:8px; overflow-x:auto; margin-top:-6px; scrollbar-width:none; }
+  .sc-foto img{ width:84px; height:84px; object-fit:cover; border-radius:12px; flex:none; cursor:pointer; }
+  .sc-piede{ display:flex; flex-direction:column; gap:8px; }
+  .sc-modi{ display:flex; gap:6px; }
+  .sc-modi button{ border:1px solid var(--border); background:var(--card); color:var(--muted); font:inherit; font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; cursor:pointer; }
+  .sc-modi button.attivo{ background:var(--text); border-color:var(--text); color:#fff; }
   .scheda-foto-descrizione{ font-size:12.5px; line-height:1.45; color:var(--muted); padding:0 2px; }
   .cantiere-foto-nota-segno{ position:absolute; left:6px; bottom:6px; width:22px; height:22px; border-radius:7px; background:rgba(20,23,29,.62); color:#fff; display:flex; align-items:center; justify-content:center; pointer-events:none; }
   .cantiere-foto-nota-segno svg{ width:13px; height:13px; }
@@ -2608,6 +2650,7 @@
         <!-- Foto negli appunti (25/09/2026, Gianardi): scatti, e nella
              scheda della foto detti o scrivi la nota. -->
         <input type="file" id="cantiereAppuntiFotoInput" accept="image/*" style="display:none;">
+        <input type="file" id="schedaClienteFotoInput" accept="image/*" capture="environment" style="display:none;">
         <button type="button" class="appunti-foto-btn" id="cantiereAppuntiFotoBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           <span id="cantiereAppuntiFotoTesto">Scatta una foto con appunto</span>
@@ -4112,13 +4155,13 @@ async function dbEliminaPerSempre(table, id){
    la tabella) e aggiornaDatiToccati() (aggiorna solo il record giusto),
    così le due strade non rischiano di andare fuori sincrono tra loro. */
 function mappaCliente(c){
-  return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description || "", last:c.last_contact || "", phone:c.phone || "", color:c.color, archived:!!c.is_archived };
+  return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description || "", last:c.last_contact || "", phone:c.phone || "", email:c.email || "", color:c.color, archived:!!c.is_archived };
 }
 function mappaImpegno(t){
   return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
 }
 function mappaAppunto(a){
-  return { id:a.id, testo:a.testo, created:a.created_at };
+  return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null };
 }
 
 /* Carica i dati veri di un utente già registrato, sostituendo il contenuto
@@ -6224,6 +6267,8 @@ function buildClientCard(c){
       Apri conversazione
     </button>
   `;
+  // Tocco sulla card: la scheda del cliente con tutte le azioni
+  card.addEventListener("click", () => mostraSchedaCliente(c));
   card.querySelector(".client-edit-btn").addEventListener("click", (e) => {
     e.stopPropagation();
     openSheet("cliente", c);
@@ -6407,18 +6452,19 @@ const sheetForms = {
       ], default:"attivo" },
       { key:"value", label:"Valore (€)", type:"text", inputmode:"decimal", placeholder:"Es. 15.000" },
       { key:"phone", label:"Telefono", type:"text", inputmode:"tel", placeholder:"Es. 335 1234567" },
+      { key:"email", label:"Email", type:"text", inputmode:"email", placeholder:"Es. mara@esempio.it" },
       { key:"desc", label:"Lavoro da fare", type:"textarea", placeholder:"Es. Rifacimento bagno: piastrelle e sanitari" },
     ],
     table: "clients",
     toDb: v => ({
       name: v.name, status: v.status, value: leggiImporto(v.value),
-      description: v.desc || "", last_contact: "oggi", phone: v.phone || "",
+      description: v.desc || "", last_contact: "oggi", phone: v.phone || "", email: (v.email || "").trim(),
       color: PALETTE[Math.floor(Math.random() * PALETTE.length)]
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
       name: v.name, status: v.status, value: leggiImporto(v.value),
-      desc: v.desc || "", last: "oggi", phone: v.phone || "",
+      desc: v.desc || "", last: "oggi", phone: v.phone || "", email: (v.email || "").trim(),
       color: saved ? saved.color : PALETTE[0]
     }),
     array: () => clients,
@@ -10109,6 +10155,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       }
     }
 
+    /* Il nome di un cliente registrato, da solo ("Rita Ambrosini"): si
+       apre subito la sua scheda, senza AI (26/09/2026). */
+    if(!inContinuazione && provaSchedaCliente(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
+    }
+
     /* Stesso principio, fase 1c: una richiesta di foto/documento/
        preventivo di un cliente già riconoscibile con certezza apre
        subito la card risorsa, senza passare dall'AI. */
@@ -10337,7 +10391,15 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
         daDire.push("Foto eliminata");
       } else if(a.tool === "crea_cliente"){
-        mostra("Cliente aggiunto", a.esito.nome);
+        /* Si apre subito la scheda del cliente nuovo. Se nella frase c'era
+           una foto ("fammi la foto e crea il cliente..."), il tasto Foto è
+           in evidenza: la fotocamera il telefono la apre solo con un tocco. */
+        const nuovo = clients.find(c => c.id === a.esito.id) || clients.find(c => nomeChiave(c.name) === nomeChiave(a.esito.nome));
+        const vuoleFoto = /\bfot/i.test(testo);
+        if(nuovo){
+          mostraSchedaCliente(nuovo, { messaggio: "Cliente aggiunto." + (vuoleFoto ? " Tocca \"Scatta foto\" per la foto." : ""), evidenziaFoto: vuoleFoto });
+          daDire.push("Cliente aggiunto: " + a.esito.nome);
+        } else mostra("Cliente aggiunto", a.esito.nome);
       } else if(a.tool === "aggiorna_cliente"){
         mostra("Cliente aggiornato", (a.esito.aggiornato || []).join(", "));
       } else if(a.tool === "manda_messaggio"){
@@ -10887,6 +10949,293 @@ function chiudiRisorsaCard(){
 document.getElementById("risorsaChiudi").addEventListener("click", chiudiRisorsaCard);
 document.getElementById("risorsaOverlay").addEventListener("click", (e) => {
   if(e.target.id === "risorsaOverlay") chiudiRisorsaCard();
+});
+
+/* ===== Scheda del cliente (26/09/2026, Gianardi: "dico il nome di un
+   cliente e deve aprirmi subito la card, e da lì fare tutto: appunti,
+   foto, stato lavori, chiamare, email, WhatsApp, messaggio").
+   Principio richiesta → azione: il nome di un cliente registrato apre la
+   sua scheda senza passare dall'AI. Nella scheda: contatti in un tocco,
+   stato del lavoro, impegni, appunti e foto del cliente, e in fondo una
+   barra per parlare con EON di QUEL cliente o prendere un appunto. ===== */
+
+/* Il cliente se la frase è SOLO il suo nome ("Rita Ambrosini", "Ambrosini",
+   "apri Rita Ambrosini", "cliente Rossi"). Rigido di proposito: se il nome
+   corrisponde a più clienti, o c'è altro nella frase, null → decide l'AI. */
+function clienteDaNomeDetto(testo){
+  let t = String(testo || "").toLowerCase().replace(/[.,!?;:"]+/g, " ").replace(/\s+/g, " ").trim();
+  t = t.replace(/^(?:apri(?:mi)?|mostra(?:mi)?|fammi vedere|fai vedere|vai (?:a|al|alla|su)|dammi)\s+/, "")
+       .replace(/^(?:la\s+)?(?:scheda|card)\s+(?:di|del|della)\s+/, "")
+       .replace(/^(?:il|la)\s+/, "")
+       .replace(/^cliente\s+/, "").trim();
+  if(!t || /\d/.test(t)) return null;
+  const parole = t.split(" ");
+  if(parole.length > 4) return null;
+  const token = c => String(c.name || "").toLowerCase().replace(/[.,]+/g, " ").split(/\s+/).filter(Boolean);
+  const cerca = (archiviati) => {
+    const gruppo = clients.filter(c => !!c.archived === archiviati);
+    const esatti = gruppo.filter(c => token(c).join(" ") === parole.join(" "));
+    if(esatti.length === 1) return esatti[0];
+    const tutti = gruppo.filter(c => { const tk = token(c); return parole.every(p => tk.includes(p)); });
+    return tutti.length === 1 ? tutti[0] : (tutti.length > 1 ? false : null);
+  };
+  const attivi = cerca(false);
+  if(attivi) return attivi;
+  if(attivi === false) return null; // più clienti con quel nome: decide l'AI (chiede quale)
+  return cerca(true) || null;
+}
+
+function provaSchedaCliente(testo){
+  const c = clienteDaNomeDetto(testo);
+  if(!c) return false;
+  mostraSchedaCliente(c);
+  return true;
+}
+
+const numeroPerLink = tel => {
+  let n = String(tel || "").replace(/[^\d+]/g, "");
+  if(!n) return "";
+  if(n.startsWith("00")) n = "+" + n.slice(2);
+  if(!n.startsWith("+")) n = "+39" + n; // numeri italiani scritti senza prefisso
+  return n;
+};
+
+/* Impegni del cliente: gli appuntamenti nella sua conversazione e le cose
+   da fare che lo nominano (stesso criterio del Calendario). */
+function impegniDelCliente(c){
+  const voci = [];
+  const chat = chatDelCliente(c);
+  if(chat) chat.messages.forEach(m => { if(m.eventType === "appt" && !m.annullato) voci.push({ titolo: m.title || "Appuntamento", quando: m.text || m.time || "" }); });
+  const parole = c.name.toLowerCase().split(/\s+/).filter(p => p.length > 2);
+  tasks.forEach(t => {
+    if(t.status === "done" || t.status === "annullato") return;
+    const titolo = String(t.title || "").toLowerCase();
+    if(parole.some(p => new RegExp("\\b" + p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(titolo))) voci.push({ titolo: t.title, quando: t.time || "" });
+  });
+  return voci;
+}
+
+const ETICHETTA_STATO_CLIENTE = { attivo: "Lavoro in corso", trattativa: "In trattativa", inattivo: "Fermo" };
+
+function mostraSchedaCliente(c, opzioni){
+  opzioni = opzioni || {};
+  const stato = { modo: opzioni.modo || "eon", runId: null, inCorso: false };
+  const corpo = document.createElement("div");
+  corpo.className = "scheda-cliente";
+
+  // Chi è e a che punto è il lavoro
+  const testa = document.createElement("div");
+  testa.className = "sc-testa";
+  const iniziali = c.name.split(" ").slice(0, 2).map(w => w[0] || "").join("").toUpperCase();
+  testa.innerHTML = `<div class="sc-avatar" style="background:${coloreCliente(c)}">${escapeHtml(iniziali)}</div>
+    <div class="sc-testa-testo">
+      <div class="sc-stato"><span class="sc-pallino ${escapeHtml(c.status || "attivo")}"></span>${escapeHtml(ETICHETTA_STATO_CLIENTE[c.status] || "Lavoro in corso")}${c.value > 0 ? " · €" + c.value.toLocaleString("it-IT") : ""}${c.archived ? " · archiviato" : ""}</div>
+      <div class="sc-lavoro${c.desc && c.desc.trim() ? "" : " vuoto"}">${c.desc && c.desc.trim() ? escapeHtml(c.desc.trim()) : "Tocca per scrivere il lavoro da fare"}</div>
+    </div>`;
+  testa.querySelector(".sc-lavoro").addEventListener("click", () => { chiudiRisorsaCard(); openSheet("cliente", c); setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="desc"]'); if(d) d.focus(); }, 50); });
+  corpo.appendChild(testa);
+
+  // Contatti in un tocco
+  const tel = numeroPerLink(c.phone);
+  const contatti = document.createElement("div");
+  contatti.className = "sc-contatti";
+  const aggiungiContatto = (campo) => { chiudiRisorsaCard(); openSheet("cliente", c); setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="' + campo + '"]'); if(d) d.focus(); }, 50); };
+  [
+    { nome: "Chiama", icona: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/>', href: tel ? "tel:" + tel : "", manca: "phone" },
+    { nome: "WhatsApp", icona: '<path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 9.5c.3 2 2.5 4.3 4.6 4.8l1.1-1.1 2 .9c-.3 1-1.2 1.6-2.2 1.5C11 15.2 8.4 12.6 8 9.9c-.1-1 .5-1.9 1.5-2.2l.9 2z"/>', href: tel ? "https://wa.me/" + tel.replace("+", "") : "", manca: "phone", classe: "wa" },
+    { nome: "Email", icona: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>', href: c.email ? "mailto:" + c.email : "", manca: "email" },
+    { nome: "Messaggio", icona: '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/>', azione: async () => { chiudiRisorsaCard(); await openClientChat(c); } },
+  ].forEach(k => {
+    const el = document.createElement(k.href ? "a" : "button");
+    el.className = "sc-contatto" + (k.classe ? " " + k.classe : "") + (!k.href && !k.azione ? " manca" : "");
+    if(k.href){ el.href = k.href; if(/^https/.test(k.href)){ el.target = "_blank"; el.rel = "noopener"; } }
+    else el.type = "button";
+    el.dataset.contatto = k.nome;
+    el.innerHTML = `<span class="sc-contatto-icona"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${k.icona}</svg></span><span>${k.nome}</span>`;
+    if(k.azione) el.addEventListener("click", k.azione);
+    else if(!k.href) el.addEventListener("click", () => aggiungiContatto(k.manca));
+    contatti.appendChild(el);
+  });
+  corpo.appendChild(contatti);
+
+  // Azioni sul cantiere
+  const fotoCliente = cantiereFoto.filter(f => f.clientId === c.id).slice().sort((a, b) => new Date(b.created) - new Date(a.created));
+  const appuntiCliente = cantiereAppunti.filter(a => a.clientId === c.id).slice().sort((a, b) => new Date(b.created) - new Date(a.created));
+  const chat = chatDelCliente(c);
+  const documentiCliente = chat ? chat.messages.filter(m => m.eventType === "doc" || m.fileUrl) : [];
+  const azioni = document.createElement("div");
+  azioni.className = "sc-azioni";
+  const azione = (id, nome, sotto, icona, fn) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "sc-azione"; b.dataset.azione = id;
+    b.innerHTML = `<span class="sc-azione-icona"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${icona}</svg></span><span class="sc-azione-testo"><b>${nome}</b><small>${sotto}</small></span>`;
+    b.addEventListener("click", fn);
+    azioni.appendChild(b);
+    return b;
+  };
+  azione("foto", "Scatta foto", fotoCliente.length ? fotoCliente.length + (fotoCliente.length === 1 ? " foto" : " foto") : "Nessuna foto", '<path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/>', () => {
+    clienteIdPerSchedaFoto = c.id;
+    document.getElementById("schedaClienteFotoInput").click();
+  });
+  azione("appunto", "Appunto", appuntiCliente.length ? appuntiCliente.length + (appuntiCliente.length === 1 ? " appunto" : " appunti") : "Scrivi o detta", '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', () => impostaModo("appunto", true));
+  azione("documenti", "Documenti", documentiCliente.length ? documentiCliente.length + (documentiCliente.length === 1 ? " documento" : " documenti") : "Nessun documento", '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>', () => {
+    const docs = documentiCliente.slice().reverse().slice(0, 10).map(m => m.eventType === "doc"
+      ? { id: m.id, tipo: "preventivo_o_fattura", titolo: m.title, riepilogo: m.text || null, importoTesto: m.amount || null, url: null, quandoTesto: m.time, dati: m.docDati || null }
+      : { id: m.id, tipo: "allegato", titolo: m.fileName || "(senza nome)", url: m.fileUrl, quandoTesto: m.time });
+    mostraRisorsaDocumenti(docs, c.name);
+  });
+  azione("modifica", "Modifica", "Dati del cliente", '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>', () => { chiudiRisorsaCard(); openSheet("cliente", c); });
+  corpo.appendChild(azioni);
+
+  // Stato lavori: impegni, appunti, foto
+  const sezione = (titolo) => { const s = document.createElement("div"); s.className = "risorsa-sezione"; s.textContent = titolo; corpo.appendChild(s); };
+  const impegni = impegniDelCliente(c);
+  sezione("Impegni");
+  const listaImpegni = document.createElement("div");
+  listaImpegni.className = "sc-lista";
+  if(impegni.length) impegni.slice(0, 5).forEach(i => {
+    const r = document.createElement("div"); r.className = "sc-riga";
+    r.innerHTML = `<span class="sc-riga-punto"></span><span class="sc-riga-testo">${escapeHtml(i.titolo)}</span><span class="sc-riga-quando">${escapeHtml(i.quando)}</span>`;
+    listaImpegni.appendChild(r);
+  });
+  else listaImpegni.innerHTML = '<div class="sc-vuoto">Nessun impegno. Dimmi "domani alle 9 sopralluogo" qui sotto.</div>';
+  corpo.appendChild(listaImpegni);
+
+  sezione("Appunti");
+  const listaAppunti = document.createElement("div");
+  listaAppunti.className = "sc-lista";
+  const disegnaAppunti = () => {
+    const elenco = cantiereAppunti.filter(a => a.clientId === c.id).slice().sort((a, b) => new Date(b.created) - new Date(a.created));
+    listaAppunti.innerHTML = "";
+    if(!elenco.length){ listaAppunti.innerHTML = '<div class="sc-vuoto">Nessun appunto per questo cliente.</div>'; return; }
+    elenco.slice(0, 5).forEach(a => {
+      const r = document.createElement("div"); r.className = "sc-riga";
+      r.innerHTML = `<span class="sc-riga-punto appunto"></span><span class="sc-riga-testo">${escapeHtml(a.testo)}</span><span class="sc-riga-quando">${a.created ? new Date(a.created).toLocaleDateString("it-IT", { day: "2-digit", month: "short" }) : ""}</span>`;
+      listaAppunti.appendChild(r);
+    });
+  };
+  disegnaAppunti();
+  corpo.appendChild(listaAppunti);
+
+  if(fotoCliente.length){
+    sezione("Foto");
+    const striscia = document.createElement("div");
+    striscia.className = "sc-foto";
+    fotoCliente.slice(0, 8).forEach(f => {
+      const img = document.createElement("img");
+      img.src = f.url; img.alt = f.nota || "Foto"; img.loading = "lazy";
+      img.addEventListener("click", () => mostraSchedaFoto(f, c.name));
+      striscia.appendChild(img);
+    });
+    corpo.appendChild(striscia);
+  }
+
+  const chatScheda = document.createElement("div");
+  chatScheda.className = "scheda-chat";
+  corpo.appendChild(chatScheda);
+  const bolla = (chi, testo) => {
+    const b = document.createElement("div");
+    b.className = "scheda-bolla " + chi;
+    b.textContent = testo;
+    chatScheda.appendChild(b);
+    b.scrollIntoView({ block: "end", behavior: "smooth" });
+    return b;
+  };
+  if(opzioni.messaggio) bolla("eon", opzioni.messaggio);
+
+  // In fondo: parla con EON di questo cliente, oppure prendi un appunto
+  const piede = document.createElement("div");
+  piede.className = "sc-piede";
+  const modi = document.createElement("div");
+  modi.className = "sc-modi";
+  modi.innerHTML = '<button type="button" data-modo="eon">Chiedi a EON</button><button type="button" data-modo="appunto">Appunto</button>';
+  const composer = document.createElement("div");
+  composer.className = "scheda-composer";
+  const campo = document.createElement("textarea");
+  campo.rows = 1; campo.className = "scheda-campo"; campo.id = "schedaClienteCampo";
+  const invia = document.createElement("button");
+  invia.type = "button"; invia.className = "scheda-invia"; invia.setAttribute("aria-label", "Invia");
+  invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const nomeBreve = c.name.split(" ")[0];
+  function impostaModo(modo, focus){
+    stato.modo = modo;
+    modi.querySelectorAll("button").forEach(b => b.classList.toggle("attivo", b.dataset.modo === modo));
+    campo.placeholder = modo === "appunto" ? "Appunto per " + nomeBreve + "…" : "Chiedi a EON per " + nomeBreve + "…";
+    if(focus) campo.focus();
+  }
+  modi.addEventListener("click", (e) => { const b = e.target.closest("button[data-modo]"); if(b) impostaModo(b.dataset.modo, true); });
+
+  async function salvaAppunto(testo){
+    if(!isDbReady()){ bolla("eon", "Per salvare l'appunto serve la connessione."); return; }
+    const creato = await dbInsert("cantiere_appunti", { testo, client_id: c.id });
+    if(!creato){ bolla("eon", "Non sono riuscita a salvarlo, riprova."); return; }
+    cantiereAppunti.push({ id: creato.id, testo: creato.testo, created: creato.created_at, clientId: c.id });
+    aggiornaCantiereSottotitoli(); renderCantiereAppunti(); disegnaAppunti();
+    bolla("eon", "Appunto salvato.");
+  }
+
+  async function chiediPerCliente(testo){
+    if(!BACKEND_CONFIGURED || !currentSession){ bolla("eon", "Per chiedere a EON serve essere collegati."); return; }
+    const attesa = bolla("eon attesa", "Un attimo…");
+    try{
+      const messaggio = stato.runId ? testo
+        : `Il professionista ha aperto la scheda del cliente "${c.name}" (già in anagrafica, non crearlo di nuovo) e dice, riferito a questo cliente: "${testo}". Fallo subito; rispondi con una frase breve.`;
+      const risposta = await chiediAssistente(messaggio, stato.runId || undefined);
+      attesa.remove();
+      const azioniEseguite = risposta.azioni || [];
+      const scritte = azioniEseguite.filter(a => !["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa"].includes(a.tool));
+      const fotoTrovate = azioniEseguite.find(a => a.tool === "recupera_foto_cantiere");
+      const documentiTrovati = azioniEseguite.find(a => a.tool === "recupera_documenti_cliente");
+      if(scritte.length){
+        await aggiornaDatiToccati(scritte);
+        renderTasks(); renderCalendar(); renderSummary(); renderClientArchive(); renderChatList(); renderCantiereAppunti(); aggiornaCantiereSottotitoli();
+      }
+      const documento = scritte.find(a => a.tool === "crea_preventivo_o_fattura" && a.esito && a.esito.dati);
+      if(documento){ mostraAnteprimaDocumento(documento.esito.dati, documento.esito.id, c.name); return; }
+      if(fotoTrovate){ mostraRisorsaFoto(fotoTrovate.esito.foto || [], c.name); return; }
+      if(documentiTrovati){ mostraRisorsaDocumenti(documentiTrovati.esito.documenti || [], c.name); return; }
+      const fatti = scritte.filter(a => a.tool === "crea_impegno").map(a => "Segnato: " + a.esito.titolo + " — " + a.esito.quando_visualizzato);
+      const testoRisposta = (risposta.testo || "").trim();
+      stato.runId = /\?\s*$/.test(testoRisposta) && risposta.runId ? risposta.runId : null;
+      bolla("eon", [fatti.join("\n"), testoRisposta].filter(Boolean).join("\n") || (scritte.length ? "Fatto." : "Non ho capito, prova a dirlo in un altro modo."));
+    }catch(err){
+      attesa.remove();
+      stato.runId = null;
+      bolla("eon", "Non ci sono riuscita: " + err.message);
+    }
+  }
+
+  async function manda(testo){
+    testo = String(testo || "").trim();
+    if(!testo || stato.inCorso) return;
+    stato.inCorso = true; invia.disabled = true; campo.value = "";
+    bolla("me", testo);
+    try{ if(stato.modo === "appunto") await salvaAppunto(testo); else await chiediPerCliente(testo); }
+    finally{ stato.inCorso = false; invia.disabled = false; }
+  }
+  invia.addEventListener("click", () => manda(campo.value));
+  campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(campo.value); } });
+  const mic = creaMicRapido((t) => manda(t));
+  mic.classList.add("scheda-mic");
+  mic.setAttribute("aria-label", "Parla");
+  composer.appendChild(mic); composer.appendChild(campo); composer.appendChild(invia);
+  piede.appendChild(modi); piede.appendChild(composer);
+  impostaModo(stato.modo, false);
+
+  apriRisorsaCard(c.name, corpo, piede);
+  if(opzioni.evidenziaFoto){
+    const b = corpo.querySelector('.sc-azione[data-azione="foto"]');
+    if(b) b.classList.add("evidenziata");
+  }
+}
+
+let clienteIdPerSchedaFoto = null;
+document.getElementById("schedaClienteFotoInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  const clienteId = clienteIdPerSchedaFoto;
+  clienteIdPerSchedaFoto = null;
+  e.target.value = "";
+  if(f && clienteId) caricaCantiereFoto(f, clienteId);
 });
 
 function creaRigaCanaliInvio(clienteNome, testoDaInviare){
