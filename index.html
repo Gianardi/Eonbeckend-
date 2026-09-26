@@ -124,7 +124,9 @@
   .tab-item.active{ color:var(--indigo); }
 
   /* main */
-  main{ flex:1; padding:16px 16px 20px; }
+  /* Con EON aperto dalla Home del telefono la barra di stato (ora, batteria)
+     sta sopra la pagina: si lascia il suo spazio (26/09/2026, foto di Andrea). */
+  main{ flex:1; padding:calc(16px + env(safe-area-inset-top, 0px)) 16px 20px; }
 
   /* Ridisegnato il 23/09/2026 (Gianardi: "il logo in alto non è ben
      proporzionato rispetto al resto"). Un marchio permanente in cima a
@@ -9896,6 +9898,21 @@ function impegniDelGiorno(data){
   return voci.sort((a, b) => (a.ora || "99") < (b.ora || "99") ? -1 : 1);
 }
 
+/* "lun 28 set, 09:00" → "lunedì ore 09:00" (oggi, domani, dopodomani,
+   il giorno della settimana entro 6 giorni; più in là "lun 5 ott ore 09:00") */
+function quandoBreve(quandoVisualizzato){
+  const testo = String(quandoVisualizzato || "");
+  const d = interpretaQuando(testo);
+  const ora = estraiOra(testo);
+  if(!d) return testo;
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const diff = Math.round((d - oggi) / 86400000);
+  const giorno = diff === 0 ? "oggi" : diff === 1 ? "domani" : diff === 2 ? "dopodomani"
+    : diff > 2 && diff < 7 ? d.toLocaleDateString("it-IT", { weekday:"long" })
+    : d.toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" }).replace(".", "");
+  return giorno + (ora ? " ore " + ora : "");
+}
+
 function provaLetturaLocale(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return null;
@@ -10735,13 +10752,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
-      const fatti = impegniCreati.map(a =>
-        (a.esito.tipo === "chiamata" ? "Chiamata · " : a.esito.tipo === "incontro" ? "Appuntamento · " : "Da fare · ") +
-        a.esito.titolo + " — " + a.esito.quando_visualizzato);
-      mostra(
-        impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
-        fatti.join("\n")
-      );
+      /* Breve, come vuole Andrea (26/09/2026): "Ok, segnato lunedì ore 09:00".
+         Con più impegni, uno per riga: "lunedì ore 09:00 · Chiamare Walter". */
+      if(impegniCreati.length === 1) mostra("Ok, segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato), "");
+      else mostra("Ok, segnati " + impegniCreati.length + " impegni", impegniCreati.map(a => quandoBreve(a.esito.quando_visualizzato) + " · " + a.esito.titolo).join("\n"));
     }
 
     /* Come in organizza(): un solo avviso con "Annulla" anche per più
@@ -10761,7 +10775,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     risultatiVisibili.filter(a => a.tool !== "crea_impegno" && a.tool !== "elimina_impegno").forEach(a => {
       if(a.tool === "sposta_impegno"){
-        mostra("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
+        mostra("Ok, spostato a " + quandoBreve(a.esito.quando_visualizzato), "");
       } else if(a.tool === "annulla_impegno"){
         mostra("Impegno annullato", a.esito.titolo);
       } else if(a.tool === "elimina_cliente"){
@@ -11651,7 +11665,7 @@ function mostraSchedaCliente(c, opzioni){
       if(documento){ mostraAnteprimaDocumento(documento.esito.dati, documento.esito.id, c.name); return; }
       if(fotoTrovate){ mostraRisorsaFoto(fotoTrovate.esito.foto || [], c.name); return; }
       if(documentiTrovati){ mostraRisorsaDocumenti(documentiTrovati.esito.documenti || [], c.name); return; }
-      const fatti = scritte.filter(a => a.tool === "crea_impegno").map(a => "Segnato: " + a.esito.titolo + " — " + a.esito.quando_visualizzato);
+      const fatti = scritte.filter(a => a.tool === "crea_impegno").map(a => "Ok, segnato " + quandoBreve(a.esito.quando_visualizzato));
       const testoRisposta = (risposta.testo || "").trim();
       stato.runId = /\?\s*$/.test(testoRisposta) && risposta.runId ? risposta.runId : null;
       bolla("eon", [fatti.join("\n"), testoRisposta].filter(Boolean).join("\n") || (scritte.length ? "Fatto." : "Non ho capito, prova a dirlo in un altro modo."));

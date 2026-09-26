@@ -151,7 +151,7 @@ async function main() {
     await page.press("#schedaClienteCampo", "Enter");
     await page.waitForTimeout(500);
     const eon = await page.evaluate(() => [...document.querySelectorAll(".scheda-bolla.eon")].map((b) => b.textContent));
-    verifica("Chiedi a EON: la richiesta parte col nome del cliente e la risposta resta nella scheda", richiesteAI.length === 1 && /Rita Ambrosini/.test(richiesteAI[0]) && eon.some((t) => /Segnato: Sopralluogo Ambrosini — domani 9:00/.test(t)) && (await schedaAperta()) === "Rita Ambrosini", JSON.stringify({ richiesteAI, eon }));
+    verifica("Chiedi a EON: la richiesta parte col nome del cliente e la risposta resta nella scheda", richiesteAI.length === 1 && /Rita Ambrosini/.test(richiesteAI[0]) && eon.some((t) => /Ok, segnato domani ore 09:00/.test(t)) && (await schedaAperta()) === "Rita Ambrosini", JSON.stringify({ richiesteAI, eon }));
 
     /* ---- Cliente creato dall'AI ---- */
     await prepara();

@@ -93,6 +93,15 @@ async function main() {
     verifica("la conversazione resta nella STESSA card: richiesta, domanda, risposta, esito", conv.titolo === "Appuntamento con dini domani alle 10" && JSON.stringify(conv.bolle) === JSON.stringify(["me:appuntamento con dini domani alle 10", "eon:Ci sono due Dini: Giampiero Dini e Sara Dini. Quale intendi?", "me:giampiero", "eon:Ok, segnato con Giampiero Dini alle 10."]), JSON.stringify(conv));
     await page.click("#risorsaChiudi");
 
+    // Conferma breve (26/09, Andrea: "deve dire ok segnato a lunedì ore 09")
+    risposte = [{ stato: "concluso", runId: "r5", testo: "Fatto.", azioni: [{ tool: "crea_impegno", esito: { id: "t5", titolo: "Chiamare Walter", tipo: "chiamata", quando_visualizzato: "Domani, 09:00" } }] }];
+    await page.evaluate(() => { document.getElementById("aiToastContainer").innerHTML = ""; });
+    await page.fill("#homeHeroCampo", "chiamata walter domani ore 9 per il preventivo");
+    await page.click("#homeHeroSend");
+    await page.waitForTimeout(500);
+    const breve = await page.evaluate(() => document.getElementById("aiToastContainer").innerText.replace(/\s+/g, " ").trim());
+    verifica("appuntamento segnato: solo \"Ok, segnato domani ore 09:00\"", /Ok, segnato domani ore 09:00/.test(breve) && !/Chiamata ·|Segnato in calendario/.test(breve), breve);
+
     // Preventivo: EON chiede le voci, si risponde nella card, il preventivo si apre lì
     risposte = [
       { stato: "in_attesa_risposta", runId: "r3", testo: "Ok, te lo preparo: mi dai le voci e i prezzi del preventivo?", azioni: [] },
