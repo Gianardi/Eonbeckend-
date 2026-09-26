@@ -248,6 +248,12 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
 
 **Menu e pagamenti**
 - **La tua azienda → cruscotto**: entrate, uscite, tasse, quanto resta.
+  **Fatto (27/09)**: pagina vera dal Menu, mese/anno, calcolata dai dati
+  veri (fatture → entrate, spese → uscite, clienti). Tasse = **stima** con
+  una percentuale che l'utente cambia (30% di partenza).
+- **Fisco per mestiere** (deciso 27/09 con Andrea): regime (forfettario/
+  ordinario), IVA, contributi e coefficienti diversi per ogni professione.
+  Si fa nel dettaglio **solo dopo l'ok di 10 artigiani/professionisti**.
 - **Chiamate → rubrica**: tutti i clienti col telefono, un tocco e chiami.
 - **Cresci**: oggi "Lavori in corso", da decidere cosa diventa.
 - **Pagamenti a colpo d'occhio**: gli incassi in calendario con un colore

@@ -1391,6 +1391,42 @@
   .chat-window-name{ font-size:15px; font-weight:800; color:var(--text); }
   .chat-window-status{ font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
+  /* ===== La tua azienda (27/09/2026) ===== */
+  .az-periodo{ display:flex; width:max-content; background:var(--card); border:1px solid var(--border); border-radius:999px; padding:3px; margin:0 0 14px; }
+  .az-periodo button{ border:none; background:none; cursor:pointer; padding:7px 16px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; color:var(--muted); }
+  .az-periodo button.on{ background:var(--text); color:#fff; }
+  .az-hero{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:18px 18px 16px; margin-bottom:12px; }
+  .az-hero-label{ font-size:13px; font-weight:600; color:var(--muted); }
+  .az-hero-cifra{ font-family:'Manrope'; font-size:38px; font-weight:800; letter-spacing:-.02em; color:var(--text); margin:4px 0 12px; font-variant-numeric:tabular-nums; }
+  .az-hero-cifra.negativo{ color:var(--coral); }
+  .az-barra{ display:flex; gap:2px; height:10px; border-radius:6px; overflow:hidden; margin-bottom:10px; }
+  .az-barra i{ display:block; min-width:4px; }
+  .az-legenda{ display:flex; flex-wrap:wrap; gap:14px; font-size:12px; font-weight:600; color:var(--muted); }
+  .az-legenda i{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
+  .az-lista{ background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; margin-bottom:12px; }
+  .az-riga{ display:flex; align-items:center; gap:12px; width:100%; padding:14px; border:none; background:none; cursor:pointer; text-align:left; font:inherit; color:inherit; }
+  .az-riga + .az-riga{ border-top:1px solid var(--border); }
+  .az-ic{ width:40px; height:40px; border-radius:12px; flex:none; display:flex; align-items:center; justify-content:center; }
+  .az-ic svg{ width:19px; height:19px; }
+  .az-corpo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .az-nome{ display:flex; justify-content:space-between; gap:8px; font-size:15px; font-weight:700; color:var(--text); }
+  .az-nome span:last-child{ font-family:'Manrope'; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .az-sotto{ font-size:12.5px; color:var(--muted); }
+  .az-freccia{ width:16px; height:16px; flex:none; color:var(--faint); }
+  .az-stima{ font-style:normal; font-size:10.5px; font-weight:700; color:var(--amber); background:var(--amber-soft); padding:2px 7px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+  .az-sez{ font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); margin:6px 6px 8px; }
+  .az-clienti{ display:grid; grid-template-columns:repeat(3,1fr); background:var(--card); border:1px solid var(--border); border-radius:18px; cursor:pointer; margin-bottom:12px; }
+  .az-clienti > div{ padding:14px 8px; text-align:center; }
+  .az-clienti > div + div{ border-left:1px solid var(--border); }
+  .az-clienti b{ display:block; font-family:'Manrope'; font-size:24px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
+  .az-clienti span{ font-size:12px; font-weight:600; color:var(--muted); }
+  .az-nota{ margin:0 6px; font-size:12px; color:var(--faint); line-height:1.5; }
+  .az-tasse-card p{ margin:0 0 12px; font-size:14px; line-height:1.5; color:var(--text); }
+  .az-tasse-card .az-tasse-nota{ font-size:12.5px; color:var(--muted); }
+  .az-tasse-campo{ display:flex; align-items:center; gap:8px; margin:0 0 12px; }
+  .az-tasse-campo input{ width:90px; padding:10px 12px; border:1px solid var(--border-strong); border-radius:12px; font:inherit; font-size:20px; font-weight:800; text-align:center; color:var(--text); }
+  .az-tasse-campo span{ font-size:18px; font-weight:800; color:var(--muted); }
+
   /* ===== Centro messaggi (26/09/2026): stesso stile della Home ===== */
   #page-chat .chat-list-panel{ background:var(--bg); }
   .msg-testa{ display:flex; align-items:center; gap:10px; padding:calc(14px + env(safe-area-inset-top, 0px)) 20px 8px; flex:none; }
@@ -3494,13 +3530,13 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
-        <div class="azienda-link-card" id="laTuaAziendaCard">
+        <div class="azienda-link-card" data-page="azienda" id="laTuaAziendaCard">
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 21V9h6v12"/></svg>
           </div>
           <div class="azienda-link-card-body">
             <div class="module-title">La tua azienda</div>
-            <div class="module-sub">Clienti totali, attivi, in trattativa, valore portafoglio</div>
+            <div class="module-sub">Clienti, entrate, uscite e quanto ti resta</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -3587,6 +3623,53 @@
           <div class="stat-label" id="statValueLabel">Valore portafoglio</div>
         </div>
       </div>
+    </div>
+
+    <!-- ===== Sotto-pagina: La tua azienda (27/09/2026) =====
+         Gianardi: "se clicco su azienda deve aprirsi una pagina come le
+         altre, con clienti, entrate, uscite, tasse — collegati davvero".
+         Tutto calcolato dai dati veri (clients, incomes, payments). Le
+         tasse sono una stima con una percentuale che si cambia: il
+         calcolo per regime e mestiere arriva dopo (vedi ROADMAP). -->
+    <div class="page" id="page-azienda">
+      <div class="back-link" data-page="gestisci-azienda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Torna al Menu
+      </div>
+      <div class="az-periodo" id="azPeriodo">
+        <button type="button" class="on" data-periodo="mese" id="azPeriodoMese">Questo mese</button>
+        <button type="button" data-periodo="anno" id="azPeriodoAnno">Quest'anno</button>
+      </div>
+      <div class="az-hero">
+        <div class="az-hero-label" id="azRestaLabel">Ti restano questo mese</div>
+        <div class="az-hero-cifra" id="azResta">€0</div>
+        <div class="az-barra" id="azBarra"></div>
+        <div class="az-legenda"><span><i style="background:var(--indigo)"></i>Ti resta</span><span><i style="background:var(--coral)"></i>Uscite</span><span><i style="background:var(--amber)"></i>Tasse</span></div>
+      </div>
+      <div class="az-lista">
+        <button type="button" class="az-riga" data-page="entrate" id="azRigaEntrate">
+          <span class="az-ic" style="background:var(--green-soft);color:var(--green);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+          <span class="az-corpo"><span class="az-nome"><span>Entrate</span><span id="azEntrate">€0</span></span><span class="az-sotto" id="azEntrateSotto">Nessuna entrata</span></span>
+          <svg class="az-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <button type="button" class="az-riga" data-page="pagamenti" id="azRigaUscite">
+          <span class="az-ic" style="background:var(--coral-soft);color:var(--coral);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>
+          <span class="az-corpo"><span class="az-nome"><span>Uscite</span><span id="azUscite">€0</span></span><span class="az-sotto" id="azUsciteSotto">Nessuna uscita</span></span>
+          <svg class="az-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <button type="button" class="az-riga" id="azRigaTasse">
+          <span class="az-ic" style="background:var(--amber-soft);color:var(--amber);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></span>
+          <span class="az-corpo"><span class="az-nome"><span>Tasse <em class="az-stima">stima</em></span><span id="azTasse">€0</span></span><span class="az-sotto" id="azTasseSotto">Da mettere da parte</span></span>
+          <svg class="az-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="az-sez" id="azClientiTitolo">Clienti</div>
+      <div class="az-clienti" data-page="clienti" id="azClienti">
+        <div><b id="azClientiCorso">0</b><span>Lavori in corso</span></div>
+        <div><b id="azClientiTrattativa">0</b><span>In trattativa</span></div>
+        <div><b id="azClientiArchiviati">0</b><span>Archiviati</span></div>
+      </div>
+      <p class="az-nota" id="azNota">Si aggiorna da solo: aggiungi un cliente, una fattura o una spesa e i numeri cambiano subito.</p>
     </div>
 
     <!-- ===== Sotto-pagina: Cestino ===== -->
@@ -3762,9 +3845,9 @@
 
     <!-- ===== Sotto-pagina: Pagamenti da Fare ===== -->
     <div class="page" id="page-pagamenti">
-      <div class="back-link" data-page="gestisci-azienda">
+      <div class="back-link" data-page="azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna al Menu
+        Torna a La tua azienda
       </div>
       <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
         <div class="stat-card">
@@ -3795,9 +3878,9 @@
 
     <!-- ===== Sotto-pagina: Entrate ===== -->
     <div class="page" id="page-entrate">
-      <div class="back-link" data-page="gestisci-azienda">
+      <div class="back-link" data-page="azienda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Torna al Menu
+        Torna a La tua azienda
       </div>
       <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
         <div class="stat-card">
@@ -4397,10 +4480,10 @@ async function loadUserDataFromDB(){
   }));
   employees.length = 0; dbEmployees.forEach(e => employees.push({ id:e.id, name:e.name, role:e.role, color:e.color }));
   payments.length = 0; dbPayments.forEach(x => payments.push({
-    id:x.id, supplier:x.supplier, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status
+    id:x.id, supplier:x.supplier, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status, created:x.created_at
   }));
   incomes.length = 0; dbIncomes.forEach(x => incomes.push({
-    id:x.id, client:x.client_name, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status
+    id:x.id, client:x.client_name, desc:x.description, amount:Number(x.amount)||0, due:x.due_date, status:x.status, created:x.created_at
   }));
   tasks.length = 0; dbTasks.forEach(t => tasks.push(mappaImpegno(t)));
   goals.length = 0; dbGoals.forEach(g => goals.push({
@@ -6225,6 +6308,7 @@ function renderClientStats(){
   document.getElementById("statActive").textContent = active;
   document.getElementById("statTrattativa").textContent = inTrattativa;
   document.getElementById("statValue").textContent = "€" + totalValue.toLocaleString("it-IT");
+  aggiornaAziendaSeAperta();
 }
 
 document.getElementById("extraTile").addEventListener("click", () => {
@@ -7628,6 +7712,7 @@ function renderPayments(){
   document.getElementById("payTotalDue").textContent = "€" + totalDue.toLocaleString("it-IT");
   document.getElementById("payCountDue").textContent = payments.filter(p=>p.status!=="pagato").length;
   document.getElementById("payCountDone").textContent = payments.filter(p=>p.status==="pagato").length;
+  aggiornaAziendaSeAperta();
   renderSummary();
   saveState("eon-payments-" + currentProfession, payments);
 }
@@ -7658,7 +7743,118 @@ function renderIncomes(){
   document.getElementById("incTotal").textContent = "€" + incomes.reduce((s,i)=>s+i.amount,0).toLocaleString("it-IT");
   document.getElementById("incPending").textContent = incomes.filter(i=>i.status==="attesa").length;
   document.getElementById("incLate").textContent = incomes.filter(i=>i.status==="scaduto").length;
+  aggiornaAziendaSeAperta();
 }
+
+/* ============ LA TUA AZIENDA (27/09/2026) ============
+   Un colpo d'occhio sui conti, calcolato dai dati veri: entrate
+   (incomes: le fatture di EON ci finiscono da sole, "Rossi mi ha pagato"
+   le segna incassate), uscite (payments), clienti. Le tasse sono una
+   STIMA: una percentuale di quello che guadagni (entrate − uscite), che
+   l'utente può cambiare. Il calcolo vero per regime, IVA e mestiere
+   arriverà quando i primi 10 artigiani/professionisti diranno sì. */
+let azPeriodo = "mese";
+const AZ_TASSE_DEFAULT = 30;
+function percentualeTasse(){
+  try {
+    const v = Number(localStorage.getItem("eon-tasse-percentuale"));
+    if(v > 0 && v < 100) return v;
+  } catch(e){}
+  return AZ_TASSE_DEFAULT;
+}
+const MESI_BREVI = { gen:0, feb:1, mar:2, apr:3, mag:4, giu:5, lug:6, ago:7, set:8, ott:9, nov:10, dic:11 };
+/* Data di un'entrata/uscita: la scadenza (2026-09-28 o "05 ago 2026"),
+   altrimenti il giorno in cui è stata creata (le fatture di EON). */
+function dataVoceConti(x){
+  const d = String(x.due || "").trim();
+  let m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  m = d.toLowerCase().match(/^(\d{1,2})\s+([a-z]{3})\w*\.?\s+(\d{4})$/);
+  if(m && m[2] in MESI_BREVI) return new Date(+m[3], MESI_BREVI[m[2]], +m[1]);
+  if(x.created){ const c = new Date(x.created); if(!isNaN(c)) return c; }
+  return null;
+}
+function nelPeriodo(x, periodo, oggi){
+  const d = dataVoceConti(x);
+  if(!d) return periodo === "mese" ? false : true; // senza data: la contiamo nell'anno, non nel mese
+  if(d.getFullYear() !== oggi.getFullYear()) return false;
+  return periodo === "anno" || d.getMonth() === oggi.getMonth();
+}
+const euroConti = n => (n < 0 ? "−€" : "€") + Math.round(Math.abs(n)).toLocaleString("it-IT");
+
+function contiAzienda(periodo, oggi){
+  oggi = oggi || new Date();
+  const ent = incomes.filter(i => nelPeriodo(i, periodo, oggi));
+  const usc = payments.filter(p => nelPeriodo(p, periodo, oggi));
+  const somma = a => a.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+  const entrate = somma(ent), incassati = somma(ent.filter(i => i.status === "incassato"));
+  const uscite = somma(usc), pagate = somma(usc.filter(p => p.status === "pagato"));
+  const perc = percentualeTasse();
+  const tasse = Math.max(0, entrate - uscite) * perc / 100;
+  return { entrate, incassati, daIncassare: entrate - incassati, nEntrate: ent.length,
+           uscite, pagate, daPagare: uscite - pagate, nUscite: usc.length,
+           perc, tasse, resta: entrate - uscite - tasse };
+}
+
+function renderAzienda(){
+  if(!document.getElementById("page-azienda")) return;
+  const c = contiAzienda(azPeriodo);
+  const nomeMese = new Date().toLocaleDateString("it-IT", { month:"long" });
+  document.getElementById("azPeriodoMese").textContent = nomeMese.charAt(0).toUpperCase() + nomeMese.slice(1);
+  document.getElementById("azPeriodoAnno").textContent = String(new Date().getFullYear());
+  document.querySelectorAll("#azPeriodo [data-periodo]").forEach(b => b.classList.toggle("on", b.dataset.periodo === azPeriodo));
+  document.getElementById("azRestaLabel").textContent = azPeriodo === "mese" ? "Ti restano questo mese" : "Ti restano quest'anno";
+  const resta = document.getElementById("azResta");
+  resta.textContent = euroConti(c.resta);
+  resta.classList.toggle("negativo", c.resta < 0);
+
+  const barra = document.getElementById("azBarra");
+  const pezzi = [[Math.max(0, c.resta), "var(--indigo)"], [c.uscite, "var(--coral)"], [c.tasse, "var(--amber)"]].filter(x => x[0] > 0);
+  barra.innerHTML = pezzi.length ? pezzi.map(([v, col]) => '<i style="flex:' + v + ';background:' + col + '"></i>').join("") : '<i style="flex:1;background:var(--border)"></i>';
+
+  document.getElementById("azEntrate").textContent = euroConti(c.entrate);
+  document.getElementById("azEntrateSotto").textContent = c.nEntrate ? "Incassati " + euroConti(c.incassati) + " · da incassare " + euroConti(c.daIncassare) : "Nessuna entrata in questo periodo";
+  document.getElementById("azUscite").textContent = euroConti(c.uscite);
+  document.getElementById("azUsciteSotto").textContent = c.nUscite ? "Pagate " + euroConti(c.pagate) + " · da pagare " + euroConti(c.daPagare) : "Nessuna uscita in questo periodo";
+  document.getElementById("azTasse").textContent = euroConti(c.tasse);
+  document.getElementById("azTasseSotto").textContent = c.perc + "% di quello che guadagni";
+
+  const attivi = clients.filter(x => !x.archived);
+  document.getElementById("azClientiTitolo").textContent = "Clienti · " + attivi.length;
+  document.getElementById("azClientiCorso").textContent = attivi.filter(x => x.status === "attivo").length;
+  document.getElementById("azClientiTrattativa").textContent = attivi.filter(x => x.status !== "attivo").length;
+  document.getElementById("azClientiArchiviati").textContent = clients.filter(x => x.archived).length;
+}
+function aggiornaAziendaSeAperta(){ const pg = document.getElementById("page-azienda"); if(pg && pg.classList.contains("visible")) renderAzienda(); }
+
+document.getElementById("azPeriodo").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-periodo]");
+  if(!b) return;
+  azPeriodo = b.dataset.periodo;
+  renderAzienda();
+});
+
+/* Tasse: la percentuale da mettere da parte si cambia qui */
+document.getElementById("azRigaTasse").addEventListener("click", () => {
+  const corpo = document.createElement("div");
+  corpo.className = "az-tasse-card";
+  corpo.innerHTML = `
+    <p>È una <b>stima</b> di quanto mettere da parte per tasse e contributi, su quello che guadagni (entrate meno uscite).</p>
+    <label class="az-tasse-campo"><input type="number" inputmode="decimal" min="1" max="99" step="1" id="azTassePerc" value="${percentualeTasse()}"><span>%</span></label>
+    <p class="az-tasse-nota">Se il tuo commercialista ti ha dato una percentuale, mettila qui. Più avanti EON la calcolerà da solo in base al tuo regime e al tuo mestiere.</p>
+    <button type="button" class="primary-btn" id="azTasseSalva">Salva</button>`;
+  apriRisorsaCard("Tasse da mettere da parte", corpo);
+  const campo = corpo.querySelector("#azTassePerc");
+  const salva = () => {
+    const v = Math.round(Number(String(campo.value).replace(",", ".")));
+    if(!(v > 0 && v < 100)){ campo.focus(); return; }
+    try { localStorage.setItem("eon-tasse-percentuale", String(v)); } catch(e){}
+    chiudiRisorsaCard();
+    renderAzienda();
+  };
+  corpo.querySelector("#azTasseSalva").addEventListener("click", salva);
+  campo.addEventListener("keydown", (e) => { if(e.key === "Enter") salva(); });
+});
 
 /* ============ CARTA INTESTATA ============ */
 /* Marchio di ogni documento generato (Fattura, Preventivo, Lettera,
@@ -9173,10 +9369,6 @@ function collegaHubRacconta(){
 
 function chiudiHubAI(){ document.getElementById("aiHubOverlay").style.display = "none"; }
 
-document.getElementById("laTuaAziendaCard").addEventListener("click", () => {
-  const box = document.getElementById("cruscottoAziendaBox");
-  box.style.display = box.style.display === "none" ? "grid" : "none";
-});
 document.getElementById("cambiaProfessioneCard")?.addEventListener("click", () => { // voce tolta dal Menu il 25/09/2026
   document.querySelectorAll("#cambiaProfessioneCards .ob-card").forEach(c => {
     c.classList.toggle("selected", c.dataset.profession === currentProfession);
@@ -10113,8 +10305,9 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "cantiere-cliente": ["cliente cantiere"],
   "impostazioni": ["impostazioni", "le impostazioni"],
   "fatture-preventivi": ["fatture", "preventivi", "fatture e preventivi", "preventivi e fatture", "le fatture", "i preventivi", "le mie fatture", "i miei preventivi"],
-  "pagamenti": ["pagamenti"],
-  "entrate": ["entrate"],
+  "azienda": ["azienda", "la mia azienda", "la tua azienda", "cruscotto", "il cruscotto", "i conti", "i miei conti"],
+  "pagamenti": ["pagamenti", "uscite", "le uscite", "spese", "le spese"],
+  "entrate": ["entrate", "le entrate", "incassi", "gli incassi"],
 };
 
 /* Apertura riconosciuta: solo il verbo di navigazione (con la sua
@@ -13528,7 +13721,8 @@ const pageMeta = {
   business: { title:"Business", sub:null },
   "gestisci-azienda": { title:"Menu", sub:null },
   "assegna-compiti": { title:"Assegna Compiti", sub:null },
-  pagamenti: { title:"Pagamenti", sub:null },
+  azienda: { title:"La tua azienda", sub:null },
+  pagamenti: { title:"Uscite", sub:null },
   entrate: { title:"Entrate", sub:null },
   "crea-fattura": { title:"Crea Fattura", sub:null },
   "crea-preventivo": { title:"Crea Preventivo", sub:null },
@@ -13558,7 +13752,7 @@ const tabForPage = {
   clienti:"clienti",
   chat:"azienda",
   cresci:"cresci",
-  "gestisci-azienda":"azienda", "assegna-compiti":"azienda", pagamenti:"azienda", entrate:"azienda",
+  "gestisci-azienda":"azienda", azienda:"azienda", "assegna-compiti":"azienda", pagamenti:"azienda", entrate:"azienda",
   "crea-fattura":"azienda", "crea-preventivo":"azienda", regalo:"azienda", business:"azienda",
   "assemblee":"azienda", "udienze":"azienda", "revisioni":"azienda",
   calendario:"home", chiamate:"home",
@@ -13610,6 +13804,7 @@ function navigateTo(page){
   }
 
   if(page === "cestino") renderCestino();
+  if(page === "azienda") renderAzienda();
   const btnImpSezione = document.getElementById("topbarImpostazioni");
   if(btnImpSezione) btnImpSezione.hidden = !(IMPOSTAZIONI_SEZIONE && IMPOSTAZIONI_SEZIONE[page]);
   if(page === "impostazioni") disegnaImpostazioni();
