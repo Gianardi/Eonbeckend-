@@ -3774,3 +3774,39 @@ worker (per non rischiare versioni vecchie in cache).
 Mandate 3 ipotesi ad Andrea (A logo a sinistra e data a destra, B data come
 un foglio di calendario, C tutto centrato), tutte con "Buongiorno, Andrea".
 In attesa della scelta.
+
+## Meno AI, fase 1 — analisi delle richieste vere di settembre (26/09/2026)
+
+**Passo 0 fatto**: da oggi `ai_request_log` salva per ogni richiesta i token
+veri (ingresso, uscita, cache scritta/letta), il costo stimato in dollari
+(listino: Haiku 4.5 $1/$5, Sonnet 4.5 $3/$15 per milione; cache 1,25× e
+0,1×) e il tipo di richiesta (`intento`: operazione/oggetto/entità
+dichiarati dall'AI). Migrazione `supabase/ai_request_log_consumo.sql`
+(staging + produzione, solo aggiunte). Test in `percorso-documento.test.mjs`.
+
+**Analisi** (139 richieste all'AI dall'1 al 26/09, quasi tutte di Andrea;
+Sonnet 75 in media 10,6 s, Haiku 63 in media 5,0 s). Conteggi a mano,
+approssimati:
+
+| Gruppo | Richieste | Esempi |
+|---|---|---|
+| Già senza AI dopo i pacchetti del 25-26/09 | ~29 (21%) | foto/documenti/preventivi di un cliente, DURC, appunti, nome del cliente, meteo |
+| **1 · Si può scrivere nel codice** | ~60 (43%) | impegno con giorno e ora ("Chiamata Valter lunedì alle 9"), correzioni ("no alle 11", "sposta hunter alle 11"), "cosa ho da fare domani", cancellazioni con conferma, cliente nuovo con telefono ("Luca Ferretti 333… bagno"), fattura/preventivo con cliente+importo+lavoro chiari, "fai la foto", scelta tra omonimi con pulsanti ("Giampiero"), saluti |
+| 2 · AI piccola (Haiku, istruzioni corte) | ~27 (19%) | dettati con più impegni insieme, modifiche a voce di un documento, fatture con frase ambigua, correzioni di un nome ("non Bake ma bike") |
+| 3 · AI completa | ~23 (17%) | domande tecniche (IVA, TFR, SCIA, delibere), consigli ("cosa mi consigli domani"), richieste in più passi ("registra il versamento e mandagli il PDF") |
+
+Dopo la fase 1: **~64% senza AI** (oggi ~21%), risposta in meno di mezzo
+secondo invece di 5-11 s. Costo AI stimato per cliente: da ~10-25 € a
+~4-10 €/mese, e ~2-5 € con le istruzioni accorciate (stime: da
+confermare con i token veri che si registrano da oggi).
+
+**Ordine proposto per "fare"** (per frequenza):
+1. impegni semplici + correzioni d'orario + "cosa ho da fare domani/lunedì";
+2. fatture e preventivi con cliente, importo e lavoro chiari (oggi l'AI
+   legge la frase e il codice esegue: togliere anche la lettura);
+3. cliente nuovo con telefono e lavoro;
+4. cancellazioni (sempre con conferma);
+5. scelta tra clienti omonimi con pulsanti invece di una domanda all'AI;
+6. saluti e "fai la foto".
+Ogni punto con i suoi test; nel dubbio la frase va all'AI (un mancato
+riconoscimento è innocuo, un riconoscimento sbagliato no).

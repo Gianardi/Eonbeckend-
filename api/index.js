@@ -2649,8 +2649,31 @@ async function registraOperazione(user, tool, input, esito, stato) {
    Supabase lento in un timeout per l'utente che aspetta la vera
    risposta di EON — meglio perdere questa singola riga di log che
    bloccare la conversazione. */
+/* Costo di una risposta dell'AI, dai token veri che Anthropic restituisce
+   in "usage" (26/09/2026, "meno AI" passo 0). Prezzi per milione di token
+   (listino ufficiale): Haiku 4.5 $1 in / $5 out, Sonnet 4.5 $3 / $15;
+   cache: scrittura 1,25× il prezzo di ingresso, lettura 0,1×. */
+const PREZZI_MODELLI = { haiku: { input: 1, output: 5 }, sonnet: { input: 3, output: 15 } };
+function nuovoConsumo() { return { input: 0, output: 0, cacheScritti: 0, cacheLetti: 0, costo: 0 }; }
+function sommaConsumo(consumo, modello, usage) {
+  if (!usage) return;
+  const p = /haiku/i.test(modello || "") ? PREZZI_MODELLI.haiku : PREZZI_MODELLI.sonnet;
+  const inp = usage.input_tokens || 0, out = usage.output_tokens || 0;
+  const cw = usage.cache_creation_input_tokens || 0, cr = usage.cache_read_input_tokens || 0;
+  consumo.input += inp; consumo.output += out; consumo.cacheScritti += cw; consumo.cacheLetti += cr;
+  consumo.costo += (inp * p.input + out * p.output + cw * p.input * 1.25 + cr * p.input * 0.1) / 1e6;
+}
+
 async function registraRichiesta(dati) {
+  const c = dati.consumo;
+  const it = dati.intento;
   await scriviRegistro("ai_request_log", {
+    token_input: c ? c.input : null,
+    token_output: c ? c.output : null,
+    token_cache_scritti: c ? c.cacheScritti : null,
+    token_cache_letti: c ? c.cacheLetti : null,
+    costo_usd: c ? Math.round(c.costo * 100000) / 100000 : null,
+    intento: it ? [it.operazione, it.oggetto, it.entita && it.entita.tipo].filter(Boolean).join("/") : null,
     owner_id: dati.user.id,
     tipo: dati.tipo,
     messaggio: dati.messaggio || null,
@@ -3351,6 +3374,7 @@ async function handleAssistant(req, res, user, accessToken) {
   let runReclamato = false; // true dal momento in cui il run passa a "in_corso": da qui in poi va sempre richiuso, mai lasciato a metà
   let modelloUsato = null; // impostato dentro proseguiAssistente() appena si sceglie/ripiega su un modello — resta null se il turno non ha chiamato nessun modello (es. conferma con salto del giro finale)
   let giriUsati = 0;
+  const consumo = nuovoConsumo(); // token e costo veri di questo turno (tutti i giri)
 
   const inizioTurno = Date.now();
   const tipoTurno = runId ? (typeof body.conferma === "boolean" ? "conferma" : "continuazione") : "nuovo";
@@ -3364,7 +3388,7 @@ async function handleAssistant(req, res, user, accessToken) {
     await registraRichiesta({
       user, tipo: tipoTurno, messaggio: body.messaggio, risposta: risposta && risposta.testo, modello: modelloUsato, giri: giriUsati,
       strumenti: azioniEseguite.map((a) => a.tool), stato: risposta && risposta.stato,
-      durataMs: Date.now() - inizioTurno,
+      durataMs: Date.now() - inizioTurno, consumo, intento: intentoPerRegistro(),
     });
     return risposta;
   } catch (err) {
@@ -3384,9 +3408,13 @@ async function handleAssistant(req, res, user, accessToken) {
     await registraRichiesta({
       user, tipo: tipoTurno, messaggio: body.messaggio, modello: modelloUsato, giri: giriUsati,
       strumenti: azioniEseguite.map((a) => a.tool), errore: err.message || String(err),
-      durataMs: Date.now() - inizioTurno,
+      durataMs: Date.now() - inizioTurno, consumo, intento: intentoPerRegistro(),
     });
     throw err;
+  }
+
+  function intentoPerRegistro() {
+    try { return estraiIntentoDaMessaggi(messages || []); } catch (e) { return null; }
   }
 
   async function proseguiAssistente() {
@@ -3696,6 +3724,7 @@ async function handleAssistant(req, res, user, accessToken) {
       }
 
       data = await r.json();
+      sommaConsumo(consumo, modelloUsato, data && data.usage);
 
       /* "Non sicuro" vuol dire che Haiku, al giro decisionale, non ha
          chiamato nessuno strumento E la risposta non è nemmeno una
