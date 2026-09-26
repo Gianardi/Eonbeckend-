@@ -278,9 +278,15 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
     conservazione per 10 anni. (B) EON si collega al programma che
     l'artigiano usa già (es. Fatture in Cloud, API incluse nella
     licenza): meno responsabilità, ma solo per chi ce l'ha e lo paga.
-    Consiglio: (A), perché EON fa tutto; (B) come alternativa per chi ha
-    già un programma o un commercialista che lo usa. Prima prova
-    nell'ambiente di test dello SdI.
+    **Decisione di Andrea (27/09): strada (B)**, perché gli artigiani
+    hanno già tutti un loro servizio di fatturazione: EON è partner, non
+    concorrente (e l'App Store di Fatture in Cloud può essere un canale
+    per trovare clienti). Ai primi artigiani si chiede quale usano, e si
+    parte dai più diffusi (Fatture in Cloud, Aruba…).
+    **Strada (A) = fonte di business futura**: EON autonomo sulle fatture
+    (invio diretto allo SdI tramite servizio ponte), da valutare più
+    avanti come ricavo in più. Prima di farla: prove nell'ambiente di
+    test dello SdI.
   - *Banca.* Tramite un fornitore autorizzato (Tink, Salt Edge, Yapily,
     Enable Banking…; GoCardless Bank Account Data ha chiuso). Prezzo per
     conto collegato al mese, solo su preventivo, di solito con un minimo
