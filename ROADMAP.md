@@ -1,6 +1,6 @@
 # EON — Roadmap completa
 
-Aggiornata al 26/09/2026. Un solo posto con tutto quello che resta da fare,
+Aggiornata al 26/09/2026 (sera). Un solo posto con tutto quello che resta da fare,
 in ordine. Il dettaglio tecnico di ogni punto è in `TODO.md`.
 
 **In breve**
@@ -202,7 +202,7 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
 
 ## 3. Una "vera app" sul telefono
 
-- **[Claude] Installabile** dal browser ("Aggiungi a Home") con icona e
+- **[fatto 26/09] Installabile** dal browser ("Aggiungi a Home") con icona e
   schermata di avvio.
 - **[insieme] App Store e Google Play** (dopo): servono gli account
   sviluppatore (Apple 99 $/anno, Google 25 $ una volta).
@@ -267,7 +267,10 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
 - Cosa metterci davvero: da decidere insieme.
 
 **Servizi esterni** (servono fornitore e costo)
-- Meteo per i cantieri · Mappe e traffico tra cantieri.
+- ~~Meteo per i cantieri~~ **fatto il 26/09** (MET Norway, gratis).
+- **Tempi di viaggio col traffico** dentro EON: serve Google Maps (account
+  Google Cloud di Andrea; gratis fino a qualche migliaio di calcoli al mese,
+  stima). Oggi EON apre le Mappe del telefono con il percorso.
 
 **Da controllare**
 - Fuso orario delle date calcolate dal server (il server lavora in UTC).
@@ -465,6 +468,13 @@ memoria del lavoro difficilmente cambia (pochi clienti persi).
 - Onestà: dire cosa è una stima, cosa non è provato, cosa non conviene.
 
 ---
+
+## Fatto il 26/09/2026 (prossimo pacchetto)
+
+Scheda del cliente dal nome (contatti, foto, appunti, stato lavori, EON) ·
+foto + nuovo cliente · documenti dell'impresa e card per nome (DURC, carta
+intestata…) · caricamento immediato e foto compresse · domande di EON dentro
+la card · meteo gratuito · percorsi nelle Mappe · EON sulla Home del telefono.
 
 ## Fatto il 25/09/2026 (nel pacchetto #97 o già online)
 
