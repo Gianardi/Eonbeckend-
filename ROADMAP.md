@@ -13,8 +13,10 @@ in ordine. Il dettaglio tecnico di ogni punto è in `TODO.md`.
 - 4 · Funzioni del prodotto.
 - 5 · Il cervello di EON:
   - 5b · **meno AI, stessa qualità**: apprendimento e **modello AI nostro**;
-  - 5c · **EON Admin**, il tuo pannello privato.
+  - 5c · **EON Admin**, il tuo pannello privato;
+  - 5d · **EON "mente" del professionista**, che diventa come lui.
 - 6 · Mercato: da 5 a 50 artigiani.
+- 7 · Quanto può valere EON, e i principi di lavoro.
 
 Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
 **[Claude]** lo faccio io · **[insieme]** servono tutti e due.
@@ -225,24 +227,56 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
 - **Documenti impresa**: EON legge da solo la scadenza (es. DURC) e ricorda
   il rinnovo 30 giorni prima.
 
-**Menu**
+**Menu e pagamenti**
 - **La tua azienda → cruscotto**: entrate, uscite, tasse, quanto resta.
 - **Chiamate → rubrica**: tutti i clienti col telefono, un tocco e chiami.
 - **Cresci**: oggi "Lavori in corso", da decidere cosa diventa.
+- **Pagamenti a colpo d'occhio**: gli incassi in calendario con un colore
+  diverso dagli altri impegni; chi ha pagato e chi no in una schermata.
+- **Card rinominabili** per i mestieri (es. "Foto cantiere" → come vuoi
+  tu): cambia solo il nome, non cosa fa.
 
-**Messaggi = Communication Hub**
-- Messaggi diventa il punto unico: EON, **WhatsApp** ed **email** arrivano
-  nella chat del cliente giusto. Progetto grande, a sé.
+**Communication Hub — Messaggi diventa il punto unico** (progetto grande)
+- EON, **WhatsApp** ed **email** arrivano e partono dalla chat del cliente
+  giusto: una sola conversazione per cliente, qualunque canale usi.
+- EON legge i messaggi in arrivo, li collega al cliente, propone la
+  risposta e segna gli impegni che ci sono dentro ("ci vediamo giovedì").
+- Nella scheda di foto e documenti i pulsanti WhatsApp/Email ci sono già
+  ma sono spenti ("presto disponibile") fino all'Hub; oggi funziona EON.
+- **Ordine deciso (03/09)**: prima EON usato davvero con dati veri, poi
+  l'Hub, poi una prova finale con tutto insieme. Mai il contrario: un
+  errore del cervello non deve mandare un messaggio vero a un cliente
+  vero.
+- Serve: WhatsApp Business (account Meta, costo per messaggio), un
+  servizio email, consenso privacy.
 
 **Voce**
-- Voce umana di EON (non robotica) e trascrizione di registrazioni e
-  telefonate (programma OpenAI, già in parte configurato).
+- EON che parla anche nella schermata AI grande e che legge ad alta voce
+  le domande di conferma.
+- **Programma OpenAI** (chiave già sul server): voce umana non robotica;
+  **trascrizione di telefonate e vocali dei clienti**; dalla trascrizione
+  EON segna da solo in calendario gli impegni presi ("ti richiamo
+  venerdì").
+
+**Piano Free "Organizza la giornata"** (uso personale, non i 4 mestieri)
+- **Cartelle libere** create dall'utente ("Casa", "Palestra",
+  "Ristrutturazione"), che EON riconosce a voce: "segnami in Casa di
+  chiamare l'idraulico".
+- Schermata di benvenuto che spiega come funziona e che le cartelle si
+  personalizzano.
+- Cosa metterci davvero: da decidere insieme.
 
 **Servizi esterni** (servono fornitore e costo)
 - Meteo per i cantieri · Mappe e traffico tra cantieri.
 
 **Da controllare**
 - Fuso orario delle date calcolate dal server (il server lavora in UTC).
+- Riconoscere un documento anche dal contenuto, non solo dal nome.
+
+**Piccole cose già decise**
+- Ingranaggio delle impostazioni anche in Calendario, Clienti, Messaggi,
+  quando avranno impostazioni loro.
+- Ricerca dei documenti dell'impresa per nome, come per i clienti.
 
 **Grafica**
 - Una sessione dedicata alla grafica di tutta l'app.
@@ -256,10 +290,19 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
 - Un codice per ogni richiesta che colleghi tutto quello che EON ha fatto
   ("perché EON ha fatto questa cosa?").
 - Memoria di contesto più lunga dei 90 secondi di oggi.
-- Suite di valutazione automatica (il "libro" dei professionisti).
+- **Il "libro" dei professionisti**: centinaia di situazioni vere per
+  mestiere (edile fatto; poi strato comune, amministratore di condominio,
+  elettricista, avvocato) trasformate in test automatici, per trovare gli
+  errori prima dei clienti. Il libro resta nostro, non entra nel prompt.
+- Controllo automatico dello schema del database a ogni pubblicazione
+  (oggi si lancia a mano).
 - Risposta ancora più veloce (un solo giro con l'AI invece di due).
 - Ragionamento più accurato solo sui casi difficili (date, calcoli).
-- EON impara dalle risposte tecniche già date (più utenti, meno ricerche).
+- **EON impara dalle risposte tecniche già date** (idea di Andrea, il
+  "principio democratico": es. TFR, SCIA, delibere condominiali): più
+  utenti, meno ricerche e meno AI. Rischio da risolvere PRIMA: una
+  risposta sbagliata salvata si ripeterebbe per tutti; serve sapere quando
+  una risposta salvata è vecchia e va rifatta.
 - Abitudini nel tempo ("ogni lunedì chiami Rossi") — quando ci sarà uso
   reale.
 
@@ -349,6 +392,25 @@ richiesta di tutti gli utenti insieme, **mai i messaggi privati**.
 - **Da togliere nella versione commerciale**: il "Registro AI" che oggi
   vede l'utente in Impostazioni → Aiuto (serve a noi, non a lui).
 
+### 5d. EON "mente" del professionista (visione di Andrea, 17/09/2026)
+
+*"EON deve diventare sempre di più come il professionista che lo usa."*
+Oggi EON è personalizzato per **mestiere** (uguale per tutti gli
+idraulici); il passo dopo è per **persona**. Con quello che abbiamo già,
+senza tecnologie nuove:
+- **Il suo modo di scrivere**: EON impara il tono dai messaggi che
+  l'artigiano ha già mandato ai clienti (come Gmail).
+- **Le correzioni valgono per sempre**: se lo correggi due volte sulla
+  stessa cosa, la terza la fa giusta da solo.
+- **Ricordi veri**: prima di rispondere, EON guarda come ha già gestito
+  situazioni simili con quel cliente.
+- **Memoria a due livelli**: cosa vale oggi ("chiama Rossi") e cosa vale
+  sempre ("lavora il sabato mattina").
+- **"Cosa ricordo di te"**: una pagina onesta che mostra cosa EON sa di
+  te e perché l'ha usato; si può correggere o cancellare.
+Ordine: prima il modo di scrivere (i dati ci sono già). Va insieme a EON
+Memory (2b): più EON ricorda, più è tuo.
+
 ---
 
 ## 6. Mercato
@@ -368,9 +430,39 @@ davvero):
    tempo". Con 50 che lo usano e pagano: azienda vera, numeri veri sui
    costi, apprendimento che funziona, più facile trovare investitori.
 
+- **[Andrea] Da subito: dati veri e uso quotidiano** — una decina di
+  clienti veri nell'app, usarla ogni giorno e segnare (col feedback) ogni
+  volta che EON non fa quello che ti aspetti: frase esatta + cosa è
+  successo.
 - Conta chi lo **usa** ogni giorno, non chi si iscrive.
 - Raccogliere i feedback (c'è già "Manda un feedback") e sistemare.
 - Decidere il prezzo con i dati veri di uso e di costo.
+
+---
+
+## 7. Quanto può valere EON, e i principi di lavoro
+
+**Scenari di valore** (22/09/2026, metodo standard per i software in
+abbonamento: multiplo del fatturato annuo; stime, prezzo non ancora
+deciso):
+
+| Clienti paganti | a 20 €/mese | a 40 €/mese | a 60 €/mese |
+|---|---|---|---|
+| **500** (fatturato 120–360 mila €/anno) | 0,36–0,96 M€ | 0,72–1,9 M€ | 1,1–2,9 M€ |
+| **10.000** (fatturato 2,4–7,2 M€/anno) | 12–24 M€ | 24–48 M€ | 36–72 M€ |
+
+A 500 interessa a business angel e piccoli fondi italiani; a 10.000 a
+fondi veri. Punto di forza: chi mette in EON calendario, clienti e
+memoria del lavoro difficilmente cambia (pochi clienti persi).
+
+**Principi di lavoro (sempre validi)**
+- I tre pilastri: ogni funzione rafforza tempo, memoria o soldi.
+- **Imparare dalle grandi app**: prima di inventare, guardare come lo
+  risolvono WhatsApp, Gmail, Apple, e adattarlo; ogni proposta spiegata
+  nel merito, mai "perché lo fa Google".
+- Meno AI, qualità mai più bassa (5b).
+- Testare prima di consegnare; un pacchetto, un merge, un link.
+- Onestà: dire cosa è una stima, cosa non è provato, cosa non conviene.
 
 ---
 
