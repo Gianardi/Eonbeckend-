@@ -113,6 +113,26 @@ function controlloAutomatico(caso, risposta) {
     risultati.push({ descrizione: `il testo ${caso.atteso.testo_finisce_con_domanda ? "" : "NON "}finisce con un punto interrogativo`, ok: finisceConDomanda === caso.atteso.testo_finisce_con_domanda, dettaglio: `testo: "${testo}"` });
   }
 
+  /* Nato dal bug reale del 23/09/2026 (vedi TODO.md): l'assistente ha
+     dichiarato un preventivo "creato e salvato" senza aver mai chiamato
+     crea_preventivo_o_fattura — nessun documento esisteva davvero.
+     Questo controllo generale intercetta la STESSA classe di bug su
+     qualunque strumento delicato: se il turno si conclude (non è una
+     domanda aperta) SENZA aver eseguito lo strumento dichiarato
+     obbligatorio, è un falso "fatto" — anche se il testo suona giusto. */
+  if (caso.atteso.strumento_richiesto_se_conclude !== undefined) {
+    const testo = (risposta.testo || risposta.domanda || "").trim();
+    const eDomandaAperta = /\?\s*$/.test(testo);
+    const strumentiOttenuti = (risposta.azioni || []).map((a) => a.tool);
+    const chiamato = strumentiOttenuti.includes(caso.atteso.strumento_richiesto_se_conclude);
+    const ok = eDomandaAperta || chiamato;
+    risultati.push({
+      descrizione: `se il turno si conclude, deve aver chiamato ${caso.atteso.strumento_richiesto_se_conclude} (mai un "fatto" finto)`,
+      ok,
+      dettaglio: `stato="${risposta.stato}", domanda_aperta=${eDomandaAperta}, azioni=[${strumentiOttenuti.join(", ")}], testo: "${testo}"`,
+    });
+  }
+
   return risultati.length ? risultati : null;
 }
 

@@ -2542,6 +2542,26 @@ const TOOLS = {
      limite, e resta comunque loggato come ogni altro tool
      (registraOperazione) — è la base per capire in futuro quali
      RISORSE mancano davvero nel registro. */
+  meteo: {
+    risk: "read",
+    categoria: "supporto",
+    schema: {
+      name: "meteo",
+      description: "Previsioni del tempo vere (MET Norway) per un luogo e un giorno, fino a 9 giorni avanti: cielo, minima e massima, pioggia in mm, vento, e alcune ore della giornata. Usalo per 'che tempo fa', 'piove domani a Pisa?', 'posso gettare il cemento sabato a Lerici?'. Se l'utente non dice il luogo e non si capisce dal contesto (es. il cantiere del cliente), chiedilo.",
+      input_schema: {
+        type: "object",
+        properties: {
+          luogo: { type: "string", description: "Città o indirizzo, es. 'Pisa', 'Lerici', 'viale Nicolò Fieschi, La Spezia'" },
+          giorno: { type: "string", description: "'oggi', 'domani', 'dopodomani' oppure una data AAAA-MM-GG" },
+        },
+        required: ["luogo"],
+      },
+    },
+    async run(input) {
+      return await previsioniMeteo({ luogo: input.luogo, giorno: input.giorno || "oggi" });
+    },
+  },
+
   capacita_non_disponibile: {
     risk: "read",
     categoria: "supporto",
@@ -4768,6 +4788,133 @@ export { estraiIntentoDaMessaggi, costruisciFocus };
    Punto di ingresso unico
    ============================================================ */
 
+/* ------------------------------------------------------------
+   Meteo (26/09/2026). Previsioni dell'istituto meteorologico norvegese
+   (MET Norway, api.met.no): gratuite anche per uso commerciale, con gli
+   stessi modelli europei dei siti meteo seri; chiedono solo un
+   User-Agent che dica chi siamo. Il luogo detto a voce si trasforma in
+   coordinate con OpenStreetMap (Nominatim, gratuito, uso moderato).
+   ------------------------------------------------------------ */
+const METEO_USER_AGENT = "EON/1.0 (+https://eonbeckend.vercel.app)";
+const METEO_FUSO = "Europe/Rome";
+const DESCRIZIONE_METEO = {
+  clearsky: "Sereno", fair: "Poco nuvoloso", partlycloudy: "Parzialmente nuvoloso", cloudy: "Nuvoloso", fog: "Nebbia",
+  lightrain: "Pioggia debole", rain: "Pioggia", heavyrain: "Pioggia forte",
+  lightrainshowers: "Qualche rovescio", rainshowers: "Rovesci", heavyrainshowers: "Rovesci forti",
+  lightsleet: "Nevischio", sleet: "Nevischio", heavysleet: "Nevischio forte", lightsleetshowers: "Nevischio", sleetshowers: "Nevischio", heavysleetshowers: "Nevischio forte",
+  lightsnow: "Neve debole", snow: "Neve", heavysnow: "Neve forte", lightsnowshowers: "Qualche nevicata", snowshowers: "Nevicate", heavysnowshowers: "Nevicate forti",
+};
+function descriviSimbolo(codice) {
+  const base = String(codice || "").replace(/_(day|night|polartwilight)$/, "");
+  if (/thunder/.test(base)) return "Temporale";
+  return DESCRIZIONE_METEO[base] || "Variabile";
+}
+function categoriaSimbolo(codice) {
+  const b = String(codice || "");
+  if (/thunder/.test(b)) return "temporale";
+  if (/snow|sleet/.test(b)) return "neve";
+  if (/rain/.test(b)) return "pioggia";
+  if (/fog/.test(b)) return "nebbia";
+  if (/cloudy/.test(b) && !/partly/.test(b)) return "nuvoloso";
+  if (/partlycloudy|fair/.test(b)) return "variabile";
+  return "sereno";
+}
+const dataLocale = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: METEO_FUSO, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+const oraLocale = (d) => Number(new Intl.DateTimeFormat("en-GB", { timeZone: METEO_FUSO, hour: "2-digit", hour12: false }).format(d)) % 24;
+
+async function trovaLuogo(nome) {
+  const u = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=it&countrycodes=it&q=" + encodeURIComponent(nome);
+  let r = await fetch(u, { headers: { "User-Agent": METEO_USER_AGENT } });
+  let righe = r.ok ? await r.json() : [];
+  if (!Array.isArray(righe) || !righe.length) {
+    // Fuori dall'Italia
+    r = await fetch(u.replace("&countrycodes=it", ""), { headers: { "User-Agent": METEO_USER_AGENT } });
+    righe = r.ok ? await r.json() : [];
+  }
+  if (!Array.isArray(righe) || !righe.length) return null;
+  const x = righe[0];
+  const nomeBreve = String(x.name || x.display_name || nome).split(",")[0];
+  return { lat: Number(x.lat), lon: Number(x.lon), nome: nomeBreve };
+}
+
+/* Il nome del paese dalla posizione del telefono ("Lerici"), per il titolo */
+async function nomeDelPosto(lat, lon) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=it&lat=${lat}&lon=${lon}`, { headers: { "User-Agent": METEO_USER_AGENT } });
+    const x = r.ok ? await r.json() : null;
+    const a = (x && x.address) || {};
+    return a.city || a.town || a.village || a.municipality || a.county || "dove sei";
+  } catch (e) {
+    return "dove sei";
+  }
+}
+
+/* giorno: "oggi" | "domani" | "dopodomani" | "AAAA-MM-GG" (fino a 9 giorni avanti) */
+async function previsioniMeteo({ luogo, lat, lon, giorno }) {
+  let posto = null;
+  if (Number.isFinite(Number(lat)) && Number.isFinite(Number(lon)) && lat !== "" && lon !== "" && lat != null && lon != null) posto = { lat: Number(lat), lon: Number(lon), nome: eStringaNonVuota(luogo) ? luogo.trim() : await nomeDelPosto(Number(lat), Number(lon)) };
+  else if (eStringaNonVuota(luogo)) posto = await trovaLuogo(luogo.trim());
+  if (!posto) return { errore: eStringaNonVuota(luogo) ? `Non trovo il luogo "${luogo}".` : "Mi serve il luogo: dimmi la città." };
+
+  const oggi = new Date();
+  let dataCercata;
+  const g = String(giorno || "oggi").toLowerCase().trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(g)) dataCercata = g;
+  else dataCercata = dataLocale(new Date(oggi.getTime() + (g === "domani" ? 1 : g === "dopodomani" ? 2 : 0) * 86400000));
+
+  const r = await fetch(`https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${posto.lat.toFixed(4)}&lon=${posto.lon.toFixed(4)}`, { headers: { "User-Agent": METEO_USER_AGENT } });
+  if (!r.ok) return { errore: "Il servizio meteo non risponde, riprova tra poco." };
+  const dati = await r.json();
+  const serie = (dati && dati.properties && dati.properties.timeseries) || [];
+  const delGiorno = serie.filter((p) => dataLocale(new Date(p.time)) === dataCercata);
+  if (!delGiorno.length) return { errore: "Le previsioni arrivano fino a 9 giorni avanti.", luogo: posto.nome };
+
+  const temperature = delGiorno.map((p) => p.data.instant.details.air_temperature).filter(Number.isFinite);
+  const venti = delGiorno.map((p) => p.data.instant.details.wind_speed).filter(Number.isFinite);
+  // Pioggia: ore singole dove ci sono, altrimenti blocchi di 6 ore (per i giorni più lontani)
+  let pioggia = 0;
+  const conUnOra = delGiorno.filter((p) => p.data.next_1_hours);
+  if (conUnOra.length >= 6) pioggia = conUnOra.reduce((s, p) => s + (p.data.next_1_hours.details.precipitation_amount || 0), 0);
+  else pioggia = delGiorno.filter((p) => p.data.next_6_hours && oraLocale(new Date(p.time)) % 6 === 0).reduce((s, p) => s + (p.data.next_6_hours.details.precipitation_amount || 0), 0);
+  // Il cielo di giorno (8-19): il simbolo più frequente
+  const simboli = {};
+  delGiorno.forEach((p) => {
+    const h = oraLocale(new Date(p.time));
+    const s = (p.data.next_1_hours || p.data.next_6_hours || {}).summary;
+    if (s && h >= 8 && h <= 19) simboli[s.symbol_code] = (simboli[s.symbol_code] || 0) + 1;
+  });
+  let simbolo = Object.keys(simboli).sort((a, b) => simboli[b] - simboli[a])[0];
+  if (!simbolo) { const s = (delGiorno[0].data.next_6_hours || delGiorno[0].data.next_1_hours || {}).summary; simbolo = s ? s.symbol_code : ""; }
+  // Pioggia nelle ore di lavoro vince sul cielo prevalente
+  const pioveDiGiorno = Object.keys(simboli).find((k) => /rain|snow|sleet|thunder/.test(k));
+  if (pioveDiGiorno && !/rain|snow|sleet|thunder/.test(simbolo) && pioggia >= 1) simbolo = pioveDiGiorno;
+  const ore = [8, 11, 14, 17].map((h) => {
+    const p = delGiorno.find((x) => oraLocale(new Date(x.time)) === h);
+    if (!p) return null;
+    const s = (p.data.next_1_hours || p.data.next_6_hours || {}).summary;
+    return { ora: String(h).padStart(2, "0") + ":00", temperatura: Math.round(p.data.instant.details.air_temperature), cielo: s ? categoriaSimbolo(s.symbol_code) : null };
+  }).filter(Boolean);
+
+  return {
+    luogo: posto.nome,
+    giorno: dataCercata,
+    cielo: descriviSimbolo(simbolo),
+    categoria: categoriaSimbolo(simbolo),
+    minima: Math.round(Math.min(...temperature)),
+    massima: Math.round(Math.max(...temperature)),
+    pioggia_mm: Math.round(pioggia * 10) / 10,
+    vento_max_kmh: venti.length ? Math.round(Math.max(...venti) * 3.6) : null,
+    ore,
+    fonte: "MET Norway",
+  };
+}
+
+async function handleMeteo(req, res) {
+  const url = new URL(req.url, "http://localhost");
+  const esito = await previsioniMeteo({ luogo: url.searchParams.get("luogo") || "", lat: url.searchParams.get("lat"), lon: url.searchParams.get("lon"), giorno: url.searchParams.get("giorno") || "oggi" });
+  send(res, esito.errore ? 404 : 200, esito.errore ? { error: esito.errore } : esito);
+}
+
 export default async function handler(req, res) {
   cors(res);
 
@@ -4815,6 +4962,7 @@ export default async function handler(req, res) {
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
     if (action === "descrivi_foto") return await handleDescriviFoto(req, res, user, accessToken);
     if (action === "elimina_account") return await handleEliminaAccount(req, res, user, accessToken);
+    if (action === "meteo") return await handleMeteo(req, res);
     if (action === "analizza_messaggio") return await handleAnalizzaMessaggio(req, res, user, accessToken);
     if (action === "rispondi_richiesta_cliente") return await handleRispondiRichiestaCliente(req, res, user, accessToken);
     if (action === "transcribe") return await handleTranscribe(req, res);

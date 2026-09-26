@@ -3706,3 +3706,71 @@ corrisponde a più parole del nome ("fattura mario rossi" non tira dentro
 Luca Rossi); più documenti → elenco con il nome su ogni riga. La ricerca
 per cliente in anagrafica resta come ripiego.
 Da fare: lo stesso per i documenti dell'impresa (senza cliente).
+
+## Test di Gianardi dopo il pacchetto #97 (26/09/2026)
+
+Principio "richiesta → azione": chiedi una cosa e EON la fa subito, senza
+passare dall'AI quando non serve.
+
+### Scheda del cliente (26/09/2026)
+Il nome di un cliente, da solo ("Rita Ambrosini", "apri Ambrosini"), in
+Home o in Clienti, apre subito la sua scheda senza AI (prima: "Rita
+Ambrosini cosa c'entra?" / "esiste già in anagrafica"). Si apre anche
+toccando la card in Clienti. Nella scheda: stato del lavoro, Chiama,
+WhatsApp, Email, Messaggio (se manca il numero/l'email apre la modifica
+sul campo giusto), Scatta foto (fotocamera, foto collegata al cliente),
+Appunto (salvato col cliente, senza AI), Documenti, Modifica, impegni,
+appunti e foto del cliente; in fondo "Chiedi a EON" riferito a quel
+cliente, con la risposta nella scheda. Rigido di proposito: se il nome è
+di più clienti ("Rossi") o c'è altro nella frase, decide l'AI.
+Migrazione additiva (staging + produzione): `supabase/cliente_email_appunti.sql`
+(clients.email, cantiere_appunti.client_id). Test: `eval/scheda-cliente.test.js` (15).
+
+### "Fammi la foto al cantiere e crea il cliente X" (26/09/2026)
+Il cliente creato dall'AI apre la sua scheda, con "Scatta foto" in evidenza
+se la frase parlava di una foto. Limite vero: il telefono apre la
+fotocamera solo con un tocco dell'utente (regola dei browser), quindi serve
+un tocco su "Scatta foto".
+
+### Documenti dell'impresa e card per nome (26/09/2026)
+"Mi dai il DURC", "dammi la visura", "l'assicurazione del furgone":
+cercato tra i documenti dell'impresa, uno → si apre (Apri, Invia), più →
+elenco, nessuno → decide l'AI. "Carta intestata", "lettera", "cartello",
+"appunti", "foto", "documenti", "impostazioni" si aprono per nome
+("apri/dammi/mi dai/fammi vedere..."). Test: `eval/documenti-impresa.test.js` (17).
+
+### Caricamento immediato e foto più leggere (26/09/2026)
+Il documento caricato compare subito in elenco ("Sto caricando…") e sale
+in sottofondo; se non riesce sparisce e lo si dice. Foto compresse prima
+del caricamento (lato 2000 px, JPEG; foto di documenti 2400 px): ~10 volte
+più leggere; se la compressione non riesce si carica l'originale.
+
+### Domande di EON dentro la card (26/09/2026)
+"Mi crei preventivo a Lorenzo Guaschina" → "mi dai le voci e i prezzi?":
+la card diventa una chat (richiesta, domanda, barra per rispondere) e resta
+aperta fino alla fine; il preventivo finito si apre lì. "sì/no/ok" valgono
+come risposta. Test: `eval/risposte.test.js`.
+
+### Meteo e percorsi (26/09/2026)
+Meteo gratuito da MET Norway (anche uso commerciale; chiede solo lo
+User-Agent), luogo con OpenStreetMap Nominatim (gratuito, uso moderato: con
+molti utenti valutare un servizio a pagamento o una cache). "Che tempo fa?"
+→ card senza AI con la posizione del telefono; "piove domani a Pisa?" →
+per la città; consigli da cantiere (pioggia, vento, gelo). Frasi
+articolate ("posso gettare il cemento sabato a Lerici?") → AI con lo
+strumento `meteo`. Percorsi: "ci metto di più ad arrivare in X o Y?" →
+card con le mete che aprono le Mappe col traffico vero. **Da fare**:
+confronto dei tempi dentro EON con Google Maps (Routes API, traffico):
+serve un account Google Cloud di Andrea. Test: `eval/meteo.test.mjs` (8),
+`eval/meteo-app.test.js` (14).
+
+### EON sulla Home del telefono (26/09/2026)
+Era già installabile su iPhone (Aggiungi a Home). Aggiunti: icona nuova in
+file (`icone/`), `manifest.webmanifest` (Android, schermo intero), e in
+Impostazioni → Aiuto "Metti EON sulla Home" con i passi. Nessun service
+worker (per non rischiare versioni vecchie in cache).
+
+### Scritta in alto nella Home (26/09/2026)
+Mandate 3 ipotesi ad Andrea (A logo a sinistra e data a destra, B data come
+un foglio di calendario, C tutto centrato), tutte con "Buongiorno, Andrea".
+In attesa della scelta.
