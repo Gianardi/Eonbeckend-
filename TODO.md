@@ -3845,3 +3845,29 @@ subito; la nota viene dalla frase ("Pavimenti") e, se nomina un cliente
 voce il telefono non apre la fotocamera da solo: card con "Scatta la foto".
 Con "crea", "cliente", "vedere", "manda"... → AI come prima. Test in
 `scheda-cliente.test.js`.
+
+### Centro messaggi: EON, WhatsApp ed Email (26/09/2026)
+Gianardi: "sistemare la messaggistica, molto più semplice e intuitiva, lo
+stesso stile dell'app; il centro di comunicazione con email, EON e
+WhatsApp". Anteprima approvata ("Ok"), poi fatto:
+- Elenco: titolo grande "Messaggi", matita (scegli il cliente a cui
+  scrivere o "Nuovo cliente"), cerca (anche dentro i messaggi), filtri
+  Tutti / EON / WhatsApp / Email, righe in ordine di ultimo messaggio con
+  pallino del canale sull'avatar, "Tu: …", ora/"Ieri"/giorno, non letti
+  in grassetto; "Archiviate · N" in fondo. Via le vecchie linguette
+  (Urgenti, Clienti, Da chiudere, Da acquisire, Team).
+- Conversazione: sotto il nome il lavoro del cliente (non più
+  "online/offline"), pulsante Chiama, "⋯" con Scheda del cliente, File,
+  Archivia, Elimina; le bolle dicono il canale ("WhatsApp · 10:40").
+- "Invia con" EON / WhatsApp / Email, ricordato per ogni chat. WhatsApp:
+  si apre wa.me col testo; Email: si apre la posta (destinatario, oggetto
+  "Messaggio da <impresa>", testo). Il messaggio resta in chat con
+  `messages.canale`. Senza numero o email: avviso e scheda del cliente
+  aperta sul campo. Vocali solo su EON.
+- Database: `supabase/messaggi_canale.sql` (colonna `canale`;
+  `portale_messaggi` mostra al cliente solo i messaggi EON), già applicato
+  a staging e produzione.
+- Non ancora: le risposte WhatsApp/email non arrivano qui (servono
+  WhatsApp Business e un dominio email, cioè la società). Non provato
+  sull'iPhone vero che WhatsApp e Mail si aprano dal link. Test in
+  `eval/messaggi.test.js`.

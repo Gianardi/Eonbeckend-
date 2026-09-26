@@ -256,6 +256,13 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
   tu): cambia solo il nome, non cosa fa.
 
 **Communication Hub — Messaggi diventa il punto unico** (progetto grande)
+- **Primo passo fatto (26/09)**: Messaggi ridisegnata nello stile
+  dell'app — un solo elenco con EON, WhatsApp ed Email (pallino del
+  canale, cerca, filtri, archiviate in fondo); nella chat "Invia con"
+  EON / WhatsApp / Email. WhatsApp ed Email per ora "a metà": si apre
+  l'app col testo già scritto e il messaggio resta nella chat, ma le
+  **risposte** restano in WhatsApp o nella posta. Il cliente nel suo
+  portale vede solo i messaggi EON.
 - EON, **WhatsApp** ed **email** arrivano e partono dalla chat del cliente
   giusto: una sola conversazione per cliente, qualunque canale usi.
 - EON legge i messaggi in arrivo, li collega al cliente, propone la
