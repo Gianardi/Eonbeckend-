@@ -1,7 +1,20 @@
 # EON — Roadmap completa
 
-Aggiornata al 25/09/2026. Un solo posto con tutto quello che resta da fare,
+Aggiornata al 26/09/2026. Un solo posto con tutto quello che resta da fare,
 in ordine. Il dettaglio tecnico di ogni punto è in `TODO.md`.
+
+**In breve**
+- I tre pilastri: tempo, memoria, soldi.
+- 0 · Pubblicare il pacchetto #97.
+- 1 · Obbligatori prima di vendere.
+- 2 · Per incassare (abbonamento, costi).
+- 2b · **EON Memory**, "l'iCloud del lavoro" + analisi di costi e spazio.
+- 3 · Una vera app sul telefono (Face ID, avvisi, App Store).
+- 4 · Funzioni del prodotto.
+- 5 · Il cervello di EON:
+  - 5b · **meno AI, stessa qualità**: apprendimento e **modello AI nostro**;
+  - 5c · **EON Admin**, il tuo pannello privato.
+- 6 · Mercato: da 5 a 50 artigiani.
 
 Legenda: **[Andrea]** serve una tua decisione o un tuo account ·
 **[Claude]** lo faccio io · **[insieme]** servono tutti e due.
@@ -52,7 +65,7 @@ pilastri, altrimenti non si fa.
 | **Dominio tuo** (es. eon.it) | [insieme] | Tu lo compri (~10–20 €/anno), io lo collego al posto di eonbeckend.vercel.app. |
 | **Avviso automatico degli errori** | [Claude] | Se qualcosa si rompe a un cliente lo so subito. |
 | **Compressione delle foto** (subito dopo il merge) | [Claude] | Come WhatsApp: da ~3 MB a ~300 KB per foto, a occhio uguali (lato lungo ~2000 px). Le foto di documenti da leggere (fatture, DURC) restano più nitide. Spazio ~10 volte meno, caricamento più veloce in cantiere. |
-| **Pannello di controllo di EON** | [Claude] | Per gestire 100–1000 clienti dal telefono e dal PC: utenti, chi paga, errori, costo AI, feedback arrivati. |
+| **Pannello di controllo di EON** (EON Admin, vedi 5c) | [Claude] | Per gestire 100–1000 clienti dal telefono e dal PC: utenti, chi paga, errori, costo AI, feedback arrivati, quanto fa EON senza AI. |
 | **Staging uguale a produzione** | [Claude] | Oggi lo schema di prova è diverso (niente cascata sul profilo, niente creazione automatica del profilo). |
 | **Scollegare il progetto Vercel doppio** (eonbeckend-mx2t) | [Andrea] | L'app usa solo "eonbeckend"; il doppione raddoppiava le pubblicazioni. |
 
@@ -62,9 +75,9 @@ pilastri, altrimenti non si fa.
 
 - **[insieme] Abbonamento con Stripe**: prova gratuita, piano mensile/annuale,
   fattura automatica, blocco se non si paga. Il prezzo lo decidi tu.
-- **[insieme] Spazio incluso per cliente** (es. 10 GB ≈ 30.000 foto
-  compresse): barra "spazio usato" in Impostazioni → Account, avviso all'80%,
-  piano superiore per chi ne vuole di più; mai cancellazioni automatiche.
+- **[insieme] Spazio incluso per cliente**: vedi EON Memory (2b) — 20 GB
+  nell'abbonamento, extra a pagamento; barra "spazio usato" in
+  Impostazioni → Account, avviso all'80%, mai cancellazioni automatiche.
   L'archivio è su Supabase (non in Claude, che vede i dati solo quando
   risponde e non li conserva come archivio).
 - **[Claude] Costo AI per cliente**: misurato dai registri, per fare il
@@ -340,8 +353,23 @@ richiesta di tutti gli utenti insieme, **mai i messaggi privati**.
 
 ## 6. Mercato
 
-- **[Andrea] 3–5 artigiani veri per 2 settimane**: la cosa che vale di più.
-- Raccogliere i loro feedback (c'è già "Manda un feedback") e sistemare.
+**Prima di darlo a qualcuno: EON "solido", non "perfetto"** (qualche
+giorno, non mesi): pacchetto #97 pubblicato e accessi chiusi · la tua
+prova dal telefono · avviso automatico degli errori · backup (Supabase
+Pro) · compressione delle foto · privacy di base. Il resto lo si migliora
+**con** gli artigiani, non prima.
+
+**Da 5 a 50 artigiani, per gradini** (obiettivo di Andrea: 50 che lo usano
+davvero):
+1. **5** artigiani che conosci, gratis, "è una prova, aiutami a
+   migliorarlo", per 2 settimane: la cosa che vale di più.
+2. **15**: i loro colleghi, col passaparola (cantieri, fornitori).
+3. **50**: EON si vende perché qualcuno dice "io lo uso, mi fa risparmiare
+   tempo". Con 50 che lo usano e pagano: azienda vera, numeri veri sui
+   costi, apprendimento che funziona, più facile trovare investitori.
+
+- Conta chi lo **usa** ogni giorno, non chi si iscrive.
+- Raccogliere i feedback (c'è già "Manda un feedback") e sistemare.
 - Decidere il prezzo con i dati veri di uso e di costo.
 
 ---
