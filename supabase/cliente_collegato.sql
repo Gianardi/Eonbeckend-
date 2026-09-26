@@ -2,6 +2,8 @@
 -- Andrea: "ho rimosso dei clienti e in La tua azienda ci sono ancora i loro
 -- dati. Vorrei una connessione totale tra i diversi spazi."
 -- Solo aggiunte (una funzione e due trigger). Prima staging, poi produzione.
+-- NB: cliente_collega_dati è stata aggiornata in entrate_cliente_id.sql
+-- (prima per id, poi per nome): quella è la versione in uso.
 --
 -- Quando un cliente:
 --   * va nel cestino      → ci vanno anche le sue entrate, trattative,

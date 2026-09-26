@@ -572,8 +572,9 @@ Appuntamenti "a casa di / da cliente" con giorno e ora letti senza AI, con
 la nota ("portare attrezzi") e il cliente nuovo creato da solo · connessione
 totale: cliente tolto, ripristinato o rinominato → lo stesso per le sue
 entrate, trattative, foto e appunti (trigger nel database) · 3 entrate di
-clienti non più esistenti di Andrea nel Cestino. Da fare: legare entrate e
-trattative al cliente per id, non solo per nome.
+clienti non più esistenti di Andrea nel Cestino · entrate e trattative
+legate al cliente vero (id), anche con due clienti con lo stesso nome ·
+corretto: la fattura fatta dalla chat non diventava un'entrata salvata.
 
 ## Fatto il 26/09/2026 (prossimo pacchetto)
 
