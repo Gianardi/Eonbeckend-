@@ -2,6 +2,8 @@
    pagina vera; entrate, uscite, tasse (stima) e "ti resta" calcolati dai
    dati veri, per il mese o per l'anno; i clienti si contano da soli
    (aggiungi → sale, togli → scende); la percentuale delle tasse si cambia.
+   Connessione totale (26/09/2026): togliere o rinominare un cliente toglie
+   o rinomina anche le sue entrate e i suoi appunti, subito.
    Carica la vera index.html con Supabase finto.
 
    Uso: NODE_PATH=/opt/node22/lib/node_modules node eval/azienda.test.js */
@@ -112,6 +114,28 @@ async function main() {
     await page.evaluate(() => { clients.splice(clients.findIndex((c) => c.id === "n0"), 10); renderClientStats(); });
     v = await leggi();
     verifica("li tolgo: tornano 3", v.clienti === "Clienti · 3", v.clienti);
+
+    // Connessione totale: tolgo un cliente → spariscono anche le sue entrate
+    await page.evaluate(async () => {
+      cantiereAppunti.push({ id: "ap1", testo: "misure bagno", clientId: "b" });
+      await cestinaClienteEChat(clients.find((c) => c.id === "b"), null);
+      ridisegnaClientiEChat(); navigateTo("azienda");
+    });
+    v = await leggi();
+    const restoDini = await page.evaluate(() => ({ entrate: incomes.filter((x) => x.client === "Dini").length, appunti: cantiereAppunti.filter((a) => a.clientId === "b").length }));
+    verifica("tolgo il cliente Dini: via anche la sua entrata e i suoi appunti (entrate €5.000, clienti 2)", v.entrate === "€5.000" && v.clienti === "Clienti · 2" && restoDini.entrate === 0 && restoDini.appunti === 0, JSON.stringify({ v, restoDini }));
+    // Rinomino un cliente: le sue entrate seguono il nome
+    const rinominata = await page.evaluate(async () => { const c = clients.find((x) => x.id === "a"); c.name = "Rita Bianchi"; await rinominaChatDelCliente("Rita", "Rita Bianchi"); return incomes.filter((x) => x.client === "Rita Bianchi").length; });
+    verifica("rinomino Rita in Rita Bianchi: la sua entrata segue il nuovo nome", rinominata === 1, String(rinominata));
+    // Omonimi: due "Conti", ne tolgo uno → l'entrata resta (non si sa di chi è)
+    const omonimo = await page.evaluate(async () => { clients.push({ id: "c2", name: "conti", status: "attivo", value: 0, archived: false }); await cestinaClienteEChat(clients.find((c) => c.id === "c2"), null); return incomes.filter((x) => x.client === "Conti").length; });
+    verifica("due clienti con lo stesso nome: toglierne uno non tocca le entrate", omonimo === 1, String(omonimo));
+    // rimetto Dini com'era per i conti che seguono
+    await page.evaluate(() => {
+      clients.push({ id: "b", name: "Dini", status: "trattativa", value: 0, archived: false });
+      incomes.push({ client: "Dini", desc: "Fattura 2", amount: 3000, due: null, created: new Date().toISOString(), status: "attesa" });
+      renderClientStats(); navigateTo("azienda");
+    });
 
     // Una nuova entrata o uscita aggiorna subito
     await page.evaluate(() => { payments.push({ supplier: "Benzina", desc: "", amount: 1000, due: new Date().toISOString().slice(0, 10), status: "pagato" }); renderPayments(); navigateTo("azienda"); });

@@ -4025,3 +4025,41 @@ pagina Admin. Fatto comunque, come le app delle banche:
   scansiona codice QR". Ora il pulsante compare solo se Face ID è stato
   attivato su quel telefono; se il telefono ha già una chiave (memoria
   cancellata) "Attiva" la riconosce e basta.
+
+### Prove di Andrea: appuntamenti semplici senza AI, cliente creato, tutto collegato (27/09/2026)
+
+Andrea: "Domani casa Simone Massari per rubinetto ore 09:00 portare attrezzi —
+sono richieste semplici, perché usare l'AI? In entrambi i casi non mi ha
+creato il cliente. E in La tua azienda ci sono ancora dati di clienti che ho
+rimosso: vorrei una connessione totale tra i diversi spazi."
+- **Appuntamento dal cliente letto dal codice** (api/index.js,
+  `leggiAppuntamentoDaCliente` / `provaAppuntamentoDaCliente`, prima di
+  `leggiImpegnoSenzaAI`): giorno + ora + "a casa di / da / dal cliente /
+  presso NOME (per LAVORO)", con la nota dopo "portare / ricordati /
+  serve…". Titolo: "Da Simone Massari per rubinetto · portare attrezzi".
+  Cliente che non c'è e nome scritto con la maiuscola → creato (nota:
+  "Lavoro: rubinetto"); cliente già in rubrica → collegato. L'app dice "Ok,
+  segnato … · Nuovo cliente: Simone Massari". Va all'AI (come prima) quando
+  c'è un dubbio: nome minuscolo e sconosciuto, "casa mia", manca l'ora, due
+  clienti con lo stesso nome, nome solo simile, due lavori.
+  Test: `eval/appuntamento-cliente.test.mjs` (20).
+- **Connessione totale** (`supabase/cliente_collegato.sql`, staging +
+  produzione, provato su entrambi con prove annullate): trigger sulla
+  tabella clienti. Cliente nel cestino → nel cestino anche le sue entrate,
+  trattative, foto e appunti di cantiere (stessa ora); ripristinato →
+  tornano (solo quelli cestinati con lui); rinominato → entrate e
+  trattative seguono il nome; eliminato per sempre → spariscono anche
+  entrate, trattative e appunti cestinati con lui (le foto restano nel
+  cestino). Due clienti vivi con lo stesso nome: le entrate (legate solo dal
+  nome) non si toccano. Nell'app lo stesso sui dati già aperti
+  (`staccaDatiDelCliente`, `rinominaDatiDelCliente`), così lo schermo cambia
+  subito. Test in `eval/azienda.test.js`.
+- **Pulizia dei dati di Andrea** (produzione): 3 entrate di clienti che non
+  esistono più (Fabbri €69.540, Testolina €122, Giampiero Dini €366) messe
+  nel Cestino (si possono ripristinare da lì).
+- Da sapere: i 39 clienti di Andrea sono tutti **archiviati**, non
+  eliminati. Le fatture dei clienti archiviati contano ancora nelle entrate
+  (Michele soda studio 2×€366, Tommaso Greti €1.830): un cliente finito
+  resta un incasso vero. Se Andrea vuole diversamente, si cambia.
+- Da fare più avanti: entrate e trattative sono legate al cliente solo dal
+  nome; il giusto è un collegamento per id (client_id), come foto e appunti.

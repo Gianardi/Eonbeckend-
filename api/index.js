@@ -3545,6 +3545,81 @@ async function creaImpegnoRapido(dati, cliente, user, ctx) {
   };
 }
 
+/* ---------- Appuntamento a casa di un cliente, letto dal codice (27/09/2026) ----------
+   Andrea: "Domani casa Simone Massari per rubinetto ore 09:00 portare
+   attrezzi" = domani alle 9 vado dal cliente Simone Massari a sistemare il
+   rubinetto, e devo portare gli attrezzi. Prima passava dall'AI, non creava
+   il cliente e perdeva "portare attrezzi". Ora il codice legge:
+   giorno + ora + (casa / a casa di / da / dal cliente / presso) + NOME
+   + (per LAVORO) + (nota: "portare…", "ricordati…", o dopo il punto).
+   Anche senza "casa/da" se il nome ha le maiuscole ("Domani ore 11 Simone
+   Massari per revisione caldaia"). Il cliente: se c'è lo collega, se non
+   c'è e il nome ha le maiuscole lo crea; simile o più di uno → AI. */
+// Calcolato alla prima richiesta: NON_NOME_CLIENTE è definito più sotto nel file
+let nonNomeAppuntamento = null;
+const NON_NOME_APPUNTAMENTO_EXTRA = ["mia", "mio", "tua", "tuo", "sua", "suo", "nostra", "nostro", "loro", "nuova", "nuovo", "solo", "sola", "me", "te", "lui", "lei", "noi", "voi", "mamma", "papa", "zio", "zia", "nonna", "nonno", "ufficio", "cantiere", "banca", "posta", "comune", "medico", "dentista", "avvocato", "commercialista", "notaio", "palestra", "scuola", "negozio", "fornitore", "magazzino", "domani", "oggi", "ore", "alle", "vedere", "fare", "sistemare"];
+const nonNomeApp = () => nonNomeAppuntamento || (nonNomeAppuntamento = new Set([...NON_NOME_CLIENTE, ...NON_NOME_APPUNTAMENTO_EXTRA]));
+const INIZIO_NOTA = /\b(portare|porta|portarsi|prendere|prendi|ricordati|ricordarsi|ricordami|serve|servono|attenzione|chiamare prima|chiamarlo prima|chiamarla prima)\b/i;
+
+function leggiAppuntamentoDaCliente(testo, adesso) {
+  if (!eStringaNonVuota(testo) || testo.length > 180) return null;
+  let principale = testo.trim(), nota = "";
+  // La nota: dopo un punto ("… ore 09. Portare attrezzi") o da "portare/ricordati…"
+  const punto = principale.match(/^(.*?\S)\.\s+(\D.*)$/);
+  if (punto) { principale = punto[1]; nota = punto[2]; }
+  const m = principale.match(INIZIO_NOTA);
+  if (m && m.index > 0) { nota = (principale.slice(m.index) + (nota ? " " + nota : "")).trim(); principale = principale.slice(0, m.index).trim(); }
+  nota = nota.replace(/[.\s]+$/, "");
+  if (nota && (nota.length > 80 || /\d/.test(nota))) return null;
+
+  const letto = estraiGiornoEOra(normalizzaFraseImpegno(principale).replace(VERBI_INIZIALI, ""), adesso);
+  if (!letto || !letto.giornoIso || !letto.ora) return null; // serve giorno E ora: altrimenti decide l'AI
+  let tipo = "";
+  let resto = letto.resto.replace(/^(?:vado|andare|devo andare|appuntamento|intervento|lavoro|sopralluogo)\s+/, (m) => { const w = m.trim(); if (w === "sopralluogo" || w === "intervento") tipo = w.charAt(0).toUpperCase() + w.slice(1); return ""; });
+  const conMarcatore = resto.match(/^(?:a\s+)?(?:casa(?:\s+(?:di|del|della))?|da|dal|dalla|dal cliente|dalla cliente|presso|cliente)\s+(.+)$/);
+  const parti = (conMarcatore ? conMarcatore[1] : resto).split(/\s+per\s+/);
+  if (parti.length > 2) return null;
+  const paroleNome = parti[0].split(" ").filter(Boolean);
+  const lavoro = (parti[1] || "").trim();
+  if (!paroleNome.length || paroleNome.length > 3) return null;
+  if (!paroleNome.every((p) => p.length >= 2 && /^[a-z'-]+$/.test(p) && !nonNomeApp().has(p))) return null;
+  if (!conMarcatore && !lavoro) return null; // "Domani ore 11 Rossi": nome da solo, lo legge già l'altro percorso
+  if (lavoro && (lavoro.split(" ").length > 6 || /\b(per|e poi|poi|anche)\b/.test(lavoro))) return null;
+  // Il nome com'è scritto nella frase: con le maiuscole è un nome proprio
+  const nomeOriginale = paroleOriginaliDelNome(principale, paroleNome);
+  const maiuscole = nomeOriginale.split(" ").every((p) => /^[A-ZÀ-Ý]/.test(p));
+  if (!conMarcatore && !maiuscole) return null;
+  const nome = nomeOriginale.split(" ").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+  const lavoroOriginale = lavoro ? (principale.match(new RegExp("\\bper\\s+(.+?)(?:\\s+(?:alle ore|alle|ore|h)\\s+\\d.*)?$", "i")) || [])[1] || lavoro : "";
+  const lavoroPulito = lavoroOriginale.replace(/\s+(?:domani|oggi|dopodomani)\b.*$/i, "").trim().toLowerCase();
+  const titolo = (chi) => (tipo ? tipo + " da " : "Da ") + chi + (lavoroPulito ? " per " + lavoroPulito : "") + (nota ? " · " + nota.charAt(0).toLowerCase() + nota.slice(1) : "");
+  return { nome, maiuscole, lavoro: lavoroPulito, nota, titolo, quando_iso: `${letto.giornoIso}T${letto.ora}:00` };
+}
+
+async function provaAppuntamentoDaCliente(testo, user, ctx) {
+  const letto = leggiAppuntamentoDaCliente(testo);
+  if (!letto) return null;
+  const risolto = await risolviClienteDaNome(letto.nome, ctx).catch(() => null);
+  if (!risolto) return null;
+  let cliente = null;
+  const azioniCliente = [];
+  if (risolto.stato === "trovato") cliente = { id: risolto.id, nome: risolto.nome };
+  else if (risolto.stato === "non_trovato" && letto.maiuscole) {
+    const input = { nome: letto.nome };
+    if (letto.lavoro) input.note = letto.lavoro.charAt(0).toUpperCase() + letto.lavoro.slice(1);
+    const esito = await TOOLS.crea_cliente.run(input, ctx);
+    await registraOperazione(user, "crea_cliente", input, esito, "auto");
+    cliente = { id: esito.id, nome: esito.nome || letto.nome };
+    // Per l'app: un cliente nato insieme all'appuntamento (niente scheda aperta, solo il nome nella conferma)
+    azioniCliente.push({ tool: "trova_o_crea_cliente", esito: { id: cliente.id, nome: cliente.nome, creato: true } });
+  } else return null; // simile, omonimi o nome senza maiuscole: decide l'AI (chiede)
+  // Nel titolo il nome com'è in anagrafica ("da Rossi" → "Da Mario Rossi per la caldaia")
+  const fatto = await creaImpegnoRapido({ titolo: letto.titolo(cliente.nome), tipo: "incontro", quando_iso: letto.quando_iso }, cliente, user, ctx);
+  ctx.lettoSenzaAI = true;
+  const azioni = [...azioniCliente, ...fatto.azioni];
+  return { azioni, payload: { ...fatto.payload, azioni } };
+}
+
 /* Appuntamenti: { payload, azioni } se gestito, null → motore completo. */
 async function provaPercorsoRapidoImpegno(body, ctx, user) {
   if (!body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
@@ -3556,6 +3631,12 @@ async function provaPercorsoRapidoImpegno(body, ctx, user) {
     const trovato = await trovaImpegno(ultimo.id, ctx).catch(() => null);
     const quando = trovato && trovato.record.scheduled_at;
     ultimo = quando ? { ...ultimo, quando: String(quando).slice(0, 16) } : null;
+  }
+
+  // "Domani casa Simone Massari per rubinetto ore 9, portare attrezzi": cliente + appuntamento dal codice
+  if (!ultimo || !/^(?:no|anzi|meglio|facciamo|fai|fallo|mettilo|spostalo|sposta)\b/i.test(testo.trim())) {
+    const daCliente = await provaAppuntamentoDaCliente(testo, user, ctx);
+    if (daCliente) return daCliente;
   }
 
   // Prima il codice (zero AI); solo se la frase non è chiarissima, la piccola AI come prima

@@ -4961,9 +4961,35 @@ async function impostaArchivioClienteEChat(cliente, chat, archiviato){
   if(cliente){ cliente.archived = archiviato; if(isDbReady() && cliente.id) await dbUpdate("clients", cliente.id, { is_archived: archiviato }); }
   if(chat){ chat.archived = archiviato; if(isDbReady() && chat.id) await dbUpdate("conversations", chat.id, { is_archived: archiviato }); }
 }
+/* Connessione totale (26/09/2026). Andrea: "ho rimosso dei clienti e in
+   La tua azienda ci sono ancora i loro dati". Nel database ci pensa un
+   trigger (supabase/cliente_collegato.sql): cliente nel cestino → nel
+   cestino anche entrate, trattative, foto e appunti; ripristinato → tornano;
+   rinominato → entrate e trattative seguono il nome. Qui si fa lo stesso
+   sui dati già aperti nell'app, così lo schermo cambia subito. */
+function staccaDatiDelCliente(cliente){
+  const chiave = nomeChiave(cliente.name);
+  const omonimo = clients.some(c => c !== cliente && nomeChiave(c.name) === chiave);
+  const togli = (arr, via) => { for(let i = arr.length - 1; i >= 0; i--) if(via(arr[i])) arr.splice(i, 1); };
+  if(!omonimo && chiave){
+    togli(incomes, x => nomeChiave(x.client) === chiave);
+    togli(opportunities, x => nomeChiave(x.client) === chiave);
+  }
+  if(cliente.id){
+    togli(cantiereFoto, f => f.clientId === cliente.id);
+    togli(cantiereAppunti, a => a.clientId === cliente.id);
+  }
+}
+function rinominaDatiDelCliente(vecchioNome, nuovoNome){
+  const chiave = nomeChiave(vecchioNome);
+  if(!chiave || clients.filter(c => nomeChiave(c.name) === chiave).length) return; // omonimo ancora vivo: non si sa di chi sono
+  incomes.forEach(x => { if(nomeChiave(x.client) === chiave) x.client = nuovoNome; });
+  opportunities.forEach(x => { if(nomeChiave(x.client) === chiave) x.client = nuovoNome; });
+}
 async function cestinaClienteEChat(cliente, chat){
   if(cliente){
     const i = clients.indexOf(cliente); if(i > -1) clients.splice(i, 1);
+    staccaDatiDelCliente(cliente);
     if(isDbReady() && cliente.id) await dbDelete("clients", cliente.id);
   }
   if(chat){
@@ -4974,6 +5000,7 @@ async function cestinaClienteEChat(cliente, chat){
 }
 async function rinominaChatDelCliente(vecchioNome, nuovoNome){
   if(nomeChiave(vecchioNome) === nomeChiave(nuovoNome) && vecchioNome === nuovoNome) return;
+  rinominaDatiDelCliente(vecchioNome, nuovoNome);
   const chat = chats.find(c => nomeChiave(c.name) === nomeChiave(vecchioNome));
   if(!chat) return;
   chat.name = nuovoNome;
@@ -8718,7 +8745,7 @@ async function eliminaChatConAnnulla(chat){
     activeChatIndex = aperta ? chats.indexOf(aperta) : null;
     if(isDbReady()){
       if(chat.id) await dbRestore("conversations", chat.id);
-      if(cliente && cliente.id) await dbRestore("clients", cliente.id);
+      if(cliente && cliente.id){ await dbRestore("clients", cliente.id); await loadUserDataFromDB(); } // tornano anche entrate, foto, appunti
     }
     ridisegnaClientiEChat();
   });
@@ -11590,7 +11617,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(impegniCreati.length){
       /* Breve, come vuole Andrea (26/09/2026): "Ok, segnato lunedì ore 09:00".
          Con più impegni, uno per riga: "lunedì ore 09:00 · Chiamare Walter". */
-      if(impegniCreati.length === 1) mostra("Ok, segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato), "");
+      const clienteNato = risultatiVisibili.find(a => a.tool === "trova_o_crea_cliente" && a.esito && a.esito.creato);
+      if(impegniCreati.length === 1) mostra("Ok, segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato), clienteNato ? "Nuovo cliente: " + clienteNato.esito.nome : "");
       else mostra("Ok, segnati " + impegniCreati.length + " impegni", impegniCreati.map(a => quandoBreve(a.esito.quando_visualizzato) + " · " + a.esito.titolo).join("\n"));
     }
 
