@@ -151,7 +151,7 @@ async function main() {
     await page.press("#schedaClienteCampo", "Enter");
     await page.waitForTimeout(500);
     const eon = await page.evaluate(() => [...document.querySelectorAll(".scheda-bolla.eon")].map((b) => b.textContent));
-    verifica("Chiedi a EON: la richiesta parte col nome del cliente e la risposta resta nella scheda", richiesteAI.length === 1 && /Rita Ambrosini/.test(richiesteAI[0]) && eon.some((t) => /Segnato: Sopralluogo Ambrosini — domani 9:00/.test(t)) && (await schedaAperta()) === "Rita Ambrosini", JSON.stringify({ richiesteAI, eon }));
+    verifica("Chiedi a EON: la richiesta parte col nome del cliente e la risposta resta nella scheda", richiesteAI.length === 1 && /Rita Ambrosini/.test(richiesteAI[0]) && eon.some((t) => /Ok, segnato domani ore 09:00/.test(t)) && (await schedaAperta()) === "Rita Ambrosini", JSON.stringify({ richiesteAI, eon }));
 
     /* ---- Cliente creato dall'AI ---- */
     await prepara();
@@ -161,6 +161,32 @@ async function main() {
     await page.waitForTimeout(300);
     const creato = await page.evaluate(() => ({ t: document.getElementById("risorsaTitolo").textContent, foto: !!document.querySelector('.sc-azione[data-azione="foto"].evidenziata'), bolla: (document.querySelector(".scheda-bolla.eon") || {}).textContent }));
     verifica("\"fammi la foto... e crea il cliente\": si apre la sua scheda con Foto in evidenza", creato.t === "Pinco Gianardi" && creato.foto && /Scatta foto/.test(creato.bolla || ""), JSON.stringify(creato));
+
+    /* ---- "Fai foto a pavimenti": fotocamera subito, nota dalla frase (26/09) ---- */
+    await prepara();
+    richiesteAI.length = 0;
+    await page.fill("#homeHeroCampo", "Fai foto a pavimenti");
+    const [sceltaF] = await Promise.all([page.waitForEvent("filechooser", { timeout: 2000 }).catch(() => null), page.click("#homeHeroSend")]);
+    verifica("\"Fai foto a pavimenti\": si apre subito la fotocamera, senza AI", !!sceltaF && richiesteAI.length === 0 && (await page.getAttribute("#fotoRapidaInput", "capture")) === "environment");
+    if (sceltaF) await sceltaF.setFiles({ name: "p.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0xd9]) });
+    await page.waitForTimeout(400);
+    const notaF = await page.evaluate(() => ({ s: window.__scritture.filter((x) => x.tabella === "cantiere_foto"), titolo: document.getElementById("risorsaTitolo").textContent }));
+    verifica("foto salvata con la nota \"Pavimenti\", senza chiedere a chi si riferisce", notaF.s.some((x) => x.tipo === "update" && x.patch.nota === "Pavimenti") && !notaF.s.some((x) => x.tipo === "update" && x.patch.client_id), JSON.stringify(notaF));
+
+    await prepara();
+    await page.fill("#homeHeroCampo", "fai foto al bagno di Rita Ambrosini");
+    const [sceltaG] = await Promise.all([page.waitForEvent("filechooser", { timeout: 2000 }).catch(() => null), page.click("#homeHeroSend")]);
+    if (sceltaG) await sceltaG.setFiles({ name: "b.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0xd9]) });
+    await page.waitForTimeout(400);
+    const fotoCl = await page.evaluate(() => window.__scritture.filter((x) => x.tabella === "cantiere_foto" && x.tipo === "update").map((x) => x.patch));
+    verifica("\"fai foto al bagno di Rita Ambrosini\": nota \"Bagno\" e foto nella scheda di Rita", fotoCl.some((p) => p.nota === "Bagno") && fotoCl.some((p) => p.client_id === "c1"), JSON.stringify(fotoCl));
+
+    await prepara();
+    const aVoce = await page.evaluate(() => { const ok = provaFotoImmediata("fai foto a pavimenti", true); return { ok, titolo: document.getElementById("risorsaTitolo").textContent, bottone: !!document.getElementById("fotoRapidaScatta") }; });
+    const [sceltaV] = await Promise.all([page.waitForEvent("filechooser", { timeout: 2000 }).catch(() => null), page.click("#fotoRapidaScatta")]);
+    verifica("a voce: card con \"Scatta la foto\" (il telefono vuole un tocco), che apre la fotocamera", aVoce.ok && aVoce.bottone && !!sceltaV, JSON.stringify(aVoce));
+    const nonFoto = await page.evaluate(() => ["fammi vedere le foto di Rita", "fammi la foto al cantiere e crea il cliente pinco", "fai fattura a Rossi da 300"].map((f) => !!capisciFotoRapida(f)));
+    verifica("\"fammi vedere le foto\", \"...e crea il cliente\", fatture: non sono scatti", nonFoto.every((x) => !x), JSON.stringify(nonFoto));
 
     verifica("nessun errore nella pagina", errori.length === 0, errori.join(" | "));
   } finally {

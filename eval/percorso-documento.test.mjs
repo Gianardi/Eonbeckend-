@@ -87,7 +87,7 @@ function anthropicFinto(init) {
   const passo = copione[chiamateAI.length - 1];
   if (!passo) throw new Error(`Chiamata all'AI n. ${chiamateAI.length} non prevista dallo scenario`);
   const risposta = passo(corpo);
-  return rispostaJson({ id: "msg_finto", type: "message", role: "assistant", model: corpo.model, usage: { input_tokens: 1, output_tokens: 1 }, ...risposta });
+  return rispostaJson({ id: "msg_finto", type: "message", role: "assistant", model: corpo.model, usage: { input_tokens: 1000, output_tokens: 200, cache_read_input_tokens: 18000 }, ...risposta });
 }
 const usaStrumento = (name, input) => ({ content: [{ type: "tool_use", id: "toolu_" + randomUUID().slice(0, 8), name, input }], stop_reason: "tool_use" });
 const rispondiTesto = (text) => ({ content: [{ type: "text", text }], stop_reason: "end_turn" });
@@ -194,6 +194,8 @@ await scenario(
     verifica("dati completi del documento restituiti (per l'anteprima)", r.corpo.azioni.at(-1).esito.dati && Array.isArray(r.corpo.azioni.at(-1).esito.dati.voci));
     verifica("fattura segnata tra le entrate attese", tabelle.incomes.length === 1 && Number(tabelle.incomes[0].amount) === 366);
     verifica("turno registrato in ai_request_log", tabelle.ai_request_log.length === 1 && tabelle.ai_request_log[0].stato === "concluso");
+    const riga = tabelle.ai_request_log[0];
+    verifica("nel registro anche token veri, costo e tipo di richiesta (passo 0 \"meno AI\")", riga.token_input > 0 && riga.token_input % 1000 === 0 && riga.token_output === riga.token_input / 5 && riga.token_cache_letti === riga.token_input * 18 && riga.costo_usd > 0 && /^crea\//.test(riga.intento || ""), JSON.stringify(riga));
   }
 );
 

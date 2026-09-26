@@ -25,9 +25,8 @@ const PREFISSO = "Il professionista ti ha appena raccontato cosa deve fare: ";
 
 /* date relative ad adesso, nel formato che usa EON (ora locale, senza fuso) */
 function giornoFra(n) {
-  const d = new Date(Date.now() + n * 24 * 3600 * 1000);
-  const p = (x) => String(x).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  // Giorno italiano (il codice legge "domani" con l'ora di Roma, non quella del server)
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(Date.now() + n * 24 * 3600 * 1000));
 }
 const DOMANI = giornoFra(1);
 
@@ -164,18 +163,17 @@ const nuovo = (frase, extra) => ({ messaggio: PREFISSO + `"${frase}"`, ...(extra
 
 /* 1 — il caso base */
 await scenario(
-  "\"Segna appuntamento con Claudia Spori domani alle 10\" → una sola chiamata piccola",
+  "\"Segna appuntamento con Claudia Spori domani alle 10\" → letto dal codice, ZERO chiamate all'AI",
   () => ({ spori: aggiungiCliente("Claudia Spori") }),
-  [{ body: nuovo("Segna appuntamento con Claudia Spori domani alle 10"),
-     copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Claudia Spori", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Claudia Spori" })] }],
+  [{ body: nuovo("Segna appuntamento con Claudia Spori domani alle 10"), copione: [] }],
   ([r], [ai]) => {
     verifica("risposta 200, concluso", r.status === 200 && r.corpo.stato === "concluso", JSON.stringify(r.corpo));
-    verifica("UNA sola chiamata all'AI", ai.length === 1, ai.length);
-    verifica("chiamata piccola: un solo strumento, prompt corto, modello economico", ai[0].tools.length === 1 && ai[0].system.length < 2000 && ai[0].model === "claude-haiku-4-5");
+    verifica("nessuna chiamata all'AI", ai.length === 0, ai.length);
+    verifica("titolo come lo scriveva la piccola AI", appuntamenti()[0] && /Appuntamento con Claudia Spori/.test(JSON.stringify(appuntamenti()[0])), JSON.stringify(appuntamenti()[0]));
     verifica("appuntamento segnato sul cliente, alle 10 di domani", appuntamenti().length === 1 && appuntamenti()[0].scheduled_at === `${DOMANI}T10:00:00` && tabelle.conversations[0].contact_name === "Claudia Spori");
     verifica("azioni per l'app: crea_impegno", JSON.stringify(strumentiAzioni(r)) === '["crea_impegno"]', JSON.stringify(strumentiAzioni(r)));
     verifica("focus sul cliente", r.corpo.focus && r.corpo.focus.riferimento === "Claudia Spori");
-    verifica("registrato in ai_audit_log e ai_request_log", tabelle.ai_audit_log.some((a) => a.tool === "crea_impegno") && tabelle.ai_request_log[0].giri === 1);
+    verifica("registrato in ai_audit_log e ai_request_log (modello \"codice\", 0 giri, costo 0)", tabelle.ai_audit_log.some((a) => a.tool === "crea_impegno") && tabelle.ai_request_log[0].giri === 0 && tabelle.ai_request_log[0].modello === "codice" && Number(tabelle.ai_request_log[0].costo_usd) === 0, JSON.stringify(tabelle.ai_request_log[0]));
   }
 );
 
@@ -184,18 +182,12 @@ await scenario(
   "Andrea: \"Segna appuntamento Dini domani alle 10\" e poi \"no alle 11\" → spostato subito, senza conferma",
   () => ({ dini: aggiungiCliente("Giampiero Dini") }),
   [
-    { body: nuovo("Segna appuntamento Dini domani alle 10"),
-      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
-    { body: (prec) => nuovo("No alle 11", { ricordo: prec[0].corpo.azioni.map((a) => ({ tool: a.tool, esito: a.esito })) }),
-      copione: [(corpo) => {
-        // l'AI deve ricevere l'ultimo impegno con la sua data
-        if (!JSON.stringify(corpo.messages).includes(`${DOMANI}T10:00`)) throw new Error("ultimo impegno non passato all'AI");
-        return usaStrumento("leggi_impegno", { azione: "correggi_ultimo", quando_iso: `${DOMANI}T11:00:00`, nome_nella_frase: "" });
-      }] },
+    { body: nuovo("Segna appuntamento Dini domani alle 10"), copione: [] },
+    { body: (prec) => nuovo("No alle 11", { ricordo: prec[0].corpo.azioni.map((a) => ({ tool: a.tool, esito: a.esito })) }), copione: [] },
   ],
   ([r1, r2], [ai1, ai2]) => {
-    verifica("primo: appuntamento alle 10 con Giampiero Dini", r1.corpo.stato === "concluso" && appuntamenti().length === 1);
-    verifica("secondo: una sola chiamata all'AI", ai2.length === 1, ai2.length);
+    verifica("primo: appuntamento alle 10 con Giampiero Dini, senza AI", r1.corpo.stato === "concluso" && appuntamenti().length === 1 && ai1.length === 0);
+    verifica("secondo: nessuna chiamata all'AI", ai2.length === 0, ai2.length);
     verifica("secondo: NESSUNA richiesta di conferma", r2.corpo.stato === "concluso", r2.corpo.stato);
     verifica("spostato alle 11, stesso appuntamento (nessun doppione)", appuntamenti().length === 1 && appuntamenti()[0].scheduled_at === `${DOMANI}T11:00:00`, appuntamenti().map((a) => a.scheduled_at).join(","));
     verifica("azioni per l'app: sposta_impegno", JSON.stringify(strumentiAzioni(r2)) === '["sposta_impegno"]');
@@ -207,14 +199,13 @@ await scenario(
   "Due clienti Dini → \"quale dei due?\" e la risposta \"Giampiero\" risolta dal codice",
   () => ({ sara: aggiungiCliente("Sara Dini"), gp: aggiungiCliente("Giampiero Dini") }),
   [
-    { body: nuovo("Appuntamento Dini domani alle 10"),
-      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
+    { body: nuovo("Appuntamento Dini domani alle 10"), copione: [] },
     { body: (prec) => ({ runId: prec[0].corpo.runId, messaggio: "Giampiero" }), copione: [] },
   ],
   ([r1, r2], [ai1, ai2]) => {
     verifica("domanda con i due nomi, che finisce con '?'", /Sara Dini/.test(r1.corpo.testo) && /Giampiero Dini/.test(r1.corpo.testo) && /\?\s*$/.test(r1.corpo.testo), r1.corpo.testo);
     verifica("conversazione aperta (runId)", !!r1.corpo.runId);
-    verifica("domanda con una sola chiamata all'AI", ai1.length === 1, ai1.length);
+    verifica("domanda senza nessuna chiamata all'AI", ai1.length === 0, ai1.length);
     verifica("risposta risolta SENZA nessuna chiamata all'AI", ai2.length === 0, ai2.length);
     verifica("appuntamento su Giampiero Dini alle 10", appuntamenti().length === 1 && tabelle.conversations[0].contact_name === "Giampiero Dini" && appuntamenti()[0].scheduled_at === `${DOMANI}T10:00:00`);
     verifica("conversazione chiusa", tabelle.ai_runs[0].stato === "concluso");
@@ -226,8 +217,7 @@ await scenario(
   "Due omonimi, risposta \"il secondo\"",
   () => ({ sara: aggiungiCliente("Sara Dini"), gp: aggiungiCliente("Giampiero Dini") }),
   [
-    { body: nuovo("Chiamare Dini domani alle 9"),
-      copione: [leggi({ azione: "nuovo", titolo: "Chiamare Dini", tipo: "chiamata", quando_iso: `${DOMANI}T09:00:00`, nome_nella_frase: "Dini" })] },
+    { body: nuovo("Chiamare Dini domani alle 9"), copione: [] },
     { body: (prec) => ({ runId: prec[0].corpo.runId, messaggio: "il secondo" }), copione: [] },
   ],
   ([r1, r2]) => {
@@ -240,8 +230,7 @@ await scenario(
   "Due omonimi, risposta non chiara (\"boh quello di Firenze\") → motore completo",
   () => ({ sara: aggiungiCliente("Sara Dini"), gp: aggiungiCliente("Giampiero Dini") }),
   [
-    { body: nuovo("Appuntamento Dini domani alle 10"),
-      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
+    { body: nuovo("Appuntamento Dini domani alle 10"), copione: [] },
     { body: (prec) => ({ runId: prec[0].corpo.runId, messaggio: "boh quello di Firenze" }),
       copione: [(corpo) => {
         if (!JSON.stringify(corpo.messages).includes("Quale dei due intendi")) throw new Error("cronologia non passata al motore");
@@ -258,10 +247,10 @@ await scenario(
 await scenario(
   "Nome non in anagrafica (\"chiamare Pippo domani alle 9\") → segnato subito",
   null,
-  [{ body: nuovo("Chiamare Pippo domani alle 9"),
-     copione: [leggi({ azione: "nuovo", titolo: "Chiamare Pippo", tipo: "chiamata", quando_iso: `${DOMANI}T09:00:00`, nome_nella_frase: "Pippo" })] }],
+  [{ body: nuovo("Chiamare Pippo domani alle 9"), copione: [] }],
   ([r], [ai]) => {
-    verifica("una chiamata, concluso", ai.length === 1 && r.corpo.stato === "concluso");
+    verifica("nessuna chiamata all'AI, concluso", ai.length === 0 && r.corpo.stato === "concluso");
+    verifica("titolo \"Chiamare Pippo\", tipo chiamata", tabelle.tasks[0] && tabelle.tasks[0].title === "Chiamare Pippo", JSON.stringify(tabelle.tasks[0]));
     verifica("impegno tra le cose da fare, alle 9", tabelle.tasks.length === 1 && tabelle.tasks[0].scheduled_at === `${DOMANI}T09:00:00`);
     verifica("nessun cliente creato", tabelle.clients.length === 0);
   }
@@ -283,7 +272,7 @@ await scenario(
 await scenario(
   "L'AI mette un nome che NON è nella frase (preso chissà dove) → motore completo",
   () => ({ c: aggiungiCliente("Tommaso Greti") }),
-  [{ body: nuovo("Appuntamento con Raspadori domani alle 10"),
+  [{ body: nuovo("Appuntamento con Raspadori domani alle 10 per il bagno"),
      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Tommaso Greti" }), ...motore] }],
   ([r], [ai]) => {
     verifica("motore completo, niente scritto", ai.length === 3 && appuntamenti().length === 0 && tabelle.tasks.length === 0);
@@ -293,7 +282,7 @@ await scenario(
 await scenario(
   "Data non valida o nel passato → motore completo",
   null,
-  [{ body: nuovo("Chiamare Pippo lunedì alle 9"),
+  [{ body: nuovo("Chiamare Pippo lunedì alle 9 per il preventivo"),
      copione: [leggi({ azione: "nuovo", titolo: "Chiamare Pippo", tipo: "chiamata", quando_iso: "2020-01-06T09:00:00", nome_nella_frase: "Pippo" }), ...motore] }],
   ([r], [ai]) => {
     verifica("motore completo, niente scritto", ai.length === 3 && tabelle.tasks.length === 0);
@@ -303,10 +292,9 @@ await scenario(
 await scenario(
   "Nome simile a un cliente (\"Tabri\" / \"Fabbri\") → motore completo, che chiede",
   () => ({ c: aggiungiCliente("Fabbri") }),
-  [{ body: nuovo("Appuntamento Tabri domani alle 10"),
-     copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Tabri", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Tabri" }), ...motore] }],
+  [{ body: nuovo("Appuntamento Tabri domani alle 10"), copione: [...motore] }],
   ([r], [ai]) => {
-    verifica("motore completo, niente scritto", ai.length === 3 && appuntamenti().length === 0 && tabelle.tasks.length === 0);
+    verifica("letto dal codice, poi motore completo (niente scritto)", ai.length === 2 && eMotoreCompleto(ai[0]) && appuntamenti().length === 0 && tabelle.tasks.length === 0, ai.length);
   }
 );
 
@@ -314,8 +302,7 @@ await scenario(
   "\"no alle 11\" ma nomina un'altra persona → non è una correzione, motore completo",
   () => ({ dini: aggiungiCliente("Giampiero Dini"), rossi: aggiungiCliente("Rossi") }),
   [
-    { body: nuovo("Segna Dini domani alle 10"),
-      copione: [leggi({ azione: "nuovo", titolo: "Appuntamento con Dini", tipo: "incontro", quando_iso: `${DOMANI}T10:00:00`, nome_nella_frase: "Dini" })] },
+    { body: nuovo("Segna Dini domani alle 10"), copione: [] },
     { body: (prec) => nuovo("No Rossi alle 11", { ricordo: prec[0].corpo.azioni }),
       copione: [leggi({ azione: "correggi_ultimo", quando_iso: `${DOMANI}T11:00:00`, nome_nella_frase: "Rossi" }), ...motore] },
   ],
@@ -328,7 +315,7 @@ await scenario(
 await scenario(
   "L'AI piccola non risponde (errore 500) → motore completo, nessun blocco",
   null,
-  [{ body: nuovo("Chiamare Pippo domani alle 9"), copione: [() => "ERRORE_500", ...motore] }],
+  [{ body: nuovo("Chiamare Pippo domani alle 9 per il bagno"), copione: [() => "ERRORE_500", ...motore] }],
   ([r], [ai]) => {
     verifica("risposta 200 dal motore completo", r.status === 200 && ai.length === 3 && eMotoreCompleto(ai[1]), `${r.status} ${ai.length}`);
   }

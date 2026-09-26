@@ -5,7 +5,7 @@ in ordine. Il dettaglio tecnico di ogni punto è in `TODO.md`.
 
 **In breve**
 - I tre pilastri: tempo, memoria, soldi.
-- 0 · Pubblicare il pacchetto #97.
+- **0 · Adesso, in quest'ordine** (deciso con Andrea il 26/09).
 - 1 · Obbligatori prima di vendere.
 - 2 · Per incassare (abbonamento, costi).
 - 2b · **EON Memory**, "l'iCloud del lavoro" + analisi di costi e spazio.
@@ -44,15 +44,28 @@ pilastri, altrimenti non si fa.
 
 ---
 
-## 0. Domani mattina — pubblicare il pacchetto
+## 0. Adesso, in quest'ordine (deciso con Andrea, 26/09/2026)
 
-1. **[Andrea]** Merge del pacchetto unico (PR #97).
-2. **[Claude]** Controllo che la pubblicazione su Vercel sia andata.
-3. **[Claude]** Chiudo i vecchi accessi della pagina cliente
-   (`supabase/portale_chiudi_accessi.sql`) e blocco il cambio di
-   professione (`supabase/profilo_professione_fissa.sql`).
-4. **[Andrea]** 5 minuti di prova sul telefono: Esci e rientra, scorri tra
-   le pagine, foto in Appunti, "cosa ho da fare domani?", Impostazioni.
+1. **[Claude]** Sistemare i problemi trovati da Andrea nei test del 26/09.
+2. **[Andrea]** Scegliere la scritta in alto nella Home (A, B o C).
+3. **[Claude] Meno AI, fase 1** (vedi 5b):
+   - misurare: costo e tipo di ogni richiesta nei registri;
+   - analizzare: elenco di tutto quello che EON fa, in tre gruppi (senza
+     AI / AI piccola / AI completa), partendo dalle frasi vere di Andrea
+     nei registri — ad Andrea con il risparmio stimato;
+   - fare: spostare nel codice il primo gruppo, con i test, senza toccare
+     la qualità.
+4. **[Claude]** Avviso automatico degli errori.
+5. Poi la sezione 1 (prima di vendere) e i primi 5 artigiani (sezione 6).
+
+**Privacy e società** (26/09): per la prova gratuita con i primi artigiani
+basta Andrea come persona fisica titolare del trattamento (informativa e
+consenso a suo nome). Per vendere gli abbonamenti serve la società (o una
+partita IVA) prima di Stripe; allora l'informativa si aggiorna. Testi da
+far controllare a un legale.
+
+Pubblicati: pacchetto #97 (25/09) e #70 (26/09), con gli accessi della
+pagina cliente chiusi e la professione bloccata in produzione.
 
 ---
 
@@ -63,7 +76,7 @@ pilastri, altrimenti non si fa.
 | **Vercel Pro** (~20 $/mese) | [Andrea] | Il piano gratuito vieta l'uso commerciale e ha il limite di pubblicazioni che ci ha bloccato il 25/09. |
 | **Supabase Pro** (~25 $/mese) | [Andrea] | Backup giornalieri, nessuna pausa del progetto. |
 | **Servizio email vero** (es. Resend) | [insieme] | Oggi Supabase manda email solo a noi del team. Poi: email in italiano e **conferma email obbligatoria** accesa. |
-| **Privacy, termini, consenso GDPR** | [insieme] | Mi servono ragione sociale, P.IVA, sede, email. Io preparo testi e casella "accetto"; li fai controllare a legale/commercialista. |
+| **Privacy, termini, consenso GDPR** | [insieme] | Per la prova: a nome di Andrea (persona fisica). Per vendere: con la società. Io preparo testi e casella "accetto"; li fai controllare a legale/commercialista. |
 | **Dominio tuo** (es. eon.it) | [insieme] | Tu lo compri (~10–20 €/anno), io lo collego al posto di eonbeckend.vercel.app. |
 | **Avviso automatico degli errori** | [Claude] | Se qualcosa si rompe a un cliente lo so subito. |
 | **Compressione delle foto** (subito dopo il merge) | [Claude] | Come WhatsApp: da ~3 MB a ~300 KB per foto, a occhio uguali (lato lungo ~2000 px). Le foto di documenti da leggere (fatture, DURC) restano più nitide. Spazio ~10 volte meno, caricamento più veloce in cantiere. |
@@ -84,6 +97,12 @@ pilastri, altrimenti non si fa.
   risponde e non li conserva come archivio).
 - **[Claude] Costo AI per cliente**: misurato dai registri, per fare il
   prezzo giusto.
+- **Prezzo — ipotesi, non decisione** (26/09): il costo basso (AI 1-2 €
+  a cliente con migliaia di clienti e modello nostro) è un **vantaggio**,
+  non il prezzo. Piano base 25-35 € (i gestionali per artigiani costano già
+  20-50 €); eventuale piano "Lite" a ~9 € come porta d'ingresso. Costi per
+  cliente oltre all'AI: server/database ~0,5 €, spazio ~0,3 €, Stripe ~0,4 €,
+  SdI/WhatsApp/email ~0,5-1 € (stime). Si decide coi dati dei primi artigiani.
 - **[Andrea] Piano Free "Organizza la giornata"** con pubblicità
   personalizzata (deciso il 17/09): da progettare quando si apre al
   pubblico generico.
@@ -237,6 +256,13 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
   tu): cambia solo il nome, non cosa fa.
 
 **Communication Hub — Messaggi diventa il punto unico** (progetto grande)
+- **Primo passo fatto (26/09)**: Messaggi ridisegnata nello stile
+  dell'app — un solo elenco con EON, WhatsApp ed Email (pallino del
+  canale, cerca, filtri, archiviate in fondo); nella chat "Invia con"
+  EON / WhatsApp / Email. WhatsApp ed Email per ora "a metà": si apre
+  l'app col testo già scritto e il messaggio resta nella chat, ma le
+  **risposte** restano in WhatsApp o nella posta. Il cliente nel suo
+  portale vede solo i messaggi EON.
 - EON, **WhatsApp** ed **email** arrivano e partono dalla chat del cliente
   giusto: una sola conversazione per cliente, qualunque canale usi.
 - EON legge i messaggi in arrivo, li collega al cliente, propone la
@@ -337,6 +363,16 @@ dall'AI scende piano piano, **la qualità non scende mai**.
   centinaia di utenti (stima: centinaia–migliaia di € per addestrarlo,
   centinaia–1.000+ €/mese di server). Da verificare prima: le regole di
   Anthropic sull'uso delle risposte di Claude per addestrare altri modelli.
+- **Come funzionerebbe il modello nostro** (26/09): modello aperto (Llama
+  di Meta, uso commerciale gratuito; o Mistral, europeo) specializzato con
+  gli esempi confermati dagli utenti; gira su un server affittato (a ore
+  ~0,5-1 €/h, dedicato ~200-1.000+ €/mese, o "a richiesta"; meglio europeo:
+  Hetzner, OVH, Scaleway) oppure da un fornitore a consumo (Together, Groq,
+  Fireworks). Tre livelli: codice → modello nostro → Claude, ognuno passa
+  al successivo se non è sicuro. Ri-addestrato ogni tanto, e messo online
+  solo se passa i test. Conviene con molti clienti (costo fisso che si
+  divide): stima AI per cliente ~15 € con 50 clienti, ~3 € con 500, ~1,5 €
+  con 5.000. Il conto vero si fa coi token registrati.
 - **Curva attesa** (stima): ~90% con AI all'inizio → ~50% dopo la fase 1
   → ~30% dopo l'apprendimento; il 20–30% finale (frasi nuove, domande
   tecniche, testi, foto) resta all'AI o al modello nostro.

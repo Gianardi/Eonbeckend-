@@ -231,6 +231,7 @@ async function main() {
     await prepara();
     await page.evaluate(() => { chiudiRisorsaCard(); document.getElementById("aiToastContainer").innerHTML = ""; navigateTo("chat"); chatFilter = null; renderChatList(); });
     const selDini = '#chatList .scorri-wrap:has(.chat-item-name:text-is("Dini")) .chat-item';
+    await page.locator(selDini).first().scrollIntoViewIfNeeded();
     await trascina(selDini, -20);
     verifica("scorrimento corto: la riga torna al suo posto, niente si apre", await page.evaluate(() => [...document.querySelectorAll("#chatList .scorri-elimina")].every((b) => parseFloat(b.style.width || "0") === 0) && !document.getElementById("chatSlider").classList.contains("show-conv")));
     await trascina(selDini, -12, 80);

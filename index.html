@@ -54,6 +54,9 @@
     --violet-tint:#C9A7FF;
     --wa:#12C971;
     --wa-soft:rgba(18,201,113,.13);
+    /* Canali del centro messaggi */
+    --wa-msg:#1FA855;
+    --mail:#8A5CF6;
 
     --radius:16px;
     --shadow-sm:0 1px 2px rgba(20,23,29,.05), 0 1px 1px rgba(20,23,29,.04);
@@ -124,7 +127,9 @@
   .tab-item.active{ color:var(--indigo); }
 
   /* main */
-  main{ flex:1; padding:16px 16px 20px; }
+  /* Con EON aperto dalla Home del telefono la barra di stato (ora, batteria)
+     sta sopra la pagina: si lascia il suo spazio (26/09/2026, foto di Andrea). */
+  main{ flex:1; padding:calc(16px + env(safe-area-inset-top, 0px)) 16px 20px; }
 
   /* Ridisegnato il 23/09/2026 (Gianardi: "il logo in alto non è ben
      proporzionato rispetto al resto"). Un marchio permanente in cima a
@@ -137,7 +142,7 @@
      data (un solo blocco compatto, non due elementi separati che si
      susseguono), e il titolo sotto resta l'elemento dominante della
      pagina, come dovrebbe essere ogni giorno che si apre l'app. */
-  .brand-hero{ display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 0 18px; }
+  .brand-hero{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 20px 0; }
   /* Il marchio e la ricerca generale stanno solo in Home: nelle altre
      sezioni ci sarebbero due barre di ricerca e due titoli. */
   .brand-hero.nascosto{ display:none; }
@@ -147,8 +152,8 @@
   }
   .brand-hero-wordmark{
     display:flex; align-items:center; justify-content:center; gap:2px;
-    font-family:'Manrope'; font-weight:800; font-size:14.5px; letter-spacing:-.01em;
-    color:var(--faint);
+    font-family:'Manrope'; font-weight:800; font-size:18px; letter-spacing:.02em;
+    color:var(--text);
   }
   .logo-o{ display:inline-flex; align-items:center; justify-content:center; }
   /* Un solo colore pieno (l'indaco già usato per le azioni primarie
@@ -157,8 +162,9 @@
      che riconoscibile — un marchio piccolo regge meglio un solo
      colore netto. */
   .brand-hero-wordmark .logo-o{
-    width:16px; height:16px; margin:0 1px; border-radius:50%;
+    width:17px; height:17px; margin:0 1px; border-radius:50%;
     background:var(--indigo); color:#fff;
+    animation:none; box-shadow:none;
   }
   .brand-hero-wordmark .logo-o svg{ width:60%; height:60%; }
   .ai-clock-btn{
@@ -355,6 +361,22 @@
     color:var(--text);
   }
   .home-hero-eyebrow{ position:relative; font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:3px; }
+  .brand-avatar{
+    width:38px; height:38px; border-radius:50%; border:none; flex:none; cursor:pointer;
+    background:linear-gradient(135deg,#5A87FF,#2E5FE8); color:#fff;
+    font-family:'Manrope'; font-weight:800; font-size:13.5px; letter-spacing:.02em;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand-avatar:active{ transform:scale(.95); }
+  .home-oggi-titolo{ font-family:'Manrope'; font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.12; color:var(--text); overflow-wrap:anywhere; }
+  .home-oggi-riga{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0 26px; }
+  #homeOggiData{ font-size:15px; font-weight:500; color:var(--muted); }
+  .home-oggi-pill{
+    display:inline-flex; align-items:center; gap:6px; border:none; cursor:pointer; font-family:inherit;
+    font-size:12.5px; font-weight:700; color:var(--indigo); background:var(--indigo-soft);
+    border-radius:999px; padding:5px 11px;
+  }
+  .home-oggi-pill svg{ width:14px; height:14px; }
   .home-hero-title{ position:relative; font-family:'Manrope'; font-size:22px; font-weight:900; letter-spacing:-.01em; margin-bottom:26px; }
   .home-hero-mic-wrap{ position:relative; display:flex; justify-content:center; margin-bottom:12px; }
   .home-hero-mic{
@@ -1351,7 +1373,7 @@
   /* Scorri a sinistra per eliminare (chat e messaggi) */
   .scorri-wrap{ position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; }
   .scorri-contenuto{ position:relative; z-index:1; touch-action:pan-y; }
-  .chat-list .scorri-contenuto{ background:var(--card); }
+  .chat-list .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
   .scorri-elimina{
     position:absolute; top:0; right:0; bottom:0; width:0; overflow:hidden; z-index:0;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
@@ -1367,7 +1389,132 @@
   .chat-item-time{ font-size:11px; color:var(--faint); }
   .chat-unread{ display:inline-flex; margin-top:5px; background:var(--grad-blue); color:#fff; font-size:10px; font-weight:800; min-width:18px; height:18px; border-radius:20px; align-items:center; justify-content:center; padding:0 5px; }
   .chat-window-name{ font-size:15px; font-weight:800; color:var(--text); }
-  .chat-window-status{ font-size:11.5px; color:var(--teal); }
+  .chat-window-status{ font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* ===== Centro messaggi (26/09/2026): stesso stile della Home ===== */
+  #page-chat .chat-list-panel{ background:var(--bg); }
+  .msg-testa{ display:flex; align-items:center; gap:10px; padding:calc(14px + env(safe-area-inset-top, 0px)) 20px 8px; flex:none; }
+  .msg-testa .chat-fs-back{ background:var(--card); border:1px solid var(--border); }
+  .msg-titolo{ flex:1; font-family:'Manrope'; font-size:28px; font-weight:800; letter-spacing:-.02em; color:var(--text); }
+  .msg-nuovo{
+    width:40px; height:40px; border-radius:50%; flex:none; border:none; cursor:pointer;
+    background:var(--text); color:#fff; display:flex; align-items:center; justify-content:center;
+  }
+  .msg-nuovo svg{ width:18px; height:18px; }
+  .msg-cerca{
+    display:flex; align-items:center; gap:8px; margin:4px 16px 10px; padding:0 14px; flex:none;
+    background:var(--card); border:1px solid var(--border); border-radius:14px; color:var(--faint);
+  }
+  .msg-cerca svg{ width:17px; height:17px; flex:none; }
+  .msg-cerca input{
+    flex:1; min-width:0; border:none; outline:none; background:transparent; padding:11px 0;
+    font:inherit; font-size:15px; color:var(--text); -webkit-appearance:none; appearance:none;
+  }
+  .msg-cerca:focus-within{ border-color:rgba(59,111,255,.45); }
+  .msg-chips{ display:flex; gap:8px; padding:0 16px 12px; flex:none; overflow-x:auto; scrollbar-width:none; }
+  .msg-chips::-webkit-scrollbar{ display:none; }
+  .msg-chips button{
+    display:flex; align-items:center; gap:6px; flex:none; padding:7px 13px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--border); background:var(--card); font:inherit; font-size:13px; font-weight:700; color:var(--muted);
+  }
+  .msg-chips button.on{ background:var(--text); color:#fff; border-color:var(--text); }
+  .pallino{ width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; }
+  .pallino.eon{ background:var(--indigo); }
+  .pallino.whatsapp{ background:var(--wa-msg); }
+  .pallino.email{ background:var(--mail); }
+  #page-chat .chat-list{
+    flex:0 1 auto; padding:0; margin:0 12px; background:var(--card);
+    border:1px solid var(--border); border-radius:18px; overflow-y:auto;
+  }
+  #page-chat .chat-list .scorri-wrap{ border-radius:0; }
+  #page-chat .chat-list .scorri-wrap + .scorri-wrap .chat-item{ border-top:1px solid var(--border); }
+  #page-chat .chat-item{ border-radius:0; padding:12px 14px; }
+  #page-chat .chat-item.active{ background:var(--indigo-soft); }
+  .msg-avatar{
+    position:relative; width:46px; height:46px; border-radius:50%; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Manrope'; font-size:15px; font-weight:800;
+  }
+  .msg-avatar.piccolo{ width:34px; height:34px; font-size:12.5px; }
+  .msg-canale{
+    position:absolute; right:-3px; bottom:-3px; width:20px; height:20px; border-radius:50%;
+    border:2px solid var(--card); display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .msg-canale svg{ width:10px; height:10px; }
+  .chat-item-riga{ display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; }
+  .chat-item-riga + .chat-item-riga{ margin-top:2px; }
+  #page-chat .chat-item-name{ font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  #page-chat .chat-item-time{ font-size:12px; color:var(--faint); flex:none; font-variant-numeric:tabular-nums; }
+  #page-chat .chat-item-last{ font-size:13.5px; margin-top:0; min-width:0; }
+  #page-chat .chat-unread{ margin-top:0; flex:none; background:var(--indigo); font-size:11px; min-width:20px; height:20px; }
+  .chat-item.non-letto .chat-item-name{ font-weight:800; }
+  .chat-item.non-letto .chat-item-last{ color:var(--text); font-weight:600; }
+  .chat-item.non-letto .chat-item-time{ color:var(--indigo); font-weight:700; }
+  .msg-archiviate{
+    display:flex; align-items:center; gap:8px; margin:6px 16px calc(12px + env(safe-area-inset-bottom, 0px)); padding:10px 6px;
+    border:none; background:none; cursor:pointer; font:inherit; font-size:13.5px; font-weight:600; color:var(--muted); flex:none;
+  }
+  .msg-archiviate[hidden]{ display:none; }
+  .msg-archiviate svg{ width:17px; height:17px; }
+
+  /* Conversazione */
+  #page-chat .chat-fs-head{ padding:calc(12px + env(safe-area-inset-top, 0px)) 14px 12px; gap:10px; }
+  #page-chat .chat-fs-persona{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; cursor:pointer; }
+  #page-chat .chat-fs-persona > div:last-child{ min-width:0; }
+  #page-chat #chatWinAvatar{ width:40px; height:40px; font-family:'Manrope'; font-weight:800; font-size:14px; }
+  #page-chat .chat-window-name{ font-family:'Manrope'; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .msg-chiama, .msg-altro{
+    width:38px; height:38px; border-radius:50%; flex:none; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .msg-chiama{ background:var(--green-soft); color:var(--wa-msg); }
+  .msg-altro{ background:var(--bg); color:var(--text); }
+  .msg-chiama[hidden], .msg-altro[hidden]{ display:none; }
+  .msg-chiama svg{ width:18px; height:18px; }
+  .msg-altro svg{ width:18px; height:18px; }
+  #page-chat [hidden]{ display:none !important; }
+  #page-chat .bubble.me{ background:var(--indigo); box-shadow:none; }
+  #page-chat .bubble.me.via-whatsapp{ background:var(--wa-msg); }
+  #page-chat .bubble.me.via-email{ background:var(--mail); }
+  #page-chat .chat-input-row input[type="text"]:focus{ outline:none; border-color:rgba(59,111,255,.45); }
+  .bubble.them.via-whatsapp .bubble-time{ color:var(--wa-msg); opacity:1; font-weight:600; }
+  .bubble.them.via-email .bubble-time{ color:var(--mail); opacity:1; font-weight:600; }
+  .msg-invia-con{
+    display:flex; align-items:center; gap:8px; padding:8px 12px 0; flex:none;
+    background:var(--card); border-top:1px solid var(--border); font-size:12px; font-weight:600; color:var(--muted);
+  }
+  .msg-invia-con + .chat-input-row{ border-top:none; padding-top:8px; }
+  .msg-seg{ display:flex; background:var(--bg); border-radius:999px; padding:3px; }
+  .msg-seg button{
+    display:flex; align-items:center; gap:5px; padding:5px 11px; border-radius:999px; border:none; cursor:pointer;
+    background:none; font:inherit; font-size:12px; font-weight:700; color:var(--muted);
+  }
+  .msg-seg button .pallino{ width:7px; height:7px; }
+  .msg-seg button.on{ background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(20,30,60,.12); }
+  #page-chat .chat-send{ background:var(--indigo); box-shadow:none; }
+  #page-chat .chat-send.via-whatsapp{ background:var(--wa-msg); }
+  #page-chat .chat-send.via-email{ background:var(--mail); }
+
+  /* Scegli a chi scrivere / menu ⋯ (nella card bianca) */
+  .msg-scegli{ display:flex; flex-direction:column; gap:10px; }
+  .msg-scegli-cerca{
+    border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:11px 13px;
+    font:inherit; font-size:15px; color:var(--text); outline:none;
+  }
+  .msg-scegli-nuovo{
+    display:flex; align-items:center; justify-content:center; gap:8px; padding:11px; border-radius:12px; cursor:pointer;
+    border:1px dashed rgba(59,111,255,.35); background:var(--indigo-soft); color:var(--indigo); font:inherit; font-size:14px; font-weight:700;
+  }
+  .msg-scegli-nuovo svg{ width:16px; height:16px; }
+  .msg-scegli-lista{ display:flex; flex-direction:column; max-height:50vh; overflow-y:auto; }
+  .msg-scegli-riga, .msg-menu-voce{
+    display:flex; align-items:center; gap:12px; padding:10px 4px; border:none; background:none; cursor:pointer; text-align:left;
+    font:inherit; font-size:15px; font-weight:600; color:var(--text); border-bottom:1px solid var(--border);
+  }
+  .msg-scegli-riga:last-child, .msg-menu-voce:last-child{ border-bottom:none; }
+  .msg-menu{ display:flex; flex-direction:column; }
+  .msg-menu-voce svg{ width:20px; height:20px; color:var(--muted); flex:none; }
+  .msg-menu-voce.rosso, .msg-menu-voce.rosso svg{ color:var(--coral); }
 
   /* card di contesto fissata in cima alla chat: stato cliente, valore, ultimo contatto */
   .chat-context-pin{
@@ -1725,6 +1872,10 @@
   .percorso-meta span{ flex:1; min-width:0; }
   .percorso-meta .percorso-freccia{ color:var(--faint); width:16px; height:16px; }
   .percorso-presto{ margin:0; font-size:11.5px; color:var(--faint); text-align:center; }
+  .foto-rapida-card{ display:flex; flex-direction:column; align-items:center; gap:12px; padding:8px 0 4px; }
+  .foto-rapida-btn{ display:flex; align-items:center; gap:10px; border:none; border-radius:18px; background:var(--text); color:#fff; font-family:'Manrope'; font-weight:800; font-size:17px; padding:18px 26px; cursor:pointer; }
+  .foto-rapida-btn svg{ width:24px; height:24px; }
+  .foto-rapida-nota{ margin:0; font-size:14px; color:var(--muted); }
   /* Scheda del cliente (26/09/2026) */
   .scheda-cliente{ display:flex; flex-direction:column; gap:14px; }
   .sc-testa{ display:flex; gap:12px; align-items:center; }
@@ -2537,8 +2688,11 @@
   </aside>
 
   <main>
+    <!-- Intestazione della Home (26/09/2026, "Mix 2" scelto da Andrea: la
+         G stile Things/Todoist col saluto della D stile Apple): marchio a
+         sinistra, iniziali a destra (aprono le Impostazioni); sotto il
+         saluto col nome, la data e quanti impegni ci sono. -->
     <div class="brand-hero" id="brandHero">
-      <div class="brand-data" id="brandData">&nbsp;</div>
       <div class="brand-hero-wordmark">
         <span>E</span>
         <button class="logo-o ai-clock-btn" id="aiClockBtn" title="Chiedi all'AI di organizzarti la giornata" aria-label="Organizza la giornata con l'AI">
@@ -2546,6 +2700,7 @@
         </button>
         <span>N</span>
       </div>
+      <button type="button" class="brand-avatar" id="brandAvatar" aria-label="Impostazioni">EON</button>
     </div>
 
     <div class="topbar" style="display:none;">
@@ -2564,8 +2719,11 @@
     <div class="page visible" id="page-home">
 
       <div class="home-hero">
-        <div class="home-hero-eyebrow">Buongiorno</div>
-        <div class="home-hero-title">Cosa facciamo oggi</div>
+        <div class="home-oggi-titolo" id="homeSaluto">Buongiorno</div>
+        <div class="home-oggi-riga">
+          <span id="homeOggiData"></span>
+          <button type="button" class="home-oggi-pill" id="homeOggiPill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span id="homeOggiConta">Nessun impegno</span></button>
+        </div>
 
         <div class="home-hero-mic-wrap">
           <button class="home-hero-mic" id="homeHeroMic" aria-label="Tocca per parlare" type="button">
@@ -2687,6 +2845,7 @@
              scheda della foto detti o scrivi la nota. -->
         <input type="file" id="cantiereAppuntiFotoInput" accept="image/*" style="display:none;">
         <input type="file" id="schedaClienteFotoInput" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="fotoRapidaInput" accept="image/*" capture="environment" style="display:none;">
         <button type="button" class="appunti-foto-btn" id="cantiereAppuntiFotoBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           <span id="cantiereAppuntiFotoTesto">Scatta una foto con appunto</span>
@@ -3901,25 +4060,32 @@
     <div class="page" id="page-chat">
       <div class="chat-slider" id="chatSlider">
         <div class="chat-list-panel">
-          <div class="chat-fs-head">
-            <div class="chat-fs-back" data-page="home">
+          <!-- Centro messaggi (26/09/2026): EON, WhatsApp ed Email in un
+               solo elenco, nello stile del resto dell'app. -->
+          <div class="msg-testa">
+            <div class="chat-fs-back" data-page="home" aria-label="Indietro">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </div>
-            <div class="chat-fs-title">Messaggi</div>
+            <div class="msg-titolo">Messaggi</div>
+            <button type="button" class="msg-nuovo" id="chatNuovoBtn" aria-label="Nuovo messaggio">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+            </button>
           </div>
-          <div class="chat-filter-tabs">
-            <div class="chat-filter-tab" id="chatFilterArchivio" data-filter="archivio">Archivio</div>
-            <div class="chat-filter-tab active" id="chatFilterUrgenti" data-filter="urgenti">Urgenti</div>
-            <div class="chat-filter-tab" id="chatFilterClienti" data-filter="clienti">Clienti</div>
-            <div class="chat-filter-tab" id="chatFilterChiudere" data-filter="chiudere">Da chiudere</div>
-            <div class="chat-filter-tab" id="chatFilterAcquisire" data-filter="acquisire">Da acquisire</div>
-            <div class="chat-filter-tab" id="chatFilterTeam" data-filter="team">Team</div>
+          <label class="msg-cerca">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input type="search" id="chatCerca" placeholder="Cerca un cliente o un messaggio" autocomplete="off">
+          </label>
+          <div class="msg-chips" id="chatCanali">
+            <button type="button" class="on" data-canale="tutti">Tutti</button>
+            <button type="button" data-canale="eon"><i class="pallino eon"></i>EON</button>
+            <button type="button" data-canale="whatsapp"><i class="pallino whatsapp"></i>WhatsApp</button>
+            <button type="button" data-canale="email"><i class="pallino email"></i>Email</button>
           </div>
-          <button class="chat-aggiungi" id="chatAggiungiBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-            <span id="chatAggiungiTesto">Aggiungi</span>
-          </button>
           <div class="chat-list" id="chatList"></div>
+          <button type="button" class="msg-archiviate" id="chatArchiviateBtn" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
+            <span id="chatArchiviateTesto">Archiviate</span>
+          </button>
         </div>
 
         <div class="chat-conv-panel">
@@ -3933,21 +4099,34 @@
                 <div class="chat-window-name" id="chatWinName">Seleziona una chat</div>
                 <div class="chat-window-status" id="chatWinStatus">&nbsp;</div>
               </div>
-              <svg class="chat-fs-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
             </div>
-            <button type="button" class="row-action-btn" id="chatArchiviaBtn" title="Archivia questa chat" style="margin-left:auto;">
+            <a class="msg-chiama" id="chatChiamaBtn" aria-label="Chiama" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg>
+            </a>
+            <button type="button" class="msg-altro" id="chatAltroBtn" aria-label="Altre azioni">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+            <button type="button" class="row-action-btn" id="chatArchiviaBtn" title="Archivia questa chat" hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
             </button>
-            <button type="button" class="row-action-btn" id="chatEliminaBtn" title="Elimina questa chat">
+            <button type="button" class="row-action-btn" id="chatEliminaBtn" title="Elimina questa chat" hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
             </button>
           </div>
-          <div id="chatContextPin"></div>
+          <div id="chatContextPin" hidden></div>
           <div id="chatSuggestions"></div>
           <div class="chat-messages" id="chatMessages"></div>
           <div class="chat-upload-bar" id="chatUploadBar" style="display:none;">
             <div class="chat-upload-text" id="chatUploadText">Sto caricando…</div>
             <div class="chat-upload-track"><div class="chat-upload-fill" id="chatUploadFill"></div></div>
+          </div>
+          <div class="msg-invia-con" id="chatInviaCon">
+            <span>Invia con</span>
+            <div class="msg-seg">
+              <button type="button" class="on" data-canale="eon"><i class="pallino eon"></i>EON</button>
+              <button type="button" data-canale="whatsapp"><i class="pallino whatsapp"></i>WhatsApp</button>
+              <button type="button" data-canale="email"><i class="pallino email"></i>Email</button>
+            </div>
           </div>
           <div class="chat-input-row">
             <button class="chat-attach" id="chatPiuBtn" aria-label="Allega o crea un documento">
@@ -4341,6 +4520,7 @@ async function loadChatsFromDB(){
       docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
       createdAt: m.created_at || undefined,
       fileType: m.file_type || undefined,
+      canale: m.canale || "eon",
       time: formatMsgTime(m.created_at)
     }));
     chats.push({
@@ -4978,6 +5158,7 @@ function subscribeToMessages(){
       docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
       createdAt: m.created_at || undefined,
       fileType: m.file_type || undefined,
+      canale: m.canale || "eon",
       time: formatMsgTime(m.created_at)
         });
         if(m.sender === "them" && chats[activeChatIndex] !== chat) chat.unread++;
@@ -8265,6 +8446,44 @@ async function eliminaChatConAnnulla(chat){
   });
 }
 
+/* ============ CENTRO MESSAGGI (26/09/2026) ============
+   Gianardi: "la messaggistica deve essere molto più semplice, nello stile
+   dell'app: il centro di comunicazione con email, EON e WhatsApp".
+   Un solo elenco, ordinato per ultimo messaggio; ogni riga dice da quale
+   canale è arrivato l'ultimo messaggio (pallino sull'avatar). Sopra: cerca
+   e i filtri Tutti / EON / WhatsApp / Email. In fondo: le archiviate. */
+let msgCanale = "tutti";
+let msgCerca = "";
+// Le archiviate si vedono con chatFilter === "archivio" (come prima)
+
+const CANALI_MSG = {
+  eon:      { nome: "EON",      colore: "var(--indigo)", icona: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>' },
+  whatsapp: { nome: "WhatsApp", colore: "var(--wa-msg)", icona: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/></svg>' },
+  email:    { nome: "Email",    colore: "var(--mail)",   icona: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>' }
+};
+const canaleDi = m => (m && CANALI_MSG[m.canale]) ? m.canale : "eon";
+const chatHaCanale = (c, k) => c.messages.some(m => canaleDi(m) === k);
+
+/* Quando, detto come lo direbbe una persona: 10:40 · Ieri · mar · 12 set */
+function quandoMessaggio(m){
+  if(!m) return "";
+  if(!m.createdAt) return m.time || "";
+  const d = new Date(m.createdAt);
+  if(isNaN(d)) return m.time || "";
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const giorno = new Date(d); giorno.setHours(0,0,0,0);
+  const diff = Math.round((oggi - giorno) / 86400000);
+  if(diff <= 0) return d.getHours().toString().padStart(2,"0") + ":" + d.getMinutes().toString().padStart(2,"0");
+  if(diff === 1) return "Ieri";
+  if(diff < 7) return d.toLocaleDateString("it-IT", { weekday:"short" });
+  return d.toLocaleDateString("it-IT", { day:"numeric", month:"short" });
+}
+const momentoChat = c => {
+  const last = c.messages[c.messages.length - 1];
+  const t = last && last.createdAt ? Date.parse(last.createdAt) : NaN;
+  return isNaN(t) ? 0 : t;
+};
+
 function renderChatList(){
   const wrap = document.getElementById("chatList");
   wrap.innerHTML = "";
@@ -8272,43 +8491,40 @@ function renderChatList(){
   const withIdx = chats.map((c, idx) => ({ c, idx }));
   // Archiviata se lo è la chat O il suo cliente: chat e anagrafica mostrano le stesse persone
   const arch = x => chatArchiviata(x.c);
-  let filtered = withIdx.filter(x => !arch(x));
-  if(chatFilter === "archivio") filtered = withIdx.filter(x => arch(x));
-  if(chatFilter === "urgenti") filtered = withIdx.filter(x => !arch(x) && (x.c.toCallToday || x.c.unread > 0));
-  if(chatFilter === "clienti") filtered = withIdx.filter(x => !arch(x) && x.c.isClient);
-  if(chatFilter === "chiudere") filtered = withIdx.filter(x => !arch(x) && x.c.isClient && x.c.toSeeToday);
-  if(chatFilter === "acquisire") filtered = withIdx.filter(x => !arch(x) && x.c.isProspect);
-  if(chatFilter === "team") filtered = withIdx.filter(x => !arch(x) && !x.c.isClient && !x.c.isProspect);
+  const quanteArchiviate = withIdx.filter(arch).length;
+  const cerca = nomeChiave(msgCerca);
+  const msgArchiviate = chatFilter === "archivio";
+  let filtered = withIdx.filter(x => msgArchiviate ? arch(x) : !arch(x));
+  if(msgCanale !== "tutti") filtered = filtered.filter(x => chatHaCanale(x.c, msgCanale));
+  if(cerca) filtered = filtered.filter(x => nomeChiave(x.c.name).includes(cerca)
+    || x.c.messages.some(m => nomeChiave(m.text || m.title || "").includes(cerca)));
+  // Come in ogni app di messaggi: in alto chi ha scritto per ultimo
+  filtered.sort((a, b) => momentoChat(b.c) - momentoChat(a.c));
 
-  const emptyLabels = {
-    archivio:"Nessuna conversazione archiviata.",
-    urgenti:"Niente di urgente al momento, ottimo lavoro.",
-    clienti:"Nessun cliente in chat.",
-    chiudere:"Nessuna trattativa da chiudere al momento.",
-    acquisire:"Nessun nuovo contatto da acquisire al momento.",
-    team:"Nessun collaboratore o dipendente in chat."
-  };
-  const emptyMsg = emptyLabels[chatFilter] || "Nessuna conversazione qui.";
   if(filtered.length === 0){
-    wrap.innerHTML = '<div class="chat-list-empty">' + emptyMsg + '</div>';
+    let vuoto = "Nessuna conversazione. Tocca la matita in alto per scrivere a un cliente.";
+    if(cerca) vuoto = "Nessun risultato per “" + escapeHtml(msgCerca.trim()) + "”.";
+    else if(msgArchiviate) vuoto = "Nessuna conversazione archiviata.";
+    else if(msgCanale === "whatsapp") vuoto = "Nessun messaggio WhatsApp ancora.<br>Apri una chat e scegli “Invia con WhatsApp”.";
+    else if(msgCanale === "email") vuoto = "Nessuna email ancora.<br>Apri una chat e scegli “Invia con Email”.";
+    wrap.innerHTML = '<div class="chat-list-empty">' + vuoto + '</div>';
   }
 
   filtered.forEach(({ c, idx }) => {
     const item = document.createElement("div");
-    item.className = "chat-item" + (idx === activeChatIndex ? " active" : "");
-    const initials = c.name.split(" ").map(w=>w[0]).join("").toUpperCase();
+    const nonLetti = c.unread > 0;
+    item.className = "chat-item" + (idx === activeChatIndex ? " active" : "") + (nonLetti ? " non-letto" : "");
+    const iniziali = c.name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
     const last = c.messages[c.messages.length - 1];
-    const tag = c.isClient ? (c.toSeeToday ? '<span class="pill attivo" style="margin-top:4px;display:inline-block;">Da vedere oggi</span>' : c.toCallToday ? '<span class="pill trattativa" style="margin-top:4px;display:inline-block;">Da sentire oggi</span>' : '') : '';
+    const canale = CANALI_MSG[canaleDi(last)];
+    const anteprima = last ? (last.from === "me" && !last.eventType && !last.fileUrl ? "Tu: " : "") + anteprimaMessaggio(last) : "Nessun messaggio";
     item.innerHTML = `
-      <div class="row-avatar" style="background:${c.online ? 'var(--wa)' : 'var(--faint)'};">${initials}</div>
-      <div class="chat-item-body">
-        <div class="chat-item-name">${c.name}</div>
-        <div class="chat-item-last">${anteprimaMessaggio(last)}</div>
-        ${tag}
+      <div class="msg-avatar" style="background:${coloreCliente(clienteDellaChat(c) || c)};">${escapeHtml(iniziali)}
+        ${last ? '<span class="msg-canale" style="background:' + canale.colore + ';" title="' + canale.nome + '">' + canale.icona + '</span>' : ''}
       </div>
-      <div class="chat-item-meta">
-        <div class="chat-item-time">${last ? last.time : ""}</div>
-        ${c.unread > 0 ? '<div class="chat-unread">'+c.unread+'</div>' : ''}
+      <div class="chat-item-body">
+        <div class="chat-item-riga"><span class="chat-item-name">${escapeHtml(c.name)}</span><span class="chat-item-time">${escapeHtml(quandoMessaggio(last))}</span></div>
+        <div class="chat-item-riga"><span class="chat-item-last">${escapeHtml(anteprima)}</span>${nonLetti ? '<span class="chat-unread">' + c.unread + '</span>' : ''}</div>
       </div>
     `;
     item.addEventListener("click", () => {
@@ -8320,6 +8536,12 @@ function renderChatList(){
     });
     wrap.appendChild(rendiScorrevole(item, () => eliminaChatConAnnulla(c)));
   });
+
+  const archBtn = document.getElementById("chatArchiviateBtn");
+  if(archBtn){
+    archBtn.hidden = !msgArchiviate && quanteArchiviate === 0;
+    document.getElementById("chatArchiviateTesto").textContent = msgArchiviate ? "Torna ai messaggi" : "Archiviate · " + quanteArchiviate;
+  }
   renderSummary();
   saveState("eon-chats", chats);
 }
@@ -8337,7 +8559,52 @@ document.querySelectorAll("[data-catfilter]").forEach(icon => {
   });
 });
 
-document.getElementById("chatFilterArchivio").addEventListener("click", () => { chatFilter = "archivio"; updateChatFilterTabs(); renderChatList(); });
+document.getElementById("chatCerca").addEventListener("input", (e) => { msgCerca = e.target.value; renderChatList(); });
+document.getElementById("chatCanali").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-canale]");
+  if(!b) return;
+  msgCanale = b.dataset.canale;
+  updateChatFilterTabs();
+  renderChatList();
+});
+document.getElementById("chatArchiviateBtn").addEventListener("click", () => {
+  chatFilter = chatFilter === "archivio" ? "tutti" : "archivio";
+  renderChatList();
+  document.getElementById("chatList").scrollTop = 0;
+});
+
+/* Matita: scegli a chi scrivere (o aggiungi un cliente nuovo) */
+document.getElementById("chatNuovoBtn").addEventListener("click", () => {
+  const corpo = document.createElement("div");
+  corpo.className = "msg-scegli";
+  const cerca = document.createElement("input");
+  cerca.type = "search"; cerca.placeholder = "Cerca un cliente"; cerca.className = "msg-scegli-cerca";
+  const lista = document.createElement("div");
+  lista.className = "msg-scegli-lista";
+  const nuovo = document.createElement("button");
+  nuovo.type = "button"; nuovo.className = "msg-scegli-nuovo";
+  nuovo.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Nuovo cliente';
+  nuovo.addEventListener("click", () => { chiudiRisorsaCard(); openSheet("cliente"); });
+  const disegna = () => {
+    const q = nomeChiave(cerca.value);
+    lista.innerHTML = "";
+    const elenco = clients.filter(c => !c.archived && (!q || nomeChiave(c.name).includes(q)))
+      .sort((a, b) => a.name.localeCompare(b.name, "it"));
+    if(elenco.length === 0) lista.innerHTML = '<div class="chat-list-empty">Nessun cliente trovato.</div>';
+    elenco.forEach(c => {
+      const r = document.createElement("button");
+      r.type = "button"; r.className = "msg-scegli-riga";
+      const ini = c.name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+      r.innerHTML = '<span class="msg-avatar piccolo" style="background:' + coloreCliente(c) + ';">' + escapeHtml(ini) + '</span><span>' + escapeHtml(c.name) + '</span>';
+      r.addEventListener("click", () => { chiudiRisorsaCard(); openClientChat(c); });
+      lista.appendChild(r);
+    });
+  };
+  cerca.addEventListener("input", disegna);
+  disegna();
+  corpo.appendChild(nuovo); corpo.appendChild(cerca); corpo.appendChild(lista);
+  apriRisorsaCard("Scrivi a…", corpo);
+});
 
 document.getElementById("chatArchiviaBtn").addEventListener("click", async () => {
   if(activeChatIndex === null) return;
@@ -8371,90 +8638,117 @@ document.getElementById("chatEliminaBtn").addEventListener("click", async () => 
   }
   renderChatList(); renderChatWindow();
 });
-document.getElementById("chatFilterUrgenti").addEventListener("click", () => { chatFilter = "urgenti"; updateChatFilterTabs(); renderChatList(); });
-document.getElementById("chatFilterClienti").addEventListener("click", () => { chatFilter = "clienti"; updateChatFilterTabs(); renderChatList(); });
-document.getElementById("chatFilterChiudere").addEventListener("click", () => { chatFilter = "chiudere"; updateChatFilterTabs(); renderChatList(); });
-document.getElementById("chatFilterAcquisire").addEventListener("click", () => { chatFilter = "acquisire"; updateChatFilterTabs(); renderChatList(); });
-document.getElementById("chatFilterTeam").addEventListener("click", () => { chatFilter = "team"; updateChatFilterTabs(); renderChatList(); });
+/* Chi chiama ancora updateChatFilterTabs (es. apri la chat di un cliente):
+   ridisegna i filtri Tutti/EON/WhatsApp/Email. */
 function updateChatFilterTabs(){
-  ["archivio","urgenti","clienti","chiudere","acquisire","team"].forEach(f => {
-    document.getElementById("chatFilter" + f.charAt(0).toUpperCase() + f.slice(1)).classList.toggle("active", chatFilter === f);
-  });
-  aggiornaPulsanteAggiungi();
+  document.querySelectorAll("#chatCanali [data-canale]").forEach(b => b.classList.toggle("on", b.dataset.canale === msgCanale));
 }
 
-/* Il pulsante "Aggiungi" cambia a seconda di dove sei: in Team aggiunge
-   una persona, in Clienti un cliente. Dove non ha senso, sparisce. */
-function aggiornaPulsanteAggiungi(){
-  const btn = document.getElementById("chatAggiungiBtn");
-  const testo = document.getElementById("chatAggiungiTesto");
-  if(!btn) return;
-  if(chatFilter === "team"){
-    btn.style.display = "flex";
-    testo.textContent = "Aggiungi collaboratore";
-  } else if(chatFilter === "clienti"){
-    btn.style.display = "flex";
-    testo.textContent = "Aggiungi cliente";
-  } else if(chatFilter === "acquisire"){
-    btn.style.display = "flex";
-    testo.textContent = "Aggiungi contatto";
-  } else {
-    btn.style.display = "none";
+/* "⋯" in cima alla conversazione: le azioni meno frequenti, in un posto solo */
+document.getElementById("chatAltroBtn").addEventListener("click", () => {
+  if(activeChatIndex === null) return;
+  const c = chats[activeChatIndex];
+  const cliente = clienteDellaChat(c);
+  const corpo = document.createElement("div");
+  corpo.className = "msg-menu";
+  const voci = [
+    cliente && { nome: "Scheda del cliente", icona: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>', azione: () => mostraSchedaCliente(cliente) },
+    { nome: "File e documenti della chat", icona: '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/>', azione: () => { chiudiRisorsaCard(); apriArchivio(); } },
+    { nome: chatArchiviata(c) ? "Togli dall'archivio" : "Archivia", icona: '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/>', azione: () => { chiudiRisorsaCard(); document.getElementById("chatArchiviaBtn").click(); } },
+    { nome: "Elimina", rosso: true, icona: '<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>', azione: () => { chiudiRisorsaCard(); document.getElementById("chatEliminaBtn").click(); } }
+  ].filter(Boolean);
+  voci.forEach(v => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "msg-menu-voce" + (v.rosso ? " rosso" : "");
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + v.icona + '</svg>' + v.nome;
+    b.addEventListener("click", v.azione);
+    corpo.appendChild(b);
+  });
+  apriRisorsaCard(c.name, corpo);
+});
+
+/* ===== Invia con: EON (chat del portale), WhatsApp, Email =====
+   WhatsApp ed Email, per ora, "a metà": si apre l'app giusta con il testo
+   già scritto e il messaggio resta anche qui, segnato col suo canale. Le
+   risposte arrivano in WhatsApp o nella posta (per vederle qui servono
+   WhatsApp Business e un dominio email: vedi ROADMAP). La scelta si
+   ricorda per ogni chat. */
+function leggiCanaliInvio(){ try { return JSON.parse(localStorage.getItem("eon-canale-invio") || "{}") || {}; } catch(e){ return {}; } }
+const chiaveChatInvio = c => c.id || nomeChiave(c.name);
+function canaleInvio(){
+  if(activeChatIndex === null) return "eon";
+  const k = leggiCanaliInvio()[chiaveChatInvio(chats[activeChatIndex])];
+  return CANALI_MSG[k] ? k : "eon";
+}
+function aggiornaInviaCon(){
+  const k = canaleInvio();
+  document.querySelectorAll("#chatInviaCon [data-canale]").forEach(b => b.classList.toggle("on", b.dataset.canale === k));
+  const invia = document.getElementById("chatSendBtn");
+  invia.classList.remove("via-whatsapp", "via-email");
+  if(k !== "eon") invia.classList.add("via-" + k);
+  const c = activeChatIndex !== null ? chats[activeChatIndex] : null;
+  const nome = c ? c.name.split(" ")[0] : "";
+  document.getElementById("chatInput").placeholder = !c ? "Scrivi un messaggio..."
+    : k === "whatsapp" ? "WhatsApp a " + nome + "…"
+    : k === "email" ? "Email a " + nome + "…"
+    : "Scrivi a " + nome + "…";
+  // Microfono (vocale) e allegati viaggiano solo su EON
+  document.getElementById("chatMicBtn").style.display = k === "eon" ? "" : "none";
+}
+document.getElementById("chatInviaCon").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-canale]");
+  if(!b || activeChatIndex === null) return;
+  const scelte = leggiCanaliInvio();
+  scelte[chiaveChatInvio(chats[activeChatIndex])] = b.dataset.canale;
+  try { localStorage.setItem("eon-canale-invio", JSON.stringify(scelte)); } catch(e){}
+  aggiornaInviaCon();
+  document.getElementById("chatInput").focus();
+});
+
+/* mailto: si apre nella stessa pagina (così il telefono passa a Mail) */
+function apriLinkEsterno(url){ window.location.href = url; }
+
+/* Apre la scheda del cliente sul campo che manca (telefono o email) */
+function chiediContattoMancante(chat, campo){
+  const cliente = clienteDellaChat(chat);
+  const cosa = campo === "phone" ? "il numero di telefono" : "l'email";
+  showAIToast("Manca " + cosa, escapeHtml(cliente ? "Aggiungilo nella scheda di " + chat.name + " e riprova." : "Aggiungi " + chat.name + " ai clienti con " + cosa + "."));
+  if(cliente){
+    openSheet("cliente", cliente);
+    setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="' + campo + '"]'); if(d) d.focus(); }, 50);
   }
 }
-
-document.getElementById("chatAggiungiBtn").addEventListener("click", () => {
-  if(chatFilter === "team") openSheet("collaboratore");
-  else openSheet("cliente");
-});
 
 function renderChatWindow(){
   const nameEl = document.getElementById("chatWinName");
   const statusEl = document.getElementById("chatWinStatus");
   const avatarEl = document.getElementById("chatWinAvatar");
   const messagesEl = document.getElementById("chatMessages");
-  const pinEl = document.getElementById("chatContextPin");
-  const archiviaBtn = document.getElementById("chatArchiviaBtn");
-  const eliminaBtn = document.getElementById("chatEliminaBtn");
+  const chiamaBtn = document.getElementById("chatChiamaBtn");
+  const altroBtn = document.getElementById("chatAltroBtn");
   if(activeChatIndex === null){
     nameEl.textContent = "Seleziona una chat";
     statusEl.textContent = "";
     avatarEl.textContent = "–";
     messagesEl.innerHTML = "";
-    pinEl.innerHTML = "";
-    if(archiviaBtn) archiviaBtn.style.display = "none";
-    if(eliminaBtn) eliminaBtn.style.display = "none";
+    chiamaBtn.hidden = true;
+    altroBtn.hidden = true;
+    aggiornaInviaCon();
     return;
   }
   const c = chats[activeChatIndex];
+  const cliente = clienteDellaChat(c);
   nameEl.textContent = c.name;
-  statusEl.textContent = c.online ? "online" : "offline";
-  avatarEl.textContent = c.name.split(" ").map(w=>w[0]).join("").toUpperCase();
-  avatarEl.style.background = c.online ? "var(--wa)" : "var(--faint)";
-  if(archiviaBtn){
-    archiviaBtn.style.display = "flex";
-    archiviaBtn.title = c.archived ? "Rimuovi dall'archivio" : "Archivia questa chat";
-    archiviaBtn.classList.toggle("active", !!c.archived);
-  }
-  if(eliminaBtn) eliminaBtn.style.display = "flex";
-
-  pinEl.innerHTML = "";
-  if(c.isClient){
-    const match = clienteDellaChat(c);
-    if(match){
-      const pill = `<span class="pill ${match.status}">${clientStatusLabel[match.status]}</span>`;
-      pinEl.innerHTML = `
-        <div class="chat-context-pin">
-          <div class="chat-context-pin-top">
-            <div class="chat-context-pin-name">${match.name}</div>
-            <div class="chat-context-pin-name">${match.value > 0 ? "€" + match.value.toLocaleString("it-IT") : "—"}</div>
-          </div>
-          ${match.desc ? '<div class="chat-context-pin-desc">' + match.desc + "</div>" : ""}
-          <div class="chat-context-pin-foot">${pill}${match.last ? '<span class="pill todo">Ultimo contatto: ' + match.last + "</span>" : ""}</div>
-        </div>
-      `;
-    }
-  }
+  // Sotto il nome: il lavoro in corso (non "online/offline", che qui non vuol dire niente)
+  const lavoro = cliente && cliente.desc ? cliente.desc.trim() : "";
+  statusEl.textContent = lavoro || (cliente ? "Cliente" + (chatArchiviata(c) ? " · archiviato" : "") : (chatArchiviata(c) ? "Archiviata" : ""));
+  avatarEl.textContent = c.name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  avatarEl.style.background = coloreCliente(cliente || c);
+  const tel = cliente ? numeroPerLink(cliente.phone) : "";
+  chiamaBtn.hidden = !tel;
+  if(tel) chiamaBtn.href = "tel:" + tel;
+  altroBtn.hidden = false;
+  aggiornaInviaCon();
 
   messagesEl.innerHTML = "";
   const eventIcons = {
@@ -8557,8 +8851,9 @@ function renderChatWindow(){
     riga.style.cssText = "display:flex; align-items:flex-end; gap:4px; justify-content:" + (lato === "me" ? "flex-end" : "flex-start") + ";";
 
     const b = document.createElement("div");
-    b.className = "bubble " + lato;
-    b.innerHTML = m.text + '<span class="bubble-time">' + m.time + '</span>';
+    const canale = canaleDi(m);
+    b.className = "bubble " + lato + (canale !== "eon" ? " via-" + canale : "");
+    b.innerHTML = m.text + '<span class="bubble-time">' + (canale !== "eon" ? CANALI_MSG[canale].nome + " · " : "") + (m.time || "") + '</span>';
 
     riga.appendChild(b);
     metti(riga);
@@ -8576,6 +8871,24 @@ async function sendChatMessage(){
   const chat = chats[activeChatIndex];
   const now = new Date();
   const time = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+  const canale = canaleInvio();
+
+  /* WhatsApp ed Email: l'app va aperta subito, dentro il tocco (prima di
+     qualunque attesa), altrimenti il telefono la blocca. */
+  if(canale !== "eon"){
+    const cliente = clienteDellaChat(chat);
+    if(canale === "whatsapp"){
+      const numero = numeroWhatsApp(cliente && cliente.phone);
+      if(!numero){ chiediContattoMancante(chat, "phone"); return; }
+      window.open("https://wa.me/" + numero + "?text=" + encodeURIComponent(val), "_blank");
+    } else {
+      const email = cliente && cliente.email ? String(cliente.email).trim() : "";
+      if(!email){ chiediContattoMancante(chat, "email"); return; }
+      const impresa = profiloUtente && (profiloUtente.business_name || profiloUtente.full_name);
+      const oggetto = impresa ? "Messaggio da " + impresa : "Messaggio per " + chat.name;
+      apriLinkEsterno("mailto:" + encodeURIComponent(email).replace(/%40/g, "@") + "?subject=" + encodeURIComponent(oggetto) + "&body=" + encodeURIComponent(val));
+    }
+  }
 
   input.value = "";
 
@@ -8583,17 +8896,17 @@ async function sendChatMessage(){
     /* Il messaggio non viene aggiunto qui: arriva dal realtime, cosi' e'
        identico a quello che vede il cliente e non compare due volte. */
     const { error } = await supabaseClient.from("messages").insert({
-      conversation_id: chat.id, sender: "me", body: val
+      conversation_id: chat.id, sender: "me", body: val, canale
     });
     if(error){
       console.error("Errore invio messaggio:", error.message);
-      chat.messages.push({ from:"me", text:val, time });
-      renderChatWindow();
+      chat.messages.push({ from:"me", text:val, time, canale, createdAt: now.toISOString() });
+      renderChatWindow(); renderChatList();
     }
     return;
   }
 
-  chat.messages.push({ from:"me", text:val, time });
+  chat.messages.push({ from:"me", text:val, time, canale, createdAt: now.toISOString() });
   renderChatWindow();
   renderChatList();
 }
@@ -9475,6 +9788,9 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
     if(!creato) throw new Error("scrittura non riuscita");
     const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"" };
     cantiereFoto.push(nuovaFoto);
+    // Nota già detta nella frase ("fai foto a pavimenti" → "Pavimenti")
+    const notaDetta = opzioni && opzioni.nota ? String(opzioni.nota).trim() : "";
+    if(notaDetta){ nuovaFoto.nota = notaDetta; await dbUpdate("cantiere_foto", creato.id, { nota: notaDetta }); }
     descriviFoto(nuovaFoto); // in sottofondo: EON guarda la foto e ne scrive una descrizione
     if(daAppunti){
       /* Da Appunti: niente "a quale cliente?", si apre subito la scheda
@@ -9492,6 +9808,11 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
       renderCantiereFoto();
       const clienteFoto = clients.find(c => c.id === clienteIdForzato);
       mostraSchedaFoto(nuovaFoto, clienteFoto ? clienteFoto.name : null, { appenaScattata: true });
+    } else if(notaDetta){
+      // Già sappiamo cos'è: niente domanda "a chi si riferisce", si apre la sua scheda
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      mostraSchedaFoto(nuovaFoto, null, { appenaScattata: true });
     } else {
       aggiornaCantiereSottotitoli();
       renderCantiereFoto();
@@ -9839,24 +10160,71 @@ function provaNavigazioneDiretta(testo){
    esatta, un mancato riconoscimento è innocuo e la frase prosegue verso
    l'AI come sempre. Nessuna scrittura passa mai da qui.
    Restituisce {titolo, testo} se riconosciuta, altrimenti null. */
+/* Le parole con cui si chiede il programma di un giorno; tutto il resto → AI */
+const PAROLE_LETTURA_GIORNO = new Set(["mi","dici","dimmi","cosa","che","ho","devo","fare","da","c","e","ce","il","programma","di","per","gli","impegni","impegno","appuntamenti","appuntamento","agenda","l","in","la","giornata","mostrami","fammi","vedere","sapere","quali","sono","i","miei","ehi","eon","segnato","segnati","calendario","a","ci","cos"]);
+const PAROLE_CHIAVE_LETTURA = /\b(cosa|programma|impegni|impegno|appuntamenti|agenda|giornata|calendario|segnat[oi])\b/;
+const GIORNI_LETTURA = ["domenica","lunedi","martedi","mercoledi","giovedi","venerdi","sabato"];
+function capisciLetturaGiorno(t){
+  const n = String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’'?!.,]/g, " ").replace(/\s+/g, " ").trim();
+  if(!PAROLE_CHIAVE_LETTURA.test(n)) return null;
+  const parole = n.split(" ");
+  const giorni = parole.filter(p => p === "oggi" || p === "domani" || p === "dopodomani" || GIORNI_LETTURA.includes(p));
+  if(giorni.length !== 1) return null;
+  if(!parole.every(p => p === giorni[0] || PAROLE_LETTURA_GIORNO.has(p))) return null;
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const g = giorni[0];
+  let diff;
+  if(g === "oggi") diff = 0; else if(g === "domani") diff = 1; else if(g === "dopodomani") diff = 2;
+  else { diff = (GIORNI_LETTURA.indexOf(g) - oggi.getDay() + 7) % 7; if(diff === 0) return null; } // "lunedì" detto di lunedì: decide l'AI
+  const data = new Date(oggi); data.setDate(data.getDate() + diff);
+  const etichetta = g === "oggi" || g === "domani" || g === "dopodomani" ? g : data.toLocaleDateString("it-IT", { weekday:"long", day:"numeric" });
+  return { data, etichetta };
+}
+/* Gli impegni di un giorno, dalle stesse fonti del Calendario (cose da fare
+   con data e appuntamenti nelle chat dei clienti), in ordine di ora. */
+function impegniDelGiorno(data){
+  const voci = [];
+  const stessoGiorno = (quando) => { const d = interpretaQuando(quando); return d && d.getTime() === data.getTime(); };
+  tasks.filter(t => t.status !== "done" && t.status !== "annullato" && t.time && stessoGiorno(t.time))
+    .forEach(t => voci.push({ titolo: t.title, ora: estraiOra(t.time) }));
+  chats.forEach(c => c.messages.forEach(m => {
+    if(m.eventType === "appt" && !m.annullato && stessoGiorno(m.text || m.time)) voci.push({ titolo: (m.title || "Appuntamento") + (c.name && !String(m.title || "").includes(c.name) ? " — " + c.name : ""), ora: estraiOra(m.text || m.time) });
+  }));
+  return voci.sort((a, b) => (a.ora || "99") < (b.ora || "99") ? -1 : 1);
+}
+
+/* "lun 28 set, 09:00" → "lunedì ore 09:00" (oggi, domani, dopodomani,
+   il giorno della settimana entro 6 giorni; più in là "lun 5 ott ore 09:00") */
+function quandoBreve(quandoVisualizzato){
+  const testo = String(quandoVisualizzato || "");
+  const d = interpretaQuando(testo);
+  const ora = estraiOra(testo);
+  if(!d) return testo;
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const diff = Math.round((d - oggi) / 86400000);
+  const giorno = diff === 0 ? "oggi" : diff === 1 ? "domani" : diff === 2 ? "dopodomani"
+    : diff > 2 && diff < 7 ? d.toLocaleDateString("it-IT", { weekday:"long" })
+    : d.toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" }).replace(".", "");
+  return giorno + (ora ? " ore " + ora : "");
+}
+
 function provaLetturaLocale(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return null;
 
-  if(["appuntamenti di oggi", "gli appuntamenti di oggi", "cosa ho oggi", "cosa devo fare oggi", "impegni di oggi", "i miei impegni di oggi"].includes(t)){
-    /* Stessa interpretazione della data usata dal calendario
-       (interpretaQuando, più sopra nel file): un impegno risulta "di
-       oggi" identicamente a come lo mostra già la pagina Calendario. */
-    const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
-    const impegniOggi = tasks.filter(task => task.status !== "done" && task.time).filter(task => {
-      const d = interpretaQuando(task.time);
-      return d && d.getTime() === oggi.getTime();
-    });
+  /* "Cosa ho da fare domani?", "programma di lunedì", "impegni di oggi"
+     (Meno AI, 26/09/2026): letti dal calendario già in memoria, senza AI.
+     Solo se la frase è FATTA di queste parole e di un giorno; con
+     qualunque altra parola ("cosa mi consigli di fare domani") decide l'AI. */
+  const letturaGiorno = capisciLetturaGiorno(t);
+  if(letturaGiorno){
+    const voci = impegniDelGiorno(letturaGiorno.data);
     navigateTo("calendario");
-    if(!impegniOggi.length) return { titolo: "Oggi", testo: "Nessun impegno per oggi." };
+    const quando = letturaGiorno.etichetta;
+    if(!voci.length) return { titolo: quando.charAt(0).toUpperCase() + quando.slice(1), testo: "Niente in programma per " + quando + "." };
     return {
-      titolo: impegniOggi.length === 1 ? "1 impegno oggi" : impegniOggi.length + " impegni oggi",
-      testo: impegniOggi.map(task => task.title + (task.time ? " — " + task.time : "")).join("\n"),
+      titolo: (voci.length === 1 ? "1 impegno " : voci.length + " impegni ") + quando,
+      testo: voci.map(v => v.ora ? "**" + v.ora + "** – " + v.titolo : v.titolo).join("\n"),
     };
   }
 
@@ -10158,6 +10526,52 @@ function provaPercorso(testo){
   return true;
 }
 
+/* "Fai foto a pavimenti", "scatta foto", "fammi la foto al bagno di Rossi"
+   (26/09/2026): si apre subito la fotocamera, senza AI. La nota ("Pavimenti")
+   e l'eventuale cliente vengono dalla frase. Scritta e inviata col tasto, la
+   fotocamera si apre direttamente; a voce il telefono vuole un tocco, quindi
+   c'è una card con "Scatta la foto". Frasi con "crea", "cliente", "vedere"...
+   vanno all'AI come prima. */
+const TRIGGER_FOTO_RAPIDA = /^(?:mi\s+)?(?:fai|fammi|fare|scatta|scattami|scatto|prendi|fotografa|fotografami)\s+(?:(?:una|la|le|delle|un'?|qualche)\s+)?(?:foto|fotografia|fotografie)?\b\s*(.*)$/;
+let fotoRapidaDaSalvare = null; // { clienteId, nota } per il prossimo scatto
+function capisciFotoRapida(testo){
+  const t = String(testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  if(!/\bfot/.test(t) || /\b(vedere|mostra|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|recupera)\b/.test(t)) return null;
+  const m = t.match(TRIGGER_FOTO_RAPIDA);
+  if(!m) return null;
+  let resto = (m[1] || "").replace(/^(?:a|al|alla|allo|ai|agli|alle|del|della|dello|dei|delle|di|per|sul|sulla|sui|sulle|nel|nella|in)\s+/, "").trim();
+  if(/\d/.test(resto)) return null; // orari, importi: decide l'AI
+  const parole = resto.split(/\s+/).filter(Boolean);
+  if(parole.length > 6) return null;
+  const cliente = parole.length ? trovaClienteDaParole(parole) : null;
+  const paroleCliente = cliente ? cliente.name.toLowerCase().split(/\s+/) : [];
+  const GENERICHE = /^(cantiere|lavoro|questo|questa|qui|qua|a|al|alla|di|del|della|per|e|il|la|lo|le|i|gli)$/;
+  const notaParole = parole.filter(p => !paroleCliente.includes(p) && !GENERICHE.test(p));
+  const nota = notaParole.join(" ");
+  return { clienteId: cliente ? cliente.id : null, clienteNome: cliente ? cliente.name : null, nota: nota ? nota.charAt(0).toUpperCase() + nota.slice(1) : "" };
+}
+function provaFotoImmediata(testo, viaVoce){
+  const foto = capisciFotoRapida(testo);
+  if(!foto) return false;
+  fotoRapidaDaSalvare = foto;
+  const input = document.getElementById("fotoRapidaInput");
+  if(!viaVoce){ input.click(); return true; } // scritta e inviata col tasto: fotocamera subito
+  const corpo = document.createElement("div");
+  corpo.className = "foto-rapida-card";
+  corpo.innerHTML = `<button type="button" class="foto-rapida-btn" id="fotoRapidaScatta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span>Scatta la foto</span></button>
+    ${foto.nota || foto.clienteNome ? `<p class="foto-rapida-nota">${escapeHtml([foto.nota, foto.clienteNome ? "per " + foto.clienteNome : ""].filter(Boolean).join(" · "))}</p>` : ""}`;
+  corpo.querySelector("#fotoRapidaScatta").addEventListener("click", () => input.click());
+  apriRisorsaCard("Foto", corpo);
+  return true;
+}
+document.getElementById("fotoRapidaInput").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  const dati = fotoRapidaDaSalvare || {};
+  fotoRapidaDaSalvare = null;
+  e.target.value = "";
+  if(f){ chiudiRisorsaCard(); caricaCantiereFoto(f, dati.clienteId || null, { nota: dati.nota }); }
+});
+
 function provaRisorsaImmediata(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return false;
@@ -10455,9 +10869,17 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         hint.textContent = TESTO_HINT_BASE;
         const righeLettura = (lettura.testo || "").split("\n").filter(Boolean);
         mostraRispostaEON(testo, righeLettura.length > 1 ? righeLettura.map(r => "- " + r).join("\n") : lettura.testo, { titolo: lettura.titolo });
-        if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\n+/g, ". ") : ""));
+        if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
         return;
       }
+    }
+
+    /* "Fai foto a pavimenti": fotocamera subito (prima di ogni attesa,
+       così il tocco sul tasto vale ancora per aprirla) */
+    if(!inContinuazione && provaFotoImmediata(testo, viaVoce)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
     }
 
     /* Il nome di un cliente registrato, da solo ("Rita Ambrosini"): si
@@ -10679,13 +11101,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
-      const fatti = impegniCreati.map(a =>
-        (a.esito.tipo === "chiamata" ? "Chiamata · " : a.esito.tipo === "incontro" ? "Appuntamento · " : "Da fare · ") +
-        a.esito.titolo + " — " + a.esito.quando_visualizzato);
-      mostra(
-        impegniCreati.length === 1 ? "Segnato in calendario" : impegniCreati.length + " impegni in calendario",
-        fatti.join("\n")
-      );
+      /* Breve, come vuole Andrea (26/09/2026): "Ok, segnato lunedì ore 09:00".
+         Con più impegni, uno per riga: "lunedì ore 09:00 · Chiamare Walter". */
+      if(impegniCreati.length === 1) mostra("Ok, segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato), "");
+      else mostra("Ok, segnati " + impegniCreati.length + " impegni", impegniCreati.map(a => quandoBreve(a.esito.quando_visualizzato) + " · " + a.esito.titolo).join("\n"));
     }
 
     /* Come in organizza(): un solo avviso con "Annulla" anche per più
@@ -10705,7 +11124,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     risultatiVisibili.filter(a => a.tool !== "crea_impegno" && a.tool !== "elimina_impegno").forEach(a => {
       if(a.tool === "sposta_impegno"){
-        mostra("Appuntamento spostato", a.esito.titolo + " — " + a.esito.quando_visualizzato);
+        mostra("Ok, spostato a " + quandoBreve(a.esito.quando_visualizzato), "");
       } else if(a.tool === "annulla_impegno"){
         mostra("Impegno annullato", a.esito.titolo);
       } else if(a.tool === "elimina_cliente"){
@@ -10903,6 +11322,9 @@ function aggiornaHomeHero(gruppiPerGiorno){
 
   sub.textContent = voci.length === 0 ? "Nessun impegno oggi"
     : (voci.length === 1 ? "1 impegno oggi" : voci.length + " impegni oggi");
+  // L'etichetta sotto "Oggi", in cima alla Home: stessi impegni
+  const conta = document.getElementById("homeOggiConta");
+  if(conta) conta.textContent = voci.length === 0 ? "Nessun impegno" : (voci.length === 1 ? "1 impegno" : voci.length + " impegni");
 
   if(voci.length === 0){
     lista.innerHTML = '<div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div>';
@@ -11592,7 +12014,7 @@ function mostraSchedaCliente(c, opzioni){
       if(documento){ mostraAnteprimaDocumento(documento.esito.dati, documento.esito.id, c.name); return; }
       if(fotoTrovate){ mostraRisorsaFoto(fotoTrovate.esito.foto || [], c.name); return; }
       if(documentiTrovati){ mostraRisorsaDocumenti(documentiTrovati.esito.documenti || [], c.name); return; }
-      const fatti = scritte.filter(a => a.tool === "crea_impegno").map(a => "Segnato: " + a.esito.titolo + " — " + a.esito.quando_visualizzato);
+      const fatti = scritte.filter(a => a.tool === "crea_impegno").map(a => "Ok, segnato " + quandoBreve(a.esito.quando_visualizzato));
       const testoRisposta = (risposta.testo || "").trim();
       stato.runId = /\?\s*$/.test(testoRisposta) && risposta.runId ? risposta.runId : null;
       bolla("eon", [fatti.join("\n"), testoRisposta].filter(Boolean).join("\n") || (scritte.length ? "Fatto." : "Non ho capito, prova a dirlo in un altro modo."));
@@ -13328,6 +13750,32 @@ hiddenDateHolder.textContent = todayDateText;
 document.getElementById("pageSub").style.display = "none";
 const bd = document.getElementById("brandData");
 if(bd) bd.textContent = dataBreve;
+// Sotto "Oggi": "sabato 26 settembre"
+const homeOggiData = document.getElementById("homeOggiData");
+if(homeOggiData) homeOggiData.textContent = nowDate.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" });
+document.getElementById("homeOggiPill").addEventListener("click", () => navigateTo("calendario"));
+document.getElementById("brandAvatar").addEventListener("click", () => navigateTo("impostazioni"));
+/* "Buongiorno, Andrea" / "Buon pomeriggio, …" / "Buonasera, …" */
+function aggiornaSalutoHome(nomeProprio){
+  const el = document.getElementById("homeSaluto");
+  if(!el) return;
+  const ora = new Date().getHours();
+  const saluto = ora >= 5 && ora < 13 ? "Buongiorno" : ora >= 13 && ora < 18 ? "Buon pomeriggio" : "Buonasera";
+  el.textContent = nomeProprio ? saluto + ", " + nomeProprio : saluto;
+}
+aggiornaSalutoHome("");
+/* Le iniziali in alto a destra: dal nome dell'account (o dell'attività) */
+function aggiornaAvatarHome(){
+  const el = document.getElementById("brandAvatar");
+  if(!el) return;
+  const p = (typeof profiloUtente !== "undefined" && profiloUtente) || {};
+  const nome = String(p.full_name || p.business_name || "").trim();
+  const iniziali = nome ? nome.split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() : "";
+  el.textContent = iniziali || "EON";
+  el.setAttribute("aria-label", "Impostazioni" + (nome ? " di " + nome : ""));
+  const primo = p.full_name ? String(p.full_name).trim().split(/\s+/)[0] : "";
+  aggiornaSalutoHome(primo ? primo.charAt(0).toUpperCase() + primo.slice(1) : "");
+}
 document.getElementById("oggiHeroDate").textContent = days[nowDate.getDay()].charAt(0).toUpperCase()+days[nowDate.getDay()].slice(1) + " " + nowDate.getDate() + " " + months[nowDate.getMonth()];
 document.body.appendChild(hiddenDateHolder);
 
@@ -13854,6 +14302,7 @@ let profiloUtente = null;
 const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
 function ricordaProfilo(profilo, email){
   profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
+  aggiornaAvatarHome();
 }
 function datiAccount(){
   const p = profiloUtente || { full_name:"", business_name:"", profession: currentProfession, email:"" };
@@ -13972,6 +14421,7 @@ suTocco("impVoceProfilo", () => {
     b.disabled = false;
     if(error) return esitoImp("impEsitoProfilo", "Non salvato: " + error.message, false);
     profiloUtente = { ...(profiloUtente || {}), full_name: nome, business_name: attivita };
+    aggiornaAvatarHome();
     pageMeta.home.title = "Buongiorno, " + nome.split(" ")[0];
     disegnaImpostazioni();
     esitoImp("impEsitoProfilo", "Salvato.", true);

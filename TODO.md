@@ -3771,6 +3771,103 @@ Impostazioni → Aiuto "Metti EON sulla Home" con i passi. Nessun service
 worker (per non rischiare versioni vecchie in cache).
 
 ### Scritta in alto nella Home (26/09/2026)
-Mandate 3 ipotesi ad Andrea (A logo a sinistra e data a destra, B data come
-un foglio di calendario, C tutto centrato), tutte con "Buongiorno, Andrea".
-In attesa della scelta.
+Mandate 3 ipotesi (A, B, C) e poi altre 4 ispirate alle grandi app (D Apple,
+E Google, F banche, G Things/Todoist), poi due mix. Scelta finale: **Mix 2**
+(la G col saluto della D): marchio EON a sinistra (la "O" resta il tasto
+"organizza la giornata"), iniziali dell'account a destra che aprono le
+Impostazioni, sotto "Buongiorno, Andrea" (Buon pomeriggio / Buonasera
+secondo l'ora), la data e l'etichetta "N impegni" (stesso conteggio del
+riquadro Calendario) che apre il calendario. Test in `impostazioni.test.js`.
+
+## Meno AI, fase 1 — analisi delle richieste vere di settembre (26/09/2026)
+
+**Passo 0 fatto**: da oggi `ai_request_log` salva per ogni richiesta i token
+veri (ingresso, uscita, cache scritta/letta), il costo stimato in dollari
+(listino: Haiku 4.5 $1/$5, Sonnet 4.5 $3/$15 per milione; cache 1,25× e
+0,1×) e il tipo di richiesta (`intento`: operazione/oggetto/entità
+dichiarati dall'AI). Migrazione `supabase/ai_request_log_consumo.sql`
+(staging + produzione, solo aggiunte). Test in `percorso-documento.test.mjs`.
+
+**Analisi** (139 richieste all'AI dall'1 al 26/09, quasi tutte di Andrea;
+Sonnet 75 in media 10,6 s, Haiku 63 in media 5,0 s). Conteggi a mano,
+approssimati:
+
+| Gruppo | Richieste | Esempi |
+|---|---|---|
+| Già senza AI dopo i pacchetti del 25-26/09 | ~29 (21%) | foto/documenti/preventivi di un cliente, DURC, appunti, nome del cliente, meteo |
+| **1 · Si può scrivere nel codice** | ~60 (43%) | impegno con giorno e ora ("Chiamata Valter lunedì alle 9"), correzioni ("no alle 11", "sposta hunter alle 11"), "cosa ho da fare domani", cancellazioni con conferma, cliente nuovo con telefono ("Luca Ferretti 333… bagno"), fattura/preventivo con cliente+importo+lavoro chiari, "fai la foto", scelta tra omonimi con pulsanti ("Giampiero"), saluti |
+| 2 · AI piccola (Haiku, istruzioni corte) | ~27 (19%) | dettati con più impegni insieme, modifiche a voce di un documento, fatture con frase ambigua, correzioni di un nome ("non Bake ma bike") |
+| 3 · AI completa | ~23 (17%) | domande tecniche (IVA, TFR, SCIA, delibere), consigli ("cosa mi consigli domani"), richieste in più passi ("registra il versamento e mandagli il PDF") |
+
+Dopo la fase 1: **~64% senza AI** (oggi ~21%), risposta in meno di mezzo
+secondo invece di 5-11 s. Costo AI stimato per cliente: da ~10-25 € a
+~4-10 €/mese, e ~2-5 € con le istruzioni accorciate (stime: da
+confermare con i token veri che si registrano da oggi).
+
+**Ordine proposto per "fare"** (per frequenza):
+1. impegni semplici + correzioni d'orario + "cosa ho da fare domani/lunedì";
+2. fatture e preventivi con cliente, importo e lavoro chiari (oggi l'AI
+   legge la frase e il codice esegue: togliere anche la lettura);
+3. cliente nuovo con telefono e lavoro;
+4. cancellazioni (sempre con conferma);
+5. scelta tra clienti omonimi con pulsanti invece di una domanda all'AI;
+6. saluti e "fai la foto".
+Ogni punto con i suoi test; nel dubbio la frase va all'AI (un mancato
+riconoscimento è innocuo, un riconoscimento sbagliato no).
+
+### Meno AI, fase 1 — punto 1 fatto (26/09/2026)
+- **Appuntamenti letti dal codice** (`leggiImpegnoSenzaAI` in api/index.js,
+  prima della piccola AI in `provaPercorsoRapidoImpegno`): giorno (oggi,
+  domani, dopodomani, giorno della settimana, domattina, stasera), ora
+  precisa (anche "pomeriggio alle 3" → 15:00, "stasera alle 8" → 20:00),
+  un nome; titoli come quelli della piccola AI ("Chiamare Valter",
+  "Appuntamento con Dini", "Sopralluogo con Rossi"). Correzioni "no alle
+  11", "anzi no fai alle 10", "no dopodomani alle 9". Nel dubbio → piccola
+  AI come prima: orari vaghi, ore 1-7 senza mattina/pomeriggio, parole in
+  più ("per il bagno"), luoghi, due orari, "prossimo", nome di più parole
+  che non è un cliente in anagrafica, giorno della settimana uguale a oggi.
+  Registro: modello "codice", 0 giri, costo 0. Test `eval/meno-ai.test.mjs`
+  (28, con le frasi vere dei registri).
+- **"Cosa ho da fare domani?"** e il programma di un giorno ("programma di
+  domani", "impegni di lunedì", "cosa ho oggi") letti dal calendario in
+  memoria, senza AI, con impegni e appuntamenti dei clienti in ordine di
+  ora. Con altre parole ("cosa mi consigli di fare domani") → AI. Test in
+  `risposte.test.js`.
+- Data e ora date all'AI ora nel fuso italiano (prima quello del server).
+- Prossimi: fatture e preventivi con cliente, importo e lavoro chiari;
+  clienti nuovi; cancellazioni; omonimi con pulsanti; saluti e "fai la foto".
+
+### "Fai foto a pavimenti" (26/09/2026)
+Prima: EON chiedeva l'orario (l'AI l'aveva preso per un impegno). Ora
+(`provaFotoImmediata`, senza AI): scritta e inviata, la fotocamera si apre
+subito; la nota viene dalla frase ("Pavimenti") e, se nomina un cliente
+("fai foto al bagno di Rita Ambrosini"), la foto va nella sua scheda. A
+voce il telefono non apre la fotocamera da solo: card con "Scatta la foto".
+Con "crea", "cliente", "vedere", "manda"... → AI come prima. Test in
+`scheda-cliente.test.js`.
+
+### Centro messaggi: EON, WhatsApp ed Email (26/09/2026)
+Gianardi: "sistemare la messaggistica, molto più semplice e intuitiva, lo
+stesso stile dell'app; il centro di comunicazione con email, EON e
+WhatsApp". Anteprima approvata ("Ok"), poi fatto:
+- Elenco: titolo grande "Messaggi", matita (scegli il cliente a cui
+  scrivere o "Nuovo cliente"), cerca (anche dentro i messaggi), filtri
+  Tutti / EON / WhatsApp / Email, righe in ordine di ultimo messaggio con
+  pallino del canale sull'avatar, "Tu: …", ora/"Ieri"/giorno, non letti
+  in grassetto; "Archiviate · N" in fondo. Via le vecchie linguette
+  (Urgenti, Clienti, Da chiudere, Da acquisire, Team).
+- Conversazione: sotto il nome il lavoro del cliente (non più
+  "online/offline"), pulsante Chiama, "⋯" con Scheda del cliente, File,
+  Archivia, Elimina; le bolle dicono il canale ("WhatsApp · 10:40").
+- "Invia con" EON / WhatsApp / Email, ricordato per ogni chat. WhatsApp:
+  si apre wa.me col testo; Email: si apre la posta (destinatario, oggetto
+  "Messaggio da <impresa>", testo). Il messaggio resta in chat con
+  `messages.canale`. Senza numero o email: avviso e scheda del cliente
+  aperta sul campo. Vocali solo su EON.
+- Database: `supabase/messaggi_canale.sql` (colonna `canale`;
+  `portale_messaggi` mostra al cliente solo i messaggi EON), già applicato
+  a staging e produzione.
+- Non ancora: le risposte WhatsApp/email non arrivano qui (servono
+  WhatsApp Business e un dominio email, cioè la società). Non provato
+  sull'iPhone vero che WhatsApp e Mail si aprano dal link. Test in
+  `eval/messaggi.test.js`.
