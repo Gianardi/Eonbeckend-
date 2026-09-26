@@ -3989,3 +3989,34 @@ Fase 1 di "meno AI" completata. Non provato dal vivo (Vercel = main).
   Andrea chiedeva di entrare in EON). Ora la pagina ha il suo modulo "Entra"
   (email e password, compilabili da Face ID) e resta collegata; "Esci" in
   fondo. Test in `eval/admin-app.test.js` (17).
+
+### Accesso da grande app: Face ID e niente accessi inutili (27/09/2026)
+Andrea: "metti il Face ID anche su EON, ogni volta devo rimettere le
+credenziali… rendi EON una grande app anche dal punto di vista
+dell'accesso". Dai registri di Supabase EON restava già collegato (rinnovi
+automatici tutto il giorno); gli accessi con password erano quelli della
+pagina Admin. Fatto comunque, come le app delle banche:
+- **Passkey (WebAuthn) senza librerie** (api/index.js): registrazione
+  (`passkey_opzioni_registrazione`, `passkey_registra`: chiave pubblica
+  SPKI da `getPublicKey()`, niente attestazione), accesso
+  (`passkey_opzioni_accesso`, `passkey_accedi`: controllo di origine, sito,
+  sfida HMAC valida 5 minuti, Face ID obbligatorio, firma, contatore, stessa
+  firma mai due volte), poi sessione Supabase con link magico generato e
+  verificato dal server (nessuna email). `passkey_stato`, `passkey_disattiva`.
+  Tabella `passkeys` (`supabase/passkey.sql`, staging + produzione, RLS
+  senza policy). Origini: eonbeckend.vercel.app + `PASSKEY_ORIGINI`.
+- **App**: "Entra con Face ID" nella schermata Accedi (solo se il telefono
+  lo supporta); dopo l'accesso con la password la proposta "Entra con Face
+  ID la prossima volta?" (una volta; "Non ora" non la ripropone); chi l'ha
+  attivo e non è collegato arriva dritto su Accedi; Impostazioni → Face ID
+  (attiva/disattiva). Su Android dice "l'impronta".
+- **Rete lenta all'apertura**: accesso valido ma profilo non arrivato → si
+  entra lo stesso con il profilo salvato sul telefono (prima compariva la
+  schermata di accesso).
+- Test: `eval/passkey.test.mjs` (20, firme P-256 vere e tentativi sbagliati),
+  `eval/faceid.test.js` (11: con il Face ID virtuale di Chrome, dall'accesso
+  con password fino all'accesso con Face ID verificato dal vero server).
+- Non provato su un iPhone vero; da provare dopo il merge. Punto delicato:
+  la creazione della sessione con link magico (generate_link + verify) non
+  si può provare qui senza la chiave di servizio vera — se non va, EON
+  risponde "Accesso non riuscito: riprova con email e password".

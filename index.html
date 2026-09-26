@@ -1395,6 +1395,21 @@
   .scheda-scelte{ display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 6px; }
   .scheda-scelta{ border:1px solid rgba(59,111,255,.35); background:var(--indigo-soft); color:var(--indigo); border-radius:999px; padding:9px 16px; font:inherit; font-size:14.5px; font-weight:700; cursor:pointer; }
 
+  /* ===== Face ID (27/09/2026) ===== */
+  .ob-faceid{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin:14px 0 6px; padding:14px; border-radius:14px; border:none; cursor:pointer; background:var(--text); color:#fff; font:inherit; font-size:16px; font-weight:700; }
+  .ob-faceid[hidden]{ display:none; }
+  .ob-faceid svg{ width:24px; height:24px; }
+  .ob-faceid:disabled{ opacity:.6; }
+  .faceid-proposta{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; }
+  .faceid-ico{ width:64px; height:64px; border-radius:18px; background:var(--indigo-soft); color:var(--indigo); display:flex; align-items:center; justify-content:center; }
+  .faceid-ico svg{ width:36px; height:36px; }
+  .faceid-proposta p{ margin:0; font-size:15px; line-height:1.5; color:var(--text); max-width:32ch; }
+  .faceid-proposta .annulla-piede{ width:100%; margin-top:6px; }
+  .faceid-si{ background:var(--indigo); color:#fff; }
+  .faceid-esito{ min-height:18px; font-size:13px; font-weight:600; color:var(--coral); }
+  .imp-testo{ margin:0 0 12px; font-size:14px; line-height:1.5; color:var(--text); }
+  #impVoceFaceId[hidden]{ display:none; }
+
   /* ===== Annullare impegni: conferma (27/09/2026) ===== */
   .annulla-lista{ display:flex; flex-direction:column; margin-bottom:14px; }
   .annulla-riga{ display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid var(--border); cursor:pointer; }
@@ -2630,6 +2645,11 @@
         <div class="ob-auth-tab" data-mode="login" id="obTabLogin">Ho già un account</div>
       </div>
 
+      <!-- Entra con Face ID (27/09/2026): visibile solo in "Ho già un account" e se il telefono lo supporta -->
+      <button type="button" class="ob-faceid" id="obFaceIdBtn" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9v4.5h-1M9.5 16c1.5 1 3.5 1 5 0"/></svg>
+        <span id="obFaceIdTesto">Entra con Face ID</span>
+      </button>
       <!-- Un <form> vero (25/09/2026): così l'iPhone propone di salvare
            email e password nel portachiavi e al prossimo accesso le
            compila da solo con Face ID. -->
@@ -3740,6 +3760,16 @@
           <div class="azienda-link-card-body">
             <div class="module-title">Sicurezza</div>
             <div class="module-sub">Cambia la password di accesso</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVoceFaceId" role="button" tabindex="0" hidden>
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9v4.5h-1M9.5 16c1.5 1 3.5 1 5 0"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Face ID</div>
+            <div class="module-sub" id="impFaceIdSotto">Entra senza password</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -14356,6 +14386,7 @@ function setObAuthMode(mode){
   document.getElementById("obAuthInfo").style.display = "none";
   document.getElementById("obPasswordDimenticata").style.display = mode === "login" ? "block" : "none";
   document.getElementById("obPassword").setAttribute("autocomplete", mode === "login" ? "current-password" : "new-password");
+  if(typeof aggiornaPulsanteFaceId === "function") aggiornaPulsanteFaceId();
 }
 document.getElementById("obTabSignup").addEventListener("click", () => {
   if(obSoloAccesso && !obSelectedProfession){
@@ -14479,6 +14510,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
     renderPayments(); renderIncomes();
     document.getElementById("onboardingScreen").classList.add("hidden");
     if(benvenutoDaMostrare){ benvenutoDaMostrare = false; mostraBenvenuto(); }
+    else if(obAuthMode === "login") setTimeout(proponiFaceId, 700); // "Entra con Face ID la prossima volta?"
 
   }catch(err){
     console.error("Errore autenticazione:", err);
@@ -14597,6 +14629,22 @@ async function loadOnboarding(){
   return null;
 }
 
+function profiloSalvatoSulTelefono(idUtente){
+  try{
+    const p = JSON.parse(localStorage.getItem("eon-profilo") || "null");
+    return p && p.id === idUtente ? p : null;
+  }catch(e){ return null; }
+}
+/* Chi ha Face ID attivo su questo telefono e non è collegato arriva dritto
+   alla schermata "Accedi", con il pulsante "Entra con Face ID". */
+function apriAccessoSeFaceId(){
+  try{
+    if(!BACKEND_CONFIGURED || !localStorage.getItem("eon-passkey")) return;
+    if(document.getElementById("onboardingScreen").classList.contains("hidden")) return;
+    document.getElementById("obVaiAccedi").click();
+  }catch(e){}
+}
+
 async function initApp(){
   /* Se il backend è collegato, controlla se l'utente ha già una sessione
      valida (ha già fatto login prima): in tal caso salta l'onboarding. */
@@ -14604,7 +14652,11 @@ async function initApp(){
     const { data } = await supabaseClient.auth.getSession();
     if(data && data.session){
       currentSession = data.session;
-      const { data: profile } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single());
+      const { data: profiloDalServer } = await conRiprovaDiRete(() => supabaseClient.from("profiles").select("*").eq("id", data.session.user.id).single());
+      /* Accesso valido ma profilo non arrivato (rete lenta all'apertura):
+         si entra lo stesso con il profilo salvato sul telefono, invece di
+         mostrare la schermata di accesso come se non fossi collegato. */
+      const profile = profiloDalServer || profiloSalvatoSulTelefono(data.session.user.id);
       if(profile){
         document.getElementById("onboardingScreen").classList.add("hidden");
         ricordaProfilo(profile, data.session.user.email);
@@ -14660,6 +14712,7 @@ async function initApp(){
   renderGifts();
   renderChatList();
   renderChatWindow();
+  apriAccessoSeFaceId();
 }
 /* Aggiornamento automatico dell'app (25/09/2026). Sul telefono EON resta
    aperta in memoria per ore: dopo un merge Gianardi continuava a usare la
@@ -14788,6 +14841,7 @@ const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvoc
 function ricordaProfilo(profilo, email){
   profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
   aggiornaAvatarHome();
+  try{ if(currentSession && currentSession.user) localStorage.setItem("eon-profilo", JSON.stringify({ ...profiloUtente, id: currentSession.user.id })); }catch(e){}
 }
 
 function datiAccount(){
@@ -14797,6 +14851,7 @@ function datiAccount(){
 function disegnaImpostazioni(){
   const d = datiAccount();
   document.getElementById("impAccountSotto").textContent = [d.email, d.professione].filter(x => x && x !== "—").join(" · ") || "Email e professione";
+  voceFaceIdImpostazioni();
 }
 function esitoImp(id, testo, ok){
   const e = document.getElementById(id);
@@ -14945,6 +15000,157 @@ async function esciDallAccount(){
   window.location.reload();
 }
 suTocco("impEsci", esciDallAccount);
+
+/* ===== Accesso con Face ID (passkey), 27/09/2026 =====
+   Andrea: "rendi EON una grande app anche dal punto di vista dell'accesso".
+   Come le app delle banche: dopo il primo accesso con la password, EON
+   propone "Entra con Face ID"; da lì si entra guardando il telefono, senza
+   scrivere niente. La password resta sempre come alternativa. Il telefono
+   tiene la chiave segreta (protetta da Face ID); il server ha solo quella
+   pubblica (vedi passkey in api/index.js). */
+var PASSKEY_API = "https://eonbeckend.vercel.app/api?action=";
+var b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+var daB64u = (s) => { const t = String(s).replace(/-/g, "+").replace(/_/g, "/"); const b = atob(t + "===".slice((t.length + 3) % 4)); return Uint8Array.from(b, (c) => c.charCodeAt(0)); };
+var leggiLocale = (k) => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+var scriviLocale = (k, v) => { try{ v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); }catch(e){} };
+var passkeyOkCache = null; // var: la schermata di accesso può chiederlo prima di questa riga
+async function passkeySupportata(){
+  if(passkeyOkCache !== null) return passkeyOkCache;
+  try{
+    passkeyOkCache = !!(window.PublicKeyCredential && navigator.credentials && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+  }catch(e){ passkeyOkCache = false; }
+  return passkeyOkCache;
+}
+var nomeBiometria = () => /Android/i.test(navigator.userAgent) ? "l'impronta" : "Face ID";
+
+async function attivaFaceId(){
+  const token = await tokenValido();
+  if(!token) throw new Error("Entra prima nel tuo account");
+  const r = await fetch(PASSKEY_API + "passkey_opzioni_registrazione", { headers: { Authorization: "Bearer " + token } });
+  if(!r.ok) throw new Error("Il server non risponde, riprova");
+  const o = await r.json();
+  const cred = await navigator.credentials.create({ publicKey: {
+    challenge: daB64u(o.challenge), rp: o.rp,
+    user: { id: daB64u(o.user.id), name: o.user.name, displayName: o.user.displayName },
+    pubKeyCredParams: o.pubKeyCredParams, authenticatorSelection: o.authenticatorSelection,
+    attestation: o.attestation, timeout: o.timeout,
+    excludeCredentials: (o.excludeCredentials || []).map((c) => ({ type: "public-key", id: daB64u(c.id) })),
+  } });
+  const risposta = cred.response;
+  if(typeof risposta.getPublicKey !== "function") throw new Error("Questo telefono non supporta ancora l'accesso con " + nomeBiometria());
+  const s = await fetch(PASSKEY_API + "passkey_registra", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({
+    id: cred.id, clientDataJSON: b64u(risposta.clientDataJSON), publicKey: b64u(risposta.getPublicKey()),
+    alg: risposta.getPublicKeyAlgorithm(), authenticatorData: typeof risposta.getAuthenticatorData === "function" ? b64u(risposta.getAuthenticatorData()) : undefined,
+  }) });
+  if(!s.ok){ const j = await s.json().catch(() => ({})); throw new Error(j.error || "Attivazione non riuscita"); }
+  scriviLocale("eon-passkey", "1");
+}
+
+async function entraConFaceId(){
+  const r = await fetch(PASSKEY_API + "passkey_opzioni_accesso");
+  if(!r.ok) throw new Error("Il server non risponde, riprova");
+  const o = await r.json();
+  const cred = await navigator.credentials.get({ publicKey: { challenge: daB64u(o.challenge), rpId: o.rpId, userVerification: "required", timeout: o.timeout, allowCredentials: [] } });
+  const risposta = cred.response;
+  const a = await fetch(PASSKEY_API + "passkey_accedi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+    id: cred.id, clientDataJSON: b64u(risposta.clientDataJSON), authenticatorData: b64u(risposta.authenticatorData), signature: b64u(risposta.signature),
+  }) });
+  const j = await a.json().catch(() => ({}));
+  if(!a.ok) throw new Error(j.error || "Accesso non riuscito");
+  const { error } = await supabaseClient.auth.setSession({ access_token: j.access_token, refresh_token: j.refresh_token });
+  if(error) throw error;
+  scriviLocale("eon-passkey", "1");
+  window.location.reload();
+}
+function messaggioFaceId(err){
+  const nome = err && err.name;
+  if(nome === "NotAllowedError" || nome === "AbortError") return ""; // annullato dall'utente: niente messaggio
+  if(nome === "InvalidStateError") return nomeBiometria() + " è già attivo su questo telefono.";
+  return (err && err.message) || "Non è andata, riprova.";
+}
+
+/* Schermata di accesso: il pulsante "Entra con Face ID" */
+async function aggiornaPulsanteFaceId(){
+  const b = document.getElementById("obFaceIdBtn");
+  if(!b) return;
+  const ok = obAuthMode === "login" && BACKEND_CONFIGURED && await passkeySupportata();
+  b.hidden = !ok;
+  document.getElementById("obFaceIdTesto").textContent = "Entra con " + nomeBiometria();
+}
+document.getElementById("obFaceIdBtn").addEventListener("click", async () => {
+  const errorBox = document.getElementById("obAuthError");
+  errorBox.style.display = "none";
+  const b = document.getElementById("obFaceIdBtn");
+  b.disabled = true;
+  try{ await entraConFaceId(); }
+  catch(err){
+    const m = messaggioFaceId(err);
+    if(m){ errorBox.textContent = m; errorBox.style.display = "block"; }
+  }finally{ b.disabled = false; }
+});
+
+/* Dopo un accesso con la password: "Entra con Face ID la prossima volta?" */
+async function proponiFaceId(){
+  if(!BACKEND_CONFIGURED || leggiLocale("eon-passkey") || leggiLocale("eon-passkey-no") || !(await passkeySupportata())) return;
+  const corpo = document.createElement("div");
+  corpo.className = "faceid-proposta";
+  corpo.innerHTML = `
+    <div class="faceid-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9v4.5h-1M9.5 16c1.5 1 3.5 1 5 0"/></svg></div>
+    <p>La prossima volta entri solo guardando il telefono, senza scrivere email e password.</p>
+    <div class="faceid-esito" id="faceIdEsito"></div>
+    <div class="annulla-piede"><button type="button" class="annulla-no" id="faceIdNo">Non ora</button><button type="button" class="faceid-si" id="faceIdSi">Attiva ${nomeBiometria()}</button></div>`;
+  apriRisorsaCard("Entra con " + nomeBiometria(), corpo);
+  corpo.querySelector("#faceIdNo").addEventListener("click", () => { scriviLocale("eon-passkey-no", "1"); chiudiRisorsaCard(); });
+  corpo.querySelector("#faceIdSi").addEventListener("click", async (e) => {
+    const b = e.currentTarget; b.disabled = true;
+    try{
+      await attivaFaceId();
+      chiudiRisorsaCard();
+      showAIToast("Fatto", nomeBiometria() + " attivo: la prossima volta entri guardando il telefono.");
+    }catch(err){
+      const m = messaggioFaceId(err);
+      corpo.querySelector("#faceIdEsito").textContent = m;
+      b.disabled = false;
+    }
+  });
+}
+
+/* Impostazioni → "Face ID": attiva o disattiva */
+async function voceFaceIdImpostazioni(){
+  const attivo = !!leggiLocale("eon-passkey");
+  const sotto = document.getElementById("impFaceIdSotto");
+  if(sotto) sotto.textContent = attivo ? "Attivo su questo telefono" : "Entra senza password";
+  const voce = document.getElementById("impVoceFaceId");
+  if(voce) voce.hidden = !(await passkeySupportata());
+}
+suTocco("impVoceFaceId", async () => {
+  const attivo = !!leggiLocale("eon-passkey");
+  const corpo = schedaImpostazione(nomeBiometria(), attivo
+    ? `<p class="imp-testo">${nomeBiometria()} è attivo: entri in EON guardando il telefono. Se lo disattivi, per entrare userai email e password.</p>
+       <button type="button" class="imp-btn imp-btn-pericolo" id="impFaceIdDisattiva">Disattiva ${nomeBiometria()}</button><div class="imp-esito" id="impEsitoFaceId"></div>`
+    : `<p class="imp-testo">Entra in EON solo guardando il telefono, senza scrivere email e password. La password resta valida.</p>
+       <button type="button" class="imp-btn" id="impFaceIdAttiva">Attiva ${nomeBiometria()}</button><div class="imp-esito" id="impEsitoFaceId"></div>`);
+  const b = corpo.querySelector("#impFaceIdAttiva, #impFaceIdDisattiva");
+  b.addEventListener("click", async () => {
+    b.disabled = true;
+    try{
+      if(attivo){
+        const r = await fetch(PASSKEY_API + "passkey_disattiva", { method: "POST", headers: { Authorization: "Bearer " + (await tokenValido()) } });
+        if(!r.ok) throw new Error("Non disattivato, riprova");
+        scriviLocale("eon-passkey", null);
+        esitoImp("impEsitoFaceId", nomeBiometria() + " disattivato.", true);
+      } else {
+        await attivaFaceId();
+        esitoImp("impEsitoFaceId", nomeBiometria() + " attivo.", true);
+      }
+      voceFaceIdImpostazioni();
+    }catch(err){
+      const m = messaggioFaceId(err);
+      if(m) esitoImp("impEsitoFaceId", m, false);
+      b.disabled = false;
+    }
+  });
+});
 
 /* Elimina account: il server cancella file e account (con l'account se ne
    vanno tutti i dati, collegati a lui nel database). */
