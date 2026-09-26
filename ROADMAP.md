@@ -250,6 +250,64 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
 - Abitudini nel tempo ("ogni lunedì chiami Rossi") — quando ci sarà uso
   reale.
 
+### 5b. Meno AI, stessa qualità (deciso con Andrea, 25/09/2026)
+
+Obiettivo: EON fa da solo tutto quello che può, l'AI resta solo per i casi
+difficili. Meno costi, risposte più veloci. Traguardo realistico: **60–70%
+delle richieste senza AI** (stima, da confermare coi dati veri).
+
+1. **Passo 0 — Misurare** [Claude]: salvare i token veri di ogni richiesta
+   e il "tipo" di richiesta (spostare appuntamento, nuovo cliente, domanda
+   tecnica…). Senza questo ogni cifra resta una stima.
+2. **Passo 1 — Analisi del codice** [Claude]: dividere le funzioni in tre
+   gruppi: *senza AI* (scritte nel codice), *AI piccola* (Haiku, prompt
+   corto), *AI completa* (casi difficili).
+3. **Passo 2 — Modifiche** [Claude]: spostare nel codice il primo gruppo,
+   accorciare il prompt (da ~18k a 6–8k token), Haiku come predefinito.
+   Test prima di ogni consegna.
+4. **Passo 3 — EON impara, sotto controllo** [Claude] (quando ci sono
+   artigiani veri che lo usano):
+   - ogni frase nuova diventa uno **schema** ("sposta X a giovedì alle Y");
+   - **in prova**: EON chiama ancora l'AI e confronta di nascosto la sua
+     risposta; l'utente non si accorge di niente;
+   - **attivo** solo dopo 20 risposte uguali all'AI su utenti diversi e
+     nessuna correzione;
+   - **controlli a campione**: 1 volta su 20 lo schema attivo viene
+     ricontrollato con l'AI;
+   - **torna in prova** se l'utente corregge ("no", Annulla, cancella
+     subito);
+   - **controllo dei dati**: il cliente esiste, l'orario ha senso,
+     altrimenti passa all'AI;
+   - le azioni delicate chiedono sempre conferma, come oggi;
+   - dopo ogni aggiornamento dell'app gli schemi attivi si ritestano;
+   - si imparano solo **modi di dire**, mai i dati degli utenti.
+
+Stati di uno schema: **osservato → in prova → attivo** (e **sospeso** se
+sbaglia). Nel dubbio vince sempre l'AI: un errore costa più di un risparmio.
+
+### 5c. EON Admin — il pannello privato di Andrea
+
+Solo per l'account di Andrea (e per Claude quando lavora). Numeri e tipi di
+richiesta di tutti gli utenti insieme, **mai i messaggi privati**.
+
+- **Oggi**: utenti attivi, richieste, errori, costo AI del giorno/mese.
+- **Apprendimento** (la pagina per seguire EON che impara):
+  - totale richieste divise in *senza AI* / *con AI*, e come cambia
+    settimana dopo settimana (es. 1.500 richieste: 100 senza AI → dopo
+    l'addestramento 1.100 senza AI);
+  - per ogni tipo di richiesta: quante, quanta parte è già senza AI,
+    quanti schemi sono in prova;
+  - per ogni schema: esempio di frase, stato, barra di avanzamento
+    ("18/20 risposte uguali all'AI"), correzioni ricevute;
+  - **risparmio**: quanto costerebbe con l'AI e quanto si spende davvero;
+  - pulsanti: sospendi uno schema, rimettilo in prova.
+- **Avvisi**: uno schema attivo sbaglia, errori in aumento, costo AI oltre
+  la soglia.
+- **Riassunto settimanale** sul telefono: "questa settimana 3 schemi
+  diventati attivi, 62% senza AI, risparmiati ~X €".
+- **Da togliere nella versione commerciale**: il "Registro AI" che oggi
+  vede l'utente in Impostazioni → Aiuto (serve a noi, non a lui).
+
 ---
 
 ## 6. Mercato
