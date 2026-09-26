@@ -74,7 +74,7 @@ async function main() {
       const catena = (tabella) => { const q = {
         select: () => q, not: () => q, is: () => q, eq: () => q, order: () => q, limit: () => q, in: () => q,
         update: () => ({ eq: async () => ({ error: null }) }),
-        single: async () => (tabella === "profiles" && !window.__profiloLento ? { data: { id: "11111111-1111-4111-8111-111111111111", full_name: "Andrea Gianardi", business_name: "", profession: "edile" }, error: null } : { data: null, error: { message: "rete lenta" } }),
+        single: async () => (tabella === "profiles" && !window.__profiloLento ? { data: { id: "11111111-1111-4111-8111-111111111111", full_name: "Andrea Gianardi", business_name: "", profession: "edile", termini_versione: "1.0" }, error: null } : { data: null, error: { message: "rete lenta" } }),
         then: (ok) => ok({ data: [], error: null }) }; return q; };
       window.supabase = { createClient: () => ({ from: catena, channel: () => ({ on() { return this; }, subscribe() { return this; } }), auth: {
         getSession: async () => ({ data: { session: leggi() } }),

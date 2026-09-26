@@ -36,7 +36,7 @@ async function main() {
           select: () => q, not: () => q, is: () => q, order: () => q, limit: () => q, in: () => q, eq: () => q,
           update: (patch) => ({ eq: async () => { reg({ tabella, update: patch }); return { error: null }; } }),
           insert: (righe) => { reg({ tabella, insert: righe }); return { select: () => ({ single: async () => ({ data: {}, error: null }), then: (ok) => ok({ data: [], error: null }) }) }; },
-          single: async () => ({ data: tabella === "profiles" && cfg.sessione ? { id: "u1", full_name: "Mario Bianchi", business_name: "", profession: "edile" } : null, error: null }),
+          single: async () => ({ data: tabella === "profiles" && cfg.sessione ? { id: "u1", full_name: "Mario Bianchi", business_name: "", profession: "edile", termini_versione: "1.0" } : null, error: null }),
           then: (ok) => ok({ data: [], error: null }),
         };
         return q;
@@ -73,6 +73,7 @@ async function main() {
       await page.fill("#obName", "Mario Bianchi");
       await page.fill("#obBusinessName", "Bianchi Costruzioni");
       await page.fill("#obEmail", "nuovo@esempio.it");
+      await page.check("#obAccetto"); // 27/09: Termini e Privacy da accettare per creare l'account
     };
 
     await apri({});

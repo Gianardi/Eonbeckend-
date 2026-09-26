@@ -49,6 +49,14 @@
     {
       "source": "/admin",
       "destination": "/admin.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/termini",
+      "destination": "/termini.html"
     }
   ]
 }
