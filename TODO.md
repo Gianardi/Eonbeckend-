@@ -3871,3 +3871,33 @@ WhatsApp". Anteprima approvata ("Ok"), poi fatto:
   WhatsApp Business e un dominio email, cioè la società). Non provato
   sull'iPhone vero che WhatsApp e Mail si aprano dal link. Test in
   `eval/messaggi.test.js`.
+
+### La tua azienda (27/09/2026)
+Gianardi: "se clicco su azienda deve aprirsi una pagina come nelle altre,
+con clienti, entrate, uscite, tasse — collegati: aggiungo 10 clienti e si
+aggiungono, li levo e si tolgono". Prima la voce del Menu apriva 4 numeri
+sotto il Menu, e contava anche i clienti archiviati (i suoi 39 lo sono
+tutti, da qui "36 in trattativa").
+- Pagina `page-azienda` (anche a voce: "apri la mia azienda", "i conti"):
+  Questo mese / Quest'anno; "Ti restano" = entrate − uscite − tasse, con
+  barra; Entrate (incassati / da incassare) → pagina Entrate; Uscite
+  (pagate / da pagare) → pagina Uscite (ex Pagamenti); Tasse "stima";
+  Clienti non archiviati (in corso / in trattativa) + archiviati a parte
+  → Clienti. Tutto ricalcolato quando cambiano clienti, entrate, uscite.
+- Data di una voce: la scadenza, altrimenti il giorno di creazione (le
+  fatture di EON non hanno scadenza).
+- Tasse: percentuale su (entrate − uscite), 30% di partenza, si cambia
+  toccando la riga. Salvata sul telefono (localStorage), non ancora nel
+  profilo: su un altro telefono riparte da 30%.
+- Il fisco vero per regime/IVA/mestiere: dopo l'ok di 10 artigiani o
+  professionisti (vedi ROADMAP). Test in `eval/azienda.test.js`.
+
+### Conti veri ed esatti — idea registrata (27/09/2026)
+Domanda di Gianardi: "c'è un modo per rendere il costo delle tasse reale
+ed esatto?". Risposta: sì, con dati veri + regole giuste; "al centesimo"
+solo il commercialista. Ordine deciso (in ROADMAP, dopo i 10 sì):
+fatturazione elettronica SdI → calcolo esatto forfettario → banca (Open
+Banking, sola lettura, tramite un fornitore autorizzato: EON non vede mai
+le credenziali; consenso da rinnovare periodicamente) → accesso del
+commercialista. Nota importante: le fatture PDF di EON oggi non sono
+fatture fiscali valide.
