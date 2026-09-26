@@ -3955,3 +3955,31 @@ Prossimi: clienti nuovi senza AI; omonimi con pulsanti; saluti.
   stai", "grazie", "chi sei / cosa sai fare" → risposta subito col nome,
   solo se la frase è SOLO quello. Test `eval/saluti-scelte.test.js` (11).
 Fase 1 di "meno AI" completata. Non provato dal vivo (Vercel = main).
+
+### Avviso automatico degli errori ed EON Admin (27/09/2026)
+- **Database** (`supabase/admin_errori.sql`, staging + produzione, solo
+  aggiunte): `app_errori` (RLS senza policy: solo il server), `eon_admin`
+  (Andrea), funzione `admin_riepilogo(p_admin)` eseguibile solo dalla
+  chiave di servizio (verificato: anon/authenticated no). Il pannello non
+  mostra MAI le frasi degli utenti (ROADMAP 5c): degli errori dell'AI solo
+  l'errore e il modello.
+- **Server** (api/index.js): `action=errore_app` (anche senza login; stesso
+  errore della stessa persona entro un'ora → conteggio+1; max 30/minuto per
+  indirizzo; testi tagliati), gli errori 500 del server registrati come
+  "server", notifica facoltativa `AVVISO_ERRORI_URL` solo per gli errori
+  nuovi; `admin_stato`, `admin_riepilogo`, `admin_errori_visti` solo per chi
+  è in `eon_admin` (gli altri: 403).
+- **App**: errori JS, promesse rifiutate e `console.error` segnalati da soli
+  (max 15 per sessione, una volta per errore, niente errori di rete né dal
+  computer di prova). Per l'amministratore: voce "EON Admin" nel Menu con il
+  numero di errori nuovi, e avviso all'apertura.
+- **admin.html** (`/admin`): errori nuovi, utenti e attivi, richieste,
+  costo AI del mese, % senza AI, attesa media; grafico 14 giorni; errori
+  (nuovo, ×N, dettagli tecnici, "Segna come visti"); errori dell'AI;
+  utenti con clienti, richieste, costo, spazio. Si mette sulla Home del
+  telefono come EON.
+- Test: `eval/admin.test.mjs` (16, server), `eval/admin-app.test.js` (16,
+  app e pannello). `eval/meteo.test.mjs` corretto: dipendeva dall'ora.
+- Da fare [Andrea], facoltativo: notifica sul telefono ad app chiusa →
+  installare l'app ntfy, scegliere un nome segreto per il canale e mettere
+  `AVVISO_ERRORI_URL=https://ntfy.sh/<nome>` su Vercel.

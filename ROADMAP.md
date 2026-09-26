@@ -78,9 +78,9 @@ pagina cliente chiusi e la professione bloccata in produzione.
 | **Servizio email vero** (es. Resend) | [insieme] | Oggi Supabase manda email solo a noi del team. Poi: email in italiano e **conferma email obbligatoria** accesa. |
 | **Privacy, termini, consenso GDPR** | [insieme] | Per la prova: a nome di Andrea (persona fisica). Per vendere: con la società. Io preparo testi e casella "accetto"; li fai controllare a legale/commercialista. |
 | **Dominio tuo** (es. eon.it) | [insieme] | Tu lo compri (~10–20 €/anno), io lo collego al posto di eonbeckend.vercel.app. |
-| **Avviso automatico degli errori** | [Claude] | Se qualcosa si rompe a un cliente lo so subito. |
+| **Avviso automatico degli errori** | [Claude] | **Fatto (27/09)**: ogni errore dell'app e del server va nel pannello Admin; ad Andrea compare l'avviso quando apre EON. Notifica sul telefono anche ad app chiusa: basta impostare `AVVISO_ERRORI_URL` su Vercel (es. un canale ntfy.sh) [Andrea]. |
 | **Compressione delle foto** (subito dopo il merge) | [Claude] | Come WhatsApp: da ~3 MB a ~300 KB per foto, a occhio uguali (lato lungo ~2000 px). Le foto di documenti da leggere (fatture, DURC) restano più nitide. Spazio ~10 volte meno, caricamento più veloce in cantiere. |
-| **Pannello di controllo di EON** (EON Admin, vedi 5c) | [Claude] | Per gestire 100–1000 clienti dal telefono e dal PC: utenti, chi paga, errori, costo AI, feedback arrivati, quanto fa EON senza AI. |
+| **Pannello di controllo di EON** (EON Admin, vedi 5c) — **prima versione fatta (27/09)**: `/admin` | [Claude] | Per gestire 100–1000 clienti dal telefono e dal PC: utenti, chi paga, errori, costo AI, feedback arrivati, quanto fa EON senza AI. |
 | **Staging uguale a produzione** | [Claude] | Oggi lo schema di prova è diverso (niente cascata sul profilo, niente creazione automatica del profilo). |
 | **Scollegare il progetto Vercel doppio** (eonbeckend-mx2t) | [Andrea] | L'app usa solo "eonbeckend"; il doppione raddoppiava le pubblicazioni. |
 

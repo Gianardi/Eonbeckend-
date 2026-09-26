@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0E1424">
+<title>EON Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="EON Admin">
+<link rel="apple-touch-icon" href="/icone/apple-touch-icon.png">
+<link rel="icon" href="/icone/eon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- EON Admin (27/09/2026): il pannello privato di Andrea. Legge tutto dal
+     server (action=admin_riepilogo), che risponde solo a chi è nella tabella
+     eon_admin. Nessun dato è scritto in questa pagina. -->
+<style>
+  :root{
+    --bg:#F5F7FC; --card:#FFFFFF;
+    --border:rgba(20,30,60,.08); --border-strong:rgba(20,30,60,.15);
+    --text:#0E1424; --muted:#5B6478; --faint:#98A0B4;
+    --indigo:#3B6FFF; --indigo-soft:rgba(59,111,255,.12);
+    --coral:#E5484D; --coral-soft:rgba(229,72,77,.11);
+    --green:#12A55E; --green-soft:rgba(18,165,94,.12);
+    --amber:#C98A00; --amber-soft:rgba(240,165,0,.14);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter', -apple-system, sans-serif; -webkit-font-smoothing:antialiased; }
+  main{ max-width:760px; margin:0 auto; padding:calc(18px + env(safe-area-inset-top, 0px)) 16px calc(40px + env(safe-area-inset-bottom, 0px)); }
+  a{ color:inherit; }
+
+  .testa{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .indietro{ width:36px; height:36px; border-radius:50%; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; flex:none; text-decoration:none; }
+  .indietro svg{ width:17px; height:17px; }
+  h1{ flex:1; margin:0; font-family:'Manrope'; font-size:28px; font-weight:800; letter-spacing:-.02em; }
+  .aggiorna{ border:1px solid var(--border); background:var(--card); border-radius:999px; padding:8px 14px; font:inherit; font-size:13px; font-weight:700; color:var(--text); cursor:pointer; }
+  .sotto{ font-size:13px; color:var(--muted); margin:0 0 16px 48px; }
+
+  .tiles{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:12px; }
+  @media (min-width:640px){ .tiles{ grid-template-columns:repeat(3, 1fr); } }
+  .tile{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; min-width:0; }
+  .tile .num{ font-family:'Manrope'; font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .tile .lab{ font-size:12.5px; font-weight:600; color:var(--muted); margin-top:2px; }
+  .tile .extra{ font-size:12px; color:var(--faint); margin-top:4px; }
+  .tile.allarme{ border-color:rgba(229,72,77,.35); background:var(--coral-soft); }
+  .tile.allarme .num{ color:var(--coral); }
+
+  .sezione{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px; margin-bottom:12px; }
+  .sezione h2{ margin:0 0 4px; font-family:'Manrope'; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .sezione .desc{ font-size:12.5px; color:var(--muted); margin:0 0 12px; }
+  .riga-azioni{ display:flex; gap:8px; justify-content:space-between; align-items:center; }
+  .bottone{ border:none; border-radius:999px; padding:8px 14px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; background:var(--text); color:#fff; white-space:nowrap; flex:none; }
+  .riga-azioni h2{ flex:1; min-width:0; }
+  .bottone:disabled{ opacity:.4; cursor:default; }
+
+  /* Grafico: una serie sola (richieste al giorno), barre sottili con l'estremità arrotondata */
+  .grafico{ position:relative; }
+  .barre{ display:flex; align-items:flex-end; gap:2px; height:138px; padding-top:18px; border-bottom:1px solid var(--border-strong); }
+  .barra{ flex:1; position:relative; height:100%; display:flex; align-items:flex-end; cursor:default; }
+  .barra i{ display:block; width:100%; background:var(--indigo); border-radius:4px 4px 0 0; min-height:0; }
+  .barra.oggi i{ background:#2050D8; }
+  .barra .valore{ position:absolute; left:50%; transform:translateX(-50%); font-size:10.5px; font-weight:700; color:var(--muted); white-space:nowrap; }
+  .assi{ display:flex; gap:2px; margin-top:4px; }
+  .assi span{ flex:1; text-align:center; font-size:10px; color:var(--faint); font-variant-numeric:tabular-nums; }
+  .suggerimento{ position:absolute; top:-6px; transform:translate(-50%, -100%); background:var(--text); color:#fff; font-size:12px; font-weight:600; padding:6px 9px; border-radius:8px; white-space:nowrap; pointer-events:none; }
+  .suggerimento[hidden]{ display:none; }
+
+  .elenco{ display:flex; flex-direction:column; }
+  .voce{ padding:11px 0; border-top:1px solid var(--border); }
+  .voce:first-child{ border-top:none; }
+  .voce-testa{ display:flex; gap:8px; align-items:baseline; justify-content:space-between; }
+  .voce-titolo{ font-size:14px; font-weight:600; min-width:0; overflow-wrap:anywhere; }
+  .voce-quando{ font-size:12px; color:var(--faint); flex:none; font-variant-numeric:tabular-nums; }
+  .voce-meta{ font-size:12.5px; color:var(--muted); margin-top:3px; overflow-wrap:anywhere; }
+  .pill{ display:inline-block; font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:999px; margin-right:6px; vertical-align:1px; letter-spacing:.02em; }
+  .pill.nuovo{ background:var(--coral); color:#fff; }
+  .pill.server{ background:var(--amber-soft); color:var(--amber); }
+  .pill.app{ background:var(--indigo-soft); color:var(--indigo); }
+  details{ margin-top:6px; }
+  summary{ font-size:12px; color:var(--indigo); font-weight:600; cursor:pointer; }
+  pre{ margin:6px 0 0; padding:10px; background:var(--bg); border-radius:10px; font-size:11px; line-height:1.45; white-space:pre-wrap; overflow-wrap:anywhere; max-height:220px; overflow:auto; }
+  .vuoto{ font-size:13.5px; color:var(--muted); padding:6px 0; }
+  .vuoto.ok{ color:var(--green); font-weight:600; }
+
+  .utente{ padding:12px 0; border-top:1px solid var(--border); }
+  .utente:first-child{ border-top:none; }
+  .utente-nome{ font-size:15px; font-weight:700; }
+  .utente-sub{ font-size:12.5px; color:var(--muted); margin-top:1px; overflow-wrap:anywhere; }
+  .utente-numeri{ display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-top:8px; }
+  .utente-numeri div{ background:var(--bg); border-radius:10px; padding:7px 8px; min-width:0; }
+  .utente-numeri b{ display:block; font-family:'Manrope'; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .utente-numeri span{ font-size:11px; color:var(--muted); }
+
+  .messaggio-stato{ text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; line-height:1.55; }
+  .messaggio-stato h2{ font-family:'Manrope'; color:var(--text); font-size:20px; margin:0 0 8px; }
+  .messaggio-stato a{ display:inline-block; margin-top:14px; background:var(--text); color:#fff; text-decoration:none; padding:11px 18px; border-radius:999px; font-weight:700; }
+  button:focus-visible, a:focus-visible, summary:focus-visible{ outline:2px solid var(--indigo); outline-offset:2px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="testa">
+    <a class="indietro" href="/" aria-label="Torna a EON"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+    <h1>EON Admin</h1>
+    <button type="button" class="aggiorna" id="aggiorna">Aggiorna</button>
+  </div>
+  <p class="sotto" id="sotto">Carico…</p>
+  <div id="contenuto"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://alxtmsfbxrkrevbioogv.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_cx-aRXg-ZCFDmsTfqBBccg_Li9rqqEa";
+const API = "https://eonbeckend.vercel.app/api?action=";
+const client = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const numero = (n, dec) => Number(n || 0).toLocaleString("it-IT", { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+const dollari = (n) => "$" + Number(n || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const NOMI_MESTIERE = { edile: "Impresa edile", condominio: "Amministratore di condominio", avvocato: "Avvocato", consulente: "Consulente" };
+function quando(iso){
+  if(!iso) return "—";
+  const d = new Date(iso), oggi = new Date();
+  const ore = d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  const g0 = new Date(oggi); g0.setHours(0,0,0,0);
+  const g = new Date(d); g.setHours(0,0,0,0);
+  const diff = Math.round((g0 - g) / 86400000);
+  if(diff === 0) return "oggi " + ore;
+  if(diff === 1) return "ieri " + ore;
+  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) + " " + ore;
+}
+
+let token = null;
+let dati = null;
+
+function statoPagina(titolo, testo, link){
+  $("sotto").textContent = "";
+  $("contenuto").innerHTML = `<div class="messaggio-stato"><h2>${esc(titolo)}</h2>${esc(testo)}${link ? `<br><a href="/">Apri EON</a>` : ""}</div>`;
+}
+
+async function carica(){
+  $("sotto").textContent = "Carico…";
+  if(!client){ statoPagina("Connessione assente", "Non riesco a raggiungere EON. Controlla la rete e riprova."); return; }
+  const { data } = await client.auth.getSession();
+  const sessione = data && data.session;
+  if(!sessione){ statoPagina("Entra prima in EON", "Apri EON con il tuo account, poi torna su questa pagina.", true); return; }
+  token = sessione.access_token;
+  let r;
+  try{
+    r = await fetch(API + "admin_riepilogo", { headers: { Authorization: "Bearer " + token } });
+  }catch(e){ statoPagina("Connessione assente", "Non riesco a raggiungere il server. Riprova tra poco."); return; }
+  if(r.status === 403){ statoPagina("Pagina riservata", "Questo pannello è solo per l'amministratore di EON.", true); return; }
+  if(!r.ok){ statoPagina("Qualcosa non va", "Il server ha risposto con un errore (" + r.status + "). Riprova tra poco."); return; }
+  dati = await r.json();
+  disegna();
+}
+
+function disegna(){
+  const t = dati.totali || {};
+  const visti = dati.errori_visti_fino ? new Date(dati.errori_visti_fino) : null;
+  $("sotto").textContent = "Aggiornato " + quando(dati.generato);
+  const tiles = [
+    { num: numero(t.errori_nuovi), lab: "Errori nuovi", extra: t.errori_nuovi ? "da guardare qui sotto" : "tutto a posto", allarme: t.errori_nuovi > 0 },
+    { num: numero(t.utenti), lab: "Utenti", extra: numero(t.attivi_7g) + " attivi negli ultimi 7 giorni" },
+    { num: numero(t.richieste_oggi), lab: "Richieste a EON oggi", extra: numero(t.richieste_7g) + " negli ultimi 7 giorni" },
+    { num: dollari(t.costo_mese_usd), lab: "Costo AI questo mese", extra: "in dollari, come lo fattura Anthropic" },
+    { num: t.senza_ai_pct == null ? "—" : numero(t.senza_ai_pct) + "%", lab: "Richieste senza AI", extra: "ultimi 30 giorni" },
+    { num: t.durata_media_ms == null ? "—" : numero(t.durata_media_ms / 1000, 1) + " s", lab: "Attesa media con l'AI", extra: "ultimi 30 giorni" },
+  ];
+  const giorni = dati.giorni || [];
+  const massimo = Math.max(1, ...giorni.map((g) => g.richieste || 0));
+  const errori = dati.errori || [];
+  const erroriAI = dati.errori_ai || [];
+  const utenti = dati.utenti || [];
+  const giorniNomi = (g) => new Date(g + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric" });
+
+  $("contenuto").innerHTML = `
+    <div class="tiles">${tiles.map((x) => `<div class="tile${x.allarme ? " allarme" : ""}"><div class="num">${esc(x.num)}</div><div class="lab">${esc(x.lab)}</div><div class="extra">${esc(x.extra)}</div></div>`).join("")}</div>
+
+    <div class="sezione">
+      <h2>Richieste a EON, ultimi 14 giorni</h2>
+      <p class="desc">Tocca una barra per vedere il giorno. Il picco e oggi hanno il numero sopra.</p>
+      <div class="grafico" id="grafico">
+        <div class="barre">${giorni.map((g, i) => {
+          const h = Math.round((g.richieste || 0) / massimo * 100);
+          const ultimo = i === giorni.length - 1, picco = (g.richieste || 0) === massimo && g.richieste > 0;
+          const etichetta = (ultimo || picco) && g.richieste ? `<span class="valore" style="bottom:calc(${h}% + 3px)">${numero(g.richieste)}</span>` : "";
+          const giorno = new Date(g.giorno + "T12:00:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
+          const testo = `${giorno}: ${numero(g.richieste)} richieste · ${dollari(g.costo_usd)} · ${numero(g.errori)} errori`;
+          return `<div class="barra${ultimo ? " oggi" : ""}" data-testo="${esc(testo)}" tabindex="0" aria-label="${esc(testo)}"><i style="height:${h}%"></i>${etichetta}</div>`;
+        }).join("")}</div>
+        <div class="assi">${giorni.map((g) => `<span>${giorniNomi(g.giorno)}</span>`).join("")}</div>
+        <div class="suggerimento" id="suggerimento" hidden></div>
+      </div>
+    </div>
+
+    <div class="sezione">
+      <div class="riga-azioni"><h2>Errori dell'app e del server</h2><button type="button" class="bottone" id="visti" ${t.errori_nuovi ? "" : "disabled"}>Segna come visti</button></div>
+      <p class="desc">Raccolti in automatico. Lo stesso errore ripetuto entro un'ora conta una volta sola, con "×N".</p>
+      <div class="elenco">${errori.length ? errori.map((e) => {
+        const nuovo = !visti || new Date(e.ultima_volta) > visti;
+        return `<div class="voce">
+          <div class="voce-testa"><div class="voce-titolo">${nuovo ? '<span class="pill nuovo">NUOVO</span>' : ""}<span class="pill ${e.origine === "server" ? "server" : "app"}">${e.origine === "server" ? "SERVER" : "APP"}</span>${esc(e.messaggio)}${e.conteggio > 1 ? ` <b>×${numero(e.conteggio)}</b>` : ""}</div><div class="voce-quando">${esc(quando(e.ultima_volta))}</div></div>
+          <div class="voce-meta">${esc([e.email || "senza login", e.pagina ? "pagina " + e.pagina : "", e.dispositivo ? dispositivoBreve(e.dispositivo) : ""].filter(Boolean).join(" · "))}</div>
+          ${e.dettaglio ? `<details><summary>Dettagli tecnici</summary><pre>${esc(e.dettaglio)}</pre></details>` : ""}
+        </div>`;
+      }).join("") : '<div class="vuoto ok">Nessun errore registrato.</div>'}</div>
+    </div>
+
+    <div class="sezione">
+      <h2>Richieste all'AI finite male</h2>
+      <p class="desc">Ultimi 30 giorni. Solo l'errore: le frasi degli utenti restano private.</p>
+      <div class="elenco">${erroriAI.length ? erroriAI.map((e) => `<div class="voce">
+          <div class="voce-testa"><div class="voce-titolo">${esc(e.messaggio)}</div><div class="voce-quando">${esc(quando(e.created_at))}</div></div>
+          <div class="voce-meta">${esc([e.email, e.modello].filter(Boolean).join(" · "))}</div>
+        </div>`).join("") : '<div class="vuoto ok">Nessuna.</div>'}</div>
+    </div>
+
+    <div class="sezione">
+      <h2>Utenti · ${numero(utenti.length)}</h2>
+      <p class="desc">In alto chi ha usato EON per ultimo. Costo e richieste solo dell'AI.</p>
+      <div class="elenco">${utenti.map((u) => `<div class="utente">
+          <div class="utente-nome">${esc(u.full_name || u.business_name || u.email)}</div>
+          <div class="utente-sub">${esc([u.business_name && u.full_name ? u.business_name : "", NOMI_MESTIERE[u.profession] || u.profession || "", u.email].filter(Boolean).join(" · "))}</div>
+          <div class="utente-sub">Iscritto ${esc(quando(u.created_at))} · ultimo uso ${esc(quando(u.ultima_richiesta || u.last_sign_in_at))}</div>
+          <div class="utente-numeri">
+            <div><b>${numero(u.clienti)}</b><span>clienti</span></div>
+            <div><b>${numero(u.richieste_30g)}</b><span>richieste 30 gg</span></div>
+            <div><b>${dollari(u.costo_mese_usd)}</b><span>AI questo mese</span></div>
+            <div><b>${numero(u.spazio_mb, 1)} MB</b><span>spazio</span></div>
+          </div>
+        </div>`).join("")}</div>
+    </div>`;
+
+  // Suggerimento sulle barre (tocco o passaggio del mouse)
+  const grafico = $("grafico"), sugg = $("suggerimento");
+  const mostra = (b) => {
+    const rg = grafico.getBoundingClientRect(), rb = b.getBoundingClientRect();
+    sugg.textContent = b.dataset.testo;
+    sugg.hidden = false;
+    const x = rb.left + rb.width / 2 - rg.left;
+    sugg.style.left = Math.min(Math.max(x, 110), rg.width - 110) + "px";
+  };
+  grafico.querySelectorAll(".barra").forEach((b) => {
+    b.addEventListener("mouseenter", () => mostra(b));
+    b.addEventListener("click", () => mostra(b));
+    b.addEventListener("focus", () => mostra(b));
+  });
+  grafico.addEventListener("mouseleave", () => { sugg.hidden = true; });
+
+  const visto = $("visti");
+  if(visto) visto.addEventListener("click", async () => {
+    visto.disabled = true;
+    const r = await fetch(API + "admin_errori_visti", { method: "POST", headers: { Authorization: "Bearer " + token } }).catch(() => null);
+    if(r && r.ok) carica(); else visto.disabled = false;
+  });
+}
+function dispositivoBreve(ua){
+  if(/iPhone/.test(ua)) return "iPhone";
+  if(/iPad/.test(ua)) return "iPad";
+  if(/Android/.test(ua)) return "Android";
+  if(/Macintosh/.test(ua)) return "Mac";
+  if(/Windows/.test(ua)) return "Windows";
+  return "";
+}
+
+$("aggiorna").addEventListener("click", carica);
+carica();
+</script>
+</body>
+</html>

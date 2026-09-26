@@ -22,10 +22,11 @@ const ora = (d) => Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/R
 
 // Previsioni finte: oggi sereno 14-24 °C; domani pioggia dalle 10 alle 16 (1,5 mm/ora), vento fino a 10 m/s
 function serieFinta() {
-  const inizio = new Date(); inizio.setUTCMinutes(0, 0, 0);
+  // Dalla mezzanotte italiana di oggi (non da "adesso"): la sera la massima del giorno è già passata e il test falliva
+  const inizio = new Date(); inizio.setUTCHours(0, 0, 0, 0); inizio.setTime(inizio.getTime() - 2 * 3600000);
   const domani = fmt(new Date(Date.now() + 86400000));
   const serie = [];
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 72; i++) {
     const t = new Date(inizio.getTime() + i * 3600000);
     const h = ora(t), eDomani = fmt(t) === domani;
     const piove = eDomani && h >= 10 && h <= 16;
