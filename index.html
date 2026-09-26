@@ -1695,6 +1695,36 @@
   .imp-installa-passi{ margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:9px; font-size:14.5px; line-height:1.45; color:var(--text); align-self:stretch; }
   .imp-installa-fatto{ margin:0; font-weight:700; color:var(--teal); }
   .imp-installa-nota{ margin:0; font-size:12.5px; color:var(--muted); text-align:center; }
+  /* Meteo e percorsi (26/09/2026) */
+  .meteo-card{ display:flex; flex-direction:column; gap:14px; }
+  .meteo-testa{ display:flex; align-items:center; gap:16px; padding:16px; border-radius:18px; background:linear-gradient(135deg,#EAF1FF,#F6F9FF); color:#2E5FE8; }
+  .meteo-testa.meteo-pioggia, .meteo-testa.meteo-temporale{ background:linear-gradient(135deg,#E9EEF6,#F4F6FA); color:#44587A; }
+  .meteo-testa.meteo-sereno{ background:linear-gradient(135deg,#FFF6E0,#FFFBF0); color:#D98A00; }
+  .meteo-icona{ width:58px; height:58px; flex:none; }
+  .meteo-testa-testo{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .meteo-giorno{ font-size:12px; font-weight:700; color:var(--muted); }
+  .meteo-cielo{ font-family:'Manrope'; font-size:18px; font-weight:800; color:var(--text); }
+  .meteo-temp{ display:flex; align-items:baseline; gap:8px; font-family:'Manrope'; color:var(--text); }
+  .meteo-temp b{ font-size:28px; font-weight:800; }
+  .meteo-temp span{ font-size:17px; font-weight:700; color:var(--muted); }
+  .meteo-dati{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .meteo-dati div{ border:1px solid var(--border); border-radius:14px; padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
+  .meteo-dati small{ font-size:11px; color:var(--muted); font-weight:600; }
+  .meteo-dati b{ font-family:'Manrope'; font-size:16px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
+  .meteo-ore{ display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; }
+  .meteo-ore div{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0; border-radius:12px; background:#F5F7FC; }
+  .meteo-ore small{ font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .meteo-ora-icona{ width:22px; height:22px; color:var(--indigo); }
+  .meteo-ore b{ font-size:14px; color:var(--text); }
+  .meteo-consiglio{ font-size:13px; line-height:1.5; color:#8A5A00; background:var(--amber-soft); border-radius:12px; padding:10px 12px; }
+  .meteo-fonte{ font-size:10.5px; color:var(--faint); text-align:center; }
+  .percorso-card{ display:flex; flex-direction:column; gap:10px; }
+  .percorso-nota{ margin:0; font-size:13.5px; color:var(--muted); line-height:1.45; }
+  .percorso-meta{ display:flex; align-items:center; gap:12px; padding:14px; border:1px solid var(--border); border-radius:14px; text-decoration:none; color:var(--text); font-weight:700; font-size:15px; }
+  .percorso-meta svg{ width:20px; height:20px; color:var(--indigo); flex:none; }
+  .percorso-meta span{ flex:1; min-width:0; }
+  .percorso-meta .percorso-freccia{ color:var(--faint); width:16px; height:16px; }
+  .percorso-presto{ margin:0; font-size:11.5px; color:var(--faint); text-align:center; }
   /* Scheda del cliente (26/09/2026) */
   .scheda-cliente{ display:flex; flex-direction:column; gap:14px; }
   .sc-testa{ display:flex; gap:12px; align-items:center; }
@@ -9978,6 +10008,156 @@ function provaDocumentoImpresa(testo){
   return true;
 }
 
+/* Meteo e strade (26/09/2026). "Che tempo fa", "piove domani a Pisa?":
+   previsioni vere (MET Norway, gratuito) in una card, senza AI. Senza
+   città si usa la posizione del telefono. Le domande più articolate
+   ("posso gettare il cemento sabato a Lerici?") vanno all'AI, che ha lo
+   stesso strumento "meteo". */
+const TRIGGER_METEO = /^(?:ehi eon\s+)?(?:che tempo fa|che tempo farà|che tempo fara|com'è il tempo|come è il tempo|com'e il tempo|che tempo c'è|meteo|il meteo|previsioni(?: del tempo| meteo)?|piove|pioverà|piovera|nevica|nevicherà|farà bel tempo|fara bel tempo|fa bel tempo)\b(.*)$/i;
+const GIORNI_SETTIMANA = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+const METEO_URL = "https://eonbeckend.vercel.app/api?action=meteo";
+
+function capisciRichiestaMeteo(testo){
+  const t = String(testo || "").trim().toLowerCase().replace(/[?!.]+$/, "").replace(/\s+/g, " ");
+  const m = t.match(TRIGGER_METEO);
+  if(!m) return null;
+  let resto = " " + (m[1] || "") + " ";
+  let giorno = "oggi";
+  const oggi = new Date();
+  if(/\bdopodomani\b/.test(resto)){ giorno = "dopodomani"; resto = resto.replace(/\bdopodomani\b/, " "); }
+  else if(/\bdomani\b/.test(resto)){ giorno = "domani"; resto = resto.replace(/\bdomani\b/, " "); }
+  else if(/\b(oggi|stamattina|stasera|adesso|ora)\b/.test(resto)){ resto = resto.replace(/\b(oggi|stamattina|stasera|adesso|ora)\b/, " "); }
+  else {
+    const gs = GIORNI_SETTIMANA.findIndex(g => new RegExp("\\b" + g.replace("ì", "[iì]") + "\\b").test(resto));
+    if(gs > -1){
+      const diff = ((gs - oggi.getDay()) + 7) % 7 || 7;
+      const d = new Date(oggi.getTime() + diff * 86400000);
+      giorno = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      resto = resto.replace(new RegExp("\\b" + GIORNI_SETTIMANA[gs].replace("ì", "[iì]") + "\\b"), " ");
+    }
+  }
+  resto = resto.replace(/\b(che tempo fa|fa|farà|oggi|qui|da me|in zona|sul cantiere)\b/g, " ").replace(/\s+/g, " ").trim();
+  let luogo = "";
+  const l = resto.match(/^(?:a|ad|in|su|per|sul|sulla|verso|a\s+la)\s+(.+)$/);
+  if(l) luogo = l[1].trim();
+  else if(resto) return null; // altro nella frase che non è un luogo: decide l'AI
+  return { giorno, luogo };
+}
+
+function posizioneTelefono(){
+  return new Promise((ok) => {
+    if(!navigator.geolocation) return ok(null);
+    navigator.geolocation.getCurrentPosition((p) => ok({ lat: p.coords.latitude, lon: p.coords.longitude }), () => ok(null), { timeout: 8000, maximumAge: 30 * 60 * 1000 });
+  });
+}
+
+const ICONA_METEO = {
+  sereno: '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.2M12 19.8V22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2 12h2.2M19.8 12H22M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/>',
+  variabile: '<path d="M8 3.5v1.3M3.9 5.4l.9.9M2.5 9.5h1.3M12.7 6.3l.9-.9"/><path d="M5.4 11.2a3.3 3.3 0 1 1 5.7-3.3"/><path d="M8 20h9.5a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.5 1.3A2.9 2.9 0 0 0 8 20z"/>',
+  nuvoloso: '<path d="M7 19h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 19z"/>',
+  pioggia: '<path d="M7 15h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 15z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/>',
+  temporale: '<path d="M7 14h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 14z"/><path d="M12.5 15.5l-2 3.5h3l-2 3.5"/>',
+  neve: '<path d="M7 14h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 14z"/><path d="M8 18h.01M12 20h.01M16 18h.01M10 22h.01M14 22h.01"/>',
+  nebbia: '<path d="M4 9h16M3 13h18M5 17h14"/>',
+};
+const iconaMeteo = (cat, classe) => `<svg class="${classe || ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONA_METEO[cat] || ICONA_METEO.variabile}</svg>`;
+
+function etichettaGiornoMeteo(iso){
+  const [a, m, g] = iso.split("-").map(Number);
+  const d = new Date(a, m - 1, g);
+  const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+  const diff = Math.round((d - oggi) / 86400000);
+  const nome = d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+  return diff === 0 ? "Oggi, " + nome : diff === 1 ? "Domani, " + nome : nome.charAt(0).toUpperCase() + nome.slice(1);
+}
+
+function mostraMeteo(m){
+  const corpo = document.createElement("div");
+  corpo.className = "meteo-card";
+  const consigli = [];
+  if(m.pioggia_mm >= 1) consigli.push("Pioggia prevista: occhio ai lavori all'aperto e ai getti.");
+  if(m.vento_max_kmh >= 40) consigli.push("Vento forte: attenzione a tetti e ponteggi.");
+  if(m.minima <= 2) consigli.push("Rischio gelo: niente getti di calcestruzzo senza protezioni.");
+  corpo.innerHTML = `
+    <div class="meteo-testa meteo-${escapeHtml(m.categoria)}">
+      ${iconaMeteo(m.categoria, "meteo-icona")}
+      <div class="meteo-testa-testo">
+        <div class="meteo-giorno">${escapeHtml(etichettaGiornoMeteo(m.giorno))}</div>
+        <div class="meteo-cielo">${escapeHtml(m.cielo)}</div>
+        <div class="meteo-temp"><b>${m.massima}°</b><span>${m.minima}°</span></div>
+      </div>
+    </div>
+    <div class="meteo-dati">
+      <div><small>Pioggia</small><b>${m.pioggia_mm ? String(m.pioggia_mm).replace(".", ",") + " mm" : "No"}</b></div>
+      <div><small>Vento fino a</small><b>${m.vento_max_kmh != null ? m.vento_max_kmh + " km/h" : "—"}</b></div>
+    </div>
+    ${m.ore && m.ore.length ? `<div class="meteo-ore">${m.ore.map(o => `<div><small>${escapeHtml(o.ora)}</small>${iconaMeteo(o.cielo, "meteo-ora-icona")}<b>${o.temperatura}°</b></div>`).join("")}</div>` : ""}
+    ${consigli.length ? `<div class="meteo-consiglio">${consigli.map(escapeHtml).join("<br>")}</div>` : ""}
+    <div class="meteo-fonte">Previsioni MET Norway</div>`;
+  apriRisorsaCard("Meteo · " + m.luogo, corpo);
+}
+
+async function chiediMeteo(richiesta, viaVoce){
+  let url = METEO_URL + "&giorno=" + encodeURIComponent(richiesta.giorno);
+  let luogo = richiesta.luogo;
+  if(luogo) url += "&luogo=" + encodeURIComponent(luogo);
+  else {
+    const pos = await posizioneTelefono();
+    if(pos) url += "&lat=" + pos.lat.toFixed(4) + "&lon=" + pos.lon.toFixed(4);
+    else {
+      let ultimo = ""; try{ ultimo = localStorage.getItem("eonUltimoLuogoMeteo") || ""; }catch(e){}
+      if(!ultimo){ mostraRispostaEON("", "Dimmi la città, per esempio: «che tempo fa domani a Pisa». Oppure consenti la posizione per EON nelle impostazioni del telefono.", { titolo: "Meteo" }); return; }
+      url += "&luogo=" + encodeURIComponent(ultimo);
+    }
+  }
+  try{
+    const r = await fetch(url, { headers: { "Authorization": "Bearer " + (await tokenValido()) } });
+    const dati = await r.json().catch(() => ({}));
+    if(!r.ok){ mostraRispostaEON("", dati.error || "Il meteo non risponde, riprova tra poco.", { titolo: "Meteo" }); return; }
+    if(luogo){ try{ localStorage.setItem("eonUltimoLuogoMeteo", luogo); }catch(e){} }
+    mostraMeteo(dati);
+    if(viaVoce) parlaRisposta(etichettaGiornoMeteo(dati.giorno).split(",")[0] + (dati.luogo && dati.luogo !== "dove sei" ? " a " + dati.luogo : "") + ": " + dati.cielo.toLowerCase() + ", da " + dati.minima + " a " + dati.massima + " gradi" + (dati.pioggia_mm >= 1 ? ", pioggia prevista" : ""));
+  }catch(err){
+    mostraRispostaEON("", "Il meteo non risponde: " + err.message, { titolo: "Meteo" });
+  }
+}
+
+function provaMeteo(testo, viaVoce){
+  const richiesta = capisciRichiestaMeteo(testo);
+  if(!richiesta) return false;
+  if(!currentSession){ return false; } // senza accesso decide il percorso normale (che spiega di accedere)
+  chiediMeteo(richiesta, viaVoce);
+  return true;
+}
+
+/* Tempi di viaggio: col traffico serve Google Maps (da collegare, con
+   un account Google Cloud). Intanto EON apre subito il percorso nelle
+   Mappe del telefono, che mostrano il tempo col traffico vero. */
+const TRIGGER_PERCORSO = /^(?:quanto (?:tempo )?ci metto|ci metto di (?:più|piu|meno)|quanto ci vuole|quanto tempo ci vuole|quanto è lontan[oa]|quanto e lontan[oa]|come arrivo|strada per|percorso per|portami)\s+(.*)$/i;
+function capisciRichiestaPercorso(testo){
+  const t = String(testo || "").trim().replace(/[?!.]+$/, "").replace(/\s+/g, " ");
+  const m = t.match(TRIGGER_PERCORSO);
+  if(!m) return null;
+  let resto = m[1].replace(/^(?:ad? arrivare|per arrivare|ad andare|per andare|a andare)\s+/i, "").replace(/^(?:a|ad|in|al|alla|allo|fino a|verso|da qui a)\s+/i, "");
+  const mete = resto.split(/\s+(?:o|oppure|o a|o ad|o in)\s+/i).map(x => x.replace(/^(?:a|ad|in|al|alla|allo)\s+/i, "").trim()).filter(Boolean);
+  return mete.length && mete.length <= 3 ? mete : null;
+}
+function linkPercorso(meta){
+  const iPhone = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  return iPhone ? "https://maps.apple.com/?daddr=" + encodeURIComponent(meta) + "&dirflg=d" : "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(meta);
+}
+function provaPercorso(testo){
+  const mete = capisciRichiestaPercorso(testo);
+  if(!mete) return false;
+  const corpo = document.createElement("div");
+  corpo.className = "percorso-card";
+  corpo.innerHTML = `<p class="percorso-nota">${mete.length > 1 ? "Tocca una meta: le Mappe ti mostrano subito il tempo col traffico di adesso." : "Tocca per vedere il tempo col traffico di adesso nelle Mappe."}</p>
+    ${mete.map(meta => `<a class="percorso-meta" href="${escapeHtml(linkPercorso(meta))}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>${escapeHtml(meta.charAt(0).toUpperCase() + meta.slice(1))}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>`).join("")}
+    <p class="percorso-presto">Presto EON confronterà i tempi da solo, qui.</p>`;
+  apriRisorsaCard(mete.length > 1 ? "Quale strada è più veloce" : "Percorso", corpo);
+  return true;
+}
+
 function provaRisorsaImmediata(testo){
   const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
   if(!t) return false;
@@ -10283,6 +10463,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Il nome di un cliente registrato, da solo ("Rita Ambrosini"): si
        apre subito la sua scheda, senza AI (26/09/2026). */
     if(!inContinuazione && provaSchedaCliente(testo)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
+    }
+
+    /* Meteo e strade: subito, in una card */
+    if(!inContinuazione && (provaMeteo(testo, viaVoce) || provaPercorso(testo))){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
       return;

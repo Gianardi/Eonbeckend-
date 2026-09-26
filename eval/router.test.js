@@ -398,7 +398,7 @@ async function main() {
 
       /* Turno 1: nessun focus dichiarato dal server -> nessuna nota
          nel messaggio successivo. */
-      await invia("che tempo fa domani", { stato: "concluso", testo: "Non lo so.", azioni: [] });
+      await invia("quanto ho incassato questo mese", { stato: "concluso", testo: "Non lo so.", azioni: [] });
       // Turno 2: il server dichiara un focus esplicito (foto del cantiere Trani).
       await invia("fammi vedere le foto del cantiere Trani", {
         stato: "concluso", testo: "Ecco le foto.", azioni: [],
