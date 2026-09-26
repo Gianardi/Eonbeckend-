@@ -100,7 +100,18 @@ async function main() {
     await page.evaluate(() => chiudiRisorsaCard());
     await page.click("#impVoceAiuto");
     const aiuto = await page.evaluate(() => ({ titolo: document.getElementById("risorsaTitolo").textContent, voci: [...document.querySelectorAll("#risorsaCorpo .module-title")].map((e) => e.textContent) }));
-    verifica("Aiuto: Manda un feedback e Registro AI", aiuto.titolo === "Aiuto" && JSON.stringify(aiuto.voci) === '["Manda un feedback","Registro AI"]', JSON.stringify(aiuto));
+    verifica("Aiuto: Manda un feedback, Registro AI, Metti EON sulla Home", aiuto.titolo === "Aiuto" && JSON.stringify(aiuto.voci) === '["Manda un feedback","Registro AI","Metti EON sulla Home"]', JSON.stringify(aiuto));
+    await page.click('#risorsaCorpo [data-azione="installa"]');
+    const installa = await page.evaluate(() => ({ titolo: document.getElementById("risorsaTitolo").textContent, passi: document.querySelectorAll("#risorsaCorpo .imp-installa-passi li").length, icona: document.querySelector("#risorsaCorpo .imp-installa img").getAttribute("src") }));
+    verifica("\"Metti EON sulla Home\": i passi per il telefono, con l'icona", installa.titolo === "Metti EON sulla Home" && installa.passi === 3 && installa.icona === "/icone/apple-touch-icon.png", JSON.stringify(installa));
+    const app = await page.evaluate(async () => {
+      const m = await (await fetch(document.querySelector('link[rel="manifest"]').href)).json();
+      const icone = await Promise.all([document.querySelector('link[rel="apple-touch-icon"]').href, ...m.icons.map((i) => i.src)].map(async (u) => (await fetch(u)).status));
+      return { nome: m.name, display: m.display, icone };
+    });
+    verifica("installabile: manifest con nome EON, schermo intero, icone presenti", app.nome === "EON" && app.display === "standalone" && app.icone.length === 4 && app.icone.every((x) => x === 200), JSON.stringify(app));
+    await page.evaluate(() => chiudiRisorsaCard());
+    await page.click("#impVoceAiuto");
     if (process.env.SCREEN_AIUTO) { await page.waitForTimeout(400); await page.screenshot({ path: process.env.SCREEN_AIUTO }); }
     await page.click('#risorsaCorpo [data-azione="feedback"]');
     verifica("dall'Aiuto: \"Manda un feedback\" apre il modulo", await page.evaluate(() => !!document.getElementById("feedbackCampo")));

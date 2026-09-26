@@ -1,0 +1,16 @@
+{
+  "name": "EON",
+  "short_name": "EON",
+  "description": "Parli, EON fa. E si ricorda tutto.",
+  "lang": "it",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F5F7FC",
+  "theme_color": "#F5F7FC",
+  "icons": [
+    { "src": "/icone/eon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icone/eon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icone/eon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
