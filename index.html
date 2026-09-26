@@ -987,6 +987,21 @@
     font-size:13.5px; border-radius:14px;
   }
   .add-btn svg{ width:16px; height:16px; }
+  .importa-clienti-btn{ background:var(--card); color:var(--text); border:1px solid var(--border); box-shadow:none; margin-top:-4px; }
+  .importa-card{ display:flex; flex-direction:column; gap:10px; }
+  .importa-riepilogo{ font-size:13px; color:var(--muted); line-height:1.5; }
+  .importa-cerca{ width:100%; padding:10px 12px; border-radius:11px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:14px; }
+  .importa-tutti{ display:flex; align-items:center; gap:10px; font-size:13px; font-weight:700; padding:2px 2px; cursor:pointer; }
+  .importa-tutti input, .importa-riga input{ width:20px; height:20px; flex:none; accent-color:var(--indigo); }
+  .importa-lista{ max-height:46vh; overflow-y:auto; border-top:1px solid var(--border); }
+  .importa-riga{ display:flex; align-items:center; gap:12px; padding:10px 2px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .importa-riga[hidden]{ display:none; }
+  .importa-testo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .importa-testo b{ font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .importa-testo span{ font-size:12px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .importa-gia{ font-size:11px; font-weight:800; color:var(--teal); flex:none; }
+  .importa-vai{ background:var(--text); color:var(--card); border:none; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:14px; cursor:pointer; }
+  .importa-vai:disabled{ opacity:.5; cursor:default; }
 
   /* pannello che si apre dal basso per inserire e modificare i dati */
   .sheet-overlay{
@@ -1374,6 +1389,9 @@
   .scorri-wrap{ position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; }
   .scorri-contenuto{ position:relative; z-index:1; touch-action:pan-y; }
   .chat-list .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
+  .doc-scorri{ margin:6px; }
+  .doc-scorri .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
+  .doc-scorri .doc-list-card{ width:100% !important; margin:0 !important; }
   .scorri-elimina{
     position:absolute; top:0; right:0; bottom:0; width:0; overflow:hidden; z-index:0;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
@@ -3412,6 +3430,11 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
         Aggiungi cliente a mano
       </button>
+      <button class="primary-btn add-btn importa-clienti-btn" id="importaClientiBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        Importa dalla rubrica o da Excel
+      </button>
+      <input type="file" id="importaClientiFile" accept=".vcf,.vcard,.csv,.xlsx,.txt,text/vcard,text/x-vcard,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
 
       <div class="card-panel" style="margin-bottom:18px;">
         <div class="card-header">
@@ -4632,6 +4655,7 @@ async function aggiornaDatiToccati(azioni){
          foto): non ha scritto nulla, non c'è niente da riallineare. */
     } else if(a.tool === "crea_appunto"){
       cantiereAppunti.push({ id:a.esito.id, testo:a.esito.testo, created:new Date().toISOString(), clientId:a.esito.client_id || null });
+      ricordaAppuntoCreato(a.esito.id);
       if(a.esito.appuntamento) toccaChat = true; // la nota è anche nel titolo dell'appuntamento
     } else if(a.tool === "correggi_appunto"){
       const appunto = cantiereAppunti.find(x => x.id === a.esito.id);
@@ -4794,7 +4818,7 @@ async function renderCestino(){
     row.innerHTML = `
       <div class="azienda-link-card-body">
         <div class="module-title">${nome}</div>
-        <div class="module-sub">${ETICHETTA_CESTINO[tabella]} · eliminato il ${quando}</div>
+        <div class="module-sub">${tabella === "messages" && riga.event_type === "doc" ? (/^fattura/i.test(riga.title || "") ? "Fattura" : "Preventivo") : ETICHETTA_CESTINO[tabella]} · eliminato il ${quando}</div>
       </div>
       <button type="button" class="row-action-btn cestino-restore-btn" title="Ripristina" style="margin-left:auto;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
@@ -9288,6 +9312,12 @@ function collegaHubRacconta(){
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
     }
+    if(provaCancellaAppunto(testo)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      chiudiHubAI();
+      return;
+    }
     /* Fase 1c: stesso principio, per una richiesta di foto/documento/
        preventivo di un cliente riconoscibile con certezza. */
     if(provaRisorsaImmediata(testo)){
@@ -9459,6 +9489,8 @@ function collegaHubRacconta(){
           a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.",
           () => annullaEliminazioneCliente(a.esito)
         );
+      } else if(a.tool === "elimina_appunto"){
+        showAIToastConAnnulla("Appunto cancellato", escapeHtml(a.esito.testo), () => annullaEliminazioneFoto(a.esito));
       } else if(a.tool === "elimina_foto_cantiere"){
         showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
       } else if(a.tool === "crea_cliente"){
@@ -10528,6 +10560,8 @@ function capisciAzioneDiretta(testo){
   if(/\b(face ?id|impronta|riconoscimento facciale)\b/.test(n) && parole.length <= 8 && /^(attiva|attivare|attivami|disattiva|disattivare|togli|togliere|metti|mettere|voglio|vorrei|usa|usare|imposta|impostare|face)\b/.test(n)) return { tipo: "faceid" };
   // EON sulla Home del telefono
   if(/^(?:come (?:faccio a |si fa a )?)?(?:metti|mettere|metto|installa|installare|installo|aggiungi|aggiungere)\s+(?:l app\s+)?(?:eon\s+)?(?:l app\s+)?(?:sulla|nella|alla)\s+(?:schermata\s+)?home\b/.test(n) || /^(?:come (?:faccio a )?)?(?:installa|installare|installo)\s+(?:l app\s+)?eon$/.test(n)) return { tipo: "installa" };
+  // Importa i clienti dalla rubrica o da Excel
+  if(/^(?:voglio |vorrei |devo |come (?:faccio a |posso )?)?(?:importa|importare|importo|carica|caricare|porta|portare|prendi|prendere|aggiungi|aggiungere)\s+(?:(?:i|tutti i|le|la|il|dei|miei|mie)\s+)*(?:clienti|contatti|rubrica|anagrafica)(?:\s+(?:dalla|dal|da|della|del)\s+(?:rubrica|telefono|excel|file|csv|fatture in cloud|gestionale|cellulare))?$/.test(n)) return { tipo: "importa" };
   // Esci
   if(/^(?:esci|uscire|voglio uscire|fammi uscire|disconnettiti|disconnetti|logout)(?: dall account| da eon| dall app)?$/.test(n)) return { tipo: "esci" };
   // Feedback, suggerimenti, "dovreste aggiungere…"
@@ -10564,6 +10598,8 @@ function provaAzioneDiretta(testo, primaDiAprire){
     if(!apriVoceImpostazioni("impVoceFaceId")) showAIToast("Face ID", "Su questo telefono non si può usare: entra con email e password.");
   } else if(a.tipo === "installa"){
     mostraComeInstallare();
+  } else if(a.tipo === "importa"){
+    navigateTo("clienti"); apriImportaClienti();
   } else if(a.tipo === "esci"){
     esciDallAccount();
   } else if(a.tipo === "feedback"){
@@ -10805,6 +10841,353 @@ function provaAnnullaImmediato(testo, viaVoce){
   corpo.appendChild(piede);
   apriRisorsaCard(voci.length === 1 ? "Annullo questo impegno?" : "Annullo questi " + voci.length + " impegni?", corpo);
   if(viaVoce) parlaRisposta(voci.length === 1 ? "Annullo " + voci[0].titolo + "? Conferma col tasto." : "Annullo " + voci.length + " impegni? Conferma col tasto.");
+  return true;
+}
+
+/* ===== Importa clienti dalla rubrica o da Excel (27/09/2026) =====
+   Andrea: "quando un artigiano entra, come porta dentro i clienti con
+   numeri ed email?". Un file, scelto da lui:
+   - la rubrica del telefono (.vcf: iPhone Contatti → seleziona → Esporta;
+     Android Contatti → Esporta);
+   - un Excel o CSV (Fatture in Cloud, gestionale, Google Contatti, Outlook).
+   EON mostra l'elenco con le caselle: si importa solo chi è un cliente
+   (non la mamma). Niente doppioni: se c'è già, si aggiungono solo il
+   telefono o l'email che mancavano. Nessuna chat creata in massa: la chat
+   di un cliente nasce quando serve. Tutto nel telefono, nessuna AI. */
+function decodificaQP(v){
+  const byte = []; const t = v.replace(/=\r?\n/g, "");
+  for(let i = 0; i < t.length; i++){
+    if(t[i] === "=" && /^[0-9A-F]{2}$/i.test(t.substr(i + 1, 2))){ byte.push(parseInt(t.substr(i + 1, 2), 16)); i += 2; }
+    else byte.push(...new TextEncoder().encode(t[i]));
+  }
+  try{ return new TextDecoder("utf-8").decode(new Uint8Array(byte)); }catch(e){ return t; }
+}
+function leggiVCard(testo){
+  const righe = String(testo).replace(/\r\n?/g, "\n").replace(/\n[ \t]/g, "").replace(/=\n/g, "=\n").split("\n");
+  const out = []; let c = null;
+  for(let i = 0; i < righe.length; i++){
+    let r = righe[i];
+    // quoted-printable su più righe (vecchi Android): la riga finisce con "="
+    while(/QUOTED-PRINTABLE/i.test(r) && /=$/.test(r) && i + 1 < righe.length){ r = r.slice(0, -1) + righe[++i]; }
+    if(/^BEGIN:VCARD/i.test(r)){ c = { nome: "", nomeN: "", org: "", telefoni: [], email: [] }; continue; }
+    if(/^END:VCARD/i.test(r)){ if(c) out.push(c); c = null; continue; }
+    if(!c) continue;
+    const k = r.indexOf(":"); if(k < 0) continue;
+    const testa = r.slice(0, k), campo = testa.split(";")[0].replace(/^item\d+\./i, "").toUpperCase();
+    let valore = r.slice(k + 1);
+    if(/ENCODING=QUOTED-PRINTABLE/i.test(testa)) valore = decodificaQP(valore);
+    valore = valore.replace(/\\,/g, ",").replace(/\;/g, ";").replace(/\\n/gi, " ").trim();
+    if(campo === "FN") c.nome = valore;
+    else if(campo === "N"){ const [cognome, nome] = valore.split(";"); c.nomeN = [nome, cognome].filter(Boolean).join(" ").trim(); }
+    else if(campo === "ORG") c.org = valore.split(";")[0].trim();
+    else if(campo === "TEL" && valore){ const cell = /CELL|MOBILE|IPHONE/i.test(testa); cell ? c.telefoni.unshift(valore) : c.telefoni.push(valore); }
+    else if(campo === "EMAIL" && valore) c.email.push(valore);
+  }
+  return out.map(c => ({ nome: (c.nome || c.nomeN || c.org).replace(/\s+/g, " ").trim(), telefono: c.telefoni[0] || "", email: c.email[0] || "" }));
+}
+function leggiCSV(testo){
+  const t = String(testo).replace(/^﻿/, "");
+  const primaRiga = t.split(/\r?\n/)[0] || "";
+  const sep = [";", "\t", ","].map(x => [x, primaRiga.split(x).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const righe = []; let riga = [], campo = "", tra = false;
+  for(let i = 0; i < t.length; i++){
+    const ch = t[i];
+    if(tra){ if(ch === '"'){ if(t[i + 1] === '"'){ campo += '"'; i++; } else tra = false; } else campo += ch; continue; }
+    if(ch === '"') tra = true;
+    else if(ch === sep){ riga.push(campo); campo = ""; }
+    else if(ch === "\n" || ch === "\r"){ if(ch === "\r" && t[i + 1] === "\n") i++; riga.push(campo); righe.push(riga); riga = []; campo = ""; }
+    else campo += ch;
+  }
+  if(campo || riga.length){ riga.push(campo); righe.push(riga); }
+  return righe.filter(r => r.some(x => String(x).trim()));
+}
+// Excel (.xlsx) senza librerie: è uno zip; si legge il primo foglio.
+async function leggiXLSX(buffer){
+  const dati = new Uint8Array(buffer), vista = new DataView(buffer);
+  let fine = -1;
+  for(let i = dati.length - 22; i >= Math.max(0, dati.length - 65557); i--) if(vista.getUint32(i, true) === 0x06054b50){ fine = i; break; }
+  if(fine < 0) throw new Error("File Excel non valido");
+  const n = vista.getUint16(fine + 10, true); let p = vista.getUint32(fine + 16, true);
+  const file = {};
+  for(let k = 0; k < n; k++){
+    const metodo = vista.getUint16(p + 10, true), compresso = vista.getUint32(p + 20, true);
+    const lNome = vista.getUint16(p + 28, true), lExtra = vista.getUint16(p + 30, true), lNota = vista.getUint16(p + 32, true);
+    const locale = vista.getUint32(p + 42, true);
+    const nome = new TextDecoder().decode(dati.subarray(p + 46, p + 46 + lNome));
+    file[nome] = { metodo, compresso, locale };
+    p += 46 + lNome + lExtra + lNota;
+  }
+  const leggi = async (nome) => {
+    const f = file[nome]; if(!f) return null;
+    const inizio = f.locale + 30 + vista.getUint16(f.locale + 26, true) + vista.getUint16(f.locale + 28, true);
+    const pezzo = dati.subarray(inizio, inizio + f.compresso);
+    if(f.metodo === 0) return new TextDecoder().decode(pezzo);
+    const flusso = new Blob([pezzo]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return await new Response(flusso).text();
+  };
+  const xml = (t) => new DOMParser().parseFromString(t, "application/xml");
+  const condivise = [];
+  const ss = await leggi("xl/sharedStrings.xml");
+  if(ss) xml(ss).querySelectorAll("si").forEach(si => condivise.push([...si.querySelectorAll("t")].map(x => x.textContent).join("")));
+  const nomeFoglio = Object.keys(file).filter(k => /^xl\/worksheets\/sheet\d+\.xml$/.test(k)).sort()[0];
+  const foglio = nomeFoglio ? await leggi(nomeFoglio) : null;
+  if(!foglio) throw new Error("Nessun foglio nel file Excel");
+  const colonna = (ref) => { const m = String(ref || "").match(/^[A-Z]+/); let v = 0; if(m) for(const ch of m[0]) v = v * 26 + ch.charCodeAt(0) - 64; return v - 1; };
+  const righe = [];
+  xml(foglio).querySelectorAll("sheetData > row").forEach(r => {
+    const riga = [];
+    r.querySelectorAll("c").forEach(c => {
+      const tipo = c.getAttribute("t"), v = c.querySelector("v"), is = c.querySelector("is");
+      let val = tipo === "s" ? (condivise[+(v && v.textContent)] || "") : tipo === "inlineStr" ? (is ? is.textContent : "") : (v ? v.textContent : "");
+      riga[colonna(c.getAttribute("r"))] = val;
+    });
+    for(let i = 0; i < riga.length; i++) if(riga[i] == null) riga[i] = "";
+    if(riga.some(x => String(x).trim())) righe.push(riga);
+  });
+  return righe;
+}
+/* Da una tabella (CSV o Excel) ai contatti: si riconoscono le colonne dal titolo */
+function contattiDaTabella(righe){
+  if(!righe.length) return [];
+  const norm = (h) => normalizzaComando(h).replace(/\s+/g, " ");
+  const testa = righe[0].map(norm);
+  const trova = (...prove) => testa.findIndex(h => prove.some(p => p instanceof RegExp ? p.test(h) : h === p));
+  const iDen = trova(/^(denominazione|ragione sociale|cliente|nominativo|azienda|ditta|societa|company|organization name|display name|nome e cognome|nome completo|name)$/);
+  const iNome = trova(/^(nome|first name|given name)$/);
+  const iCogn = trova(/^(cognome|last name|family name)$/);
+  const iTel = trova(/^(cellulare|cell|mobile|mobile phone|telefono cellulare)$/, /^(telefono|tel|phone|numero|numero di telefono|phone 1 value|primary phone|business phone|home phone|telefono 1)$/, /telefon|phone|cellular/);
+  const iEmail = trova(/^(email|e mail|mail|indirizzo email|e mail address|e mail 1 value|email 1)$/, /mail/);
+  if(iDen < 0 && iNome < 0 && iCogn < 0) return []; // senza una colonna del nome non sappiamo chi è
+  return righe.slice(1).map(r => {
+    const v = (i) => i >= 0 ? String(r[i] == null ? "" : r[i]).trim() : "";
+    const nome = v(iDen) || [v(iNome), v(iCogn)].filter(Boolean).join(" ");
+    const tel = v(iTel).replace(/\.0$/, ""), email = v(iEmail).split(/[;,\s]+/)[0] || "";
+    return { nome: nome.replace(/\s+/g, " ").trim(), telefono: tel, email };
+  });
+}
+async function leggiFileContatti(file){
+  const nome = String(file.name || "").toLowerCase();
+  if(/\.xlsx$/.test(nome)) return contattiDaTabella(await leggiXLSX(await file.arrayBuffer()));
+  const testo = await file.text();
+  if(/BEGIN:VCARD/i.test(testo)) return leggiVCard(testo);
+  if(/\.xls$/.test(nome)) throw new Error("Questo è un Excel vecchio (.xls): salvalo come .xlsx o .csv e riprova.");
+  return contattiDaTabella(leggiCSV(testo));
+}
+/* Pulizia: senza nome no; stessi nomi nel file → uno solo (con i dati di tutti) */
+function preparaContatti(grezzi){
+  const perNome = new Map(); let senzaNome = 0;
+  grezzi.forEach(c => {
+    if(!c.nome || !/[A-Za-zÀ-ÿ]/.test(c.nome)){ senzaNome++; return; }
+    const k = nomeChiave(c.nome), gia = perNome.get(k);
+    if(gia){ gia.telefono = gia.telefono || c.telefono; gia.email = gia.email || c.email; }
+    else perNome.set(k, { ...c });
+  });
+  const contatti = [...perNome.values()].slice(0, 2000).map(c => ({ ...c, esistente: clients.find(x => nomeChiave(x.name) === nomeChiave(c.nome)) || null }));
+  return { contatti, senzaNome };
+}
+async function importaContattiScelti(scelti){
+  let nuovi = 0, aggiornati = 0;
+  const daCreare = [];
+  for(const c of scelti){
+    if(c.esistente){
+      const patch = {};
+      if(c.telefono && !c.esistente.phone) patch.phone = c.telefono;
+      if(c.email && !c.esistente.email) patch.email = c.email;
+      if(Object.keys(patch).length){
+        if(patch.phone) c.esistente.phone = patch.phone;
+        if(patch.email) c.esistente.email = patch.email;
+        if(isDbReady() && c.esistente.id) await dbUpdate("clients", c.esistente.id, patch);
+        aggiornati++;
+      }
+    } else daCreare.push({ name: c.nome, phone: c.telefono || null, email: c.email || "", status: "inattivo", value: 0, description: "" });
+  }
+  if(daCreare.length){
+    if(isDbReady()){
+      for(let i = 0; i < daCreare.length; i += 200){
+        const salvati = await dbInsertMany("clients", daCreare.slice(i, i + 200));
+        salvati.forEach(r => clients.push(mappaCliente(r)));
+        nuovi += salvati.length;
+      }
+    } else {
+      daCreare.forEach(r => clients.push({ id: undefined, name: r.name, status: r.status, value: 0, desc: "", last: "", phone: r.phone || "", email: r.email || "", archived: false }));
+      nuovi = daCreare.length;
+    }
+  }
+  renderClientArchive(); renderClientStats();
+  return { nuovi, aggiornati, falliti: daCreare.length - nuovi };
+}
+/* Prima una card con le istruzioni (dove si trova il file sul telefono) e
+   il tasto "Scegli il file": la scelta del file la apre solo un tocco. */
+function apriImportaClienti(){
+  const iPhone = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const corpo = document.createElement("div");
+  corpo.className = "importa-card";
+  corpo.innerHTML = `<div class="importa-riepilogo">
+      <b>Dalla rubrica del telefono</b><br>
+      ${iPhone ? "Apri <b>Contatti</b>, tocca <b>Liste</b>, tieni premuto su una lista (o su «Tutti i contatti») e scegli <b>Esporta</b>: salva il file, poi sceglilo qui."
+               : "Apri <b>Contatti</b> → menu → <b>Esporta</b> (file .vcf), poi sceglilo qui."}<br><br>
+      <b>Da Excel o dal programma delle fatture</b><br>
+      Esporta l'elenco clienti (Excel o CSV) e sceglilo qui. Serve una colonna con il nome; telefono ed email se ci sono.<br><br>
+      Poi scegli tu chi importare: solo i clienti, non tutta la rubrica.</div>
+    <button type="button" class="importa-vai" id="importaScegliFile">Scegli il file</button>`;
+  corpo.querySelector("#importaScegliFile").addEventListener("click", () => {
+    const input = document.getElementById("importaClientiFile");
+    input.value = "";
+    input.click();
+  });
+  apriRisorsaCard("Importa clienti", corpo);
+}
+async function mostraSceltaImport(file){
+  let grezzi;
+  try{ grezzi = await leggiFileContatti(file); }
+  catch(err){ showAILanding("File non letto", err.message || "Non riesco a leggere questo file."); return; }
+  const { contatti, senzaNome } = preparaContatti(grezzi);
+  if(!contatti.length){
+    showAILanding("Nessun contatto trovato", "Nel file non ho trovato nomi. Serve il file della rubrica (.vcf) o un Excel/CSV con una colonna «Nome» o «Denominazione».");
+    return;
+  }
+  const molti = contatti.length > 60; // tutta la rubrica: meglio scegliere uno per uno
+  const corpo = document.createElement("div");
+  corpo.className = "importa-card";
+  const nuoviN = contatti.filter(c => !c.esistente).length;
+  corpo.innerHTML = `<div class="importa-riepilogo">Trovati <b>${contatti.length}</b> contatti${nuoviN < contatti.length ? " (" + (contatti.length - nuoviN) + " già tra i clienti: aggiungo solo il telefono o l'email che mancano)" : ""}${senzaNome ? " · " + senzaNome + " senza nome, saltati" : ""}. Spunta chi è un cliente.</div>
+    <input class="importa-cerca" id="importaCerca" type="search" placeholder="Cerca un nome…" autocomplete="off">
+    <label class="importa-tutti"><input type="checkbox" id="importaTutti" ${molti ? "" : "checked"}> Seleziona tutti</label>
+    <div class="importa-lista" id="importaLista"></div>
+    <button type="button" class="importa-vai" id="importaVai"></button>`;
+  const lista = corpo.querySelector("#importaLista");
+  contatti.forEach((c, i) => {
+    const r = document.createElement("label");
+    r.className = "importa-riga";
+    r.dataset.nome = nomeChiave(c.nome);
+    r.innerHTML = `<input type="checkbox" data-i="${i}" ${molti ? "" : "checked"}><span class="importa-testo"><b>${escapeHtml(c.nome)}</b><span>${escapeHtml([c.telefono, c.email].filter(Boolean).join(" · ") || "Senza telefono né email")}</span></span>${c.esistente ? '<span class="importa-gia">Già cliente</span>' : ""}`;
+    lista.appendChild(r);
+  });
+  const vai = corpo.querySelector("#importaVai");
+  const scelti = () => [...lista.querySelectorAll("input:checked")].map(x => contatti[+x.dataset.i]);
+  const aggiorna = () => { const k = scelti().length; vai.textContent = k === 0 ? "Spunta i clienti da importare" : k === 1 ? "Importa 1 cliente" : "Importa " + k + " clienti"; vai.disabled = k === 0; };
+  lista.addEventListener("change", aggiorna);
+  corpo.querySelector("#importaTutti").addEventListener("change", (e) => {
+    lista.querySelectorAll(".importa-riga:not([hidden]) input").forEach(x => { x.checked = e.target.checked; });
+    aggiorna();
+  });
+  corpo.querySelector("#importaCerca").addEventListener("input", (e) => {
+    const q = nomeChiave(e.target.value);
+    lista.querySelectorAll(".importa-riga").forEach(r => { r.hidden = !!q && !r.dataset.nome.includes(q); });
+  });
+  vai.addEventListener("click", async () => {
+    const v = scelti(); if(!v.length) return;
+    vai.disabled = true; vai.textContent = "Importo…";
+    const esito = await importaContattiScelti(v);
+    chiudiRisorsaCard();
+    navigateTo("clienti");
+    const parti = [];
+    if(esito.nuovi) parti.push(esito.nuovi === 1 ? "1 cliente nuovo" : esito.nuovi + " clienti nuovi");
+    if(esito.aggiornati) parti.push(esito.aggiornati === 1 ? "1 aggiornato" : esito.aggiornati + " aggiornati");
+    if(esito.falliti) parti.push(esito.falliti + " non salvati: riprova");
+    showAIToast("Importazione fatta", parti.join(" · ") || "Niente da cambiare: erano già tutti a posto.");
+  });
+  aggiorna();
+  apriRisorsaCard("Importa clienti", corpo);
+}
+document.getElementById("importaClientiBtn").addEventListener("click", apriImportaClienti);
+document.getElementById("importaClientiFile").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if(f) mostraSceltaImport(f);
+});
+
+/* ===== Cancellare gli appunti a voce o scritto (27/09/2026) =====
+   Andrea: "possibilità di annullare gli appunti a voce o scrivendo".
+   Senza AI, con i dati già nell'app:
+   - "cancella l'ultimo appunto", "togli l'appunto" → il più recente;
+   - "togli l'appunto della chiave", "cancella gli appunti di Baudi" → quelli
+     che contengono quelle parole (o di quel cliente);
+   - "annulla" / "cancellalo" subito dopo averne salvato uno → quello;
+   - "cancella tutti gli appunti" → elenco con le caselle e conferma.
+   Uno solo → nel Cestino subito, con Annulla; più di uno → si sceglie. */
+let ultimoAppuntoCreato = null; // { id, t }: per "annulla" detto subito dopo
+function ricordaAppuntoCreato(id){ ultimoAppuntoCreato = id ? { id, t: Date.now() } : null; }
+const PAROLE_VUOTE_APPUNTO = new Set(["il","lo","la","i","gli","le","l","un","una","uno","di","del","della","dello","dei","degli","delle","da","dal","dalla","a","al","alla","su","sul","sulla","per","con","che","e","mi","me","quello","quella","quelli","quelle","appunto","appunti","nota","note","parla","parlava","dice","diceva","riguarda","sopra"]);
+function capisciCancellaAppunto(testo){
+  const n = normalizzaComando(testo);
+  if(/^(?:annulla|annullalo|annullala|cancellalo|cancellala|toglilo|toglila|eliminalo|eliminala|no annulla|annulla l ultimo|annulla quello)$/.test(n)){
+    return ultimoAppuntoCreato && Date.now() - ultimoAppuntoCreato.t < 120000 ? { tipo: "appena" } : null;
+  }
+  const m = n.match(/^(?:mi\s+)?(?:cancella|cancellare|cancellami|togli|toglimi|togliere|elimina|eliminami|eliminare|rimuovi|leva|levami|annulla|butta)\s+(?:(?:l|lo|il|gli|i|tutti gli|tutti i|tutte le)\s+)?(ultimo appunto|ultima nota|appunto|appunti|nota|note)\b\s*(.*)$/);
+  if(!m) return null;
+  if(/^tutti|^tutte/.test(n.split(" ").slice(1).join(" "))) return { tipo: "tutti" };
+  if(/^ultim/.test(m[1])) return m[2] ? null : { tipo: "ultimo" };
+  const parole = m[2].split(" ").filter(p => p && !PAROLE_VUOTE_APPUNTO.has(p) && p.length >= 3);
+  if(!parole.length) return m[1] === "appunti" || m[1] === "note" ? null : { tipo: "ultimo" };
+  return { tipo: "cerca", parole };
+}
+function appuntiDaCancellare(richiesta){
+  const ordinati = cantiereAppunti.slice().sort((a, b) => String(b.created || "").localeCompare(String(a.created || "")));
+  if(richiesta.tipo === "appena") return ordinati.filter(a => a.id === ultimoAppuntoCreato.id);
+  if(richiesta.tipo === "ultimo") return ordinati.slice(0, 1);
+  if(richiesta.tipo === "tutti") return ordinati.slice(0, 30);
+  // Le parole nel testo dell'appunto, oppure il nome del suo cliente
+  const nomeCliente = (a) => { const c = a.clientId ? clients.find(x => x.id === a.clientId) : null; return c ? normalizzaComando(c.name) : ""; };
+  return ordinati.filter(a => {
+    const dove = new Set((normalizzaComando(a.testo) + " " + nomeCliente(a)).split(" "));
+    return richiesta.parole.every(p => dove.has(p) || [...dove].some(w => w.length >= 4 && (w.startsWith(p) || p.startsWith(w))));
+  });
+}
+async function cancellaAppuntiSenzaAvviso(voci){
+  voci.forEach(a => { const i = cantiereAppunti.indexOf(a); if(i > -1) cantiereAppunti.splice(i, 1); annullaModificaAppuntoSeId(a.id); });
+  if(ultimoAppuntoCreato && voci.some(a => a.id === ultimoAppuntoCreato.id)) ultimoAppuntoCreato = null;
+  aggiornaCantiereSottotitoli(); renderCantiereAppunti();
+  if(isDbReady()) await Promise.all(voci.map(a => dbDelete("cantiere_appunti", a.id)));
+}
+async function cancellaAppuntiScelti(voci){
+  for(const a of voci){
+    const i = cantiereAppunti.indexOf(a);
+    if(i > -1) cantiereAppunti.splice(i, 1);
+    annullaModificaAppuntoSeId(a.id);
+    if(ultimoAppuntoCreato && ultimoAppuntoCreato.id === a.id) ultimoAppuntoCreato = null;
+  }
+  aggiornaCantiereSottotitoli(); renderCantiereAppunti();
+  if(isDbReady()) await Promise.all(voci.map(a => dbDelete("cantiere_appunti", a.id)));
+  showAIToastConAnnulla(voci.length === 1 ? "Appunto cancellato" : voci.length + " appunti cancellati",
+    escapeHtml(voci.length === 1 ? voci[0].testo : "Sono nel Cestino."), async () => {
+      voci.forEach(a => { if(!cantiereAppunti.includes(a)) cantiereAppunti.push(a); });
+      aggiornaCantiereSottotitoli(); renderCantiereAppunti();
+      if(isDbReady()) await Promise.all(voci.map(a => dbRestore("cantiere_appunti", a.id)));
+    });
+}
+function provaCancellaAppunto(testo, viaVoce){
+  const richiesta = capisciCancellaAppunto(testo);
+  if(!richiesta) return false;
+  const voci = appuntiDaCancellare(richiesta);
+  if(!voci.length){
+    mostraRispostaEON(testo, richiesta.tipo === "cerca" ? "Non trovo appunti con «" + richiesta.parole.join(" ") + "»." : "Non hai appunti da cancellare.", { titolo: "Nessun appunto" });
+    if(viaVoce) parlaRisposta("Non trovo quell'appunto");
+    return true;
+  }
+  if(voci.length === 1 && richiesta.tipo !== "tutti"){ cancellaAppuntiScelti(voci); if(viaVoce) parlaRisposta("Appunto cancellato"); return true; }
+  const corpo = document.createElement("div");
+  corpo.className = "annulla-card";
+  const lista = document.createElement("div");
+  lista.className = "annulla-lista";
+  voci.forEach((a, i) => {
+    const riga = document.createElement("label");
+    riga.className = "annulla-riga";
+    riga.innerHTML = `<input type="checkbox" ${richiesta.tipo === "tutti" || voci.length <= 3 ? "checked" : ""} data-i="${i}"><span class="annulla-testo"><b>${escapeHtml(a.testo)}</b><span>${escapeHtml(a.created ? new Date(a.created).toLocaleDateString("it-IT", { day:"numeric", month:"short" }) : "")}</span></span>`;
+    lista.appendChild(riga);
+  });
+  corpo.appendChild(lista);
+  const piede = document.createElement("div");
+  piede.className = "annulla-piede";
+  const no = document.createElement("button"); no.type = "button"; no.className = "annulla-no"; no.textContent = "No";
+  const si = document.createElement("button"); si.type = "button"; si.className = "annulla-si"; si.id = "cancellaAppuntiConferma";
+  const scelte = () => [...lista.querySelectorAll("input:checked")].map(c => voci[+c.dataset.i]);
+  const aggiorna = () => { const k = scelte().length; si.textContent = k === 0 ? "Scegli cosa cancellare" : k === 1 ? "Cancella 1 appunto" : "Cancella " + k + " appunti"; si.disabled = k === 0; };
+  lista.addEventListener("change", aggiorna); aggiorna();
+  si.addEventListener("click", async () => { const v = scelte(); if(!v.length) return; si.disabled = true; chiudiRisorsaCard(); await cancellaAppuntiScelti(v); });
+  no.addEventListener("click", chiudiRisorsaCard);
+  piede.appendChild(no); piede.appendChild(si); corpo.appendChild(piede);
+  apriRisorsaCard("Quali appunti cancello?", corpo);
+  if(viaVoce) parlaRisposta("Quali appunti cancello? Scegli e conferma col tasto.");
   return true;
 }
 
@@ -11351,8 +11734,12 @@ async function provaAppuntoImmediato(testo){
      qualcosa che non c'è. Il resto NON va all'AI, per non duplicare
      quelli già salvati. */
   const mancanti = appunti.length - salvati.length;
-  showAIToast(salvati.length === 1 ? "Appunto aggiunto" : salvati.length + " appunti aggiunti",
-    salvati.join("\n") + (mancanti ? `\n(${mancanti} non salvat${mancanti === 1 ? "o" : "i"}: riprova)` : ""));
+  const nuovi = cantiereAppunti.slice(-salvati.length);
+  ricordaAppuntoCreato(nuovi.length === 1 ? nuovi[0].id : null);
+  // Con Annulla: l'appunto appena salvato si toglie con un tocco (27/09/2026)
+  showAIToastConAnnulla(salvati.length === 1 ? "Appunto aggiunto" : salvati.length + " appunti aggiunti",
+    escapeHtml(salvati.join("\n") + (mancanti ? `\n(${mancanti} non salvat${mancanti === 1 ? "o" : "i"}: riprova)` : "")),
+    async () => { await cancellaAppuntiSenzaAvviso(nuovi); });
   return true;
 }
 
@@ -11523,6 +11910,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(viaVoce) parlaRisposta(saluto.titolo + ". " + saluto.testo.split("\n")[0]);
         return;
       }
+    }
+
+    /* "Cancella l'ultimo appunto", "togli l'appunto della chiave", "annulla"
+       subito dopo un appunto: senza AI (27/09/2026) */
+    if(!inContinuazione && provaCancellaAppunto(testo, viaVoce)){
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
     }
 
     /* "Annulla gli appuntamenti di domani": lista e conferma, senza AI */
@@ -11802,6 +12197,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         const testoAvviso = a.esito.nome + (a.esito.conversazione_eliminata ? " e la sua conversazione sono" : " è") + " nel Cestino.";
         showAIToastConAnnulla("Cliente eliminato", testoAvviso, () => annullaEliminazioneCliente(a.esito));
         daDire.push("Cliente eliminato: " + testoAvviso.replace(/\n+/g, ". "));
+      } else if(a.tool === "elimina_appunto"){
+        showAIToastConAnnulla("Appunto cancellato", escapeHtml(a.esito.testo), () => annullaEliminazioneFoto(a.esito));
       } else if(a.tool === "elimina_foto_cantiere"){
         showAIToastConAnnulla("Foto eliminata", "Nel Cestino.", () => annullaEliminazioneFoto(a.esito));
         daDire.push("Foto eliminata");
@@ -13524,7 +13921,47 @@ function renderFatturePreventivi(){
     lista.appendChild(vuoto);
     return;
   }
-  visibili.forEach(d => lista.appendChild(creaRigaDocumento(d)));
+  visibili.forEach(d => lista.appendChild(rigaDocumentoScorrevole(d)));
+}
+/* Scorri a sinistra per eliminare un preventivo o una fattura (27/09/2026,
+   Andrea): va nel Cestino, con Annulla. Una fattura porta con sé la sua
+   entrata (quella creata insieme a lei), così i conti restano giusti. */
+function rigaDocumentoScorrevole(d){
+  const wrap = rendiScorrevole(creaRigaDocumento(d), () => eliminaDocumentoConAnnulla(d));
+  wrap.classList.add("doc-scorri");
+  return wrap;
+}
+function entrataDellaFattura(d){
+  if(d.dati.tipo !== "fattura") return null;
+  const chi = nomeChiave(d.dati.cliente || d.clienteChat);
+  const riassunto = (Array.isArray(d.dati.voci) ? d.dati.voci.map(v => v.desc).join(" · ") : "").slice(0, 60);
+  const totale = Number(d.dati.totale || 0);
+  return incomes.find(x => nomeChiave(x.client) === chi && Math.abs(Number(x.amount || 0) - totale) < 0.01 && (!riassunto || String(x.desc || "") === riassunto)) || null;
+}
+async function eliminaDocumentoConAnnulla(d){
+  const chat = chats.find(c => (c.messages || []).some(m => m.id === d.id));
+  const idx = chat ? chat.messages.findIndex(m => m.id === d.id) : -1;
+  const messaggio = idx > -1 ? chat.messages[idx] : null;
+  if(messaggio) chat.messages.splice(idx, 1);
+  const entrata = entrataDellaFattura(d);
+  const iEntrata = entrata ? incomes.indexOf(entrata) : -1;
+  if(iEntrata > -1) incomes.splice(iEntrata, 1);
+  renderFatturePreventivi(); renderIncomes(); renderSummary();
+  if(isDbReady()){
+    await dbDelete("messages", d.id);
+    if(entrata && entrata.id) await dbDelete("incomes", entrata.id);
+  }
+  const eFattura = d.dati.tipo === "fattura";
+  const nome = (eFattura ? "Fattura " : "Preventivo ") + (d.dati.numero || "") + " · " + (d.dati.cliente || d.clienteChat || "");
+  showAIToastConAnnulla(eFattura ? "Fattura eliminata" : "Preventivo eliminato", escapeHtml(nome) + (entrata ? " (e la sua entrata)" : "") + ". Nel Cestino.", async () => {
+    if(messaggio && chat && !chat.messages.includes(messaggio)) chat.messages.splice(Math.min(idx, chat.messages.length), 0, messaggio);
+    if(entrata && !incomes.includes(entrata)) incomes.splice(Math.min(iEntrata, incomes.length), 0, entrata);
+    renderFatturePreventivi(); renderIncomes(); renderSummary();
+    if(isDbReady()){
+      await dbRestore("messages", d.id);
+      if(entrata && entrata.id) await dbRestore("incomes", entrata.id);
+    }
+  });
 }
 /* Una riga della cartella (numero, cliente, lavoro, data, totale): tocco
    → anteprima con Modifica. Usata dalla pagina Fatture e preventivi e
@@ -13691,11 +14128,12 @@ function chiudiDocumento(){
 /* Numerazione progressiva per anno, contando quelli gia' emessi */
 function prossimoNumero(tipo){
   const anno = new Date().getFullYear();
-  let n = 0;
+  let quanti = 0, massimo = 0;
   chats.forEach(c => c.messages.forEach(m => {
-    if(m.eventType === "doc" && m.docTipo === tipo && m.docAnno === anno) n++;
+    // Anche il più alto già usato, non solo quanti sono: dopo un'eliminazione un numero non si ripete
+    if(m.eventType === "doc" && m.docTipo === tipo && m.docAnno === anno){ quanti++; massimo = Math.max(massimo, parseInt(m.docDati && m.docDati.numero, 10) || 0); }
   }));
-  return (n + 1) + "/" + anno;
+  return (Math.max(quanti, massimo) + 1) + "/" + anno;
 }
 
 function disegnaVoci(){

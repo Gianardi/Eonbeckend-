@@ -1273,6 +1273,37 @@ const TOOLS = {
     },
   },
 
+  elimina_appunto: {
+    risk: "low_write",
+    categoria: "azione",
+    schema: {
+      name: "elimina_appunto",
+      description: "Sposta nel cestino un appunto già esistente (si può ripristinare: l'utente vede un avviso con Annulla). Usalo quando l'utente chiede di cancellare, togliere o annullare un appunto. Se non dice quale, è l'ultimo creato.",
+      input_schema: {
+        type: "object",
+        properties: {
+          cerca: { type: "string", description: "Una parola o frase del testo dell'appunto da cancellare. Vuoto = l'ultimo appunto creato." },
+        },
+        required: [],
+      },
+    },
+    async run(input, ctx) {
+      const recenti = await db(`cantiere_appunti?select=id,testo,created_at&deleted_at=is.null&order=created_at.desc&limit=30`, { method: "GET" }, ctx.accessToken);
+      const lista = Array.isArray(recenti) ? recenti : [];
+      if (!lista.length) throw fail("Non ci sono appunti da cancellare");
+      let bersagli = lista.slice(0, 1);
+      if (eStringaNonVuota(input.cerca)) {
+        const q = input.cerca.trim().toLowerCase();
+        bersagli = lista.filter((a) => a.testo.toLowerCase().includes(q));
+        if (!bersagli.length) throw fail(`Non ho trovato nessun appunto che parli di "${input.cerca.trim()}": chiedi all'utente quale.`);
+        if (bersagli.length > 1) throw fail(`Ci sono ${bersagli.length} appunti che parlano di "${input.cerca.trim()}": ${bersagli.slice(0, 5).map((a) => `"${a.testo}"`).join(", ")}. Chiedi all'utente quale cancellare.`);
+      }
+      const a = bersagli[0];
+      await db(`cantiere_appunti?id=eq.${a.id}`, { method: "PATCH", body: JSON.stringify({ deleted_at: new Date().toISOString() }) }, ctx.accessToken);
+      return { id: a.id, testo: a.testo, tabella: "cantiere_appunti" };
+    },
+  },
+
   correggi_appunto: {
     risk: "low_write",
     categoria: "azione",
@@ -1827,21 +1858,26 @@ const TOOLS = {
 
       const [conversazione, tuttiDoc, righeProfilo] = await Promise.all([
         trovaOCreaConversazione(cliente, ctx),
-        db(`messages?select=file_name&event_type=eq.doc&deleted_at=is.null`, { method: "GET" }, ctx.accessToken),
+        // Anche quelli nel cestino: un numero già usato non si riusa mai
+        db(`messages?select=file_name&event_type=eq.doc`, { method: "GET" }, ctx.accessToken),
         db(`profiles?select=business_name,full_name&id=eq.${ctx.user.id}&limit=1`, { method: "GET" }, ctx.accessToken),
       ]);
 
       /* Stesso conteggio del frontend (prossimoNumero in index.html),
          ma sui documenti veri in database invece che sulle sole chat
          già caricate in memoria: numero progressivo per tipo e anno. */
-      let contatore = 0;
+      /* Il numero più alto già usato + 1 (27/09/2026): contando i documenti,
+         dopo averne eliminato uno il successivo avrebbe ripreso un numero
+         già esistente (fatture 1, 2, 3 → elimino la 2 → la nuova sarebbe
+         stata di nuovo la 3). */
+      let quanti = 0, massimo = 0;
       (Array.isArray(tuttiDoc) ? tuttiDoc : []).forEach((m) => {
         try {
           const d = JSON.parse(m.file_name);
-          if (d && d.tipo === input.tipo && d.anno === anno) contatore++;
+          if (d && d.tipo === input.tipo && d.anno === anno) { quanti++; massimo = Math.max(massimo, parseInt(d.numero, 10) || 0); }
         } catch (err) { /* riga senza dati validi: non conta, non blocca */ }
       });
-      const numero = `${contatore + 1}/${anno}`;
+      const numero = `${Math.max(quanti, massimo) + 1}/${anno}`;
       const profilo = Array.isArray(righeProfilo) && righeProfilo[0];
       const professionista = (profilo && (profilo.business_name || profilo.full_name)) || "Il professionista";
 

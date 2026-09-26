@@ -264,17 +264,18 @@ async function main() {
 
     // Salvataggio vero, con il database simulato: due appunti, poi un salvataggio che fallisce a metà.
     const salvataggi = await page.evaluate(async () => {
-      const originali = { isDbReady, dbInsert, showAIToast };
+      const originali = { isDbReady, dbInsert, showAIToast, showAIToastConAnnulla };
       const scritti = [], avvisi = [];
       let falliscaDopo = Infinity;
       isDbReady = () => true;
       dbInsert = async (tabella, riga) => scritti.length >= falliscaDopo ? null : (scritti.push({ tabella, ...riga }), { id: "id" + scritti.length, testo: riga.testo, created_at: "" });
       showAIToast = (titolo, testo) => avvisi.push({ titolo, testo });
+      showAIToastConAnnulla = (titolo, testo) => avvisi.push({ titolo, testo }); // 27/09: l'avviso ha anche Annulla
       const esito1 = await provaAppuntoImmediato("mi aggiungi in appunti via XXIV Maggio 152 e anche un altro appunto parto tetto e finestra");
       const scrittiPrima = scritti.slice();
       falliscaDopo = scritti.length + 1;
       const esito2 = await provaAppuntoImmediato("mi appunti comprare silicone e anche un altro appunto chiamare il vetraio");
-      isDbReady = originali.isDbReady; dbInsert = originali.dbInsert; showAIToast = originali.showAIToast;
+      isDbReady = originali.isDbReady; dbInsert = originali.dbInsert; showAIToast = originali.showAIToast; showAIToastConAnnulla = originali.showAIToastConAnnulla;
       return { esito1, scrittiPrima, esito2, scritti, avvisi };
     });
     verifica("due appunti salvati davvero, nella tabella giusta", salvataggi.esito1 === true && salvataggi.scrittiPrima.length === 2 && salvataggi.scrittiPrima.every((r) => r.tabella === "cantiere_appunti"), JSON.stringify(salvataggi.scrittiPrima));

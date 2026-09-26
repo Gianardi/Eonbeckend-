@@ -4148,3 +4148,37 @@ Frasi vere dai registri (`ai_request_log`, `ai_audit_log`):
   Limite: Rita vede il messaggio solo se ha il link della sua pagina
   (WhatsApp non ancora collegato). La nuova data fissata in chat la segna
   Andrea (per ora non la legge il codice).
+
+### Appunti cancellabili, scorri su preventivi e fatture, importa clienti (27/09/2026)
+
+- **Cancellare gli appunti a voce o scritto** (index.html,
+  `provaCancellaAppunto`, senza AI): "cancella l'ultimo appunto", "togli
+  l'appunto della chiave" (parole del testo o nome del cliente collegato),
+  "cancella tutti gli appunti" (elenco con caselle e conferma), "annulla"
+  entro 2 minuti da un appunto appena salvato. Sempre nel Cestino con
+  Annulla; l'avviso "Appunto aggiunto" ha anche lui Annulla. Per l'AI:
+  strumento `elimina_appunto` (api/index.js).
+- **Scorri per eliminare preventivi e fatture** (cartella Fatture /
+  Preventivi, stesso gesto delle chat e del calendario): il documento va
+  nel Cestino (è un messaggio `event_type = doc`), la fattura porta con sé
+  la sua entrata (stesso cliente, importo e descrizione), Annulla rimette
+  tutto. Nel Cestino si legge "Fattura" / "Preventivo".
+- **Bug evitato nella numerazione**: il numero nuovo contava i documenti;
+  con l'eliminazione, fatture 1-2-3 → elimino la 2 → la nuova sarebbe stata
+  di nuovo 3/2026. Ora è il più alto già usato + 1, contando anche il
+  Cestino (server) — un numero non si ripete mai.
+- **Importa clienti** (Clienti → "Importa dalla rubrica o da Excel", o a
+  voce "importa i clienti dalla rubrica"): card con le istruzioni (iPhone:
+  Contatti → Liste → tieni premuto → Esporta; Android: Contatti → Esporta),
+  poi il file: `.vcf` (anche vecchi Android con quoted-printable), `.csv`
+  (virgola, punto e virgola, tab; Fatture in Cloud, Google, Outlook) o
+  `.xlsx` letto senza librerie (zip + DecompressionStream). Colonne
+  riconosciute dal titolo (Denominazione/Nome/Cognome, Cellulare/Telefono,
+  Email). Elenco con caselle (tutte spuntate fino a 60 contatti, oltre si
+  sceglie; ricerca per nome), "Già cliente" → si aggiungono solo telefono
+  ed email mancanti, doppioni nel file uniti, senza nome saltati. I nuovi
+  entrano come "Fermo" (stato `inattivo`), senza creare 200 chat vuote: la
+  chat nasce quando serve.
+  Non provato su un iPhone vero (il percorso di esportazione dei Contatti
+  è quello di iOS 16+).
+- Test: `eval/appunti-documenti-import.test.js` (26).
