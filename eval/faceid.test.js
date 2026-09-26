@@ -102,7 +102,7 @@ async function main() {
     /* 1 — accesso con la password */
     await page.click("#obVaiAccedi");
     await page.waitForTimeout(300);
-    verifica("schermata Accedi: c'è \"Entra con Face ID\" (il telefono lo supporta)", await page.isVisible("#obFaceIdBtn"));
+    verifica("schermata Accedi prima di attivarlo: niente \"Entra con Face ID\" (non confonde)", !(await page.isVisible("#obFaceIdBtn")));
     await page.fill("#obEmail", "andrea@esempio.it");
     await page.fill("#obPassword", "password-giusta");
     await page.click("#obFinishBtn");

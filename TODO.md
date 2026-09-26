@@ -4020,3 +4020,8 @@ pagina Admin. Fatto comunque, come le app delle banche:
   la creazione della sessione con link magico (generate_link + verify) non
   si può provare qui senza la chiave di servizio vera — se non va, EON
   risponde "Accesso non riuscito: riprova con email e password".
+- Correzione (27/09, prova di Andrea): "Entra con Face ID" compariva anche
+  prima di averlo attivato, e l'iPhone mostrava "nessuna passkey salvata /
+  scansiona codice QR". Ora il pulsante compare solo se Face ID è stato
+  attivato su quel telefono; se il telefono ha già una chiave (memoria
+  cancellata) "Attiva" la riconosce e basta.
