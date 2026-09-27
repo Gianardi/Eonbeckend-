@@ -52,9 +52,10 @@ Vercel, Anthropic, OpenAI) a nome della società.
   `portale_*`.
 - Admin separato (`/admin`), non mostra mai i messaggi degli utenti.
 - Cestino prima della cancellazione definitiva; eliminazione account completa.
-- **Punto debole noto**: le foto e i documenti nello storage hanno indirizzi
-  pubblici (lunghi e casuali, ma chi ha il link li apre). Da fare: storage
-  privato con link firmati a scadenza.
+- Foto e documenti in uno spazio privato (dal 27/09/2026): si aprono solo
+  con link firmati dal server a scadenza (1 ora nell'app, 7 giorni quando si
+  condividono), dopo aver controllato chi li chiede (`firma_file`,
+  `portale_firma_file`).
 
 ## Violazioni dei dati
 

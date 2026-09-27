@@ -43,6 +43,15 @@
           "value": "noindex"
         }
       ]
+    },
+    {
+      "source": "/file-privati.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
     }
   ],
   "rewrites": [

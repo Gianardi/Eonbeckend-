@@ -2268,6 +2268,8 @@
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- File privati: foto e documenti con link che scadono (27/09/2026) -->
+<script src="/file-privati.js"></script>
 </head>
 <body>
 
@@ -4434,6 +4436,18 @@ async function tokenValido(){
   }
   return currentSession ? currentSession.access_token : "";
 }
+/* File privati (27/09/2026): i link a scadenza li dà il server, solo per i
+   file dell'utente e delle sue chat (vedi file-privati.js e firma_file). */
+if(window.EonFile) EonFile.imposta(async (urls, durata) => {
+  const token = await tokenValido();
+  if(!token) return { firmati: {} };
+  const r = await fetch("https://eonbeckend.vercel.app/api?action=firma_file", {
+    method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+    body: JSON.stringify({ urls, durata })
+  });
+  return r.ok ? await r.json() : { firmati: {} };
+});
+function apriFile(url){ if(window.EonFile) EonFile.apri(url); else window.open(url, "_blank"); }
 
 /* ============ SINCRONIZZAZIONE COL DATABASE VERO (Supabase) ============
    Finché BACKEND_CONFIGURED è false, queste funzioni non vengono usate:
@@ -9202,7 +9216,7 @@ function renderChatWindow(){
           <div class="msg-doc-name">${m.fileName || "Documento"}</div>
           <div class="msg-doc-sub">Tocca per aprire · ${m.time}</div>
         </div>`;
-      d.addEventListener("click", () => window.open(m.fileUrl, "_blank"));
+      d.addEventListener("click", () => apriFile(m.fileUrl));
       metti(d);
       return;
     }
@@ -9957,7 +9971,7 @@ function renderCantiereDocumenti(){
     elimina.addEventListener("click", (e) => { e.stopPropagation(); eliminaCantiereDocumento(d.id); });
 
     card.appendChild(icon); card.appendChild(body); card.appendChild(elimina);
-    card.addEventListener("click", () => window.open(d.url, "_blank"));
+    card.addEventListener("click", () => apriFile(d.url));
     wrap.appendChild(card);
   });
 }
@@ -11358,23 +11372,25 @@ function mostraDocumentoImpresa(d){
   if(/^image\//.test(d.tipo || "") || /\.(jpe?g|png|webp|gif|heic)$/i.test(d.url || "")){
     const img = document.createElement("img");
     img.className = "scheda-foto-img"; img.src = d.url; img.alt = d.nome;
-    img.addEventListener("click", () => window.open(d.url, "_blank"));
+    img.addEventListener("click", () => apriFile(d.url));
     corpo.appendChild(img);
   } else {
-    corpo.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => window.open(d.url, "_blank")));
+    corpo.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => apriFile(d.url)));
   }
   const riga = document.createElement("div");
   riga.className = "risorsa-riga-btn";
   const apri = document.createElement("button");
   apri.type = "button"; apri.className = "doc-btn-secondario"; apri.textContent = "Apri";
-  apri.addEventListener("click", () => window.open(d.url, "_blank"));
+  apri.addEventListener("click", () => apriFile(d.url));
   riga.appendChild(apri);
   const condividi = document.createElement("button");
   condividi.type = "button"; condividi.className = "doc-btn-secondario"; condividi.textContent = "Invia";
   condividi.addEventListener("click", async () => {
     const titolo = nomeDocumentoPulito(d.nome);
-    if(navigator.share){ try{ await navigator.share({ title: titolo, text: titolo + ": " + d.url }); return; }catch(e){ return; } }
-    try{ await navigator.clipboard.writeText(d.url); showAIToast("Link copiato", "Incollalo su WhatsApp o nell'email."); }catch(e){ showAILanding(titolo, d.url); }
+    // Link che dura 7 giorni (lo spazio file è privato): chi lo riceve lo apre senza EON
+    const link = window.EonFile ? await EonFile.perCondividere(d.url) : d.url;
+    if(navigator.share){ try{ await navigator.share({ title: titolo, text: titolo + ": " + link }); return; }catch(e){ return; } }
+    try{ await navigator.clipboard.writeText(link); showAIToast("Link copiato", "Incollalo su WhatsApp o nell'email. Vale 7 giorni."); }catch(e){ showAILanding(titolo, link); }
   });
   riga.appendChild(condividi);
   corpo.appendChild(riga);
@@ -13448,10 +13464,17 @@ function creaRigaInvioFoto(foto, clienteNome, getNota){
   riga.className = "scheda-invio";
   riga.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
   const cliente = clienteNome ? clients.find(c => nomeChiave(c.name) === nomeChiave(clienteNome)) : null;
-  const testo = () => (getNota() ? getNota() + "\n" : "") + foto.url;
+  const testo = (link) => (getNota() ? getNota() + "\n" : "") + (link || foto.url);
+  /* Lo spazio file è privato: a chi riceve la foto va un link che vale 7
+     giorni. La finestra di WhatsApp si apre subito (vale il tocco), il
+     messaggio arriva appena il link è pronto. */
+  const linkFoto = () => window.EonFile ? EonFile.perCondividere(foto.url) : Promise.resolve(foto.url);
   const voci = [
-    { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => window.open("https://wa.me/" + numeroWhatsApp(cliente && cliente.phone) + "?text=" + encodeURIComponent(testo()), "_blank") },
-    { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', azione: () => { window.location.href = "mailto:?subject=" + encodeURIComponent("Foto del cantiere") + "&body=" + encodeURIComponent(testo()); } },
+    { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => {
+      const w = window.open("", "_blank");
+      linkFoto().then(link => { const u = "https://wa.me/" + numeroWhatsApp(cliente && cliente.phone) + "?text=" + encodeURIComponent(testo(link)); if(w) w.location.href = u; else window.location.href = u; });
+    } },
+    { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', azione: async () => { const link = await linkFoto(); window.location.href = "mailto:" + (cliente && cliente.email ? encodeURIComponent(cliente.email).replace(/%40/g, "@") : "") + "?subject=" + encodeURIComponent("Foto del cantiere") + "&body=" + encodeURIComponent(testo(link)); } },
     { nome: "EON", icona: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', azione: () => inviaRisorsaEonInterna(clienteNome, "Ti mando la foto: " + testo()) },
   ];
   voci.forEach(v => {
@@ -13934,7 +13957,7 @@ function creaVoceDocumento(doc, clienteNome){
     /* Modifica e invio stanno dentro la scheda del documento (Apri):
        qui solo cifra, numero e Apri. */
   } else {
-    if(doc.url) el.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => window.open(doc.url, "_blank")));
+    if(doc.url) el.appendChild(creaIconaHero("var(--indigo)", ICONA_DOCUMENTO, () => apriFile(doc.url)));
     const titolo = document.createElement("div");
     titolo.className = "risorsa-voce-titolo";
     titolo.textContent = doc.titolo || "(senza titolo)";
@@ -13953,7 +13976,7 @@ function creaVoceDocumento(doc, clienteNome){
       apriBtn.className = "doc-btn-secondario";
       apriBtn.type = "button";
       apriBtn.textContent = "Apri";
-      apriBtn.addEventListener("click", () => window.open(doc.url, "_blank"));
+      apriBtn.addEventListener("click", () => apriFile(doc.url));
       btnRiga.appendChild(apriBtn);
       el.appendChild(btnRiga);
       if(clienteNome) el.appendChild(creaRigaCanaliInvio(clienteNome, "Ti mando il documento \"" + doc.titolo + "\": " + doc.url));
@@ -14504,6 +14527,17 @@ function nomeProfessionista(){
 /* ---- Il PDF ---- */
 function apriPdfDocumento(dati){
   if(!dati){ return; }
+  /* Il logo è nello spazio file privato: la finestra si apre subito (vale il
+     tocco), il documento si scrive appena il link del logo è pronto. */
+  const intestLogo = aziendaIntestazione && aziendaIntestazione.logo_url;
+  if(window.EonFile && EonFile.eFile(intestLogo)){
+    const finestra = window.open("", "_blank");
+    EonFile.firma(intestLogo).then(link => scriviPdfDocumento(dati, finestra, link || null));
+    return;
+  }
+  scriviPdfDocumento(dati, null, intestLogo || null);
+}
+function scriviPdfDocumento(dati, finestraGiaAperta, logoFirmato){
   const euro = n => "€ " + Number(n).toLocaleString("it-IT", { minimumFractionDigits:2, maximumFractionDigits:2 });
   // Testo dell'utente e dei clienti mai inserito come HTML
   const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
@@ -14513,8 +14547,8 @@ function apriPdfDocumento(dati){
   const f = formatoAttuale();
   const intest = aziendaIntestazione || {};
   const nomeEmittente = intest.nome_azienda || dati.professionista || "";
-  const marchio = intest.logo_url
-    ? `<img src="${esc(intest.logo_url)}" alt="${esc(nomeEmittente)}" style="max-height:48px; max-width:220px; object-fit:contain;">`
+  const marchio = logoFirmato
+    ? `<img src="${esc(logoFirmato)}" alt="${esc(nomeEmittente)}" style="max-height:48px; max-width:220px; object-fit:contain;">`
     : esc(nomeEmittente);
   const dettagli = righeIntestazione(intest).map(esc).join("<br>");
 
@@ -14590,7 +14624,7 @@ function apriPdfDocumento(dati){
   <button class="stampa" onclick="window.print()">Salva come PDF</button>
 </body></html>`;
 
-  const w = window.open("", "_blank");
+  const w = finestraGiaAperta || window.open("", "_blank");
   if(!w){
     showAILanding("Apertura bloccata", "Il browser ha bloccato la nuova finestra. Consenti le finestre pop-up per aprire il documento.");
     return;
@@ -14753,7 +14787,7 @@ function disegnaArchivio(){
       el.addEventListener("click", () => {
         if(v.tipo === "documento"){ apriPdfDocumento(v.m.docDati); return; }
         if(v.tipo === "foto" || v.tipo === "video"){ apriMedia(v.m.fileUrl, v.m.fileType); return; }
-        if(v.m.fileUrl){ window.open(v.m.fileUrl, "_blank"); return; }
+        if(v.m.fileUrl){ apriFile(v.m.fileUrl); return; }
         /* appuntamenti e note: chiudo e mostro la conversazione */
         chiudiArchivio();
       });

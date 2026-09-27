@@ -4258,3 +4258,27 @@ stessa professione o se rafforza un pilastro; i feedback arrivano in Admin.
 - Parole dopo "invia il preventivo" che non sono un cliente ("di ieri") →
   la frase va all'AI come prima, invece di "non trovo".
 Test in `eval/invio-privacy.test.js` e `eval/azioni-dirette.test.js`.
+
+### Foto e documenti in uno spazio privato (27/09/2026)
+
+Andrea: "come fanno le grandi app?" → come Google Drive/Dropbox: spazio
+privato, il server controlla chi chiede e dà un link che scade.
+- **Server** (api/index.js): `firma_file` (utente: solo la sua cartella e
+  `clienti/<chat sua>/`; 1 ora, o 7 giorni con `durata: "condivisione"`),
+  `portale_firma_file` (pagina del cliente, con il codice: solo i file della
+  sua chat, caricati da lui o mandati nella chat), `descrivi_foto` passa
+  all'AI un link di 5 minuti, `transcribe` scarica con la chiave di servizio
+  solo file consentiti (prima scaricava qualsiasi indirizzo).
+- **App e pagina del cliente**: `file-privati.js`, un "guardiano" unico: ogni
+  `<img>`, `<video>`, `<audio>`, `<a>` con un file di EON riceve il link a
+  scadenza (un viaggio al server per tutta la pagina, rinnovo ogni 40 minuti);
+  "Apri" apre la finestra subito e poi il link; foto e documenti mandati su
+  WhatsApp/email hanno link di 7 giorni; il PDF del preventivo ha il logo
+  firmato. Negli archivi resta l'indirizzo di sempre (serve solo da nome).
+- **Interruttore** (`supabase/file_privati.sql`): bucket `eon-files`
+  `public = false`, da fare in produzione **dopo il merge** (staging non ha
+  lo spazio file). Per tornare indietro: `public = true`.
+- Da sapere: i link a foto mandati prima su WhatsApp con l'indirizzo pubblico
+  smettono di funzionare dopo l'interruttore.
+- Test: `eval/file-privati.test.mjs` (9, permessi), `eval/file-privati-app.test.js`
+  (10, app e pagina del cliente); aggiornati foto e percorso-rapido.

@@ -5471,7 +5471,7 @@ async function handleSeed(req, res, user, accessToken) {
    sull'italiano e costa pochissimo (circa 0,006 $ al minuto).
    Richiede la variabile OPENAI_API_KEY su Vercel.
    ============================================================ */
-async function handleTranscribe(req, res) {
+async function handleTranscribe(req, res, user, accessToken) {
   if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
 
   const OPENAI_KEY = process.env.OPENAI_API_KEY;
@@ -5488,10 +5488,16 @@ async function handleTranscribe(req, res) {
     throw fail("Campo 'audioUrl' mancante");
   }
 
-  /* Scarichiamo l'audio dallo spazio file e lo giriamo al servizio */
+  /* Scarichiamo l'audio dallo spazio file (privato) e lo giriamo al
+     servizio: solo un file dell'utente o delle sue chat, mai un indirizzo
+     qualsiasi. */
+  const percorsoAudio = percorsoFileEon(audioUrl);
+  if (!percorsoAudio || !(await percorsiConsentiti([percorsoAudio], user, accessToken)).length) {
+    throw fail("Audio non trovato nello spazio di EON", 404);
+  }
   let audioResp;
   try {
-    audioResp = await fetch(audioUrl);
+    audioResp = await scaricaFileEon(percorsoAudio);
   } catch (netErr) {
     throw fail("Non riesco a scaricare l'audio: " + netErr.message, 502);
   }
@@ -5636,6 +5642,88 @@ async function storageServizio(percorso, options) {
   if (!r.ok) throw fail("Storage: " + ((json && (json.message || json.error)) || r.status), 502);
   return json;
 }
+/* ============ FILE PRIVATI (27/09/2026) ============
+   Andrea: "come fanno le grandi app?". Come Google Drive e Dropbox: lo
+   spazio file (bucket eon-files) è privato; per vedere una foto o un
+   documento il server controlla che chi chiede ne abbia il diritto e dà un
+   link che scade (1 ora dentro l'app, 7 giorni quando lo mandi a qualcuno).
+   Negli archivi resta l'indirizzo di sempre (…/object/public/eon-files/…):
+   serve solo come nome del file, non apre più niente da solo. */
+const DURATA_LINK_APP = 60 * 60;             // 1 ora: foto e documenti dentro l'app
+const DURATA_LINK_CONDIVISO = 7 * 24 * 60 * 60; // 7 giorni: link mandati a clienti e fornitori
+function percorsoFileEon(url) {
+  if (typeof url !== "string") return null;
+  const m = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/eon-files\/([^?#]+)/);
+  if (!m) return null;
+  let percorso;
+  try { percorso = decodeURIComponent(m[1]); } catch { return null; }
+  if (!percorso || percorso.includes("..") || percorso.startsWith("/")) return null;
+  return percorso;
+}
+async function firmaPercorsi(percorsi, secondi) {
+  if (!percorsi.length) return {};
+  const risposta = await storageServizio("object/sign/eon-files", { method: "POST", body: JSON.stringify({ expiresIn: secondi, paths: percorsi }) });
+  const firmati = {};
+  (Array.isArray(risposta) ? risposta : []).forEach((r) => {
+    if (r && r.path && r.signedURL && !r.error) firmati[r.path] = `${SUPABASE_URL}/storage/v1${r.signedURL.startsWith("/") ? "" : "/"}${r.signedURL}`;
+  });
+  return firmati;
+}
+/* Può l'utente aprire questo file? I suoi (cartella con il suo id) e quelli
+   mandati dai suoi clienti nelle sue chat (clienti/<id della chat>/…). */
+async function percorsiConsentiti(percorsi, user, accessToken) {
+  const chat = [...new Set(percorsi.map((p) => (p.match(/^clienti\/([0-9a-f-]{36})\//) || [])[1]).filter(Boolean))];
+  let chatMie = new Set();
+  if (chat.length) {
+    const righe = await db(`conversations?select=id&id=in.(${chat.join(",")})`, { method: "GET" }, accessToken); // RLS: solo le sue
+    chatMie = new Set((Array.isArray(righe) ? righe : []).map((r) => r.id));
+  }
+  return percorsi.filter((p) => p.startsWith(user.id + "/") || chatMie.has((p.match(/^clienti\/([0-9a-f-]{36})\//) || [])[1]));
+}
+async function handleFirmaFile(req, res, user, accessToken) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  const body = await readBody(req);
+  const urls = Array.isArray(body.urls) ? body.urls.filter((u) => typeof u === "string").slice(0, 200) : [];
+  const secondi = body.durata === "condivisione" ? DURATA_LINK_CONDIVISO : DURATA_LINK_APP;
+  const perUrl = new Map(urls.map((u) => [u, percorsoFileEon(u)]).filter(([, p]) => p));
+  const consentiti = await percorsiConsentiti([...new Set(perUrl.values())], user, accessToken);
+  const firmati = await firmaPercorsi(consentiti, secondi);
+  const out = {};
+  perUrl.forEach((p, u) => { if (firmati[p]) out[u] = firmati[p]; });
+  return send(res, 200, { firmati: out, scade_tra: secondi });
+}
+/* La pagina del cliente (senza login): con il codice del suo link può
+   aprire solo i file della SUA chat — quelli caricati da lui e quelli che
+   il professionista gli ha mandato in quella chat. */
+async function handlePortaleFirmaFile(req, res) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  const body = await readBody(req);
+  const codice = typeof body.codice === "string" ? body.codice.trim() : "";
+  if (codice.length < 16 || codice.length > 200) throw fail("Link non valido", 403);
+  const conv = await servizio(`conversations?select=id&access_code=eq.${encodeURIComponent(codice)}&deleted_at=is.null&limit=1`, { method: "GET" });
+  const c = Array.isArray(conv) ? conv[0] : null;
+  if (!c) throw fail("Link non valido", 403);
+  const urls = Array.isArray(body.urls) ? body.urls.filter((u) => typeof u === "string").slice(0, 200) : [];
+  const perUrl = new Map(urls.map((u) => [u, percorsoFileEon(u)]).filter(([, p]) => p));
+  const messaggi = await servizio(`messages?select=file_url,body&conversation_id=eq.${c.id}&deleted_at=is.null&limit=2000`, { method: "GET" });
+  const nellaChat = new Set();
+  (Array.isArray(messaggi) ? messaggi : []).forEach((m) => {
+    const p = percorsoFileEon(m.file_url); if (p) nellaChat.add(p);
+    String(m.body || "").replace(/https?:\/\/\S+/g, (u) => { const q = percorsoFileEon(u); if (q) nellaChat.add(q); return u; });
+  });
+  const consentiti = [...new Set(perUrl.values())].filter((p) => p.startsWith(`clienti/${c.id}/`) || nellaChat.has(p));
+  const firmati = await firmaPercorsi(consentiti, DURATA_LINK_APP);
+  const out = {};
+  perUrl.forEach((p, u) => { if (firmati[p]) out[u] = firmati[p]; });
+  return send(res, 200, { firmati: out, scade_tra: DURATA_LINK_APP });
+}
+async function scaricaFileEon(percorso) {
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/object/eon-files/${percorso.split("/").map(encodeURIComponent).join("/")}`, {
+    headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+  });
+  return r;
+}
+
 async function elencaFileStorage(prefisso, profondita = 0, trovati = []) {
   if (profondita > 5 || trovati.length > 5000) return trovati;
   const voci = await storageServizio("object/list/eon-files", {
@@ -5695,9 +5783,13 @@ async function handleDescriviFoto(req, res, user, accessToken) {
   const foto = Array.isArray(righe) ? righe[0] : null;
   if (!foto) throw fail("Foto non trovata", 404);
   if (eStringaNonVuota(foto.descrizione) && !body.rifai) return send(res, 200, { descrizione: foto.descrizione });
-  if (typeof foto.url !== "string" || !foto.url.startsWith(SUPABASE_URL + "/storage/v1/object/public/")) {
+  const percorsoFoto = percorsoFileEon(foto.url);
+  if (!percorsoFoto || !(await percorsiConsentiti([percorsoFoto], user, accessToken)).length) {
     throw fail("Questa foto non è nello spazio di EON: non posso descriverla", 400);
   }
+  // Spazio privato: all'AI un link che scade in 5 minuti
+  const urlPerAI = (await firmaPercorsi([percorsoFoto], 300))[percorsoFoto];
+  if (!urlPerAI) throw fail("Foto non raggiungibile", 502);
 
   let r;
   try {
@@ -5710,7 +5802,7 @@ async function handleDescriviFoto(req, res, user, accessToken) {
         messages: [{
           role: "user",
           content: [
-            { type: "image", source: { type: "url", url: foto.url } },
+            { type: "image", source: { type: "url", url: urlPerAI } },
             { type: "text", text: "Foto scattata da un artigiano su un cantiere o in una casa. Descrivi in italiano, in UNA frase breve (massimo 15 parole), cosa si vede, con i dettagli utili a riconoscerla e a cercare un pezzo uguale: tipo di oggetto, materiale, colore, finitura, particolari. Solo la descrizione: niente frasi introduttive, niente ipotesi su cose che non si vedono." },
           ],
         }],
@@ -5918,6 +6010,8 @@ export default async function handler(req, res) {
     if (action === "errore_app") return await handleErroreApp(req, res);
     // Entrare con Face ID: per definizione prima del login
     if (action === "passkey_opzioni_accesso" || action === "passkey_accedi") return await handlePasskeyAccesso(action, req, res);
+    // Pagina del cliente: link ai file della sua chat, con il codice del suo link
+    if (action === "portale_firma_file") return await handlePortaleFirmaFile(req, res);
 
     const { user, accessToken } = await requireUser(req);
 
@@ -5926,11 +6020,12 @@ export default async function handler(req, res) {
     if (action === "ai") return await handleAI(req, res);
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
     if (action === "descrivi_foto") return await handleDescriviFoto(req, res, user, accessToken);
+    if (action === "firma_file") return await handleFirmaFile(req, res, user, accessToken);
     if (action === "elimina_account") return await handleEliminaAccount(req, res, user, accessToken);
     if (action === "meteo") return await handleMeteo(req, res);
     if (action === "analizza_messaggio") return await handleAnalizzaMessaggio(req, res, user, accessToken);
     if (action === "rispondi_richiesta_cliente") return await handleRispondiRichiestaCliente(req, res, user, accessToken);
-    if (action === "transcribe") return await handleTranscribe(req, res);
+    if (action === "transcribe") return await handleTranscribe(req, res, user, accessToken);
     if (action === "leggi_intestazione_da_foto") return await handleLeggiIntestazioneDaFoto(req, res);
     if (action === "seed") return await handleSeed(req, res, user, accessToken);
     if (resource) return await handleResource(req, res, resource, user, accessToken);
