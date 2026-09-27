@@ -368,6 +368,88 @@ async function main() {
     const logo = await page.evaluate(() => { const o = document.getElementById("aiClockBtn"); return { tag: o.tagName, cliccabile: o.tagName === "BUTTON" }; });
     verifica("la \"O\" di EON è solo il marchio (niente funzione AI)", logo.tag === "SPAN" && !logo.cliccabile, JSON.stringify(logo));
 
+    /* ---- Senza AI: fatto, incassi, chi mi deve, link, archivia, preventivi di ---- */
+    await page.evaluate(() => {
+      chiudiRisorsaCard(); navigateTo("home");
+      document.getElementById("aiToastContainer").innerHTML = "";
+      clients.splice(0, clients.length,
+        { id: "c1", name: "Rita Ambrosini", status: "attivo", value: 0, desc: "", phone: "333 1234567", email: "", address: "", archived: false },
+        { id: "c5", name: "Mario Rossi", status: "attivo", value: 0, desc: "", phone: "", email: "", address: "", archived: false });
+      chats.splice(0, chats.length, { id: "v1", name: "Rita Ambrosini", isClient: true, archived: false, unread: 0, accessCode: "ABC123", messages: [], toSeeToday: false, toCallToday: false });
+      tasks.splice(0, tasks.length,
+        { id: "t1", title: "Sopralluogo Rita Ambrosini", owner: "user", status: "todo", time: "" },
+        { id: "t2", title: "Chiamata Mario Rossi", owner: "user", status: "todo", time: "" },
+        { id: "t3", title: "Chiamata fornitore", owner: "user", status: "todo", time: "" });
+      const oggi = new Date(), iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      incomes.splice(0, incomes.length,
+        { id: "i1", client: "Rita Ambrosini", desc: "Bagno", amount: 1200, due: iso(oggi), status: "incassato" },
+        { id: "i2", client: "Rita Ambrosini", desc: "Cucina", amount: 300, due: iso(oggi), status: "attesa" },
+        { id: "i3", client: "Mario Rossi", desc: "Tetto", amount: 2000, due: iso(new Date(oggi.getFullYear(), oggi.getMonth() - 1, 10)), status: "scaduto" });
+      window.__scritture.length = 0; window.__aperti.length = 0;
+    });
+    const fatto = await page.evaluate(async () => {
+      const r = {};
+      r.unoSolo = provaComandiSemplici("ho finito il sopralluogo da Rita", false) && tasks[0].status === "done" && window.__scritture.some((w) => w.tabella === "tasks" && w.id === "t1" && w.patch.status === "done");
+      document.querySelector("#aiToastContainer .ai-toast-yes").click();
+      await new Promise((ok) => setTimeout(ok, 30));
+      r.annulla = tasks[0].status === "todo";
+      document.getElementById("aiToastContainer").innerHTML = "";
+      r.scelta = provaComandiSemplici("segna fatto chiamata", false) && document.getElementById("risorsaTitolo").textContent === "Quale hai finito?" && document.querySelectorAll("#risorsaCorpo .fatto-scelta").length === 2;
+      document.querySelectorAll("#risorsaCorpo .fatto-scelta")[1].click();
+      r.sceltaFatta = tasks[2].status === "done" && tasks[1].status === "todo" && document.getElementById("risorsaOverlay").style.display === "none";
+      r.nessunoAllAI = provaComandiSemplici("ho finito il cemento", false) === false && provaComandiSemplici("cosa ho fatto", false) === false;
+      return r;
+    });
+    verifica("\"ho finito il sopralluogo da Rita\": segnato fatto, con Annulla; se sono due si sceglie; se non c'è decide l'AI", Object.values(fatto).every(Boolean), JSON.stringify(fatto));
+    const soldi = await page.evaluate(() => {
+      const r = {};
+      const mese = provaLetturaLocale("quanto ho incassato questo mese");
+      r.mese = mese && /1\.200/.test(mese.testo) && /300/.test(mese.testo) && document.querySelector(".page.visible").id === "page-azienda";
+      const scorso = provaLetturaLocale("quanto ho incassato il mese scorso");
+      r.scorso = scorso && /€0/.test(scorso.testo) && /2\.000/.test(scorso.testo);
+      const chi = provaLetturaLocale("chi mi deve soldi?");
+      r.chi = chi && chi.titolo === "Ti devono €2.300" && /Mario Rossi\*\* – €2\.000 \(scaduto\)/.test(chi.testo) && /Rita Ambrosini\*\* – €300/.test(chi.testo) && chi.testo.indexOf("Mario") < chi.testo.indexOf("Rita");
+      const daRossi = provaLetturaLocale("quanto ho incassato da Rossi");
+      r.daRossi = daRossi && daRossi.titolo === "Mario Rossi" && /Ti deve ancora €2\.000/.test(daRossi.testo);
+      r.altroAllAI = provaLetturaLocale("quanto ho incassato con i bagni") === null;
+      return r;
+    });
+    verifica("\"quanto ho incassato questo mese / il mese scorso / da Rossi\" e \"chi mi deve soldi\": dai conti, senza AI", Object.values(soldi).every(Boolean), JSON.stringify(soldi));
+    const linkCliente = await page.evaluate(async () => {
+      const r = {};
+      r.riconosciuto = provaComandiSemplici("manda il link a Rita", false);
+      await new Promise((ok) => setTimeout(ok, 50));
+      r.card = document.getElementById("risorsaTitolo").textContent === "Link per Rita Ambrosini";
+      document.querySelector('#risorsaCorpo .scheda-invio-btn[data-canale="WhatsApp"]').click();
+      const url = decodeURIComponent(window.__aperti.pop() || "");
+      r.whatsapp = url.startsWith("https://wa.me/393331234567?text=") && url.includes("/cliente.html?c=ABC123");
+      chiudiRisorsaCard();
+      r.nessunCliente = provaComandiSemplici("manda il link a Giovanni", false) === false;
+      return r;
+    });
+    verifica("\"manda il link a Rita\": card con WhatsApp (messaggio e link pronti), Email e Copia", Object.values(linkCliente).every(Boolean), JSON.stringify(linkCliente));
+    const archivia = await page.evaluate(async () => {
+      const r = {};
+      document.getElementById("aiToastContainer").innerHTML = "";
+      r.chiede = provaComandiSemplici("archivia Rita", false) && /Archiviare "Rita Ambrosini"/.test(document.getElementById("aiToastContainer").textContent) && clients[0].archived === false;
+      document.querySelector("#aiToastContainer .ai-toast-yes").click();
+      await new Promise((ok) => setTimeout(ok, 50));
+      r.archiviato = clients[0].archived === true;
+      document.getElementById("aiToastContainer").innerHTML = "";
+      r.giaArchiviato = provaComandiSemplici("archivia Rita", false) && /già in archivio/.test(document.getElementById("risorsaCorpo").textContent);
+      chiudiRisorsaCard();
+      r.riattiva = provaComandiSemplici("riattiva Rita", false) && /Riportare "Rita Ambrosini"/.test(document.getElementById("aiToastContainer").textContent);
+      document.querySelector("#aiToastContainer .ai-toast-yes").click();
+      await new Promise((ok) => setTimeout(ok, 50));
+      r.riattivato = clients[0].archived === false;
+      document.getElementById("aiToastContainer").innerHTML = "";
+      r.preventiviDiRossi = provaRisorsaImmediata("preventivi di Rossi") && /Mario Rossi non ha ancora preventivi/.test(document.getElementById("risorsaCorpo").textContent);
+      chiudiRisorsaCard();
+      r.preventivoPerRossiAllAI = provaRisorsaImmediata("preventivo per Rossi") === false;
+      return r;
+    });
+    verifica("\"archivia Rita\" / \"riattiva Rita\" con conferma; \"preventivi di Rossi\" risponde anche se non ce ne sono", Object.values(archivia).every(Boolean), JSON.stringify(archivia));
+
     /* ---- Modifica di un appunto nella card ---- */
     const appunto = await page.evaluate(() => {
       window.__scritture.length = 0;

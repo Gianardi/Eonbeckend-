@@ -2055,6 +2055,7 @@
   .sc-riga-punto.appunto{ background:var(--amber); }
   .sc-riga-testo{ flex:1; min-width:0; overflow-wrap:anywhere; }
   .sc-riga-quando{ flex:none; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  button.sc-riga{ width:100%; border:0; background:var(--card); font-family:inherit; color:var(--text); text-align:left; cursor:pointer; }
   .sc-vuoto{ padding:11px 13px; font-size:12.5px; color:var(--muted); }
   .sc-foto{ display:flex; gap:8px; overflow-x:auto; margin-top:-6px; scrollbar-width:none; }
   .sc-foto img{ width:84px; height:84px; object-fit:cover; border-radius:12px; flex:none; cursor:pointer; }
@@ -10915,14 +10916,6 @@ function apriSeNomeDiPagina(testo, domandaEON){
    subito. Il cliente deve essere uno solo e tutte le parole dette devono
    stare nel suo nome; altrimenti (due Rossi, o una frase più lunga come
    "scrivi a Rita che arrivo alle 10") decide chi viene dopo, come prima. */
-function clienteDaNomeDetto(detto){
-  const parole = nomeChiave(detto).split(" ").filter(p => p && !/^(il|lo|la|sig|signor|signora|sigra|dott|ing|geom|arch)$/.test(p));
-  if(!parole.length) return null;
-  const esatto = clients.filter(c => !c.archived && nomeChiave(c.name) === parole.join(" "));
-  if(esatto.length === 1) return esatto[0];
-  const trovati = clients.filter(c => !c.archived && parole.every(p => nomeChiave(c.name).split(" ").includes(p)));
-  return trovati.length === 1 ? trovati[0] : null;
-}
 function provaComandiSemplici(testo, viaVoce){
   const t = nomeChiave(String(testo || "").replace(/[.!?]+$/, ""));
   if(!t) return false;
@@ -10958,7 +10951,136 @@ function provaComandiSemplici(testo, viaVoce){
     openClientChat(c);
     return true;
   }
+  // Manda il link a X: la sua pagina, pronta da mandare
+  const n = normalizzaComando(testo);
+  m = n.match(/^(?:manda(?:gli|le)?|mandare|invia(?:gli|le)?|inviare|condividi|dai|passa)\s+(?:il\s+)?link\s+(?:a|ad|di|per|con|al|alla)\s+(.+)$/)
+    || n.match(/^(?:manda|invia)\s+(?:a|ad)\s+(.+?)\s+il\s+link$/)
+    || n.match(/^(?:il\s+)?link\s+(?:cliente\s+|di\s+|per\s+|del\s+cliente\s+)?(.+)$/);
+  if(m){
+    const c = clienteDaNomeDetto(m[1]);
+    if(!c) return false;
+    mandaLinkCliente(c);
+    return true;
+  }
+  // Archivia X / riattiva X: con conferma, come dalla scheda
+  m = n.match(/^(?:archivia|archiviare|metti in archivio|sposta in archivio)\s+(.+)$/);
+  const mRiattiva = n.match(/^(?:riattiva|riattivare|togli dall archivio|riporta tra i clienti)\s+(.+)$/);
+  if(m || mRiattiva){
+    const c = clienteDaNomeDetto((m || mRiattiva)[1]);
+    if(!c) return false;
+    if(!!mRiattiva !== !!c.archived){
+      mostraRispostaEON(testo, c.archived ? c.name + " è già in archivio. Se vuoi riportarlo tra i clienti dimmi «riattiva " + c.name + "»." : c.name + " è già tra i clienti attivi.", { titolo: c.name });
+      return true;
+    }
+    chiediArchivioCliente(c);
+    return true;
+  }
+  // Ho finito X / segna fatto X: l'impegno giusto diventa fatto
+  if(provaSegnaFatto(testo)) return true;
   return false;
+}
+
+/* "Archiviare Rita?" con Archivia/Annulla: dalla scheda e a voce */
+function chiediArchivioCliente(c){
+  const domanda = c.archived ? 'Riportare "' + c.name + '" tra i clienti attivi?' : 'Archiviare "' + c.name + '"? Sparirà dalle liste (anche dalla chat) finché non lo riattivi.';
+  showAIToastConDecisione(c.archived ? "Riattivare il cliente?" : "Archiviare il cliente?", domanda, async () => {
+    chiudiRisorsaCard();
+    await impostaArchivioClienteEChat(c, chatDelCliente(c), !c.archived);
+    ridisegnaClientiEChat();
+  }, null, c.archived ? "Riattiva" : "Archivia", "Annulla");
+}
+
+/* "Manda il link a Rita": la card con WhatsApp, Email e Copia, il
+   messaggio già scritto (un tocco, perché WhatsApp e Mail vogliono un
+   tocco vero per aprirsi) */
+async function mandaLinkCliente(c){
+  const chat = await ensureConversationFor(c);
+  if(!chat || !chat.accessCode){
+    showAILanding("Link non disponibile", "Il link privato si prepara solo quando l'app è collegata a internet. Riprova tra poco.");
+    return;
+  }
+  const link = window.location.origin + "/cliente.html?c=" + chat.accessCode;
+  const messaggio = "Ciao " + c.name + ", da qui puoi seguire il lavoro e scrivermi direttamente: " + link;
+  const corpo = document.createElement("div");
+  corpo.className = "termini-card";
+  const p = document.createElement("p");
+  p.textContent = "Il messaggio con il link è pronto: scegli come mandarlo. " + c.name + " vedrà solo la sua pagina, con i suoi lavori e documenti.";
+  corpo.appendChild(p);
+  const riga = document.createElement("div");
+  riga.className = "scheda-invio";
+  riga.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
+  const voci = [
+    { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => { window.open("https://wa.me/" + numeroWhatsApp(c.phone) + "?text=" + encodeURIComponent(messaggio), "_blank"); } },
+    { nome: "Email", icona: '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', azione: () => { apriLinkEsterno("mailto:" + encodeURIComponent(c.email || "") + "?subject=" + encodeURIComponent("La tua pagina dei lavori") + "&body=" + encodeURIComponent(messaggio)); } },
+    { nome: "Copia", icona: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>', azione: async () => {
+      try{ await navigator.clipboard.writeText(link); showAIToast("Link copiato", "Incollalo dove vuoi: WhatsApp, SMS o email."); }
+      catch(e){ showAILanding("Link di " + c.name, link); }
+    } },
+  ];
+  voci.forEach(v => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "scheda-invio-btn"; b.dataset.canale = v.nome;
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + v.icona + '</svg><span>' + v.nome + '</span>';
+    b.addEventListener("click", v.azione);
+    riga.appendChild(b);
+  });
+  corpo.appendChild(riga);
+  apriRisorsaCard("Link per " + c.name, corpo);
+}
+
+/* "Ho finito il sopralluogo da Rita", "segna fatto chiamata Rossi",
+   "tetto Bianchi fatto": l'impegno ancora da fare con TUTTE quelle parole
+   nel titolo diventa fatto, con Annulla. Più di uno: si sceglie con un
+   tocco. Nessuno: decide l'AI come prima ("ho finito il cemento"). */
+const PAROLE_VUOTE_FATTO = /^(il|lo|la|l|i|gli|le|un|una|uno|di|da|del|dello|della|dei|degli|delle|dal|dalla|con|per|a|ad|al|alla|ai|alle|in|nel|nella|su|sul|sulla|e|che|oggi|adesso|ora|appena|gia|anche|tutto|lavoro|appuntamento|impegno)$/;
+function capisciSegnaFatto(testo){
+  const n = normalizzaComando(testo);
+  const m = n.match(/^(?:ho|abbiamo)\s+(?:appena\s+|gia\s+)?(?:finito|fatto|completato|terminato)\s+(?:con\s+)?(.+)$/)
+    || n.match(/^(?:segna(?:mi)?|metti|mettimi)\s+(?:come\s+)?(?:fatto|fatta|finito|finita|completato|completata)\s+(.+)$/)
+    || n.match(/^(?:segna(?:mi)?|metti|mettimi)\s+(.+?)\s+(?:come\s+)?(?:fatto|fatta|finito|finita|completato|completata)$/)
+    || n.match(/^(?:finito|fatto|completato)\s+(.+)$/)
+    || n.match(/^(.+?)\s+(?:e\s+)?(?:fatto|fatta|fatti|finito|finita|completato|completata)$/);
+  if(!m) return null;
+  const parole = m[1].split(" ").filter(p => p && !PAROLE_VUOTE_FATTO.test(p));
+  return parole.length ? parole : null;
+}
+function stessaParola(a, b){
+  if(a === b) return true;
+  // "sopralluogo"/"sopralluoghi", "chiamata"/"chiamate"
+  return a.length >= 4 && b.length >= 4 && a.slice(0, -1) === b.slice(0, -1);
+}
+function provaSegnaFatto(testo){
+  const parole = capisciSegnaFatto(testo);
+  if(!parole) return false;
+  const trovati = tasks.filter(t => t.status !== "done" && t.status !== "annullato" && t.title && (() => {
+    const titolo = normalizzaComando(t.title).split(" ");
+    return parole.every(p => titolo.some(w => stessaParola(p, w)));
+  })());
+  if(!trovati.length) return false;
+  if(trovati.length === 1){ segnaImpegnoFatto(trovati[0]); return true; }
+  const corpo = document.createElement("div");
+  corpo.className = "sc-lista";
+  trovati.slice(0, 6).forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "sc-riga fatto-scelta";
+    b.innerHTML = '<span class="sc-riga-punto"></span><span class="sc-riga-testo">' + escapeHtml(t.title) + '</span><span class="sc-riga-quando">' + escapeHtml(t.time ? quandoBreve(t.time) : "") + '</span>';
+    b.addEventListener("click", () => { chiudiRisorsaCard(); segnaImpegnoFatto(t); });
+    corpo.appendChild(b);
+  });
+  apriRisorsaCard("Quale hai finito?", corpo);
+  return true;
+}
+function segnaImpegnoFatto(t){
+  const prima = t.status;
+  const ridisegna = () => { renderTasks(); renderRing(); renderDifficulty(); renderCalendar(); };
+  t.status = "done";
+  if(isDbReady() && t.id) dbUpdate("tasks", t.id, { status: "done" });
+  ridisegna();
+  showAIToastConAnnulla("Fatto", "«" + t.title + "»: segnato come finito.", () => {
+    t.status = prima;
+    if(isDbReady() && t.id) dbUpdate("tasks", t.id, { status: prima });
+    ridisegna();
+  });
 }
 
 /* ============ AZIONI DIRETTE, SENZA AI (27/09/2026) ============
@@ -11673,6 +11795,9 @@ function provaLetturaLocale(testo){
     };
   }
 
+  const soldi = capisciDomandaSoldi(t);
+  if(soldi) return soldi;
+
   if(["quanti clienti ho", "quanti clienti", "quanti sono i miei clienti", "quanti clienti ho in anagrafica"].includes(t)){
     const attivi = clients.filter(c => !c.archived).length;
     navigateTo("clienti");
@@ -11697,6 +11822,64 @@ function provaLetturaLocale(testo){
     };
   }
 
+  return null;
+}
+
+/* "Quanto ho incassato questo mese?" e "chi mi deve soldi?" (27/09/2026):
+   dalle entrate già in memoria (le fatture di EON ci finiscono da sole),
+   gli stessi conti della pagina La tua azienda. */
+const MESI_LUNGHI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+function capisciDomandaSoldi(testo){
+  const n = normalizzaComando(testo).replace(/^(?:eon|ehi eon|senti)\s+/, "").replace(/\s+(?:per favore|grazie)$/, "");
+  const oggi = new Date();
+  const incasso = n.match(/^(?:quanto|quanti soldi|quanto denaro)\s+(?:ho|abbiamo)\s+(?:gia\s+)?(?:incassato|preso|fatturato)(?:\s+(.+))?$/)
+    || n.match(/^(?:gli\s+)?(?:incassi|incassato|quanto e entrato|quanti soldi sono entrati)(?:\s+(.+))?$/);
+  if(incasso){
+    /* "Quanto ho incassato da Rossi": quello che ha pagato e quello che deve */
+    const daChi = (incasso[1] || "").match(/^(?:da|dal|dalla|con)\s+(.+)$/);
+    if(daChi){
+      const cl = clienteDaNomeDetto(daChi[1]);
+      if(!cl) return null;
+      const sue = incomes.filter(i => nomeChiave(i.client) === nomeChiave(cl.name) || (i.clientId && i.clientId === cl.id));
+      const pagato = sue.filter(i => i.status === "incassato").reduce((s, i) => s + (Number(i.amount) || 0), 0);
+      const deve = sue.filter(i => i.status !== "incassato").reduce((s, i) => s + (Number(i.amount) || 0), 0);
+      navigateTo("entrate");
+      if(!sue.length) return { titolo: cl.name, testo: "Nessuna entrata per " + cl.name + "." };
+      return { titolo: cl.name, testo: "Incassati **" + euroConti(pagato) + "**" + (deve > 0 ? "\nTi deve ancora " + euroConti(deve) : "\nHa pagato tutto") };
+    }
+    const quando = (incasso[1] || "questo mese").replace(/^(?:in|nel|del|di|a|ad)\s+/, "");
+    let periodo = "mese", rif = oggi, etichetta;
+    if(/^(?:questo mese|il mese|mese|sto mese|questo mese qui)$/.test(quando)) etichetta = MESI_LUNGHI[oggi.getMonth()];
+    else if(/^(?:mese scorso|il mese scorso|scorso mese)$/.test(quando)){ rif = new Date(oggi.getFullYear(), oggi.getMonth() - 1, 15); etichetta = MESI_LUNGHI[rif.getMonth()]; }
+    else if(/^(?:quest anno|anno|l anno|questo anno|tutto l anno)$/.test(quando)){ periodo = "anno"; etichetta = "quest'anno"; }
+    else if(MESI_LUNGHI.includes(quando.replace(/^(?:il\s+)?mese\s+di\s+/, ""))){ const mm = MESI_LUNGHI.indexOf(quando.replace(/^(?:il\s+)?mese\s+di\s+/, "")); rif = new Date(oggi.getFullYear(), mm, 15); etichetta = MESI_LUNGHI[mm]; }
+    else return null; // altre parole ("quanto ho incassato da Rossi"): decide l'AI
+    const c = contiAzienda(periodo, rif);
+    const alMese = periodo === "mese" && rif.getMonth() === oggi.getMonth() && rif.getFullYear() === oggi.getFullYear();
+    if(periodo === "anno" || alMese){ azPeriodo = periodo; navigateTo("azienda"); }
+    else navigateTo("entrate");
+    const titolo = periodo === "anno" ? "Incassi di quest'anno" : "Incassi di " + etichetta;
+    if(!c.nEntrate) return { titolo, testo: "Nessuna entrata " + (periodo === "anno" ? "quest'anno" : "a " + etichetta) + "." };
+    return { titolo, testo: "Incassati **" + euroConti(c.incassati) + "**" + (c.daIncassare > 0 ? "\nDa incassare ancora " + euroConti(c.daIncassare) : "\nTutto incassato") };
+  }
+  if(/^(?:chi\s+(?:mi\s+deve(?:\s+dare)?|deve\s+(?:darmi|pagarmi)|mi\s+deve\s+pagare|non\s+mi\s+ha\s+(?:ancora\s+)?pagato|deve\s+ancora\s+pagar(?:mi|e))(?:\s+(?:ancora\s+)?(?:dei\s+|i\s+)?soldi)?(?:\s+ancora)?|chi\s+e\s+in\s+ritardo(?:\s+con\s+i\s+pagamenti)?|(?:cosa|quanto)\s+(?:devo|ho)\s+(?:ancora\s+)?(?:da\s+)?incassare|(?:i\s+miei\s+)?crediti|soldi\s+da\s+incassare|da\s+incassare)$/.test(n)){
+    const perCliente = new Map();
+    incomes.filter(i => i.status !== "incassato").forEach(i => {
+      const k = i.client || "Senza nome";
+      const v = perCliente.get(k) || { nome: k, totale: 0, scaduto: false };
+      v.totale += Number(i.amount) || 0;
+      if(i.status === "scaduto") v.scaduto = true;
+      perCliente.set(k, v);
+    });
+    navigateTo("entrate");
+    const elenco = [...perCliente.values()].filter(v => v.totale > 0).sort((a, b) => b.totale - a.totale);
+    if(!elenco.length) return { titolo: "Nessuno ti deve soldi", testo: "Hai incassato tutto." };
+    const totale = elenco.reduce((s, v) => s + v.totale, 0);
+    return {
+      titolo: "Ti devono " + euroConti(totale),
+      testo: elenco.map(v => "**" + v.nome + "** – " + euroConti(v.totale) + (v.scaduto ? " (scaduto)" : "")).join("\n"),
+    };
+  }
   return null;
 }
 
@@ -12129,6 +12312,13 @@ function provaRisorsaImmediata(testo){
   const tipoDoc = /^fattur/.test(tipoRichiesto) ? "fattura" : /^preventiv/.test(tipoRichiesto) ? "preventivo" : null;
   if(tipoDoc){
     documenti = documenti.filter(d => d.tipo === "preventivo_o_fattura" && ((d.dati && d.dati.tipo === tipoDoc) || new RegExp(tipoDoc, "i").test(d.titolo || "")));
+    /* Al plurale e solo il nome ("preventivi di Rossi") è una domanda, non
+       un documento da fare: se non ce ne sono, lo diciamo */
+    const soloNome = !paroleFiltro.some(p => !/^(per|di|del|della|dello|dei|il|la|lo|i|gli|le|a|al|alla|e|che|un|una)$/.test(p));
+    if(!documenti.length && /^(preventivi|fatture)$/.test(tipoRichiesto) && soloNome){
+      mostraRispostaEON(testo, cliente.name + " non ha ancora " + tipoRichiesto + ". Per farne " + (tipoDoc === "fattura" ? "una: «fattura" : "uno: «preventivo") + " per " + cliente.name + ", lavoro e importo».", { titolo: tipoRichiesto.charAt(0).toUpperCase() + tipoRichiesto.slice(1) + " di " + cliente.name });
+      return true;
+    }
     if(!documenti.length) return false;
   }
   /* Parole in più oltre al nome ("fattura testolina porte"): filtrano per
@@ -13419,7 +13609,7 @@ function clienteDaNomeDetto(testo){
   t = t.replace(/^(?:apri(?:mi)?|mostra(?:mi)?|fammi vedere|fai vedere|vai (?:a|al|alla|su)|dammi)\s+/, "")
        .replace(/^(?:la\s+)?(?:scheda|card)\s+(?:di|del|della)\s+/, "")
        .replace(/^(?:il|la)\s+/, "")
-       .replace(/^cliente\s+/, "").trim();
+       .replace(/^(?:cliente|sig|signor|signora|sigra|dott|ing|geom|arch)\s+/, "").trim();
   if(!t || /\d/.test(t)) return null;
   const parole = t.split(" ");
   if(parole.length > 4) return null;
@@ -13540,14 +13730,7 @@ function mostraSchedaCliente(c, opzioni){
   azione("modifica", "Modifica", "Dati del cliente", '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>', () => { chiudiRisorsaCard(); openSheet("cliente", c); });
   /* Dalla lista Clienti semplice (27/09/2026) queste due stanno qui */
   azione("link", "Link cliente", "La sua pagina con lavori e documenti", '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>', async () => { await shareClientLink(c); });
-  azione("archivia", c.archived ? "Riattiva" : "Archivia", c.archived ? "Torna tra i clienti" : "Lavoro finito: toglilo dalle liste", c.archived ? '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>' : '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>', () => {
-    const domanda = c.archived ? 'Riportare "' + c.name + '" tra i clienti attivi?' : 'Archiviare "' + c.name + '"? Sparirà dalle liste (anche dalla chat) finché non lo riattivi.';
-    showAIToastConDecisione(c.archived ? "Riattivare il cliente?" : "Archiviare il cliente?", domanda, async () => {
-      chiudiRisorsaCard();
-      await impostaArchivioClienteEChat(c, chatDelCliente(c), !c.archived);
-      ridisegnaClientiEChat();
-    }, null, c.archived ? "Riattiva" : "Archivia", "Annulla");
-  });
+  azione("archivia", c.archived ? "Riattiva" : "Archivia", c.archived ? "Torna tra i clienti" : "Lavoro finito: toglilo dalle liste", c.archived ? '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>' : '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>', () => chiediArchivioCliente(c));
   corpo.appendChild(azioni);
 
   // Stato lavori: impegni, appunti, foto
