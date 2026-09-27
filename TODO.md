@@ -4308,7 +4308,12 @@ torna per chi è… tutto compresso così che non si vede bene".
   vecchi (oltre 15 minuti); un appuntamento si sposta o si annulla solo per
   messaggi scritti dopo che è stato fissato; stessa data → niente. L'avviso
   dice "Appuntamento spostato" e il nome del cliente una volta sola.
-- **Dati di Andrea**: l'appuntamento con Rita è ancora su gio 1 ott 10:00
-  (spostato per errore). Da rimettere a lun 28 set 11:00 solo se lui dice sì.
-- Test: `eval/chat-foto.test.js` (9), `eval/analisi-chat.test.mjs` (5; con il
-  codice di prima 4 su 5 falliscono, cioè riproducono il problema).
+- **Regola generale** (dopo il merge, Andrea: "a logica non sta in piedi"):
+  EON fissa, sposta o annulla un appuntamento dalla chat solo se il messaggio
+  appena arrivato fa parte dell'accordo (è la proposta o la risposta, degli
+  ultimi 15 minuti). Prima un "grazie" di oggi poteva ancora trasformare lo
+  scambio di agosto in un appuntamento nuovo.
+- **Dati di Andrea**: l'appuntamento con Rita spostato per errore lo
+  sistema lui direttamente.
+- Test: `eval/chat-foto.test.js` (9), `eval/analisi-chat.test.mjs` (7; con il
+  codice di prima falliscono, cioè riproducono il problema).
