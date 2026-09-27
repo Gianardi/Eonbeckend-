@@ -90,7 +90,7 @@ async function main() {
       return { menu, impostazioni: titoli("#page-impostazioni > .azienda-list"), aperta: document.getElementById("page-impostazioni").classList.contains("visible") };
     });
     verifica("Menu pulito: senza \"EON AI\" e \"Cambia professione\", con Impostazioni in fondo", !voci.menu.includes("EON AI") && !voci.menu.includes("Cambia professione") && voci.menu.at(-1) === "Impostazioni", JSON.stringify(voci.menu));
-    verifica("Impostazioni: Account, Profilo, Sicurezza, Face ID, Aiuto, Esci, Elimina account", voci.aperta && JSON.stringify(voci.impostazioni) === '["Account","Profilo","Sicurezza","Face ID","Aiuto","Esci","Elimina account"]', JSON.stringify(voci));
+    verifica("Impostazioni: Account, Profilo, Sicurezza, Face ID, Aiuto, Privacy e dati, Esci, Elimina account", voci.aperta && JSON.stringify(voci.impostazioni) === '["Account","Profilo","Sicurezza","Face ID","Aiuto","Privacy e dati","Esci","Elimina account"]', JSON.stringify(voci));
     const registro = await page.evaluate(() => { document.querySelector('#page-impostazioni [data-page="ai-request-log"]').click(); const indietro = document.querySelector("#page-ai-request-log .back-link"); indietro.click(); return document.querySelector(".page.visible").id; });
     verifica("dal Registro AI si torna alle Impostazioni", registro === "page-impostazioni", registro);
 
@@ -118,19 +118,27 @@ async function main() {
 
     let domande = [];
     page.on("dialog", (d) => { domande.push(d.message()); (page.__risposta === false ? d.dismiss() : d.accept()); });
-    const clickArchivia = (nome) => page.evaluate((n) => {
+    /* Dalla lista Clienti semplice (27/09/2026): "Archivia" è nella scheda
+       del cliente, con la conferma nella card di EON (non più il riquadro
+       del browser) */
+    const clickArchivia = (nome, conferma) => page.evaluate(async ([n, conferma]) => {
       navigateTo("clienti");
+      renderClientArchive();
       const card = [...document.querySelectorAll(".client-archive-card")].find((c) => c.textContent.includes(n));
-      card.querySelector(".client-archive-btn").click();
-    }, nome);
+      card.querySelector(".row-name").click();
+      document.querySelector('[data-azione="archivia"]').click();
+      const toast = [...document.querySelectorAll("#aiToastContainer .ai-toast.decisione")].at(-1);
+      const testo = toast ? toast.textContent : "";
+      toast.querySelector(conferma ? ".ai-toast-yes" : ".ai-toast-no").click();
+      await new Promise((r) => setTimeout(r, 100));
+      return testo;
+    }, [nome, conferma]);
 
-    page.__risposta = false; domande = [];
-    await clickArchivia("Mario Rossi");
+    let domandaCard = await clickArchivia("Mario Rossi", false);
     await page.waitForTimeout(150);
-    verifica("archiviare chiede conferma; con \"Annulla\" non cambia niente", domande.length === 1 && /Archiviare "Mario Rossi"/.test(domande[0]) && (await scritture()).length === 0, JSON.stringify({ domande, s: await scritture() }));
+    verifica("archiviare chiede conferma; con \"Annulla\" non cambia niente", /Archiviare "Mario Rossi"/.test(domandaCard) && (await scritture()).length === 0, JSON.stringify({ domandaCard, s: await scritture() }));
 
-    page.__risposta = true; domande = [];
-    await clickArchivia("Mario Rossi");
+    domandaCard = await clickArchivia("Mario Rossi", true);
     await page.waitForTimeout(150);
     let s = await scritture();
     verifica("archiviato il cliente: archiviata anche la sua chat", s.some((w) => w.tabella === "clients" && w.id === "c-rossi" && w.patch.is_archived === true) && s.some((w) => w.tabella === "conversations" && w.id === "v-rossi" && w.patch.is_archived === true), JSON.stringify(s));

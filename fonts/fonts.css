@@ -1,0 +1,13 @@
+/* Caratteri di EON, ospitati da EON (27/09/2026): prima arrivavano da
+   Google Fonts, che così vedeva l'indirizzo internet di chi apre l'app;
+   e se Google tardava, i titoli uscivano in un carattere di riserva.
+   Inter e Manrope, licenza SIL Open Font License 1.1 (vedi LICENSE-*.txt). */
+@font-face{ font-family:'Inter'; font-style:normal; font-weight:400; font-display:swap; src:url(/fonts/inter-latin-400-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Inter'; font-style:normal; font-weight:500; font-display:swap; src:url(/fonts/inter-latin-500-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Inter'; font-style:normal; font-weight:600; font-display:swap; src:url(/fonts/inter-latin-600-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Inter'; font-style:normal; font-weight:700; font-display:swap; src:url(/fonts/inter-latin-700-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Manrope'; font-style:normal; font-weight:500; font-display:swap; src:url(/fonts/manrope-latin-500-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Manrope'; font-style:normal; font-weight:600; font-display:swap; src:url(/fonts/manrope-latin-600-normal.woff2) format('woff2'); }
+@font-face{ font-family:'Manrope'; font-style:normal; font-weight:700; font-display:swap; src:url(/fonts/manrope-latin-700-normal.woff2) format('woff2'); }
+/* Manrope arriva fino a 800: anche il "900" usato nei titoli è l'800 */
+@font-face{ font-family:'Manrope'; font-style:normal; font-weight:800 900; font-display:swap; src:url(/fonts/manrope-latin-800-normal.woff2) format('woff2'); }

@@ -24,7 +24,7 @@
 
 const CONTRATTO = {
   profiles: ["id", "full_name", "business_name", "profession", "created_at"],
-  clients: ["id", "owner_id", "name", "status", "value", "phone", "deleted_at"],
+  clients: ["id", "owner_id", "name", "status", "value", "phone", "deleted_at", "address"],
   tasks: ["id", "owner_id", "title", "owner_type", "status", "time", "scheduled_at", "deleted_at"],
   conversations: ["id", "owner_id", "contact_name", "deleted_at", "ultimo_analizzato", "ultimo_esito"],
   messages: ["id", "conversation_id", "sender", "event_type", "title", "body", "amount", "file_url", "file_name", "scheduled_at", "deleted_at"],

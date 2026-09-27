@@ -38,7 +38,7 @@ Accordo art. 28: sezione 10 dei Termini d'uso (accettata alla registrazione).
 | Anthropic | modello AI (Claude, API) | USA | termini commerciali API (no addestramento), SCC |
 | OpenAI | trascrizione vocali (Whisper, API) | USA | termini API (no addestramento di default), SCC / DPF |
 | MET Norway, OpenStreetMap (Nominatim) | meteo, luogo | Norvegia / UE | solo nome del luogo o coordinate |
-| Google Fonts, jsDelivr | caratteri, libreria Supabase | USA / UE | solo IP; valutare di ospitarli in EON |
+| jsDelivr | libreria Supabase | UE / USA | solo IP (i caratteri dal 27/09/2026 sono ospitati da EON) |
 
 Da fare prima della vendita: firmare/scaricare i DPA dei fornitori (Supabase,
 Vercel, Anthropic, OpenAI) a nome della società.
@@ -52,6 +52,8 @@ Vercel, Anthropic, OpenAI) a nome della società.
   `portale_*`.
 - Admin separato (`/admin`), non mostra mai i messaggi degli utenti.
 - Cestino prima della cancellazione definitiva; eliminazione account completa.
+- Copia dei propri dati con un tocco (Impostazioni → Privacy e dati → Scarica i
+  miei dati, art. 20).
 - Foto e documenti in uno spazio privato (dal 27/09/2026): si aprono solo
   con link firmati dal server a scadenza (1 ora nell'app, 7 giorni quando si
   condividono), dopo aver controllato chi li chiede (`firma_file`,

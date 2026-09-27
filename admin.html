@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-title" content="EON Admin">
 <link rel="apple-touch-icon" href="/icone/apple-touch-icon.png">
 <link rel="icon" href="/icone/eon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link href="/fonts/fonts.css" rel="stylesheet">
 <!-- EON Admin (27/09/2026): il pannello privato di Andrea. Legge tutto dal
      server (action=admin_riepilogo), che risponde solo a chi è nella tabella
      eon_admin. Nessun dato è scritto in questa pagina. -->
@@ -35,21 +35,21 @@
   .testa{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
   .indietro{ width:36px; height:36px; border-radius:50%; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; flex:none; text-decoration:none; }
   .indietro svg{ width:17px; height:17px; }
-  h1{ flex:1; margin:0; font-family:'Manrope'; font-size:28px; font-weight:800; letter-spacing:-.02em; }
+  h1{ flex:1; margin:0; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:28px; font-weight:800; letter-spacing:-.02em; }
   .aggiorna{ border:1px solid var(--border); background:var(--card); border-radius:999px; padding:8px 14px; font:inherit; font-size:13px; font-weight:700; color:var(--text); cursor:pointer; }
   .sotto{ font-size:13px; color:var(--muted); margin:0 0 16px 48px; }
 
   .tiles{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:12px; }
   @media (min-width:640px){ .tiles{ grid-template-columns:repeat(3, 1fr); } }
   .tile{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; min-width:0; }
-  .tile .num{ font-family:'Manrope'; font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .tile .num{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
   .tile .lab{ font-size:12.5px; font-weight:600; color:var(--muted); margin-top:2px; }
   .tile .extra{ font-size:12px; color:var(--faint); margin-top:4px; }
   .tile.allarme{ border-color:rgba(229,72,77,.35); background:var(--coral-soft); }
   .tile.allarme .num{ color:var(--coral); }
 
   .sezione{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px; margin-bottom:12px; }
-  .sezione h2{ margin:0 0 4px; font-family:'Manrope'; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .sezione h2{ margin:0 0 4px; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px; }
   .sezione .desc{ font-size:12.5px; color:var(--muted); margin:0 0 12px; }
   .riga-azioni{ display:flex; gap:8px; justify-content:space-between; align-items:center; }
   .bottone{ border:none; border-radius:999px; padding:8px 14px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; background:var(--text); color:#fff; white-space:nowrap; flex:none; }
@@ -91,11 +91,11 @@
   .utente-sub{ font-size:12.5px; color:var(--muted); margin-top:1px; overflow-wrap:anywhere; }
   .utente-numeri{ display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-top:8px; }
   .utente-numeri div{ background:var(--bg); border-radius:10px; padding:7px 8px; min-width:0; }
-  .utente-numeri b{ display:block; font-family:'Manrope'; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .utente-numeri b{ display:block; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; }
   .utente-numeri span{ font-size:11px; color:var(--muted); }
 
   .accesso{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:20px 18px; display:flex; flex-direction:column; gap:12px; max-width:420px; margin:20px auto 0; }
-  .accesso h2{ margin:0; font-family:'Manrope'; font-size:22px; font-weight:800; }
+  .accesso h2{ margin:0; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:22px; font-weight:800; }
   .accesso p{ margin:-6px 0 4px; font-size:13.5px; color:var(--muted); }
   .accesso label{ display:flex; flex-direction:column; gap:6px; font-size:13px; font-weight:600; color:var(--muted); }
   .accesso input{ border:1px solid var(--border-strong); border-radius:12px; padding:12px 13px; font:inherit; font-size:16px; color:var(--text); background:var(--bg); }
@@ -104,7 +104,7 @@
   .bottone.grande{ padding:13px; font-size:15px; }
   .accesso-link{ text-align:center; font-size:13px; color:var(--indigo); text-decoration:none; }
   .messaggio-stato{ text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; line-height:1.55; }
-  .messaggio-stato h2{ font-family:'Manrope'; color:var(--text); font-size:20px; margin:0 0 8px; }
+  .messaggio-stato h2{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; color:var(--text); font-size:20px; margin:0 0 8px; }
   .messaggio-stato a{ display:inline-block; margin-top:14px; background:var(--text); color:#fff; text-decoration:none; padding:11px 18px; border-radius:999px; font-weight:700; }
   button:focus-visible, a:focus-visible, summary:focus-visible{ outline:2px solid var(--indigo); outline-offset:2px; }
 </style>
