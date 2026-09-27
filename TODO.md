@@ -4499,3 +4499,28 @@ cliente, conversazione) e nella pagina Appunti; in Fatture la frase diventava
   "appuntamento con Rita domani": decide l'AI come prima). Non vale nella
   finestra "a quale cliente è questa foto?" (lì si risponde con un nome).
 - Test: `eval/pacchetto-27-09.test.js` (+2: 25 nomi di pagina, 6 caselle).
+
+### Altre sei cose senza AI (27/09/2026, notte tardi)
+
+Andrea: "falle tutte" (la lista proposta di cose che il codice fa da solo).
+- **"Ho finito il sopralluogo da Rita"**, "segna fatto chiamata Rossi",
+  "tetto Bianchi fatto" (`provaSegnaFatto`): l'impegno da fare con TUTTE
+  quelle parole nel titolo diventa fatto, con Annulla. Se sono più di uno:
+  card "Quale hai finito?" con un tocco. Se nessuno ("ho finito il cemento"):
+  decide l'AI come prima. Oggi l'AI non aveva uno strumento per questo.
+- **"Quanto ho incassato questo mese / il mese scorso / a luglio /
+  quest'anno / da Rossi"** e **"chi mi deve soldi"**, "chi non mi ha pagato"
+  (`capisciDomandaSoldi`): dalle entrate in memoria, gli stessi conti della
+  pagina La tua azienda (`contiAzienda`). Chi deve: per cliente, dal più
+  alto, con "(scaduto)". Con altre parole ("con i bagni") decide l'AI.
+- **"Manda il link a Rita"**, "link di Rita" (`mandaLinkCliente`): card con
+  WhatsApp (messaggio e link già scritti), Email e Copia. Serve un tocco
+  perché WhatsApp e Mail si aprono solo con un tocco vero.
+- **"Archivia Rita" / "riattiva Rita"** (`chiediArchivioCliente`, lo stesso
+  della scheda): con conferma. Se è già archiviato lo dice.
+- **"Preventivi di Rossi"** esisteva già; ora al plurale, se non ce ne sono,
+  lo dice subito invece di passare all'AI (cambiato il test in `fatture`).
+- Pulizia: c'erano due `clienteDaNomeDetto` (vinceva il secondo); tolto il
+  primo, i titoli (sig., dott., geom.) ora si tolgono nel secondo.
+- Test: `eval/pacchetto-27-09.test.js` (+4); `router` usava "quanto ho
+  incassato" come frase per l'AI, sostituita.
