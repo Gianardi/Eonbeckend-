@@ -4382,3 +4382,17 @@ in su (nella prova: 880 pixel sopra l'ultimo messaggio).
   fondo, a meno che l'utente non stia già scorrendo. Anche nella pagina del
   cliente.
 - Test: `eval/chat-foto.test.js` (+3, con screenshot).
+
+### Chat: "sposta" solo se si parla di cambiare (27/09/2026, sera)
+
+Prova di Andrea: "Ciao domattina ore 10:00?" — Rita "Ok" → in 3 secondi EON ha
+SPOSTATO l'appuntamento che Rita aveva già (quello di gio 1 ott) a lun 28
+alle 10, invece di segnarne uno nuovo. Regola decisa con Andrea:
+- "sposta" solo se nella proposta o nella risposta si parla di cambiare
+  (`PAROLE_DI_CAMBIO`: spostiamo, anticipiamo, posticipiamo, rimandiamo,
+  invece, cambiare, non riesco, non posso, salta…); altrimenti è un
+  appuntamento nuovo (anche nel prompt: più appuntamenti con lo stesso
+  cliente sono normali).
+- Doppione = stesso cliente alla stessa ora, qualunque titolo.
+- Test: `eval/analisi-chat.test.mjs` (+2; il caso di stasera fallisce con il
+  codice di prima).
