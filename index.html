@@ -5672,6 +5672,38 @@ async function callAI(prompt, maxTokens){
 /* extra: campi in più per il server, solo per un messaggio nuovo (es.
    ricordo: le azioni del turno precedente, usate dal percorso rapido
    degli appuntamenti per correggere subito "no, alle 11"). */
+/* Memoria della giornata (27/09/2026): le risposte date dal codice
+   nell'app (senza AI) non passano dal server, quindi le teniamo qui e le
+   mandiamo con ogni messaggio nuovo; quelle dell'AI il server le rilegge
+   da solo dal registro. Solo in memoria: si svuota ricaricando l'app. */
+const memoriaLocale = [];
+function ricordaTurnoLocale(domanda, risposta){
+  if(!domanda) return;
+  memoriaLocale.push({ domanda: String(domanda).slice(0, 300), risposta: String(risposta || "Fatto.").slice(0, 400), quando: new Date().toISOString() });
+  if(memoriaLocale.length > 8) memoriaLocale.shift();
+}
+/* Cosa ha fatto il codice, letto da quello che si vede: la card aperta
+   (titolo e contenuto) o la pagina aperta */
+function ricordaEsitoCodice(domanda){
+  setTimeout(() => {
+    const overlay = document.getElementById("risorsaOverlay");
+    let esito;
+    if(overlay && overlay.style.display !== "none"){
+      const titolo = (document.getElementById("risorsaTitolo") || {}).textContent || "";
+      const corpo = ((document.getElementById("risorsaCorpo") || {}).innerText || "").replace(/\s+/g, " ").trim();
+      esito = (titolo + (corpo ? ": " + corpo : "")).slice(0, 400);
+    } else {
+      const avviso = ((document.getElementById("aiToastContainer") || {}).innerText || "").replace(/\s+/g, " ").trim();
+      esito = avviso ? avviso.slice(0, 300) : "Ho aperto la pagina " + ((document.getElementById("pageTitle") || {}).textContent || "");
+    }
+    ricordaTurnoLocale(domanda, esito);
+  }, 0);
+}
+function recentiLocaliDaMandare(){
+  const da = Date.now() - 12 * 3600 * 1000;
+  return memoriaLocale.filter(x => new Date(x.quando).getTime() >= da).slice(-6);
+}
+
 async function chiediAssistente(messaggio, runId, extra, opzioni){
   if(!BACKEND_CONFIGURED || !currentSession){
     throw new Error("l'assistente richiede un backend configurato e una sessione attiva");
@@ -5709,7 +5741,7 @@ async function chiediAssistente(messaggio, runId, extra, opzioni){
     return risposta; // { stato:"concluso", runId, testo, azioni:[{tool, esito}] }
   }
 
-  return gestisci(runId ? { runId, messaggio } : { messaggio, ...(extra || {}) });
+  return gestisci(runId ? { runId, messaggio } : { messaggio, recentiLocali: recentiLocaliDaMandare(), ...(extra || {}) });
 }
 
 /* ============ PERSISTENZA (salvataggio automatico) ============
@@ -11207,6 +11239,174 @@ function capisciLetturaGiorno(t){
   const etichetta = g === "oggi" || g === "domani" || g === "dopodomani" ? g : data.toLocaleDateString("it-IT", { weekday:"long", day:"numeric" });
   return { data, etichetta };
 }
+/* ===== "Domani alle 15 sono libero?" (27/09/2026, Andrea: "non serve
+   l'AI, basta il codice") =====
+   Il codice riconosce i PEZZI della frase (giorno, ora o fascia, la parola
+   libero/occupato) invece di frasi fisse: così una regola sola copre
+   "sono libero domani alle 15", "domani pomeriggio ho qualcosa?",
+   "giovedì dalle 10 alle 12 sono libera?", "quando sono libero domani?".
+   Ogni parola deve essere tra quelle capite; una parola in più ("poi",
+   un nome, un lavoro) → decide l'AI, che ha anche la memoria del discorso.
+   Un impegno conta un'ora (non sappiamo quanto dura davvero). */
+const PAROLE_DISPONIBILITA = new Set(["sono","sei","e","io","ho","hai","qualcosa","qualche","niente","nulla","impegni","impegno","appuntamenti","appuntamento","da","fare","c","ce","un","una","il","la","lo","l","di","del","della","in","per","a","alle","all","ore","le","verso","dalle","dall","al","fino","posto","buco","buchi","spazio","tempo","quando","che","ora","orari","orario","mi","dici","dimmi","sai","eon","ehi","giornata","tutta","tutto","giorno","prossimo","prossima","momento","mattina","mattinata","pomeriggio","sera","serata","stamattina","stamani","stasera","oggi","domani","dopodomani","questo","questa","si","no","segnato","calendario","programma","libero","libera","liberi","libere","occupato","occupata","impegnato","impegnata","disponibile","disponibili","pieno","piena","mezza","mezzo","trenta","quarto","ancora"]);
+const FASCE_ORARIE = { mattina: [480, 780, "mattina"], pomeriggio: [780, 1140, "pomeriggio"], sera: [1080, 1320, "sera"] };
+function capisciDisponibilita(testo){
+  let n = String(testo || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/(\d{1,2})[.:](\d{2})/g, "$1:$2").replace(/[’'?!.,;]/g, " ").replace(/\s+/g, " ").trim();
+  if(!/\b(liber[oaie]|occupat[oa]|impegnat[oa]|disponibil[ei]|pien[oa]|posto|buc(?:o|hi)|qualcosa)\b/.test(n)) return null;
+  const parole = n.split(" ");
+  if(!parole.every(p => PAROLE_DISPONIBILITA.has(p) || GIORNI_LETTURA.includes(p) || /^\d{1,2}(?::\d{2})?$/.test(p))) return null;
+  // "ho qualcosa" senza giorno, ora o fascia non è una domanda sul calendario
+  // Il giorno
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const giorni = parole.filter(p => ["oggi","domani","dopodomani","stamattina","stamani","stasera"].includes(p) || GIORNI_LETTURA.includes(p));
+  if(giorni.length > 1) return null;
+  const g = giorni[0] || "oggi";
+  let diff = 0;
+  if(g === "domani") diff = 1; else if(g === "dopodomani") diff = 2;
+  else if(GIORNI_LETTURA.includes(g)){ diff = (GIORNI_LETTURA.indexOf(g) - oggi.getDay() + 7) % 7; if(diff === 0 && parole.includes("prossimo")) diff = 7; }
+  const data = new Date(oggi); data.setDate(data.getDate() + diff);
+  const etichettaGiorno = diff === 0 ? "oggi" : diff === 1 ? "domani" : diff === 2 ? "dopodomani" : diff < 7 ? data.toLocaleDateString("it-IT", { weekday:"long" }) : data.toLocaleDateString("it-IT", { weekday:"long", day:"numeric" });
+  // L'ora: "alle 15", "alle 15:30", "alle 3 e mezza" (1-7 = pomeriggio), "dalle 10 alle 12"
+  const minuti = (h, resto) => {
+    let ore = Number(h);
+    if(ore >= 1 && ore <= 7) ore += 12;
+    let m = 0;
+    if(resto && resto.includes(":")) m = Number(resto.split(":")[1]);
+    return ore > 23 || m > 59 ? null : ore * 60 + m;
+  };
+  const numeri = [...n.matchAll(/\b(?:alle|all|ore|le|dalle|dall|fino alle)\s+(\d{1,2}(?::\d{2})?)(\s+e\s+(?:mezza|mezzo|trenta|un quarto))?/g)];
+  if(numeri.length !== parole.filter(p => /^\d/.test(p)).length) return null; // un numero non legato a un'ora ("15 minuti"): AI
+  let da = null, a = null, etichettaOra = "";
+  if(numeri.length){
+    const primo = numeri[0];
+    da = minuti(primo[1], primo[1]);
+    if(da === null) return null;
+    if(primo[2]) da += /quarto/.test(primo[2]) ? 15 : 30;
+    if(numeri.length === 2){ a = minuti(numeri[1][1], numeri[1][1]); if(a === null || a <= da) return null; }
+    else if(numeri.length > 2) return null;
+    else a = da + 60;
+  }
+  const oraTesto = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  if(da !== null) etichettaOra = numeri.length === 2 ? "dalle " + oraTesto(da) + " alle " + oraTesto(a) : "alle " + oraTesto(da);
+  let fascia = null;
+  if(g === "stamattina" || g === "stamani" || parole.some(p => p === "mattina" || p === "mattinata")) fascia = FASCE_ORARIE.mattina;
+  else if(parole.includes("pomeriggio")) fascia = FASCE_ORARIE.pomeriggio;
+  else if(g === "stasera" || parole.some(p => p === "sera" || p === "serata")) fascia = FASCE_ORARIE.sera;
+  if(da === null && fascia){ da = fascia[0]; a = fascia[1]; etichettaOra = fascia[2] === "mattina" && diff === 0 ? "stamattina" : fascia[2] === "sera" && diff === 0 ? "stasera" : fascia[2]; }
+  const quandoDetto = (etichettaGiorno + " " + etichettaOra).trim().replace(/^oggi (stamattina|stasera)$/, "$1");
+  // Con chi parla: "libera" → risponde "libera"
+  const femminile = parole.some(p => /^(libera|occupata|impegnata|piena)$/.test(p));
+  const libero = femminile ? "libera" : "libero";
+
+  const voci = impegniDelGiorno(data).map(v => {
+    const [h, m] = (v.ora || "").split(":").map(Number);
+    return { ...v, min: v.ora ? h * 60 + m : null };
+  });
+  const senzaOra = voci.filter(v => v.min === null);
+  const conOra = voci.filter(v => v.min !== null);
+  const riga = v => "**" + v.ora + "** – " + v.titolo;
+  const notaSenzaOra = senzaOra.length ? "\nSenza orario: " + senzaOra.map(v => v.titolo).join(", ") : "";
+
+  // "Quando sono libero domani?": i buchi tra le 8 e le 19
+  if(parole.includes("quando") || (parole.includes("che") && parole.includes("ora") && da === null)){
+    const inizio = da !== null ? da : 480, fine = a !== null && numeri.length !== 1 ? a : 1140;
+    const occupati = conOra.map(v => [v.min, v.min + 60]).filter(([x, y]) => y > inizio && x < fine).sort((p, q) => p[0] - q[0]);
+    const buchi = [];
+    let cursore = inizio;
+    occupati.forEach(([x, y]) => { if(x - cursore >= 60) buchi.push([cursore, x]); cursore = Math.max(cursore, y); });
+    if(fine - cursore >= 60) buchi.push([cursore, fine]);
+    const titolo = "Quando sei " + libero + " " + quandoDetto.replace(/ alle .*$/, "");
+    if(!occupati.length) return { titolo, testo: "Sempre: " + etichettaGiorno + " non hai niente " + (fascia ? "di " + fascia[2] : "tra le 8 e le 19") + "." + notaSenzaOra };
+    if(!buchi.length) return { titolo, testo: "Mai: è tutto pieno.\n" + conOra.map(riga).join("\n") + notaSenzaOra };
+    return { titolo, testo: buchi.map(([x, y]) => y >= 1140 && !fascia && numeri.length !== 2 ? "Dalle **" + oraTesto(x) + "** in poi" : "Dalle **" + oraTesto(x) + "** alle **" + oraTesto(y) + "**").join("\n") + "\nGià occupato: " + conOra.map(v => v.ora + " " + v.titolo).join(", ") + notaSenzaOra };
+  }
+  // Un orario o una fascia: cosa c'è in quell'intervallo
+  // Un'ora precisa: occupato solo se in quel momento c'è già un impegno
+  if(da !== null && numeri.length === 1){
+    const occupante = conOra.find(v => v.min <= da && da < v.min + 60);
+    if(occupante) return { titolo: "No, " + quandoDetto + " hai un impegno", testo: riga(occupante) + notaSenzaOra };
+    const subito = conOra.find(v => v.min > da && v.min < da + 60);
+    const prima = conOra.filter(v => v.min + 60 <= da).pop();
+    const dopo = subito || conOra.find(v => v.min >= da + 60);
+    const intorno = [prima ? "Prima: " + riga(prima) : "", dopo ? (subito ? "Ma subito dopo: " : "Dopo: ") + riga(dopo) : ""].filter(Boolean).join("\n");
+    return { titolo: "Sì, sei " + libero, testo: "Sì, " + quandoDetto + " sei " + libero + "." + (intorno ? "\n" + intorno : "") + notaSenzaOra };
+  }
+  if(da !== null){
+    const dentro = conOra.filter(v => v.min < a && v.min + 60 > da);
+    if(!dentro.length){
+      const prima = conOra.filter(v => v.min + 60 <= da).pop();
+      const dopo = conOra.find(v => v.min >= a);
+      const intorno = [prima ? "Prima: " + riga(prima) : "", dopo ? "Dopo: " + riga(dopo) : ""].filter(Boolean).join("\n");
+      return { titolo: "Sì, sei " + libero, testo: "Sì, " + quandoDetto + " sei " + libero + "." + (intorno ? "\n" + intorno : "") + notaSenzaOra };
+    }
+    return { titolo: "No, " + quandoDetto + " hai " + (dentro.length === 1 ? "un impegno" : dentro.length + " impegni"), testo: dentro.map(riga).join("\n") + notaSenzaOra };
+  }
+  // Solo il giorno: "domani sono libero?"
+  if(!voci.length) return { titolo: "Sì, sei " + libero, testo: etichettaGiorno.charAt(0).toUpperCase() + etichettaGiorno.slice(1) + " non hai niente in programma." };
+  return { titolo: etichettaGiorno.charAt(0).toUpperCase() + etichettaGiorno.slice(1) + ": " + (voci.length === 1 ? "1 impegno" : voci.length + " impegni"), testo: conOra.map(riga).join("\n") + notaSenzaOra };
+}
+
+/* "Quando vado da Rita?", "prossimo appuntamento", "numero di Rita",
+   "dove abita Rita": dalla rubrica e dal calendario, senza AI. */
+function prossimiImpegni(filtro){
+  const adesso = new Date();
+  const out = [];
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  for(let i = 0; i < 60; i++){
+    const d = new Date(oggi); d.setDate(d.getDate() + i);
+    impegniDelGiorno(d).forEach(v => {
+      if(filtro && !filtro(v)) return;
+      const quando = new Date(d);
+      if(v.ora){ const [h, m] = v.ora.split(":").map(Number); quando.setHours(h, m); }
+      if(i === 0 && v.ora && quando < adesso) return; // già passato
+      out.push({ ...v, data: d, quando });
+    });
+    if(out.length >= 3) break;
+  }
+  return out;
+}
+function quandoDiImpegno(v){
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const diff = Math.round((v.data - oggi) / 86400000);
+  const giorno = diff === 0 ? "oggi" : diff === 1 ? "domani" : diff === 2 ? "dopodomani"
+    : diff < 7 ? v.data.toLocaleDateString("it-IT", { weekday:"long" }) : v.data.toLocaleDateString("it-IT", { weekday:"long", day:"numeric", month:"long" });
+  return giorno + (v.ora ? " alle " + v.ora : "");
+}
+function capisciDomandaCliente(testo){
+  const n = normalizzaComando(testo).replace(/^(?:eon|ehi eon|senti)\s+/, "");
+  // Il prossimo impegno in assoluto
+  if(/^(?:(?:qual e |dimmi |cos e )?il prossimo (?:appuntamento|impegno)|(?:cosa|che) (?:ho|c e|devo fare) (?:dopo|adesso|ora)|prossimo (?:appuntamento|impegno))$/.test(n)){
+    const [v] = prossimiImpegni();
+    if(!v) return { titolo: "Nessun impegno", testo: "Non hai niente in programma nei prossimi giorni." };
+    return { titolo: v.titolo, testo: "**" + quandoDiImpegno(v).replace(/^./, x => x.toUpperCase()) + "**" };
+  }
+  // Quando vado da Rita?
+  let m = n.match(/^quando\s+(?:vado|devo andare|passo|vedo|incontro|sento|chiamo|ho|c e|e)\s+(?:da|dalla|dal|con|a)?\s*(?:l appuntamento con\s+|appuntamento con\s+|il sopralluogo da\s+)?(.+)$/)
+    || n.match(/^(?:il\s+)?prossimo\s+(?:appuntamento|impegno)\s+(?:con|da|di|per)\s+(.+)$/);
+  if(m){
+    const c = clienteDaNomeDetto(m[1]);
+    if(!c) return null;
+    const parole = normalizzaComando(c.name).split(" ").filter(p => p.length > 2);
+    const suoi = prossimiImpegni(v => { const t = normalizzaComando(v.titolo); return parole.some(p => new RegExp("\\b" + p + "\\b").test(t)); });
+    if(!suoi.length) return { titolo: c.name, testo: "Non hai appuntamenti in programma con " + c.name + ". Se vuoi fissarlo: «" + c.name.split(" ")[0] + " giovedì alle 10»." };
+    return { titolo: c.name, testo: suoi.map(v => "**" + quandoDiImpegno(v).replace(/^./, x => x.toUpperCase()) + "** – " + v.titolo).join("\n") };
+  }
+  // Numero, email, indirizzo di Rita / dove abita Rita
+  m = n.match(/^(?:(?:mi\s+)?(?:dai|dammi|dimmi|qual e|che)\s+)?(?:il\s+|l\s+|la\s+)?(numero|telefono|cellulare|indirizzo|email|mail)\s+(?:di\s+telefono\s+)?(?:di|del|della|dello|a)\s+(.+)$/);
+  const dove = n.match(/^dove\s+(?:abita|sta|vive|si trova|e la casa di|e il cantiere di)\s+(.+)$/);
+  if(m || dove){
+    const c = clienteDaNomeDetto(m ? m[2] : dove[1]);
+    if(!c) return null;
+    const cosa = dove ? "indirizzo" : /^(numero|telefono|cellulare)$/.test(m[1]) ? "telefono" : m[1] === "indirizzo" ? "indirizzo" : "email";
+    const valore = cosa === "telefono" ? c.phone : cosa === "indirizzo" ? c.address : c.email;
+    if(!valore) return { titolo: c.name, testo: "Non ho " + (cosa === "email" ? "l'email" : cosa === "indirizzo" ? "l'indirizzo" : "il telefono") + " di " + c.name + ". Aggiungilo dalla sua scheda con Modifica." };
+    const suggerimento = cosa === "telefono" ? "Per chiamare: «chiama " + c.name.split(" ")[0] + "»." : cosa === "indirizzo" ? "Per andarci: «portami da " + c.name.split(" ")[0] + "»." : "";
+    return { titolo: c.name, testo: "**" + valore + "**" + (suggerimento ? "\n" + suggerimento : "") };
+  }
+  return null;
+}
+
 /* Gli impegni di un giorno, dalle stesse fonti del Calendario (cose da fare
    con data e appuntamenti nelle chat dei clienti), in ordine di ora. */
 function impegniDelGiorno(data){
@@ -11797,6 +11997,10 @@ function provaLetturaLocale(testo){
 
   const soldi = capisciDomandaSoldi(t);
   if(soldi) return soldi;
+  const libero = capisciDisponibilita(t);
+  if(libero) return libero;
+  const suCliente = capisciDomandaCliente(t);
+  if(suCliente) return suCliente;
 
   if(["quanti clienti ho", "quanti clienti", "quanti sono i miei clienti", "quanti clienti ho in anagrafica"].includes(t)){
     const attivi = clients.filter(c => !c.archived).length;
@@ -12545,6 +12749,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       runIdAperto = null;
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
     // La pagina può completare la frase (es. in Fatture: "Rossi, 300" → "Fattura per Rossi, 300")
@@ -12561,6 +12766,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaNavigazioneDiretta(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
     /* "Voglio cambiare password", "manda un feedback", "assegna un compito",
@@ -12568,12 +12774,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaAzioneDiretta(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
     /* "Chiama Rita", "scrivi a Rita", "nuovo cliente": subito, senza AI */
     if(!inContinuazione && provaComandiSemplici(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
     /* "Invia il preventivo a Rossi": WhatsApp o Mail già pronti, senza AI.
@@ -12582,6 +12790,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaInvioDocumento(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
 
@@ -12594,6 +12803,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(lettura){
         campo.value = "";
         hint.textContent = TESTO_HINT_BASE;
+        ricordaEsitoCodice(testo);
         const righeLettura = (lettura.testo || "").split("\n").filter(Boolean);
         mostraRispostaEON(testo, righeLettura.length > 1 ? righeLettura.map(r => "- " + r).join("\n") : lettura.testo, { titolo: lettura.titolo });
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
@@ -12607,6 +12817,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(saluto){
         campo.value = "";
         hint.textContent = TESTO_HINT_BASE;
+        ricordaEsitoCodice(testo);
         mostraRispostaEON(testo, saluto.testo, { titolo: saluto.titolo });
         if(viaVoce) parlaRisposta(saluto.titolo + ". " + saluto.testo.split("\n")[0]);
         return;
@@ -12618,6 +12829,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaCancellaAppunto(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
 
@@ -12625,6 +12837,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaAnnullaImmediato(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
 
@@ -12633,6 +12846,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaFotoImmediata(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
 
@@ -12641,6 +12855,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaSchedaCliente(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
 
@@ -12648,6 +12863,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && (provaMeteo(testo, viaVoce) || provaPercorso(testo))){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       return;
     }
 
@@ -12655,6 +12871,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaDocumentoImpresa(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       if(viaVoce) parlaRisposta("Ecco il documento");
       return;
     }
@@ -12665,6 +12882,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaRisorsaImmediata(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       if(viaVoce) parlaRisposta("Ecco quello che hai chiesto");
       return;
     }
@@ -12674,6 +12892,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && await provaAppuntoImmediato(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
+      ricordaEsitoCodice(testo);
       if(viaVoce) parlaRisposta("Appunto aggiunto");
       return;
     }

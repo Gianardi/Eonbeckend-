@@ -3016,6 +3016,55 @@ function sommaConsumo(consumo, modello, usage) {
   consumo.costo += (inp * p.input + out * p.output + cw * p.input * 1.25 + cr * p.input * 0.1) / 1e6;
 }
 
+/* La frase detta dall'utente in una riga del registro: senza le note di
+   contesto che l'app aggiunge ("[Contesto: ...]") e senza la cornice
+   ("Il professionista ti ha appena raccontato ...: "...""). */
+function fraseDalRegistro(messaggio) {
+  if (!eStringaNonVuota(messaggio)) return "";
+  const senzaNote = messaggio.split(/\n\s*\[/)[0].trim();
+  const m = senzaNote.match(/^[^"]{0,160}:\s*"([\s\S]*)"\s*$/);
+  return (m ? m[1] : senzaNote).trim();
+}
+const MEMORIA_MAX_TURNI = 8;
+const MEMORIA_ORE = 12;
+const MEMORIA_MAX_CARATTERI = 500;
+/* Le ultime frasi di oggi (massimo 8, ultime 12 ore), in ordine: quelle
+   passate dall'AI dal registro, quelle a cui ha risposto il codice
+   nell'app (recentiLocali, mandate dall'app stessa: non passano dal
+   server). Diventano coppie utente/EON prima del messaggio nuovo. Un
+   errore qui non blocca mai il turno: si risponde senza memoria. */
+async function memoriaDellaGiornata(user, accessToken, recentiLocali) {
+  const da = new Date(Date.now() - MEMORIA_ORE * 3600 * 1000);
+  const turni = [];
+  try {
+    const righe = await db(`ai_request_log?select=created_at,tipo,messaggio,risposta,strumenti&owner_id=eq.${user.id}&created_at=gte.${da.toISOString()}&messaggio=not.is.null&order=created_at.desc&limit=${MEMORIA_MAX_TURNI}`, { method: "GET" }, accessToken);
+    (Array.isArray(righe) ? righe : []).forEach((r) => {
+      const frase = fraseDalRegistro(r.messaggio);
+      if (!frase) return;
+      const strumenti = Array.isArray(r.strumenti) ? r.strumenti.filter((x) => x !== "interpreta_richiesta") : [];
+      const risposta = String(r.risposta || "").trim() || (strumenti.length ? "Fatto." : "");
+      turni.push({ quando: r.created_at, frase, risposta, strumenti });
+    });
+  } catch (err) {
+    console.warn("Memoria della giornata non letta, proseguo senza:", err.message);
+  }
+  (Array.isArray(recentiLocali) ? recentiLocali.slice(-MEMORIA_MAX_TURNI) : []).forEach((x) => {
+    if (!x || !eStringaNonVuota(x.domanda) || !eStringaNonVuota(x.quando)) return;
+    const quando = new Date(x.quando);
+    if (isNaN(quando) || quando < da || quando > new Date(Date.now() + 60000)) return;
+    turni.push({ quando: quando.toISOString(), frase: x.domanda, risposta: eStringaNonVuota(x.risposta) ? x.risposta : "Fatto.", strumenti: [] });
+  });
+  const ultimi = turni.sort((a, b) => a.quando.localeCompare(b.quando)).slice(-MEMORIA_MAX_TURNI);
+  const taglia = (t) => (t.length > MEMORIA_MAX_CARATTERI ? t.slice(0, MEMORIA_MAX_CARATTERI) + "…" : t);
+  const ora = (iso) => new Date(iso).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Rome" });
+  const out = [];
+  ultimi.forEach((t) => {
+    out.push({ role: "user", content: `[Prima, alle ${ora(t.quando)}] ${taglia(t.frase)}` });
+    out.push({ role: "assistant", content: taglia(t.risposta || "Fatto.") + (t.strumenti.length ? ` [azioni già fatte: ${[...new Set(t.strumenti)].join(", ")}]` : "") });
+  });
+  return out;
+}
+
 async function registraRichiesta(dati) {
   const c = dati.consumo;
   const it = dati.intento;
@@ -3094,6 +3143,10 @@ function systemPromptAssistente(professione) {
   let prompt = `Sei l'assistente operativo dentro EON, un'app per professionisti italiani.
 
 Hai delle funzioni per leggere e modificare i dati del professionista: usale davvero, non limitarti a descrivere cosa faresti.
+
+MEMORIA DELLA GIORNATA: prima dell'ultimo messaggio possono esserci le frasi di oggi (segnate "[Prima, alle HH:MM]") e le tue risposte. Sono SOLO contesto per capire l'ultimo messaggio ("poi giornata libera?", "dimmelo", "e quello di ieri?", "no, intendevo l'altro"): le azioni lì dentro sono GIÀ state fatte, non rifarle mai. Rispondi e agisci solo sull'ultimo messaggio. Se l'ultimo messaggio parla d'altro, ignora la memoria.
+
+COME PARLI: sei il collaboratore di fiducia di un artigiano, non un modulo da compilare. Italiano semplice, dai del tu, frasi normali e brevi, niente gergo tecnico. Se ti chiede un parere o un consiglio sul suo lavoro (un prezzo, se accettare un lavoro, come organizzare la settimana, un cliente che non paga), rispondi davvero come farebbe una persona esperta: prima guarda i suoi dati con gli strumenti di lettura (storico_cliente, elenca_appuntamenti, cerca_cliente, recupera_documenti_cliente), poi dai un parere chiaro in due o tre righe e di' che è un parere. Se è una battuta, uno sfogo o due parole di chiacchiera ("che giornata", "sono stanco", "esci"), rispondi in una riga con naturalezza, senza trasformarla in un'azione e senza elencare cosa sai fare. Non rispondere con un elenco di opzioni ("vuoi A, B o C?") quando dalla conversazione di oggi si capisce cosa intende: usa la conversazione. Resta sul lavoro: a domande che non c'entrano rispondi in breve e gentile. Mai inventare dati o numeri: se non li hai, dillo.
 
 Nei messaggi nuovi il primo strumento che chiami è sempre interpreta_richiesta (il sistema te lo richiede automaticamente): dichiara lì operazione e oggetto della richiesta prima di scegliere il tool vero. Se hai dichiarato oggetto "risorsa" con operazione "mostra" (l'utente vuole vedere/recuperare qualcosa che esiste già), prova prima recupera_foto_cantiere (foto del cantiere/lavoro), recupera_documenti_cliente (documenti, preventivi e fatture già creati per un cliente) o recupera_documenti_impresa (documenti dell'impresa NON legati a un cliente, es. fatture fornitori, DDT, modelli): mostrano davvero la risorsa, invece di limitarsi a dire che esiste. Se la richiesta non nomina né lascia intuire nessun cliente in particolare, prova recupera_documenti_impresa prima di concludere che non è disponibile. Se invece operazione è "crea" e l'oggetto è un preventivo o una fattura mai fatti prima, quella non è una richiesta di RECUPERO ma di CREAZIONE: usa crea_preventivo_o_fattura (vedi le sue istruzioni dettagliate più sotto), mai capacita_non_disponibile. Solo se la risorsa richiesta non è né recuperabile né creabile con nessuno strumento reale (es. un tipo di documento che l'app non gestisce affatto) NON usare crea_impegno o crea_appunto come ripiego per far finta di aver fatto qualcosa: chiama capacita_non_disponibile e spiega onestamente il limite, chiedendo se preferisce che tu lo segni comunque come promemoria da controllare a mano. crea_impegno/crea_appunto restano lo strumento giusto quando l'utente vuole davvero che tu registri qualcosa da fare (oggetto "azione"), non quando vuole vedere o creare qualcosa che è a sua volta un documento/una risorsa. Se lo stesso messaggio contiene più richieste distinte di natura diversa (es. "mandami il preventivo del tetto E segnami di stamparlo dopo", oppure una domanda di parere seguita da un impegno scollegato come "Quale preventivo preparo prima? Comunque segnami di chiamare Bianchi domani"), richiama interpreta_richiesta una seconda volta per dichiarare il cambio quando passi dall'una all'altra — anche quando passi da "consulta" a un'azione vera — invece di lasciare attivo solo il primo oggetto/operazione dichiarato per l'intero messaggio: altrimenti un'azione scollegata e legittima rischia di essere rifiutata come se fosse ancora parte della domanda di parere.
 
@@ -4527,6 +4580,16 @@ async function handleAssistant(req, res, user, accessToken) {
     }
   }
 
+  /* Memoria della giornata (27/09/2026, Andrea: "EON deve poter fare una
+     conversazione normale"): un messaggio nuovo arriva con le ultime
+     frasi di oggi e le risposte di EON, così "poi giornata libera?",
+     "dimmelo", "e quello di ieri?" si capiscono. Solo come contesto: le
+     azioni lì dentro sono già fatte (vedi il prompt). */
+  if (!runId) {
+    const memoria = await memoriaDellaGiornata(user, accessToken, body.recentiLocali);
+    if (memoria.length) messages = memoria.concat(messages);
+  }
+
   const schemi = Object.values(TOOLS).map((t) => t.schema);
   const professione = await professionePromessa;
   const promptStatico = systemPromptAssistente(professione); // uguale ad ogni giro: costruito una sola volta fuori dal loop
@@ -4687,8 +4750,15 @@ async function handleAssistant(req, res, user, accessToken) {
          caso che il prompt è pensato per gestire bene. Non si applica
          al giro forzato di interpreta_richiesta: lì tool_choice
          garantisce già stop_reason "tool_use". */
+      /* Due chiacchiere o un parere ("sono stanco", "esci", "che ne
+         pensi?"): dichiarato consulta/nessuno e una risposta SENZA numeri
+         (quindi nessun orario, importo o dato che potrebbe essere
+         inventato) va bene anche da Haiku: rifarla con Sonnet costava
+         fino a 10 volte tanto per una riga di conversazione (27/09/2026). */
+      const soloConversazione = intentoAttivo && intentoAttivo.operazione === "consulta" && intentoAttivo.oggetto === "nessuno"
+        && !/\d/.test(testoDiRisposta(data));
       const nonSicuroAlGiroIniziale = round === primoGiroSostanziale && modelloUsato === MODEL_HAIKU && tentativo === 0
-        && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data));
+        && data.stop_reason !== "tool_use" && !/\?\s*$/.test(testoDiRisposta(data)) && !soloConversazione;
 
       /* Guardia specifica sulla creazione di fatture/preventivi (bug
          reale in produzione, 23/09/2026, confermato con ai_audit_log):

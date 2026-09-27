@@ -450,6 +450,66 @@ async function main() {
     });
     verifica("\"archivia Rita\" / \"riattiva Rita\" con conferma; \"preventivi di Rossi\" risponde anche se non ce ne sono", Object.values(archivia).every(Boolean), JSON.stringify(archivia));
 
+    /* ---- "Domani alle 15 sono libero?" e altre domande sul calendario, senza AI ---- */
+    const libero = await page.evaluate(() => {
+      chiudiRisorsaCard();
+      tasks.splice(0, tasks.length,
+        { id: "d1", title: "Sopralluogo Rita Ambrosini", owner: "user", status: "todo", time: "domani, 09:00" },
+        { id: "d2", title: "Incontro UniCredit", owner: "user", status: "todo", time: "domani, 15:30" },
+        { id: "d3", title: "Comprare silicone", owner: "user", status: "todo", time: "domani" });
+      chats.forEach((c) => { c.messages = []; });
+      const r = {};
+      const d = (frase) => capisciDisponibilita(frase);
+      const alle15 = d("Domani alle 15 sono libero?");
+      r.alle15 = alle15 && alle15.titolo === "Sì, sei libero" && /Ma subito dopo: \*\*15:30\*\* – Incontro UniCredit/.test(alle15.testo) && /Senza orario: Comprare silicone/.test(alle15.testo);
+      const alle9 = d("domani alle 9 sono libera?");
+      r.alle9 = alle9 && alle9.titolo === "No, domani alle 09:00 hai un impegno" && /Sopralluogo Rita/.test(alle9.testo);
+      const treMezza = d("domani alle 3 e mezza sono libero");
+      r.treMezza = treMezza && /alle 15:30/.test(treMezza.titolo);
+      const pomeriggio = d("domani pomeriggio ho qualcosa?");
+      r.pomeriggio = pomeriggio && /^No, domani pomeriggio/.test(pomeriggio.titolo);
+      const quando = d("quando sono libero domani?");
+      r.quando = quando && /Dalle \*\*08:00\*\* alle \*\*09:00\*\*/.test(quando.testo) && /Dalle \*\*10:00\*\* alle \*\*15:30\*\*/.test(quando.testo) && /Dalle \*\*16:30\*\* in poi/.test(quando.testo);
+      const stasera = d("stasera sono libero?");
+      r.stasera = stasera && stasera.titolo === "Sì, sei libero";
+      r.poiAllAI = d("Poi giornata libera?") === null;
+      r.conNomeAllAI = d("domani alle 15 sono libero per Rossi?") === null;
+      r.senzaParolaChiave = d("domani alle 15") === null;
+      return r;
+    });
+    verifica("\"domani alle 15 sono libero?\" (e alle 9, alle 3 e mezza, pomeriggio, quando, stasera) dal calendario; con altre parole decide l'AI", Object.values(libero).every(Boolean), JSON.stringify(libero));
+    const domandeCliente = await page.evaluate(() => {
+      const r = {};
+      const quando = capisciDomandaCliente("quando vado da Rita?");
+      r.quando = quando && quando.titolo === "Rita Ambrosini" && /Domani alle 09:00\*\* – Sopralluogo/.test(quando.testo);
+      const prossimo = capisciDomandaCliente("prossimo appuntamento");
+      r.prossimo = prossimo && prossimo.titolo === "Sopralluogo Rita Ambrosini";
+      const numero = capisciDomandaCliente("numero di Rita");
+      r.numero = numero && /333 1234567/.test(numero.testo) && /chiama Rita/.test(numero.testo);
+      const indirizzo = capisciDomandaCliente("dove abita Rossi");
+      r.indirizzoMancante = indirizzo && /Non ho l'indirizzo di Mario Rossi/.test(indirizzo.testo);
+      r.sconosciutoAllAI = capisciDomandaCliente("numero di Giovanni") === null;
+      return r;
+    });
+    verifica("\"quando vado da Rita?\", \"prossimo appuntamento\", \"numero di Rita\", \"dove abita Rossi\": senza AI", Object.values(domandeCliente).every(Boolean), JSON.stringify(domandeCliente));
+
+    /* ---- Memoria: le risposte del codice vanno a EON con la frase dopo ---- */
+    await page.evaluate(() => { chiudiRisorsaCard(); memoriaLocale.length = 0; window.__sessionePrima = currentSession; currentSession = currentSession || { access_token: "t", user: { id: "u1" } }; navigateTo("home"); });
+    let corpoAI = null;
+    await page.route("**/api?action=assistant", (r) => { corpoAI = JSON.parse(r.request().postData() || "{}"); r.fulfill({ status: 200, contentType: "application/json", body: '{"stato":"concluso","testo":"Sì, dopo le 16:30 sei libero."}' }); });
+    await nascondiGuide();
+    await page.fill("#homeHeroCampo", "Domani alle 15 sono libero?");
+    await page.click("#homeHeroSend");
+    await page.waitForTimeout(100);
+    await page.evaluate(() => chiudiRisorsaCard());
+    await page.fill("#homeHeroCampo", "e dopo cosa mi conviene fare?");
+    await page.click("#homeHeroSend");
+    await page.waitForTimeout(400);
+    const memoria = corpoAI && corpoAI.recentiLocali;
+    verifica("la domanda a cui ha risposto il codice va a EON con la frase dopo (memoria della giornata)", Array.isArray(memoria) && memoria.length === 1 && memoria[0].domanda === "Domani alle 15 sono libero?" && /Sì, sei libero/.test(memoria[0].risposta) && !!memoria[0].quando, JSON.stringify(corpoAI));
+    await page.unroute("**/api?action=assistant");
+    await page.evaluate(() => { chiudiRisorsaCard(); currentSession = window.__sessionePrima; });
+
     /* ---- Modifica di un appunto nella card ---- */
     const appunto = await page.evaluate(() => {
       window.__scritture.length = 0;
