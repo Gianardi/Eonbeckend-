@@ -1008,19 +1008,16 @@
   .ob-accetto a{ color:var(--text); font-weight:700; }
   .termini-card{ display:flex; flex-direction:column; gap:12px; }
   .termini-card p{ margin:0; font-size:14px; line-height:1.55; color:var(--muted); }
-  .fp-nuovo{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-  .fp-nuovo-btn{ margin:0; background:var(--text); box-shadow:0 4px 14px rgba(14,20,36,.22); white-space:nowrap; padding-left:10px; padding-right:10px; font-size:14px; justify-content:center; }
   .fp-dettatura{ display:flex; align-items:center; gap:10px; }
   .fp-mic{ width:52px; height:52px; flex:none; }
   .fp-mic svg{ width:22px; height:22px; }
   .fp-textwrap{ flex:1; margin:0; }
   .fp-textwrap .home-hero-campo{ min-height:52px; padding-top:15px; padding-bottom:13px; }
   .fp-hint{ margin:8px 0 14px; font-size:12.5px; }
+  .fp-hint:empty{ display:none; }
+  .fp-dettatura{ margin-bottom:14px; }
   /* Clienti: un'unica lista (27/09/2026, simulazione A) */
   .cl-dettatura{ margin-top:2px; }
-  .cl-cerca{ display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:0 14px; margin-bottom:12px; }
-  .cl-cerca svg{ width:18px; height:18px; color:var(--faint); flex:none; }
-  .cl-cerca input{ flex:1; min-width:0; border:none; outline:none; background:none; font:inherit; font-size:15px; color:var(--text); padding:13px 0; }
   .cl-filtri{ display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:12px; scrollbar-width:none; }
   .cl-filtri::-webkit-scrollbar{ display:none; }
   .cl-filtro{ flex:none; padding:8px 14px; border-radius:999px; border:1px solid var(--border); background:var(--card); font:inherit; font-size:13.5px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; }
@@ -3081,32 +3078,22 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Torna a Documenti
       </div>
-      <!-- Nuovo documento (27/09/2026, Andrea: "manca il tasto, scritto e
-           a microfono"): due tasti che chiedono per chi e cosa, oppure si
-           dice tutto a EON qui sotto, a voce o scritto. -->
-      <div class="fp-nuovo">
-        <button class="primary-btn add-btn fp-nuovo-btn" id="fpNuovoPreventivo" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-          Nuovo preventivo
-        </button>
-        <button class="primary-btn add-btn fp-nuovo-btn" id="fpNuovaFattura" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-          Nuova fattura
-        </button>
-      </div>
+      <!-- Nuovo documento (27/09/2026, Andrea: "un microfono e uno spazio
+           per scrivere", niente altro): in Fatture si crea una fattura, in
+           Preventivi un preventivo, a voce o scritto. -->
       <div class="fp-dettatura">
         <button class="home-hero-mic fp-mic" id="fpMic" aria-label="Tocca per parlare" type="button">
           <span class="home-hero-mic-ring"></span>
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
         </button>
         <div class="home-hero-textwrap fp-textwrap">
-          <textarea class="home-hero-campo" id="fpCampo" rows="1" placeholder="Es. fattura da 300 per Rossi"></textarea>
+          <textarea class="home-hero-campo" id="fpCampo" rows="1" placeholder="Es. preventivo per Rossi, 3.000 euro"></textarea>
           <button class="home-hero-send" id="fpSend" aria-label="Invia" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </div>
       </div>
-      <div class="home-hero-hint fp-hint" id="fpHint">Dillo a voce o scrivilo: per chi, cosa e quanto</div>
+      <div class="home-hero-hint fp-hint" id="fpHint"></div>
       <div class="arch-filtri" id="fpFiltri" style="padding:0 0 12px;">
         <button class="arch-filtro fp-filtro on" type="button" data-f="tutti">Tutti</button>
         <button class="arch-filtro fp-filtro" type="button" data-f="fattura">Fatture</button>
@@ -3494,27 +3481,23 @@
 
     <div class="page" id="page-clienti">
       <!-- Clienti in un'unica lista (27/09/2026, Andrea: "non farei
-           distinzione tra clienti e potenziali", scelta la simulazione A):
-           si detta o si scrive un cliente, si cerca, si filtra per stato,
-           e un tocco apre la scheda con tutte le azioni. -->
+           distinzione tra clienti e potenziali", scelta la simulazione A;
+           poi "un microfono e uno spazio per scrivere"): la stessa casella
+           cerca mentre scrivi e, se invii, EON aggiunge o aggiorna il
+           cliente. Filtri per stato; un tocco apre la scheda. -->
       <div class="fp-dettatura cl-dettatura">
         <button class="home-hero-mic fp-mic" id="clientiHeroMic" aria-label="Tocca per parlare" type="button">
           <span class="home-hero-mic-ring"></span>
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
         </button>
         <div class="home-hero-textwrap fp-textwrap">
-          <textarea class="home-hero-campo" id="clientiHeroCampo" rows="1" placeholder="Es. Mario Rossi, 333 1234567, tetto"></textarea>
+          <textarea class="home-hero-campo" id="clientiHeroCampo" rows="1" placeholder="Cerca o aggiungi un cliente"></textarea>
           <button class="home-hero-send" id="clientiHeroSend" aria-label="Invia" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </div>
       </div>
-      <div class="home-hero-hint fp-hint" id="clientiHeroHint">Racconta il cliente: nome, contatto, cosa deve fare</div>
-
-      <label class="cl-cerca">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input type="search" id="clientSearchInput" placeholder="Cerca un cliente" autocomplete="off">
-      </label>
+      <div class="home-hero-hint fp-hint" id="clientiHeroHint"></div>
       <div class="cl-filtri" id="clientiFiltri"></div>
 
       <div class="cl-lista" id="clientArchiveList"></div>
@@ -6998,7 +6981,7 @@ const FILTRI_CLIENTI = [
   { k:"inattivo", t:"Conclusi" }, { k:"archiviati", t:"Archiviati" },
 ];
 function renderClientArchive(){
-  const query = (document.getElementById("clientSearchInput").value || "").trim().toLowerCase();
+  const query = (document.getElementById("clientiHeroCampo").value || "").trim().toLowerCase();
   const matches = c => !query ||
     c.name.toLowerCase().includes(query) ||
     (c.desc || "").toLowerCase().includes(query) ||
@@ -7035,7 +7018,7 @@ function renderClientArchive(){
   wrap.classList.toggle("vuota", scelti.length === 0);
   if(scelti.length === 0){
     wrap.innerHTML = query
-      ? '<div class="empty-hint">Nessun cliente trovato per "' + escapeHtml(query) + '".</div>'
+      ? '<div class="empty-hint">Nessun cliente con "' + escapeHtml(query) + '". Tocca la freccia per aggiungerlo: EON crea la scheda.</div>'
       : clients.length
         ? '<div class="empty-hint">Nessun cliente in questo elenco.</div>'
         : '<div class="empty-hint"><b>Nessun cliente ancora</b>Dimmelo qui sopra a voce, oppure tocca "Nuovo cliente".</div>';
@@ -7044,7 +7027,9 @@ function renderClientArchive(){
   scelti.forEach(c => wrap.appendChild(buildClientCard(c)));
 }
 
-document.getElementById("clientSearchInput").addEventListener("input", renderClientArchive);
+document.getElementById("clientiHeroCampo").addEventListener("input", renderClientArchive);
+// Inviato a EON: la casella si svuota, la lista torna intera
+document.getElementById("clientiHeroSend").addEventListener("click", () => setTimeout(renderClientArchive, 0));
 
 /* ============================================================
    PANNELLO DI INSERIMENTO / MODIFICA
@@ -12176,7 +12161,7 @@ function notaFocusCorrente(focus){
    vero (stesso motore di "Raccontami la giornata"): usato dalla Home
    (qualsiasi cosa) e dalla pagina Clienti (aggiungere un cliente). Un
    solo posto per la logica — cambia solo il prompt e i testi. */
-function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciPrompt, fallbackHint }){
+function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciPrompt, fallbackHint, preparaTesto }){
   const mic = document.getElementById(micId);
   const campo = document.getElementById(campoId);
   const send = document.getElementById(sendId);
@@ -12215,6 +12200,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
   async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
     const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+    // La pagina può completare la frase (es. in Fatture: "Rossi, 300" → "Fattura per Rossi, 300")
+    if(preparaTesto && testo && !inContinuazione) testo = preparaTesto(testo);
     // "sì", "no", "ok" sono risposte valide a una domanda di EON
     if(!testo || inCorso || testo.length < 2 || (testo.length < 3 && !inContinuazione)) return;
 
@@ -12718,7 +12705,7 @@ collegaMicTesto({
 });
 collegaMicTesto({
   micId:"clientiHeroMic", campoId:"clientiHeroCampo", sendId:"clientiHeroSend", hintId:"clientiHeroHint",
-  hintBase:"Racconta il cliente: nome, contatto, cosa deve fare — creo la scheda subito",
+  hintBase:"",
   fallbackHint:"Prova a raccontarmi un cliente, per esempio: Mario Rossi, 333 1234567, deve rifare il tetto",
   costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo. Se menziona anche impegni o appuntamenti da fissare per questo cliente, creali (crea_impegno).`
 });
@@ -12729,29 +12716,23 @@ collegaMicTesto({
   costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente del cantiere: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo.`
 });
 
+/* Fatture e preventivi: un microfono e una casella. In Fatture quello che
+   dici diventa una fattura, in Preventivi un preventivo, anche senza dire
+   la parola ("Rossi, bagno, 300 euro"). */
+function completaFraseDocumento(testo){
+  const t = String(testo || "").trim();
+  if(/\b(fattur|preventiv)/i.test(t)) return t;
+  const tipo = filtroFatturePreventivi === "fattura" ? "Fattura" : filtroFatturePreventivi === "preventivo" ? "Preventivo" : "";
+  if(!tipo) return t;
+  return tipo + " per " + t.replace(/^(?:per|a)\s+/i, "");
+}
 collegaMicTesto({
   micId:"fpMic", campoId:"fpCampo", sendId:"fpSend", hintId:"fpHint",
-  hintBase:"Dillo a voce o scrivilo: per chi, cosa e quanto",
-  fallbackHint:"Prova così: preventivo per Rossi, rifacimento bagno, 3.000 euro",
+  hintBase:"",
+  fallbackHint:"Prova così: Rossi, rifacimento bagno, 3.000 euro",
+  preparaTesto: completaFraseDocumento,
   costruisciPrompt:(testo) => `Il professionista, dalla pagina Fatture e preventivi, ha scritto o dettato: "${testo}"`
 });
-/* "Nuovo preventivo" / "Nuova fattura": EON chiede per chi e cosa, nella
-   sua card (si risponde scrivendo o a voce), poi prepara il documento come
-   se glielo avessi detto tu. */
-function nuovoDocumentoDaTasto(tipo){
-  const nome = tipo === "fattura" ? "la fattura" : "il preventivo";
-  const esempio = tipo === "fattura" ? "«Rossi, rifacimento bagno, 3.000 euro»" : "«Rossi, rifacimento bagno, 3.000 euro»";
-  apriConversazioneCard(null, "Per chi è " + nome + " e cosa comprende? Per esempio " + esempio + ".", (t) => {
-    const risposta = String(t || "").trim();
-    if(!risposta) return;
-    chiudiRisorsaCard();
-    const campo = document.getElementById("fpCampo");
-    campo.value = (tipo === "fattura" ? "Fattura per " : "Preventivo per ") + risposta;
-    document.getElementById("fpSend").click();
-  });
-}
-document.getElementById("fpNuovoPreventivo").addEventListener("click", () => nuovoDocumentoDaTasto("preventivo"));
-document.getElementById("fpNuovaFattura").addEventListener("click", () => nuovoDocumentoDaTasto("fattura"));
 
 /* Aggiorna il riquadro scuro della Home ("Calendario attività" e "Cosa
    devo fare oggi") riusando i gruppi già calcolati da renderCalendar():
@@ -14406,6 +14387,10 @@ function renderFatturePreventivi(){
   const tutti = documentiVeri();
   const visibili = filtroFatturePreventivi === "tutti" ? tutti : tutti.filter(d => d.dati.tipo === filtroFatturePreventivi);
   document.getElementById("fpTitolo").textContent = filtroFatturePreventivi === "fattura" ? "Fatture" : filtroFatturePreventivi === "preventivo" ? "Preventivi" : "Tutti i documenti";
+  const campoFp = document.getElementById("fpCampo");
+  if(campoFp) campoFp.placeholder = filtroFatturePreventivi === "fattura" ? "Nuova fattura: per chi e quanto"
+    : filtroFatturePreventivi === "preventivo" ? "Nuovo preventivo: per chi e quanto"
+    : "Es. preventivo per Rossi, 3.000 euro";
   document.getElementById("fpCount").textContent = visibili.length;
 
   const annoCorrente = new Date().getFullYear();
@@ -14419,9 +14404,9 @@ function renderFatturePreventivi(){
   if(!visibili.length){
     const vuoto = document.createElement("div");
     vuoto.className = "risorsa-vuoto";
-    vuoto.textContent = filtroFatturePreventivi === "preventivo" ? "Nessun preventivo ancora. Chiedilo a EON: «preventivo da 500 per Rossi»."
-      : filtroFatturePreventivi === "fattura" ? "Nessuna fattura ancora. Chiedila a EON: «fattura da 300 per Rossi»."
-      : "Nessun documento ancora. Chiedilo a EON: «fattura da 300 per Rossi».";
+    vuoto.textContent = filtroFatturePreventivi === "preventivo" ? "Nessun preventivo ancora. Dillo qui sopra: «Rossi, tetto, 5.000 euro»."
+      : filtroFatturePreventivi === "fattura" ? "Nessuna fattura ancora. Dilla qui sopra: «Rossi, bagno, 300 euro»."
+      : "Nessun documento ancora. Dillo qui sopra: «fattura per Rossi, bagno, 300 euro».";
     lista.appendChild(vuoto);
     return;
   }
