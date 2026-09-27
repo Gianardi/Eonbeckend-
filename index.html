@@ -9322,7 +9322,27 @@ function renderChatWindow(){
     riga.appendChild(b);
     metti(riga);
   });
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  tieniInFondo(messagesEl);
+}
+
+/* La chat resta sull'ultimo messaggio, come WhatsApp (27/09/2026, Andrea:
+   "quando invio il messaggio la chat rimane alta"). Le foto si caricano
+   un attimo dopo e, crescendo, spingevano tutto in su: finché arrivano,
+   si torna in fondo — a meno che l'utente non stia già scorrendo lui. */
+function tieniInFondo(el){
+  if(!el) return;
+  el.scrollTop = el.scrollHeight;
+  const fino = Date.now() + 10000;
+  let scorreLui = false;
+  const ferma = () => { scorreLui = true; };
+  el.addEventListener("touchstart", ferma, { once:true, passive:true });
+  el.addEventListener("wheel", ferma, { once:true, passive:true });
+  el.querySelectorAll("img, video").forEach(m => {
+    if(m.tagName === "IMG" && m.complete && m.naturalHeight) return;
+    m.addEventListener(m.tagName === "VIDEO" ? "loadedmetadata" : "load", () => {
+      if(!scorreLui && Date.now() < fino) el.scrollTop = el.scrollHeight;
+    }, { once:true });
+  });
 }
 
 document.getElementById("chatSendBtn").addEventListener("click", sendChatMessage);
@@ -9357,11 +9377,13 @@ async function sendChatMessage(){
   input.value = "";
 
   if(isDbReady() && chat.id){
-    /* Il messaggio non viene aggiunto qui: arriva dal realtime, cosi' e'
-       identico a quello che vede il cliente e non compare due volte. */
-    const { error } = await supabaseClient.from("messages").insert({
+    /* Il messaggio compare appena salvato, senza aspettare il tempo reale
+       (che a volte tarda): è la riga vera del database, con il suo id, così
+       quando arriva anche dal tempo reale non compare due volte. */
+    const { data: salvato, error } = await supabaseClient.from("messages").insert({
       conversation_id: chat.id, sender: "me", body: val, canale
-    });
+    }).select().single();
+    if(!error && salvato){ riceviMessaggio(salvato, true); return; }
     if(error){
       console.error("Errore invio messaggio:", error.message);
       chat.messages.push({ from:"me", text:val, time, canale, createdAt: now.toISOString() });

@@ -610,7 +610,24 @@ function renderMessages(){
     wrap.appendChild(b);
   });
 
-  wrap.scrollTop = wrap.scrollHeight;
+  tieniInFondo(wrap);
+}
+
+/* La chat resta sull'ultimo messaggio (27/09/2026, come nell'app): le foto
+   si caricano un attimo dopo e, crescendo, spingevano tutto in su. */
+function tieniInFondo(el){
+  el.scrollTop = el.scrollHeight;
+  const fino = Date.now() + 10000;
+  let scorreLui = false;
+  const ferma = () => { scorreLui = true; };
+  el.addEventListener("touchstart", ferma, { once:true, passive:true });
+  el.addEventListener("wheel", ferma, { once:true, passive:true });
+  el.querySelectorAll("img, video").forEach(m => {
+    if(m.tagName === "IMG" && m.complete && m.naturalHeight) return;
+    m.addEventListener(m.tagName === "VIDEO" ? "loadedmetadata" : "load", () => {
+      if(!scorreLui && Date.now() < fino) el.scrollTop = el.scrollHeight;
+    }, { once:true });
+  });
 }
 
 /* ---- Invio messaggio ---- */
@@ -882,8 +899,7 @@ document.getElementById("tabMessaggi").addEventListener("click", () => {
   document.getElementById("tabLavoro").classList.remove("active");
   document.getElementById("panelMessaggi").classList.add("visible");
   document.getElementById("panelLavoro").classList.remove("visible");
-  const wrap = document.getElementById("messages");
-  wrap.scrollTop = wrap.scrollHeight;
+  tieniInFondo(document.getElementById("messages"));
 });
 
 init();

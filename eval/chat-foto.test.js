@@ -41,7 +41,11 @@ async function main() {
       const catena = (tabella) => {
         const q = {
           update: () => ({ eq: async () => ({ error: null }) }),
-          insert: async (riga) => { window.__inseriti.push({ tabella, riga }); return { error: null }; },
+          insert: (riga) => {
+            window.__inseriti.push({ tabella, riga });
+            const salvato = { id: "db" + window.__inseriti.length, created_at: new Date().toISOString(), event_type: null, ...riga };
+            return { then: (ok) => ok({ error: null }), select: () => ({ single: async () => ({ data: salvato, error: null }) }) };
+          },
           select: () => q, not: () => q, is: () => q, eq: () => q, order: () => q, limit: () => q, in: () => q,
           gt: (col, val) => { window.__dopo = val; return q; },
           then: (ok) => ok({ data: tabella === "messages" ? (window.__persi || []) : [], error: null }),
@@ -182,6 +186,39 @@ async function main() {
     });
     verifica("avviso: \"Appuntamento spostato\", il nome del cliente una volta sola", toast.length === 2 && toast[0].startsWith("Appuntamento spostato | Appuntamento con Rita Ambrosini: ora è gio 1 ott, 10:00") && (toast[0].match(/Rita Ambrosini/g) || []).length === 1, JSON.stringify(toast));
     verifica("…e se il titolo non ha il nome, lo aggiunge", toast[1] && toast[1].includes("Sopralluogo con Rita Ambrosini"), JSON.stringify(toast));
+    /* "Quando invio il messaggio la chat rimane alta" (Andrea): il messaggio
+       compare subito e la chat resta in fondo, anche con foto che si
+       caricano dopo (quelle di Rita). */
+    await page.route("https://foto.prova/**", async (route) => {
+      await new Promise((r) => setTimeout(r, 700)); // foto lenta
+      route.fulfill({ status: 200, contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800"><rect width="600" height="800" fill="#8ab"/></svg>' });
+    });
+    const fondo = await page.evaluate(async () => {
+      const chat = chats[0];
+      chat.messages = [];
+      for (let i = 0; i < 14; i++) chat.messages.push({ id: "t" + i, from: i % 2 ? "them" : "me", text: "Messaggio numero " + i + " per le piastrelle del bagno", time: "10:" + String(10 + i), createdAt: new Date(Date.now() - (40 - i) * 60000).toISOString() });
+      for (let i = 0; i < 4; i++) chat.messages.push({ id: "f" + i, from: "me", text: "", fileUrl: "https://foto.prova/f" + i + ".svg", fileName: "foto.jpg", fileType: "image/jpeg", time: "10:3" + i, createdAt: new Date(Date.now() - (20 - i) * 60000).toISOString() });
+      activeChatIndex = 0;
+      renderChatWindow();
+      document.getElementById("chatSlider").classList.add("show-conv");
+      await new Promise((r) => setTimeout(r, 1800)); // le foto arrivano
+      const el = document.querySelector("#page-chat .chat-messages");
+      const dopoFoto = el.scrollHeight - el.clientHeight - el.scrollTop;
+      // Andrea scrive e invia
+      document.getElementById("chatInput").value = "Arrivo alle 10";
+      const t0 = performance.now();
+      document.getElementById("chatSendBtn").click();
+      await new Promise((r) => setTimeout(r, 60));
+      const ultimo = [...el.querySelectorAll(".bubble")].pop();
+      const subito = ultimo ? ultimo.textContent : "";
+      await new Promise((r) => setTimeout(r, 1500));
+      return { dopoFoto, subito, ms: Math.round(performance.now() - t0), dopoInvio: el.scrollHeight - el.clientHeight - el.scrollTop, scorre: el.scrollHeight > el.clientHeight };
+    });
+    verifica("chat con foto che arrivano dopo: resta in fondo, sull'ultimo messaggio", fondo.scorre && fondo.dopoFoto <= 2, JSON.stringify(fondo));
+    verifica("messaggio inviato: compare subito, senza aspettare il server", fondo.subito.startsWith("Arrivo alle 10"), JSON.stringify(fondo));
+    verifica("…e la chat va in fondo, sul messaggio appena inviato", fondo.dopoInvio <= 2, JSON.stringify(fondo));
+    await page.screenshot({ path: require("path").join(require("os").tmpdir(), "eon-chat-invio.png") });
+
     verifica("nessun errore nella pagina", errori.length === 0, JSON.stringify(errori));
   } finally {
     await browser.close();
