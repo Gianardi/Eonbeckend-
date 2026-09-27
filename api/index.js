@@ -5114,9 +5114,12 @@ Esempio C:
   → messaggioProposta = 1, messaggioConferma = null, rimastoInSospeso = true
 
 === SPOSTAMENTO ===
-Se nell'elenco sopra c'è già un appuntamento e nella conversazione si parla di cambiarne giorno od ora, l'azione è "sposta", MAI "nuovo".
-Se dicono solo l'ora nuova ("possiamo fare alle 10?"), tieni il giorno dell'appuntamento esistente.
-Se dicono solo il giorno nuovo ("facciamo giovedì"), tieni l'ora dell'appuntamento esistente.
+"sposta" SOLO se nella conversazione si dice chiaramente di cambiare un appuntamento già fissato
+("spostiamo a giovedì", "anticipiamo alle 9", "invece di martedì facciamo mercoledì", "non riesco martedì, facciamo venerdì?").
+Una proposta di data senza parlare di cambiare ("ci vediamo domattina alle 10?") è un appuntamento "nuovo",
+anche se il cliente ne ha già altri: si possono avere più appuntamenti con lo stesso cliente.
+Se spostano dicendo solo l'ora nuova ("spostiamo alle 10"), tieni il giorno dell'appuntamento esistente.
+Se spostano dicendo solo il giorno nuovo ("spostiamo a giovedì"), tieni l'ora dell'appuntamento esistente.
 Se disdicono senza rifissare, azione "annulla".
 
 === FORMATO E MODI DI DIRE ===
@@ -5229,6 +5232,8 @@ async function esitoGiaLetto(conversazione, ultimo, ctx) {
   if (esito && esito.messaggio_id === ultimo.id) return { ...esito, azioni: esito.azioni || [], gia_letto: true };
   return { azioni: [], in_corso: true, messaggio_id: ultimo.id }; // lo sta leggendo qualcun altro proprio ora
 }
+
+const PAROLE_DI_CAMBIO = /\b(spost\w*|anticip\w*|posticip\w*|rimand\w*|rinvi\w*|slitt\w*|cambi\w*|invece|non riesc\w*|non posso|non ce la faccio|salt\w*)\b/i;
 
 async function analizzaChat(conversazione, ctx, opzioni) {
   const user = ctx.user;
@@ -5349,6 +5354,16 @@ async function analizzaChat(conversazione, ctx, opzioni) {
     const dopoIlRiferito = (m) => !riferito || !riferito.created_at || !m || !m.created_at ||
       new Date(m.created_at).getTime() > new Date(riferito.created_at).getTime();
     const msgChePropone = msgProposta || recenti[recenti.length - 1];
+
+    /* Spostare solo se si parla di cambiare (27/09/2026, Andrea: "Ciao
+       domattina ore 10:00?" — "Ok" ha spostato l'appuntamento che Rita aveva
+       già, invece di segnarne uno nuovo). Senza parole come "spostiamo",
+       "anticipiamo", "invece di…", "non riesco…" è un appuntamento nuovo. */
+    if (azione === "sposta") {
+      const detto = [msgChePropone, msgConferma].filter(Boolean).map((m) => m.body).join(" ");
+      if (!PAROLE_DI_CAMBIO.test(detto)) azione = "nuovo";
+    }
+
     if (riferito && (azione === "sposta" || azione === "annulla") && !dopoIlRiferito(msgChePropone)) {
       return await chiudi({ azioni });
     }
@@ -5438,8 +5453,10 @@ async function analizzaChat(conversazione, ctx, opzioni) {
        stesso, l'importante è non perdere la data. */
     const titoloNuovo = app.titolo || (quandoIso ? "Incontro" : null);
     if (titoloNuovo && quandoIso) {
+      /* Con lo stesso cliente alla stessa ora c'è già: è quello, non un altro
+         (anche se il titolo è diverso, es. "Incontro" e "Appuntamento con…") */
       const duplicato = esistenti.some(
-        (m) => m.title === titoloNuovo && m.scheduled_at && new Date(m.scheduled_at).getTime() === new Date(quandoIso).getTime()
+        (m) => m.scheduled_at && new Date(m.scheduled_at).getTime() === new Date(quandoIso).getTime()
       );
       if (!duplicato) {
         /* Scriviamo direttamente nella conversazione che stiamo già

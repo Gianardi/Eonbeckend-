@@ -160,6 +160,18 @@ prepara(ANDREA, null);
 r = await analizza(true);
 verifica("recupero su una chat mai letta prima: si segna soltanto, niente AI", chiamateAI === 0 && r.corpo.azioni.length === 0 && tabelle.conversations[0].ultimo_analizzato === "m1", JSON.stringify({ chiamateAI, conv: tabelle.conversations[0] }));
 
+// 9b. Il caso di Andrea (sera): Rita ha già un appuntamento, "Ciao domattina
+//     ore 10:00?" — "Ok" → appuntamento NUOVO, quello che c'era non si sposta
+prepara([{ sender: "me", body: "Ciao domattina ore 10:00?", created_at: fa(1) }, { sender: "them", body: "Ok", created_at: fa(0) }], "m0");
+rispostaAI = { appuntamento: { azione: "sposta", quando_iso: "2026-09-28T10:00:00", titolo: null, messaggioProposta: 1, messaggioConferma: 2 } };
+r = await analizza();
+const nuovoDomattina = scritture.find((w) => w.t === "messages" && w.metodo === "POST" && w.body && w.body.event_type === "appt");
+verifica("proposta senza parlare di spostare: appuntamento nuovo, quello di prima resta", !spostato() && !!nuovoDomattina && nuovoDomattina.body.scheduled_at === "2026-09-28T10:00:00", JSON.stringify({ r, scritture }));
+prepara([{ sender: "them", body: "Non riesco lunedì, facciamo martedì alla stessa ora?", created_at: fa(1) }, { sender: "me", body: "Va bene", created_at: fa(0) }], "m0");
+rispostaAI = { appuntamento: { azione: "sposta", quando_iso: "2026-09-29T11:00:00", titolo: null, messaggioProposta: 1, messaggioConferma: 2 } };
+r = await analizza();
+verifica("\"non riesco lunedì, facciamo martedì?\" — \"va bene\": si sposta", spostato(), JSON.stringify(scritture));
+
 // 10. Come WhatsApp: Rita scrive "Ok" dalla sua pagina → il server lo legge
 //     subito, con i permessi di Andrea, anche ad app chiusa
 async function portale(codice) {
