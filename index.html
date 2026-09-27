@@ -10150,6 +10150,8 @@ async function eliminaCantiereAppunto(id){
     const testo = campo.value.trim();
     if(testo.length < 2 || inCorso) return;
     fermaAscolto();
+    // "Calendario", "Cestino": il nome di una pagina la apre anche da qui
+    if(!appuntoInModifica && apriSeNomeDiPagina(testo)){ campo.value = ""; hint.textContent = HINT_BASE; return; }
     if(!isDbReady()){
       showAILanding("Non collegato", "Per salvare gli appunti serve la connessione al database.");
       return;
@@ -10824,26 +10826,34 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
    giornata": lì l'articolo non viene toccato dall'apertura (vedi
    APERTURA_NAVIGAZIONE) e serve il confronto diretto. */
 const PAGINE_NAVIGABILI_A_VOCE = {
-  "home": ["home", "inizio"],
+  "home": ["home", "inizio", "casa", "pagina iniziale"],
   "oggi": ["oggi", "giornata", "la giornata"],
-  "clienti": ["clienti", "anagrafica", "miei clienti", "i miei clienti"],
-  "calendario": ["calendario", "agenda", "appuntamenti", "gli appuntamenti"],
-  "chat": ["chat", "conversazioni", "messaggi", "la chat", "le chat"],
-  "cestino": ["cestino"],
+  "clienti": ["clienti", "cliente", "anagrafica", "miei clienti", "i miei clienti"],
+  "calendario": ["calendario", "agenda", "appuntamenti", "gli appuntamenti", "appuntamento", "impegni", "gli impegni", "i miei impegni"],
+  "chat": ["chat", "conversazioni", "messaggi", "messaggio", "la chat", "le chat", "i messaggi"],
+  "chiamate": ["chiamate", "le chiamate", "chiamata", "telefonate", "le telefonate", "da chiamare", "chi devo chiamare", "registro chiamate", "il registro chiamate"],
+  "cestino": ["cestino", "spazzatura", "eliminati", "le cose eliminate"],
+  "gestisci-azienda": ["menu", "menù", "il menu", "il menù"],
+  "cresci": ["cresci"],
+  "assegna-compiti": ["compiti", "i compiti", "assegna compiti", "assegna compito", "compito", "squadra", "la squadra", "team", "il team", "dipendenti", "i dipendenti"],
   "documenti-impresa": ["documenti impresa", "documenti dell'impresa", "documenti azienda", "documenti aziendali", "documenti dell'azienda", "i documenti dell'impresa", "i documenti dell'azienda"],
-  "cantiere-documenti": ["documenti", "i documenti", "i miei documenti"],
+  "cantiere-documenti": ["documenti", "i documenti", "i miei documenti", "documento"],
   "carta-intestata": ["carta intestata", "la carta intestata", "la mia carta intestata"],
-  "crea-lettera": ["lettera", "la lettera"],
+  "crea-lettera": ["lettera", "la lettera", "lettere"],
   "crea-cartello": ["cartello", "il cartello", "cartello fine lavori", "il cartello fine lavori", "cartello di fine lavori"],
-  "cantiere-appunti": ["appunti", "gli appunti", "i miei appunti", "note", "le note"],
-  "cantiere-foto": ["foto", "le foto", "foto cantiere", "le foto del cantiere", "foto del cantiere", "galleria"],
+  "cantiere-appunti": ["appunti", "gli appunti", "i miei appunti", "note", "le note", "appunto", "nota"],
+  "cantiere-foto": ["foto", "le foto", "foto cantiere", "le foto del cantiere", "foto del cantiere", "galleria", "fotografie", "le fotografie"],
   "cantiere-cliente": ["cliente cantiere"],
-  "impostazioni": ["impostazioni", "le impostazioni"],
-  "fatture-preventivi": ["fatture", "preventivi", "fatture e preventivi", "preventivi e fatture", "le fatture", "i preventivi", "le mie fatture", "i miei preventivi"],
-  "azienda": ["azienda", "la mia azienda", "la tua azienda", "cruscotto", "il cruscotto", "i conti", "i miei conti"],
-  "pagamenti": ["pagamenti", "uscite", "le uscite", "spese", "le spese"],
-  "entrate": ["entrate", "le entrate", "incassi", "gli incassi"],
+  "impostazioni": ["impostazioni", "le impostazioni", "impostazione", "opzioni", "settings", "account", "il mio account", "profilo", "il mio profilo"],
+  "fatture-preventivi": ["fatture", "preventivi", "fatture e preventivi", "preventivi e fatture", "le fatture", "i preventivi", "le mie fatture", "i miei preventivi", "fattura", "preventivo"],
+  "azienda": ["azienda", "la mia azienda", "la tua azienda", "cruscotto", "il cruscotto", "i conti", "i miei conti", "conti"],
+  "pagamenti": ["pagamenti", "uscite", "le uscite", "spese", "le spese", "pagamento", "uscita"],
+  "entrate": ["entrate", "le entrate", "incassi", "gli incassi", "entrata", "incasso"],
+  "assemblee": ["assemblee", "le assemblee", "assemblea"],
+  "ai-request-log": ["registro ai", "registro", "registro dell'assistente", "il registro"],
 };
+/* Voci delle Impostazioni che si aprono dicendo solo il nome */
+const VOCI_IMPOSTAZIONI_A_VOCE = { "privacy": "impVocePrivacy", "privacy e dati": "impVocePrivacy", "i miei dati": "impVocePrivacy", "aiuto": "impVoceAiuto", "sicurezza": "impVocePassword" };
 
 /* Apertura riconosciuta: solo il verbo di navigazione (con la sua
    preposizione per "vai"/"portami", che nell'italiano corretto include
@@ -10858,8 +10868,10 @@ const PAGINE_NAVIGABILI_A_VOCE = {
 const APERTURA_NAVIGAZIONE = /^(?:apri|aprimi|mostrami|mostra|dammi|mi dai|mi apri|mi mostri|fammi vedere|voglio vedere|mi serve|mi servono)\s+|^(?:vai|portami)\s+(?:a|al|ai|alla|allo|agli|alle|in|su|sulla|sulle|sui)\s+/;
 
 function provaNavigazioneDiretta(testo){
-  const t = (testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  const t = (testo || "").trim().toLowerCase().replace(/[.!?,]+$/, "").replace(/\s+(?:per favore|grazie)$/, "").replace(/\s+/g, " ");
   if(!t) return false;
+  const voceImp = VOCI_IMPOSTAZIONI_A_VOCE[t.replace(/^(?:apri|aprimi|vai (?:a|al|alla|in)|mostrami)\s+(?:la |le |il )?/, "")];
+  if(voceImp){ apriVoceImpostazioni(voceImp); return true; }
   /* Solo il nome della pagina ("Messaggi", "Calendario", "Fatture"):
      si apre subito (27/09/2026, Andrea: "se dico Messaggi aprimi subito
      messaggi"). Qualsiasi parola in più → come prima (serve l'apertura
@@ -10882,6 +10894,20 @@ function provaNavigazioneDiretta(testo){
     }
   }
   return false;
+}
+
+/* Il nome di una pagina vale OVUNQUE (27/09/2026, Andrea: "deve funzionare
+   per tutte"): nella Home, nelle altre pagine, dentro una card (anche la
+   scheda del cliente) e anche quando EON ha appena fatto una domanda. È un
+   comando chiaro, non una risposta: la card si chiude e si va lì. */
+function apriSeNomeDiPagina(testo, domandaEON){
+  /* Se EON ha appena chiesto "in calendario o negli appunti?", la parola
+     detta è la risposta, non un cambio di pagina */
+  const parola = String(testo || "").trim().toLowerCase().replace(/[.!?,]+$/, "");
+  if(domandaEON && parola && String(domandaEON).toLowerCase().includes(parola)) return false;
+  if(!provaNavigazioneDiretta(testo)) return false;
+  if(document.getElementById("risorsaOverlay").style.display !== "none" && !document.querySelector("#risorsaCorpo .imp-form")) chiudiRisorsaCard();
+  return true;
 }
 
 /* ============ COMANDI SEMPLICI, SENZA AI (27/09/2026, sera) ============
@@ -12301,6 +12327,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
      scambiato per una risposta a una domanda ormai dimenticata. */
   let runIdAperto = null;
   let runIdApertoScadenza = 0;
+  let testoDomandaAperta = "";
 
   /* Azioni scrivibili eseguite da EON nell'ultimo turno in questo
      microfono, tenute per una breve finestra così una correzione veloce
@@ -12321,6 +12348,15 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
   async function elabora(testo, viaVoce){
     testo = (testo || "").trim();
     const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+    /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
+       anche se EON aveva appena fatto una domanda (tranne quando la
+       parola era proprio nella domanda: allora è la risposta) */
+    if(testo && !inCorso && apriSeNomeDiPagina(testo, inContinuazione ? testoDomandaAperta : "")){
+      runIdAperto = null;
+      campo.value = "";
+      hint.textContent = TESTO_HINT_BASE;
+      return;
+    }
     // La pagina può completare la frase (es. in Fatture: "Rossi, 300" → "Fattura per Rossi, 300")
     if(preparaTesto && testo && !inContinuazione) testo = preparaTesto(testo);
     // "sì", "no", "ok" sono risposte valide a una domanda di EON
@@ -12575,6 +12611,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         if(eDomandaAperta){
           runIdAperto = risposta.runId;
           runIdApertoScadenza = Date.now() + 90 * 1000;
+          testoDomandaAperta = testoRisp;
           /* Il campo di testo qui sotto resta sempre attivo (non solo
              il microfono): il messaggio lo dice esplicitamente, perché
              finora non era ovvio che si potesse anche scrivere invece
@@ -13286,6 +13323,8 @@ function apriConversazioneCard(domanda, testo, rispondi){
   invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
   const manda = (t) => {
     t = String(t || "").trim();
+    const ultimaDiEON = [...corpo.querySelectorAll(".scheda-bolla.eon:not(.attesa)")].pop();
+    if(t && apriSeNomeDiPagina(t, ultimaDiEON ? ultimaDiEON.textContent : testo)){ campo.value = ""; conversazioneCard = null; return; }
     if(!t || !conversazioneCard || conversazioneCard.attesa) return;
     campo.value = "";
     bollaConversazione("me", t);
@@ -13333,7 +13372,7 @@ function mostraRispostaEON(domanda, testo, opzioni){
     invia.className = "scheda-invia";
     invia.setAttribute("aria-label", "Invia la risposta");
     invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
-    const manda = (t) => { t = String(t || "").trim(); if(!t) return; chiudiRisorsaCard(); opzioni.rispondi(t); };
+    const manda = (t) => { t = String(t || "").trim(); if(!t) return; if(apriSeNomeDiPagina(t, testo)) return; chiudiRisorsaCard(); opzioni.rispondi(t); };
     invia.addEventListener("click", () => manda(campo.value));
     campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(campo.value); } });
     const mic = creaMicRapido((t) => manda(t));
@@ -13632,6 +13671,7 @@ function mostraSchedaCliente(c, opzioni){
   async function manda(testo){
     testo = String(testo || "").trim();
     if(!testo || stato.inCorso) return;
+    if(stato.modo !== "appunto" && apriSeNomeDiPagina(testo)){ campo.value = ""; return; }
     stato.inCorso = true; invia.disabled = true; campo.value = "";
     bolla("me", testo);
     try{ if(stato.modo === "appunto") await salvaAppunto(testo); else await chiediPerCliente(testo); }

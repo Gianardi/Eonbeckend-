@@ -4478,3 +4478,24 @@ per tutto", "aggiungi cliente: basta un microfono e uno spazio per scrivere",
 Altre cose che il codice può fare senza AI (da proporre ad Andrea):
 "segna fatto X / ho finito X", "quanto ho incassato questo mese", "chi mi deve
 soldi", "manda il link a Rita", "archivia Rita", "preventivi di Rossi".
+
+### Il nome di una pagina funziona ovunque (27/09/2026, notte tardi)
+
+Andrea: "su Chiamate non funziona, idem su Cestino, Impostazione — deve
+funzionare per tutte". Cause: alcune pagine mancavano del tutto (Chiamate,
+Menu, Compiti, Assemblee, Registro, Cresci), mancavano i singolari
+("Impostazione", "Appuntamento", "Preventivo"), e il nome non veniva
+controllato quando EON aveva appena fatto una domanda, dentro le card (scheda
+cliente, conversazione) e nella pagina Appunti; in Fatture la frase diventava
+"Fattura per Cestino".
+- `PAGINE_NAVIGABILI_A_VOCE` con tutte le pagine e i loro sinonimi;
+  "Privacy", "Aiuto", "Sicurezza" aprono la voce di Impostazioni
+  (`VOCI_IMPOSTAZIONI_A_VOCE`).
+- `apriSeNomeDiPagina(testo, domandaEON)`: controllato per primo in ogni
+  casella (Home, Clienti, Fatture, Appunti, scheda cliente, card di EON), anche
+  mentre EON aspetta una risposta. Unica eccezione: se la parola era nella
+  domanda di EON ("in calendario o negli appunti?") è la risposta.
+- Non cambia pagina se c'è altro oltre al nome ("Cestino di Rita",
+  "appuntamento con Rita domani": decide l'AI come prima). Non vale nella
+  finestra "a quale cliente è questa foto?" (lì si risponde con un nome).
+- Test: `eval/pacchetto-27-09.test.js` (+2: 25 nomi di pagina, 6 caselle).
