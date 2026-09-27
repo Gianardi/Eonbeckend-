@@ -114,8 +114,16 @@ async function main() {
     lista = await page.evaluate(() => [...document.querySelectorAll("#clientArchiveList .row-name")].map((e) => e.textContent));
     verifica("la stessa casella cerca mentre scrivi: \"ambro\" → Rita Ambrosini", JSON.stringify(lista) === '["Rita Ambrosini"]', JSON.stringify(lista));
     await page.fill("#clientiHeroCampo", "");
-    const nuovo = await page.evaluate(() => { document.getElementById("addClientBtn").click(); const campi = [...document.querySelectorAll("#sheetBody [data-field]")].map((e) => e.dataset.field); closeSheet(); return campi; });
-    verifica("\"Nuovo cliente\": il modulo ha anche l'Indirizzo", nuovo.includes("address") && nuovo.includes("phone"), JSON.stringify(nuovo));
+    const nuovo = await page.evaluate(() => { openSheet("cliente", clients[0]); const campi = [...document.querySelectorAll("#sheetBody [data-field]")].map((e) => e.dataset.field); const voce = !!document.getElementById("dettatura"); closeSheet(); return { campi, voce }; });
+    verifica("modifica cliente: c'è l'Indirizzo, e niente riquadro \"Raccontalo a EON AI\"", nuovo.campi.includes("address") && nuovo.campi.includes("phone") && !nuovo.voce, JSON.stringify(nuovo));
+    const nuovoCliente = await page.evaluate(() => { document.getElementById("addClientBtn").click(); const b = [...document.querySelectorAll(".scheda-bolla")].pop(); const r = { domanda: b ? b.textContent : "", titolo: document.getElementById("risorsaTitolo").textContent, campo: !!document.getElementById("conversazioneCardCampo"), mic: !!document.querySelector(".scheda-composer .scheda-mic"), foglio: document.getElementById("sheetBody").children.length && document.querySelector(".sheet.open, .sheet-overlay.open") ? true : false }; return r; });
+    verifica("\"Nuovo cliente\": la card di EON con microfono e una casella (niente modulo)", nuovoCliente.titolo === "Nuovo cliente" && /nome, telefono/.test(nuovoCliente.domanda) && nuovoCliente.campo && nuovoCliente.mic && !nuovoCliente.foglio, JSON.stringify(nuovoCliente));
+    await page.evaluate(() => { window.__clientiInvio = null; document.getElementById("clientiHeroSend").addEventListener("click", () => { window.__clientiInvio = document.getElementById("clientiHeroCampo").value; }, { capture: true, once: true }); });
+    await page.fill("#conversazioneCardCampo", "Mario Bianchi, 333 7654321, rifà il tetto");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(100);
+    verifica("…e la frase va a EON, che crea la scheda", (await page.evaluate(() => window.__clientiInvio)) === "Mario Bianchi, 333 7654321, rifà il tetto", String(await page.evaluate(() => window.__clientiInvio)));
+    await page.evaluate(() => { chiudiRisorsaCard(); clients.splice(0, clients.length, ...clients.filter((c) => c.name !== "Mario Bianchi")); navigateTo("clienti"); document.getElementById("clientiHeroCampo").value = ""; renderClientArchive(); });
 
     /* ---- Scheda: Portami lì e Archivia ---- */
     await page.evaluate(() => [...document.querySelectorAll("#clientArchiveList .cl-riga")].find((r) => r.textContent.includes("Rita")).click());
@@ -262,6 +270,63 @@ async function main() {
       return document.querySelectorAll("#aiToastContainer .ai-toast.messaggio").length;
     });
     verifica("con la chat di Rita già aperta: nessuna notifica (il messaggio si vede lì)", inChatAperta === 0, String(inChatAperta));
+
+    /* ---- Senza AI: solo il nome della pagina, chiama, scrivi a ---- */
+    const senzaAI = await page.evaluate(() => {
+      const r = {};
+      for (const [frase, pagina] of [["Messaggi", "chat"], ["calendario", "calendario"], ["fatture", "fatture-preventivi"], ["Clienti", "clienti"], ["impostazioni", "impostazioni"]]) {
+        navigateTo("home");
+        r[frase] = provaNavigazioneDiretta(frase) && document.querySelector(".page.visible").id === "page-" + pagina;
+      }
+      navigateTo("home");
+      r["messaggi di Rita (non solo il nome)"] = provaNavigazioneDiretta("messaggi di Rita") === false;
+      return r;
+    });
+    verifica("solo il nome della pagina (\"Messaggi\", \"calendario\"…): si apre subito", Object.values(senzaAI).every(Boolean), JSON.stringify(senzaAI));
+    const comandi = await page.evaluate(async () => {
+      clients.splice(0, clients.length,
+        { id: "c1", name: "Rita Ambrosini", status: "attivo", value: 0, desc: "", phone: "333 1234567", email: "", address: "", archived: false },
+        { id: "c5", name: "Mario Rossi", status: "attivo", value: 0, desc: "", phone: "", email: "", address: "", archived: false },
+        { id: "c6", name: "Luca Rossi", status: "attivo", value: 0, desc: "", phone: "", email: "", address: "", archived: false });
+      chats.splice(0, chats.length, { id: "v1", name: "Rita Ambrosini", isClient: true, archived: false, unread: 0, messages: [], toSeeToday: false, toCallToday: false });
+      const r = {};
+      r.chiamaVoce = provaComandiSemplici("chiama Rita", true) && /Chiama Rita Ambrosini/.test((document.querySelector(".percorso-meta") || {}).textContent || "") && /tel:\+?39?3331234567/.test((document.querySelector(".percorso-meta") || { getAttribute: () => "" }).getAttribute("href"));
+      chiudiRisorsaCard();
+      r.chiamaDueRossi = provaComandiSemplici("chiama Rossi", false) === false;
+      r.chiamaSenzaNumero = provaComandiSemplici("chiama Mario Rossi", false) && /Numero mancante/.test(document.getElementById("aiToastContainer").textContent);
+      chiudiRisorsaCard();
+      const riconosciuto = provaComandiSemplici("scrivi a Rita Ambrosini", false);
+      await new Promise((ok) => setTimeout(ok, 50)); // la chat si apre appena pronta
+      r.scrivi = riconosciuto && document.querySelector(".page.visible").id === "page-chat" && document.getElementById("chatSlider").classList.contains("show-conv");
+      navigateTo("home");
+      r.scriviConMessaggio = provaComandiSemplici("scrivi a Rita che arrivo alle 10", false) === false;
+      r.nuovoCliente = provaComandiSemplici("aggiungi cliente", false) && document.getElementById("risorsaTitolo").textContent === "Nuovo cliente";
+      chiudiRisorsaCard();
+      return r;
+    });
+    verifica("\"chiama Rita\" a voce: un tasto per chiamarla; \"chiama Rossi\" (due Rossi) decide l'AI; senza numero lo dice", comandi.chiamaVoce && comandi.chiamaDueRossi && comandi.chiamaSenzaNumero, JSON.stringify(comandi));
+    verifica("\"scrivi a Rita Ambrosini\": la sua chat; con il messaggio dentro decide chi viene dopo; \"aggiungi cliente\": la card", comandi.scrivi && comandi.scriviConMessaggio && comandi.nuovoCliente, JSON.stringify(comandi));
+
+    /* ---- Il logo: la O è solo il marchio ---- */
+    const logo = await page.evaluate(() => { const o = document.getElementById("aiClockBtn"); return { tag: o.tagName, cliccabile: o.tagName === "BUTTON" }; });
+    verifica("la \"O\" di EON è solo il marchio (niente funzione AI)", logo.tag === "SPAN" && !logo.cliccabile, JSON.stringify(logo));
+
+    /* ---- Modifica di un appunto nella card ---- */
+    const appunto = await page.evaluate(() => {
+      window.__scritture.length = 0;
+      cantiereAppunti.splice(0, cantiereAppunti.length, { id: "ap1", testo: "Per la caldaia di Baudi portare la chiave", created: new Date().toISOString(), clientId: null });
+      navigateTo("cantiere-appunti"); renderCantiereAppunti();
+      const voce = document.querySelector(".cantiere-appunto-testo");
+      voce.parentElement.click();
+      const campo = document.getElementById("modificaAppuntoCampo");
+      return { card: !!campo, testo: campo && campo.value, mic: !!document.querySelector(".scheda-composer .scheda-mic"), campoPagina: document.getElementById("cantiereAppuntiCampo").value };
+    });
+    verifica("tocco su un appunto: si apre la card con il testo, il microfono e Salva (la casella della pagina resta libera)", appunto.card && appunto.testo === "Per la caldaia di Baudi portare la chiave" && appunto.mic && appunto.campoPagina === "", JSON.stringify(appunto));
+    await page.fill("#modificaAppuntoCampo", "Per la caldaia di Baudi portare chiave e sportello 12");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(200);
+    const salvato = await page.evaluate(() => ({ scritto: window.__scritture.filter((w) => w.tabella === "cantiere_appunti"), inLista: document.querySelector(".cantiere-appunto-testo").textContent, card: document.getElementById("risorsaOverlay").style.display !== "none" }));
+    verifica("Salva: appunto aggiornato, card chiusa", salvato.scritto.length === 1 && salvato.scritto[0].id === "ap1" && salvato.scritto[0].patch.testo === "Per la caldaia di Baudi portare chiave e sportello 12" && salvato.inLista === "Per la caldaia di Baudi portare chiave e sportello 12" && !salvato.card, JSON.stringify(salvato));
 
     await page.screenshot({ path: path.join(require("os").tmpdir(), "eon-pacchetto.png") });
     verifica("nessun errore nella pagina", errori.length === 0, JSON.stringify(errori));
