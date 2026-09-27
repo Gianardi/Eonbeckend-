@@ -4440,3 +4440,18 @@ Da fare dopo (deciso con Andrea, in quest'ordine da concordare):
 - Traffico in tempo reale dentro EON.
 - Cresci: oggi "Lavori in corso" per scelta di Andrea (25/09); da riempire o
   togliere dalla barra prima della vendita.
+
+### Più semplice: un microfono e una casella (27/09/2026, sera)
+
+Andrea, dopo il merge: "troppo assembramento e cose doppie… un microfono e uno
+spazio per scrivere… crea preventivo solo in preventivo e crea fatture solo in
+fatture".
+- **Clienti**: tolta la seconda casella (ricerca) e la frase d'aiuto. Una sola
+  casella: mentre scrivi filtra la lista, se invii EON aggiunge o aggiorna il
+  cliente. Restano i filtri per stato.
+- **Fatture / Preventivi**: tolti i due tasti grandi e la frase d'aiuto. Un
+  microfono e una casella: in Fatture quello che dici diventa una fattura, in
+  Preventivi un preventivo, anche senza dire la parola
+  (`completaFraseDocumento`, via l'aggancio `preparaTesto` di collegaMicTesto).
+- Test: `eval/pacchetto-27-09.test.js` (+4), aggiornati `fatture` e
+  `scorri-pagine` (il gesto non parte dalla striscia dei filtri).

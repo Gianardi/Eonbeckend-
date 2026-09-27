@@ -208,7 +208,7 @@ async function main() {
       navigateTo("fatture-preventivi");
       return document.getElementById("fpLista").textContent;
     });
-    verifica("senza documenti: spiega come crearli", /Chiedilo a EON/.test(vuoto), vuoto);
+    verifica("senza documenti: spiega come crearli", /Dillo qui sopra/.test(vuoto), vuoto);
   } finally {
     await browser.close();
     server.kill();

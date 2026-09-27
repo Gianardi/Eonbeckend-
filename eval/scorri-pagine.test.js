@@ -42,7 +42,8 @@ async function main() {
       const pagina = document.querySelector(".page.visible");
       for (let y = 160; y < 760; y += 20) {
         const el = document.elementFromPoint(200, y);
-        if (el && pagina.contains(el) && !el.closest("input, textarea, select, button, .scorri-wrap")) return y;
+        // non da una striscia che scorre in orizzontale (es. i filtri di Clienti): lì l'app giustamente non cambia pagina
+        if (el && pagina.contains(el) && !el.closest("input, textarea, select, button, .scorri-wrap, .cl-filtri, .home-hero-textwrap")) return y;
       }
       return 300;
     });

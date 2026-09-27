@@ -5,7 +5,8 @@
      l'indirizzo se manca e lo ricorda;
    - Privacy e dati in Impostazioni, con "Scarica i miei dati";
    - Elettricista al posto di Avvocato;
-   - Fatture e preventivi: tasti "Nuovo preventivo / Nuova fattura" e dettatura;
+   - Fatture e preventivi: un microfono e una casella (in Fatture si crea una
+     fattura, in Preventivi un preventivo);
    - Clienti in un'unica lista con i filtri per stato; la scheda ha Portami lì
      e Archivia;
    - avvisi nello stile delle card; notifica del messaggio ricevuto con
@@ -109,10 +110,10 @@ async function main() {
     lista = await page.evaluate(() => [...document.querySelectorAll("#clientArchiveList .row-name")].map((e) => e.textContent));
     verifica("filtro Preventivo: solo Bar Centrale", JSON.stringify(lista) === '["Bar Centrale"]', JSON.stringify(lista));
     await page.click("#clientiFiltri .cl-filtro:nth-child(1)");
-    await page.fill("#clientSearchInput", "ambro");
+    await page.fill("#clientiHeroCampo", "ambro");
     lista = await page.evaluate(() => [...document.querySelectorAll("#clientArchiveList .row-name")].map((e) => e.textContent));
-    verifica("cerca \"ambro\": Rita Ambrosini", JSON.stringify(lista) === '["Rita Ambrosini"]', JSON.stringify(lista));
-    await page.fill("#clientSearchInput", "");
+    verifica("la stessa casella cerca mentre scrivi: \"ambro\" → Rita Ambrosini", JSON.stringify(lista) === '["Rita Ambrosini"]', JSON.stringify(lista));
+    await page.fill("#clientiHeroCampo", "");
     const nuovo = await page.evaluate(() => { document.getElementById("addClientBtn").click(); const campi = [...document.querySelectorAll("#sheetBody [data-field]")].map((e) => e.dataset.field); closeSheet(); return campi; });
     verifica("\"Nuovo cliente\": il modulo ha anche l'Indirizzo", nuovo.includes("address") && nuovo.includes("phone"), JSON.stringify(nuovo));
 
@@ -205,22 +206,24 @@ async function main() {
     verifica("\"Scarica i miei dati\": un file con clienti, messaggi e il resto", /^eon-i-miei-dati-\d{4}-\d\d-\d\d\.json$/.test(privacy.file) && privacy.clienti[0].name === "Rita Ambrosini" && privacy.messaggi[0].body === "Ciao" && privacy.account === "a@b.it", JSON.stringify(privacy));
     await page.evaluate(() => chiudiRisorsaCard());
 
-    /* ---- Fatture e preventivi: nuovo documento ---- */
-    const fp = await page.evaluate(async () => {
+    /* ---- Fatture e preventivi: un microfono e una casella ---- */
+    const fp = await page.evaluate(() => {
+      filtroFatturePreventivi = "fattura";
       navigateTo("fatture-preventivi");
-      let inviato = null;
-      document.getElementById("fpSend").addEventListener("click", () => { inviato = document.getElementById("fpCampo").value; }, { capture: true });
-      document.getElementById("fpNuovoPreventivo").click();
-      const domanda = [...document.querySelectorAll(".scheda-bolla")].pop().textContent;
-      return { domanda, tasti: !!document.getElementById("fpNuovaFattura") && !!document.getElementById("fpMic"), get inviato() { return inviato; } };
+      return {
+        tastiGrandi: document.querySelectorAll("#fpNuovoPreventivo, #fpNuovaFattura, .fp-nuovo").length,
+        mic: !!document.getElementById("fpMic"), campi: document.querySelectorAll("#page-fatture-preventivi textarea, #page-fatture-preventivi input[type=text], #page-fatture-preventivi input[type=search]").length,
+        segnaposto: document.getElementById("fpCampo").placeholder,
+        fattura: completaFraseDocumento("Rossi, bagno, 300 euro"),
+        esplicito: completaFraseDocumento("preventivo per Bianchi 200"),
+      };
     });
-    verifica("\"Nuovo preventivo\": EON chiede per chi e cosa", /Per chi è il preventivo/.test(fp.domanda) && fp.tasti, JSON.stringify(fp));
-    await page.evaluate(() => { window.__fpInviato = null; document.getElementById("fpSend").addEventListener("click", () => { window.__fpInviato = document.getElementById("fpCampo").value; }, { capture: true }); });
-    await page.fill("#conversazioneCardCampo", "Rossi, rifacimento bagno, 3.000 euro");
-    await page.keyboard.press("Enter");
-    await page.waitForTimeout(150);
-    const inviato = await page.evaluate(() => window.__fpInviato);
-    verifica("…e lo manda a EON come \"Preventivo per Rossi, …\"", inviato === "Preventivo per Rossi, rifacimento bagno, 3.000 euro", String(inviato));
+    verifica("Fatture: un microfono e una casella, niente tasti doppi", fp.tastiGrandi === 0 && fp.mic && fp.campi === 1 && /Nuova fattura/.test(fp.segnaposto), JSON.stringify(fp));
+    verifica("in Fatture \"Rossi, bagno, 300 euro\" diventa una fattura", fp.fattura === "Fattura per Rossi, bagno, 300 euro" && fp.esplicito === "preventivo per Bianchi 200", JSON.stringify(fp));
+    const pv = await page.evaluate(() => { filtroFatturePreventivi = "preventivo"; navigateTo("fatture-preventivi"); return { segnaposto: document.getElementById("fpCampo").placeholder, frase: completaFraseDocumento("per Rossi, tetto, 5.000") }; });
+    verifica("in Preventivi diventa un preventivo", /Nuovo preventivo/.test(pv.segnaposto) && pv.frase === "Preventivo per Rossi, tetto, 5.000", JSON.stringify(pv));
+    const clientiCampi = await page.evaluate(() => { navigateTo("clienti"); return { campi: document.querySelectorAll("#page-clienti textarea, #page-clienti input[type=text], #page-clienti input[type=search]").length, mic: document.querySelectorAll("#page-clienti .home-hero-mic").length }; });
+    verifica("Clienti: un microfono e una casella (che fa anche da ricerca)", clientiCampi.campi === 1 && clientiCampi.mic === 1, JSON.stringify(clientiCampi));
 
     /* ---- Avvisi nello stile delle card ---- */
     const avviso = await page.evaluate(() => {
