@@ -4369,3 +4369,16 @@ nell'app (in secondo piano il telefono la mette in pausa).
   (servono le notifiche push: progetto a parte, da mettere in fila).
 - Test: `eval/analisi-chat.test.mjs` (19), `eval/chat-foto.test.js` (15),
   `eval/portale.test.js` (+1).
+
+### Chat: dopo l'invio resta sull'ultimo messaggio (27/09/2026)
+
+Andrea: "quando invio il messaggio la chat rimane alta e non concentrata sul
+messaggio che ho inviato". Due cause: il messaggio compariva solo al ritorno
+dal tempo reale; le foto (caricate un attimo dopo) crescendo spingevano tutto
+in su (nella prova: 880 pixel sopra l'ultimo messaggio).
+- Il messaggio compare appena salvato (la riga vera, con il suo id: niente
+  doppioni quando arriva anche dal tempo reale), e da lì parte l'analisi.
+- `tieniInFondo`: finché le foto arrivano (fino a 10 secondi) la chat torna in
+  fondo, a meno che l'utente non stia già scorrendo. Anche nella pagina del
+  cliente.
+- Test: `eval/chat-foto.test.js` (+3, con screenshot).
