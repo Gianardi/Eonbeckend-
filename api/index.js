@@ -5210,9 +5210,19 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
      lo scambio "lunedì alle 16" -> "ok" che questa analisi deve vedere. */
   const [messaggiGrezzi, tuttiGliAppuntamenti, clientiTrovati] = await Promise.all([
     db(`messages?select=id,sender,body,created_at&conversation_id=eq.${conversazione.id}&event_type=is.null&deleted_at=is.null&order=created_at.desc&limit=20`, { method: "GET" }, ctx.accessToken),
-    db(`messages?select=id,title,body,scheduled_at&conversation_id=eq.${conversazione.id}&event_type=eq.appt&deleted_at=is.null&order=created_at.asc`, { method: "GET" }, ctx.accessToken),
+    db(`messages?select=id,title,body,scheduled_at,created_at&conversation_id=eq.${conversazione.id}&event_type=eq.appt&deleted_at=is.null&order=created_at.asc`, { method: "GET" }, ctx.accessToken),
     db(`clients?select=*&name=eq.${encodeURIComponent(conversazione.contact_name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken),
   ]);
+
+  /* Si analizza solo quando è appena arrivato un messaggio con del testo
+     (27/09/2026, Gianardi: una foto mandata a Rita Ambrosini ha fatto
+     rileggere una chat di agosto, "ci vediamo mercoledì ore 10?" —
+     "Perfetto", e spostare l'appuntamento di lunedì a giovedì). Una foto,
+     un vocale, un documento senza testo, o un messaggio vecchio non
+     portano niente di nuovo da capire. */
+  const ultimo = (messaggiGrezzi || [])[0];
+  if (!ultimo || !ultimo.body || !ultimo.body.trim()) return send(res, 200, { azioni: [] });
+  if (ultimo.created_at && Date.now() - new Date(ultimo.created_at).getTime() > 15 * 60 * 1000) return send(res, 200, { azioni: [] });
 
   const recenti = (messaggiGrezzi || []).filter((m) => m.body && m.body.trim()).slice(0, 6).reverse();
   if (recenti.length === 0) return send(res, 200, { azioni: [] });
@@ -5267,6 +5277,16 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
 
     const riferito = esistenti.length ? esistenti[esistenti.length - 1] : null;
 
+    /* Un appuntamento si sposta o si annulla solo per messaggi scritti
+       DOPO che è stato fissato: quello che ci si era detti prima (magari
+       settimane fa, per un altro incontro) non lo tocca. */
+    const dopoIlRiferito = (m) => !riferito || !riferito.created_at || !m || !m.created_at ||
+      new Date(m.created_at).getTime() > new Date(riferito.created_at).getTime();
+    const msgChePropone = msgProposta || recenti[recenti.length - 1];
+    if (riferito && (azione === "sposta" || azione === "annulla") && !dopoIlRiferito(msgChePropone)) {
+      return send(res, 200, { azioni });
+    }
+
     /* Da qui in giù, come nella versione originale: quasi ogni ramo
        chiude la richiesta subito (un messaggio che tocca un appuntamento
        non controlla anche attività/cambio-stato nello stesso giro) —
@@ -5304,6 +5324,9 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
     }
 
     if (azione === "sposta" && riferito) {
+      /* Stessa data e stesso titolo: non c'è niente da spostare */
+      const stessaData = !quandoIso || (riferito.scheduled_at && new Date(quandoIso).getTime() === new Date(riferito.scheduled_at).getTime());
+      if (stessaData && (!app.titolo || app.titolo === riferito.title)) return send(res, 200, { azioni });
       const esito = await TOOLS.sposta_impegno.run({ id: riferito.id, nuovo_quando_iso: quandoIso || riferito.scheduled_at }, ctx);
       /* Come nella versione precedente: se insieme allo spostamento
          cambia anche il titolo, lo aggiorniamo — sposta_impegno da solo

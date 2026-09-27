@@ -215,6 +215,19 @@ con Annulla, stato vuoto.
 NODE_PATH=/opt/node22/lib/node_modules node eval/calendario.test.js
 ```
 
+### `chat-foto.test.js` e `analisi-chat.test.mjs` — chat con il cliente, girano subito
+
+Chat lunga senza messaggi schiacciati, foto ridotta e visibile subito,
+l'avviso di uno spostamento con il nome una volta sola; l'analisi della
+chat non parte per una foto o per messaggi vecchi, e non sposta un
+appuntamento per cose dette prima che fosse fissato (il caso di Rita
+Ambrosini, 27/09/2026).
+
+```
+NODE_PATH=/opt/node22/lib/node_modules node eval/chat-foto.test.js
+node eval/analisi-chat.test.mjs
+```
+
 ### `live-check.js` — parte che richiede l'AI vera, non ancora eseguita
 
 Copre tutto il resto: riconoscimento dell'intento, ambiguità, clienti

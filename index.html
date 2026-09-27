@@ -1391,7 +1391,9 @@
   }
   .chat-item:hover{ background:rgba(20,23,29,.035); }
   /* Scorri a sinistra per eliminare (chat e messaggi) */
-  .scorri-wrap{ position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; }
+  /* flex-shrink:0: dentro la chat (una colonna che scorre) una riga con
+     overflow:hidden si lascerebbe schiacciare quando i messaggi sono tanti */
+  .scorri-wrap{ position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; flex-shrink:0; }
   .scorri-contenuto{ position:relative; z-index:1; touch-action:pan-y; }
   .chat-list .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
   .doc-scorri{ margin:6px; }
@@ -5204,13 +5206,17 @@ async function analyzeMessage(msg, chat){
     await Promise.all([loadUserDataFromDB(), loadChatsFromDB()]);
     renderCalendar(); renderChatWindow(); renderTasks(); renderRing(); renderDifficulty();
 
+    /* "Appuntamento con Rita Ambrosini" + " con Rita Ambrosini": il nome
+       si aggiunge solo se il titolo non lo dice già */
+    const conChi = t => String(t || "Appuntamento") +
+      (String(t || "").toLowerCase().includes(String(chat.name || "").toLowerCase()) ? "" : " con " + chat.name);
     for(const a of risposta.azioni){
       if(a.tool === "crea_impegno"){
         showAIToast("Appuntamento confermato",
-          a.esito.titolo + " con " + chat.name + "\n" + a.esito.quando_visualizzato + "\nLo trovi in Calendario.");
+          conChi(a.esito.titolo) + "\n" + a.esito.quando_visualizzato + "\nLo trovi in Calendario.");
       } else if(a.tool === "sposta_impegno"){
-        showAIToast("Appuntamento confermato",
-          a.esito.titolo + " con " + chat.name + " spostato a " + a.esito.quando_visualizzato + ". Aggiornato in Calendario.");
+        showAIToast("Appuntamento spostato",
+          conChi(a.esito.titolo) + ": ora è " + a.esito.quando_visualizzato + ". Aggiornato in Calendario.");
       } else if(a.tool === "annulla_impegno"){
         showAIToast("Appuntamento annullato", a.esito.titolo + " tolto dal calendario.");
       }
@@ -5432,7 +5438,7 @@ function subscribeToMessages(){
 
         /* L'AI rilegge le ultime battute, da qualunque lato arrivi il
            messaggio: cosi' capisce anche "ci vediamo lunedi" -> "ok". */
-        if(!m.event_type) analyzeMessage(m, chat);
+        if(!m.event_type && m.body && m.body.trim()) analyzeMessage(m, chat); // una foto o un vocale senza testo: niente da capire
       })
     .subscribe();
 }
@@ -12553,6 +12559,7 @@ async function inviaAllegato(file){
   const chat = chats[activeChatIndex];
   const tipo = tipoAllegato(file);
   const limite = LIMITI_MB[tipo];
+  if(tipo === "foto") file = await comprimiImmagine(file, { lato: 1600, qualita: 0.82 }); // foto più leggera: parte subito
 
   if(file.size > limite*1024*1024){
     showAILanding("File troppo pesante",
@@ -12569,6 +12576,9 @@ async function inviaAllegato(file){
   btn.disabled = true;
   mostraCaricamento("Sto inviando " + file.name + " (" + pesoLeggibile(file.size) + ")…", 20);
   try{
+    /* Foto (27/09/2026): è già ridotta sopra (da 3-5 MB a qualche centinaio
+       di KB, ben nitida sul telefono), e nella chat si vede subito la copia
+       che è già sul telefono, senza aspettare di riscaricarla. */
     const percorso = currentSession.user.id + "/" + nomeFileSicuro(file.name);
     mostraCaricamento("Sto inviando " + file.name + "…", 55);
     const { error: upErr } = await supabaseClient.storage
@@ -12576,6 +12586,7 @@ async function inviaAllegato(file){
     if(upErr) throw upErr;
     mostraCaricamento("Quasi fatto…", 85);
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+    if(tipo === "foto" && window.EonFile && window.URL && URL.createObjectURL) EonFile.anteprima(pub.publicUrl, URL.createObjectURL(file));
     const { error: msgErr } = await supabaseClient.from("messages").insert({
       conversation_id: chat.id, sender:"me", body:"",
       file_url: pub.publicUrl, file_name: file.name, file_type: file.type

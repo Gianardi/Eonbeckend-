@@ -4282,3 +4282,33 @@ privato, il server controlla chi chiede e dà un link che scade.
   smettono di funzionare dopo l'interruttore.
 - Test: `eval/file-privati.test.mjs` (9, permessi), `eval/file-privati-app.test.js`
   (10, app e pagina del cliente); aggiornati foto e percorso-rapido.
+- **Interruttore applicato** (27/09/2026, 11:44): bucket `eon-files` privato in
+  produzione, dopo aver visto nei registri il nuovo sistema al lavoro (foto
+  caricata da Andrea → `POST /object/sign` 200 → foto aperta con link firmato).
+  Andrea ha riaperto la pagina: la foto si vede. Non verificato da qui
+  (rete bloccata): che il vecchio indirizzo pubblico dia errore, e la pagina
+  del cliente in produzione (provata solo nei test).
+
+### Chat con il cliente: foto, messaggi schiacciati, spostamento sbagliato (27/09/2026)
+
+Prova di Andrea con Rita Ambrosini: "molto lento nell'invio foto… non mi
+torna per chi è… tutto compresso così che non si vede bene".
+- **Messaggi schiacciati**: con tanti messaggi, le righe "scorri per
+  eliminare" (`.scorri-wrap`, `overflow:hidden`) si restringevano dentro la
+  colonna della chat (alte 10 pixel invece di 80). Ora `flex-shrink:0`.
+- **Foto lenta**: partiva l'originale del telefono (3-5 MB). Ora si riduce
+  prima (lato 1600, JPEG 0,82: qualche centinaio di KB, nitida sul
+  telefono), sia dall'app sia dalla pagina del cliente, e nella chat si
+  vede subito la copia già sul telefono (`EonFile.anteprima`).
+- **"Per chi è"**: mandare la foto faceva partire l'analisi della chat, che
+  ha riletto uno scambio di agosto ("ci vediamo mercoledì ore 10?" —
+  "Perfetto") e ha spostato DA SOLA l'appuntamento con Rita da lun 28 set
+  11:00 a gio 1 ott 10:00 (registro `ai_audit_log`, stato `auto_da_chat`).
+  Ora: niente analisi per foto/vocali/documenti senza testo né per messaggi
+  vecchi (oltre 15 minuti); un appuntamento si sposta o si annulla solo per
+  messaggi scritti dopo che è stato fissato; stessa data → niente. L'avviso
+  dice "Appuntamento spostato" e il nome del cliente una volta sola.
+- **Dati di Andrea**: l'appuntamento con Rita è ancora su gio 1 ott 10:00
+  (spostato per errore). Da rimettere a lun 28 set 11:00 solo se lui dice sì.
+- Test: `eval/chat-foto.test.js` (9), `eval/analisi-chat.test.mjs` (5; con il
+  codice di prima 4 su 5 falliscono, cioè riproducono il problema).
