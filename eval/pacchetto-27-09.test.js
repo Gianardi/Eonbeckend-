@@ -283,6 +283,63 @@ async function main() {
       return r;
     });
     verifica("solo il nome della pagina (\"Messaggi\", \"calendario\"…): si apre subito", Object.values(senzaAI).every(Boolean), JSON.stringify(senzaAI));
+
+    /* ---- Il nome di una pagina funziona per TUTTE le pagine e da OGNI casella ---- */
+    const tutteLePagine = await page.evaluate(() => {
+      const casi = [["Chiamate", "chiamate"], ["chi devo chiamare", "chiamate"], ["Cestino", "cestino"], ["spazzatura", "cestino"],
+        ["Impostazione", "impostazioni"], ["Profilo", "impostazioni"], ["Menu", "gestisci-azienda"], ["Compiti", "assegna-compiti"],
+        ["Squadra", "assegna-compiti"], ["Registro", "ai-request-log"], ["Assemblee", "assemblee"], ["Cresci", "cresci"],
+        ["messaggio", "chat"], ["Appuntamento", "calendario"], ["Preventivo", "fatture-preventivi"], ["Documenti", "cantiere-documenti"],
+        ["Foto", "cantiere-foto"], ["Appunti", "cantiere-appunti"], ["Lettere", "crea-lettera"], ["Pagamenti", "pagamenti"],
+        ["Entrate", "entrate"], ["Conti", "azienda"], ["Casa", "home"], ["apri le chiamate", "chiamate"], ["Chiamate per favore", "chiamate"]];
+      const sbagliati = [];
+      for (const [frase, pagina] of casi) {
+        navigateTo("clienti");
+        const ok = provaNavigazioneDiretta(frase) && document.querySelector(".page.visible").id === "page-" + pagina;
+        if (!ok) sbagliati.push(frase + " → " + document.querySelector(".page.visible").id);
+      }
+      navigateTo("home");
+      for (const frase of ["Chiama Rita", "Cestino di Rita", "appuntamento con Rita domani"]) if (provaNavigazioneDiretta(frase)) sbagliati.push("intercettato: " + frase);
+      provaNavigazioneDiretta("Privacy");
+      const privacy = document.getElementById("risorsaTitolo").textContent;
+      chiudiRisorsaCard();
+      return { sbagliati, privacy };
+    });
+    verifica("tutte le pagine per nome (Chiamate, Cestino, Impostazione, Menu, Compiti, Registro…) e \"Privacy\" apre la sua voce", tutteLePagine.sbagliati.length === 0 && tutteLePagine.privacy === "Privacy e dati", JSON.stringify(tutteLePagine));
+
+    const pagina = () => page.evaluate(() => document.querySelector(".page.visible").id.replace("page-", ""));
+    const nascondiGuide = () => page.evaluate(() => document.querySelectorAll(".ai-landing-overlay").forEach((o) => { o.style.display = "none"; }));
+    const daCaselle = {};
+    await page.evaluate(() => navigateTo("home"));
+    await nascondiGuide();
+    await page.fill("#homeHeroCampo", "Chiamate");
+    await page.click("#homeHeroSend");
+    daCaselle.home = (await pagina()) === "chiamate";
+    await page.evaluate(() => { navigateTo("fatture-preventivi"); filtroFatturePreventivi = "fattura"; });
+    await nascondiGuide();
+    await page.fill("#fpCampo", "Cestino");
+    await page.click("#fpSend");
+    daCaselle.fatture = (await pagina()) === "cestino";
+    await page.evaluate(() => navigateTo("cantiere-appunti"));
+    await nascondiGuide();
+    await page.fill("#cantiereAppuntiCampo", "Impostazione");
+    await page.click("#cantiereAppuntiSend");
+    daCaselle.appunti = (await pagina()) === "impostazioni";
+    await page.evaluate(() => { navigateTo("clienti"); mostraSchedaCliente({ id: "c1", name: "Rita Ambrosini", status: "attivo", value: 0, desc: "", phone: "333 1234567", email: "", address: "", archived: false }); });
+    await page.fill("#schedaClienteCampo", "Calendario");
+    await page.keyboard.press("Enter");
+    daCaselle.schedaCliente = (await pagina()) === "calendario" && (await page.evaluate(() => document.getElementById("risorsaOverlay").style.display === "none"));
+    daCaselle.risposte = [];
+    await page.evaluate(() => { navigateTo("home"); apriConversazioneCard("Metti Rita", "Lo segno in calendario o negli appunti?", (t) => window.__risposte.push(t)); });
+    await page.evaluate(() => { window.__risposte = []; });
+    await page.fill("#conversazioneCardCampo", "Calendario");
+    await page.keyboard.press("Enter");
+    daCaselle.parolaDellaDomanda = (await pagina()) === "home" && (await page.evaluate(() => window.__risposte.join())) === "Calendario";
+    await page.evaluate(() => { chiudiRisorsaCard(); apriConversazioneCard("Metti Rita", "A che ora?", (t) => window.__risposte.push(t)); window.__risposte = []; });
+    await page.fill("#conversazioneCardCampo", "Chiamate");
+    await page.keyboard.press("Enter");
+    daCaselle.cardConDomanda = (await pagina()) === "chiamate" && (await page.evaluate(() => window.__risposte.length === 0 && document.getElementById("risorsaOverlay").style.display === "none"));
+    verifica("il nome della pagina funziona da ogni casella: Home, Fatture, Appunti, scheda cliente, card con domanda di EON (se la parola era nella domanda, è la risposta)", daCaselle.home && daCaselle.fatture && daCaselle.appunti && daCaselle.schedaCliente && daCaselle.parolaDellaDomanda && daCaselle.cardConDomanda, JSON.stringify(daCaselle));
     const comandi = await page.evaluate(async () => {
       clients.splice(0, clients.length,
         { id: "c1", name: "Rita Ambrosini", status: "attivo", value: 0, desc: "", phone: "333 1234567", email: "", address: "", archived: false },
