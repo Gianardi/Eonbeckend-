@@ -4236,3 +4236,25 @@ Rossi" non è un invio (è un documento nuovo). Anche l'Email dalla scheda del
 documento ora ha l'indirizzo del cliente.
 Test: `eval/invio-privacy.test.js` (19); aggiornati account, faceid,
 impostazioni.
+
+### Da fare: ogni artigiano rinomina le sue cartelle (Andrea, 27/09/2026)
+
+Idea nata parlando dei tester ("vorrei che questa cartella si chiamasse
+così"): tenendo premuto sul titolo di una cartella/sezione, l'artigiano la
+rinomina solo per sé (salvato nel profilo, sopra i nomi della professione in
+`professionData`). Così i cambi di nome non passano da noi. Lavoro piccolo.
+Regola per le richieste dei tester: si fa quando la chiedono in tanti della
+stessa professione o se rafforza un pilastro; i feedback arrivano in Admin.
+
+### Dalle prove di Andrea del 26/09 sera (registri) — 27/09/2026
+
+- "Voglio cambiare e-mail" andava all'AI: il trattino di "e-mail" non era
+  riconosciuto → `normalizzaComando` legge "e-mail" come "email".
+- "Invia preventivo Lombardi" (senza "a") non era capito → il nome può
+  venire subito dopo "preventivo"/"fattura".
+- "Invia preventivo Michele Possa a …@…": l'indirizzo scritto nella frase
+  non era usato → email o numero nella frase = destinatario (Mail per
+  quell'indirizzo, WhatsApp a quel numero).
+- Parole dopo "invia il preventivo" che non sono un cliente ("di ieri") →
+  la frase va all'AI come prima, invece di "non trovo".
+Test in `eval/invio-privacy.test.js` e `eval/azioni-dirette.test.js`.

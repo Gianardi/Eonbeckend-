@@ -113,8 +113,24 @@ async function main() {
     const chat = await page.evaluate(() => ({ attiva: activeChatIndex !== null && chats[activeChatIndex] && chats[activeChatIndex].name, testo: (document.getElementById("chatInput") || {}).value }));
     verifica("cliente senza telefono né email: la chat EON con il messaggio pronto", chat.attiva === "Sara Dini" && /il preventivo n\. 3\/2026/.test(chat.testo || ""), JSON.stringify(chat));
 
+    await chiedi("Invia preventivo Rossi");
+    aperti = await page.evaluate(() => window.__aperti.slice());
+    verifica("\"Invia preventivo Rossi\" (senza \"a\", prova di Andrea): WhatsApp con il preventivo di Rossi", aperti.length === 1 && decodeURIComponent(aperti[0]).includes("il preventivo n. 2/2026"), JSON.stringify(aperti));
+
+    await chiedi("Invia preventivo Sara Dini a sara.dini@gmail.com");
+    const mail2 = await page.evaluate(() => window.__mail.slice());
+    verifica("\"… a sara.dini@gmail.com\" (indirizzo nella frase, prova di Andrea): Mail per quell'indirizzo", mail2.length === 1 && mail2[0].startsWith("mailto:sara.dini@gmail.com?subject=") && decodeURIComponent(mail2[0]).includes("Preventivo n. 3/2026"), JSON.stringify(mail2));
+
+    await chiedi("manda la fattura di Rossi al 347 1112223");
+    aperti = await page.evaluate(() => window.__aperti.slice());
+    verifica("\"… al 347 1112223\": WhatsApp a quel numero", aperti.length === 1 && aperti[0].startsWith("https://wa.me/393471112223?text="), JSON.stringify(aperti));
+
     await chiedi("invia la fattura a Bianchi");
-    verifica("documento che non c'è: lo dice, senza AI", /Non trovo una fattura per Bianchi/.test(await page.textContent("body")));
+    verifica("\"invia la fattura a Bianchi\" (Bianchi non è un cliente): va avanti come prima, niente aperto", (await page.evaluate(() => window.__aperti.length + window.__mail.length)) === 0);
+
+    await page.evaluate(() => { clients.push({ id: "c3", name: "Luca Bianchi", status: "attivo", value: 0, archived: false, phone: "", email: "" }); });
+    await chiedi("invia la fattura a Bianchi");
+    verifica("cliente senza quel documento: lo dice, senza AI", /Non trovo una fattura per Bianchi/.test(await page.textContent("body")));
 
     await chiedi("manda la fattura da 500 a Rossi");
     verifica("\"manda la fattura da 500 a Rossi\" (un documento nuovo): non è un invio, va avanti come prima", (await page.evaluate(() => window.__aperti.length + window.__mail.length)) === 0);
@@ -157,7 +173,7 @@ async function main() {
     const cliente = await (await fetch(`http://localhost:${PORT}/cliente.html`)).text();
     verifica("pagina del cliente: riga sulla privacy con il link", /class="privacy-cliente"/.test(cliente) && /href="\/privacy#clienti"/.test(cliente));
 
-    verifica("nessuna chiamata all'AI per gli invii", aiInvio <= 1, String(aiInvio)); // l'unica possibile: "fattura da 500", che non è un invio
+    verifica("nessuna chiamata all'AI per gli invii", aiInvio <= 2, String(aiInvio)); // le uniche: "fattura da 500" e "Bianchi" quando non era un cliente, che non sono invii
     verifica("nessun errore nella pagina", erroriPagina.length === 0, JSON.stringify(erroriPagina));
   } finally {
     await browser.close();
