@@ -4756,6 +4756,7 @@ async function loadChatsFromDB(){
       archived: c.is_archived,
       toSeeToday: c.to_see_today,
       toCallToday: c.to_call_today,
+      ultimoAnalizzato: c.ultimo_analizzato || null, // l'ultimo messaggio già letto da EON
       messages: msgs
     });
   });
@@ -5150,7 +5151,7 @@ let pendingSuggestions = [];
    stesse funzioni autorizzate e tracciate del motore assistente. Qui
    restano solo la chiamata e come mostrare il risultato — le regole
    di quando agire da sola o chiedere conferma sono invariate. */
-async function analyzeMessage(msg, chat){
+async function analyzeMessage(msg, chat, recupero){
   if(!msg || !chat || !chat.id) return;
   if(!BACKEND_CONFIGURED || !currentSession) return;
 
@@ -5159,7 +5160,7 @@ async function analyzeMessage(msg, chat){
     const response = await fetch(ANALIZZA_MESSAGGIO_ENDPOINT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
-      body: JSON.stringify({ conversation_id: chat.id })
+      body: JSON.stringify({ conversation_id: chat.id, recupero: !!recupero })
     });
     const dati = await response.json();
     if(!response.ok) throw new Error(dati.error || ("il backend ha risposto con errore (" + response.status + ")"));
@@ -5406,42 +5407,88 @@ function subscribeToMessages(){
     .channel("eon-messages")
     .on("postgres_changes",
       { event: "INSERT", schema: "public", table: "messages" },
-      (payload) => {
-        const m = payload.new;
-        const chat = chats.find(c => c.id === m.conversation_id);
-        if(!chat) return;
-        if(chat.messages.some(x => x.id === m.id)) return; // gia' mostrato
-
-        chat.messages.push({
-          id: m.id, from: m.sender,
-          eventType: m.event_type || undefined,
-          title: (m.title && m.title.startsWith("❌")) ? m.title.slice(1).trim() : (m.title || undefined),
-          annullato: !!(m.title && m.title.startsWith("❌")),
-          text: m.body || "",
-          amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
-          fileUrl: m.file_url || undefined,
-      fileName: m.file_name || undefined,
-      docDati: leggiDatiDocumento(m),
-      docTipo: leggiDatiDocumento(m) ? leggiDatiDocumento(m).tipo : undefined,
-      docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
-      createdAt: m.created_at || undefined,
-      fileType: m.file_type || undefined,
-      canale: m.canale || "eon",
-      time: formatMsgTime(m.created_at)
-        });
-        if(m.sender === "them" && chats[activeChatIndex] !== chat) chat.unread++;
-        renderChatList();
-        if(chats[activeChatIndex] === chat) renderChatWindow();
-
-        /* Se e' un appuntamento, il calendario deve aggiornarsi */
-        if(m.event_type) renderCalendar();
-
-        /* L'AI rilegge le ultime battute, da qualunque lato arrivi il
-           messaggio: cosi' capisce anche "ci vediamo lunedi" -> "ok". */
-        if(!m.event_type && m.body && m.body.trim()) analyzeMessage(m, chat); // una foto o un vocale senza testo: niente da capire
-      })
+      (payload) => riceviMessaggio(payload.new, true))
     .subscribe();
 }
+
+/* Un messaggio nuovo nella chat: arrivato in tempo reale, oppure
+   recuperato quando l'app si riapre (vedi recuperaMessaggiPersi). */
+function riceviMessaggio(m, analizza){
+  const chat = chats.find(c => c.id === m.conversation_id);
+  if(!chat) return;
+  if(chat.messages.some(x => x.id === m.id)) return; // gia' mostrato
+
+  chat.messages.push({
+    id: m.id, from: m.sender,
+    eventType: m.event_type || undefined,
+    title: (m.title && m.title.startsWith("❌")) ? m.title.slice(1).trim() : (m.title || undefined),
+    annullato: !!(m.title && m.title.startsWith("❌")),
+    text: m.body || "",
+    amount: m.amount ? "€" + Number(m.amount).toLocaleString("it-IT") : undefined,
+    fileUrl: m.file_url || undefined,
+    fileName: m.file_name || undefined,
+    docDati: leggiDatiDocumento(m),
+    docTipo: leggiDatiDocumento(m) ? leggiDatiDocumento(m).tipo : undefined,
+    docAnno: leggiDatiDocumento(m) ? leggiDatiDocumento(m).anno : undefined,
+    createdAt: m.created_at || undefined,
+    fileType: m.file_type || undefined,
+    canale: m.canale || "eon",
+    time: formatMsgTime(m.created_at)
+  });
+  if(m.sender === "them" && chats[activeChatIndex] !== chat) chat.unread++;
+  renderChatList();
+  if(chats[activeChatIndex] === chat) renderChatWindow();
+
+  /* Se e' un appuntamento, il calendario deve aggiornarsi */
+  if(m.event_type) renderCalendar();
+
+  /* L'AI rilegge le ultime battute, da qualunque lato arrivi il
+     messaggio: cosi' capisce anche "ci vediamo lunedi" -> "ok".
+     Una foto o un vocale senza testo: niente da capire. */
+  if(analizza && !m.event_type && m.body && m.body.trim()){
+    chat.ultimoAnalizzato = m.id;
+    analyzeMessage(m, chat);
+  }
+}
+
+/* Risposte mai perse (27/09/2026, Gianardi: "ci vediamo martedì 14:30?" —
+   "Ok", e non ha segnato niente). Il tempo reale arriva solo ad app
+   aperta: l'"Ok" di Rita è arrivato mentre Andrea era sulla pagina del
+   cliente, e nessuno l'ha letto. Ora, quando l'app si riapre o torna in
+   primo piano, si recuperano i messaggi arrivati nel frattempo e EON
+   legge l'ultimo di ogni chat, se non l'ha già letto (il server lo
+   ricorda: mai due volte lo stesso). */
+async function recuperaMessaggiPersi(){
+  if(!isDbReady()) return;
+  let ultimo = "";
+  chats.forEach(c => c.messages.forEach(m => { if(m.createdAt && m.createdAt > ultimo) ultimo = m.createdAt; }));
+  if(ultimo){
+    try{
+      const { data } = await supabaseClient.from("messages").select("*")
+        .is("deleted_at", null).gt("created_at", ultimo).order("created_at", { ascending:true });
+      (data || []).forEach(m => riceviMessaggio(m, false));
+    }catch(err){ console.warn("Recupero messaggi non riuscito:", err.message); }
+  }
+  await analizzaRisposteArretrate();
+}
+async function analizzaRisposteArretrate(){
+  if(!isDbReady()) return;
+  const setteGiorni = Date.now() - 7 * 24 * 3600 * 1000;
+  for(const chat of chats){
+    const ultimo = [...chat.messages].reverse().find(m => !m.eventType);
+    if(!ultimo || !ultimo.id || !(ultimo.text || "").trim()) continue;
+    if(ultimo.id === chat.ultimoAnalizzato) continue;
+    if(!ultimo.createdAt || new Date(ultimo.createdAt).getTime() < setteGiorni) continue;
+    chat.ultimoAnalizzato = ultimo.id;
+    await analyzeMessage({ id: ultimo.id }, chat, true);
+  }
+}
+let nascostaDa = 0;
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "hidden"){ nascostaDa = Date.now(); return; }
+  if(nascostaDa && Date.now() - nascostaDa > 3000) recuperaMessaggiPersi();
+  nascostaDa = 0;
+});
 
 /* Chiamata unica e sicura all'AI: passa dal backend (che nasconde la chiave),
    invece di chiamare direttamente api.anthropic.com dal telefono dell'utente. */
@@ -15276,6 +15323,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
         benvenutoDaMostrare = true;
       await loadChatsFromDB();
       subscribeToMessages();
+      analizzaRisposteArretrate(); // risposte arrivate ad app chiusa
       }
 
       const firstName = name.split(" ")[0];
@@ -15299,6 +15347,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       await loadUserDataFromDB();
       await loadChatsFromDB();
       subscribeToMessages();
+      analizzaRisposteArretrate(); // risposte arrivate ad app chiusa
     }
 
     await applyProfession(obSelectedProfession || "artigiano", true);
@@ -15462,6 +15511,7 @@ async function initApp(){
         await loadUserDataFromDB();
       await loadChatsFromDB();
       subscribeToMessages();
+      analizzaRisposteArretrate(); // risposte arrivate ad app chiusa
         await applyProfession(profile.profession, true);
         renderTasks(); renderDifficulty(); renderRing(); renderGoals(); renderAssignedTasks();
         renderPayments(); renderIncomes(); renderInvoices(); renderQuotes(); renderGifts();
