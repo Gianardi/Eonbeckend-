@@ -4282,3 +4282,9 @@ privato, il server controlla chi chiede e dà un link che scade.
   smettono di funzionare dopo l'interruttore.
 - Test: `eval/file-privati.test.mjs` (9, permessi), `eval/file-privati-app.test.js`
   (10, app e pagina del cliente); aggiornati foto e percorso-rapido.
+- **Interruttore applicato** (27/09/2026, 11:44): bucket `eon-files` privato in
+  produzione, dopo aver visto nei registri il nuovo sistema al lavoro (foto
+  caricata da Andrea → `POST /object/sign` 200 → foto aperta con link firmato).
+  Andrea ha riaperto la pagina: la foto si vede. Non verificato da qui
+  (rete bloccata): che il vecchio indirizzo pubblico dia errore, e la pagina
+  del cliente in produzione (provata solo nei test).
