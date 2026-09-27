@@ -6,6 +6,8 @@
    - la foto parte ridotta (qualche centinaio di KB, non 3-5 MB) e nella
      chat si vede subito la copia già sul telefono;
    - una foto mandata non fa partire l'analisi della chat;
+   - una risposta arrivata ad app in secondo piano si recupera alla
+     riapertura, e EON la legge una volta sola;
    - l'avviso di uno spostamento non ripete il nome del cliente.
    Uso: NODE_PATH=/opt/node22/lib/node_modules node eval/chat-foto.test.js */
 
@@ -31,7 +33,7 @@ async function main() {
     const errori = [];
     page.on("pageerror", (e) => errori.push(e.message));
     const analisi = [];
-    await page.route("https://eonbeckend.vercel.app/api?action=analizza_messaggio", (route) => { analisi.push(1); route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ azioni: [] }) }); });
+    await page.route("https://eonbeckend.vercel.app/api?action=analizza_messaggio", (route) => { analisi.push(JSON.parse(route.request().postData() || "{}")); route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ azioni: [] }) }); });
     await page.addInitScript((PUB) => {
       window.__caricati = []; window.__inseriti = [];
       const catena = (tabella) => {
@@ -39,7 +41,8 @@ async function main() {
           update: () => ({ eq: async () => ({ error: null }) }),
           insert: async (riga) => { window.__inseriti.push({ tabella, riga }); return { error: null }; },
           select: () => q, not: () => q, is: () => q, eq: () => q, order: () => q, limit: () => q, in: () => q,
-          then: (ok) => ok({ data: [], error: null }),
+          gt: (col, val) => { window.__dopo = val; return q; },
+          then: (ok) => ok({ data: tabella === "messages" ? (window.__persi || []) : [], error: null }),
         };
         return q;
       };
@@ -111,6 +114,25 @@ async function main() {
     await page.evaluate(() => { window.__tempoReale({ new: { id: "txt1", conversation_id: "33333333-3333-4333-8333-333333333333", sender: "them", event_type: null, body: "Va bene giovedì", created_at: new Date().toISOString() } }); });
     await page.waitForTimeout(300);
     verifica("un messaggio con testo fa partire l'analisi, come prima", analisi.length === 1, String(analisi.length));
+
+    /* L'"Ok" di Rita arriva mentre l'app è in secondo piano (tempo reale
+       perso): alla riapertura si recupera, si vede e EON lo legge */
+    await page.evaluate(() => {
+      window.__persi = [{ id: "ok1", conversation_id: "33333333-3333-4333-8333-333333333333", sender: "them", event_type: null, body: "Ok", created_at: new Date(Date.now() + 1000).toISOString() }];
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => window.__vis || "visible" });
+      window.__vis = "hidden"; document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await page.waitForTimeout(3300);
+    const primaDellaRiapertura = analisi.length;
+    await page.evaluate(() => { window.__vis = "visible"; document.dispatchEvent(new Event("visibilitychange")); });
+    await page.waitForTimeout(500);
+    const dopo = await page.evaluate(() => ({ testi: chats[0].messages.slice(-1).map((m) => m.text), segnato: chats[0].ultimoAnalizzato }));
+    const nuove = analisi.slice(primaDellaRiapertura);
+    verifica("riaperta l'app: l'\"Ok\" arrivato nel frattempo compare nella chat", dopo.testi[0] === "Ok", JSON.stringify(dopo));
+    verifica("…e EON lo legge (una volta, come recupero)", nuove.length === 1 && nuove[0].recupero === true && nuove[0].conversation_id === "33333333-3333-4333-8333-333333333333" && dopo.segnato === "ok1", JSON.stringify(nuove));
+    await page.evaluate(() => { window.__persi = []; return analizzaRisposteArretrate(); });
+    await page.waitForTimeout(200);
+    verifica("già letto: alla riapertura successiva non si rilegge", analisi.length === primaDellaRiapertura + 1, String(analisi.length));
 
     /* L'avviso dello spostamento: il nome una volta sola */
     const toast = await page.evaluate(async () => {

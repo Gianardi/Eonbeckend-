@@ -5214,15 +5214,37 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
     db(`clients?select=*&name=eq.${encodeURIComponent(conversazione.contact_name)}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken),
   ]);
 
-  /* Si analizza solo quando è appena arrivato un messaggio con del testo
+  /* Si analizza solo l'ultimo messaggio arrivato, se ha del testo
      (27/09/2026, Gianardi: una foto mandata a Rita Ambrosini ha fatto
      rileggere una chat di agosto, "ci vediamo mercoledì ore 10?" —
      "Perfetto", e spostare l'appuntamento di lunedì a giovedì). Una foto,
-     un vocale, un documento senza testo, o un messaggio vecchio non
-     portano niente di nuovo da capire. */
+     un vocale, un documento senza testo, o un messaggio di più di 7 giorni
+     fa non portano niente di nuovo da capire. */
   const ultimo = (messaggiGrezzi || [])[0];
   if (!ultimo || !ultimo.body || !ultimo.body.trim()) return send(res, 200, { azioni: [] });
-  if (ultimo.created_at && Date.now() - new Date(ultimo.created_at).getTime() > 15 * 60 * 1000) return send(res, 200, { azioni: [] });
+  if (ultimo.created_at && Date.now() - new Date(ultimo.created_at).getTime() > 7 * 24 * 3600 * 1000) return send(res, 200, { azioni: [] });
+
+  /* Ogni messaggio si legge una volta sola. L'app chiede l'analisi quando
+     il messaggio arriva, e di nuovo quando si riapre (per le risposte
+     arrivate mentre era chiusa): chi arriva primo "prenota" il messaggio,
+     gli altri (un secondo telefono, una ripresa) non rifanno niente.
+     Se la colonna non c'è ancora, si va avanti come prima. */
+  if (conversazione.ultimo_analizzato === ultimo.id) return send(res, 200, { azioni: [] });
+  /* Recupero su una chat mai letta prima (la prima volta dopo questo
+     cambio): la si segna e basta, senza rileggere il passato. */
+  const soloSegna = body.recupero === true && !conversazione.ultimo_analizzato;
+  try {
+    const prenotato = await db(
+      `conversations?id=eq.${conversazione.id}&or=(ultimo_analizzato.is.null,ultimo_analizzato.neq.${ultimo.id})`,
+      { method: "PATCH", body: JSON.stringify({ ultimo_analizzato: ultimo.id }), headers: { Prefer: "return=representation" } },
+      ctx.accessToken
+    );
+    if (Array.isArray(prenotato) && prenotato.length === 0) return send(res, 200, { azioni: [] });
+  } catch (err) {
+    console.warn("Prenotazione analisi non riuscita:", err.message);
+    if (body.recupero === true) return send(res, 200, { azioni: [] }); // senza memoria, il recupero non rilegge niente
+  }
+  if (soloSegna) return send(res, 200, { azioni: [] });
 
   const recenti = (messaggiGrezzi || []).filter((m) => m.body && m.body.trim()).slice(0, 6).reverse();
   if (recenti.length === 0) return send(res, 200, { azioni: [] });
@@ -5260,7 +5282,11 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
     let azione = app.azione || "nuovo";
     const quandoIso = eIso(app.quando_iso) ? app.quando_iso : null;
 
-    if (azione === "nuovo" && esistenti.length > 0) azione = "sposta";
+    /* Prima un "nuovo" con un appuntamento già in calendario diventava
+       sempre "sposta": così un secondo appuntamento concordato in chat
+       (27/09/2026, Andrea: "martedì 14:30?" — "Ok") avrebbe spostato in
+       silenzio quello che c'era. Ora decide chi legge la chat (le regole
+       sopra gli dicono già: se si cambia giorno od ora è "sposta"). */
 
     const nProposta = Number(app.messaggioProposta);
     const nConferma = Number(app.messaggioConferma);
@@ -5290,10 +5316,20 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
     /* Regola generale (27/09/2026, Gianardi: "a logica non sta in piedi"):
        si fa qualcosa solo se il messaggio appena arrivato fa parte
        dell'accordo — è la risposta che conferma, o la proposta. Un "grazie"
-       di oggi non fa diventare un appuntamento uno scambio di settimane fa. */
-    const diAdesso = (m) => !!m && (!m.created_at || Date.now() - new Date(m.created_at).getTime() <= 15 * 60 * 1000);
-    if (confermato && !diAdesso(msgConferma)) return send(res, 200, { azioni });
-    if (!confermato && !diAdesso(msgChePropone)) return send(res, 200, { azioni });
+       di oggi non fa diventare un appuntamento uno scambio di settimane fa.
+       "Appena arrivato" = l'ultimo turno: i messaggi in fila dell'ultimo
+       che ha scritto, a poche ore l'uno dall'altro (anche se l'app lo legge
+       ore dopo, alla riapertura). */
+    const ultimoTurno = [];
+    const tempo = (m) => (m.created_at ? new Date(m.created_at).getTime() : Date.now());
+    for (let i = recenti.length - 1; i >= 0 && recenti[i].sender === recenti[recenti.length - 1].sender; i--) {
+      // di fila e a poche ore l'uno dall'altro: un "Perfetto" di agosto e un "Grazie" di oggi non sono lo stesso turno
+      if (ultimoTurno.length && tempo(ultimoTurno[ultimoTurno.length - 1]) - tempo(recenti[i]) > 3 * 3600 * 1000) break;
+      ultimoTurno.push(recenti[i]);
+    }
+    const nellUltimoTurno = (m) => !!m && ultimoTurno.includes(m);
+    if (confermato && !nellUltimoTurno(msgConferma)) return send(res, 200, { azioni });
+    if (!confermato && !nellUltimoTurno(msgChePropone)) return send(res, 200, { azioni });
 
     /* Da qui in giù, come nella versione originale: quasi ogni ramo
        chiude la richiesta subito (un messaggio che tocca un appuntamento
@@ -5353,6 +5389,9 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
       await registra("annulla_impegno", { id: riferito.id }, esito);
       return send(res, 200, { azioni });
     }
+
+    /* Un appuntamento nuovo si scrive solo quando l'altro ha accettato */
+    if (!confermato) return send(res, 200, { azioni });
 
     /* Appuntamento nuovo, confermato: come l'originale, un titolo
        mancante non blocca la registrazione — "Incontro" va bene lo

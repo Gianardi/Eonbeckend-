@@ -26,7 +26,7 @@ const CONTRATTO = {
   profiles: ["id", "full_name", "business_name", "profession", "created_at"],
   clients: ["id", "owner_id", "name", "status", "value", "phone", "deleted_at"],
   tasks: ["id", "owner_id", "title", "owner_type", "status", "time", "scheduled_at", "deleted_at"],
-  conversations: ["id", "owner_id", "contact_name", "deleted_at"],
+  conversations: ["id", "owner_id", "contact_name", "deleted_at", "ultimo_analizzato"],
   messages: ["id", "conversation_id", "sender", "event_type", "title", "body", "amount", "file_url", "file_name", "scheduled_at", "deleted_at"],
   documents: ["id", "owner_id", "doc_type", "client_name", "amount", "content"],
   cantiere_foto: ["id", "owner_id", "url", "client_id", "cantiere_id", "nota", "descrizione", "created_at", "deleted_at"],

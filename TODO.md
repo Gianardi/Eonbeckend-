@@ -4317,3 +4317,28 @@ torna per chi è… tutto compresso così che non si vede bene".
   sistema lui direttamente.
 - Test: `eval/chat-foto.test.js` (9), `eval/analisi-chat.test.mjs` (7; con il
   codice di prima falliscono, cioè riproducono il problema).
+
+### Risposte del cliente mai perse (27/09/2026)
+
+Andrea: "ci vediamo martedì 14:30?" — Rita "Ok" — "non ha segnato niente".
+Causa: EON leggeva le risposte del cliente solo se l'app del professionista
+era aperta in quell'istante (tempo reale). L'"Ok" è arrivato mentre Andrea
+era sulla pagina di Rita: nessuno l'ha letto. Con un cliente vero, che scrive
+quando vuole, succedeva quasi sempre.
+- **Recupero**: quando l'app si riapre o torna in primo piano, recupera i
+  messaggi arrivati nel frattempo e EON legge l'ultimo di ogni chat (fino a
+  7 giorni). Lo mostra con lo stesso avviso ("Appuntamento confermato").
+- **Mai due volte**: `conversations.ultimo_analizzato` (migrazione
+  `supabase/chat_analizzata.sql`, applicata su staging e produzione): il server
+  "prenota" l'ultimo messaggio, un secondo telefono o una seconda riapertura
+  non rifanno niente. Alla prima riapertura una chat mai letta viene solo
+  segnata (niente riletture del passato).
+- **Regola dell'accordo**: la conferma (o la proposta) deve essere nell'ultimo
+  turno: i messaggi di fila dell'ultimo che ha scritto, a poche ore l'uno
+  dall'altro. Vale anche se l'app lo legge ore dopo.
+- **"Nuovo" resta nuovo**: prima un appuntamento concordato in chat con un
+  cliente che ne aveva già uno diventava sempre uno spostamento di quello
+  esistente. Ora decide la lettura della chat (le sue regole: se si cambia
+  giorno od ora è "sposta").
+- Test: `eval/analisi-chat.test.mjs` (11), `eval/chat-foto.test.js` (12).
+- Da provare dal vero: app chiusa, il cliente risponde "Ok", riaprire l'app.
