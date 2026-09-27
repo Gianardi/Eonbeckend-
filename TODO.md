@@ -4455,3 +4455,26 @@ fatture".
   (`completaFraseDocumento`, via l'aggancio `preparaTesto` di collegaMicTesto).
 - Test: `eval/pacchetto-27-09.test.js` (+4), aggiornati `fatture` e
   `scorri-pagine` (il gesto non parte dalla striscia dei filtri).
+
+### Meno AI, più diretto (27/09/2026, notte)
+
+Andrea: "se dico Messaggi aprimi subito messaggi — questo principio deve valere
+per tutto", "aggiungi cliente: basta un microfono e uno spazio per scrivere",
+"la O al centro non serve più", "modificare un appunto: si deve aprire la card".
+- **Solo il nome della pagina** ("Messaggi", "Calendario", "Fatture",
+  "Clienti", "Impostazioni"…) apre la pagina subito (prima serviva "apri…").
+- **Comandi semplici senza AI** (`provaComandiSemplici`): "chiama Rita" (scritto
+  chiama subito, a voce un tasto solo; senza numero lo dice e apre la scheda),
+  "scrivi a Rita" (la sua chat), "nuovo cliente"/"aggiungi cliente" (la card).
+  Il cliente deve essere uno solo e tutte le parole nel suo nome, altrimenti
+  decide l'AI come prima ("chiama Rossi" con due Rossi, "scrivi a Rita che…").
+- **Nuovo cliente**: la card di EON con microfono e casella (niente modulo);
+  tolto il riquadro "Raccontalo a EON AI". I campi restano per modificare.
+- **La O del logo** è solo il marchio; "Organizza la giornata" resta nell'hub.
+- **Modifica appunto**: si apre la card con il testo, il microfono (quello che
+  detti prende il posto del testo) e Salva.
+- Test: `eval/pacchetto-27-09.test.js` (+8).
+
+Altre cose che il codice può fare senza AI (da proporre ad Andrea):
+"segna fatto X / ho finito X", "quanto ho incassato questo mese", "chi mi deve
+soldi", "manda il link a Rita", "archivia Rita", "preventivi di Rossi".
