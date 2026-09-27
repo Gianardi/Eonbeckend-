@@ -265,6 +265,8 @@
   .privacy-cliente a{ color:inherit; font-weight:700; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- File privati: foto e documenti con link che scadono (27/09/2026) -->
+<script src="/file-privati.js"></script>
 </head>
 <body>
 
@@ -356,6 +358,15 @@ const supabaseClient = window.supabase
 
 /* Il codice privato arriva dal link: cliente.html?c=XXXXX */
 const accessCode = new URLSearchParams(window.location.search).get("c");
+/* File privati (27/09/2026): con il codice del link il server dà i link a
+   scadenza solo per i file di QUESTA chat (vedi portale_firma_file). */
+if(window.EonFile) EonFile.imposta(async (urls) => {
+  const r = await fetch("https://eonbeckend.vercel.app/api?action=portale_firma_file", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ codice: accessCode, urls })
+  });
+  return r.ok ? await r.json() : { firmati: {} };
+});
 
 let conversation = null;
 let clientInfo = null;
@@ -577,7 +588,7 @@ function renderMessages(){
           <div class="msg-doc-sub">Tocca per aprire · ${formatTime(m.created_at)}</div>
         </div>
       `;
-      d.addEventListener("click", () => window.open(m.file_url, "_blank"));
+      d.addEventListener("click", () => window.EonFile ? EonFile.apri(m.file_url) : window.open(m.file_url, "_blank"));
       wrap.appendChild(d);
       return;
     }

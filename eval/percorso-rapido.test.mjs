@@ -110,6 +110,11 @@ globalThis.fetch = async (url, init) => {
   if (s.startsWith("https://api.anthropic.com/")) return anthropicFinto(init);
   if (s.startsWith(process.env.SUPABASE_URL + "/auth/v1/user")) return rispostaJson(UTENTE);
   if (s.startsWith(process.env.SUPABASE_URL + "/rest/v1/")) return postgrest(s, init);
+  // Spazio file privato (27/09/2026): il server firma i link per l'AI
+  if (s === process.env.SUPABASE_URL + "/storage/v1/object/sign/eon-files") {
+    const b = JSON.parse(init.body);
+    return rispostaJson(b.paths.map((p) => ({ path: p, signedURL: `/object/sign/eon-files/${p}?token=finto`, error: null })));
+  }
   throw new Error("fetch non prevista nel test: " + s);
 };
 
@@ -600,7 +605,7 @@ async function descrivi(fotoId, testoAI) {
 {
   console.log("\n=== Descrizione automatica di una foto ===");
   databaseVuoto();
-  const base = process.env.SUPABASE_URL + "/storage/v1/object/public/eon-files/u/cantiere/foto/";
+  const base = process.env.SUPABASE_URL + "/storage/v1/object/public/eon-files/" + UTENTE.id + "/cantiere/foto/";
   tabelle.cantiere_foto = [
     { id: "11111111-1111-4111-8111-000000000001", owner_id: UTENTE.id, url: base + "porta.jpg", nota: null, descrizione: null, deleted_at: null },
     { id: "11111111-1111-4111-8111-000000000002", owner_id: UTENTE.id, url: base + "vecchia.jpg", nota: null, descrizione: "Lavandino in ceramica bianca", deleted_at: null },

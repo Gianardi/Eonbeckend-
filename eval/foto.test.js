@@ -140,7 +140,10 @@ async function main() {
     verifica("appena caricata: EON ne chiede subito la descrizione", descrizioniChieste.some((id) => /^nuova-/.test(id)), JSON.stringify(descrizioniChieste));
 
     // Invio WhatsApp con nota e link
-    const wa = await page.evaluate(() => { let url = null; window.open = (u) => { url = u; }; chiudiRisorsaCard(); mostraSchedaFoto(cantiereFoto.find((f) => f.id === "f1"), "Rossi"); document.querySelector('.scheda-invio-btn[data-canale="WhatsApp"]').click(); return url; });
+    // 27/09: la finestra si apre subito e il messaggio arriva appena il link (7 giorni) è pronto
+    await page.evaluate(() => { window.__finestraWa = null; window.open = () => (window.__finestraWa = { location: { href: "" } }); chiudiRisorsaCard(); mostraSchedaFoto(cantiereFoto.find((f) => f.id === "f1"), "Rossi"); document.querySelector('.scheda-invio-btn[data-canale="WhatsApp"]').click(); });
+    await page.waitForTimeout(300);
+    const wa = await page.evaluate(() => window.__finestraWa && window.__finestraWa.location.href);
     verifica("WhatsApp: al numero del cliente con la nota e il link della foto", wa && wa.startsWith("https://wa.me/393331234567?text=") && /Crepa/.test(decodeURIComponent(wa)) && /1\.jpg/.test(decodeURIComponent(wa)), wa);
 
     // Appunti: il tasto per la foto, la nota nella sua scheda, la foto tra gli appunti
