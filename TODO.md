@@ -4396,3 +4396,47 @@ alle 10, invece di segnarne uno nuovo. Regola decisa con Andrea:
 - Doppione = stesso cliente alla stessa ora, qualunque titolo.
 - Test: `eval/analisi-chat.test.mjs` (+2; il caso di stasera fallisce con il
   codice di prima).
+
+### Pacchetto del 27/09/2026 (sera): controllo grafico e richieste di Andrea
+
+Fatto (test: `eval/pacchetto-27-09.test.js`, 26 controlli):
+- **Svuota cestino**: tasto nella pagina Cestino, conferma nella card di EON,
+  elimina per sempre quello che si vede (una conversazione con i suoi messaggi).
+- **Portami lì**: sull'appuntamento in Calendario, nella scheda cliente, e a voce
+  ("portami da Rita"). Nuova colonna `clients.address` (migrazione
+  `supabase/cliente_indirizzo.sql`, staging e produzione) e campo "Indirizzo"
+  nel modulo cliente. Se manca, EON lo chiede una volta e lo ricorda. Il
+  traffico dentro EON (Google Maps a pagamento) resta per dopo, come deciso.
+- **Privacy**: voce "Privacy e dati" in Impostazioni (informativa, termini,
+  **Scarica i miei dati**: un file JSON con tutte le tabelle dell'utente, art.
+  20); caratteri Inter e Manrope ospitati da EON (`/fonts`, licenza OFL), niente
+  più Google Fonts (privacy.html e registro aggiornati).
+- **Elettricista** al posto di Avvocato nella scelta iniziale (il profilo
+  elettricista c'era già nel codice); `promptPackElettricista` sul server
+  (pericoli, dichiarazione di conformità mai compilata da EON, verifiche
+  periodiche solo con l'intervallo detto dall'utente). Nessun utente era avvocato.
+- **Fatture e preventivi**: tasti "Nuovo preventivo" / "Nuova fattura" (EON
+  chiede per chi e cosa, si risponde scrivendo o a voce) e dettatura in pagina.
+- **Clienti in un'unica lista** (simulazione A scelta da Andrea): detta/scrivi,
+  cerca, filtri per stato (Tutti, In corso, Preventivo, Conclusi, Archiviati),
+  riga con valore e stato, tasto "Nuovo cliente". La scheda del cliente ha ora
+  anche Portami lì, Link cliente e Archivia.
+- **Avvisi nello stile delle card** (bordo sottile, sopra la barra in basso) e
+  **notifica dei messaggi ricevuti** con "Rispondi" (si risponde dalla
+  notifica) e "Apri chat"; non compare se quella chat è già aperta.
+- **Grafica uniforme**: intestazione unica con il tasto ← tondo (al posto della
+  riga "Torna a…"), niente bordi neri spessi sulle schede della Home, niente
+  titoli ripetuti (Cestino, Fatture), filtri selezionati tutti neri.
+
+Da fare dopo (deciso con Andrea, in quest'ordine da concordare):
+- Prima guida per chi entra (piaciuta ad Andrea).
+- Fatturazione elettronica tramite intermediario accreditato (A-Cube, Openapi,
+  Aruba…): servono CF/P.IVA e codice destinatario/PEC dei clienti.
+- WhatsApp Business (Meta) ed email in entrata nella stessa casella; chat EON
+  per dipendenti, fornitori, commercialista e professionisti su EON.
+- Notifiche push ad app chiusa.
+- Elementi distintivi per mestiere; "Organizza la tua attività" per le altre
+  P.IVA con cartelle da rinominare (EON propone i nomi).
+- Traffico in tempo reale dentro EON.
+- Cresci: oggi "Lavori in corso" per scelta di Andrea (25/09); da riempire o
+  togliere dalla barra prima della vendita.

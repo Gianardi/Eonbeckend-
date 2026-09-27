@@ -100,10 +100,10 @@ async function main() {
     verifica("Annulla: l'impegno torna al suo posto", ripreso.primo === "Inviare fattura n. 3/2026 al cliente Fabbri" && ripreso.ultima.patch.deleted_at === null, JSON.stringify(ripreso));
 
     // Indietro: torna alla pagina di prima
-    await page.click("#calIndietro");
+    await page.click("#topbarIndietro");
     verifica("Indietro: torna dov'eri (Clienti)", await page.evaluate(() => paginaAttuale === "clienti" && document.getElementById("page-clienti").classList.contains("visible")));
     await page.evaluate(() => { navigateTo("calendario"); navigateTo("calendario"); });
-    await page.click("#calIndietro");
+    await page.click("#topbarIndietro");
     verifica("aperto due volte di fila: Indietro non resta sul Calendario", await page.evaluate(() => paginaAttuale !== "calendario"));
     const vuoto = await page.evaluate(() => { tasks.length = 0; chats.length = 0; navigateTo("calendario"); renderCalendar(); return { vuoto: !!document.querySelector("#calendarList .cal-vuoto"), giorni: document.querySelectorAll("#calSettimana .cal-sett-giorno:disabled").length, riepilogo: document.querySelector(".cal-riepilogo").innerText }; });
     verifica("nessun impegno: messaggio chiaro, settimana tutta vuota", vuoto.vuoto && vuoto.giorni === 7 && vuoto.riepilogo === "0 impegni in arrivo", JSON.stringify(vuoto));

@@ -17,8 +17,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/icone/eon-192.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link href="/fonts/fonts.css" rel="stylesheet">
 <style>
   :root{
     --bg:#F5F7FC;
@@ -152,7 +152,7 @@
   }
   .brand-hero-wordmark{
     display:flex; align-items:center; justify-content:center; gap:2px;
-    font-family:'Manrope'; font-weight:800; font-size:18px; letter-spacing:.02em;
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:18px; letter-spacing:.02em;
     color:var(--text);
   }
   .logo-o{ display:inline-flex; align-items:center; justify-content:center; }
@@ -215,9 +215,14 @@
   .back-link svg{ width:20px; height:20px; flex:none; }
 
   .topbar{ padding-top:2px;
-    display:flex; align-items:center; justify-content:center;
-    text-align:center; margin-bottom:16px; position:relative;
+    display:flex; align-items:center; justify-content:flex-start; gap:10px;
+    text-align:left; margin-bottom:16px; position:relative; min-height:44px;
   }
+  .topbar-testo{ flex:1; min-width:0; padding-right:48px; }
+  .topbar-indietro{ width:32px; height:32px; background:var(--card); border:1px solid var(--border); }
+  .topbar-indietro[hidden]{ display:none; }
+  /* Il tasto ← in alto sostituisce la riga "Torna a…" delle pagine */
+  .page > .back-link.in-testata{ display:none; }
   .topbar-imp{
     position:absolute; right:0; top:50%; transform:translateY(-50%);
     width:40px; height:40px; border-radius:12px; border:1px solid var(--border);
@@ -229,8 +234,9 @@
   .topbar-imp svg{ width:20px; height:20px; }
   .topbar.sola{ padding-top:14px; margin-bottom:14px; }
   .topbar h1{
-    font-size:21px; font-weight:900; letter-spacing:-.02em; margin:0;
-    color:var(--text);
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif;
+    font-size:28px; font-weight:800; letter-spacing:-.02em; margin:0; line-height:1.15;
+    color:var(--text); overflow-wrap:anywhere;
   }
   .topbar .sub{ font-size:12px; color:var(--muted); margin-top:4px; font-weight:500; }
   .search-wrap{ display:flex; align-items:center; gap:10px; flex:1; max-width:640px; margin-left:32px; }
@@ -272,7 +278,7 @@
   .ob-step.visible{ display:flex; }
   .ob-brand{
     display:flex; align-items:center; justify-content:center; gap:2px;
-    font-family:'Manrope'; font-weight:900; font-size:38px; letter-spacing:-.02em;
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:900; font-size:38px; letter-spacing:-.02em;
     color:var(--text); margin-bottom:10px;
   }
   .ob-o{ width:30px; height:30px; color:var(--indigo); display:inline-flex; align-items:center; justify-content:center; margin:0 1px; }
@@ -314,7 +320,7 @@
   .ob-controlla-email{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:18px 8px; }
   .ob-controlla-email-ico{ width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); }
   .ob-controlla-email-ico svg{ width:26px; height:26px; }
-  .ob-controlla-email b{ font-family:'Manrope'; font-size:18px; }
+  .ob-controlla-email b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:18px; }
   .ob-controlla-email p{ margin:0; font-size:14px; color:var(--muted); line-height:1.5; max-width:32ch; }
   .ob-controlla-email .ob-link-piccolo{ align-self:center; }
   .ob-auth-tab{ flex:1; text-align:center; padding:9px; border-radius:9px; font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer; }
@@ -364,11 +370,11 @@
   .brand-avatar{
     width:38px; height:38px; border-radius:50%; border:none; flex:none; cursor:pointer;
     background:linear-gradient(135deg,#5A87FF,#2E5FE8); color:#fff;
-    font-family:'Manrope'; font-weight:800; font-size:13.5px; letter-spacing:.02em;
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:13.5px; letter-spacing:.02em;
     display:flex; align-items:center; justify-content:center;
   }
   .brand-avatar:active{ transform:scale(.95); }
-  .home-oggi-titolo{ font-family:'Manrope'; font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.12; color:var(--text); overflow-wrap:anywhere; }
+  .home-oggi-titolo{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.12; color:var(--text); overflow-wrap:anywhere; }
   .home-oggi-riga{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0 26px; }
   #homeOggiData{ font-size:15px; font-weight:500; color:var(--muted); }
   .home-oggi-pill{
@@ -377,7 +383,7 @@
     border-radius:999px; padding:5px 11px;
   }
   .home-oggi-pill svg{ width:14px; height:14px; }
-  .home-hero-title{ position:relative; font-family:'Manrope'; font-size:22px; font-weight:900; letter-spacing:-.01em; margin-bottom:26px; }
+  .home-hero-title{ position:relative; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:22px; font-weight:900; letter-spacing:-.01em; margin-bottom:26px; }
   .home-hero-mic-wrap{ position:relative; display:flex; justify-content:center; margin-bottom:12px; }
   .home-hero-mic{
     position:relative; width:112px; height:112px; border-radius:50%; border:none; cursor:pointer; padding:0;
@@ -412,11 +418,11 @@
   }
   .home-hero-cal svg:first-child{ width:19px; height:19px; flex:none; }
   .home-hero-cal-testo{ flex:1; min-width:0; display:flex; flex-direction:column; }
-  .home-hero-cal-testo b{ font-family:'Manrope'; font-size:14px; font-weight:800; }
+  .home-hero-cal-testo b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:14px; font-weight:800; }
   .home-hero-cal-testo span{ font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px; }
   .home-hero-cal-freccia{ width:14px; height:14px; flex:none; color:rgba(255,255,255,.6); }
   .home-hero-oggi{ position:relative; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px 15px; cursor:pointer; }
-  .home-hero-oggi-titolo{ font-family:'Manrope'; font-size:13px; font-weight:800; margin-bottom:9px; color:var(--text); }
+  .home-hero-oggi-titolo{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:13px; font-weight:800; margin-bottom:9px; color:var(--text); }
   .home-hero-oggi-riga{ display:flex; align-items:center; gap:10px; padding:7px 0; font-size:13px; color:var(--text); }
   .home-hero-oggi-riga.fatto{ color:var(--faint); text-decoration:line-through; }
   .home-hero-oggi-check{ width:19px; height:19px; border-radius:6px; border:1.5px solid var(--border-strong); flex:none; display:flex; align-items:center; justify-content:center; }
@@ -489,7 +495,7 @@
   .module-icon.case{ background:var(--violet); }
   .module-icon.chat{ background:var(--wa); }
   .module-icon.coral{ background:var(--coral); }
-  .module-title{ font-family:'Manrope'; font-size:14px; font-weight:900; letter-spacing:-.01em; color:var(--text); margin-bottom:3px; }
+  .module-title{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:14px; font-weight:900; letter-spacing:-.01em; color:var(--text); margin-bottom:3px; }
   .module-sub{ font-size:11px; color:var(--muted); line-height:1.35; }
   .ai-log-risposta{
     margin-top:8px; padding:9px 11px; border-radius:10px;
@@ -540,7 +546,7 @@
   .mini-ring-wrap{ position:relative; width:40px; height:40px; }
   .mini-ring-pct{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-family:'Manrope'; font-size:10.5px; font-weight:800; color:var(--text);
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:10.5px; font-weight:800; color:var(--text);
   }
   .mini-ring-label{ font-size:10.5px; color:var(--muted); font-weight:600; line-height:1.3; }
   .mini-ring-label b{ display:block; color:var(--text); font-size:12px; }
@@ -548,7 +554,7 @@
   .section-label{
     display:flex; align-items:center; gap:8px;
     padding:10px 16px 4px;
-    font-family:'Manrope'; font-size:11.5px; font-weight:800;
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:11.5px; font-weight:800;
     letter-spacing:.06em; text-transform:uppercase; color:var(--faint);
   }
   .section-label .badge-ai{
@@ -559,11 +565,12 @@
   .section-label .badge-ai svg{ width:10px;height:10px; }
   .section-divider{ height:1px; background:var(--border); margin:6px 16px 0; }
 
-  /* Le 4 schede del cantiere sotto la Home: bianco e nero, stesso
-     linguaggio del riquadro sopra (icona scura piena, card chiara). */
+  /* Le 4 schede del cantiere sotto la Home: icona scura piena, card
+     chiara — con il bordo sottile di tutte le altre card (27/09/2026:
+     il bordo nero spesso le rendeva diverse dal resto dell'app). */
   .cantiere-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin-top:6px; margin-bottom:18px; }
   .cantiere-card{
-    background:var(--card); border:2px solid var(--text); border-radius:24px;
+    background:var(--card); border:1px solid var(--border); border-radius:24px;
     padding:20px 16px; display:flex; flex-direction:column; align-items:flex-start; gap:10px;
     cursor:pointer; text-align:left; font-family:inherit; -webkit-tap-highlight-color:transparent;
     box-shadow:0 6px 18px rgba(14,20,36,.1); transition:transform .12s ease;
@@ -574,7 +581,7 @@
     display:flex; align-items:center; justify-content:center; flex:none;
   }
   .cantiere-card-icon svg{ width:20px; height:20px; }
-  .cantiere-card-title{ font-family:'Manrope'; font-size:13.5px; font-weight:800; color:var(--text); }
+  .cantiere-card-title{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:13.5px; font-weight:800; color:var(--text); }
   .cantiere-card-sub{ font-size:11px; color:var(--muted); margin-top:-5px; }
 
   .cantiere-foto-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
@@ -650,7 +657,7 @@
   .pill.pagato, .pill.incassato{ background:var(--green-soft); color:var(--green); }
   .pill.dapagare, .pill.attesa{ background:var(--amber-soft); color:var(--amber); }
   .pill.ritardo, .pill.scaduto{ background:var(--coral-soft); color:var(--coral); }
-  .task-time{ font-size:12.5px; font-weight:700; color:var(--faint); flex:none; font-family:'Manrope'; }
+  .task-time{ font-size:12.5px; font-weight:700; color:var(--faint); flex:none; font-family:'Manrope', 'Inter', -apple-system, sans-serif; }
 
   .ai-run-btn{
     flex:none; font-size:11.5px; font-weight:800; color:var(--violet);
@@ -717,7 +724,7 @@
   .stat-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:13px 14px; box-shadow:var(--shadow-sm); }
   .stat-icon{ width:30px;height:30px; border-radius:9px; display:flex;align-items:center;justify-content:center; margin-bottom:8px; }
   .stat-icon svg{ width:17px;height:17px; }
-  .stat-num{ font-family:'Manrope'; font-size:18px; font-weight:800; color:var(--text); }
+  .stat-num{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:18px; font-weight:800; color:var(--text); }
   .stat-label{ font-size:12px; color:var(--muted); margin-top:2px; }
 
   /* client / list rows generici */
@@ -727,7 +734,7 @@
     font-size:12.5px; line-height:1.6;
   }
   .cal-vuoto b{
-    display:block; font-family:'Manrope'; font-size:15px; font-weight:900;
+    display:block; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:15px; font-weight:900;
     color:var(--text); margin-bottom:7px;
   }
   .cal-passati{
@@ -747,7 +754,7 @@
   .cal-sett-giorno:disabled{ cursor:default; background:transparent; box-shadow:none; color:var(--faint); }
   .cal-sett-nome{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
   .cal-sett-giorno:disabled .cal-sett-nome{ color:var(--faint); }
-  .cal-sett-num{ font-family:'Manrope'; font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.1; }
+  .cal-sett-num{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.1; }
   .cal-sett-punti{ display:flex; gap:3px; height:5px; }
   .cal-sett-punti i{ width:5px; height:5px; border-radius:50%; background:var(--indigo); }
   .cal-sett-giorno.oggi{ background:var(--text); border-color:var(--text); color:#fff; }
@@ -759,7 +766,7 @@
   .cal-giorno{
     display:flex; align-items:baseline; gap:8px; margin:22px 2px 10px; scroll-margin-top:80px;
   }
-  .cal-giorno-nome{ font-family:'Manrope'; font-size:16px; font-weight:800; color:var(--text); }
+  .cal-giorno-nome{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:16px; font-weight:800; color:var(--text); }
   .cal-giorno-nome::first-letter{ text-transform:uppercase; }
   .cal-giorno-data{ font-size:12.5px; color:var(--muted); }
   .cal-giorno i{
@@ -781,7 +788,7 @@
   .cal-voce.oggi{ border-color:var(--border-strong); }
   .cal-ora{
     flex:none; width:48px; padding-top:1px;
-    font-family:'Manrope'; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--text);
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--text);
   }
   .cal-ora.vuota{ color:var(--faint); }
   .cal-voce.oggi .cal-ora{ color:var(--indigo); }
@@ -809,12 +816,12 @@
   .row-avatar{
     width:32px;height:32px; border-radius:50%; flex:none;
     display:flex; align-items:center; justify-content:center;
-    font-family:'Manrope'; font-weight:800; font-size:11.5px; color:#fff;
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:11.5px; color:#fff;
   }
   .row-body{ flex:1; min-width:0; }
   .row-name{ font-size:14px; font-weight:700; color:var(--text); }
   .row-meta{ font-size:12px; color:var(--muted); margin-top:3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .row-value{ font-family:'Manrope'; font-size:14px; font-weight:800; text-align:right; flex:none; min-width:80px; color:var(--text); }
+  .row-value{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:14px; font-weight:800; text-align:right; flex:none; min-width:80px; color:var(--text); }
   .row-actions{ display:flex; gap:6px; flex:none; }
   .row-action-btn{
     width:30px;height:30px; border-radius:9px;
@@ -890,7 +897,7 @@
   .opp-title{ font-size:13.5px; font-weight:700; color:var(--text); }
   .opp-client{ font-size:11.5px; color:var(--muted); margin-top:2px; }
   .opp-meta{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
-  .opp-value{ font-family:'Manrope'; font-size:16px; font-weight:800; text-align:right; flex:none; min-width:90px; color:var(--text); }
+  .opp-value{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:16px; font-weight:800; text-align:right; flex:none; min-width:90px; color:var(--text); }
   .opp-value small{ display:block; font-size:11px; font-weight:600; color:var(--muted); }
 
   /* obiettivi */
@@ -954,31 +961,40 @@
   .goal-ai-dot{ width:13px;height:13px;border-radius:50%;flex:none;border:2px solid var(--border-strong); }
   .goal-row.ai-selected .goal-ai-dot{ background:var(--indigo); border-color:var(--indigo); }
 
-  /* notifiche AI in-app */
-  .ai-toast-container{ position:fixed; bottom:24px; right:24px; z-index:80; display:flex; flex-direction:column; gap:10px; max-width:340px; }
+  /* Avvisi di EON nello stile delle card (27/09/2026, Andrea: "non sarebbe
+     coerente il formato delle card?"): bianchi, angoli morbidi, ombra
+     leggera — niente più bordo nero spesso. Sul telefono stanno sopra la
+     barra in basso, larghi quanto lo schermo. */
+  .ai-toast-container{ position:fixed; left:16px; right:16px; bottom:calc(88px + env(safe-area-inset-bottom, 0px)); z-index:9998; display:flex; flex-direction:column; gap:10px; max-width:420px; margin:0 auto; pointer-events:none; }
   .ai-toast{
-    background:var(--card); border:2px solid var(--text); border-radius:20px;
-    padding:14px 15px; box-shadow:var(--shadow-md); display:flex; gap:11px;
+    pointer-events:auto;
+    background:var(--card); border:1px solid var(--border); border-radius:22px;
+    padding:15px 16px; box-shadow:0 14px 40px rgba(20,23,29,.18); display:flex; gap:12px;
     animation:toastIn .25s ease;
   }
   @keyframes toastIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
-  .ai-toast-icon{ width:30px;height:30px;border-radius:9px;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;flex:none; }
-  .ai-toast-icon svg{ width:15px;height:15px; }
+  .ai-toast-icon{ width:36px;height:36px;border-radius:12px;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;flex:none; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:13px; }
+  .ai-toast-icon svg{ width:17px;height:17px; }
   .ai-toast-body{ flex:1; min-width:0; }
-  .ai-toast-title{ font-size:12.5px; font-weight:800; color:var(--text); margin-bottom:3px; }
+  .ai-toast-title{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:15px; font-weight:800; color:var(--text); margin-bottom:3px; letter-spacing:-.01em; }
   .ai-toast-title:empty{ display:none; }
-  .ai-toast-text{ font-size:12.5px; color:var(--muted); line-height:1.5; white-space:pre-line; }
-  .ai-toast.decisione{ background:var(--card); border:2px solid var(--text); box-shadow:0 12px 34px rgba(20,23,29,.16); }
+  .ai-toast-text{ font-size:13.5px; color:var(--muted); line-height:1.5; white-space:pre-line; overflow-wrap:anywhere; }
+  .ai-toast.decisione{ box-shadow:0 18px 44px rgba(20,23,29,.22); }
   .ai-toast-actions{ display:flex; gap:8px; margin-top:12px; }
   .ai-toast-actions button{
-    flex:1; border:none; border-radius:10px; padding:10px 12px; cursor:pointer;
-    font-family:inherit; font-size:12.5px; font-weight:800;
+    flex:1; border:none; border-radius:12px; padding:11px 12px; cursor:pointer;
+    font-family:inherit; font-size:14px; font-weight:700;
   }
   .ai-toast-yes{ background:var(--text); color:#fff; }
-  .ai-toast-no{ background:rgba(20,23,29,.06); color:var(--muted); }
+  .ai-toast-no{ background:rgba(20,23,29,.06); color:var(--text); }
   .ai-toast-actions button:disabled{ opacity:.5; }
-  .ai-toast-close{ cursor:pointer; color:var(--faint); flex:none; background:none; border:none; padding:2px; }
-  .ai-toast-close svg{ width:14px;height:14px; }
+  .ai-toast-close{ cursor:pointer; color:var(--faint); flex:none; background:none; border:none; padding:2px; align-self:flex-start; }
+  .ai-toast-close svg{ width:16px;height:16px; }
+  /* Messaggio ricevuto: rispondi da qui */
+  .ai-toast-risposta{ display:flex; gap:8px; margin-top:10px; }
+  .ai-toast-risposta input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:12px; padding:10px 12px; font:inherit; font-size:14px; color:var(--text); background:#FBFBFD; outline:none; }
+  .ai-toast-risposta button{ flex:none; width:42px; border:none; border-radius:12px; background:var(--text); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .ai-toast-risposta button svg{ width:17px; height:17px; }
 
   /* notifica "landing" a tutto schermo per i consigli AI sugli obiettivi */
   /* pulsante "Aggiungi ..." in cima alle pagine con elenchi */
@@ -992,6 +1008,44 @@
   .ob-accetto a{ color:var(--text); font-weight:700; }
   .termini-card{ display:flex; flex-direction:column; gap:12px; }
   .termini-card p{ margin:0; font-size:14px; line-height:1.55; color:var(--muted); }
+  .fp-nuovo{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  .fp-nuovo-btn{ margin:0; background:var(--text); box-shadow:0 4px 14px rgba(14,20,36,.22); white-space:nowrap; padding-left:10px; padding-right:10px; font-size:14px; justify-content:center; }
+  .fp-dettatura{ display:flex; align-items:center; gap:10px; }
+  .fp-mic{ width:52px; height:52px; flex:none; }
+  .fp-mic svg{ width:22px; height:22px; }
+  .fp-textwrap{ flex:1; margin:0; }
+  .fp-textwrap .home-hero-campo{ min-height:52px; padding-top:15px; padding-bottom:13px; }
+  .fp-hint{ margin:8px 0 14px; font-size:12.5px; }
+  /* Clienti: un'unica lista (27/09/2026, simulazione A) */
+  .cl-dettatura{ margin-top:2px; }
+  .cl-cerca{ display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:0 14px; margin-bottom:12px; }
+  .cl-cerca svg{ width:18px; height:18px; color:var(--faint); flex:none; }
+  .cl-cerca input{ flex:1; min-width:0; border:none; outline:none; background:none; font:inherit; font-size:15px; color:var(--text); padding:13px 0; }
+  .cl-filtri{ display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:12px; scrollbar-width:none; }
+  .cl-filtri::-webkit-scrollbar{ display:none; }
+  .cl-filtro{ flex:none; padding:8px 14px; border-radius:999px; border:1px solid var(--border); background:var(--card); font:inherit; font-size:13.5px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; }
+  .cl-filtro b{ font-weight:700; opacity:.6; margin-left:3px; }
+  .cl-filtro.on{ background:var(--text); border-color:var(--text); color:#fff; }
+  .cl-lista{ background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; }
+  .cl-lista.vuota{ padding:18px 8px; }
+  .client-archive-card.cl-riga{ display:flex; align-items:center; gap:12px; margin:0; padding:13px 14px; border:none; border-top:1px solid var(--border); border-radius:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .client-archive-card.cl-riga:first-child{ border-top:none; }
+  .client-archive-card.cl-riga:active{ background:rgba(20,23,29,.04); }
+  .cl-riga .row-avatar{ width:44px; height:44px; font-size:15px; }
+  .cl-info{ flex:1; min-width:0; }
+  .cl-riga .row-name{ font-size:15.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cl-riga .client-lavoro{ -webkit-line-clamp:1; margin-top:2px; }
+  .cl-destra{ flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+  .cl-destra .row-value{ min-width:0; }
+  .cl-stato{ font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .cl-stato.s-attivo{ background:#E6F7F1; color:#0E8A5F; }
+  .cl-stato.s-trattativa{ background:#FFF3E0; color:#B65C00; }
+  .cl-stato.s-inattivo, .cl-stato.s-archiviato{ background:#EEF0F4; color:var(--muted); }
+  .cl-importa{ display:flex; align-items:center; justify-content:flex-start; gap:8px; width:100%; margin:12px 0 90px; padding:12px; border:none; background:none; font:inherit; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; }
+  .cl-importa svg{ width:17px; height:17px; }
+  .cl-nuovo{ position:fixed; right:18px; bottom:calc(88px + env(safe-area-inset-bottom, 0px)); z-index:40; display:flex; align-items:center; gap:8px; height:54px; padding:0 22px; border:none; border-radius:27px; background:var(--indigo); color:#fff; font:inherit; font-size:15px; font-weight:700; box-shadow:0 8px 22px rgba(41,82,204,.35); cursor:pointer; }
+  .cl-nuovo svg{ width:20px; height:20px; }
+  .cestino-svuota-btn{ background:var(--card); color:#E5484D; border:1px solid var(--border); box-shadow:none; margin:0 0 12px; }
   .importa-clienti-btn{ background:var(--card); color:var(--text); border:1px solid var(--border); box-shadow:none; margin-top:-4px; }
   .importa-card{ display:flex; flex-direction:column; gap:10px; }
   .importa-riepilogo{ font-size:13px; color:var(--muted); line-height:1.5; }
@@ -1023,7 +1077,7 @@
   @keyframes sheetIn{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
   .sheet-handle{ width:38px; height:4px; border-radius:20px; background:var(--border-strong); margin:0 auto 12px; flex:none; }
   .sheet-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex:none; }
-  .sheet-title{ font-family:'Manrope'; font-size:17px; font-weight:900; letter-spacing:-.01em; }
+  .sheet-title{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:17px; font-weight:900; letter-spacing:-.01em; }
   .sheet-close{
     width:30px; height:30px; border-radius:50%; border:none; cursor:pointer; flex:none;
     background:rgba(20,23,29,.05); color:var(--muted);
@@ -1153,7 +1207,7 @@
     display:flex; align-items:center; justify-content:center;
   }
   .ai-hub-logo svg{ width:20px; height:20px; }
-  .ai-hub-titolo{ font-family:'Manrope'; font-size:18px; font-weight:900; letter-spacing:-.01em; }
+  .ai-hub-titolo{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:18px; font-weight:900; letter-spacing:-.01em; }
   .ai-hub-sotto{ font-size:11.5px; color:var(--muted); margin-top:1px; }
   .ai-hub-chiudi{
     width:32px; height:32px; border-radius:50%; border:none; cursor:pointer; flex:none;
@@ -1237,7 +1291,7 @@
   }
   .ai-hub-ico svg{ width:18px; height:18px; }
   .ai-hub-testo{ flex:1; min-width:0; }
-  .ai-hub-testo b{ display:block; font-family:'Manrope'; font-size:14px; font-weight:800; color:var(--text); }
+  .ai-hub-testo b{ display:block; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:14px; font-weight:800; color:var(--text); }
   .ai-hub-testo small{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.4; }
   .ai-hub-freccia{ width:16px; height:16px; color:var(--faint); flex:none; }
   .ai-hub-nota{
@@ -1302,7 +1356,7 @@
   /* Impostazioni (25/09/2026) */
   .imp-card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:12px; }
   .imp-account{ display:flex; align-items:center; gap:12px; }
-  .imp-avatar{ width:46px; height:46px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); font-family:'Manrope'; font-weight:800; font-size:16px; }
+  .imp-avatar{ width:46px; height:46px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background:var(--indigo-soft); color:var(--indigo); font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:16px; }
   .imp-nome{ font-size:16px; font-weight:800; color:var(--text); }
   .imp-attivita{ font-size:13.5px; font-weight:600; color:var(--text); }
   .imp-attivita:empty{ display:none; }
@@ -1455,7 +1509,7 @@
   .az-periodo button.on{ background:var(--text); color:#fff; }
   .az-hero{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:18px 18px 16px; margin-bottom:12px; }
   .az-hero-label{ font-size:13px; font-weight:600; color:var(--muted); }
-  .az-hero-cifra{ font-family:'Manrope'; font-size:38px; font-weight:800; letter-spacing:-.02em; color:var(--text); margin:4px 0 12px; font-variant-numeric:tabular-nums; }
+  .az-hero-cifra{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:38px; font-weight:800; letter-spacing:-.02em; color:var(--text); margin:4px 0 12px; font-variant-numeric:tabular-nums; }
   .az-hero-cifra.negativo{ color:var(--coral); }
   .az-barra{ display:flex; gap:2px; height:10px; border-radius:6px; overflow:hidden; margin-bottom:10px; }
   .az-barra i{ display:block; min-width:4px; }
@@ -1468,7 +1522,7 @@
   .az-ic svg{ width:19px; height:19px; }
   .az-corpo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
   .az-nome{ display:flex; justify-content:space-between; gap:8px; font-size:15px; font-weight:700; color:var(--text); }
-  .az-nome span:last-child{ font-family:'Manrope'; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .az-nome span:last-child{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .az-sotto{ font-size:12.5px; color:var(--muted); }
   .az-freccia{ width:16px; height:16px; flex:none; color:var(--faint); }
   .az-stima{ font-style:normal; font-size:10.5px; font-weight:700; color:var(--amber); background:var(--amber-soft); padding:2px 7px; border-radius:999px; margin-left:6px; vertical-align:2px; }
@@ -1476,7 +1530,7 @@
   .az-clienti{ display:grid; grid-template-columns:repeat(3,1fr); background:var(--card); border:1px solid var(--border); border-radius:18px; cursor:pointer; margin-bottom:12px; }
   .az-clienti > div{ padding:14px 8px; text-align:center; }
   .az-clienti > div + div{ border-left:1px solid var(--border); }
-  .az-clienti b{ display:block; font-family:'Manrope'; font-size:24px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
+  .az-clienti b{ display:block; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:24px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
   .az-clienti span{ font-size:12px; font-weight:600; color:var(--muted); }
   .az-nota{ margin:0 6px; font-size:12px; color:var(--faint); line-height:1.5; }
   .az-tasse-card p{ margin:0 0 12px; font-size:14px; line-height:1.5; color:var(--text); }
@@ -1489,7 +1543,7 @@
   #page-chat .chat-list-panel{ background:var(--bg); }
   .msg-testa{ display:flex; align-items:center; gap:10px; padding:calc(14px + env(safe-area-inset-top, 0px)) 20px 8px; flex:none; }
   .msg-testa .chat-fs-back{ background:var(--card); border:1px solid var(--border); }
-  .msg-titolo{ flex:1; font-family:'Manrope'; font-size:28px; font-weight:800; letter-spacing:-.02em; color:var(--text); }
+  .msg-titolo{ flex:1; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:28px; font-weight:800; letter-spacing:-.02em; color:var(--text); }
   .msg-nuovo{
     width:40px; height:40px; border-radius:50%; flex:none; border:none; cursor:pointer;
     background:var(--text); color:#fff; display:flex; align-items:center; justify-content:center;
@@ -1527,7 +1581,7 @@
   .msg-avatar{
     position:relative; width:46px; height:46px; border-radius:50%; flex:none;
     display:flex; align-items:center; justify-content:center;
-    color:#fff; font-family:'Manrope'; font-size:15px; font-weight:800;
+    color:#fff; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:15px; font-weight:800;
   }
   .msg-avatar.piccolo{ width:34px; height:34px; font-size:12.5px; }
   .msg-canale{
@@ -1555,8 +1609,8 @@
   #page-chat .chat-fs-head{ padding:calc(12px + env(safe-area-inset-top, 0px)) 14px 12px; gap:10px; }
   #page-chat .chat-fs-persona{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; cursor:pointer; }
   #page-chat .chat-fs-persona > div:last-child{ min-width:0; }
-  #page-chat #chatWinAvatar{ width:40px; height:40px; font-family:'Manrope'; font-weight:800; font-size:14px; }
-  #page-chat .chat-window-name{ font-family:'Manrope'; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #page-chat #chatWinAvatar{ width:40px; height:40px; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:14px; }
+  #page-chat .chat-window-name{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .msg-chiama, .msg-altro{
     width:38px; height:38px; border-radius:50%; flex:none; border:none; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
@@ -1735,7 +1789,7 @@
     display:flex; align-items:center; padding:18px 18px 14px;
     border-bottom:1px solid var(--border); flex:none;
   }
-  .doc-head-titolo{ font-family:'Manrope'; font-size:17px; font-weight:900; flex:1; }
+  .doc-head-titolo{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:17px; font-weight:900; flex:1; }
   .doc-chiudi{
     width:32px; height:32px; border-radius:50%; border:none; cursor:pointer; flex:none;
     background:rgba(20,23,29,.05); color:var(--muted);
@@ -1750,7 +1804,7 @@
   .doc-cliente-av{
     width:34px; height:34px; border-radius:50%; flex:none; color:#fff;
     display:flex; align-items:center; justify-content:center;
-    font-family:'Manrope'; font-size:12px; font-weight:900;
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:12px; font-weight:900;
   }
   .doc-cliente-nome{ font-size:13.5px; font-weight:800; }
   .doc-cliente-sub{ font-size:11px; color:var(--muted); margin-top:1px; }
@@ -1791,7 +1845,7 @@
     display:flex; align-items:center; justify-content:space-between;
     font-size:13px; color:var(--muted); padding:5px 0;
   }
-  .doc-riga-tot b{ font-family:'Manrope'; font-weight:800; color:var(--text); }
+  .doc-riga-tot b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; color:var(--text); }
   .doc-riga-tot.totale{
     border-top:1px solid var(--border); margin-top:7px; padding-top:11px;
     font-size:14px; color:var(--text); font-weight:700;
@@ -1844,7 +1898,7 @@
   .risorsa-voce-titolo{ font-size:13.5px; font-weight:800; color:var(--text); text-align:center; }
   .risorsa-voce-sotto{ font-size:11.5px; color:var(--muted); margin-top:2px; text-align:center; }
   .risorsa-voce-riepilogo{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5; white-space:pre-line; text-align:center; }
-  .risorsa-voce-importo{ font-family:'Manrope'; font-size:18px; font-weight:900; color:var(--indigo); margin-top:6px; }
+  .risorsa-voce-importo{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:18px; font-weight:900; color:var(--indigo); margin-top:6px; }
   .risorsa-riga-btn{ display:flex; gap:8px; margin-top:11px; flex-wrap:wrap; justify-content:center; }
   /* L'icona/figura grande che dà nell'occhio, sempre in cima alla voce:
      una foto vera (già grande di suo, vedi .risorsa-voce img) oppure,
@@ -1856,7 +1910,7 @@
   }
   .risorsa-hero svg{ width:36px; height:36px; }
   .risorsa-hero-cifra{
-    font-family:'Manrope'; font-size:28px; font-weight:900; color:var(--text);
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:28px; font-weight:900; color:var(--text);
     text-align:center; margin-bottom:2px;
   }
   .risorsa-sezione{
@@ -1880,7 +1934,7 @@
   .eon-lista{ display:flex; flex-direction:column; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
   .eon-voce{ display:flex; align-items:baseline; gap:12px; padding:11px 14px; }
   .eon-voce + .eon-voce{ border-top:1px solid var(--border); }
-  .eon-ora{ flex:none; width:46px; font-family:'Manrope'; font-weight:800; font-variant-numeric:tabular-nums; color:var(--indigo); }
+  .eon-ora{ flex:none; width:46px; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-variant-numeric:tabular-nums; color:var(--indigo); }
   .eon-punto{ flex:none; width:6px; height:6px; border-radius:50%; background:var(--indigo); transform:translateY(-2px); }
   .eon-voce-testo{ min-width:0; overflow-wrap:anywhere; }
   .risorsa-testo-discorsivo{ font-size:14px; line-height:1.6; color:var(--text); white-space:pre-line; padding:4px 2px; }
@@ -1944,14 +1998,14 @@
   .meteo-icona{ width:58px; height:58px; flex:none; }
   .meteo-testa-testo{ display:flex; flex-direction:column; gap:2px; min-width:0; }
   .meteo-giorno{ font-size:12px; font-weight:700; color:var(--muted); }
-  .meteo-cielo{ font-family:'Manrope'; font-size:18px; font-weight:800; color:var(--text); }
-  .meteo-temp{ display:flex; align-items:baseline; gap:8px; font-family:'Manrope'; color:var(--text); }
+  .meteo-cielo{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:18px; font-weight:800; color:var(--text); }
+  .meteo-temp{ display:flex; align-items:baseline; gap:8px; font-family:'Manrope', 'Inter', -apple-system, sans-serif; color:var(--text); }
   .meteo-temp b{ font-size:28px; font-weight:800; }
   .meteo-temp span{ font-size:17px; font-weight:700; color:var(--muted); }
   .meteo-dati{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .meteo-dati div{ border:1px solid var(--border); border-radius:14px; padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
   .meteo-dati small{ font-size:11px; color:var(--muted); font-weight:600; }
-  .meteo-dati b{ font-family:'Manrope'; font-size:16px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
+  .meteo-dati b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:16px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
   .meteo-ore{ display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; }
   .meteo-ore div{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0; border-radius:12px; background:#F5F7FC; }
   .meteo-ore small{ font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
@@ -1967,13 +2021,13 @@
   .percorso-meta .percorso-freccia{ color:var(--faint); width:16px; height:16px; }
   .percorso-presto{ margin:0; font-size:11.5px; color:var(--faint); text-align:center; }
   .foto-rapida-card{ display:flex; flex-direction:column; align-items:center; gap:12px; padding:8px 0 4px; }
-  .foto-rapida-btn{ display:flex; align-items:center; gap:10px; border:none; border-radius:18px; background:var(--text); color:#fff; font-family:'Manrope'; font-weight:800; font-size:17px; padding:18px 26px; cursor:pointer; }
+  .foto-rapida-btn{ display:flex; align-items:center; gap:10px; border:none; border-radius:18px; background:var(--text); color:#fff; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:17px; padding:18px 26px; cursor:pointer; }
   .foto-rapida-btn svg{ width:24px; height:24px; }
   .foto-rapida-nota{ margin:0; font-size:14px; color:var(--muted); }
   /* Scheda del cliente (26/09/2026) */
   .scheda-cliente{ display:flex; flex-direction:column; gap:14px; }
   .sc-testa{ display:flex; gap:12px; align-items:center; }
-  .sc-avatar{ width:48px; height:48px; border-radius:15px; flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Manrope'; font-weight:800; font-size:16px; }
+  .sc-avatar{ width:48px; height:48px; border-radius:15px; flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:16px; }
   .sc-testa-testo{ min-width:0; flex:1; display:flex; flex-direction:column; gap:3px; }
   .sc-stato{ font-size:12px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:6px; }
   .sc-pallino{ width:8px; height:8px; border-radius:50%; background:var(--teal); flex:none; }
@@ -1981,7 +2035,7 @@
   .sc-pallino.inattivo{ background:var(--faint); }
   .sc-lavoro{ font-size:14.5px; line-height:1.4; color:var(--text); cursor:pointer; overflow-wrap:anywhere; }
   .sc-lavoro.vuoto{ color:var(--indigo); font-weight:600; font-size:13.5px; }
-  .sc-contatti{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; }
+  .sc-contatti{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:6px; }
   .sc-contatto{ display:flex; flex-direction:column; align-items:center; gap:5px; padding:4px 0; border:none; background:none; font:inherit; font-size:11px; font-weight:700; color:var(--text); text-decoration:none; cursor:pointer; }
   .sc-contatto-icona{ width:46px; height:46px; border-radius:50%; background:var(--indigo-soft); color:var(--indigo); display:flex; align-items:center; justify-content:center; }
   .sc-contatto-icona svg{ width:20px; height:20px; }
@@ -1993,7 +2047,7 @@
   .sc-azione-icona{ width:34px; height:34px; border-radius:11px; background:var(--text); color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
   .sc-azione-icona svg{ width:17px; height:17px; }
   .sc-azione-testo{ display:flex; flex-direction:column; min-width:0; }
-  .sc-azione-testo b{ font-family:'Manrope'; font-size:13.5px; font-weight:800; color:var(--text); }
+  .sc-azione-testo b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:13.5px; font-weight:800; color:var(--text); }
   .sc-azione-testo small{ font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sc-azione.evidenziata{ border-color:var(--indigo); box-shadow:0 0 0 3px var(--indigo-soft); }
   .sc-azione.evidenziata .sc-azione-icona{ background:var(--indigo); }
@@ -2032,7 +2086,7 @@
   }
   .msg-doc-numero{ font-size:13.5px; font-weight:800; color:var(--text); margin-top:1px; }
   .msg-doc-cifra{
-    font-family:'Manrope'; font-size:19px; font-weight:900; margin-left:auto; color:var(--text);
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:19px; font-weight:900; margin-left:auto; color:var(--text);
   }
   .msg-doc-voci{
     padding:0 14px 11px; font-size:11.5px; color:var(--muted); line-height:1.5;
@@ -2069,9 +2123,9 @@
   .arch-av{
     width:46px; height:46px; border-radius:50%; flex:none; color:#fff;
     display:flex; align-items:center; justify-content:center;
-    font-family:'Manrope'; font-size:15px; font-weight:900;
+    font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:15px; font-weight:900;
   }
-  .arch-nome{ font-family:'Manrope'; font-size:17px; font-weight:900; letter-spacing:-.01em; }
+  .arch-nome{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:17px; font-weight:900; letter-spacing:-.01em; }
   .arch-sotto{ font-size:11.5px; color:var(--muted); margin-top:2px; }
 
   .arch-azioni{ display:flex; gap:8px; padding:14px 18px 0; flex:none; }
@@ -2093,7 +2147,7 @@
     font-size:11.5px; font-weight:700; color:var(--muted);
     background:#F4F5F8; border:1px solid var(--border); white-space:nowrap;
   }
-  .arch-filtro.on{ background:var(--indigo); color:#fff; border-color:var(--indigo); }
+  .arch-filtro.on{ background:var(--text); color:#fff; border-color:var(--text); } /* come i filtri di Messaggi e Clienti */
 
   .arch-lista{ flex:1; overflow-y:auto; padding:0 18px calc(20px + env(safe-area-inset-bottom,0px)); }
   .arch-gruppo{
@@ -2115,7 +2169,7 @@
   .arch-testo{ flex:1; min-width:0; }
   .arch-titolo{ font-size:13.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .arch-meta{ font-size:11px; color:var(--muted); margin-top:2px; }
-  .arch-cifra{ font-family:'Manrope'; font-size:14px; font-weight:900; flex:none; }
+  .arch-cifra{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:14px; font-weight:900; flex:none; }
   .arch-vuoto{
     text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; line-height:1.6;
   }
@@ -2187,7 +2241,7 @@
   .placeholder-page p{ font-size:12.5px; color:var(--muted); max-width:340px; margin:0 auto; line-height:1.55; }
 
   .doc-list-card{ padding:11px 14px; border-radius:13px; border:1px solid var(--border); margin:6px 6px; display:flex; align-items:center; gap:10px; }
-  .doc-num{ font-family:'Manrope'; font-weight:800; font-size:11.5px; color:var(--indigo); background:var(--indigo-soft); padding:5px 9px; border-radius:9px; flex:none; }
+  .doc-num{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:11.5px; color:var(--indigo); background:var(--indigo-soft); padding:5px 9px; border-radius:9px; flex:none; }
 
   /* anteprima documento fattura/preventivo */
   .invoice-preview{
@@ -2195,7 +2249,7 @@
     padding:18px 18px; margin-top:14px; box-shadow:var(--shadow-md);
   }
   .invoice-preview-head{ display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--border); margin-bottom:12px; }
-  .invoice-preview-brand{ display:flex; align-items:center; font-family:'Manrope'; font-weight:900; font-size:17px; color:var(--text); }
+  .invoice-preview-brand{ display:flex; align-items:center; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:900; font-size:17px; color:var(--text); }
   .invoice-preview-brand .logo-o{ width:18px;height:18px; color:var(--indigo); }
   .invoice-preview-doctype{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:4px; }
   .invoice-preview-meta{ text-align:right; font-size:13px; color:var(--text); line-height:1.7; }
@@ -2546,9 +2600,9 @@
         <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.7s6 5.4 6 10.1a6 6 0 0 1-12 0c0-4.7 6-10.1 6-10.1z"/></svg></div>
         <div class="ob-card-body"><div class="ob-card-title">Idraulico</div></div>
       </div>
-      <div class="ob-card" data-profession="avvocato">
-        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-        <div class="ob-card-body"><div class="ob-card-title">Avvocato</div></div>
+      <div class="ob-card" data-profession="elettricista">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Elettricista</div></div>
       </div>
       <div class="ob-card" data-profession="amministratore">
         <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></div>
@@ -2628,13 +2682,13 @@
             <div class="ob-card-sub">Interventi, impianti, manutenzioni</div>
           </div>
         </div>
-        <div class="ob-card" data-profession="avvocato">
+        <div class="ob-card" data-profession="elettricista">
           <div class="ob-card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
           </div>
           <div class="ob-card-body">
-            <div class="ob-card-title">Avvocato</div>
-            <div class="ob-card-sub">Pratiche, udienze, scadenze</div>
+            <div class="ob-card-title">Elettricista</div>
+            <div class="ob-card-sub">Impianti, interventi, certificazioni</div>
           </div>
         </div>
         <div class="ob-card" data-profession="amministratore">
@@ -2809,7 +2863,13 @@
     </div>
 
     <div class="topbar" style="display:none;">
-      <div>
+      <!-- Intestazione unica (27/09/2026): come Messaggi, tasto tondo ←
+           a sinistra e titolo accanto; la riga "← Torna a…" sotto il
+           titolo non serve più (il tasto la usa al suo posto). -->
+      <button type="button" class="chat-fs-back topbar-indietro" id="topbarIndietro" aria-label="Indietro" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="topbar-testo">
         <h1 id="pageTitle">Buongiorno, Marco</h1>
         <div class="sub" id="pageSub">—</div>
       </div>
@@ -3021,13 +3081,39 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Torna a Documenti
       </div>
+      <!-- Nuovo documento (27/09/2026, Andrea: "manca il tasto, scritto e
+           a microfono"): due tasti che chiedono per chi e cosa, oppure si
+           dice tutto a EON qui sotto, a voce o scritto. -->
+      <div class="fp-nuovo">
+        <button class="primary-btn add-btn fp-nuovo-btn" id="fpNuovoPreventivo" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          Nuovo preventivo
+        </button>
+        <button class="primary-btn add-btn fp-nuovo-btn" id="fpNuovaFattura" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          Nuova fattura
+        </button>
+      </div>
+      <div class="fp-dettatura">
+        <button class="home-hero-mic fp-mic" id="fpMic" aria-label="Tocca per parlare" type="button">
+          <span class="home-hero-mic-ring"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+        </button>
+        <div class="home-hero-textwrap fp-textwrap">
+          <textarea class="home-hero-campo" id="fpCampo" rows="1" placeholder="Es. fattura da 300 per Rossi"></textarea>
+          <button class="home-hero-send" id="fpSend" aria-label="Invia" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="home-hero-hint fp-hint" id="fpHint">Dillo a voce o scrivilo: per chi, cosa e quanto</div>
       <div class="arch-filtri" id="fpFiltri" style="padding:0 0 12px;">
         <button class="arch-filtro fp-filtro on" type="button" data-f="tutti">Tutti</button>
         <button class="arch-filtro fp-filtro" type="button" data-f="fattura">Fatture</button>
         <button class="arch-filtro fp-filtro" type="button" data-f="preventivo">Preventivi</button>
       </div>
       <div class="card-panel">
-        <div class="card-header"><h2 id="fpTitolo">Fatture e preventivi</h2><span class="count" id="fpCount">0</span></div>
+        <div class="card-header"><h2 id="fpTitolo">Tutti i documenti</h2><span class="count" id="fpCount">0</span></div>
         <div id="fpTotale" class="risorsa-voce-sotto" style="text-align:left; padding:0 14px 6px;"></div>
         <div id="fpLista"></div>
       </div>
@@ -3407,65 +3493,43 @@
     </div>
 
     <div class="page" id="page-clienti">
-
-      <div class="client-search-row" style="display:none;">
-        <div class="search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input type="text" id="clientSearchInput" placeholder="Cerca qualsiasi cosa su un cliente: nome, stato, descrizione...">
-        </div>
-        <button class="icon-btn" id="clientVoiceBtn" title="Cerca a voce" aria-label="Cerca cliente a voce" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M2 7.5c4.5-1.6 7.2-1.6 10-1.6s5.5 0 10 1.6" stroke-linecap="round"/>
-            <path d="M2 12c4.5-2.3 7.2-2.3 10-2.3s5.5 0 10 2.3" stroke-linecap="round"/>
-            <path d="M2 16.5c4.5-1.6 7.2-1.6 10-1.6s5.5 0 10 1.6" stroke-linecap="round"/>
-            <circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"/>
-          </svg>
+      <!-- Clienti in un'unica lista (27/09/2026, Andrea: "non farei
+           distinzione tra clienti e potenziali", scelta la simulazione A):
+           si detta o si scrive un cliente, si cerca, si filtra per stato,
+           e un tocco apre la scheda con tutte le azioni. -->
+      <div class="fp-dettatura cl-dettatura">
+        <button class="home-hero-mic fp-mic" id="clientiHeroMic" aria-label="Tocca per parlare" type="button">
+          <span class="home-hero-mic-ring"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
         </button>
-      </div>
-
-      <div class="home-hero" style="padding:6px 0 4px;">
-        <div class="home-hero-mic-wrap" style="margin-bottom:10px;">
-          <button class="home-hero-mic" id="clientiHeroMic" aria-label="Tocca per parlare" type="button" style="width:84px; height:84px;">
-            <span class="home-hero-mic-ring"></span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" style="width:28px; height:28px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
-          </button>
-        </div>
-        <div class="home-hero-hint" id="clientiHeroHint" style="margin-bottom:14px;">Racconta il cliente: nome, contatto, cosa deve fare — creo la scheda subito</div>
-        <div class="home-hero-textwrap">
-          <textarea class="home-hero-campo" id="clientiHeroCampo" rows="2" placeholder="Es. Mario Rossi, 333 1234567, deve rifare il tetto, circa 15.000"></textarea>
+        <div class="home-hero-textwrap fp-textwrap">
+          <textarea class="home-hero-campo" id="clientiHeroCampo" rows="1" placeholder="Es. Mario Rossi, 333 1234567, tetto"></textarea>
           <button class="home-hero-send" id="clientiHeroSend" aria-label="Invia" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </div>
       </div>
+      <div class="home-hero-hint fp-hint" id="clientiHeroHint">Racconta il cliente: nome, contatto, cosa deve fare</div>
 
-      <button class="primary-btn add-btn" id="addClientBtn" style="background:var(--text); box-shadow:0 4px 14px rgba(14,20,36,.28);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
-        Aggiungi cliente a mano
-      </button>
-      <button class="primary-btn add-btn importa-clienti-btn" id="importaClientiBtn" type="button">
+      <label class="cl-cerca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="clientSearchInput" placeholder="Cerca un cliente" autocomplete="off">
+      </label>
+      <div class="cl-filtri" id="clientiFiltri"></div>
+
+      <div class="cl-lista" id="clientArchiveList"></div>
+
+      <button class="cl-importa" id="importaClientiBtn" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         Importa dalla rubrica o da Excel
       </button>
       <input type="file" id="importaClientiFile" accept=".vcf,.vcard,.csv,.xlsx,.txt,text/vcard,text/x-vcard,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
 
-      <div class="card-panel" style="margin-bottom:18px;">
-        <div class="card-header">
-          <h2 id="clientSection1Label">Clienti</h2>
-          <span class="count" id="clientCount">0</span>
-        </div>
-        <div id="clientArchiveList" style="padding:8px 0 16px;"></div>
-      </div>
+      <button class="cl-nuovo" id="addClientBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+        Nuovo cliente
+      </button>
 
-      <div class="card-panel">
-        <div class="card-header">
-          <h2 id="clientSection2Label">Potenziali Clienti</h2>
-          <span class="count" id="prospectCount">0</span>
-        </div>
-        <div id="prospectArchiveList" style="padding:8px 0 16px;"></div>
-      </div>
-
-      <div id="clientArchiviatiToggle" style="display:none; text-align:center; padding:10px; color:var(--faint); cursor:pointer; font-size:13px;"></div>
     </div>
 
     <!-- ==================== PAGINA: CRESCI (opportunità + obiettivi) ==================== -->
@@ -3753,8 +3817,11 @@
         Torna al Menu
       </div>
       <div class="card-panel">
-        <div class="card-header"><h2>Cestino</h2></div>
-        <p class="module-sub" style="padding:0 4px 12px;">Quello che elimini finisce qui prima di sparire per sempre: da qui puoi ripristinarlo o eliminarlo per davvero.</p>
+        <p class="module-sub" style="padding:4px 4px 12px;">Quello che elimini finisce qui prima di sparire per sempre: da qui puoi ripristinarlo o eliminarlo per davvero.</p>
+        <button class="primary-btn add-btn cestino-svuota-btn" id="cestinoSvuotaBtn" type="button" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Svuota cestino
+        </button>
         <div id="cestinoList" class="azienda-list"></div>
       </div>
     </div>
@@ -3816,6 +3883,16 @@
           <div class="azienda-link-card-body">
             <div class="module-title">Aiuto</div>
             <div class="module-sub">Manda un feedback, registro dell'assistente</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVocePrivacy" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Privacy e dati</div>
+            <div class="module-sub">Informativa, termini, scarica i tuoi dati</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -4583,7 +4660,7 @@ async function dbEliminaPerSempre(table, id){
    la tabella) e aggiornaDatiToccati() (aggiorna solo il record giusto),
    così le due strade non rischiano di andare fuori sincrono tra loro. */
 function mappaCliente(c){
-  return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description || "", last:c.last_contact || "", phone:c.phone || "", email:c.email || "", color:c.color, archived:!!c.is_archived };
+  return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description || "", last:c.last_contact || "", phone:c.phone || "", email:c.email || "", address:c.address || "", color:c.color, archived:!!c.is_archived };
 }
 function mappaImpegno(t){
   return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
@@ -4831,6 +4908,11 @@ async function renderCestino(){
   righe.sort((a, b) => new Date(b.riga.deleted_at) - new Date(a.riga.deleted_at));
 
   wrap.innerHTML = "";
+  const svuota = document.getElementById("cestinoSvuotaBtn");
+  if(svuota){
+    svuota.hidden = righe.length === 0;
+    svuota.onclick = () => chiediSvuotaCestino(righe);
+  }
   if(righe.length === 0){
     wrap.innerHTML = '<div class="empty-hint"><b>Il cestino è vuoto</b>Quello che elimini finisce qui prima di sparire per sempre.</div>';
     return;
@@ -4880,6 +4962,35 @@ async function renderCestino(){
     });
     wrap.appendChild(row);
   });
+}
+
+/* Svuota cestino (27/09/2026, Andrea: "mancava"): tutto quello che è
+   nel cestino ADESSO (le righe mostrate), eliminato per sempre dopo una
+   conferma. Come l'eliminazione di una riga sola: una conversazione si
+   porta via anche i suoi messaggi. */
+function chiediSvuotaCestino(righe){
+  const n = righe.length;
+  if(!n) return;
+  showAIToastConDecisione(
+    "Svuotare il cestino?",
+    (n === 1 ? "1 elemento verrà eliminato" : n + " elementi verranno eliminati") + " per sempre. Non si potranno più recuperare.",
+    async () => {
+      let fatti = 0;
+      for(const { tabella, riga } of righe){
+        try{
+          if(tabella === "conversations"){
+            const { data: msgs } = await supabaseClient.from("messages").select("id").eq("conversation_id", riga.id);
+            await Promise.all((msgs || []).map(m => dbEliminaPerSempre("messages", m.id)));
+          }
+          await dbEliminaPerSempre(tabella, riga.id);
+          fatti++;
+        }catch(err){ console.warn("Svuota cestino:", err.message); }
+      }
+      renderCestino();
+      showAIToast("Cestino svuotato", fatti === n ? "Tutto eliminato per sempre." : "Eliminati " + fatti + " elementi su " + n + ": riprova per gli altri.");
+    },
+    null, "Svuota", "Annulla"
+  );
 }
 
 /* Nessuna funzione di escape condivisa nel resto del file: ne serve
@@ -5468,6 +5579,7 @@ function riceviMessaggio(m, analizza){
   if(m.sender === "them" && chats[activeChatIndex] !== chat) chat.unread++;
   renderChatList();
   if(chats[activeChatIndex] === chat) renderChatWindow();
+  if(m.sender === "them" && !m.event_type) notificaMessaggioRicevuto(chat, m);
 
   /* Se e' un appuntamento, il calendario deve aggiornarsi */
   if(m.event_type) renderCalendar();
@@ -6349,6 +6461,10 @@ function renderCalendar(){
           <button class="cal-btn cal-chiama">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg>
             Chiama
+          </button>
+          <button class="cal-btn cal-portami">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            Portami lì
           </button>` : ''}
           ${it.id ? `
           <button class="cal-btn cal-elimina" title="Elimina">
@@ -6387,6 +6503,13 @@ function renderCalendar(){
           showAILanding("Numero mancante",
             "Non ho il telefono di " + it.contatto + ". Aggiungilo alla sua scheda in Clienti e potrai chiamare da qui.");
         }
+      });
+
+      const bPortami = row.querySelector(".cal-portami");
+      if(bPortami) bPortami.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if(cliente) portamiDaCliente(cliente);
+        else showAILanding("Cliente non trovato", it.contatto + " non è tra i tuoi clienti: aggiungilo con il suo indirizzo e potrai partire da qui.");
       });
 
       const bElimina = row.querySelector(".cal-elimina");
@@ -6533,8 +6656,6 @@ async function applyProfession(key, skipDemoData){
   }
 
   document.getElementById("oppPageTitle").textContent = p.oppPageTitle;
-  document.getElementById("clientSection1Label").textContent = p.section1;
-  document.getElementById("clientSection2Label").textContent = p.section2;
   document.getElementById("statTotalLabel").textContent = p.statTotalLabel;
   document.getElementById("statTrattativaLabel").textContent = p.statTrattativaLabel;
   document.getElementById("statValueLabel").textContent = p.statValueLabel;
@@ -6802,69 +6923,37 @@ function renderTasks(){
 }
 
 /* ============ CLIENTI ARCHIVIO ============ */
+/* Una riga della lista Clienti (27/09/2026, simulazione A): chi è, il
+   lavoro da fare, valore e stato. Un tocco apre la scheda con tutte le
+   azioni (chiama, scrivi, portami lì, link, modifica, archivia). */
+const STATO_RIGA_CLIENTE = { attivo:"In corso", trattativa:"Preventivo", inattivo:"Concluso" };
 function buildClientCard(c){
   const card = document.createElement("div");
-  card.className = "client-archive-card";
+  card.className = "client-archive-card cl-riga";
+  card.setAttribute("role", "button");
+  card.tabIndex = 0;
   const initials = c.name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  const stato = c.archived ? "archiviato" : (c.status || "attivo");
   card.innerHTML = `
-    <!-- Card del cliente (25/09/2026, Gianardi): solo nome e, sotto, una
-         descrizione breve del lavoro da fare. Tolti stato, "Ultimo
-         contatto" e i trattini: lo stato si vede già dalla sezione. -->
-    <div class="client-archive-head">
-      <div class="row-avatar" style="background:${coloreCliente(c)};">${escapeHtml(initials)}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="row-name">${escapeHtml(c.name)}</div>
-        ${c.desc && c.desc.trim()
-          ? '<div class="client-lavoro">' + escapeHtml(c.desc.trim()) + '</div>'
-          : '<button type="button" class="client-lavoro vuoto">+ Scrivi cosa c\'è da fare</button>'}
-      </div>
-      ${c.value > 0 ? '<div class="row-value">€' + c.value.toLocaleString("it-IT") + '</div>' : ""}
+    <div class="row-avatar" style="background:${coloreCliente(c)};">${escapeHtml(initials)}</div>
+    <div class="cl-info">
+      <div class="row-name">${escapeHtml(c.name)}</div>
+      ${c.desc && c.desc.trim()
+        ? '<div class="client-lavoro">' + escapeHtml(c.desc.trim()) + '</div>'
+        : '<button type="button" class="client-lavoro vuoto">+ Scrivi cosa c\'è da fare</button>'}
     </div>
-    <div class="client-archive-foot">
-      <div class="row-action-btn" title="Invia email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/></svg></div>
-      <div class="row-action-btn" title="Chiama"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/></svg></div>
-      <div class="row-action-btn client-link-btn" title="Invia il link al cliente" style="margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></div>
-      <div class="row-action-btn client-edit-btn" title="Modifica"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></div>
-      <div class="row-action-btn client-archive-btn" title="${c.archived ? "Riattiva" : "Archivia"}">
-        ${c.archived
-          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>'
-          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>'}
-      </div>
+    <div class="cl-destra">
+      ${c.value > 0 ? '<div class="row-value">€ ' + c.value.toLocaleString("it-IT") + '</div>' : ""}
+      <span class="cl-stato s-${stato}">${stato === "archiviato" ? "Archiviato" : (STATO_RIGA_CLIENTE[stato] || "In corso")}</span>
     </div>
-    <button class="client-chat-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/></svg>
-      Apri conversazione
-    </button>
   `;
-  // Tocco sulla card: la scheda del cliente con tutte le azioni
   card.addEventListener("click", () => mostraSchedaCliente(c));
-  card.querySelector(".client-edit-btn").addEventListener("click", (e) => {
-    e.stopPropagation();
-    openSheet("cliente", c);
-  });
+  card.addEventListener("keydown", (e) => { if(e.key === "Enter"){ e.preventDefault(); mostraSchedaCliente(c); } });
   const aggiungiLavoro = card.querySelector(".client-lavoro.vuoto");
   if(aggiungiLavoro) aggiungiLavoro.addEventListener("click", (e) => {
     e.stopPropagation();
     openSheet("cliente", c);
     setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="desc"]'); if(d) d.focus(); }, 50);
-  });
-  card.querySelector(".client-chat-btn").addEventListener("click", async (e) => {
-    e.stopPropagation();
-    await openClientChat(c);
-  });
-  card.querySelector(".client-link-btn").addEventListener("click", async (e) => {
-    e.stopPropagation();
-    await shareClientLink(c);
-  });
-  card.querySelector(".client-archive-btn").addEventListener("click", async (e) => {
-    e.stopPropagation();
-    // Conferma: 63 clienti su 64 erano finiti in archivio con questo tasto (25/09/2026)
-    const domanda = c.archived ? 'Riportare "' + c.name + '" tra i clienti attivi?' : 'Archiviare "' + c.name + '"? Sparirà dalle liste (anche dalla chat) finché non lo riattivi.';
-    if(!confirm(domanda)) return;
-    await impostaArchivioClienteEChat(c, chatDelCliente(c), !c.archived);
-    ridisegnaClientiEChat();
-    const pagCruscotto = document.getElementById("page-cantiere-cliente");
-    if(pagCruscotto && pagCruscotto.classList.contains("visible")) renderCantiereClienteCruscotto();
   });
   return card;
 }
@@ -6903,56 +6992,59 @@ async function shareClientLink(client){
   }
 }
 
+let filtroClienti = "tutti";
+const FILTRI_CLIENTI = [
+  { k:"tutti", t:"Tutti" }, { k:"attivo", t:"In corso" }, { k:"trattativa", t:"Preventivo" },
+  { k:"inattivo", t:"Conclusi" }, { k:"archiviati", t:"Archiviati" },
+];
 function renderClientArchive(){
   const query = (document.getElementById("clientSearchInput").value || "").trim().toLowerCase();
   const matches = c => !query ||
     c.name.toLowerCase().includes(query) ||
-    c.desc.toLowerCase().includes(query) ||
-    clientStatusLabel[c.status].toLowerCase().includes(query);
+    (c.desc || "").toLowerCase().includes(query) ||
+    (c.phone || "").replace(/\s/g, "").includes(query.replace(/\s/g, ""));
 
-  const visibili = mostraClientiArchiviati ? clients : clients.filter(c => !c.archived);
-  const archiviatiCount = clients.filter(c => c.archived).length;
+  const attivi = clients.filter(c => !c.archived);
+  const conta = {
+    tutti: attivi.length,
+    attivo: attivi.filter(c => (c.status || "attivo") === "attivo").length,
+    trattativa: attivi.filter(c => c.status === "trattativa").length,
+    inattivo: attivi.filter(c => c.status === "inattivo").length,
+    archiviati: clients.length - attivi.length,
+  };
+  if(filtroClienti === "archiviati" && !conta.archiviati) filtroClienti = "tutti";
 
-  const activeClients = visibili.filter(c => c.status !== "trattativa" && matches(c));
-  const prospects = visibili.filter(c => c.status === "trattativa" && matches(c));
+  const filtri = document.getElementById("clientiFiltri");
+  filtri.innerHTML = "";
+  FILTRI_CLIENTI.forEach(f => {
+    if(f.k === "archiviati" && !conta.archiviati) return;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "cl-filtro" + (filtroClienti === f.k ? " on" : "");
+    b.innerHTML = escapeHtml(f.t) + (conta[f.k] ? " <b>" + conta[f.k] + "</b>" : "");
+    b.addEventListener("click", () => { filtroClienti = f.k; renderClientArchive(); });
+    filtri.appendChild(b);
+  });
 
-  const clientWrap = document.getElementById("clientArchiveList");
-  clientWrap.innerHTML = "";
-  if(activeClients.length === 0){
-    clientWrap.innerHTML = query
-      ? '<div class="empty-hint">Nessun cliente trovato per "' + query + '".</div>'
-      : '<div class="empty-hint"><b>Nessun cliente ancora</b>Tocca "Aggiungi cliente" qui sopra per inserire il primo.</div>';
+  const scelti = (filtroClienti === "archiviati" ? clients.filter(c => c.archived)
+    : filtroClienti === "tutti" ? attivi
+    : attivi.filter(c => (c.status || "attivo") === filtroClienti)).filter(matches);
+
+  const wrap = document.getElementById("clientArchiveList");
+  wrap.innerHTML = "";
+  wrap.classList.toggle("vuota", scelti.length === 0);
+  if(scelti.length === 0){
+    wrap.innerHTML = query
+      ? '<div class="empty-hint">Nessun cliente trovato per "' + escapeHtml(query) + '".</div>'
+      : clients.length
+        ? '<div class="empty-hint">Nessun cliente in questo elenco.</div>'
+        : '<div class="empty-hint"><b>Nessun cliente ancora</b>Dimmelo qui sopra a voce, oppure tocca "Nuovo cliente".</div>';
+    return;
   }
-  activeClients.forEach(c => clientWrap.appendChild(buildClientCard(c)));
-  document.getElementById("clientCount").textContent = activeClients.length;
-
-  const prospectWrap = document.getElementById("prospectArchiveList");
-  prospectWrap.innerHTML = "";
-  if(prospects.length === 0){
-    prospectWrap.innerHTML = '<div class="empty-hint">Nessun potenziale cliente al momento.</div>';
-  }
-  prospects.forEach(c => prospectWrap.appendChild(buildClientCard(c)));
-  document.getElementById("prospectCount").textContent = prospects.length;
-
-  const toggleEl = document.getElementById("clientArchiviatiToggle");
-  if(toggleEl){
-    if(archiviatiCount === 0 && !mostraClientiArchiviati){
-      toggleEl.style.display = "none";
-    } else {
-      toggleEl.style.display = "block";
-      toggleEl.textContent = mostraClientiArchiviati
-        ? "Nascondi i clienti archiviati"
-        : "Mostra i clienti archiviati (" + archiviatiCount + ")";
-    }
-  }
+  scelti.forEach(c => wrap.appendChild(buildClientCard(c)));
 }
 
 document.getElementById("clientSearchInput").addEventListener("input", renderClientArchive);
-document.getElementById("clientArchiviatiToggle").addEventListener("click", () => {
-  mostraClientiArchiviati = !mostraClientiArchiviati;
-  renderClientArchive();
-});
-document.getElementById("clientVoiceBtn").addEventListener("click", function(){ this.classList.toggle("listening"); });
 
 /* ============================================================
    PANNELLO DI INSERIMENTO / MODIFICA
@@ -7022,18 +7114,21 @@ const sheetForms = {
       { key:"value", label:"Valore (€)", type:"text", inputmode:"decimal", placeholder:"Es. 15.000" },
       { key:"phone", label:"Telefono", type:"text", inputmode:"tel", placeholder:"Es. 335 1234567" },
       { key:"email", label:"Email", type:"text", inputmode:"email", placeholder:"Es. mara@esempio.it" },
+      { key:"address", label:"Indirizzo", type:"text", placeholder:"Es. Via Roma 10, Bergamo" },
       { key:"desc", label:"Lavoro da fare", type:"textarea", placeholder:"Es. Rifacimento bagno: piastrelle e sanitari" },
     ],
     table: "clients",
     toDb: v => ({
       name: v.name, status: v.status, value: leggiImporto(v.value),
       description: v.desc || "", last_contact: "oggi", phone: v.phone || "", email: (v.email || "").trim(),
+      address: (v.address || "").trim(),
       color: PALETTE[Math.floor(Math.random() * PALETTE.length)]
     }),
     toLocal: (v, saved) => ({
       id: saved ? saved.id : undefined,
       name: v.name, status: v.status, value: leggiImporto(v.value),
       desc: v.desc || "", last: "oggi", phone: v.phone || "", email: (v.email || "").trim(),
+      address: (v.address || "").trim(),
       color: saved ? saved.color : PALETTE[0]
     }),
     array: () => clients,
@@ -7725,6 +7820,80 @@ function showToast(iconSvg, title, text){
   container.appendChild(toast);
   setTimeout(() => { toast.remove(); }, 8000);
 }
+/* Messaggio ricevuto (27/09/2026, Andrea: "notifiche dei messaggi
+   ricevuti, stile delle card, possibilità di rispondere"): chi scrive,
+   l'anteprima, "Rispondi" (si scrive lì, senza aprire la chat) e "Apri
+   chat". Solo se quella chat non è già aperta davanti. */
+function notificaMessaggioRicevuto(chat, m){
+  const container = document.getElementById("aiToastContainer");
+  if(!container || !chat) return;
+  const inVista = chats[activeChatIndex] === chat && document.getElementById("chatSlider") &&
+    document.getElementById("chatSlider").classList.contains("show-conv") &&
+    document.getElementById("page-chat") && document.getElementById("page-chat").classList.contains("visible");
+  if(inVista) return;
+  const anteprima = m.body && m.body.trim() ? m.body.trim()
+    : anteprimaMessaggio({ fileType: m.file_type, fileUrl: m.file_url, fileName: m.file_name, eventType: m.event_type, title: m.title, text: m.body });
+  const iniziali = String(chat.name || "?").split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  const cliente = clienteDellaChat(chat);
+  // Una sola notifica per chat: la nuova sostituisce la precedente
+  container.querySelectorAll('.ai-toast.messaggio').forEach(t => { if(t.dataset.chat === String(chat.id)) t.remove(); });
+  const toast = document.createElement("div");
+  toast.className = "ai-toast messaggio";
+  toast.dataset.chat = String(chat.id);
+  toast.innerHTML = `
+    <div class="ai-toast-icon" style="background:${coloreCliente(cliente || chat)};">${escapeHtml(iniziali)}</div>
+    <div class="ai-toast-body">
+      <div class="ai-toast-title">${escapeHtml(chat.name)}</div>
+      <div class="ai-toast-text">${escapeHtml(anteprima.length > 160 ? anteprima.slice(0, 157) + "…" : anteprima)}</div>
+      <div class="ai-toast-actions">
+        <button class="ai-toast-yes" type="button">Rispondi</button>
+        <button class="ai-toast-no" type="button">Apri chat</button>
+      </div>
+    </div>
+    <button class="ai-toast-close" aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  `;
+  let timer = setTimeout(() => toast.remove(), 12000);
+  toast.querySelector(".ai-toast-close").addEventListener("click", () => toast.remove());
+  toast.querySelector(".ai-toast-no").addEventListener("click", () => {
+    toast.remove();
+    activeChatIndex = chats.indexOf(chat);
+    chat.unread = 0;
+    navigateTo("chat");
+    renderChatList(); renderChatWindow();
+    document.getElementById("chatSlider").classList.add("show-conv");
+  });
+  toast.querySelector(".ai-toast-yes").addEventListener("click", () => {
+    clearTimeout(timer); // mentre scrivi non sparisce
+    const azioni = toast.querySelector(".ai-toast-actions");
+    const riga = document.createElement("form");
+    riga.className = "ai-toast-risposta";
+    riga.innerHTML = `<input type="text" placeholder="Rispondi a ${escapeHtml(String(chat.name).split(" ")[0])}…" enterkeyhint="send"><button type="submit" aria-label="Invia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>`;
+    azioni.replaceWith(riga);
+    const campo = riga.querySelector("input");
+    campo.focus();
+    riga.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const testo = campo.value.trim();
+      if(!testo) return;
+      riga.querySelectorAll("input,button").forEach(x => x.disabled = true);
+      const ok = await inviaRispostaRapida(chat, testo);
+      if(ok){ toast.remove(); showAIToast("Inviato", "A " + chat.name + ": " + testo); }
+      else riga.querySelectorAll("input,button").forEach(x => x.disabled = false);
+    });
+  });
+  container.appendChild(toast);
+}
+/* Risposta scritta dalla notifica: come dalla chat, canale EON */
+async function inviaRispostaRapida(chat, testo){
+  if(!isDbReady() || !chat.id) return false;
+  const { data: salvato, error } = await supabaseClient.from("messages").insert({
+    conversation_id: chat.id, sender: "me", body: testo, canale: "eon"
+  }).select().single();
+  if(error || !salvato){ showAIToast("Non inviato", "Controlla la connessione e riprova."); return false; }
+  riceviMessaggio(salvato, true);
+  return true;
+}
+
 function showAIToast(title, text){
   showToast('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/><circle cx="12" cy="12" r="4"/></svg>', title, text);
 }
@@ -11660,9 +11829,52 @@ function linkPercorso(meta){
   const iPhone = /iphone|ipad|ipod/i.test(navigator.userAgent);
   return iPhone ? "https://maps.apple.com/?daddr=" + encodeURIComponent(meta) + "&dirflg=d" : "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(meta);
 }
+/* "Portami lì" (27/09/2026): il percorso fino al cliente, nelle Mappe del
+   telefono (col traffico vero). Se EON non ha ancora il suo indirizzo lo
+   chiede una volta, nella card, e lo ricorda sulla scheda del cliente. */
+function clienteDaMeta(meta){
+  const t = String(meta || "").toLowerCase().trim();
+  const m = t.match(/^(?:da|dal|dalla|dallo|dai|dalle)\s+(.+)$/);
+  const nome = m ? m[1] : t;
+  const esatto = clients.find(c => nomeChiave(c.name) === nomeChiave(nome));
+  if(esatto) return esatto;
+  if(!m) return null; // "portami a Bergamo" resta un luogo
+  return trovaClienteDaParole(nome.split(/\s+/).filter(p => p.length > 2));
+}
+function apriMappeVerso(indirizzo, etichetta){
+  const link = linkPercorso(indirizzo);
+  const w = window.open(link, "_blank");
+  if(w) return;
+  // Il telefono ha bloccato l'apertura (es. dopo il microfono): un tocco sul link
+  const corpo = document.createElement("div");
+  corpo.className = "percorso-card";
+  corpo.innerHTML = `<a class="percorso-meta" href="${escapeHtml(link)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>${escapeHtml(etichetta || indirizzo)}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>`;
+  apriRisorsaCard("Portami lì", corpo);
+}
+function portamiDaCliente(cliente){
+  if(!cliente) return;
+  if(cliente.address && cliente.address.trim()){ apriMappeVerso(cliente.address, cliente.name); return; }
+  apriConversazioneCard(null, "Non ho ancora l'indirizzo di " + cliente.name + ". Qual è? Lo ricordo per le prossime volte.", (t) => {
+    const indirizzo = String(t || "").trim();
+    if(!indirizzo) return;
+    chiudiRisorsaCard();
+    apriMappeVerso(indirizzo, cliente.name); // subito, dentro il tocco
+    cliente.address = indirizzo;
+    if(cliente.id && isDbReady()) dbUpdate("clients", cliente.id, { address: indirizzo });
+  });
+}
+
 function provaPercorso(testo){
   const mete = capisciRichiestaPercorso(testo);
   if(!mete) return false;
+  /* "Portami da Rita": il suo indirizzo (o EON lo chiede) */
+  if(mete.length === 1){
+    const c = clienteDaMeta(mete[0]);
+    if(c){
+      if(!c.address){ portamiDaCliente(c); return true; }
+      mete[0] = c.address;
+    }
+  }
   const corpo = document.createElement("div");
   corpo.className = "percorso-card";
   corpo.innerHTML = `<p class="percorso-nota">${mete.length > 1 ? "Tocca una meta: le Mappe ti mostrano subito il tempo col traffico di adesso." : "Tocca per vedere il tempo col traffico di adesso nelle Mappe."}</p>
@@ -12517,6 +12729,30 @@ collegaMicTesto({
   costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente del cantiere: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo.`
 });
 
+collegaMicTesto({
+  micId:"fpMic", campoId:"fpCampo", sendId:"fpSend", hintId:"fpHint",
+  hintBase:"Dillo a voce o scrivilo: per chi, cosa e quanto",
+  fallbackHint:"Prova così: preventivo per Rossi, rifacimento bagno, 3.000 euro",
+  costruisciPrompt:(testo) => `Il professionista, dalla pagina Fatture e preventivi, ha scritto o dettato: "${testo}"`
+});
+/* "Nuovo preventivo" / "Nuova fattura": EON chiede per chi e cosa, nella
+   sua card (si risponde scrivendo o a voce), poi prepara il documento come
+   se glielo avessi detto tu. */
+function nuovoDocumentoDaTasto(tipo){
+  const nome = tipo === "fattura" ? "la fattura" : "il preventivo";
+  const esempio = tipo === "fattura" ? "«Rossi, rifacimento bagno, 3.000 euro»" : "«Rossi, rifacimento bagno, 3.000 euro»";
+  apriConversazioneCard(null, "Per chi è " + nome + " e cosa comprende? Per esempio " + esempio + ".", (t) => {
+    const risposta = String(t || "").trim();
+    if(!risposta) return;
+    chiudiRisorsaCard();
+    const campo = document.getElementById("fpCampo");
+    campo.value = (tipo === "fattura" ? "Fattura per " : "Preventivo per ") + risposta;
+    document.getElementById("fpSend").click();
+  });
+}
+document.getElementById("fpNuovoPreventivo").addEventListener("click", () => nuovoDocumentoDaTasto("preventivo"));
+document.getElementById("fpNuovaFattura").addEventListener("click", () => nuovoDocumentoDaTasto("fattura"));
+
 /* Aggiorna il riquadro scuro della Home ("Calendario attività" e "Cosa
    devo fare oggi") riusando i gruppi già calcolati da renderCalendar():
    stessa fonte di verità, nessuna logica di date duplicata. */
@@ -13114,6 +13350,7 @@ function mostraSchedaCliente(c, opzioni){
     { nome: "WhatsApp", icona: '<path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 9.5c.3 2 2.5 4.3 4.6 4.8l1.1-1.1 2 .9c-.3 1-1.2 1.6-2.2 1.5C11 15.2 8.4 12.6 8 9.9c-.1-1 .5-1.9 1.5-2.2l.9 2z"/>', href: tel ? "https://wa.me/" + tel.replace("+", "") : "", manca: "phone", classe: "wa" },
     { nome: "Email", icona: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>', href: c.email ? "mailto:" + c.email : "", manca: "email" },
     { nome: "Messaggio", icona: '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8v.4z"/>', azione: async () => { chiudiRisorsaCard(); await openClientChat(c); } },
+    { nome: "Portami lì", icona: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>', azione: () => portamiDaCliente(c) },
   ].forEach(k => {
     const el = document.createElement(k.href ? "a" : "button");
     el.className = "sc-contatto" + (k.classe ? " " + k.classe : "") + (!k.href && !k.azione ? " manca" : "");
@@ -13154,6 +13391,16 @@ function mostraSchedaCliente(c, opzioni){
     mostraRisorsaDocumenti(docs, c.name);
   });
   azione("modifica", "Modifica", "Dati del cliente", '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>', () => { chiudiRisorsaCard(); openSheet("cliente", c); });
+  /* Dalla lista Clienti semplice (27/09/2026) queste due stanno qui */
+  azione("link", "Link cliente", "La sua pagina con lavori e documenti", '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>', async () => { await shareClientLink(c); });
+  azione("archivia", c.archived ? "Riattiva" : "Archivia", c.archived ? "Torna tra i clienti" : "Lavoro finito: toglilo dalle liste", c.archived ? '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>' : '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>', () => {
+    const domanda = c.archived ? 'Riportare "' + c.name + '" tra i clienti attivi?' : 'Archiviare "' + c.name + '"? Sparirà dalle liste (anche dalla chat) finché non lo riattivi.';
+    showAIToastConDecisione(c.archived ? "Riattivare il cliente?" : "Archiviare il cliente?", domanda, async () => {
+      chiudiRisorsaCard();
+      await impostaArchivioClienteEChat(c, chatDelCliente(c), !c.archived);
+      ridisegnaClientiEChat();
+    }, null, c.archived ? "Riattiva" : "Archivia", "Annulla");
+  });
   corpo.appendChild(azioni);
 
   // Stato lavori: impegni, appunti, foto
@@ -14158,7 +14405,7 @@ function renderFatturePreventivi(){
   if(paginaEl && paginaEl.classList.contains("visible")) document.getElementById("pageTitle").textContent = titoloCartella;
   const tutti = documentiVeri();
   const visibili = filtroFatturePreventivi === "tutti" ? tutti : tutti.filter(d => d.dati.tipo === filtroFatturePreventivi);
-  document.getElementById("fpTitolo").textContent = filtroFatturePreventivi === "fattura" ? "Fatture" : filtroFatturePreventivi === "preventivo" ? "Preventivi" : "Fatture e preventivi";
+  document.getElementById("fpTitolo").textContent = filtroFatturePreventivi === "fattura" ? "Fatture" : filtroFatturePreventivi === "preventivo" ? "Preventivi" : "Tutti i documenti";
   document.getElementById("fpCount").textContent = visibili.length;
 
   const annoCorrente = new Date().getFullYear();
@@ -14995,6 +15242,15 @@ function navigateTo(page){
   const meta = pageMeta[page];
   document.getElementById("pageTitle").textContent = meta.title;
 
+  /* Tasto ← in alto: fa quello che faceva la riga "Torna a…" della pagina */
+  const indietro = document.getElementById("topbarIndietro");
+  const rigaTorna = target ? target.querySelector(":scope > .back-link") : null;
+  if(indietro){
+    indietro.hidden = !rigaTorna;
+    indietro.onclick = rigaTorna ? () => rigaTorna.click() : null;
+    if(rigaTorna) rigaTorna.classList.add("in-testata");
+  }
+
   /* Marchio e ricerca generale: solo in Home. Nelle altre sezioni
      resta il titolo, e la ricerca e' quella della sezione. */
   const hero = document.getElementById("brandHero");
@@ -15775,7 +16031,7 @@ function controllaTerminiAccettati(profilo, utente){
 
 /* ---- Impostazioni: account e voci a card (25/09/2026) ---- */
 let profiloUtente = null;
-const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
+const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", elettricista:"Elettricista", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
 function ricordaProfilo(profilo, email){
   profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
   aggiornaAvatarHome();
@@ -15903,6 +16159,50 @@ suTocco("impVoceAiuto", () => {
   corpo.querySelector('[data-azione="installa"]').addEventListener("click", mostraComeInstallare);
   corpo.querySelector('[data-azione="feedback"]').addEventListener("click", () => document.getElementById("feedbackCard").click());
   corpo.querySelector('[data-azione="registro"]').addEventListener("click", () => { chiudiRisorsaCard(); navigateTo("ai-request-log"); });
+});
+
+/* Privacy e dati (27/09/2026, Andrea: "privacy migliore, quello che puoi
+   fare già ora"): informativa e termini a portata di mano, e il diritto
+   di avere una copia dei propri dati (art. 20 GDPR) con un tocco. */
+const TABELLE_MIEI_DATI = ["profiles", "clients", "conversations", "messages", "tasks", "incomes", "payments",
+  "opportunities", "goals", "employees", "assigned_tasks", "cantieri", "cantiere_foto", "cantiere_documenti",
+  "cantiere_appunti", "condomini", "documents", "azienda_intestazione", "feedback"];
+async function scaricaIMieiDati(){
+  if(!isDbReady()){ showAILanding("Non collegato", "Per scaricare i tuoi dati serve la connessione."); return; }
+  const dati = { app: "EON", creato_il: new Date().toISOString(), account: (currentSession.user && currentSession.user.email) || "",
+    nota: "Tutti i dati del tuo account EON. Foto e documenti sono indicati con il loro nome: si aprono dall'app." };
+  for(const t of TABELLE_MIEI_DATI){
+    try{
+      const { data, error } = await supabaseClient.from(t).select("*");
+      if(!error && Array.isArray(data)) dati[t] = data;
+    }catch(e){ /* tabella non disponibile: si salta */ }
+  }
+  const blob = new Blob([JSON.stringify(dati, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "eon-i-miei-dati-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  showAIToast("I tuoi dati", "File pronto: " + a.download);
+}
+suTocco("impVocePrivacy", () => {
+  const icona = (p) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${p}</svg>`;
+  const corpo = schedaImpostazione("Privacy e dati", `
+    <div class="azienda-list">
+      <a class="azienda-link-card imp-aiuto-voce" href="/privacy" target="_blank" rel="noopener" style="text-decoration:none; color:inherit;">
+        <div class="module-icon" style="background:var(--teal);">${icona('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/>')}</div>
+        <div class="azienda-link-card-body"><div class="module-title">Informativa privacy</div><div class="module-sub">Quali dati tratta EON, perché e per quanto</div></div>
+      </a>
+      <a class="azienda-link-card imp-aiuto-voce" href="/termini" target="_blank" rel="noopener" style="text-decoration:none; color:inherit;">
+        <div class="module-icon" style="background:var(--indigo);">${icona('<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/>')}</div>
+        <div class="azienda-link-card-body"><div class="module-title">Termini d'uso</div><div class="module-sub">Le regole, e l'accordo sui dati dei tuoi clienti</div></div>
+      </a>
+      <button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="scarica">
+        <div class="module-icon" style="background:var(--violet);">${icona('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>')}</div>
+        <div class="azienda-link-card-body"><div class="module-title">Scarica i miei dati</div><div class="module-sub">Una copia di tutto: clienti, messaggi, documenti, impegni</div></div>
+      </button>
+    </div>`);
+  corpo.querySelector('[data-azione="scarica"]').addEventListener("click", scaricaIMieiDati);
 });
 
 suTocco("impVoceProfilo", () => {

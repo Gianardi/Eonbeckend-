@@ -167,11 +167,11 @@ async function main() {
     // Tocchi Entrate / Uscite / Clienti
     await page.click("#azRigaEntrate");
     verifica("Entrate apre l'elenco delle entrate", await page.evaluate(() => document.getElementById("page-entrate").classList.contains("visible")));
-    await page.click('#page-entrate .back-link');
+    await page.click('#topbarIndietro');
     verifica("e \"Torna a La tua azienda\" riporta qui", await page.evaluate(() => document.getElementById("page-azienda").classList.contains("visible")));
     await page.click("#azRigaUscite");
     verifica("Uscite apre l'elenco delle uscite", await page.evaluate(() => document.getElementById("page-pagamenti").classList.contains("visible") && document.getElementById("pageTitle").textContent === "Uscite"));
-    await page.click('#page-pagamenti .back-link');
+    await page.click('#topbarIndietro');
     await page.click("#azClienti");
     verifica("Clienti apre l'elenco clienti", await page.evaluate(() => document.getElementById("page-clienti").classList.contains("visible")));
 
