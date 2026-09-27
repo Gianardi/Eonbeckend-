@@ -10545,7 +10545,7 @@ function provaNavigazioneDiretta(testo){
    precise; qualsiasi altra parola (es. "cambia l'email di Rossi", che è
    il dato di un cliente) → la frase va all'AI come sempre. */
 function normalizzaComando(t){
-  return String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+  return String(t || "").toLowerCase().replace(/\be-mail\b/g, "email").normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[’']/g, " ").replace(/[.!?,;:]+/g, " ").replace(/\s+/g, " ").trim();
 }
 const PAROLE_RICHIESTA_ACCOUNT = new Set(["voglio","vorrei","devo","posso","puoi","come","faccio","si","fa","a","ad","per","favore","eon","ehi","mi","me","la","il","lo","l","mia","mio","una","un","nuova","nuovo","di","del","dell","della","account","accesso","mettere","metti","impostare","imposta","cambiare","cambia","cambio","cambiami","modificare","modifica","aggiornare","aggiorna","reimpostare","reimposta","resettare","resetta","sostituire","ho","dimenticato","non","ricordo","piu","e","che","uso","usare","entrare","sistemare","sistema"]);
@@ -13779,8 +13779,16 @@ function mailtoDocumento(d, cliente){
 const VERBO_INVIO = "(?:mi\\s+)?(?:invia|inviare|invialo|inviala|manda|mandare|mandalo|mandala|mandagli|mandale|spedisci|spedire|gira|girare|inoltra|inoltrare)";
 const CANALE_INVIO = "(?:\\s+(?:su|con|per|via|tramite|in|col)\\s+(whatsapp|whats app|wa|email|e mail|mail|posta|eon|chat))?";
 function capisciInvioDocumento(testo){
-  const n = normalizzaComando(testo);
-  let m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:(?:il|la|l|lo|un|una)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:a|al|alla|allo|ad|per|di|del|della|dello)\\s+(.+?))?" + CANALE_INVIO + "$"));
+  /* Un indirizzo email o un numero scritti nella frase ("invia il preventivo
+     di Possa a mario@gmail.com"): si manda lì (prova di Andrea, 27/09/2026) */
+  let t = String(testo || "");
+  const mail = t.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+  if(mail) t = t.replace(mail[0], " ");
+  const tel = !mail && t.match(/\+?\d[\d ./-]{7,}\d/);
+  if(tel) t = t.replace(tel[0], " ");
+  if(mail || tel) t = t.replace(/\s+(?:a|al|alla|ad|allo|per|su|via|tramite|all'indirizzo|al numero)\s*$/i, "");
+  const n = normalizzaComando(t);
+  let m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:(?:il|la|l|lo|un|una)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:(?:a|al|alla|allo|ad|per|di|del|della|dello)\\s+)?(.+?))?" + CANALE_INVIO + "$"));
   let tipo, numero, nome, canale;
   if(m){ [, , tipo, numero, nome, canale] = m; }
   else {
@@ -13788,11 +13796,15 @@ function capisciInvioDocumento(testo){
     if(!m) return null;
     [, nome, , tipo, numero, canale] = m;
   }
+  // "invia il preventivo su whatsapp": è il canale, non un nome
+  const soloCanale = nome && nome.match(/^(?:su|con|per|via|tramite|in|col)\s+(whatsapp|whats app|wa|email|mail|posta|eon|chat)$/);
+  if(soloCanale){ canale = soloCanale[1]; nome = ""; }
   if(nome && /\d/.test(nome)) return null; // "manda la fattura da 500 a Rossi": è un documento nuovo, decide chi lo crea
   const parole = (nome || "").split(" ").filter(p => p && !/^(il|la|lo|i|gli|le|sig|signor|signora|cliente)$/.test(p));
-  if(!nome && !numero) return null;
-  const c = canale ? (/whats|^wa$/.test(canale) ? "whatsapp" : /mail|posta/.test(canale) ? "email" : "eon") : "";
-  return { tipo, numero: numero ? parseInt(numero, 10) : null, parole, canale: c };
+  if(!parole.length && !numero && !mail && !tel) return null;
+  let c = canale ? (/whats|^wa$/.test(canale) ? "whatsapp" : /mail|posta/.test(canale) ? "email" : "eon") : "";
+  if(mail) c = "email"; else if(tel && !c) c = "whatsapp";
+  return { tipo, numero: numero ? parseInt(numero, 10) : null, parole, canale: c, destEmail: mail ? mail[0] : "", destTel: tel ? tel[0] : "" };
 }
 function documentoDaInviare(r){
   const nomeDi = d => normalizzaComando(d.dati.cliente || d.clienteChat || "").split(" ").filter(Boolean);
@@ -13803,8 +13815,11 @@ function documentoDaInviare(r){
 function provaInvioDocumento(testo, primaDiAprire){
   const r = capisciInvioDocumento(testo);
   if(!r) return false;
-  if(typeof primaDiAprire === "function") primaDiAprire();
   const d = documentoDaInviare(r);
+  // Parole che non sono un cliente né un documento ("il preventivo di ieri"): decide EON come prima
+  const nominaCliente = r.parole.length && clients.some(c => r.parole.every(p => normalizzaComando(c.name).split(" ").includes(p)));
+  if(!d && r.parole.length && !nominaCliente) return false;
+  if(typeof primaDiAprire === "function") primaDiAprire();
   const cosa = r.tipo === "fattura" ? "fattura" : "preventivo";
   if(!d){
     const chi = r.parole.length ? " per " + r.parole.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ") : "";
@@ -13816,14 +13831,15 @@ function provaInvioDocumento(testo, primaDiAprire){
   const canale = r.canale || (cliente && cliente.phone ? "whatsapp" : cliente && cliente.email ? "email" : "eon");
   let esito;
   if(canale === "whatsapp"){
-    const numero = numeroWhatsApp(cliente && cliente.phone);
+    const numero = numeroWhatsApp(r.destTel || (cliente && cliente.phone));
     const aperta = window.open("https://wa.me/" + numero + "?text=" + encodeURIComponent(testoInvioDocumento(d.dati)), "_blank");
     esito = !aperta ? "Tocca WhatsApp qui sotto per aprirlo con il messaggio pronto."
       : numero ? "Ho aperto WhatsApp con il messaggio pronto per " + nomeCliente + ": tocca Invia."
       : nomeCliente + " non ha il numero in EON: in WhatsApp scegli tu il contatto, il messaggio è pronto.";
   } else if(canale === "email"){
-    apriLinkEsterno(mailtoDocumento(d.dati, cliente));
-    esito = cliente && cliente.email ? "Ho aperto la Mail con l'email pronta per " + cliente.email + ": tocca Invia."
+    const destinatario = r.destEmail ? { email: r.destEmail } : cliente;
+    apriLinkEsterno(mailtoDocumento(d.dati, destinatario));
+    esito = destinatario && destinatario.email ? "Ho aperto la Mail con l'email pronta per " + destinatario.email + ": tocca Invia."
       : nomeCliente + " non ha l'email in EON: scrivi tu l'indirizzo, il resto è pronto.";
   } else {
     inviaRisorsaEonInterna(d.clienteChat, "Le ho mandato " + (r.tipo === "fattura" ? "la fattura" : "il preventivo") + " n. " + d.dati.numero + " (totale €" + Number(d.dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 }) + "): lo trova qui in chat.");

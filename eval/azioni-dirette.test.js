@@ -62,6 +62,7 @@ async function main() {
         "Ho dimenticato la password": c("Ho dimenticato la password"),
         "Cambiamo email": c("Cambiamo email"),
         "voglio cambiare la mia email": c("voglio cambiare la mia email"),
+        "Voglio cambiare e-mail": c("Voglio cambiare e-mail"),
         "cambia l'email di Rossi": c("cambia l'email di Rossi"),
         "manda una mail a Rossi": c("manda una mail a Rossi"),
         "cambia il nome dell'attività": c("cambia il nome dell'attività"),
@@ -80,7 +81,7 @@ async function main() {
     });
     const attesi = {
       "Voglio cambiare password": "password", "cambia la password": "password", "Ho dimenticato la password": "password",
-      "Cambiamo email": "email", "voglio cambiare la mia email": "email",
+      "Cambiamo email": "email", "voglio cambiare la mia email": "email", "Voglio cambiare e-mail": "email",
       "cambia l'email di Rossi": null, "manda una mail a Rossi": null,
       "cambia il nome dell'attività": "profilo", "attiva face id": "faceid", "metti EON sulla home": "installa",
       "manda un feedback": "feedback", "Dovreste aggiungere le fatture elettroniche": "feedback", "sarebbe bello avere il meteo della settimana": "feedback",
