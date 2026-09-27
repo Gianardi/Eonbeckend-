@@ -6,6 +6,8 @@
    - un messaggio vecchio non fa partire niente;
    - cose dette PRIMA che l'appuntamento fosse fissato non lo spostano;
    - stessa data: niente da spostare;
+   - si fa qualcosa solo se il messaggio appena arrivato è la proposta o la
+     risposta (un "grazie" di oggi non riporta in vita frasi di agosto);
    - ma uno spostamento vero, proposto e confermato adesso, funziona ancora.
    Uso:  node eval/analisi-chat.test.mjs */
 
@@ -103,7 +105,20 @@ rispostaAI = { appuntamento: { azione: "sposta", quando_iso: "2026-09-28T11:00:0
 r = await analizza();
 verifica("stessa data e stesso titolo: non si tocca", chiamateAI === 1 && !spostato() && r.corpo.azioni.length === 0, JSON.stringify({ r, scritture }));
 
-// 5. Uno spostamento vero, adesso: funziona ancora
+// 5. Nessun appuntamento: un "grazie" di adesso non trasforma lo scambio di agosto in un appuntamento
+prepara([...AGOSTO, { sender: "them", body: "Grazie mille", created_at: fa(0) }]);
+tabelle.messages = tabelle.messages.filter((m) => m.id !== APPT);
+rispostaAI = { appuntamento: { azione: "nuovo", quando_iso: "2026-09-30T10:00:00", titolo: "Incontro", messaggioProposta: 1, messaggioConferma: 2 } };
+r = await analizza();
+verifica("un \"grazie\" di oggi non crea un appuntamento da frasi vecchie", !scritture.some((w) => w.t === "messages" && w.metodo === "POST"), JSON.stringify(scritture));
+
+// 6. Un appuntamento nuovo, proposto e confermato adesso: si crea ancora
+prepara([{ sender: "me", body: "Ci vediamo mercoledì alle 10?", created_at: fa(2) }, { sender: "them", body: "Perfetto", created_at: fa(0) }]);
+tabelle.messages = tabelle.messages.filter((m) => m.id !== APPT);
+r = await analizza();
+verifica("appuntamento proposto e confermato adesso: si crea", scritture.some((w) => w.t === "messages" && w.metodo === "POST" && w.body && w.body.event_type === "appt"), JSON.stringify(scritture));
+
+// 7. Uno spostamento vero, adesso: funziona ancora
 prepara([...AGOSTO, { sender: "me", body: "Rita, possiamo spostare a giovedì alle 10?", created_at: fa(3) }, { sender: "them", body: "Va benissimo", created_at: fa(0) }]);
 rispostaAI = { appuntamento: { azione: "sposta", quando_iso: "2026-10-01T10:00:00", titolo: null, messaggioProposta: 3, messaggioConferma: 4 } };
 r = await analizza();

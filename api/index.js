@@ -5287,6 +5287,14 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
       return send(res, 200, { azioni });
     }
 
+    /* Regola generale (27/09/2026, Gianardi: "a logica non sta in piedi"):
+       si fa qualcosa solo se il messaggio appena arrivato fa parte
+       dell'accordo — è la risposta che conferma, o la proposta. Un "grazie"
+       di oggi non fa diventare un appuntamento uno scambio di settimane fa. */
+    const diAdesso = (m) => !!m && (!m.created_at || Date.now() - new Date(m.created_at).getTime() <= 15 * 60 * 1000);
+    if (confermato && !diAdesso(msgConferma)) return send(res, 200, { azioni });
+    if (!confermato && !diAdesso(msgChePropone)) return send(res, 200, { azioni });
+
     /* Da qui in giù, come nella versione originale: quasi ogni ramo
        chiude la richiesta subito (un messaggio che tocca un appuntamento
        non controlla anche attività/cambio-stato nello stesso giro) —
