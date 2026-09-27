@@ -8,6 +8,8 @@
    - una foto mandata non fa partire l'analisi della chat;
    - una risposta arrivata ad app in secondo piano si recupera alla
      riapertura, e EON la legge una volta sola;
+   - come WhatsApp: quello che il server ha già fatto (il cliente ha appena
+     scritto) l'app lo mostra una volta, subito o alla riapertura;
    - l'avviso di uno spostamento non ripete il nome del cliente.
    Uso: NODE_PATH=/opt/node22/lib/node_modules node eval/chat-foto.test.js */
 
@@ -133,6 +135,39 @@ async function main() {
     await page.evaluate(() => { window.__persi = []; return analizzaRisposteArretrate(); });
     await page.waitForTimeout(200);
     verifica("già letto: alla riapertura successiva non si rilegge", analisi.length === primaDellaRiapertura + 1, String(analisi.length));
+
+    /* Come WhatsApp: l'"Ok" l'ha già letto il server (il cliente ha appena
+       scritto). L'app aspetta un attimo e mostra cosa è stato fatto, una
+       volta sola; e alla riapertura mostra quello successo ad app chiusa. */
+    const esitoServer = await page.evaluate(async () => {
+      const visti = [];
+      const toastVero = showAIToast;
+      showAIToast = (t, testo) => visti.push(t + " | " + testo);
+      loadUserDataFromDB = async () => {}; loadChatsFromDB = async () => {};
+      const fetchVero = window.fetch;
+      let giri = 0;
+      window.fetch = async () => { giri++; return new Response(JSON.stringify(giri === 1 ? { azioni: [], in_corso: true, messaggio_id: "ok2" } : { messaggio_id: "ok2", gia_letto: true, azioni: [{ tool: "crea_impegno", esito: { titolo: "Incontro", quando_visualizzato: "mar 29 set, 14:30" } }] }), { status: 200 }); };
+      await analyzeMessage({ id: "ok2" }, chats[0]);
+      await new Promise((r) => setTimeout(r, 2900));
+      const dopoServer = visti.slice(), giriPrimaVolta = giri;
+      await analyzeMessage({ id: "ok2" }, chats[0]); // arriva di nuovo (tempo reale + riapertura)
+      await new Promise((r) => setTimeout(r, 100));
+      const dopoDoppione = visti.length;
+      // Riapertura: l'ultimo messaggio l'ha già letto il server mentre l'app era chiusa
+      window.fetch = async () => { throw new Error("non deve chiamare il server"); };
+      chats[0].messages.push({ id: "ok3", from: "them", text: "Va bene", createdAt: new Date().toISOString() });
+      chats[0].ultimoAnalizzato = "ok3";
+      chats[0].ultimoEsito = { messaggio_id: "ok3", azioni: [{ tool: "crea_impegno", esito: { titolo: "Sopralluogo", quando_visualizzato: "gio 1 ott, 9:00" } }] };
+      await analizzaRisposteArretrate();
+      const dopoRiapertura = visti.slice(dopoDoppione);
+      await analizzaRisposteArretrate();
+      const dopoSecondaRiapertura = visti.length - dopoDoppione;
+      window.fetch = fetchVero; showAIToast = toastVero;
+      return { giri: giriPrimaVolta, dopoServer, dopoDoppione, dopoRiapertura, dopoSecondaRiapertura };
+    });
+    verifica("letto dal server: l'app aspetta un attimo e avvisa \"Appuntamento confermato\"", esitoServer.giri === 2 && esitoServer.dopoServer.length === 1 && esitoServer.dopoServer[0].startsWith("Appuntamento confermato | Incontro con Rita Ambrosini"), JSON.stringify(esitoServer));
+    verifica("…una volta sola, anche se il messaggio arriva di nuovo", esitoServer.dopoDoppione === 1, JSON.stringify(esitoServer));
+    verifica("riaperta l'app: mostra quello che il server ha fatto mentre era chiusa, una volta", esitoServer.dopoRiapertura.length === 1 && esitoServer.dopoRiapertura[0].includes("Sopralluogo con Rita Ambrosini") && esitoServer.dopoSecondaRiapertura === 1, JSON.stringify(esitoServer));
 
     /* L'avviso dello spostamento: il nome una volta sola */
     const toast = await page.evaluate(async () => {

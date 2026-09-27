@@ -460,6 +460,16 @@ function aggiungiMessaggio(m){
 async function scriviNelPortale(campi){
   const { data, error } = await supabaseClient.rpc("portale_scrivi", { p_codice: accessCode, ...campi });
   if(!error) aggiungiMessaggio(data);
+  /* Come WhatsApp (27/09/2026): un messaggio con del testo lo legge subito
+     EON sul server, anche se il professionista ha l'app chiusa (così un
+     "Ok" a "ci vediamo martedì alle 14:30?" segna l'appuntamento adesso).
+     Non si aspetta la risposta: al cliente non cambia niente. */
+  if(!error && campi && campi.p_body && String(campi.p_body).trim()){
+    fetch("https://eonbeckend.vercel.app/api?action=portale_analizza", {
+      method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
+      body: JSON.stringify({ codice: accessCode })
+    }).catch(() => {}); // l'appuntamento segnato compare da solo (la pagina controlla ogni 4 secondi)
+  }
   return { error };
 }
 

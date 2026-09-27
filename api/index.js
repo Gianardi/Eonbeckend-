@@ -31,6 +31,7 @@ import { createHmac, createHash, createPublicKey, randomBytes, timingSafeEqual, 
  *   POST   /api?action=ai                -> genera testo con Claude
  *   POST   /api?action=assistant         -> assistente con tool calling (legge/scrive i dati da solo)
  *   POST   /api?action=analizza_messaggio        -> legge la chat e decide appuntamenti/attività
+ *   POST   /api?action=portale_analizza          -> il cliente ha scritto: il server legge subito la chat
  *   POST   /api?action=rispondi_richiesta_cliente -> il professionista decide su una richiesta del cliente
  *   POST   /api?action=seed              -> crea i dati iniziali dell'utente
  *
@@ -2963,8 +2964,16 @@ async function handlePasskeyAccesso(action, req, res) {
   if (chiave.contatore > 0 && contatore <= chiave.contatore) throw fail("Chiave clonata o riusata", 401);
   await servizio(`passkeys?id=eq.${chiave.id}`, { method: "PATCH", body: JSON.stringify({ contatore, ultima_sfida: dati.challenge, ultimo_uso: new Date().toISOString() }), headers: { Prefer: "return=minimal" } });
 
-  // Sessione per l'utente: link magico generato e verificato dal server (nessuna email)
-  const utente = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${chiave.user_id}`, { headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` } }).then((r) => r.ok ? r.json() : null).catch(() => null);
+  const sessione = await sessioneDalServer(chiave.user_id);
+  return send(res, 200, { access_token: sessione.access_token, refresh_token: sessione.refresh_token });
+}
+
+/* Sessione per un utente, aperta dal server: link magico generato e
+   verificato qui (nessuna email). Usata da Face ID e dalla lettura della
+   chat quando scrive il cliente (portale_analizza), che deve agire con i
+   permessi del professionista e di nessun altro. */
+async function sessioneDalServer(userId) {
+  const utente = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, { headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` } }).then((r) => r.ok ? r.json() : null).catch(() => null);
   if (!utente || !utente.email) throw fail("Account non trovato", 401);
   const link = await fetch(`${SUPABASE_URL}/auth/v1/admin/generate_link`, { method: "POST", headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ type: "magiclink", email: utente.email }) }).then((r) => r.ok ? r.json() : null).catch(() => null);
   const tokenHash = link && (link.hashed_token || (link.properties && link.properties.hashed_token));
@@ -2974,7 +2983,7 @@ async function handlePasskeyAccesso(action, req, res) {
   let sessione = await verifica("magiclink");
   if (!sessione || !sessione.access_token) sessione = await verifica("email");
   if (!sessione || !sessione.access_token || !sessione.refresh_token) throw fail("Accesso non riuscito: riprova con email e password", 502);
-  return send(res, 200, { access_token: sessione.access_token, refresh_token: sessione.refresh_token });
+  return sessione;
 }
 
 async function registraOperazione(user, tool, input, esito, stato) {
@@ -5203,6 +5212,27 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
 
   const conversazione = await trovaProprio("conversations", body.conversation_id, ctx);
   if (!conversazione) throw fail("Conversazione non trovata", 404);
+  return send(res, 200, await analizzaChat(conversazione, ctx, { recupero: body.recupero === true }));
+}
+
+/* Quello che l'analisi ha fatto per un messaggio resta scritto sulla
+   conversazione (ultimo_esito): se l'ha letto il server appena il cliente
+   ha scritto, l'app lo mostra lo stesso (avviso, decisione da prendere)
+   quando lo chiede o quando si riapre. */
+async function esitoGiaLetto(conversazione, ultimo, ctx) {
+  let conv = conversazione;
+  try {
+    const righe = await db(`conversations?id=eq.${conversazione.id}&select=ultimo_esito`, { method: "GET" }, ctx.accessToken);
+    if (Array.isArray(righe) && righe[0]) conv = { ...conversazione, ...righe[0] };
+  } catch (e) { /* colonna assente: niente da mostrare */ }
+  const esito = conv.ultimo_esito;
+  if (esito && esito.messaggio_id === ultimo.id) return { ...esito, azioni: esito.azioni || [], gia_letto: true };
+  return { azioni: [], in_corso: true, messaggio_id: ultimo.id }; // lo sta leggendo qualcun altro proprio ora
+}
+
+async function analizzaChat(conversazione, ctx, opzioni) {
+  const user = ctx.user;
+  const recupero = !!(opzioni && opzioni.recupero);
 
   /* Prendiamo un margine di righe (20, non 6) prima di scartare quelle
      senza testo: se filtrassimo dopo aver già tagliato a 6, un paio di
@@ -5221,33 +5251,43 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
      un vocale, un documento senza testo, o un messaggio di più di 7 giorni
      fa non portano niente di nuovo da capire. */
   const ultimo = (messaggiGrezzi || [])[0];
-  if (!ultimo || !ultimo.body || !ultimo.body.trim()) return send(res, 200, { azioni: [] });
-  if (ultimo.created_at && Date.now() - new Date(ultimo.created_at).getTime() > 7 * 24 * 3600 * 1000) return send(res, 200, { azioni: [] });
+  if (!ultimo || !ultimo.body || !ultimo.body.trim()) return { azioni: [] };
+  if (ultimo.created_at && Date.now() - new Date(ultimo.created_at).getTime() > 7 * 24 * 3600 * 1000) return { azioni: [] };
 
   /* Ogni messaggio si legge una volta sola. L'app chiede l'analisi quando
      il messaggio arriva, e di nuovo quando si riapre (per le risposte
      arrivate mentre era chiusa): chi arriva primo "prenota" il messaggio,
      gli altri (un secondo telefono, una ripresa) non rifanno niente.
      Se la colonna non c'è ancora, si va avanti come prima. */
-  if (conversazione.ultimo_analizzato === ultimo.id) return send(res, 200, { azioni: [] });
+  if (conversazione.ultimo_analizzato === ultimo.id) return await esitoGiaLetto(conversazione, ultimo, ctx);
   /* Recupero su una chat mai letta prima (la prima volta dopo questo
      cambio): la si segna e basta, senza rileggere il passato. */
-  const soloSegna = body.recupero === true && !conversazione.ultimo_analizzato;
+  const soloSegna = recupero && !conversazione.ultimo_analizzato;
   try {
     const prenotato = await db(
       `conversations?id=eq.${conversazione.id}&or=(ultimo_analizzato.is.null,ultimo_analizzato.neq.${ultimo.id})`,
       { method: "PATCH", body: JSON.stringify({ ultimo_analizzato: ultimo.id }), headers: { Prefer: "return=representation" } },
       ctx.accessToken
     );
-    if (Array.isArray(prenotato) && prenotato.length === 0) return send(res, 200, { azioni: [] });
+    if (Array.isArray(prenotato) && prenotato.length === 0) return await esitoGiaLetto(conversazione, ultimo, ctx);
   } catch (err) {
     console.warn("Prenotazione analisi non riuscita:", err.message);
-    if (body.recupero === true) return send(res, 200, { azioni: [] }); // senza memoria, il recupero non rilegge niente
+    if (recupero) return { azioni: [] }; // senza memoria, il recupero non rilegge niente
   }
-  if (soloSegna) return send(res, 200, { azioni: [] });
+
+  /* Da qui il messaggio è "prenotato": qualunque cosa succeda, l'esito
+     si scrive sulla conversazione, così chi arriva dopo lo trova. */
+  const chiudi = async (risultato) => {
+    const esito = { messaggio_id: ultimo.id, ...risultato };
+    try {
+      await db(`conversations?id=eq.${conversazione.id}`, { method: "PATCH", body: JSON.stringify({ ultimo_esito: esito }) }, ctx.accessToken);
+    } catch (e) { console.warn("Esito analisi non salvato:", e.message); }
+    return esito;
+  };
+  if (soloSegna) return await chiudi({ azioni: [] });
 
   const recenti = (messaggiGrezzi || []).filter((m) => m.body && m.body.trim()).slice(0, 6).reverse();
-  if (recenti.length === 0) return send(res, 200, { azioni: [] });
+  if (recenti.length === 0) return await chiudi({ azioni: [] });
 
   const testoConversazione = recenti
     .map((m, i) => "[" + (i + 1) + "] " + (m.sender === "me" ? "Professionista" : "Cliente") + ": " + m.body)
@@ -5266,13 +5306,13 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
     parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
   } catch (err) {
     console.warn("Analisi chat non riuscita:", err.message);
-    return send(res, 200, { azioni: [] });
+    return await chiudi({ azioni: [] });
   }
-  if (!parsed) return send(res, 200, { azioni: [] });
+  if (!parsed) return await chiudi({ azioni: [] });
 
   const azioni = [];
   const registra = async (tool, input, esito) => {
-    await registraOperazione(user, tool, input, esito, "auto_da_chat");
+    await registraOperazione(user, tool, input, esito, (opzioni && opzioni.stato) || "auto_da_chat");
     azioni.push({ tool, esito });
   };
 
@@ -5310,7 +5350,7 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
       new Date(m.created_at).getTime() > new Date(riferito.created_at).getTime();
     const msgChePropone = msgProposta || recenti[recenti.length - 1];
     if (riferito && (azione === "sposta" || azione === "annulla") && !dopoIlRiferito(msgChePropone)) {
-      return send(res, 200, { azioni });
+      return await chiudi({ azioni });
     }
 
     /* Regola generale (27/09/2026, Gianardi: "a logica non sta in piedi"):
@@ -5328,8 +5368,8 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
       ultimoTurno.push(recenti[i]);
     }
     const nellUltimoTurno = (m) => !!m && ultimoTurno.includes(m);
-    if (confermato && !nellUltimoTurno(msgConferma)) return send(res, 200, { azioni });
-    if (!confermato && !nellUltimoTurno(msgChePropone)) return send(res, 200, { azioni });
+    if (confermato && !nellUltimoTurno(msgConferma)) return await chiudi({ azioni });
+    if (!confermato && !nellUltimoTurno(msgChePropone)) return await chiudi({ azioni });
 
     /* Da qui in giù, come nella versione originale: quasi ogni ramo
        chiude la richiesta subito (un messaggio che tocca un appuntamento
@@ -5342,19 +5382,19 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
         const esito = await segnaDaRicontattare(conversazione.contact_name, ctx);
         if (esito) await registra("segnaDaRicontattare", { cliente: conversazione.contact_name }, esito);
       }
-      return send(res, 200, { azioni });
+      return await chiudi({ azioni });
     }
 
     if (chiPropone === "cliente" && !confermato && !riferito) {
       /* Il cliente propone un appuntamento nuovo: aspettiamo che il
          professionista risponda lui stesso in chat, come oggi. */
-      return send(res, 200, { azioni });
+      return await chiudi({ azioni });
     }
 
     if (chiPropone === "cliente" && !confermato && riferito && (azione === "sposta" || azione === "annulla")) {
       /* Lo chiede il cliente: serve la decisione del professionista,
          non eseguiamo da soli. */
-      return send(res, 200, {
+      return await chiudi({
         azioni,
         richiesta_decisione: {
           azione,
@@ -5370,7 +5410,7 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
     if (azione === "sposta" && riferito) {
       /* Stessa data e stesso titolo: non c'è niente da spostare */
       const stessaData = !quandoIso || (riferito.scheduled_at && new Date(quandoIso).getTime() === new Date(riferito.scheduled_at).getTime());
-      if (stessaData && (!app.titolo || app.titolo === riferito.title)) return send(res, 200, { azioni });
+      if (stessaData && (!app.titolo || app.titolo === riferito.title)) return await chiudi({ azioni });
       const esito = await TOOLS.sposta_impegno.run({ id: riferito.id, nuovo_quando_iso: quandoIso || riferito.scheduled_at }, ctx);
       /* Come nella versione precedente: se insieme allo spostamento
          cambia anche il titolo, lo aggiorniamo — sposta_impegno da solo
@@ -5381,17 +5421,17 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
       }
       await togliDaRicontattare(conversazione.contact_name, ctx);
       await registra("sposta_impegno", { id: riferito.id }, esito);
-      return send(res, 200, { azioni });
+      return await chiudi({ azioni });
     }
 
     if (azione === "annulla" && riferito) {
       const esito = await TOOLS.annulla_impegno.run({ id: riferito.id }, ctx);
       await registra("annulla_impegno", { id: riferito.id }, esito);
-      return send(res, 200, { azioni });
+      return await chiudi({ azioni });
     }
 
     /* Un appuntamento nuovo si scrive solo quando l'altro ha accettato */
-    if (!confermato) return send(res, 200, { azioni });
+    if (!confermato) return await chiudi({ azioni });
 
     /* Appuntamento nuovo, confermato: come l'originale, un titolo
        mancante non blocca la registrazione — "Incontro" va bene lo
@@ -5443,7 +5483,7 @@ async function handleAnalizzaMessaggio(req, res, user, accessToken) {
     }
   }
 
-  return send(res, 200, {
+  return await chiudi({
     azioni,
     cambioStato: cliente && parsed.cambioStato && parsed.cambioStato !== cliente.status ? parsed.cambioStato : null,
     valore: cliente && parsed.valore && Number(parsed.valore) > 0 && Number(parsed.valore) !== Number(cliente.value) ? Number(parsed.valore) : null,
@@ -5787,6 +5827,44 @@ async function handlePortaleFirmaFile(req, res) {
   perUrl.forEach((p, u) => { if (firmati[p]) out[u] = firmati[p]; });
   return send(res, 200, { firmati: out, scade_tra: DURATA_LINK_APP });
 }
+/* Chat come WhatsApp (27/09/2026, Gianardi: "ha segnato ma con molto
+   ritardo… rendilo come WhatsApp"). Prima la risposta del cliente la
+   leggeva solo l'app del professionista, e solo se era aperta: con l'app
+   chiusa o in secondo piano l'"Ok" aspettava. Ora la pagina del cliente,
+   appena lui scrive, chiede al server di leggerlo subito: l'appuntamento
+   si segna in quel momento, con i permessi del professionista (una
+   sessione aperta e chiusa qui, mai data al cliente). Al cliente non
+   torna niente di quello che è successo. Ogni messaggio si legge una volta
+   sola (ultimo_analizzato), e l'app lo mostra quando si apre. */
+async function handlePortaleAnalizza(req, res) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  const body = await readBody(req);
+  const codice = typeof body.codice === "string" ? body.codice.trim() : "";
+  if (codice.length < 16 || codice.length > 200) throw fail("Link non valido", 403);
+  const conv = await servizio(`conversations?select=id,owner_id&access_code=eq.${encodeURIComponent(codice)}&deleted_at=is.null&limit=1`, { method: "GET" });
+  const c = Array.isArray(conv) ? conv[0] : null;
+  if (!c || !eUuid(c.owner_id)) throw fail("Link non valido", 403);
+  if (!ANTHROPIC_API_KEY) return send(res, 200, { ok: true });
+
+  /* Solo se l'ultimo messaggio è del cliente, con del testo, e non ancora
+     letto: niente sessione aperta per niente */
+  const ultimi = await servizio(`messages?select=id,sender,body&conversation_id=eq.${c.id}&event_type=is.null&deleted_at=is.null&order=created_at.desc&limit=1`, { method: "GET" });
+  const ultimo = Array.isArray(ultimi) ? ultimi[0] : null;
+  const giaLetto = await servizio(`conversations?select=id&id=eq.${c.id}&ultimo_analizzato=eq.${ultimo ? ultimo.id : "00000000-0000-0000-0000-000000000000"}&limit=1`, { method: "GET" }).catch(() => []);
+  if (!ultimo || ultimo.sender !== "them" || !String(ultimo.body || "").trim() || (Array.isArray(giaLetto) && giaLetto.length)) return send(res, 200, { ok: true });
+
+  const sessione = await sessioneDalServer(c.owner_id);
+  const ctx = { user: { id: c.owner_id }, accessToken: sessione.access_token };
+  try {
+    const conversazione = await trovaProprio("conversations", c.id, ctx);
+    if (conversazione) await analizzaChat(conversazione, ctx, { stato: "auto_da_chat_server" });
+  } finally {
+    // la sessione serviva solo per questo: si chiude subito
+    await fetch(`${SUPABASE_URL}/auth/v1/logout?scope=local`, { method: "POST", headers: { apikey: ANON_KEY || SERVICE_ROLE_KEY, Authorization: `Bearer ${sessione.access_token}` } }).catch(() => null);
+  }
+  return send(res, 200, { ok: true });
+}
+
 async function scaricaFileEon(percorso) {
   const r = await fetch(`${SUPABASE_URL}/storage/v1/object/eon-files/${percorso.split("/").map(encodeURIComponent).join("/")}`, {
     headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
@@ -6068,6 +6146,7 @@ export default async function handler(req, res) {
           ai: "POST /api?action=ai",
           assistant: "POST /api?action=assistant",
           analizza_messaggio: "POST /api?action=analizza_messaggio",
+          portale_analizza: "POST /api?action=portale_analizza",
           rispondi_richiesta_cliente: "POST /api?action=rispondi_richiesta_cliente",
           transcribe: "POST /api?action=transcribe",
           seed: "POST /api?action=seed",
@@ -6082,6 +6161,7 @@ export default async function handler(req, res) {
     if (action === "passkey_opzioni_accesso" || action === "passkey_accedi") return await handlePasskeyAccesso(action, req, res);
     // Pagina del cliente: link ai file della sua chat, con il codice del suo link
     if (action === "portale_firma_file") return await handlePortaleFirmaFile(req, res);
+    if (action === "portale_analizza") return await handlePortaleAnalizza(req, res);
 
     const { user, accessToken } = await requireUser(req);
 

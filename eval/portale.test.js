@@ -25,6 +25,8 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const errori = [];
     page.on("pageerror", (e) => errori.push(e.message));
+    const lettureServer = [];
+    await page.route("https://eonbeckend.vercel.app/api?action=portale_analizza", (route) => { lettureServer.push(JSON.parse(route.request().postData())); route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' }); });
     await page.route("https://cdn.jsdelivr.net/**", (route) => route.fulfill({ status: 200, contentType: "application/javascript", body: "/* supabase finto nel test */" }));
     await page.addInitScript((codice) => {
       window.__rpc = [];
@@ -62,6 +64,7 @@ async function main() {
     await page.waitForTimeout(200);
     const scritto = await page.evaluate(() => ({ ult: window.__rpc.filter((r) => r.nome === "portale_scrivi").at(-1), msg: document.getElementById("messages").innerText }));
     verifica("scrive col codice del link e il messaggio compare subito", scritto.ult && scritto.ult.arg.p_body === "Perfetto, vi aspetto" && /vi aspetto/.test(scritto.msg), JSON.stringify(scritto.ult));
+    verifica("come WhatsApp: appena scritto, il server lo legge subito (con il codice del link)", lettureServer.length === 1 && lettureServer[0].codice === CODICE, JSON.stringify(lettureServer));
 
     // Arriva un messaggio nuovo dal professionista: compare entro pochi secondi
     await page.evaluate(() => window.__messaggi.push({ id: "m9", sender: "me", body: "Ho spostato alle 10", created_at: new Date().toISOString() }));
