@@ -4757,6 +4757,7 @@ async function loadChatsFromDB(){
       toSeeToday: c.to_see_today,
       toCallToday: c.to_call_today,
       ultimoAnalizzato: c.ultimo_analizzato || null, // l'ultimo messaggio già letto da EON
+      ultimoEsito: c.ultimo_esito || null,           // e cosa ne ha fatto (anche se l'ha letto il server)
       messages: msgs
     });
   });
@@ -5151,7 +5152,7 @@ let pendingSuggestions = [];
    stesse funzioni autorizzate e tracciate del motore assistente. Qui
    restano solo la chiamata e come mostrare il risultato — le regole
    di quando agire da sola o chiedere conferma sono invariate. */
-async function analyzeMessage(msg, chat, recupero){
+async function analyzeMessage(msg, chat, recupero, tentativo){
   if(!msg || !chat || !chat.id) return;
   if(!BACKEND_CONFIGURED || !currentSession) return;
 
@@ -5168,6 +5169,35 @@ async function analyzeMessage(msg, chat, recupero){
   }catch(err){
     console.warn("Analisi chat non riuscita:", err.message);
     return;
+  }
+
+  /* Il messaggio lo sta già leggendo il server (il cliente ha appena
+     scritto dalla sua pagina): si richiede tra poco e si mostra l'esito. */
+  if(risposta.in_corso){
+    if((tentativo || 0) < 4) setTimeout(() => analyzeMessage(msg, chat, recupero, (tentativo || 0) + 1), 2500);
+    return;
+  }
+  await mostraEsitoAnalisi(risposta, chat);
+}
+
+/* Ogni esito si mostra una volta sola su questo telefono (lo stesso
+   messaggio può arrivare dal tempo reale e dalla riapertura) */
+function esitoGiaMostrato(id){
+  try{ return JSON.parse(localStorage.getItem("eon-esiti-mostrati") || "[]").includes(id); }catch(e){ return false; }
+}
+function segnaEsitoMostrato(id){
+  try{
+    const l = JSON.parse(localStorage.getItem("eon-esiti-mostrati") || "[]").filter(x => x !== id);
+    l.push(id);
+    localStorage.setItem("eon-esiti-mostrati", JSON.stringify(l.slice(-100)));
+  }catch(e){}
+}
+
+async function mostraEsitoAnalisi(risposta, chat){
+  if(!risposta) return;
+  if(risposta.messaggio_id){
+    if(esitoGiaMostrato(risposta.messaggio_id)) return;
+    segnaEsitoMostrato(risposta.messaggio_id);
   }
 
   /* Il cliente ha chiesto di spostare/annullare: decide il professionista,
@@ -5477,7 +5507,13 @@ async function analizzaRisposteArretrate(){
   for(const chat of chats){
     const ultimo = [...chat.messages].reverse().find(m => !m.eventType);
     if(!ultimo || !ultimo.id || !(ultimo.text || "").trim()) continue;
-    if(ultimo.id === chat.ultimoAnalizzato) continue;
+    if(ultimo.id === chat.ultimoAnalizzato){
+      /* Già letto (magari dal server, mentre l'app era chiusa): si mostra
+         cosa è successo, una volta sola */
+      const e = chat.ultimoEsito;
+      if(e && e.messaggio_id === ultimo.id && !esitoGiaMostrato(e.messaggio_id)) await mostraEsitoAnalisi(e, chat);
+      continue;
+    }
     if(!ultimo.createdAt || new Date(ultimo.createdAt).getTime() < setteGiorni) continue;
     chat.ultimoAnalizzato = ultimo.id;
     await analyzeMessage({ id: ultimo.id }, chat, true);

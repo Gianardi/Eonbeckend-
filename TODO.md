@@ -4342,3 +4342,30 @@ quando vuole, succedeva quasi sempre.
   giorno od ora è "sposta").
 - Test: `eval/analisi-chat.test.mjs` (11), `eval/chat-foto.test.js` (12).
 - Da provare dal vero: app chiusa, il cliente risponde "Ok", riaprire l'app.
+
+### Chat come WhatsApp: il server legge subito la risposta del cliente (27/09/2026)
+
+Andrea: "ha segnato ma con molto ritardo… rendilo come WhatsApp". L'"Ok" di
+Rita era arrivato al server 18 secondi dopo la domanda; il ritardo era
+nell'app (in secondo piano il telefono la mette in pausa).
+- **Pagina del cliente**: dopo ogni messaggio con testo chiama
+  `portale_analizza` (con il codice del link, senza aspettare). Il server
+  legge subito la chat e segna l'appuntamento, anche ad app chiusa. Agisce
+  con i permessi del professionista: una sessione aperta dal server
+  (`sessioneDalServer`, la stessa del Face ID) e chiusa subito
+  (`logout`). Al cliente torna solo `{ok:true}`. Solo se l'ultimo messaggio è
+  del cliente, con testo e non ancora letto.
+- **Esito scritto sulla conversazione** (`conversations.ultimo_esito`,
+  migrazione applicata su staging e produzione): l'app lo mostra una volta
+  (avviso "Appuntamento confermato", o la domanda se il cliente chiede di
+  spostare/annullare), subito se è aperta (aspetta qualche secondo se il
+  server sta ancora leggendo) o alla riapertura.
+- `analizzaChat` è il cuore comune (app e server); `handleAnalizzaMessaggio`
+  lo chiama per l'app.
+- Da sapere: ogni lettura dal server apre e chiude una sessione del
+  professionista, quindi l'"ultimo accesso" in Supabase può cambiare anche
+  quando scrive un suo cliente.
+- Ancora diverso da WhatsApp: nessuna notifica sul telefono ad app chiusa
+  (servono le notifiche push: progetto a parte, da mettere in fila).
+- Test: `eval/analisi-chat.test.mjs` (19), `eval/chat-foto.test.js` (15),
+  `eval/portale.test.js` (+1).
