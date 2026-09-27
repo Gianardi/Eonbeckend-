@@ -651,10 +651,39 @@ function mostraCaricamento(testo, pct){
   }
 }
 
+/* Foto più leggera (27/09/2026, come nell'app): quella del telefono pesa
+   3-5 MB e ci mette molto a partire; ridotta a lato 1600 resta nitida e
+   pesa qualche centinaio di KB. Se qualcosa non va, parte l'originale. */
+async function comprimiImmagine(file){
+  if(!file || !/^image\/(jpeg|jpg|png|webp|heic|heif)$/i.test(file.type || "") || file.size < 350 * 1024) return file;
+  try{
+    const immagine = await new Promise((ok, ko) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => { URL.revokeObjectURL(url); ok(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); ko(new Error("immagine non leggibile")); };
+      img.src = url;
+    });
+    const w0 = immagine.naturalWidth, h0 = immagine.naturalHeight;
+    if(!w0 || !h0) return file;
+    const scala = Math.min(1, 1600 / Math.max(w0, h0));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(w0 * scala); canvas.height = Math.round(h0 * scala);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(immagine, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(ok => canvas.toBlob(ok, "image/jpeg", 0.82));
+    if(!blob || blob.size >= file.size) return file;
+    return new File([blob], String(file.name || "foto").replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  }catch(err){
+    return file;
+  }
+}
+
 async function inviaAllegato(file){
   if(!conversation) return;
   const tipo = tipoAllegato(file);
   const limite = LIMITI[tipo];
+  if(tipo === "foto") file = await comprimiImmagine(file);
 
   if(file.size > limite * 1024 * 1024){
     showGate(`Questo ${tipo} pesa ${pesoLeggibile(file.size)}, il massimo è ${limite} MB.`);
@@ -676,6 +705,7 @@ async function inviaAllegato(file){
 
     mostraCaricamento("Quasi fatto…", 85);
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
+    if(tipo === "foto" && window.EonFile && EonFile.anteprima) EonFile.anteprima(pub.publicUrl, URL.createObjectURL(file)); // si vede subito
 
     const { error: msgErr } = await scriviNelPortale({
       p_body: "", p_file_url: pub.publicUrl, p_file_name: file.name, p_file_type: file.type

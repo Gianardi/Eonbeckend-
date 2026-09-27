@@ -109,7 +109,14 @@
     });
   }, 40 * 60 * 1000);
 
+  /* Un file appena caricato da questo telefono: finché la pagina è aperta
+     si mostra la copia che è già qui (subito, senza aspettare il server) */
+  function anteprima(u, locale) {
+    if (eFile(u) && locale) cache.set(u, { url: locale, scade: Date.now() + 30 * 60 * 1000 });
+  }
+
   window.EonFile = {
+    anteprima: anteprima,
     imposta: function (fn) {
       chiedi = fn;
       scansiona(document.documentElement);
