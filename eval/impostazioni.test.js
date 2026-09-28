@@ -56,11 +56,11 @@ async function main() {
     const dentro = await page.evaluate(() => document.getElementById("onboardingScreen").classList.contains("hidden"));
     verifica("con la sessione aperta si entra direttamente", dentro);
 
-    // Intestazione della Home (Mix 2): "Oggi", data, impegni, iniziali che aprono le Impostazioni
+    // Intestazione della Home (Mix 2): "Oggi", data, impegni, chip del mestiere (28/09, prima le iniziali) che apre le Impostazioni
     const testa = await page.evaluate(() => ({ titolo: document.getElementById("homeSaluto").textContent, data: document.getElementById("homeOggiData").textContent, conta: document.getElementById("homeOggiConta").textContent, iniziali: document.getElementById("brandAvatar").textContent }));
-    verifica("Home: saluto col nome, la data, gli impegni e le iniziali AG", /^(Buongiorno|Buon pomeriggio|Buonasera), Andrea$/.test(testa.titolo) && /\d{1,2} \w+/.test(testa.data) && /impegn/.test(testa.conta) && testa.iniziali === "AG", JSON.stringify(testa));
+    verifica("Home: saluto col nome, la data, gli impegni e il chip del mestiere", /^(Buongiorno|Buon pomeriggio|Buonasera), Andrea$/.test(testa.titolo) && /\d{1,2} \w+/.test(testa.data) && /impegn/.test(testa.conta) && testa.iniziali.trim() === "Impresa edile", JSON.stringify(testa));
     await page.click("#brandAvatar");
-    verifica("tocco sulle iniziali: si aprono le Impostazioni", await page.evaluate(() => paginaAttuale === "impostazioni"));
+    verifica("tocco sul chip: si aprono le Impostazioni", await page.evaluate(() => paginaAttuale === "impostazioni"));
     await page.evaluate(() => navigateTo("home"));
     await page.click("#homeOggiPill");
     verifica("tocco su \"impegni\": si apre il calendario", await page.evaluate(() => paginaAttuale === "calendario"));
