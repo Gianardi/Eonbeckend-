@@ -80,7 +80,7 @@ pagina cliente chiusi e la professione bloccata in produzione.
 | 3 | **"Chiunque voglia organizzare la propria attività"** → nome più bello, mini questionario, cartelle | **Fatto** (28/09): "Altra attività", questionario a 3 tocchi, cartelle proposte (0b.1). | fatto |
 | 4 | **Tratti distintivi per mestiere** (edile, idraulico, elettricista, condominio) | **Fatto** (28/09): colore, icona, esempio a voce e card per mestiere (0b.2). Mancano le funzioni dedicate (SAL, urgenze, DiCo, morosità). | fatto · [Claude] il resto |
 | 5 | **Percorsi con la mappa** | Oggi "Portami lì" apre Mappe/Google Maps. Proposta: **il giro della giornata** su una mappa dentro EON (tappe in ordine, tempi, "Avvia" apre il navigatore). Traffico vero: Google Maps (account di Andrea, gratis fino a qualche migliaio di calcoli al mese, stima). | [insieme] |
-| 6 | **Fattura elettronica valida con un tocco o a voce. Gratis?** | Possibile: EON crea l'XML e lo manda allo SdI tramite un intermediario accreditato (strada A, sezione 4). **Non gratis ma pochi centesimi** a fattura (Openapi da ~0,015-0,07 € l'invio + conservazione ~0,035 €, listini da riverificare). Serve: delega dell'artigiano all'intermediario (una volta), dati completi del cliente (CF/P.IVA, codice destinatario o PEC, indirizzo: EON li chiede se mancano), regime giusto (forfettario, bollo, ritenuta…). Il portale gratis dell'Agenzia non si collega alle app. Il 27/09 si era scelta la strada B (collegarsi a Fatture in Cloud): **da ridecidere** — la A è l'argomento di vendita "EON fa la fattura vera". **29/09: dopo la costituzione della società**, piano completo in 0b.4. | [Andrea] società · poi [insieme] |
+| 6 | **Fattura elettronica valida con un tocco o a voce. Gratis?** | Possibile: EON crea l'XML e lo manda allo SdI tramite un intermediario accreditato (strada A, sezione 4). **Non gratis ma pochi centesimi** a fattura (Openapi da ~0,015-0,07 € l'invio + conservazione ~0,035 €, listini da riverificare). Serve: delega dell'artigiano all'intermediario (una volta), dati completi del cliente (CF/P.IVA, codice destinatario o PEC, indirizzo: EON li chiede se mancano), regime giusto (forfettario, bollo, ritenuta…). Il portale gratis dell'Agenzia non si collega alle app. Il 27/09 si era scelta la strada B (collegarsi a Fatture in Cloud): **da ridecidere** — la A è l'argomento di vendita "EON fa la fattura vera". **28/09: dopo la costituzione della società**, piano completo in 0b.4. | [Andrea] società · poi [insieme] |
 | 7 | **Sito di presentazione** con "Entra in EON" | Da fare: una pagina sul dominio (eon.it o simile) con cosa fa EON, prova gratuita, "Entra". Serve il dominio. | [Andrea] dominio · [Claude] sito |
 | 8 | **EON come app** | Oggi: installabile dal browser ("Aggiungi a Home"), icona e Face ID. | fatto |
 | 9 | **EON da computer** | **Fatto** (28/09): menu laterale e più colonne. | fatto |
@@ -110,13 +110,13 @@ pagina cliente chiusi e la professione bloccata in produzione.
   vale anche per chi non ha un programma); il collegamento a Fatture in Cloud
   solo se i primi artigiani lo chiedono. Fare entrambe subito raddoppia il
   lavoro. Resta: serve la società/P.IVA per il contratto con l'intermediario,
-  prove nell'ambiente di test dello SdI. **29/09: rimandata a quando la
+  prove nell'ambiente di test dello SdI. **28/09: rimandata a quando la
   società di Andrea è costituita** (serve la sua P.IVA per iscriversi al
   portale). Tutto il piano è in **0b.4**.
 - **7** Dominio e sito: **più avanti**. App negli store: **più avanti**.
   Versione da computer: **fatta il 28/09** (sezione 3).
 - **8 Microfono**: si tiene quello attuale.
-- **"Apri …" sempre con il codice** (29/09, Andrea: "apri appunti, apri
+- **"Apri …" sempre con il codice** (28/09, Andrea: "apri appunti, apri
   fornitori, controlla che tutto possa aprirsi tramite il codice e non
   tramite AI"): **fatto**. Controllati uno a uno tutti i nomi che si vedono
   nell'app (menu, Home e card di ogni mestiere, Menu, Cresci, La tua
@@ -191,7 +191,7 @@ Stessa app, ma ogni mestiere si riconosce subito:
   condominio: assemblee e scadenze; idraulico: urgenze; edile: SAL).
 Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 
-### 0b.4 Fattura elettronica fatta da EON — piano (29/09/2026)
+### 0b.4 Fattura elettronica fatta da EON — piano (28/09/2026)
 **Quando**: si parte **dopo la costituzione della società** di Andrea.
 
 **Come funziona**
@@ -228,7 +228,7 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 11. [insieme] 2–3 artigiani, ognuno con l'autorizzazione.
 12. [Claude] dopo: regime ordinario (IVA, ritenuta, cassa).
 
-**Prezzi** (verificati il 29/09/2026 sui siti, IVA esclusa)
+**Prezzi** (verificati il 28/09/2026 sui siti, IVA esclusa)
 - Fatture in Cloud: forfettari 48 €/anno il primo anno, poi 96 €/anno;
   Standard 144 €/anno; Premium 252 €/anno. Aruba e simili ~30 €/anno (stima
   a memoria, da ricontrollare).
@@ -252,6 +252,34 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
+
+### 0b.5 Amministratori di condominio: EON accanto al gestionale (28/09/2026)
+**Cosa è successo**: un amministratore di condominio usa EON per il lavoro
+di tutti i giorni (chiamare, assemblee, appunti, cosa è successo in
+assemblea) e dice che nel suo gestionale "un funzionamento del genere è
+impossibile". Conferma che EON non sostituisce il gestionale: gli sta
+accanto. Frase per presentarlo: **"accanto al tuo gestionale, non al suo
+posto"** (il gestionale tiene i conti, EON la giornata e la memoria).
+- **Non fare**: contabilità condominiale, millesimi, riparti, rendiconti,
+  F24/CU/770 dentro EON (lavoro enorme, rischio legale).
+- **Proposte** (in attesa della risposta dell'amministratore):
+  1. verbale d'assemblea a voce;
+  2. la storia di ogni condominio (assemblee, guasti, chiamate, foto in
+     ordine di data);
+  3. dati dal suo gestionale.
+- **Collegare il gestionale a EON**, tre strade: (1) collegamento
+  automatico, solo se il gestionale ha un accesso per altre app (API):
+  **1–2 settimane di lavoro nostro, una volta per ogni gestionale** (stima),
+  per il cliente pochi minuti in Impostazioni; (2) esportazione in Excel e
+  import in EON (pochi giorni, funziona con quasi tutti); (3) EON legge i PDF
+  (rendiconti, verbali, convocazioni). All'inizio **solo in una direzione**
+  (gestionale → EON, EON non tocca i conti). **Privacy**: accordo scritto
+  in cui EON è responsabile del trattamento, prima del collegamento (e in
+  ogni caso prima di vendere).
+- **Prossimo passo** [Andrea]: chiedergli il **nome del gestionale**, cosa
+  gli fa perdere più tempo, cosa manca in EON. Documento PDF di 2 pagine
+  preparato per lui il 28/09 ("EON per l'amministratore di condominio").
+  Poi [Claude] verifica se quel gestionale ha un'API e dà strada e tempi.
 
 ### 0b.3 "Ricordami di chiamare…": calendario o appunti — FATTO il 28/09
 - **Con un giorno o un'ora** ("lunedì chiama Pedro", "alle 10 chiama Santa

@@ -303,7 +303,7 @@ async function main() {
       provaNavigazioneDiretta("Privacy");
       const privacy = document.getElementById("risorsaTitolo").textContent;
       chiudiRisorsaCard();
-      // 29/09: "Appunti" apre la card degli appunti, non più la vecchia pagina
+      // 28/09: "Appunti" apre la card degli appunti, non più la vecchia pagina
       if (!provaNavigazioneDiretta("Appunti") || document.getElementById("risorsaTitolo").textContent !== "Appunti") sbagliati.push("Appunti → niente card");
       chiudiRisorsaCard();
       return { sbagliati, privacy };

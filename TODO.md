@@ -4692,7 +4692,7 @@ da fare nel tasto.
   certificazioni (→ `cantiere-documenti`), foto impianti/quadri. **Non**
   "il durc" da solo: "mi dai il DURC" deve aprire il documento DURC.
 - ~~"apri gli appunti" apre la vecchia pagina; "apri Fornitori" non apre la
-  cartella~~ → sistemato il 29/09 (sezione sotto).
+  cartella~~ → sistemato il 28/09 (sezione sotto).
 - **Manca**: l'AI non conosce le cartelle; funzioni vere per SAL, urgenze,
   DiCo, morosità (oggi le card aprono pagine esistenti).
 - Test: nuovo `eval/mestieri-altra.test.js` (28), `pacchetto-27-09`
