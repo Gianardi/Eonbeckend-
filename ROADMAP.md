@@ -1,11 +1,13 @@
 # EON — Roadmap completa
 
-Aggiornata al 26/09/2026 (sera). Un solo posto con tutto quello che resta da fare,
+Aggiornata al 28/09/2026. Un solo posto con tutto quello che resta da fare,
 in ordine. Il dettaglio tecnico di ogni punto è in `TODO.md`.
 
 **In breve**
 - I tre pilastri: tempo, memoria, soldi.
 - **0 · Adesso, in quest'ordine** (deciso con Andrea il 26/09).
+- **0b · Considerazioni di Andrea del 28/09**: registrazione, "altra
+  attività", mestieri, mappa, fattura elettronica, sito, PC, app vera.
 - 1 · Obbligatori prima di vendere.
 - 2 · Per incassare (abbonamento, costi).
 - 2b · **EON Memory**, "l'iCloud del lavoro" + analisi di costi e spazio.
@@ -66,6 +68,65 @@ far controllare a un legale.
 
 Pubblicati: pacchetto #97 (25/09) e #70 (26/09), con gli accessi della
 pagina cliente chiusi e la professione bloccata in produzione.
+
+---
+
+## 0b. Considerazioni di Andrea del 28/09/2026 — stato e proposte
+
+| # | Cosa | Stato | Chi |
+|---|---|---|---|
+| 1 | **Registrazione bloccata** ("non mi fa registrare") | Causa trovata: in Supabase le iscrizioni sono **spente** (errore `signup_disabled`, 27/09 sera). L'app ora lo dice in italiano. Per riaprire: Supabase → Authentication → Sign In / Providers → "Allow new users to sign up" acceso. **Ma** le email di conferma oggi arrivano solo al team (serve il servizio email vero, sezione 1): senza, chi si iscrive non riesce a confermare. | [Andrea] interruttore · [insieme] email |
+| 2 | **Chiunque, infinite persone?** | Oggi **no** (iscrizioni spente + email solo al team). Con tutto aperto: una persona per email, conferma obbligatoria, limite AI 20 richieste ogni 10 minuti per account; **manca** un captcha (Cloudflare Turnstile, gratis) e un tetto di spesa AI giornaliero per account. Da fare **prima** di aprire a tutti. | [Claude] |
+| 3 | **"Chiunque voglia organizzare la propria attività"** → nome più bello, mini questionario, cartelle | Proposta sotto (0b.1). | [insieme] |
+| 4 | **Tratti distintivi per mestiere** (edile, idraulico, elettricista, condominio) | **Non fatto** (chiesto il 27/09, rimasto indietro). Proposta sotto (0b.2), con simulazioni prima di toccare l'app. | [Claude] |
+| 5 | **Percorsi con la mappa** | Oggi "Portami lì" apre Mappe/Google Maps. Proposta: **il giro della giornata** su una mappa dentro EON (tappe in ordine, tempi, "Avvia" apre il navigatore). Traffico vero: Google Maps (account di Andrea, gratis fino a qualche migliaio di calcoli al mese, stima). | [insieme] |
+| 6 | **Fattura elettronica valida con un tocco o a voce. Gratis?** | Possibile: EON crea l'XML e lo manda allo SdI tramite un intermediario accreditato (strada A, sezione 4). **Non gratis ma pochi centesimi** a fattura (Openapi da ~0,015-0,07 € l'invio + conservazione ~0,035 €, listini da riverificare). Serve: delega dell'artigiano all'intermediario (una volta), dati completi del cliente (CF/P.IVA, codice destinatario o PEC, indirizzo: EON li chiede se mancano), regime giusto (forfettario, bollo, ritenuta…). Il portale gratis dell'Agenzia non si collega alle app. Il 27/09 si era scelta la strada B (collegarsi a Fatture in Cloud): **da ridecidere** — la A è l'argomento di vendita "EON fa la fattura vera". | [Andrea] decide · poi [insieme] |
+| 7 | **Sito di presentazione** con "Entra in EON" | Da fare: una pagina sul dominio (eon.it o simile) con cosa fa EON, prova gratuita, "Entra". Serve il dominio. | [Andrea] dominio · [Claude] sito |
+| 8 | **EON come app** | Oggi: installabile dal browser ("Aggiungi a Home"), icona e Face ID. | fatto |
+| 9 | **EON da computer** | Da fare: oggi colonna stretta su schermo largo. Versione PC con menu laterale e più colonne. | [Claude] |
+| 10 | **App vera negli store** | Si "impacchetta" la stessa app (es. Capacitor) per App Store e Google Play: stesso codice, in più notifiche vere e microfono nativo. Servono gli account sviluppatore (Apple 99 $/anno, Google 25 $ una volta) e la revisione di Apple. | [insieme] |
+| 11 | **Microfono nell'app vera: serve OpenAI?** | **No.** Oggi EON usa il riconoscimento vocale del telefono (Apple/Google), gratis. Nell'app vera si usa quello nativo di iPhone/Android, sempre gratis. OpenAI (o simili) solo se vogliamo di più: voce più umana, trascrivere telefonate e vocali lunghi. | — |
+| 12 | **Tutto in roadmap** | Regola fissa: ogni considerazione di Andrea finisce qui, con stato e chi la fa. | [Claude] |
+| 13 | **Tester: "ricordami di chiamare X" negli appunti, non in calendario** | Proposta sotto (0b.3), da confermare. | [Andrea] ok · [Claude] |
+
+### 0b.1 "Chiunque voglia organizzare la propria attività" (proposta)
+- **Nome**: al posto della frase lunga, una scelta che si capisce subito tra
+  i mestieri: **"Altra attività"** con sotto "Negozi, bar, studi,
+  professionisti, servizi". (Alternative: "La mia attività", "Ogni partita
+  IVA".)
+- **Mini questionario** (3 domande, a tocchi, 20 secondi): che tipo di
+  attività (negozio · bar/ristorante · studio professionale · servizi a
+  domicilio · altro), come lavori (clienti fissi / di passaggio / su
+  appuntamento), da solo o con dipendenti.
+- **Cartelle: non vuote.** Critica: cartelle vuote da nominare = pagina
+  bianca, la maggior parte non lo fa e l'app sembra vuota. Meglio: EON
+  **propone già le cartelle** in base alle risposte (es. bar: Fornitori,
+  Personale, Scadenze, Incassi; studio: Clienti, Pratiche, Scadenze), tutte
+  **rinominabili e cancellabili**, più "+ Nuova cartella". Si parla a EON
+  come per gli artigiani ("segna in Fornitori di chiamare la Peroni").
+- Da decidere prima: se questa parte è il **Piano Free** (sezione 2) o un
+  piano a pagamento come gli altri.
+
+### 0b.2 Tratti distintivi per mestiere (proposta)
+Stessa app, ma ogni mestiere si riconosce subito:
+- **colore e icona propri** (es. edile arancio/cantiere, idraulico blu/goccia,
+  elettricista giallo/fulmine, condominio verde/palazzo);
+- **parole del mestiere** nelle card e negli esempi ("Cantieri", "Interventi",
+  "Impianti", "Condomini"; esempi a voce presi dal lavoro vero);
+- **1-2 card solo loro** (es. elettricista: dichiarazioni di conformità;
+  condominio: assemblee e scadenze; idraulico: urgenze; edile: SAL).
+Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
+
+### 0b.3 "Ricordami di chiamare…": calendario o appunti (proposta)
+- **Con un giorno o un'ora** ("lunedì chiama Pedro", "alle 10 chiama Santa
+  Maria", "domani", "stasera") → **calendario**, come oggi.
+- **Senza nessun quando** ("ricordami di chiamare Pedro", "ricordami di
+  comprare il silicone") → **appunti**, nella lista "Da fare" spuntabile,
+  visibile in Home. Oggi invece EON lo mette in calendario il primo giorno
+  utile alle 8:00 (regola del 23/09).
+- Rischio da evitare: un appunto senza data si dimentica. Per questo: la
+  lista "Da fare" in Home, e se l'appunto nomina un cliente va anche nella
+  sua scheda.
 
 ---
 
