@@ -253,6 +253,64 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
 
+### 0b.10 Il lettore unico: quasi tutto col codice, come le grandi app — FATTO il 29/09
+Andrea (29/09, dopo una sera di prove in cui "non funzionava niente"): "non
+possiamo dire per ogni cosa cosa deve fare EON… principio logico e non
+sistema IF… agisci come AD".
+- **Causa vera della sera del 28/09**: il **credito dell'AI (Anthropic) era
+  finito** dalle 17: 36 richieste su 46 andate all'AI e fallite ("niente",
+  "si impalla"); le 10 fatte dal codice erano andate bene (le fatture non
+  erano rotte). **[Andrea] ricaricare il credito e attivare la ricarica
+  automatica** su console.anthropic.com → Plans & Billing.
+- **Come le grandi app** (Siri/App Intents, Alexa, Google, Snips, Mycroft
+  Adapt, Rasa): un solo **lettore** (`lettore.js`) che in ogni frase trova il
+  **cassetto** (fattura/preventivo, messaggio, email, WhatsApp, chiamata,
+  cartella, cartello, DURC, domanda sui dati, da fare, Mente…) e i **pezzi**
+  (chi — cliente noto, nuovo o omonimo —, quando, quanto, cosa, dove). Si
+  allarga il **vocabolario**, non le regole.
+- **Le 5 regole, per tutto EON**: 1) giorno o ora → calendario (anche "da
+  fare domani" senza ora); 2) azione chiara con tutti i pezzi → la fa;
+  3) manca un pezzo → **chiede solo quello, con i tasti** (come Siri: "Per
+  quale lavoro?", "Quale Gianardi?", "«Chilosi» è il cliente o il lavoro?");
+  4) domanda sui dati → risponde dai dati (chi deve pagare, quanto incassato,
+  IVA del mese — stima —, cantieri attivi, impegni di un giorno); 5) il resto
+  → **Mente**, con il tasto "Era una richiesta a EON" (ripiego in due tempi,
+  come Rasa). L'AI resta per i giudizi ("è pesante?", "conviene?"), i
+  seguiti di un discorso, gli ordini che il codice non sa fare.
+- **Tutte le 25 frasi della sera del 28/09 ora vanno col codice** (nella
+  prova automatica): cartelle, "Domani ore 11 Mazzi. Mandare raccomandata
+  Brigida" (impegno + da fare di domani), fatture/preventivi anche per
+  **clienti nuovi** (li crea), "…e mandalo a Rita" (tasti PDF/WhatsApp/
+  Email), "scrivi a Rita se va bene domani alle 18" (appuntamento da
+  confermare + messaggio), email e chiamate con omonimi, cartello già
+  compilato, DURC (se non c'è lo dice), foto con didascalia ("TV casa Machi"
+  → quale Machi?; "TV casa Cucinelli" → cliente nuovo), domande sui soldi.
+- **Server**: i "comandi già letti" (documento, messaggio) li esegue il
+  codice con gli strumenti di sempre, dati ricontrollati (mai fidarsi
+  dell'app), registro "codice".
+- **Rete di sicurezza**: se l'AI non risponde, una cosa da segnare va nella
+  Mente ("L'AI adesso è ferma: non si perde"), una domanda riceve una
+  risposta chiara, un ordine "Adesso non riesco a farlo". Al fondatore,
+  nell'app e nel pannello Admin, l'avviso **"Credito dell'AI finito"** (solo
+  il conto delle volte, mai i messaggi).
+- **Utente virtuale** (`eval/simulatore.test.mjs`, idea di Andrea): quasi
+  3.000 frasi generate come le scriverebbe un artigiano (cortesie, importi
+  in tanti modi, clienti noti/nuovi/omonimi, giorni e ore, parole dei 4
+  mestieri) + le frasi vere di Andrea + quelle da non sbagliare: **100% lette
+  giuste**. Gira a ogni pacchetto; ogni frase nuova che sbaglia si aggiunge lì.
+- **Da sapere (onesto)**: le 3.000 frasi le ho scritte io, quindi il 100% vale
+  per quelle; le frasi vere di tutti i giorni troveranno altri buchi (si
+  aggiungono al simulatore). L'IVA è una stima dalle fatture di EON. Email e
+  WhatsApp si aprono pronti, l'invio lo tocca Andrea (l'invio automatico
+  vuole l'account email, sezione 1). Il messaggio "Ciao Rita, …" parte nella
+  chat di EON (come "di' a Rita che…").
+- **Prossimi (deciso il 29/09)**: promemoria degli appuntamenti; cartelle
+  capite dall'AI; **Mente-cervello** al posto di Cresci nel menu (Cresci va in
+  Menu): pagina "cervello" con riassunto, gruppi collegati e "EON ti conosce
+  al X%" — prima le simulazioni; **Squadra del cantiere** (direzione lavori:
+  persone coinvolte, ordini a uno o a tutti) — prima la versione semplice,
+  il 3D no per ora.
+
 ### 0b.9 Funzioni vere dei mestieri: urgenze, SAL, DiCo — FATTO il 28/09 (notte)
 Andrea: "vorrei mantenere un tono semplice e calmo, non incasinare la testa
 appena entri nell'app". **Regola decisa**: la Home non cambia; le funzioni

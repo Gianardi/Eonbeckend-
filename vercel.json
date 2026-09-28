@@ -45,6 +45,15 @@
       ]
     },
     {
+      "source": "/lettore.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/file-privati.js",
       "headers": [
         {

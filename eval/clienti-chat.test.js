@@ -212,12 +212,14 @@ async function main() {
     const foto = { id: "f9", url: "https://file.test/9.jpg", created: new Date().toISOString(), clientId: null, nota: "", descrizione: "x" };
     await page.evaluate((f) => { cantiereFoto.length = 0; cantiereFoto.push(f); apriTagFotoCantiere(f); }, foto);
     rispostaAI = { stato: "concluso", testo: "A quale cliente si riferisce?", azioni: [] };
+    const aiPrimaFoto = richiesteAI.length;
     await page.fill("#cantiereFotoTagCampo", "da cambiare e trovare modello uguale");
     await page.click("#cantiereFotoTagSend");
     await page.waitForFunction(() => /A quale cliente/.test(document.getElementById("cantiereFotoTagHint").textContent) && !document.getElementById("cantiereFotoTagSend").disabled, null, { timeout: 3000 });
     const senzaNome = await page.evaluate(() => ({ aperto: document.getElementById("cantiereFotoTagOverlay").style.display === "flex", scritture: window.__scritture.length }));
     verifica("foto con solo una nota: chiede a quale cliente, nessun cliente creato", senzaNome.aperto && senzaNome.scritture === 0, JSON.stringify(senzaNome));
-    verifica("all'AI si dice di non creare un cliente da una nota", /NON chiamare nessuno strumento/.test(richiesteAI.at(-1) || ""));
+    // 29/09/2026: la didascalia la legge il codice (lettore unico); senza nome lo chiede lui, senza AI
+    verifica("senza un nome nella didascalia lo chiede il codice, senza AI", richiesteAI.length === aiPrimaFoto);
 
     rispostaAI = { stato: "concluso", testo: "Fatto.", azioni: [{ tool: "trova_o_crea_cliente", esito: { id: "c-rossi", nome: "Mario Rossi", creato: false } }] };
     await page.fill("#cantiereFotoTagCampo", "Rossi, porta da cambiare");

@@ -47,6 +47,8 @@
   .tile .extra{ font-size:12px; color:var(--faint); margin-top:4px; }
   .tile.allarme{ border-color:rgba(229,72,77,.35); background:var(--coral-soft); }
   .tile.allarme .num{ color:var(--coral); }
+  .credito-finito{ margin-bottom:14px; }
+  .credito-finito .num{ font-size:22px; }
 
   .sezione{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px; margin-bottom:12px; }
   .sezione h2{ margin:0 0 4px; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px; }
@@ -234,7 +236,9 @@ function disegna(){
   const utenti = dati.utenti || [];
   const giorniNomi = (g) => new Date(g + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric" });
 
+  const credito = dati.ai_credito_finito;
   $("contenuto").innerHTML = `
+    ${credito ? `<div class="tile allarme credito-finito"><div class="num">Credito dell'AI finito</div><div class="lab">${esc(numero(credito.volte))} richieste non riuscite nelle ultime 24 ore, l'ultima ${esc(quando(credito.ultima))}.</div><div class="extra">Ricaricalo su console.anthropic.com → Plans &amp; Billing (e attiva la ricarica automatica). Intanto le cose da segnare vanno nella Mente.</div></div>` : ""}
     <div class="tiles">${tiles.map((x) => `<div class="tile${x.allarme ? " allarme" : ""}"><div class="num">${esc(x.num)}</div><div class="lab">${esc(x.lab)}</div><div class="extra">${esc(x.extra)}</div></div>`).join("")}</div>
 
     <div class="sezione">

@@ -2515,6 +2515,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <!-- File privati: foto e documenti con link che scadono (27/09/2026) -->
 <script src="/file-privati.js"></script>
+<script src="/lettore.js"></script>
 </head>
 <body>
 
@@ -5702,7 +5703,7 @@ function showAIToastConDecisione(titolo, testo, onSi, onNo, etichettaSi, etichet
    quando questo avviso compare — onAnnulla la ripristina, non la
    evita. Sparisce da solo dopo "secondi" (default 7): passato quel
    tempo l'azione resta definitiva, come oggi. */
-function showAIToastConAnnulla(titolo, testo, onAnnulla, secondi){
+function showAIToastConAnnulla(titolo, testo, onAnnulla, secondi, altro){
   const container = document.getElementById("aiToastContainer");
   const toast = document.createElement("div");
   toast.className = "ai-toast decisione";
@@ -5714,11 +5715,18 @@ function showAIToastConAnnulla(titolo, testo, onAnnulla, secondi){
       <div class="ai-toast-title">${titolo}</div>
       <div class="ai-toast-text">${testo}</div>
       <div class="ai-toast-actions">
-        <button class="ai-toast-yes">Annulla</button>
+        <button class="ai-toast-yes">Annulla</button>${altro ? '<button class="ai-toast-no ai-toast-altro"></button>' : ""}
       </div>
     </div>
   `;
   let deciso = false;
+  /* Ripiego in due tempi (29/09/2026, come Rasa): "l'ho messo nella
+     Mente" + un secondo tasto se era un'altra cosa */
+  if(altro){
+    const b = toast.querySelector(".ai-toast-altro");
+    b.textContent = altro.etichetta;
+    b.addEventListener("click", async () => { if(deciso) return; deciso = true; toast.querySelectorAll("button").forEach(x => x.disabled = true); await altro.azione(); toast.remove(); });
+  }
   const chiudi = () => { if(!deciso){ deciso = true; toast.remove(); } };
   toast.querySelector(".ai-toast-yes").addEventListener("click", async () => {
     if(deciso) return;
@@ -10500,6 +10508,8 @@ async function controllaAdminEon(){
     const r = await fetch(ASSISTANT_ENDPOINT_URL.replace("action=assistant", "action=admin_stato"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: "{}" });
     const j = await r.json().catch(() => ({}));
     eonAdmin = !!(r.ok && j && j.admin === true);
+    // Al fondatore, subito: il credito dell'AI è finito (29/09/2026)
+    if(eonAdmin && j.ai_credito_finito) showAIToast("Credito dell'AI finito", "Ricaricalo su console.anthropic.com → Plans & Billing. Intanto EON mette le cose nella Mente.");
   }catch(e){ eonAdmin = false; }
   document.getElementById("impVoceProva").hidden = !eonAdmin;
   let salvata = null;
@@ -11703,6 +11713,43 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
       return;
     }
     const fotoId = cantiereFotoTagId;
+    /* Prima il lettore (29/09/2026, Andrea: "TV casa Machi" deve andare
+       nella scheda di Machi col codice; "TV casa Cucinelli" = cliente nuovo) */
+    const scelte = document.getElementById("cantiereFotoTagScelte");
+    if(scelte) scelte.remove();
+    const lettura = typeof EonLettore !== "undefined" ? EonLettore.leggiDidascalia(testo, contestoLettore()) : null;
+    if(lettura){
+      const tasti = (voci) => {
+        const riga = document.createElement("div");
+        riga.id = "cantiereFotoTagScelte"; riga.className = "scheda-scelte";
+        voci.forEach(([etichetta, azione]) => { const b = document.createElement("button"); b.type = "button"; b.className = "scheda-scelta"; b.textContent = etichetta; b.addEventListener("click", () => { riga.remove(); azione(); }); riga.appendChild(b); });
+        hint.after(riga);
+      };
+      if(lettura.cliente){ await collegaFotoAlCliente(fotoId, lettura.cliente, lettura.nota, false); return; }
+      if(lettura.candidati && lettura.candidati.length){
+        hint.textContent = "Quale?";
+        tasti(lettura.candidati.slice(0, 5).map(c => [c.name, () => collegaFotoAlCliente(fotoId, c, lettura.nota, false)]));
+        return;
+      }
+      if(lettura.clienteSimile){
+        hint.textContent = "Intendi " + lettura.clienteSimile.name + "?";
+        tasti([["Sì", () => collegaFotoAlCliente(fotoId, lettura.clienteSimile, lettura.nota, false)], ["No", () => { hint.textContent = "Dimmi nome e cognome del cliente"; }]]);
+        return;
+      }
+      if(lettura.clienteNuovo){
+        const nuovo = await creaClienteDalCodice(lettura.clienteNuovo);
+        if(nuovo){ await collegaFotoAlCliente(fotoId, nuovo, lettura.nota, true); return; }
+      }
+      // Solo una parola o due, nessun nome riconosciuto: cliente nuovo o nota?
+      const soloParole = testo.trim().split(/\s+/);
+      if(soloParole.length <= 2 && soloParole.every(w => /^\p{L}{3,}$/u.test(w))){
+        const nome = soloParole.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+        hint.textContent = "«" + nome + "» è un cliente nuovo?";
+        tasti([["Sì, crealo", async () => { const c = await creaClienteDalCodice(nome); if(c) collegaFotoAlCliente(fotoId, c, "", true); }], ["No, è una nota", () => { hint.textContent = "A quale cliente? Dimmi il nome (la nota puoi scriverla anche dopo)"; }]]);
+        return;
+      }
+      if(!lettura.clienteNuovo){ hint.textContent = "A quale cliente si riferisce? Dimmi il nome (la nota puoi scriverla anche dopo)"; return; }
+    }
     inCorso = true;
     send.disabled = true;
     mic.disabled = true;
@@ -11775,6 +11822,25 @@ document.getElementById("cantiereFotoTagOverlay").addEventListener("click", (e) 
     if(questaFotoEAncoraAperta && foto) mostraSchedaFoto(foto, azioneCliente.esito.nome, { appenaScattata: true });
     await loadUserDataFromDB();
     renderClientArchive(); renderClientStats();
+  }
+  /* La foto va nella scheda del cliente, con la nota detta (dal codice) */
+  async function collegaFotoAlCliente(fotoId, cliente, notaDetta, creato){
+    if(isDbReady()){
+      const { error } = await supabaseClient.from("cantiere_foto").update({ client_id: cliente.id }).eq("id", fotoId);
+      if(error){ hint.textContent = "Non sono riuscita a collegare la foto: riprova"; return; }
+    }
+    const foto = cantiereFoto.find(f => f.id === fotoId);
+    if(foto) foto.clientId = cliente.id;
+    if(notaDetta && foto && isDbReady()){
+      const nuova = foto.nota ? foto.nota + "\n" + notaDetta : notaDetta;
+      const { error } = await supabaseClient.from("cantiere_foto").update({ nota: nuova }).eq("id", fotoId);
+      if(!error) foto.nota = nuova;
+    }
+    const aperta = cantiereFotoTagId === fotoId;
+    if(aperta){ campo.value = ""; chiudiTagFotoCantiere(); }
+    showAIToast(creato ? "Cliente creato e foto collegata" : "Foto collegata alla scheda", cliente.name + (notaDetta ? " · " + notaDetta : ""));
+    if(aperta && foto) mostraSchedaFoto(foto, cliente.name, { appenaScattata: true });
+    renderCantiereFoto(); renderClientArchive(); renderClientStats();
   }
   send.addEventListener("click", () => assegna(campo.value));
 
@@ -12405,6 +12471,477 @@ function rigaDico(x, conCliente){
   return r;
 }
 (function(){ const c = document.getElementById("cardDico"); if(c) c.addEventListener("click", apriElencoDico); })();
+
+/* ===================== LETTORE UNICO (29/09/2026) =====================
+   Andrea: "non possiamo dire per ogni cosa cosa deve fare EON". Come le
+   grandi app: lettore.js trova il cassetto (fattura, messaggio, chiamata,
+   cartella, domanda sui dati…) e i pezzi (chi, quando, quanto, cosa);
+   qui l'app fa l'azione con il codice. Le 5 regole:
+     1. giorno o ora → calendario (da fare con il giorno, o il percorso degli impegni)
+     2. azione chiara con tutti i pezzi → la fa
+     3. azione chiara ma manca un pezzo → chiede solo quello, con i tasti
+     4. domanda sui dati → risponde dai dati
+     5. il resto → Mente
+   provaLettore restituisce: null = prosegue come prima; { fatto } = fatto;
+   { comando } = va al server che lo esegue senza AI; { testo } = prosegue
+   con quel testo (i pezzi con l'ora, dopo aver segnato gli altri). */
+function contestoLettore(){
+  return { clienti: clients.filter(c => c && c.id), cartelle: cartelleVisibili(), oggi: new Date() };
+}
+function leggiConLettore(testo){
+  if(typeof EonLettore === "undefined") return null;
+  try{ return EonLettore.leggi(testo, contestoLettore()); }catch(e){ console.warn("Lettore:", e.message); return null; }
+}
+
+/* Una domanda del codice in una card: tasti di scelta e casella (anche a
+   voce). Come Siri: "manca un pezzo → chiede solo quello". */
+function domandaDelCodice({ titolo, domanda, scelte, segnaposto, senzaCampo, onRisposta }){
+  const corpo = document.createElement("div");
+  corpo.className = "scheda-chat conversazione-card domanda-codice";
+  const bolla = document.createElement("div");
+  bolla.className = "scheda-bolla eon";
+  bolla.textContent = domanda;
+  corpo.appendChild(bolla);
+  if(scelte && scelte.length){
+    const riga = document.createElement("div");
+    riga.className = "scheda-scelte";
+    scelte.forEach(s => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "scheda-scelta"; b.textContent = s.etichetta;
+      b.addEventListener("click", () => onRisposta(s.valore !== undefined ? s.valore : s.etichetta, true));
+      riga.appendChild(b);
+    });
+    corpo.appendChild(riga);
+  }
+  let piede = null;
+  if(!senzaCampo){
+    piede = document.createElement("div");
+    piede.className = "scheda-composer";
+    const campo = document.createElement("textarea");
+    campo.rows = 1; campo.className = "scheda-campo"; campo.id = "domandaCodiceCampo";
+    campo.placeholder = segnaposto || "Rispondi…";
+    const invia = document.createElement("button");
+    invia.type = "button"; invia.className = "scheda-invia"; invia.id = "domandaCodiceInvia";
+    invia.setAttribute("aria-label", "Invia la risposta");
+    invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    const manda = (t) => { t = String(t || "").trim(); if(t) onRisposta(t, false); };
+    invia.addEventListener("click", () => manda(campo.value));
+    campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(campo.value); } });
+    const mic = creaMicRapido((t) => manda(t));
+    mic.classList.add("scheda-mic");
+    piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
+  }
+  apriRisorsaCard(titolo, corpo, piede);
+}
+/* Scegli tra più clienti con lo stesso nome (al massimo 5 tasti, come Siri) */
+function scegliCliente(titolo, domanda, candidati, poi, conNuovo){
+  const scelte = candidati.slice(0, 5).map(c => ({ etichetta: c.name, valore: c.id }));
+  if(conNuovo) scelte.push({ etichetta: "Un altro: cliente nuovo", valore: "__nuovo" });
+  domandaDelCodice({ titolo, domanda, scelte, segnaposto: "Oppure scrivi il nome…", onRisposta: (v) => {
+    if(v === "__nuovo") return poi(null, true);
+    const c = clients.find(x => x.id === v) || clienteDaRisposta(v);
+    poi(c || null, false, v);
+  } });
+}
+function clienteDaRisposta(testo){
+  if(typeof EonLettore === "undefined") return null;
+  const pp = EonLettore.parole(testo);
+  const r = EonLettore.trovaCliente(pp, contestoLettore().clienti, new Set());
+  return r.stato === "trovato" ? r.cliente : null;
+}
+async function creaClienteDalCodice(nome){
+  if(!isDbReady()) return null;
+  const creato = await dbInsert("clients", { name: nome, status: "attivo", value: 0, description: "", last_contact: "oggi", phone: "", email: "", address: "", color: PALETTE[Math.floor(Math.random() * PALETTE.length)] });
+  if(!creato) return null;
+  const c = mappaCliente(creato);
+  clients.push(c);
+  renderClientArchive(); renderClientStats();
+  return c;
+}
+
+/* ---- Documento: fattura o preventivo ---- */
+function gestisciDocumento(l, testo, invia){
+  const cosa = l.tipo === "fattura" ? "fattura" : "preventivo";
+  const Cosa = cosa.charAt(0).toUpperCase() + cosa.slice(1);
+  // "Mi serve il preventivo di Machi": quelli già fatti
+  if(l.modo === "cerca"){
+    if(l.cliente && provaRisorsaImmediata(cosa + " " + l.cliente.name + (l.lavoro ? " " + l.lavoro : ""))) return { fatto: "documento_cerca" };
+    if(!l.cliente) return null;
+  }
+  const s = { tipo: l.tipo, cliente: l.cliente, clienteNuovo: l.clienteNuovo, importo: l.importo, lavoro: l.lavoro, invio: l.invio, dubbio: l.dubbio,
+    simile: l.clienteSimile, candidati: l.candidati, primaVolta: true, nota: l.modo === "cerca" ? "Non trovo " + (cosa === "fattura" ? "fatture" : "preventivi") + " di " + l.cliente.name + ": ne preparo uno nuovo. " : "" };
+  const titolo = "Nuovo " + cosa;
+  const chiedi = (domanda, altro) => domandaDelCodice({ titolo: cosa === "fattura" ? "Nuova fattura" : titolo, domanda: (s.nota || "") + domanda, ...altro });
+  const passo = () => {
+    const prima = s.primaVolta; s.primaVolta = false;
+    if(s.candidati && s.candidati.length){
+      return scegliCliente(titolo, "Per quale cliente?", s.candidati, (c, nuovo, detto) => { s.candidati = null; s.nota = ""; if(c) s.cliente = c; else if(!nuovo && detto) s.clienteNuovo = nomeBelloCodice(detto); passo(); }, true);
+    }
+    if(s.simile){
+      return chiedi("Intendi " + s.simile.name + "?", { scelte: [{ etichetta: "Sì", valore: "si" }, { etichetta: "No, un altro", valore: "no" }], senzaCampo: true, onRisposta: (v) => { s.nota = ""; if(v === "si") s.cliente = s.simile; s.simile = null; passo(); } });
+    }
+    if(s.dubbio){
+      const parola = s.dubbio;
+      return chiedi("«" + parola + "» è il cliente o il lavoro?", { scelte: [{ etichetta: parola + " è il cliente", valore: "cliente" }, { etichetta: "È il lavoro", valore: "lavoro" }], senzaCampo: true, onRisposta: (v) => {
+        s.nota = ""; s.dubbio = null;
+        if(v === "cliente") s.clienteNuovo = parola; else s.lavoro = parola;
+        passo();
+      } });
+    }
+    if(!s.cliente && !s.clienteNuovo){
+      return chiedi("Per quale cliente?", { segnaposto: "Nome del cliente…", onRisposta: (t) => {
+        s.nota = "";
+        const pp = EonLettore.parole(t);
+        const r = EonLettore.trovaCliente(pp, contestoLettore().clienti, new Set());
+        if(r.stato === "trovato") s.cliente = r.cliente;
+        else if(r.stato === "ambiguo") s.candidati = r.candidati;
+        else if(r.stato === "simile") s.simile = r.cliente;
+        else s.clienteNuovo = nomeBelloCodice(t);
+        passo();
+      } });
+    }
+    if(!s.lavoro){
+      return chiedi("Per quale lavoro?", { segnaposto: "Es. rifacimento bagno", onRisposta: (t) => { s.nota = ""; s.lavoro = t.charAt(0).toUpperCase() + t.slice(1); passo(); } });
+    }
+    if(s.importo === null || s.importo === undefined){
+      return chiedi("Quanto? (IVA esclusa)", { segnaposto: "Es. 2.000", onRisposta: (t) => {
+        const v = typeof leggiImporto === "function" ? leggiImporto(t) : Number(String(t).replace(/[^\d,]/g, "").replace(",", "."));
+        if(!(v > 0)) return chiedi("Non ho capito l'importo: quanto? (solo il numero)", { segnaposto: "Es. 2000", onRisposta: (t2) => { const v2 = leggiImporto(t2); if(v2 > 0){ s.importo = v2; passo(); } } });
+        s.nota = ""; s.importo = v; passo();
+      } });
+    }
+    // Tutto pronto: lo fa il codice sul server
+    const comando = { azione: "documento", tipo: s.tipo, importo: s.importo, lavoro: s.lavoro };
+    if(s.cliente) comando.cliente_id = s.cliente.id; else comando.nuovo_cliente = s.clienteNuovo;
+    const dopo = s.invio ? (risposta) => offriInvioDocumento(risposta) : null;
+    if(prima) return { comando, dopo };
+    chiudiRisorsaCard();
+    invia(testo, { comando, dopo });
+    return { fatto: "documento_domande" };
+  };
+  const esito = passo();
+  return esito && esito.comando ? esito : { fatto: "documento_domande" };
+}
+function nomeBelloCodice(t){ return String(t || "").trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" "); }
+/* "…e mandalo a Rita": appena fatto, i tasti per mandarlo */
+function offriInvioDocumento(risposta){
+  const a = ((risposta && risposta.azioni) || []).find(x => x.tool === "crea_preventivo_o_fattura");
+  if(!a || !a.esito || !a.esito.dati) return;
+  const d = a.esito.dati;
+  const corpo = document.createElement("div");
+  corpo.className = "termini-card";
+  const p = document.createElement("p");
+  p.textContent = "Pronto. Come lo mandi a " + a.esito.cliente + "? Per allegare il PDF tocca PDF.";
+  corpo.appendChild(p);
+  corpo.appendChild(creaRigaInvioDocumento(() => d, a.esito.cliente));
+  apriRisorsaCard(a.esito.titolo + " · " + a.esito.cliente, corpo);
+}
+
+/* ---- Messaggio, email, WhatsApp, chiamata ---- */
+function risolviClienteLettura(l, titolo, poi){
+  if(l.cliente) return poi(l.cliente);
+  if(l.candidati && l.candidati.length) return scegliCliente(titolo, "Quale?", l.candidati, (c) => { if(c) poi(c); });
+  if(l.clienteSimile) return domandaDelCodice({ titolo, domanda: "Intendi " + l.clienteSimile.name + "?", senzaCampo: true,
+    scelte: [{ etichetta: "Sì", valore: "si" }, { etichetta: "No", valore: "no" }], onRisposta: (v) => { if(v === "si") poi(l.clienteSimile); else chiudiRisorsaCard(); } });
+  return null;
+}
+function gestisciMessaggio(l, testo, invia){
+  if(!l.cliente && !l.candidati && !l.clienteSimile){
+    if(!l.nomeDetto) return null;
+    mostraRispostaEON(testo, l.nomeDetto + " non è tra i tuoi clienti. Aggiungilo (\"aggiungi " + l.nomeDetto + "\") e poi riprova.", { titolo: "Cliente non trovato" });
+    return { fatto: "messaggio_senza_cliente" };
+  }
+  const vai = (c, testoMsg) => {
+    const comando = { azione: "messaggio", cliente_id: c.id, testo: testoMsg };
+    if(l.cliente && testoMsg === l.messaggio) return { comando };
+    chiudiRisorsaCard();
+    invia(testo, { comando });
+    return { fatto: "messaggio" };
+  };
+  const conCliente = (c) => {
+    if(l.messaggio) return vai(c, l.messaggio);
+    domandaDelCodice({ titolo: "Messaggio a " + c.name, domanda: "Cosa gli scrivo?", segnaposto: "Es. arrivo alle 10", onRisposta: (t) => vai(c, t) });
+    return { fatto: "messaggio_domanda" };
+  };
+  const r = risolviClienteLettura(l, "Messaggio", conCliente);
+  return r && (r.comando || r.fatto) ? r : { fatto: "messaggio_scelta" };
+}
+function gestisciScrittura(l, testo, viaVoce){
+  const email = l.azione === "email";
+  const titolo = email ? "Email" : "WhatsApp";
+  const apri = (c) => {
+    const corpoMsg = "Ciao " + c.name.split(/\s+/)[0] + ", " + (l.messaggio ? l.messaggio.charAt(0).toLowerCase() + l.messaggio.slice(1) : "");
+    const corpo = document.createElement("div");
+    corpo.className = "percorso-card";
+    const link = document.createElement("a");
+    link.className = "percorso-meta";
+    if(email){
+      if(!c.email){ mostraSchedaCliente(c); showAIToast("Email mancante", "Non ho l'email di " + c.name + ": aggiungila con Modifica."); return { fatto: "email_mancante" }; }
+      const oggetto = l.messaggio ? l.messaggio.replace(/^Ti chiedo\s+/i, "").replace(/[.?!]+$/, "") : "";
+      link.href = "mailto:" + encodeURIComponent(c.email) + "?subject=" + encodeURIComponent(oggetto.charAt(0).toUpperCase() + oggetto.slice(1)) + "&body=" + encodeURIComponent(corpoMsg);
+    } else {
+      link.href = "https://wa.me/" + numeroWhatsApp(c.phone) + "?text=" + encodeURIComponent(corpoMsg);
+      link.target = "_blank"; link.rel = "noopener";
+    }
+    link.innerHTML = `<span>${email ? "Apri l'email per " : "Apri WhatsApp per "}${escapeHtml(c.name)}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>`;
+    const anteprima = document.createElement("p");
+    anteprima.className = "domanda-codice-anteprima";
+    anteprima.textContent = corpoMsg.trim();
+    corpo.appendChild(anteprima);
+    corpo.appendChild(link);
+    apriRisorsaCard(titolo + " · " + c.name, corpo);
+    if(viaVoce) parlaRisposta("Pronto, tocca per inviare");
+    return { fatto: l.azione };
+  };
+  if(!l.cliente && !l.candidati && !l.clienteSimile){
+    if(!l.nomeDetto) return null;
+    mostraRispostaEON(testo, l.nomeDetto + " non è tra i tuoi clienti.", { titolo: "Cliente non trovato" });
+    return { fatto: "scrittura_senza_cliente" };
+  }
+  const r = risolviClienteLettura(l, titolo, apri);
+  return r && r.fatto ? r : { fatto: l.azione + "_scelta" };
+}
+function gestisciChiamata(l, viaVoce){
+  const chiama = (c) => {
+    const numero = numeroPerLink(c.phone);
+    if(!numero){ mostraSchedaCliente(c); showAIToast("Numero mancante", "Non ho il telefono di " + c.name + ": aggiungilo con Modifica."); return { fatto: "chiama" }; }
+    const corpo = document.createElement("div");
+    corpo.className = "percorso-card";
+    corpo.innerHTML = `<a class="percorso-meta" href="tel:${escapeHtml(numero)}"><span>Chiama ${escapeHtml(c.name)}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>`;
+    apriRisorsaCard("Chiama", corpo);
+    return { fatto: "chiama" };
+  };
+  if(!l.cliente && !l.candidati && !l.clienteSimile){
+    if(!l.nomeDetto) return null;
+    mostraRispostaEON(l.originale, l.nomeDetto + " non è tra i tuoi clienti: non ho il numero.", { titolo: "Cliente non trovato" });
+    return { fatto: "chiama_senza_cliente" };
+  }
+  const r = risolviClienteLettura(l, "Chiama", chiama);
+  return r && r.fatto ? r : { fatto: "chiama_scelta" };
+}
+
+/* ---- Cartella, cartello, documenti dell'impresa ---- */
+async function salvaNotaCartella(l){
+  if(!isDbReady()) return null;
+  const riga = { testo: l.nota, cartella_id: l.cartella.id };
+  if(l.daFare) riga.da_fare = true;
+  const creato = await dbInsert("cantiere_appunti", riga);
+  if(!creato) return null;
+  const nuovo = mappaAppunto(creato);
+  cantiereAppunti.push(nuovo);
+  aggiornaCantiereSottotitoli(); renderCantiereAppunti(); renderCartelle();
+  ricordaAppuntoCreato(nuovo.id);
+  showAIToastConAnnulla("In " + escapeHtml(l.cartella.nome), "«" + escapeHtml(nuovo.testo) + "»" + (l.daFare ? ", da fare." : "."), async () => { await cancellaAppuntiSenzaAvviso([nuovo]); renderCartelle(); });
+  return { fatto: "nota_cartella" };
+}
+function apriCartelloPer(l){
+  if(!sezionePermessa("crea-cartello")) return null;
+  navigateTo("crea-cartello");
+  const c = l.cliente || l.clienteSimile;
+  if(c){
+    const nome = document.getElementById("cartelloClient"); if(nome) nome.value = c.name;
+    const ind = document.getElementById("cartelloIndirizzo"); if(ind && c.address) ind.value = c.address;
+    const desc = document.getElementById("cartelloDesc"); if(desc && c.desc && !desc.value) desc.value = c.desc;
+  }
+  const data = document.getElementById("cartelloData"); if(data && !data.value) data.value = new Date().toISOString().slice(0, 10);
+  showAIToast("Cartello fine lavori", c ? "Con i dati di " + c.name + ": controlla e tocca Genera." : "Scrivi il committente e tocca Genera.");
+  return { fatto: "cartello" };
+}
+function mostraDocImpresaPer(l, testo){
+  const trovati = cercaDocumentiImpresa(l.documento);
+  if(!trovati.length){
+    navigateTo("documenti-impresa");
+    mostraRispostaEON(testo, "Non hai ancora caricato " + (l.documento === "durc" ? "il DURC" : "questo documento") + ": caricalo qui in «Documenti impresa» e poi te lo trovo in un attimo.", { titolo: l.documento.toUpperCase() });
+    return { fatto: "doc_impresa_mancante" };
+  }
+  const d = trovati[trovati.length - 1];
+  mostraDocumentoImpresa(d);
+  const c = l.cliente;
+  if(c && (c.phone || c.email)){
+    const riga = document.createElement("div");
+    riga.className = "risorsa-riga-btn";
+    const titolo = nomeDocumentoPulito(d.nome);
+    const aggiungi = (etichetta, azione) => { const b = document.createElement("button"); b.type = "button"; b.className = "doc-btn-secondario"; b.textContent = etichetta; b.addEventListener("click", azione); riga.appendChild(b); };
+    const link = async () => (window.EonFile ? await EonFile.perCondividere(d.url) : d.url);
+    if(c.phone) aggiungi("WhatsApp a " + c.name.split(/\s+/)[0], async () => { const u = await link(); window.open("https://wa.me/" + numeroWhatsApp(c.phone) + "?text=" + encodeURIComponent(titolo + ": " + u), "_blank"); });
+    if(c.email) aggiungi("Email a " + c.name.split(/\s+/)[0], async () => { const u = await link(); window.location.href = "mailto:" + encodeURIComponent(c.email) + "?subject=" + encodeURIComponent(titolo) + "&body=" + encodeURIComponent(titolo + ": " + u); });
+    document.getElementById("risorsaCorpo").appendChild(riga);
+  }
+  return { fatto: "doc_impresa" };
+}
+
+/* ---- Da fare con il giorno (regola 1 senza ora): "domani mandare la raccomandata" ---- */
+async function salvaDaFareConGiorno(l){
+  if(!isDbReady() || !l.quando || !l.quando.giornoIso || !l.cosa || l.cosa.length < 3) return null;
+  const d = new Date(l.quando.giornoIso + "T12:00:00");
+  const time = d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" }).replace(".", "");
+  const riga = { title: l.cosa, owner_type: "user", status: "todo", time, scheduled_at: l.quando.giornoIso + "T00:00:00" };
+  if(l.cliente) riga.client_id = l.cliente.id;
+  const creato = await dbInsert("tasks", riga);
+  if(!creato) return null;
+  const nuovo = mappaImpegno(creato);
+  tasks.push(nuovo);
+  renderTasks(); renderCalendar();
+  return { fatto: "da_fare", voce: nuovo, etichetta: l.quando.etichetta };
+}
+
+/* ---- Più comandi: quelli senza ora li segna il codice qui, quelli con l'ora il percorso degli impegni ---- */
+async function gestisciPiuComandi(l, testo){
+  const pezzi = l.pezzi || [];
+  const qui = pezzi.filter(p => p.azione === "da_fare" || p.azione === "nota_cartella");
+  const alServer = pezzi.filter(p => p.azione === "impegno");
+  if(!qui.length || qui.length + alServer.length !== pezzi.length) return null; // un pezzo che il codice qui non sa fare: tutto come prima
+  const fatti = [];
+  for(const p of qui){
+    const r = p.azione === "da_fare" ? await salvaDaFareConGiorno(p) : await salvaNotaCartella(p);
+    if(!r) return fatti.length ? { fatto: "piu_parziale" } : null;
+    if(r.voce) fatti.push(r);
+  }
+  if(fatti.length){
+    showAIToastConAnnulla("Da fare " + (fatti[0].etichetta || ""), fatti.map(f => "«" + escapeHtml(f.voce.title) + "»").join("\n"), async () => {
+      for(const f of fatti){ const i = tasks.indexOf(f.voce); if(i > -1) tasks.splice(i, 1); if(isDbReady()) await dbUpdate("tasks", f.voce.id, { deleted_at: new Date().toISOString() }); }
+      renderTasks(); renderCalendar();
+    });
+  }
+  if(!alServer.length) return { fatto: "piu" };
+  return { testo: alServer.map(p => p.originale).join(". ") };
+}
+
+/* ---- Regola 4: domande sui dati ---- */
+function rispondiSuiDati(l){
+  const oggi = new Date();
+  const n = EonLettore.norm(l.testo);
+  if(l.tema === "crediti"){
+    if(l.cliente) return capisciDomandaSoldi("quanto ho incassato da " + l.cliente.name);
+    return capisciDomandaSoldi("chi mi deve");
+  }
+  if(l.tema === "incassi"){
+    if(l.cliente) return capisciDomandaSoldi("quanto ho incassato da " + l.cliente.name);
+    const mese = MESI_LUNGHI.find(m => new RegExp("\\b" + m + "\\b").test(n));
+    const periodo = /\bmese\s+scorso|scorso\s+mese\b/.test(n) ? "il mese scorso" : /\banno\b/.test(n) ? "quest anno" : mese ? mese : "questo mese";
+    return capisciDomandaSoldi("quanto ho incassato " + periodo);
+  }
+  if(l.tema === "iva"){
+    const scorso = /\bmese\s+scorso|scorso\s+mese\b/.test(n), anno = /\banno\b/.test(n);
+    const rif = scorso ? new Date(oggi.getFullYear(), oggi.getMonth() - 1, 15) : oggi;
+    const nelPeriodo = (d) => {
+      const data = d.createdAt ? new Date(d.createdAt) : null;
+      if(!data || isNaN(data)) return false;
+      return anno ? data.getFullYear() === oggi.getFullYear() : data.getFullYear() === rif.getFullYear() && data.getMonth() === rif.getMonth();
+    };
+    const fatture = documentiVeri().filter(d => d.dati && d.dati.tipo === "fattura" && nelPeriodo(d));
+    const iva = fatture.reduce((s, d) => s + (Number(d.dati.iva) || 0), 0);
+    const etichetta = anno ? "quest'anno" : MESI_LUNGHI[rif.getMonth()];
+    if(!fatture.length) return { titolo: "IVA di " + etichetta, testo: "Nessuna fattura fatta con EON " + (anno ? "quest'anno" : "a " + etichetta) + "." };
+    return { titolo: "IVA di " + etichetta + ": circa " + euroConti(iva), testo: "Dalle " + fatture.length + (fatture.length === 1 ? " fattura" : " fatture") + " fatte con EON " + (anno ? "quest'anno" : "a " + etichetta) + ".\nÈ una stima: il conto vero lo fa il commercialista (acquisti, regime, ritenute)." };
+  }
+  if(l.tema === "cantieri"){
+    const attivi = clients.filter(c => !c.archived && c.status === "attivo");
+    const nome = (pageMeta["cantiere-cliente"] && pageMeta["cantiere-cliente"].title || "Cantieri").toLowerCase();
+    navigateTo("cantiere-cliente");
+    if(!attivi.length) return { titolo: "Nessuno attivo", testo: "Non hai " + nome + " attivi in questo momento." };
+    return { titolo: attivi.length + " " + (attivi.length === 1 ? nome.replace(/i$/, "e").replace(/ie$/, "e") : nome) + " attivi", testo: attivi.slice(0, 10).map(c => "**" + c.name + "**" + (c.desc ? " – " + c.desc : "")).join("\n") + (attivi.length > 10 ? "\n…e altri " + (attivi.length - 10) : "") };
+  }
+  if(l.tema === "agenda"){
+    const libero = capisciDisponibilita(l.testo);
+    if(libero) return libero;
+    const data = l.quando && l.quando.giornoIso ? new Date(l.quando.giornoIso + "T00:00:00") : (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+    const quando = l.quando && l.quando.etichetta || "oggi";
+    const voci = impegniDelGiorno(data);
+    navigateTo("calendario");
+    if(!voci.length) return { titolo: quando.charAt(0).toUpperCase() + quando.slice(1), testo: "Niente in programma per " + quando + "." };
+    return { titolo: (voci.length === 1 ? "1 impegno " : voci.length + " impegni ") + quando, testo: voci.map(v => v.ora ? "**" + v.ora + "** – " + v.titolo : v.titolo).join("\n") };
+  }
+  if(l.tema === "clienti"){
+    const attivi = clients.filter(c => !c.archived).length;
+    navigateTo("clienti");
+    return { titolo: "Clienti", testo: attivi === 1 ? "Hai 1 cliente in anagrafica." : "Hai " + attivi + " clienti in anagrafica." };
+  }
+  if(l.tema === "urgenze"){ apriUrgenze(); return { gestito: true }; }
+  return null;
+}
+
+async function provaLettore(testo, viaVoce, invia){
+  const l = leggiConLettore(testo);
+  if(!l || !l.azione) return null;
+  switch(l.azione){
+    case "dati": {
+      const r = rispondiSuiDati(l);
+      if(!r) return null;
+      if(!r.gestito){
+        const righe = String(r.testo || "").split("\n").filter(Boolean);
+        mostraRispostaEON(testo, righe.length > 1 ? righe.map(x => "- " + x).join("\n") : r.testo, { titolo: r.titolo });
+        if(viaVoce) parlaRisposta(r.titolo + (r.testo ? ": " + r.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
+      }
+      return { fatto: "dati_" + l.tema };
+    }
+    case "documento": return gestisciDocumento(l, testo, invia);
+    case "messaggio": return gestisciMessaggio(l, testo, invia);
+    case "email": case "whatsapp": return gestisciScrittura(l, testo, viaVoce);
+    case "chiama": return gestisciChiamata(l, viaVoce);
+    case "nota_cartella": return await salvaNotaCartella(l);
+    case "cartello": return apriCartelloPer(l);
+    case "doc_impresa": return mostraDocImpresaPer(l, testo);
+    case "piu": return await gestisciPiuComandi(l, testo);
+    case "da_fare": {
+      const r = await salvaDaFareConGiorno(l);
+      if(!r) return null;
+      const voce = r.voce;
+      showAIToastConAnnulla("Da fare " + (l.quando.etichetta || ""), "«" + escapeHtml(voce.title) + "»" + (l.cliente ? " · " + escapeHtml(l.cliente.name) : ""), async () => {
+        const i = tasks.indexOf(voce); if(i > -1) tasks.splice(i, 1);
+        if(isDbReady()) await dbUpdate("tasks", voce.id, { deleted_at: new Date().toISOString() });
+        renderTasks(); renderCalendar();
+      });
+      if(viaVoce) parlaRisposta("Segnato per " + (l.quando.etichetta || ""));
+      return r;
+    }
+    case "mente": {
+      // Solo le frasi senza comando e senza cliente: le altre le sa fare già chi viene dopo
+      if(l.cliente || /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|segna|segnami|metti|mettimi|annota|salva|appunta|appuntami|fai|fammi|ciao|grazie|ricordami|ricordarmi)\b/i.test(l.testo)) return null;
+      if(!isDbReady() || l.testo.split(/\s+/).length < 2) return null;
+      const riga = { testo: l.cosa || l.testo };
+      if(l.daFare) riga.da_fare = true;
+      const creato = await dbInsert("cantiere_appunti", riga);
+      if(!creato) return null;
+      const nuovo = mappaAppunto(creato);
+      cantiereAppunti.push(nuovo);
+      aggiornaCantiereSottotitoli(); renderCantiereAppunti();
+      ricordaAppuntoCreato(nuovo.id);
+      showAIToastConAnnulla("In Mente", "«" + escapeHtml(nuovo.testo) + "»" + (l.daFare ? ", da fare." : "."), async () => { await cancellaAppuntiSenzaAvviso([nuovo]); }, 8,
+        { etichetta: "Era una richiesta a EON", azione: async () => { await cancellaAppuntiSenzaAvviso([nuovo]); invia(testo, { soloServer: true }); } });
+      if(viaVoce) parlaRisposta("Segnato");
+      return { fatto: "mente" };
+    }
+    default: return null; // impegno con l'ora, domande libere, modifiche: come prima
+  }
+}
+/* Rete di sicurezza (29/09/2026, credito dell'AI finito: 36 richieste
+   "perse" in una sera). Se l'AI non risponde: una cosa da segnare va nella
+   Mente (non si perde, lo dice chiaro); una domanda riceve una risposta
+   chiara invece del silenzio. true = la frase è stata messa al sicuro. */
+async function reteDiSicurezza(testo, errore, viaVoce){
+  const l = leggiConLettore(testo);
+  const credito = /credito/i.test(errore || "");
+  const motivo = credito ? "l'AI di EON adesso è ferma (credito finito, lo sistemiamo)" : "adesso non riesco a raggiungere l'AI di EON";
+  const eDomanda = !l || l.domanda || l.azione === "domanda" || l.azione === "dati";
+  // Un ordine a EON (svuota, sposta, cancella…) non è un appunto: si dice e basta
+  const eOrdine = l && /^(?:comando|modifica|invio_documento)$/.test(l.azione);
+  if(eDomanda || eOrdine || !isDbReady() || String(testo || "").trim().length < 3){
+    mostraRispostaEON(testo, "Scusa, " + motivo + ". Riprova tra poco." + (eDomanda || eOrdine ? "" : " Le cose da segnare le metto comunque nella Mente."), { titolo: eOrdine ? "Adesso non riesco a farlo" : "Non riesco a rispondere" });
+    if(viaVoce) parlaRisposta("Non riesco a rispondere adesso, riprova tra poco");
+    return false;
+  }
+  const t = String(testo).trim().replace(/\s+/g, " ");
+  const creato = await dbInsert("cantiere_appunti", { testo: t.charAt(0).toUpperCase() + t.slice(1) });
+  if(!creato) return false;
+  const nuovo = mappaAppunto(creato);
+  cantiereAppunti.push(nuovo);
+  aggiornaCantiereSottotitoli(); renderCantiereAppunti();
+  showAIToastConAnnulla("Messo nella Mente", "«" + escapeHtml(nuovo.testo) + "»\n" + (credito ? "L'AI adesso è ferma" : "L'AI adesso non risponde") + ": non si perde, lo trovi nella Mente.", async () => { await cancellaAppuntiSenzaAvviso([nuovo]); });
+  if(viaVoce) parlaRisposta("L'ho messo nella Mente");
+  return true;
+}
+/* ================== fine LETTORE UNICO ================== */
 
 function apriSeNomeDiPagina(testo, domandaEON){
   /* Se EON ha appena chiesto "in calendario o negli appunti?", la parola
@@ -14156,6 +14693,9 @@ function capisciPensiero(testo){
   const parole = t.split(" ").filter(Boolean);
   if(parole.length < 2 || parole.length > 30) return null;
   if(DOMANDA_PER_MENTE.test(t) || CHIACCHIERE.test(t)) return null;
+  // Un ordine a EON ("svuota il cestino") non è un pensiero: lo dice il lettore unico
+  const letta = leggiConLettore(t);
+  if(letta && /^(?:comando|modifica|invio_documento|domanda|dati)$/.test(letta.azione)) return null;
   // Il seguito di un discorso ("e quelle di ieri", "no, a Rossi", "mandalo"): decide l'AI
   if(/^(?:e|ed|anche|invece|pure|poi|allora|no|non|quell[aoie]|quest[aoie])\b/i.test(t)) return null;
   if(RIFERIMENTO_TEMPO.test(t) || TEMPO_PER_MENTE.test(t)) return null; // un giorno o un'ora: decide l'AI (può essere un impegno)
@@ -14264,7 +14804,7 @@ function notaFocusCorrente(focus){
    vero (stesso motore di "Raccontami la giornata"): usato dalla Home
    (qualsiasi cosa) e dalla pagina Clienti (aggiungere un cliente). Un
    solo posto per la logica — cambia solo il prompt e i testi. */
-function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciPrompt, fallbackHint, preparaTesto }){
+function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciPrompt, fallbackHint, preparaTesto, senzaLettore }){
   const mic = document.getElementById(micId);
   const campo = document.getElementById(campoId);
   const send = document.getElementById(sendId);
@@ -14303,9 +14843,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
      aggiorna solo quando il server manda un nuovo focus esplicito. */
   let focusCorrente = null;
 
-  async function elabora(testo, viaVoce){
+  async function elabora(testo, viaVoce, pronto){
     testo = (testo || "").trim();
     const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+    // Un comando già letto dal lettore (dopo le domande del codice): dritto al server, senza AI
+    if(pronto && (pronto.comando || pronto.soloServer)){ if(inCorso) return; return inviaAlServer(testo, viaVoce, false, pronto.comando ? pronto : null); }
     /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
        anche se EON aveva appena fatto una domanda (tranne quando la
        parola era proprio nella domanda: allora è la risposta) */
@@ -14481,6 +15023,23 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
+    /* Il lettore unico (29/09/2026): trova cassetto e pezzi e decide con
+       le 5 regole (calendario, azione, domanda del codice, dati, Mente) */
+    if(!inContinuazione && !senzaLettore){
+      const esitoLettore = await provaLettore(testo, viaVoce, (frase, p) => elabora(frase, false, p));
+      if(esitoLettore && esitoLettore.fatto){
+        campo.value = "";
+        hint.textContent = hintBaseDi();
+        ricordaEsitoCodice(testo, "lettore_" + esitoLettore.fatto);
+        return;
+      }
+      if(esitoLettore && esitoLettore.comando){
+        ricordaEsitoCodice(testo, "lettore_comando");
+        return inviaAlServer(testo, viaVoce, false, esitoLettore);
+      }
+      if(esitoLettore && esitoLettore.testo) testo = esitoLettore.testo; // restano i pezzi con l'ora
+    }
+
     /* Fase 1d: un appunto libero senza data si può salvare davvero senza
        passare dall'AI (stessa identica scrittura di sempre). */
     if(!inContinuazione && await provaAppuntoImmediato(testo, viaVoce)){
@@ -14499,6 +15058,12 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
+    return inviaAlServer(testo, viaVoce, inContinuazione, null);
+  }
+
+  /* Il viaggio verso il server: il percorso del codice (anche per i
+     comandi già letti dal lettore) o, se serve, l'AI */
+  async function inviaAlServer(testo, viaVoce, inContinuazione, pronto){
     if(!BACKEND_CONFIGURED || !currentSession){
       hint.textContent = "L'assistente scrive nei dati veri: accedi per usarlo";
       return;
@@ -14513,7 +15078,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        richiesta sembra ferma per tutta l'attesa — una breve conferma
        parlata, subito, colma il buco senza dire nulla di non confermato
        (mai un orario, solo la ricezione). */
-    const eImpegnoInArrivo = !inContinuazione && sembraRichiestaAppuntamento(testo);
+    const eImpegnoInArrivo = !inContinuazione && !pronto && sembraRichiestaAppuntamento(testo);
     if(eImpegnoInArrivo){
       aggiungiImpegnoInConferma(testo);
       if(viaVoce) parlaRisposta("Ricevuto, un attimo");
@@ -14545,7 +15110,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       risposta = await chiediAssistente(
         inContinuazione ? testo : costruisciPrompt(testo) + notaContestoRecente(contestoRecente) + notaFocusCorrente(focusCorrente),
         runIdDaContinuare || undefined,
-        contestoRecente ? { ricordo: contestoRecente } : undefined
+        (contestoRecente || pronto) ? { ...(contestoRecente ? { ricordo: contestoRecente } : {}), ...(pronto && pronto.comando ? { comando: pronto.comando } : {}) } : undefined
       );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
@@ -14556,6 +15121,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       send.disabled = false;
       mic.disabled = false;
       inCorso = false;
+      // Rete di sicurezza (29/09/2026): niente va perso se l'AI non risponde
+      if(!inContinuazione && await reteDiSicurezza(testo, err.message, viaVoce)){ campo.value = ""; hint.textContent = hintBaseDi(); }
       /* La conversazione aperta (se c'era) resta intatta: non l'abbiamo
          ancora "consumata" davvero, il tentativo è fallito prima che il
          server la vedesse — così un nuovo tentativo di rispondere ("sì")
@@ -14790,6 +15357,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     // Nella card che aspettava ("Un attimo…") non resta mai l'attesa appesa
     if(conversazioneCardAperta() && conversazioneCard.attesa) bollaConversazione("eon", "Fatto.");
+    if(pronto && typeof pronto.dopo === "function") pronto.dopo(risposta); // es. "…e mandalo a Rita": i tasti per mandarlo
     if(viaVoce) parlaRisposta(daDire.join(". "));
   }
 
@@ -14902,12 +15470,12 @@ collegaMicTesto({
 });
 collegaMicTesto({
   micId:"clientiHeroMic", campoId:"clientiHeroCampo", sendId:"clientiHeroSend", hintId:"clientiHeroHint",
-  hintBase:"",
+  hintBase:"", senzaLettore: true, // qui si raccontano i clienti: nome, telefono, lavoro
   fallbackHint:"Prova a raccontarmi un cliente, per esempio: Mario Rossi, 333 1234567, deve rifare il tetto",
   costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo. Se menziona anche impegni o appuntamenti da fissare per questo cliente, creali (crea_impegno).`
 });
 collegaMicTesto({
-  micId:"cantiereClienteMic", campoId:"cantiereClienteCampo", sendId:"cantiereClienteSend", hintId:"cantiereClienteHint",
+  micId:"cantiereClienteMic", campoId:"cantiereClienteCampo", sendId:"cantiereClienteSend", hintId:"cantiereClienteHint", senzaLettore: true,
   hintBase:"Aggiungi o modifica un cliente: nome, contatto, cosa deve fare — ci penso io",
   fallbackHint:"Prova a raccontarmi un cliente, per esempio: Mario Rossi, 333 1234567, deve rifare il tetto",
   costruisciPrompt:(testo) => `Il professionista ha scritto o dettato questo, riguardo a un cliente del cantiere: "${testo}". Se sembra un cliente nuovo (un nome che non conosci ancora), crea la scheda con i dati che ha dato (crea_cliente); se sembra riguardare un cliente che probabilmente esiste già (aggiornamento di dati, nuovo contatto, cambio di stato), cercalo prima (cerca_cliente) e aggiornalo (aggiorna_cliente) invece di crearne uno nuovo.`

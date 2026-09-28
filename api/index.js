@@ -2836,13 +2836,16 @@ async function handleAdmin(action, req, res, user) {
   const admin = await eAdmin(user).catch(() => null);
   if (action === "admin_stato") {
     if (!admin) return send(res, 200, { admin: false });
-    const nuovi = await servizio(`app_errori?select=id&ultima_volta=gt.${encodeURIComponent(admin.errori_visti_fino)}&limit=100`, { method: "GET" }).catch(() => []);
-    return send(res, 200, { admin: true, errori_nuovi: Array.isArray(nuovi) ? nuovi.length : 0 });
+    const [nuovi, credito] = await Promise.all([
+      servizio(`app_errori?select=id&ultima_volta=gt.${encodeURIComponent(admin.errori_visti_fino)}&limit=100`, { method: "GET" }).catch(() => []),
+      creditoAIFinito(),
+    ]);
+    return send(res, 200, { admin: true, errori_nuovi: Array.isArray(nuovi) ? nuovi.length : 0, ai_credito_finito: credito });
   }
   if (!admin) throw fail("Pagina riservata", 403);
   if (action === "admin_riepilogo") {
-    const dati = await servizio("rpc/admin_riepilogo", { method: "POST", body: JSON.stringify({ p_admin: user.id }) });
-    return send(res, 200, dati || {});
+    const [dati, credito] = await Promise.all([servizio("rpc/admin_riepilogo", { method: "POST", body: JSON.stringify({ p_admin: user.id }) }), creditoAIFinito()]);
+    return send(res, 200, { ...(dati || {}), ai_credito_finito: credito });
   }
   if (action === "admin_errori_visti") {
     await servizio(`eon_admin?user_id=eq.${user.id}`, { method: "PATCH", body: JSON.stringify({ errori_visti_fino: new Date().toISOString() }), headers: { Prefer: "return=minimal" } });
@@ -2850,6 +2853,16 @@ async function handleAdmin(action, req, res, user) {
   }
   if (action === "admin_codice") return send(res, 200, await riepilogoCodice());
   throw fail("Richiesta non riconosciuta");
+}
+
+/* Credito dell'AI finito (29/09/2026: il 28/09 sera 36 richieste fallite
+   e nessuno se n'era accorto). Solo il conto delle ultime 24 ore e l'ora
+   dell'ultima: mai i messaggi degli utenti. null = tutto a posto. */
+async function creditoAIFinito() {
+  const da = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const righe = await servizio(`ai_request_log?select=created_at&errore=ilike.*credito*&created_at=gt.${encodeURIComponent(da)}&order=created_at.desc&limit=500`, { method: "GET" }).catch(() => null);
+  if (!Array.isArray(righe) || !righe.length) return null;
+  return { volte: righe.length, ultima: righe[0].created_at };
 }
 
 /* ------------------------------------------------------------
@@ -4591,8 +4604,15 @@ async function provaDilloAlCliente(body, ctx, user) {
   if (nomeDetto.split(/\s+/).length > 3 || resto.length < 3 || /\?/.test(resto)) return null;
   const risolto = await risolviClienteDaNome(nomeDetto, ctx);
   if (risolto.stato !== "trovato") return null;
-  const cliente = { id: risolto.id, nome: risolto.nome };
+  return scriviAlCliente({ id: risolto.id, nome: risolto.nome }, resto, user, ctx);
+}
 
+/* Scrive al cliente nella chat (e segna l'appuntamento da confermare se
+   il messaggio ha giorno e ora): usato da "di' a Rita che…" e dal lettore
+   dell'app ("scrivi a Rita se va bene domani alle 18"). */
+async function scriviAlCliente(cliente, restoDetto, user, ctx) {
+  const domanda = /\?\s*$/.test(restoDetto);
+  const resto = String(restoDetto || "").trim().replace(/[.!?]+$/, "").trim();
   const azioni = [];
   const letto = estraiGiornoEOra(normalizzaFraseImpegno(resto), undefined);
   let appuntamento = null;
@@ -4605,7 +4625,8 @@ async function provaDilloAlCliente(body, ctx, user) {
   }
   const primoNome = cliente.nome.split(/\s+/)[0];
   const frase = resto.charAt(0).toLowerCase() + resto.slice(1);
-  const messaggio = `Ciao ${primoNome}, ${frase}` + (appuntamento ? ` (${appuntamento.quando_visualizzato}). Mi confermi?` : ".");
+  const messaggio = domanda ? `Ciao ${primoNome}, ${frase}?`
+    : `Ciao ${primoNome}, ${frase}` + (appuntamento ? ` (${appuntamento.quando_visualizzato}). Mi confermi?` : ".");
   const inputMsg = { cliente_id: cliente.id, testo: messaggio };
   const inviato = await TOOLS.manda_messaggio.run(inputMsg, ctx);
   await registraOperazione(user, "manda_messaggio", inputMsg, inviato, "auto");
@@ -4615,6 +4636,54 @@ async function provaDilloAlCliente(body, ctx, user) {
     ? `Segnato ${appuntamento.quando_visualizzato} con ${cliente.nome}, da confermare. Ho scritto: "${messaggio}" Se risponde sì lo confermo, se dice no lo tolgo.`
     : `Scritto a ${cliente.nome}: "${messaggio}"`;
   return { azioni, payload: { stato: "concluso", testo: risposta, azioni, focus: { tipo: "cliente", riferimento: cliente.nome } } };
+}
+
+/* ---------- Comandi già letti dall'app (29/09/2026) ----------
+   Il lettore unico dell'app (lettore.js) ha già trovato cassetto e pezzi
+   (chi, quanto, cosa): qui il codice li esegue con gli stessi strumenti di
+   sempre, senza AI. Dati controllati di nuovo (mai fidarsi del client);
+   se qualcosa non torna → null e la frase prosegue come prima. */
+async function eseguiComandoDiretto(comando, ctx, user) {
+  if (!comando || typeof comando !== "object") return null;
+  if (comando.azione === "documento") {
+    const tipo = TIPI_DOCUMENTO.has(comando.tipo) ? comando.tipo : null;
+    const importo = Math.round(Number(comando.importo) * 100) / 100;
+    const lavoro = eStringaNonVuota(comando.lavoro) ? comando.lavoro.trim().slice(0, 200) : "";
+    if (!tipo || !(importo > 0) || importo > 10000000 || !lavoro) return null;
+    const azioni = [];
+    let clienteId = null;
+    if (eUuid(comando.cliente_id)) {
+      const c = await trovaProprio("clients", comando.cliente_id, ctx);
+      if (!c) return null;
+      clienteId = c.id;
+    } else if (eStringaNonVuota(comando.nuovo_cliente) && comando.nuovo_cliente.trim().length <= 80) {
+      const inputC = { nome: comando.nuovo_cliente.trim() };
+      let esitoC;
+      try { esitoC = await TOOLS.trova_o_crea_cliente.run(inputC, ctx); } catch (err) { return null; }
+      await registraOperazione(user, "trova_o_crea_cliente", inputC, esitoC, "auto");
+      azioni.push({ tool: "trova_o_crea_cliente", esito: esitoC });
+      clienteId = esitoC.id;
+    } else return null;
+    const input = { cliente_id: clienteId, tipo, voci: [{ descrizione: lavoro, quantita: 1, prezzo: importo }] };
+    let esito;
+    try { esito = await TOOLS.crea_preventivo_o_fattura.run(input, ctx); } catch (err) {
+      await registraOperazione(user, "crea_preventivo_o_fattura", input, { errore: err.message }, "errore");
+      return null;
+    }
+    await registraOperazione(user, "crea_preventivo_o_fattura", input, esito, "auto");
+    azioni.push({ tool: "crea_preventivo_o_fattura", esito });
+    ctx.lettoSenzaAI = true;
+    const totaleTesto = Number(esito.totale).toLocaleString("it-IT", { maximumFractionDigits: 2 });
+    const nuovo = azioni[0] && azioni[0].esito && azioni[0].esito.creato ? ` (cliente nuovo)` : "";
+    return { azioni, payload: { stato: "concluso", testo: `${esito.titolo} per ${esito.cliente}${nuovo}: €${totaleTesto}`, azioni, focus: { tipo: "cliente", riferimento: esito.cliente } } };
+  }
+  if (comando.azione === "messaggio") {
+    if (!eUuid(comando.cliente_id) || !eStringaNonVuota(comando.testo) || comando.testo.length > 600) return null;
+    const c = await trovaProprio("clients", comando.cliente_id, ctx);
+    if (!c) return null;
+    return scriviAlCliente({ id: c.id, nome: c.name }, comando.testo.trim(), user, ctx);
+  }
+  return null;
 }
 
 async function provaPercorsoRapido(body, ctx, user) {
@@ -4857,7 +4926,7 @@ async function handleAssistant(req, res, user, accessToken) {
     /* Percorso rapido per gli appuntamenti (vedi provaPercorsoRapido):
        una sola chiamata piccola invece del motore completo. null = non
        è un caso semplice, si prosegue qui sotto esattamente come prima. */
-    const rapido = await provaPercorsoRapido(body, ctx, user);
+    const rapido = (body.comando ? await eseguiComandoDiretto(body.comando, ctx, user) : null) || await provaPercorsoRapido(body, ctx, user);
     if (rapido) {
       // Letto dal codice: nessuna AI usata (registro: modello "codice", 0 giri)
       modelloUsato = ctx.lettoSenzaAI ? "codice" : MODELLO_RAPIDO;
