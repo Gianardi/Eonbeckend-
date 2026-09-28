@@ -430,6 +430,14 @@
   .home-hero-oggi-riga.fatto .home-hero-oggi-check{ background:var(--text); border-color:var(--text); }
   .home-hero-oggi-riga.fatto .home-hero-oggi-check svg{ stroke:#fff; }
   .home-hero-oggi-vuoto{ font-size:12.5px; color:var(--muted); padding:6px 0; }
+  .home-hero-dafare{ margin-top:10px; cursor:default; }
+  .home-hero-dafare-n{ font-weight:700; color:var(--muted); margin-left:4px; font-variant-numeric:tabular-nums; }
+  .home-hero-dafare .home-hero-oggi-riga span:last-child{ cursor:pointer; min-width:0; overflow-wrap:anywhere; }
+  .home-hero-dafare-altri{ display:block; margin-top:4px; border:none; background:none; padding:4px 0; font:inherit; font-size:12.5px; font-weight:700; color:var(--indigo); cursor:pointer; }
+  .cantiere-appunto-check{ width:22px; height:22px; border-radius:7px; border:1.5px solid var(--border-strong); background:var(--card); flex:none; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; margin-right:10px; align-self:center; }
+  .cantiere-appunto-check svg{ width:13px; height:13px; stroke:#fff; }
+  .cantiere-appunto.fatto .cantiere-appunto-check{ background:var(--text); border-color:var(--text); }
+  .cantiere-appunto.fatto .cantiere-appunto-testo{ color:var(--faint); text-decoration:line-through; }
 
   .summary-panel{ margin-bottom:14px; }
   .summary-toggle{ cursor:pointer; }
@@ -2918,6 +2926,12 @@
           <div class="home-hero-oggi-titolo">Cosa devo fare oggi</div>
           <div id="homeHeroOggiLista"><div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div></div>
         </div>
+
+        <!-- Da fare (28/09/2026): "ricordami di chiamare Pedro" senza giorno né ora -->
+        <div class="home-hero-oggi home-hero-dafare" id="homeHeroDaFareBox" hidden>
+          <div class="home-hero-oggi-titolo">Da fare <span class="home-hero-dafare-n" id="homeHeroDaFareN"></span></div>
+          <div id="homeHeroDaFareLista"></div>
+        </div>
       </div>
 
       <div class="cantiere-grid">
@@ -4652,7 +4666,7 @@ function mappaImpegno(t){
   return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
 }
 function mappaAppunto(a){
-  return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null };
+  return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null, daFare:!!a.da_fare, fattoIl:a.fatto_il || null };
 }
 
 /* Carica i dati veri di un utente già registrato, sostituendo il contenuto
@@ -4742,8 +4756,9 @@ async function aggiornaDatiToccati(azioni){
       /* Ha solo trovato un cliente già esistente (es. per collegarci una
          foto): non ha scritto nulla, non c'è niente da riallineare. */
     } else if(a.tool === "crea_appunto"){
-      cantiereAppunti.push({ id:a.esito.id, testo:a.esito.testo, created:new Date().toISOString(), clientId:a.esito.client_id || null });
+      cantiereAppunti.push({ id:a.esito.id, testo:a.esito.testo, created:new Date().toISOString(), clientId:a.esito.client_id || null, daFare:!!a.esito.da_fare, fattoIl:null });
       ricordaAppuntoCreato(a.esito.id);
+      renderCantiereAppunti(); // anche la lista "Da fare" in Home
       if(a.esito.appuntamento) toccaChat = true; // la nota è anche nel titolo dell'appuntamento
     } else if(a.tool === "correggi_appunto"){
       const appunto = cantiereAppunti.find(x => x.id === a.esito.id);
@@ -10036,7 +10051,85 @@ function rigaFotoAppunto(f){
   return riga;
 }
 
+/* ===== Da fare (28/09/2026) =====
+   Il tester: "ricordami di chiamare Pedro" senza giorno né ora non lo vuole
+   in calendario ma negli appunti. Sono appunti con da_fare: in Home una
+   lista con la spunta (le ultime 5), negli Appunti la spunta accanto. */
+function appuntiDaFare(){
+  return cantiereAppunti.filter(a => a.daFare && !a.fattoIl).slice().sort((x, y) => String(y.created || "").localeCompare(String(x.created || "")));
+}
+function renderDaFare(){
+  const box = document.getElementById("homeHeroDaFareBox");
+  const lista = document.getElementById("homeHeroDaFareLista");
+  if(!box || !lista) return;
+  const voci = appuntiDaFare();
+  box.hidden = !voci.length;
+  document.getElementById("homeHeroDaFareN").textContent = voci.length > 1 ? voci.length : "";
+  lista.innerHTML = "";
+  voci.slice(0, 5).forEach(a => {
+    const riga = document.createElement("div");
+    riga.className = "home-hero-oggi-riga";
+    const segno = document.createElement("span");
+    segno.className = "home-hero-oggi-check cliccabile";
+    segno.setAttribute("role", "button");
+    segno.setAttribute("aria-label", "Segna come fatto");
+    segno.addEventListener("click", () => segnaAppuntoFatto(a));
+    const testo = document.createElement("span");
+    testo.textContent = a.testo;
+    testo.addEventListener("click", () => modificaAppuntoInCard(a));
+    riga.appendChild(segno); riga.appendChild(testo);
+    lista.appendChild(riga);
+  });
+  if(voci.length > 5){
+    const altri = document.createElement("button");
+    altri.type = "button"; altri.className = "home-hero-dafare-altri";
+    altri.textContent = "Altre " + (voci.length - 5) + " negli Appunti →";
+    altri.addEventListener("click", () => navigateTo("cantiere-appunti"));
+    lista.appendChild(altri);
+  }
+}
+function segnaAppuntoFatto(a){
+  a.fattoIl = new Date().toISOString();
+  if(isDbReady() && a.id) dbUpdate("cantiere_appunti", a.id, { fatto_il: a.fattoIl });
+  renderCantiereAppunti();
+  showAIToastConAnnulla("Fatto", "«" + escapeHtml(a.testo) + "»: segnato come fatto.", () => rimettiAppuntoDaFare(a, true));
+}
+function rimettiAppuntoDaFare(a, silenzioso){
+  a.fattoIl = null;
+  if(isDbReady() && a.id) dbUpdate("cantiere_appunti", a.id, { fatto_il: null });
+  renderCantiereAppunti();
+}
+
+/* "Ricordami di chiamare Pedro" senza nessun quando: subito negli appunti da
+   fare, senza AI. Con un giorno, un'ora o una parola di tempo anche vaga
+   ("stasera", "più tardi", "la settimana prossima") o con un cliente
+   nominato decide l'AI come sempre (calendario, o appunto sul cliente). */
+const TRIGGER_DA_FARE = /^(?:(?:ehi\s+)?eon\s*,?\s+)?(?:mi\s+)?(?:ricordami|ricordati|ricordarmi|ricorda|promemoria|da\s+fare)\s*(?:di\s+|che\s+(?:devo\s+)?|:\s*|-\s*)?(.+)$/i;
+const TEMPO_VAGO = /\b(stasera|stamattina|stamani|stanotte|mattina|mattinata|pomeriggio|sera|serata|mezzogiorno|mezzanotte|alle\s+\d|all'\s*\d|verso\s+le|fra\s|tra\s+(?:un|una|\d|poco|mezz)|più\s+tardi|piu\s+tardi|dopo|prima\s+(?:di|che)|entro|settimana|mese|prossim[oaie]|weekend|fine\s+settimana|gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|\d)/i;
+function capisciDaFare(testo){
+  const t = String(testo || "").trim().replace(/[.!?]+$/, "");
+  const m = t.match(TRIGGER_DA_FARE);
+  if(!m || RIFERIMENTO_TEMPO.test(t) || TEMPO_VAGO.test(t)) return null;
+  const cosa = m[1].trim();
+  if(cosa.length < 3) return null;
+  return cosa.charAt(0).toUpperCase() + cosa.slice(1);
+}
+async function provaDaFareImmediato(testo){
+  const cosa = capisciDaFare(testo);
+  if(!cosa || nominaUnCliente(testo) || !isDbReady()) return false;
+  const creato = await dbInsert("cantiere_appunti", { testo: cosa, da_fare: true });
+  if(!creato) return false; // l'AI ci riprova come sempre
+  const nuovo = { id: creato.id, testo: creato.testo, created: creato.created_at, clientId: null, daFare: true, fattoIl: null };
+  cantiereAppunti.push(nuovo);
+  aggiornaCantiereSottotitoli();
+  renderCantiereAppunti();
+  ricordaAppuntoCreato(nuovo.id);
+  showAIToastConAnnulla("Da fare", "«" + escapeHtml(cosa) + "»: negli appunti, in Home.", async () => { await cancellaAppuntiSenzaAvviso([nuovo]); });
+  return true;
+}
+
 function renderCantiereAppunti(){
+  renderDaFare();
   const wrap = document.getElementById("cantiereAppuntiLista");
   const fotoAppunti = cantiereFoto.filter(eFotoDiAppunti);
   document.getElementById("cantiereAppuntiCount").textContent = cantiereAppunti.length + fotoAppunti.length;
@@ -10053,7 +10146,15 @@ function renderCantiereAppunti(){
     if(v.tipo === "foto"){ wrap.appendChild(rigaFotoAppunto(v.f)); return; }
     const a = v.a;
     const riga = document.createElement("div");
-    riga.className = "cantiere-appunto";
+    riga.className = "cantiere-appunto" + (a.daFare && a.fattoIl ? " fatto" : "");
+    if(a.daFare){
+      const check = document.createElement("button");
+      check.type = "button"; check.className = "cantiere-appunto-check";
+      check.setAttribute("aria-label", a.fattoIl ? "Segna come da fare" : "Segna come fatto");
+      check.innerHTML = a.fattoIl ? '<svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' : "";
+      check.addEventListener("click", () => a.fattoIl ? rimettiAppuntoDaFare(a) : segnaAppuntoFatto(a));
+      riga.appendChild(check);
+    }
 
     const corpo = document.createElement("div");
     corpo.style.cssText = "flex:1; min-width:0; cursor:pointer;";
@@ -11083,31 +11184,39 @@ function capisciSegnaFatto(testo){
     || n.match(/^(?:segna(?:mi)?|metti|mettimi)\s+(.+?)\s+(?:come\s+)?(?:fatto|fatta|finito|finita|completato|completata)$/)
     || n.match(/^(?:finito|fatto|completato)\s+(.+)$/)
     || n.match(/^(.+?)\s+(?:e\s+)?(?:fatto|fatta|fatti|finito|finita|completato|completata)$/);
-  if(!m) return null;
-  const parole = m[1].split(" ").filter(p => p && !PAROLE_VUOTE_FATTO.test(p));
+  // "Ho chiamato Pedro", "ho comprato il silicone": il verbo stesso dice cosa è fatto (28/09/2026)
+  const conVerbo = !m && n.match(/^(?:ho|abbiamo)\s+(?:appena\s+|gia\s+)?((?:chiamat|sentit|comprat|mandat|inviat|preparat|pagat|portat|ritirat|spedit|prenotat|ordinat)\w*\s+.+)$/);
+  const resto = m ? m[1] : conVerbo ? conVerbo[1] : null;
+  if(!resto) return null;
+  const parole = resto.split(" ").filter(p => p && !PAROLE_VUOTE_FATTO.test(p));
   return parole.length ? parole : null;
 }
 function stessaParola(a, b){
   if(a === b) return true;
   // "sopralluogo"/"sopralluoghi", "chiamata"/"chiamate"
-  return a.length >= 4 && b.length >= 4 && a.slice(0, -1) === b.slice(0, -1);
+  if(a.length >= 4 && b.length >= 4 && a.slice(0, -1) === b.slice(0, -1)) return true;
+  // Stessa radice: "chiamare"/"chiamato"/"chiamata", "comprare"/"comprato"
+  let comune = 0;
+  while(comune < a.length && comune < b.length && a[comune] === b[comune]) comune++;
+  return a.length >= 5 && b.length >= 5 && comune >= Math.max(5, Math.min(a.length, b.length) - 2);
 }
 function provaSegnaFatto(testo){
   const parole = capisciSegnaFatto(testo);
   if(!parole) return false;
-  const trovati = tasks.filter(t => t.status !== "done" && t.status !== "annullato" && t.title && (() => {
-    const titolo = normalizzaComando(t.title).split(" ");
-    return parole.every(p => titolo.some(w => stessaParola(p, w)));
-  })());
+  const corrisponde = (frase) => { const w = normalizzaComando(frase).split(" "); return parole.every(p => w.some(x => stessaParola(p, x))); };
+  // Impegni del calendario ancora da fare e appunti "da fare" non spuntati
+  const trovati = tasks.filter(t => t.status !== "done" && t.status !== "annullato" && t.title && corrisponde(t.title))
+    .map(t => ({ titolo: t.title, quando: t.time ? quandoBreve(t.time) : "", segna: () => segnaImpegnoFatto(t) }))
+    .concat(appuntiDaFare().filter(a => corrisponde(a.testo)).map(a => ({ titolo: a.testo, quando: "da fare", segna: () => segnaAppuntoFatto(a) })));
   if(!trovati.length) return false;
-  if(trovati.length === 1){ segnaImpegnoFatto(trovati[0]); return true; }
+  if(trovati.length === 1){ trovati[0].segna(); return true; }
   const corpo = document.createElement("div");
   corpo.className = "sc-lista";
-  trovati.slice(0, 6).forEach(t => {
+  trovati.slice(0, 6).forEach(v => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "sc-riga fatto-scelta";
-    b.innerHTML = '<span class="sc-riga-punto"></span><span class="sc-riga-testo">' + escapeHtml(t.title) + '</span><span class="sc-riga-quando">' + escapeHtml(t.time ? quandoBreve(t.time) : "") + '</span>';
-    b.addEventListener("click", () => { chiudiRisorsaCard(); segnaImpegnoFatto(t); });
+    b.innerHTML = '<span class="sc-riga-punto"></span><span class="sc-riga-testo">' + escapeHtml(v.titolo) + '</span><span class="sc-riga-quando">' + escapeHtml(v.quando) + '</span>';
+    b.addEventListener("click", () => { chiudiRisorsaCard(); v.segna(); });
     corpo.appendChild(b);
   });
   apriRisorsaCard("Quale hai finito?", corpo);
@@ -12607,6 +12716,7 @@ function nominaUnCliente(testo){
   return maiuscole.some(w => clients.some(c => normalizzaComando(c.name).split(" ").includes(w)));
 }
 async function provaAppuntoImmediato(testo){
+  if(await provaDaFareImmediato(testo)) return true;
   const appunti = estraiAppunti(testo); // null se non è un appunto, o se ha un orario/data (resta all'AI: potrebbe essere un impegno)
   if(!appunti) return false;
   if(nominaUnCliente(testo)) return false;

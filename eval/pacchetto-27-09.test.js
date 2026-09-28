@@ -510,6 +510,50 @@ async function main() {
     await page.unroute("**/api?action=assistant");
     await page.evaluate(() => { chiudiRisorsaCard(); currentSession = window.__sessionePrima; });
 
+    /* ---- "Ricordami di chiamare Pedro": senza giorno né ora negli appunti da fare (28/09/2026) ---- */
+    const daFare = await page.evaluate(() => {
+      const r = {};
+      r.senzaQuando = capisciDaFare("Ricordami di chiamare Pedro") === "Chiamare Pedro" && capisciDaFare("ricordati che devo comprare il silicone.") === "Comprare il silicone";
+      r.conQuando = ["ricordami domani di chiamare Pedro", "ricordami alle 10 di chiamare Pedro", "ricordami stasera di chiamare Pedro", "ricordami la settimana prossima di chiamare Pedro", "ricordami più tardi di chiamare Pedro", "ricordami il 3 di pagare"].every((f) => capisciDaFare(f) === null);
+      r.mappa = mappaAppunto({ id: "x", testo: "t", created_at: "2026-09-28", da_fare: true, fatto_il: null }).daFare === true;
+      return r;
+    });
+    verifica("\"ricordami di…\" senza quando = da fare; con un giorno, un'ora o \"stasera/più tardi\" no (decide l'AI → calendario)", Object.values(daFare).every(Boolean), JSON.stringify(daFare));
+    await page.evaluate(() => {
+      chiudiRisorsaCard(); navigateTo("home"); document.getElementById("aiToastContainer").innerHTML = "";
+      cantiereAppunti.splice(0, cantiereAppunti.length); tasks.splice(0, tasks.length); renderCantiereAppunti();
+      window.__scritture.length = 0;
+    });
+    await nascondiGuide();
+    await page.fill("#homeHeroCampo", "Ricordami di chiamare Pedro");
+    await page.click("#homeHeroSend");
+    await page.waitForTimeout(250);
+    const salvatoDaFare = await page.evaluate(() => ({
+      insert: window.__scritture.filter((w) => w.tipo === "insert").map((w) => ({ tabella: w.tabella, riga: w.riga })),
+      box: !document.getElementById("homeHeroDaFareBox").hidden,
+      lista: document.getElementById("homeHeroDaFareLista").textContent,
+      toast: document.getElementById("aiToastContainer").textContent,
+    }));
+    verifica("detto in Home: salvato negli appunti come da fare (niente calendario), lista \"Da fare\" in Home", salvatoDaFare.insert.length === 1 && salvatoDaFare.insert[0].tabella === "cantiere_appunti" && salvatoDaFare.insert[0].riga.da_fare === true && salvatoDaFare.insert[0].riga.testo === "Chiamare Pedro" && salvatoDaFare.box && /Chiamare Pedro/.test(salvatoDaFare.lista) && /Da fare/.test(salvatoDaFare.toast), JSON.stringify(salvatoDaFare));
+    await page.click("#homeHeroDaFareLista .home-hero-oggi-check");
+    const spuntato = await page.evaluate(() => ({ update: window.__scritture.filter((w) => w.tipo === "update" && w.tabella === "cantiere_appunti").map((w) => w.patch), nascosto: document.getElementById("homeHeroDaFareBox").hidden }));
+    verifica("spunta in Home: fatto (data salvata), la lista sparisce", spuntato.update.length === 1 && !!spuntato.update[0].fatto_il && spuntato.nascosto, JSON.stringify(spuntato));
+    const conVoce = await page.evaluate(async () => {
+      const r = {};
+      document.getElementById("aiToastContainer").innerHTML = "";
+      const a = cantiereAppunti[0]; rimettiAppuntoDaFare(a);
+      r.ancoraDaFare = !document.getElementById("homeHeroDaFareBox").hidden;
+      r.hoChiamato = provaComandiSemplici("ho chiamato Pedro", false) && !!a.fattoIl;
+      rimettiAppuntoDaFare(a);
+      r.hoFinito = provaComandiSemplici("ho finito di chiamare Pedro", false) && !!a.fattoIl;
+      navigateTo("cantiere-appunti");
+      r.spuntaNegliAppunti = !!document.querySelector("#cantiereAppuntiLista .cantiere-appunto.fatto .cantiere-appunto-check");
+      r.conClienteAllAI = await provaDaFareImmediato("ricordami di chiamare Rita Ambrosini") === false;
+      navigateTo("home");
+      return r;
+    });
+    verifica("\"ho chiamato Pedro\" / \"ho finito di chiamare Pedro\" lo spuntano; negli Appunti c'è la spunta; con un cliente decide l'AI", Object.values(conVoce).every(Boolean), JSON.stringify(conVoce));
+
     /* ---- Modifica di un appunto nella card ---- */
     const appunto = await page.evaluate(() => {
       window.__scritture.length = 0;
