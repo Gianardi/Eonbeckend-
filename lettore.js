@@ -47,7 +47,8 @@
   /* ---------------- Pulizia ---------------- */
   /* Cortesie e riempitivi ai bordi: "eon, per favore mi puoi fare…" = "fare…" */
   const INIZIO_CORTESIA = /^(?:(?:ehi|hey|ok|okay|allora|dunque|ascolta)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?(?:(?:mi\s+)?(?:puoi|potresti|riesci\s+a|riusciresti\s+a|vorrei\s+che\s+tu)\s+)?/i;
-  const FINE_CORTESIA = /\s*,?\s*(?:per\s+favore|perfavore|per\s+cortesia|grazie(?:\s+mille)?|eon)\s*[.!]*$/i;
+  // "…, eon" solo con la virgola: "aggiungi cartella EON" è il nome della cartella
+  const FINE_CORTESIA = /\s*,?\s*(?:per\s+favore|perfavore|per\s+cortesia|grazie(?:\s+mille)?)\s*[.!]*$|\s*,\s*eon\s*[.!]*$/i;
   /* "Guarda se ho impegni sabato" = domanda "ho impegni sabato?" */
   const INIZIO_DOMANDA = /^(?:(?:mi\s+)?(?:guardi|guarda|controlla|controlli|vedi|verifica|verifichi|dimmi|mi\s+dici|mi\s+sai\s+dire|sai|fammi\s+sapere)\s+(?:un\s+po\s+)?(?:se|quanto|quanti|quante|chi|cosa|quando|che)\b\s*)/i;
 
@@ -344,6 +345,8 @@
       /* Una domanda che chiede un giudizio ("è pesante?", "conviene?",
          "cosa mi consigli?") non è solo un dato: la fa l'AI */
       const giudizio = /\b(?:pesante|pesanti|leggera|tranquill[ao]|conviene|convien\w*|consigl\w*|secondo\s+te|meglio|peggio|perche|come\s+mai|dovrei|potrei|riesco|faccio\s+in\s+tempo|ce\s+la\s+faccio|organizz\w*|priorit\w*|spieg\w*|pensi|credi)\b/.test(n);
+      const cartDom = trovaCartella(pp, ctx.cartelle, usate);
+      if (cartDom && !giudizio && (!tema || tema === "agenda")) return { ...base, domanda: true, azione: "dati", tema: "cartella", cartella: cartDom.cartella, quando };
       if (tema && !giudizio) {
         const cl = trovaCliente(pp, ctx.clienti, usate);
         return { ...base, domanda: true, azione: "dati", tema, quando, cliente: cl.stato === "trovato" ? cl.cliente : null };
@@ -442,6 +445,20 @@
         importo: importo !== null && ivaInclusa ? Math.round(importo / 1.22 * 100) / 100 : importo, ivaInclusa,
         lavoro: dubbio ? "" : maiuscola(lavoro), dubbio, invio, quando, manca: dubbio ? manca.filter((x) => x !== "cliente") : manca,
       };
+    }
+
+    /* Un pagamento RICEVUTO: "Rita ha pagato 1.200", "segna 500 euro pagati
+       da Rita", "ho incassato 300 da Bianchi" ("ho pagato il fornitore" è
+       un pagamento tuo: non è questo) */
+    const ricevuto = /\b(?:ha|hanno)\s+(?:gia\s+)?(?:pagato|saldato|versato|fatto\s+il\s+bonifico|dato)\b|\b(?:pagat[oiae]|saldat[oiae]|incassat[oiae]|ricevut[oiae]|versat[oiae])\s+(?:da|dal|dalla)\b|^(?:ho|abbiamo)\s+(?:incassato|ricevuto|preso)\b|^(?:incassati|incassato|ricevuti|ricevuto)\b|\bmi\s+ha\s+(?:pagato|dato|saldato)\b/;
+    if (ricevuto.test(n) && !/^(?:ho|abbiamo)\s+pagato\b/.test(n) && !q.ora) {
+      pp.forEach((x, i) => { if (/^(?:ha|hanno|mi|ho|abbiamo|gia|pagato|pagati|pagata|pagate|saldato|saldata|versato|versati|incassato|incassati|ricevuto|ricevuti|preso|dato|fatto|il|bonifico|da|dal|dalla|segna|segnami|registra|che|euro|di|tutto|tutti|saldo)$/.test(x.n)) usate.add(i); });
+      const importi = trovaImporto(pp, new Set());
+      const importo = importi.length === 1 ? importi[0].valore : null;
+      if (importi.length === 1) importi[0].usate.forEach((i) => usate.add(i));
+      const cl = trovaCliente(pp, ctx.clienti, usate, { nomeSolo: true });
+      return { ...base, azione: "incasso", importo, cliente: cl.stato === "trovato" ? cl.cliente : null, clienteSimile: cl.stato === "simile" ? cl.cliente : null,
+        candidati: cl.stato === "ambiguo" ? cl.candidati : null, nomeDetto: cl.stato === "nessuno" ? (nomeDopoA(pp, new Set()) || null) : null, quando };
     }
 
     /* Più comandi in una frase: ognuno letto da solo */
@@ -616,7 +633,15 @@
     return { cliente, clienteNuovo, clienteSimile, candidati, nota: nota.length >= 2 ? maiuscola(nota) : "" };
   }
 
-  const EonLettore = { leggi, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  /* Solo le cortesie ai bordi ("eon …", "… grazie"), il resto com'è (anche il "?"): per tutte le funzioni dell'app */
+  function togliCortesie(testo) {
+    const t = String(testo || "").trim();
+    const fine = (t.match(/[?!.]+$/) || [""])[0];
+    let x = t.slice(0, t.length - fine.length).trim(), prima;
+    do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
+    return x ? x + fine.replace(/[.!]+/, "") : t;
+  }
+  const EonLettore = { leggi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

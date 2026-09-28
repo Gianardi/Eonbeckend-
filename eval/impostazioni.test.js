@@ -67,7 +67,7 @@ async function main() {
 
     await page.evaluate(() => navigateTo("impostazioni"));
     const voci = await page.evaluate(() => [...document.querySelectorAll("#page-impostazioni > .azienda-list > .azienda-link-card .module-title")].map((e) => e.textContent));
-    verifica("card: Account, Profilo, Sicurezza, Face ID (solo sui telefoni che lo hanno), Aiuto, Privacy e dati, Esci, Elimina account", JSON.stringify(voci) === '["Account","Profilo","Sicurezza","Face ID","Prova come…","Aiuto","Privacy e dati","Esci","Elimina account"]' /* "Prova come…" è nella pagina ma nascosta a chi non è fondatore: vedi prova-fondatore-app */, JSON.stringify(voci));
+    verifica("card: Account, Profilo, Sicurezza, Face ID (solo sui telefoni che lo hanno), Promemoria, Aiuto, Privacy e dati, Esci, Elimina account", JSON.stringify(voci) === '["Account","Profilo","Sicurezza","Face ID","Promemoria","Prova come…","Aiuto","Privacy e dati","Esci","Elimina account"]' /* "Prova come…" è nella pagina ma nascosta a chi non è fondatore: vedi prova-fondatore-app */, JSON.stringify(voci));
     verifica("sotto \"Account\": email e professione", (await page.textContent("#impAccountSotto")) === "andrea@esempio.it · Edile", await page.textContent("#impAccountSotto"));
     if (process.env.SCREEN_IMPOSTAZIONI) await page.screenshot({ path: process.env.SCREEN_IMPOSTAZIONI, fullPage: true });
     await page.click("#impVoceAccount");

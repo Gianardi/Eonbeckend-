@@ -126,6 +126,18 @@ const NON_SBAGLIARE = [
   ["mi dai il permesso di costruire", { azione: "comando" }],
   ["mi puoi mandare il durc", { azione: "doc_impresa" }],
   ["Scrivi a Machi domani alle 10", { azione: "impegno", ora: "10:00" }], // promemoria per Andrea, deciso il 28/09
+  // Incassi (29/09): pagamenti ricevuti, non quelli fatti da te
+  ["Rita ha pagato 1.200", { azione: "incasso", cliente: "c2", importo: 1200 }],
+  ["segna 500 euro pagati da Rita", { azione: "incasso", cliente: "c2", importo: 500 }],
+  ["ho incassato 300 da Machi Alessia", { azione: "incasso", cliente: "c1", importo: 300 }],
+  ["Bianchi mi ha dato 200 euro", { azione: "incasso", cliente: "c8", importo: 200 }],
+  ["Rita ha pagato", { azione: "incasso", cliente: "c2", importo: null }],
+  ["ho pagato il fornitore 300", { azione: /^(?:mente|comando)$/ }],
+  ["devo pagare la bolletta", { azione: "mente", daFare: true }],
+  // Le cartelle nelle domande
+  ["cosa c'è in Fornitori?", { azione: "dati", tema: "cartella", cartella: "k2" }],
+  ["aggiungi cartella EON", { azione: "comando" }], // "EON" qui è il nome della cartella, non un saluto
+  ["cosa devo fare per Lerici?", { azione: "dati", tema: "cartella", cartella: "k1" }],
   ["scrivi a Rita Ambrosini che domani alle 10 arrivo", { azione: "messaggio", cliente: "c2", messaggio: "Domani alle 10 arrivo." }],
 ];
 NON_SBAGLIARE.forEach(([f, a]) => prova(f, a, "da non sbagliare"));

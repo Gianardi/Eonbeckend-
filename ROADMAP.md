@@ -253,6 +253,44 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
 
+### 0b.11 Utente virtuale per ogni professione, promemoria, incassi, cartelle — FATTO il 29/09 (sera)
+- **Utente virtuale per ogni professione** (`eval/utente-virtuale-mestieri.test.js`):
+  edile, idraulico, elettricista, amministratore e "Altra attività", circa
+  **170 frasi a testa** (848 in tutto) con i SUOI clienti, le sue parole e le
+  sue funzioni (SAL, urgenze, DiCo, assemblee, cartelle), scritte anche di
+  fretta ("eon … grazie", "per favore …"). Passano dall'**app vera e dal
+  server vero** (database e AI finti): **848 su 848 fatte col codice**, con
+  l'effetto giusto. Ha trovato e fatto sistemare 7 difetti veri:
+  - "domani alle 8 getto del solaio da Rossi" (la frase d'esempio dell'edile!)
+    andava alla piccola AI: ora il server usa la lettura dell'app;
+  - "impianto **foto**voltaico" scartato perché conteneva "foto";
+  - "alle 21" e "giovedì" con l'accento non visti dalla Mente (finivano negli
+    appunti invece che in calendario);
+  - le cortesie ("eon … grazie") facevano sfuggire SAL, DiCo, assemblee;
+  - un comando nuovo detto entro 90 secondi da una domanda di EON era preso
+    come risposta: ora, se è chiaramente nuovo, riparte da capo;
+  - "Neri mi ha detto che…" andava all'AI: ora è un appunto nella scheda;
+  - titolo "Da Francesca Neri per cappotto termico **da**".
+- **Promemoria sul telefono** (Impostazioni → Promemoria, oppure "Vuoi un
+  avviso prima?" una sola volta dopo il primo impegno): **30 minuti prima di
+  ogni impegno con l'ora arriva una notifica vera**, anche con EON chiusa.
+  Android sì; **iPhone solo con EON aggiunta alla schermata Home** (iOS 16.4+:
+  è una regola di Apple), altrimenti EON spiega come fare. Tecnica: notifiche
+  web (standard, cifrate e firmate, senza librerie), "orologio" sul database
+  (pg_cron ogni 5 minuti, già acceso in produzione), niente doppioni, i
+  telefoni spariti si tolgono da soli. **Non provato con un telefono vero**:
+  la cifratura è provata "dal lato del telefono" con codice scritto a parte,
+  ma la consegna vera (Apple/Google) si vede solo dopo il merge → **da provare
+  con Andrea**.
+- **Incassi col codice**: "Rita ha pagato 1.200", "segna 500 euro pagati da
+  Rita", "ho incassato 300 da Bianchi": l'incasso in sospeso diventa
+  incassato; se l'importo è minore chiede "è un acconto?" (resta il resto);
+  più incassi in sospeso → quale?; nessuno → ne registra uno nuovo.
+- **Cartelle**: "cosa c'è in Fornitori?", "cosa devo fare per Lerici?" aprono
+  la cartella col codice; l'AI ora le conosce (legge una cartella, scrive
+  "segna in Fornitori…" nella cartella giusta) — con l'AI vera **non provato**
+  (serve il credito).
+
 ### 0b.10 Il lettore unico: quasi tutto col codice, come le grandi app — FATTO il 29/09
 Andrea (29/09, dopo una sera di prove in cui "non funzionava niente"): "non
 possiamo dire per ogni cosa cosa deve fare EON… principio logico e non
@@ -304,8 +342,8 @@ sistema IF… agisci come AD".
   WhatsApp si aprono pronti, l'invio lo tocca Andrea (l'invio automatico
   vuole l'account email, sezione 1). Il messaggio "Ciao Rita, …" parte nella
   chat di EON (come "di' a Rita che…").
-- **Prossimi (deciso il 29/09)**: promemoria degli appuntamenti; cartelle
-  capite dall'AI; **Mente-cervello** al posto di Cresci nel menu (Cresci va in
+- **Prossimi (deciso il 29/09)**: ~~promemoria degli appuntamenti; cartelle
+  capite dall'AI~~ (fatti, 0b.11); **Mente-cervello** al posto di Cresci nel menu (Cresci va in
   Menu): pagina "cervello" con riassunto, gruppi collegati e "EON ti conosce
   al X%" — prima le simulazioni; **Squadra del cantiere** (direzione lavori:
   persone coinvolte, ordini a uno o a tutti) — prima la versione semplice,

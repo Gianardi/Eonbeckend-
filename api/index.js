@@ -1,4 +1,4 @@
-import { createHmac, createHash, createPublicKey, randomBytes, timingSafeEqual, verify as cryptoVerify } from "node:crypto";
+import { createHmac, createHash, createPublicKey, createPrivateKey, createECDH, createCipheriv, randomBytes, timingSafeEqual, sign as cryptoSign, verify as cryptoVerify } from "node:crypto";
 /**
  * ============================================================
  * EON — Backend completo (file unico)
@@ -769,6 +769,118 @@ async function assicuraChatDelCliente(cliente, ctx) {
   }
 }
 
+/* ============================================================
+   Promemoria sul telefono (29/09/2026): notifiche web push
+   ------------------------------------------------------------
+   Come WhatsApp: 30 minuti prima di un impegno con l'ora arriva la
+   notifica, anche ad app chiusa (Android; iPhone con EON aggiunta alla
+   schermata Home, iOS 16.4+). Lo standard (RFC 8291 e 8292) scritto con
+   node:crypto, senza librerie: la notifica è cifrata per quel telefono
+   (aes128gcm) e firmata con la chiave VAPID di EON. L'orologio è pg_cron
+   sul database, che ogni 5 minuti chiama action=invia_promemoria con un
+   segreto (tabella eon_segreti, solo chiave di servizio).
+   Nel database le ore sono "ora di Roma" scritta come UTC (18:00+00 =
+   le 18 a Roma): si confrontano con l'ora di Roma di adesso, scritta uguale. */
+const b64u = (buf) => Buffer.from(buf).toString("base64url");
+const hmac256 = (chiave, dati) => createHmac("sha256", chiave).update(dati).digest();
+const hkdfUno = (prk, info, lunghezza) => hmac256(prk, Buffer.concat([info, Buffer.from([1])])).subarray(0, lunghezza);
+export function cifraWebPush(testo, p256dh, auth, prova) {
+  const pubTelefono = Buffer.from(p256dh, "base64url");
+  const segretoAuth = Buffer.from(auth, "base64url");
+  if (pubTelefono.length !== 65 || segretoAuth.length < 16) throw new Error("Iscrizione non valida");
+  const ecdh = createECDH("prime256v1");
+  if (prova && prova.privata) ecdh.setPrivateKey(prova.privata); else ecdh.generateKeys();
+  const pubServer = ecdh.getPublicKey();
+  const ikm = hkdfUno(hmac256(segretoAuth, ecdh.computeSecret(pubTelefono)), Buffer.concat([Buffer.from("WebPush: info\0"), pubTelefono, pubServer]), 32);
+  const sale = (prova && prova.sale) || randomBytes(16);
+  const prk = hmac256(sale, ikm);
+  const chiave = hkdfUno(prk, Buffer.from("Content-Encoding: aes128gcm\0"), 16);
+  const nonce = hkdfUno(prk, Buffer.from("Content-Encoding: nonce\0"), 12);
+  const c = createCipheriv("aes-128-gcm", chiave, nonce);
+  const cifrato = Buffer.concat([c.update(Buffer.concat([Buffer.from(testo), Buffer.from([2])])), c.final(), c.getAuthTag()]);
+  const rs = Buffer.alloc(4); rs.writeUInt32BE(4096);
+  return Buffer.concat([sale, rs, Buffer.from([pubServer.length]), pubServer, cifrato]);
+}
+export function firmaVapid(endpoint, jwk, adesso) {
+  const intestazione = b64u(JSON.stringify({ typ: "JWT", alg: "ES256" }));
+  const corpo = b64u(JSON.stringify({ aud: new URL(endpoint).origin, exp: Math.floor((adesso || Date.now()) / 1000) + 12 * 3600, sub: "https://eonbeckend.vercel.app" }));
+  const firma = cryptoSign("sha256", Buffer.from(intestazione + "." + corpo), { key: createPrivateKey({ key: jwk, format: "jwk" }), dsaEncoding: "ieee-p1363" });
+  return intestazione + "." + corpo + "." + b64u(firma);
+}
+const chiavePubblicaVapid = (jwk) => b64u(Buffer.concat([Buffer.from([4]), Buffer.from(jwk.x, "base64url"), Buffer.from(jwk.y, "base64url")]));
+async function mandaNotifica(iscrizione, messaggio, jwk) {
+  const corpo = cifraWebPush(JSON.stringify(messaggio), iscrizione.p256dh, iscrizione.auth);
+  const r = await fetch(iscrizione.endpoint, {
+    method: "POST",
+    headers: { "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", TTL: "1800", Urgency: "high",
+      Authorization: `vapid t=${firmaVapid(iscrizione.endpoint, jwk)}, k=${chiavePubblicaVapid(jwk)}` },
+    body: corpo,
+  });
+  return r.status;
+}
+function adessoARomaComeUtc(adesso) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Rome", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    .formatToParts(adesso || new Date()).map((x) => [x.type, x.value]));
+  return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
+}
+const MINUTI_PRIMA = 30;
+async function handleInviaPromemoria(req, res) {
+  const segreti = await servizio("eon_segreti?select=nome,valore&nome=in.(cron_promemoria,vapid_jwk)", { method: "GET" });
+  const segreto = (segreti || []).find((x) => x.nome === "cron_promemoria");
+  const detto = Buffer.from(String(req.headers["x-eon-cron"] || ""));
+  if (!segreto || detto.length !== Buffer.byteLength(segreto.valore) || !timingSafeEqual(detto, Buffer.from(segreto.valore))) throw fail("Non autorizzato", 403);
+  const jwk = JSON.parse((segreti.find((x) => x.nome === "vapid_jwk") || {}).valore || "null");
+  if (!jwk) throw fail("Chiave delle notifiche mancante", 500);
+  const adesso = adessoARomaComeUtc();
+  const da = adesso.toISOString(), a = new Date(adesso.getTime() + (MINUTI_PRIMA + 5) * 60000).toISOString();
+  const [impegni, appuntamenti] = await Promise.all([
+    servizio(`tasks?select=id,owner_id,title,time,scheduled_at&deleted_at=is.null&status=neq.done&scheduled_at=gt.${encodeURIComponent(da)}&scheduled_at=lte.${encodeURIComponent(a)}&limit=500`, { method: "GET" }),
+    servizio(`messages?select=id,title,scheduled_at,conversations!inner(owner_id)&event_type=eq.appt&deleted_at=is.null&scheduled_at=gt.${encodeURIComponent(da)}&scheduled_at=lte.${encodeURIComponent(a)}&limit=500`, { method: "GET" }),
+  ]);
+  const voci = [
+    // Solo gli impegni con l'ora (quelli "da fare domani" hanno 00:00 e nessuna ora)
+    ...(impegni || []).filter((t) => /\d{1,2}:\d{2}/.test(t.time || "")).map((t) => ({ rif: "tasks:" + t.id, owner: t.owner_id, titolo: t.title, quando: t.scheduled_at })),
+    ...(appuntamenti || []).filter((m) => m.conversations && !/^❌/.test(m.title || "")).map((m) => ({ rif: "messages:" + m.id, owner: m.conversations.owner_id, titolo: m.title, quando: m.scheduled_at })),
+  ];
+  if (!voci.length) return send(res, 200, { inviati: 0 });
+  const gia = await servizio(`promemoria_inviati?select=rif&rif=in.(${voci.map((v) => encodeURIComponent('"' + v.rif + '"')).join(",")})`, { method: "GET" });
+  const giaFatti = new Set((gia || []).map((x) => x.rif));
+  const daFare = voci.filter((v) => !giaFatti.has(v.rif));
+  if (!daFare.length) return send(res, 200, { inviati: 0 });
+  const owners = [...new Set(daFare.map((v) => v.owner))];
+  const iscrizioni = await servizio(`push_iscrizioni?select=id,owner_id,endpoint,p256dh,auth,errori&owner_id=in.(${owners.join(",")})`, { method: "GET" });
+  let inviati = 0;
+  for (const v of daFare) {
+    const suoi = (iscrizioni || []).filter((x) => x.owner_id === v.owner);
+    if (!suoi.length) continue;
+    const quando = new Date(v.quando);
+    const ora = String(quando.getUTCHours()).padStart(2, "0") + ":" + String(quando.getUTCMinutes()).padStart(2, "0");
+    const minuti = Math.max(1, Math.round((quando - adesso) / 60000));
+    const messaggio = { title: minuti >= 55 ? "Tra un'ora" : "Tra " + minuti + " minuti", body: ora + " · " + String(v.titolo || "Impegno").replace(/\s*\(da confermare\)\s*$/, " (da confermare)"), tag: v.rif, url: "/index.html" };
+    let arrivato = false;
+    for (const isc of suoi) {
+      let stato = 0;
+      try { stato = await mandaNotifica(isc, messaggio, jwk); } catch (e) { stato = 0; }
+      if (stato === 404 || stato === 410) await servizio(`push_iscrizioni?id=eq.${isc.id}`, { method: "DELETE" }).catch(() => {}); // telefono che non c'è più
+      else if (stato >= 200 && stato < 300) { arrivato = true; await servizio(`push_iscrizioni?id=eq.${isc.id}`, { method: "PATCH", body: JSON.stringify({ ultimo_invio: new Date().toISOString(), errori: 0 }), headers: { Prefer: "return=minimal" } }).catch(() => {}); }
+      else await servizio(`push_iscrizioni?id=eq.${isc.id}`, { method: "PATCH", body: JSON.stringify({ errori: (isc.errori || 0) + 1 }), headers: { Prefer: "return=minimal" } }).catch(() => {});
+    }
+    await servizio("promemoria_inviati", { method: "POST", body: JSON.stringify({ rif: v.rif, owner_id: v.owner }), headers: { Prefer: "return=minimal,resolution=ignore-duplicates" } }).catch(() => {});
+    if (arrivato) inviati++;
+  }
+  return send(res, 200, { inviati });
+}
+
+/* Una cartella dell'utente dal nome detto (senza maiuscole, accenti, articoli) */
+async function trovaCartellaPerNome(nomeDetto, ctx) {
+  const righe = await db("cartelle?select=id,nome&deleted_at=is.null&limit=200", { method: "GET" }, ctx.accessToken).catch(() => []);
+  const tutte = Array.isArray(righe) ? righe : [];
+  const chiave = (t) => paroleNormalizzate(String(t || "").replace(/^(?:la\s+)?cartella\s+/i, "")).filter((w) => !["il", "lo", "la", "i", "gli", "le", "l"].includes(w)).join(" ");
+  const cercata = chiave(nomeDetto);
+  const trovata = cercata ? tutte.find((c) => chiave(c.nome) === cercata) || null : null;
+  return { trovata, nomi: tutte.map((c) => c.nome) };
+}
+
 async function trovaOCreaConversazione(cliente, ctx) {
   const filtroNome = filtroNomeConversazione(cliente.name);
   const trovate = await db(`conversations?select=*&${filtroNome}&deleted_at=is.null&limit=1`, { method: "GET" }, ctx.accessToken);
@@ -1247,6 +1359,7 @@ const TOOLS = {
           testo: { type: "string", description: "Il testo dell'appunto, come lo direbbe l'utente" },
           cliente_id: { type: "string", description: "Id del cliente a cui si riferisce l'appunto, se ne nomina uno (trovato con cerca_cliente o da cliente_risolto). Vuoto per un appunto generale." },
           da_fare: { type: "boolean", description: "true se è una cosa da fare (chiamare, comprare, mandare, preparare…) senza giorno né ora: finisce nella lista \"Da fare\" con la spunta. false o assente per una semplice nota." },
+          cartella: { type: "string", description: "Il nome di una CARTELLA dell'utente (es. \"Fornitori\", \"Lerici\") se dice di metterlo lì (\"segna in Fornitori…\", \"nella cartella Lerici…\"). Vuoto altrimenti." },
         },
         required: ["testo"],
       },
@@ -1259,14 +1372,21 @@ const TOOLS = {
         cliente = await trovaProprio("clients", input.cliente_id, ctx);
         if (!cliente) throw fail("Cliente non trovato", 404);
       }
+      // Le cartelle dell'utente (29/09/2026): "segna in Fornitori…"
+      let cartellaId = null;
+      if (eStringaNonVuota(input.cartella)) {
+        const c = await trovaCartellaPerNome(input.cartella, ctx);
+        if (!c.trovata) throw fail(`Cartella "${input.cartella}" non trovata. Le cartelle sono: ${c.nomi.join(", ") || "nessuna"}. Chiedi all'utente quale intende.`);
+        cartellaId = c.trovata.id;
+      }
       const creati = await db(
         "cantiere_appunti",
-        { method: "POST", body: JSON.stringify({ owner_id: ctx.user.id, testo, ...(cliente ? { client_id: cliente.id } : {}), ...(input.da_fare === true ? { da_fare: true } : {}) }), headers: { Prefer: "return=representation" } },
+        { method: "POST", body: JSON.stringify({ owner_id: ctx.user.id, testo, ...(cliente ? { client_id: cliente.id } : {}), ...(cartellaId ? { cartella_id: cartellaId } : {}), ...(input.da_fare === true ? { da_fare: true } : {}) }), headers: { Prefer: "return=representation" } },
         ctx.accessToken
       );
       const a = Array.isArray(creati) ? creati[0] : creati;
       const daFare = input.da_fare === true ? { da_fare: true } : {};
-      if (!cliente) return { id: a.id, testo: a.testo, ...daFare };
+      if (!cliente) return { id: a.id, testo: a.testo, ...daFare, ...(cartellaId ? { cartella: input.cartella.trim() } : {}) };
       // Una cosa da fare ("ricordami di chiamare Rossi") resta nella lista, non nel titolo dei suoi appuntamenti
       if (daFare.da_fare) return { id: a.id, testo: a.testo, cliente: cliente.name, client_id: cliente.id, ...daFare };
       /* Anche sul suo prossimo appuntamento in calendario: la nota nel titolo
@@ -1284,6 +1404,22 @@ const TOOLS = {
         }
       } catch (err) { console.warn("Appunto salvato, appuntamento non aggiornato:", err.message); }
       return { id: a.id, testo: a.testo, cliente: cliente.name, client_id: cliente.id, ...(appuntamento ? { appuntamento } : {}) };
+    },
+  },
+
+  leggi_cartella: {
+    risk: "read",
+    categoria: "risorsa",
+    schema: {
+      name: "leggi_cartella",
+      description: "Legge una CARTELLA dell'utente (es. \"Fornitori\", \"Lerici\", \"Scadenze\"): le note e le cose da fare che contiene. Usalo per domande su una cartella (\"cosa devo fare per Lerici?\", \"cosa ho segnato nei Fornitori questa settimana?\"). Senza nome restituisce l'elenco delle cartelle.",
+      input_schema: { type: "object", properties: { nome: { type: "string", description: "Nome della cartella, come detto dall'utente" } } },
+    },
+    async run(input, ctx) {
+      const c = await trovaCartellaPerNome(input.nome || "", ctx);
+      if (!c.trovata) return { cartelle: c.nomi, nota: eStringaNonVuota(input.nome) ? `Nessuna cartella "${input.nome}"` : undefined };
+      const righe = await db(`cantiere_appunti?select=testo,da_fare,fatto_il,created_at&cartella_id=eq.${c.trovata.id}&deleted_at=is.null&order=created_at.desc&limit=60`, { method: "GET" }, ctx.accessToken);
+      return { cartella: c.trovata.nome, voci: (righe || []).map((r) => ({ testo: r.testo, da_fare: !!r.da_fare && !r.fatto_il, fatto: !!r.fatto_il, quando: r.created_at })) };
     },
   },
 
@@ -3601,7 +3737,8 @@ const MODELLO_RAPIDO = "claude-haiku-4-5";
 const PREFISSO_RACCONTO = "Il professionista ti ha appena raccontato cosa deve fare:";
 const RIFERIMENTO_TEMPO_RAPIDO = /\b(oggi|domani|dopodomani|stasera|stamattina|stanotte|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|alle|ore|fra|tra)\b|\d{1,2}[:.]\d{2}|\d{1,2}\/\d{1,2}/i;
 // Richieste che non sono "segna un impegno": vanno sempre al motore completo, senza nemmeno provare.
-const ESCLUSI_RAPIDO = /fattur|preventiv|messaggi|scrivi|scrivere|manda|invia|foto|document|appunt[oi]\b|cancell|elimin|annull|disdic|cestino|\?/i;
+// "foto" come parola intera: "impianto fotovoltaico" è un lavoro, non una fotografia (29/09/2026)
+const ESCLUSI_RAPIDO = /fattur|preventiv|messaggi|scrivi|scrivere|manda|invia|\bfoto\b|\bfotograf|document|appunt[oi]\b|cancell|elimin|annull|disdic|cestino|\?/i;
 
 const STRUMENTO_LEGGI_IMPEGNO = {
   name: "leggi_impegno",
@@ -3807,6 +3944,23 @@ function leggiImpegnoSenzaAI(testo, ultimo, adesso) {
 
 /* Data/ora nel formato che usa già il resto di EON ("2026-09-26T10:00:00",
    ora locale senza fuso), non troppo nel passato né assurdamente lontana. */
+/* La lettura dell'impegno fatta dal lettore unico dell'app (29/09/2026):
+   giorno, ora, cosa, nome detto. Si usa al posto della piccola AI, dopo
+   averla ricontrollata: giorno e ora validi, e il nome e il titolo fatti
+   di parole che l'utente ha davvero detto (mai fidarsi del client). */
+function letturaImpegnoDallApp(l, testo) {
+  if (!l || typeof l !== "object") return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(l.giorno || "")) || !/^\d{2}:\d{2}$/.test(String(l.ora || ""))) return null;
+  const titolo = String(l.titolo || "").trim().slice(0, 120);
+  if (titolo.length < 3) return null;
+  const detto = new Set(paroleNormalizzate(testo));
+  if (!paroleNormalizzate(titolo).every((w) => detto.has(w))) return null;
+  const nome = String(l.nome || "").trim();
+  if (nome && !paroleNormalizzate(nome).every((w) => detto.has(w))) return null;
+  const tipo = TIPI_IMPEGNO.has(l.tipo) ? l.tipo : "commissione";
+  return { azione: "nuovo", titolo, tipo, quando_iso: `${l.giorno}T${l.ora}:00`, nome_nella_frase: nome, _senzaAI: true, _dallApp: true };
+}
+
 function quandoValido(q) {
   if (typeof q !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(q) || !eIso(q)) return null;
   const t = new Date(q).getTime();
@@ -3918,7 +4072,13 @@ function leggiAppuntamentoDaCliente(testo, adesso) {
   let lavoroSenzaPer = "";
   if (!conMarcatore && !lavoro) {
     const separati = separaLavoroENome(paroleNome, principale);
-    if (separati) { paroleNome = separati.nome; lavoro = lavoroSenzaPer = separati.lavoro.join(" "); }
+    if (separati) {
+      paroleNome = separati.nome;
+      // "cappotto termico da Neri": il "da" davanti al nome non fa parte del lavoro (29/09/2026)
+      const lav = separati.lavoro.slice();
+      while (lav.length && /^(?:da|dal|dalla|di|del|della|a|al|alla|per|presso|casa|con)$/.test(lav[lav.length - 1])) lav.pop();
+      lavoro = lavoroSenzaPer = lav.join(" ");
+    }
   }
   if (!paroleNome.length || paroleNome.length > 3) return null;
   if (!paroleNome.every((p) => p.length >= 2 && /^[a-z'-]+$/.test(p) && !nonNomeApp().has(p))) return null;
@@ -3991,7 +4151,8 @@ async function provaPercorsoRapidoImpegno(body, ctx, user) {
       && paroleNormalizzate(verifica.nome).sort().join(" ") === paroleNormalizzate(lettoDalCodice.nome_nella_frase).sort().join(" ");
     if (!uguale) lettoDalCodice = null; // non è un cliente conosciuto con quel nome esatto: legge la piccola AI
   }
-  const letto = lettoDalCodice || await leggiImpegnoConAI(testo, ultimo, ctx.consumo);
+  const letto = lettoDalCodice || letturaImpegnoDallApp(body.lettura_impegno, testo) || await leggiImpegnoConAI(testo, ultimo, ctx.consumo);
+  if (!lettoDalCodice && letto && letto._dallApp) lettoDalCodice = letto;
   if (!letto || !["nuovo", "correggi_ultimo"].includes(letto.azione)) return null;
   ctx.lettoSenzaAI = !!lettoDalCodice; // per il registro: questa richiesta non ha usato l'AI
   const quando = quandoValido(letto.quando_iso);
@@ -4676,6 +4837,17 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     const totaleTesto = Number(esito.totale).toLocaleString("it-IT", { maximumFractionDigits: 2 });
     const nuovo = azioni[0] && azioni[0].esito && azioni[0].esito.creato ? ` (cliente nuovo)` : "";
     return { azioni, payload: { stato: "concluso", testo: `${esito.titolo} per ${esito.cliente}${nuovo}: €${totaleTesto}`, azioni, focus: { tipo: "cliente", riferimento: esito.cliente } } };
+  }
+  if (comando.azione === "appunto") {
+    // "Conti mi ha detto che paga a fine mese": nella scheda del cliente (e sul suo prossimo appuntamento)
+    if (!eUuid(comando.cliente_id) || !eStringaNonVuota(comando.testo) || comando.testo.length > 600) return null;
+    const input = { testo: comando.testo.trim(), cliente_id: comando.cliente_id, ...(comando.da_fare === true ? { da_fare: true } : {}) };
+    let esito;
+    try { esito = await TOOLS.crea_appunto.run(input, ctx); } catch (err) { return null; }
+    await registraOperazione(user, "crea_appunto", input, esito, "auto");
+    ctx.lettoSenzaAI = true;
+    const azioni = [{ tool: "crea_appunto", esito }];
+    return { azioni, payload: { stato: "concluso", testo: "Fatto.", azioni, focus: { tipo: "cliente", riferimento: esito.cliente } } };
   }
   if (comando.azione === "messaggio") {
     if (!eUuid(comando.cliente_id) || !eStringaNonVuota(comando.testo) || comando.testo.length > 600) return null;
@@ -6619,6 +6791,8 @@ export default async function handler(req, res) {
 
     // Errori dall'app: accettati anche senza login (vedi handleErroreApp)
     if (action === "errore_app") return await handleErroreApp(req, res);
+    // L'orologio del database (ogni 5 minuti): i promemoria in arrivo, col suo segreto
+    if (action === "invia_promemoria") return await handleInviaPromemoria(req, res);
     // Entrare con Face ID: per definizione prima del login
     if (action === "passkey_opzioni_accesso" || action === "passkey_accedi") return await handlePasskeyAccesso(action, req, res);
     // Pagina del cliente: link ai file della sua chat, con il codice del suo link
