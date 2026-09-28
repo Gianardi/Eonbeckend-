@@ -46,6 +46,36 @@ pilastri, altrimenti non si fa.
 
 ---
 
+## Domani si riparte da qui (riepilogo del 29/09/2026, notte)
+
+**Online** (PR #136, #137, #138): urgenze, SAL, DiCo; il lettore unico
+(0b.10); utente virtuale per ogni professione, promemoria, incassi e
+cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
+(200, 23:35 UTC) e c'è già 1 telefono iscritto.
+
+**Da fare per Andrea**
+1. Ricaricare il credito dell'AI (Anthropic) e attivare la ricarica
+   automatica: il 28/09 i "niente" venivano da lì.
+2. Provare un promemoria vero: segnare un impegno tra circa 40 minuti e
+   vedere se arriva l'avviso 30 minuti prima (su iPhone EON deve essere
+   aperta dalla schermata Home).
+
+**Da fare per Claude, in ordine**
+1. Controllare con Andrea il primo promemoria vero (non ancora provato su
+   un telefono vero).
+2. 0b.12 Manuali dell'AI per ogni professione (elettricista, Altra
+   attività, 15 casi di prova per mestiere): serve il credito.
+3. 0b.13 Frasi di esempio e frasi vere (passo 1): serve il credito.
+4. Mente-cervello al posto di Cresci (prima le simulazioni); squadra del
+   cantiere (versione semplice); giro della giornata sulla mappa.
+5. Prima di riaprire le iscrizioni: account email (Resend, Andrea),
+   captcha, tetto di spesa dell'AI.
+6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
+   gestionale dell'amministratore (0b.5), morosità.
+
+Sul ramo `claude/ciao-ipc3fm`, non ancora in una PR: ROADMAP 0b.12 e
+0b.13. Andranno col prossimo pacchetto.
+
 ## 0. Adesso, in quest'ordine (deciso con Andrea, 26/09/2026)
 
 1. **[Claude]** Sistemare i problemi trovati da Andrea nei test del 26/09.
