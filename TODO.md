@@ -4684,7 +4684,16 @@ da fare nel tasto.
   (cestino, appunti di nuovo liberi). Voce: `provaAppuntoInCartella`
   ("segna in Fornitori di …" = da fare; "metti nella cartella X: …" = nota),
   primo passo di `provaAppuntoImmediato`.
+- **Stesse pagine, nomi del mestiere** (Andrea: "se Cantieri si chiama
+  Condomini la funzionalità è la stessa?" — sì): `applicaMestiereHome`
+  cambia anche `pageMeta[...].title` delle 4 pagine (i titoli di sempre
+  salvati in `applicaMestiereHome.titoli`); in `PAGINE_NAVIGABILI_A_VOCE`
+  aggiunti cantieri/interventi/impianti/condomini (→ `cantiere-cliente`),
+  certificazioni (→ `cantiere-documenti`), foto impianti/quadri. **Non**
+  "il durc" da solo: "mi dai il DURC" deve aprire il documento DURC.
+- Da valutare: "apri gli appunti" a voce apre ancora la vecchia pagina
+  Appunti, non la card; "apri Fornitori" non apre la cartella.
 - **Manca**: l'AI non conosce le cartelle; funzioni vere per SAL, urgenze,
   DiCo, morosità (oggi le card aprono pagine esistenti).
-- Test: nuovo `eval/mestieri-altra.test.js` (26), `pacchetto-27-09`
+- Test: nuovo `eval/mestieri-altra.test.js` (28), `pacchetto-27-09`
   aggiornato (tasto e card Appunti), `check-schema` (colonne nuove).

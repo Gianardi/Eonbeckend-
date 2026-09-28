@@ -129,6 +129,38 @@ async function main() {
       /solaio/.test(mestieri.edile.hint) && /perdita/.test(mestieri.idraulico.hint) && /conformità/.test(mestieri.elettricista.hint) && /assemblea/.test(mestieri.amministratore.hint)
       && Object.values(mestieri).every((m) => m.cartelleNascoste && m.carteVisibili));
 
+    /* ---- Stesse pagine, nomi del mestiere: titoli e voce ---- */
+    const titoli = await page.evaluate(async () => {
+      const r = {};
+      const titolo = (pg) => { navigateTo(pg); return document.getElementById("pageTitle").textContent; };
+      await applyProfession("idraulico", true);
+      r.idraulico = [titolo("cantiere-cliente"), titolo("cantiere-foto"), titolo("cantiere-documenti")];
+      await applyProfession("elettricista", true);
+      r.elettricista = [titolo("cantiere-cliente"), titolo("cantiere-foto"), titolo("cantiere-documenti")];
+      await applyProfession("amministratore", true);
+      r.amministratore = [titolo("cantiere-cliente"), titolo("cantiere-foto")];
+      await applyProfession("edile", true);
+      r.edile = [titolo("cantiere-cliente"), titolo("documenti-impresa"), titolo("cantiere-foto")];
+      navigateTo("home");
+      document.querySelectorAll(".ai-landing-overlay").forEach((o) => { o.style.display = "none"; });
+      return r;
+    });
+    verifica("la pagina aperta ha il nome della card del mestiere (stessa pagina di prima)",
+      titoli.idraulico.join() === "Interventi,Foto impianti,Documenti" && titoli.elettricista.join() === "Impianti,Foto quadri,Certificazioni e documenti"
+      && titoli.amministratore.join() === "Condomini,Foto" && titoli.edile.join() === "Cantieri,DURC e documenti impresa,Foto cantiere", JSON.stringify(titoli));
+    const aVoce = await page.evaluate(() => {
+      const r = {};
+      for (const [frase, pagina] of [["apri i cantieri", "cantiere-cliente"], ["apri gli interventi", "cantiere-cliente"], ["mostrami gli impianti", "cantiere-cliente"], ["apri i condomini", "cantiere-cliente"], ["apri le certificazioni", "cantiere-documenti"], ["apri le foto dei quadri", "cantiere-foto"], ["apri durc e documenti", "documenti-impresa"]]) {
+        navigateTo("home");
+        r[frase] = provaNavigazioneDiretta(frase) && paginaAttuale === pagina;
+      }
+      navigateTo("home");
+      r["fammi il durc per Rossi → AI"] = provaNavigazioneDiretta("fammi il durc per Rossi") === false;
+      document.querySelectorAll(".ai-landing-overlay").forEach((o) => { o.style.display = "none"; });
+      return r;
+    });
+    verifica("a voce i nomi nuovi aprono la pagina giusta senza AI (\"apri i condomini\", \"apri gli interventi\"…)", Object.values(aVoce).every(Boolean), JSON.stringify(aVoce));
+
     /* ---- Home: Oggi e tasto Appunti ---- */
     const home = await page.evaluate(async () => {
       await applyProfession("edile", true); navigateTo("home");

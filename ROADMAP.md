@@ -160,7 +160,12 @@ microfono; card: edile Cantieri · DURC e documenti impresa · Documenti ·
 Foto cantiere; idraulico Interventi · Preventivi e fatture; elettricista
 Impianti · Preventivi e fatture · Certificazioni e documenti · Foto quadri;
 amministratore Condomini · Assemblee.
-**Manca**: le card aprono pagine che già esistevano; **SAL** (edile),
+Le card aprono **le stesse pagine di prima** (niente rifatto): cambia il
+nome, e da allora (28/09) anche il **titolo della pagina aperta** ("Foto
+impianti", "Condomini"…) e **la voce**: "apri i condomini", "apri gli
+interventi", "apri gli impianti", "apri le certificazioni", "apri le foto
+dei quadri" aprono la pagina senza AI.
+**Manca**: **SAL** (edile),
 **urgenze** (idraulico), **dichiarazione di conformità** (elettricista) e
 **morosità** (condominio) come funzioni vere sono ancora da fare.
 

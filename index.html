@@ -6895,6 +6895,16 @@ function applicaMestiereHome(key){
       if(pagina){ c.dataset.page = pagina; const sub = c.querySelector(".cantiere-card-sub"); if(sub) sub.textContent = sotto || ""; }
     });
   }
+  /* Il titolo della pagina aperta segue il nome sulla card */
+  try{
+    const pagine = ["cantiere-cliente", "documenti-impresa", "cantiere-documenti", "cantiere-foto"];
+    if(!applicaMestiereHome.titoli) applicaMestiereHome.titoli = Object.fromEntries(pagine.map(pg => [pg, pageMeta[pg].title]));
+    pagine.forEach(pg => { pageMeta[pg].title = applicaMestiereHome.titoli[pg]; });
+    (m.carte || []).forEach(([titolo, , pagina], i) => {
+      const pg = pagina || ["cantiere-cliente", null, "cantiere-documenti", "cantiere-foto"][i];
+      if(pagine.includes(pg)) pageMeta[pg].title = titolo;
+    });
+  }catch(e){ /* pageMeta non ancora pronto: restano i titoli di sempre */ }
   document.getElementById("homeCarteMestiere").hidden = !!m.cartelle;
   document.getElementById("cartelleGriglia").hidden = !m.cartelle;
   if(m.cartelle && typeof renderCartelle === "function"){
@@ -11445,14 +11455,15 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "gestisci-azienda": ["menu", "menù", "il menu", "il menù"],
   "cresci": ["cresci"],
   "assegna-compiti": ["compiti", "i compiti", "assegna compiti", "assegna compito", "compito", "squadra", "la squadra", "team", "il team", "dipendenti", "i dipendenti"],
-  "documenti-impresa": ["documenti impresa", "documenti dell'impresa", "documenti azienda", "documenti aziendali", "documenti dell'azienda", "i documenti dell'impresa", "i documenti dell'azienda"],
-  "cantiere-documenti": ["documenti", "i documenti", "i miei documenti", "documento"],
+  "documenti-impresa": ["durc e documenti", "durc e documenti impresa", "documenti impresa", "documenti dell'impresa", "documenti azienda", "documenti aziendali", "documenti dell'azienda", "i documenti dell'impresa", "i documenti dell'azienda"],
+  "cantiere-documenti": ["documenti", "i documenti", "i miei documenti", "documento", "certificazioni", "le certificazioni", "certificazioni e documenti", "le mie certificazioni"],
   "carta-intestata": ["carta intestata", "la carta intestata", "la mia carta intestata"],
   "crea-lettera": ["lettera", "la lettera", "lettere"],
   "crea-cartello": ["cartello", "il cartello", "cartello fine lavori", "il cartello fine lavori", "cartello di fine lavori"],
   "cantiere-appunti": ["appunti", "gli appunti", "i miei appunti", "note", "le note", "appunto", "nota"],
-  "cantiere-foto": ["foto", "le foto", "foto cantiere", "le foto del cantiere", "foto del cantiere", "galleria", "fotografie", "le fotografie"],
-  "cantiere-cliente": ["cliente cantiere"],
+  "cantiere-foto": ["foto", "le foto", "foto cantiere", "le foto del cantiere", "foto del cantiere", "galleria", "fotografie", "le fotografie", "foto impianti", "le foto degli impianti", "foto quadri", "le foto dei quadri"],
+  /* La prima card della Home ha il nome del mestiere (28/09/2026) */
+  "cantiere-cliente": ["cliente cantiere", "cantieri", "i cantieri", "i miei cantieri", "interventi", "gli interventi", "i miei interventi", "impianti", "gli impianti", "i miei impianti", "condomini", "i condomini", "i miei condomini"],
   "impostazioni": ["impostazioni", "le impostazioni", "impostazione", "opzioni", "settings", "account", "il mio account", "profilo", "il mio profilo"],
   "fatture-preventivi": ["fatture", "preventivi", "fatture e preventivi", "preventivi e fatture", "le fatture", "i preventivi", "le mie fatture", "i miei preventivi", "fattura", "preventivo"],
   "azienda": ["azienda", "la mia azienda", "la tua azienda", "cruscotto", "il cruscotto", "i conti", "i miei conti", "conti"],
