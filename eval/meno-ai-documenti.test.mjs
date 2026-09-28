@@ -105,6 +105,9 @@ const casi = [
   ["Mi crei preventivo da 200 euro per pitturazione bagno per spori Claudia?", ["Claudia Spori"], { tipo: "preventivo", cliente: "Claudia Spori", prezzo: 200, lavoro: "Pitturazione bagno" }],
   ["Mi crei fattura da 300 per pitturazioni dini Giampiero", ["Giampiero Dini"], { tipo: "fattura", cliente: "Giampiero Dini", prezzo: 300, lavoro: "Pitturazioni" }],
   ["Fattura a Rossi 1.250,50 per riparazione caldaia", ["Rossi"], { tipo: "fattura", cliente: "Rossi", prezzo: 1250.5, lavoro: "Riparazione caldaia" }],
+  // La fattura del SAL dalla Home o dalla scheda (edile, 28/09/2026)
+  ["fattura Mario Rossi SAL avanzamento lavori 3600 euro", ["Mario Rossi"], { tipo: "fattura", cliente: "Mario Rossi", prezzo: 3600, lavoro: "SAL avanzamento lavori" }],
+  ["fattura Mario Rossi SAL avanzamento lavori 3600,50 euro", ["Mario Rossi"], { tipo: "fattura", cliente: "Mario Rossi", prezzo: 3600.5, lavoro: "SAL avanzamento lavori" }],
   // Queste NO: decide l'AI, come prima
   ["Mi serve preventivo Piero Liberano", ["Piero Liberano"], null], // nessun importo
   ["Fattura da 300 + IVA per Michele soda studio progetto e pitturazione locali", [], null], // cliente nuovo: nome e lavoro non separabili dal codice

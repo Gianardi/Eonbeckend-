@@ -33,11 +33,13 @@ const COMUNI = [
   ["privacy e dati", "impostazioni", "Privacy e dati"], ["registro ai", "ai-request-log"],
   ["feedback", null, "Manda un feedback"], ["manda un feedback", null, "Manda un feedback"],
   ["appunti", null, "Mente"], ["gli appunti", null, "Mente"], ["le cose da fare", null, "Mente"], ["mente", null, "Mente"], ["la mente", null, "Mente"], ["i miei pensieri", null, "Mente"],
+  ["urgenze", null, "Urgenze"], ["le urgenze", null, "Urgenze"],
 ];
 const MESTIERI = {
   edile: [["cantieri", "cantiere-cliente"], ["durc e documenti impresa", "documenti-impresa"], ["foto cantiere", "cantiere-foto"]],
   idraulico: [["interventi", "cantiere-cliente"], ["preventivi e fatture", "fatture-preventivi"], ["foto impianti", "cantiere-foto"]],
-  elettricista: [["impianti", "cantiere-cliente"], ["certificazioni e documenti", "cantiere-documenti"], ["certificazioni", "cantiere-documenti"], ["foto quadri", "cantiere-foto"]],
+  elettricista: [["impianti", "cantiere-cliente"], ["certificazioni e documenti", "cantiere-documenti"], ["certificazioni", "cantiere-documenti"], ["foto quadri", "cantiere-foto"],
+    ["dichiarazioni di conformità", "cantiere-documenti", "Dichiarazioni di conformità"], ["le dico", "cantiere-documenti", "Dichiarazioni di conformità"]],
   amministratore: [["condomini", "cantiere-cliente"], ["assemblee", "assemblee"], ["foto", "cantiere-foto"], ["nuova assemblea", "assemblee", "Nuova assemblea"]],
   artigiano: [["fornitori", null, "Fornitori"], ["la cartella fornitori", null, "Fornitori"], ["personale", null, "Personale"], ["scadenze", null, "Scadenze"],
     ["incassi", null, "Incassi"], ["clienti", null, "Clienti"], ["nuova cartella", "home", "Nuova cartella"], ["crea una cartella", "home", "Nuova cartella"], ["le cartelle", "home"]],

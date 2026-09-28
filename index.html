@@ -2393,6 +2393,24 @@
   /* Cartelle di "Altra attività" */
   .cartelle-griglia{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; margin:6px 0 18px; }
   .cartelle-griglia.sotto-mestiere{ margin-top:-6px; }
+  .sc-sal{ flex-wrap:wrap; }
+  .sc-sal-fattura{ border:none; background:var(--acc); color:var(--acc-ink); font:inherit; font-size:12.5px; font-weight:700; border-radius:999px; padding:5px 11px; cursor:pointer; margin-left:auto; }
+  .sc-sal-nuovo{ border:1px dashed var(--border); background:none; font:inherit; font-size:13.5px; font-weight:700; color:var(--muted); border-radius:12px; padding:9px; cursor:pointer; margin-top:6px; }
+  .home-oggi-urgente{ flex:none; font-size:11px; font-weight:800; letter-spacing:.02em; color:#fff; background:#E5484D; border-radius:999px; padding:2px 8px; margin-right:2px; }
+  .urgenza-gas p{ margin:0 0 8px; font-size:15px; line-height:1.5; }
+  #cardDico[hidden]{ display:none; }
+  .sc-dico{ width:100%; border:none; background:none; font:inherit; color:inherit; text-align:left; cursor:pointer; }
+  .dico-form{ gap:14px; }
+  .dico-nota{ font-size:13px; line-height:1.45; color:var(--muted); background:#F7F8FA; border:1px solid var(--border); border-radius:12px; padding:9px 12px; }
+  .dico-form textarea{ font:inherit; font-size:15px; font-weight:500; color:var(--text); padding:11px 12px; border:1px solid var(--border-strong); border-radius:12px; background:#F7F8FA; resize:vertical; }
+  .dico-scelte{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:14px; font-weight:500; color:var(--text); }
+  .dico-scelte label{ display:flex; align-items:center; gap:6px; }
+  .dico-allegati{ flex-direction:column; }
+  .dico-allegati label{ align-items:flex-start; line-height:1.35; }
+  .dico-impresa{ border:1px solid var(--border); border-radius:14px; padding:10px 12px; }
+  .dico-impresa summary{ font-size:14px; font-weight:700; cursor:pointer; }
+  .dico-impresa .imp-campo{ margin-top:12px; }
+  .urgenza-gas ul{ margin:0; padding-left:20px; font-size:15px; line-height:1.6; }
   .come-andato{ margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
   .come-andato[hidden]{ display:none; }
   .ca-testa{ display:flex; align-items:center; justify-content:space-between; }
@@ -3248,6 +3266,12 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="4" y="3" width="16" height="10" rx="1"/><path d="M9 13l1.5 1.5L15 10"/><path d="M12 13v8M9 21h6"/></svg>
           </div>
           <div class="cantiere-card-title">Cartello fine lavori</div>
+        </button>
+        <button class="cantiere-card" type="button" id="cardDico" hidden>
+          <div class="cantiere-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M12.5 10l-2 3.5h3l-2 3.5"/></svg>
+          </div>
+          <div class="cantiere-card-title">Dichiarazione di conformità</div>
         </button>
         <button class="cantiere-card" type="button" data-page="crea-lettera">
           <div class="cantiere-card-icon">
@@ -4756,7 +4780,7 @@ function isDbReady(){
 const TABELLE_CON_CESTINO = new Set([
   "clients", "opportunities", "employees", "tasks", "assigned_tasks",
   "payments", "incomes", "goals", "conversations", "messages",
-  "cantiere_foto", "cantiere_documenti", "cantiere_appunti", "cartelle", "assemblee",
+  "cantiere_foto", "cantiere_documenti", "cantiere_appunti", "cartelle", "assemblee", "sal", "dichiarazioni_conformita",
 ]);
 
 /* Riprova automatica per problemi di rete passeggeri (come fanno
@@ -4875,7 +4899,7 @@ function mappaCliente(c){
   return { id:c.id, name:c.name, status:c.status, value:Number(c.value)||0, desc:c.description || "", last:c.last_contact || "", phone:c.phone || "", email:c.email || "", address:c.address || "", color:c.color, archived:!!c.is_archived };
 }
 function mappaImpegno(t){
-  return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
+  return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "", urgente:!!t.urgente, clientId:t.client_id || null };
 }
 function mappaAppunto(a){
   return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null, daFare:!!a.da_fare, fattoIl:a.fatto_il || null, cartellaId:a.cartella_id || null, assembleaId:a.assemblea_id || null };
@@ -4919,6 +4943,9 @@ async function loadUserDataFromDB(){
   const dbCartelle = await dbSelect("cartelle").catch(() => []);
   cartelle.length = 0; (dbCartelle || []).slice().sort((a, b) => (a.ordine || 0) - (b.ordine || 0)).forEach(c => cartelle.push({ id: c.id, nome: c.nome, icona: c.icona || null }));
   // Assemblee vere (28/09/2026): prima c'erano solo quelle di esempio
+  const [dbSal, dbDico] = await Promise.all([dbSelect("sal").catch(() => []), dbSelect("dichiarazioni_conformita").catch(() => [])]);
+  salLista.length = 0; (dbSal || []).forEach(r => salLista.push(mappaSal(r)));
+  dichiarazioni.length = 0; (dbDico || []).forEach(r => dichiarazioni.push({ id:r.id, clientId:r.client_id || null, numero:r.numero || "", dati:r.dati || {}, created:r.created_at }));
   const dbAssemblee = await dbSelect("assemblee").catch(() => []);
   assemblee.length = 0; (dbAssemblee || []).forEach(a => assemblee.push(mappaAssemblea(a)));
   aggiornaCantiereSottotitoli();
@@ -6079,6 +6106,9 @@ const cantiereFoto = [];
 const cantiereDocumenti = [];
 const cantiereAppunti = [];
 const cartelle = []; // "Altra attività": { id, nome, icona }
+const salLista = []; // edile: { id, clientId, numero, percentuale, importo, note, fatturato, created }
+function mappaSal(r){ return { id:r.id, clientId:r.client_id || null, numero:r.numero || 1, percentuale:Number(r.percentuale) || 0, importo:r.importo === null || r.importo === undefined ? null : Number(r.importo), note:r.note || "", fatturato:!!r.fatturato, created:r.created_at }; }
+const dichiarazioni = []; // elettricista: { id, clientId, numero, dati, created }
 const assemblee = []; // amministratori: { id, condominio, quando ("2026-10-01T21:00"), tipo, stato, clientId }
 function mappaAssemblea(a){
   return { id:a.id, condominio:a.condominio, quando:a.quando ? String(a.quando).slice(0, 16) : null, tipo:a.tipo || "ordinaria", stato:a.stato || "da convocare", clientId:a.client_id || null, created:a.created_at };
@@ -6778,13 +6808,15 @@ function renderCalendar(){
   tasks.filter(t => t.status !== "done").forEach(t => {
     const haData = t.time && interpretaQuando(t.time);
     if(!haData && !t.inSospesoCon) return;   /* senza data e senza attesa: resta solo tra le cose da fare */
+    const nomeCliente = t.clienteCollegato || (t.clientId ? (clients.find(c => c.id === t.clientId) || {}).name : null) || null;
     items.push({
       icon: t.inSospesoCon ? "attesa" : "todo",
       title: t.title,
-      sub: t.motivo || t.clienteCollegato || "da fare",
+      sub: t.motivo || nomeCliente || "da fare",
       when: t.time,
-      urgent: false,
-      contatto: t.inSospesoCon || t.clienteCollegato || null,
+      urgent: !!t.urgente,
+      urgente: !!t.urgente, // intervento urgente vero (il segno rosso in Home)
+      contatto: t.inSospesoCon || nomeCliente || null,
       id: t.id,
       tabella: "tasks"
     });
@@ -7197,6 +7229,9 @@ function applicaMestiereHome(key){
   // Il cartello di fine lavori è solo dell'edile
   const cartello = document.querySelector('#page-cantiere-documenti [data-page="crea-cartello"]');
   if(cartello) cartello.style.display = sezionePermessa("crea-cartello") ? "" : "none";
+  // La dichiarazione di conformità è solo dell'elettricista (28/09/2026)
+  const cardDico = document.getElementById("cardDico");
+  if(cardDico) cardDico.hidden = currentProfession !== "elettricista";
   document.getElementById("homeCarteMestiere").hidden = !!m.cartelle;
   /* Cartelle per tutti (28/09/2026): gli artigiani le hanno sotto le 4
      card del mestiere ("+ Nuova cartella"); "Altra attività" le ha al loro
@@ -11943,6 +11978,8 @@ function cardDaAprireAVoce(frase, resto, restoSenzaArticolo){
     if(c) return () => apriCardAppunti(c);
   }
   if(forme.some(f => APPUNTI_A_VOCE.includes(f))) return () => apriCardAppunti(null);
+  if(currentProfession === "elettricista" && forme.some(f => ["dichiarazioni di conformita", "le dichiarazioni di conformita", "le mie dichiarazioni di conformita", "dichiarazioni", "le dichiarazioni", "le dico", "le mie dico", "tutte le dico"].includes(normalizzaComando(f)))) return () => { navigateTo("cantiere-documenti"); apriElencoDico(); };
+  if(forme.some(f => ["urgenze", "le urgenze", "le mie urgenze", "urgenti", "gli urgenti", "interventi urgenti", "gli interventi urgenti"].includes(f))) return () => apriUrgenze();
   // Amministratori: "apri l'assemblea di via Roma 12", "nuova assemblea"
   if(currentProfession === "amministratore"){
     if(forme.some(f => ["nuova assemblea", "una nuova assemblea", "crea assemblea", "crea una assemblea", "crea un assemblea"].includes(f))) return () => { navigateTo("assemblee"); nuovaAssemblea(); };
@@ -11985,6 +12022,389 @@ async function provaCreaCartella(testo){
   });
   return true;
 }
+
+/* ===== SAL, stato avanzamento lavori (edile, 28/09/2026) =====
+   "SAL 30% cantiere Rossi" = i lavori da Rossi sono al 30% (avanzamento
+   totale, come si usa in cantiere). La rata = (30% − SAL precedente) del
+   valore del lavoro (il "valore" del cliente), se c'è; oppure l'importo
+   detto ("SAL 30% Rossi 3.600 euro"). Nella scheda del cliente; in Home
+   solo l'avviso "SAL da fatturare". Col codice. */
+const FRASE_SAL = /^(?:(?:fai|fammi|segna|segnami|registra|crea|nuovo|metti)\s+(?:il\s+|un\s+|lo\s+)?)?s\.?a\.?l\.?\s+(?:n\.?\s*\d+\s+)?(?:del\s+|al\s+|a\s+)?(\d{1,3}(?:[.,]\d+)?)\s*(?:%|per\s*cento|percento)\s*(.*)$/i;
+function capisciSal(testo){
+  const m = String(testo || "").trim().replace(/[.!]+$/, "").match(FRASE_SAL);
+  if(!m) return null;
+  const percentuale = Number(m[1].replace(",", "."));
+  if(!(percentuale > 0 && percentuale <= 100)) return null;
+  let resto = m[2].trim(), importo = null;
+  const mi = resto.match(/(?:,?\s*(?:di|da|per|importo|rata)?\s*)(?:€\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2}))?\s*(?:euro|€)\s*$/i);
+  if(mi){ importo = Number(mi[1].replace(/\./g, "") + (mi[2] ? "." + mi[2] : "")); resto = resto.slice(0, mi.index).trim(); }
+  resto = resto.replace(/^(?:(?:del|dei|della|dello|per|di|da|dal|al|a|il|lo|la)\s+)*(?:cantiere|lavori|lavoro|cliente)?\s*(?:(?:del|della|di|da|dal|per)\s+)?/i, "").trim();
+  if(!resto || /\d/.test(resto)) return null;
+  const cliente = clienteDaNomeDetto(resto);
+  if(!cliente) return null;
+  return { percentuale, importo, cliente };
+}
+function salDelCliente(clientId){ return salLista.filter(x => x.clientId === clientId).sort((a, b) => a.numero - b.numero); }
+async function creaSal(cliente, percentuale, importoDetto, note){
+  if(!isDbReady()){ showAILanding("Non collegato", "Per salvare il SAL serve la connessione."); return null; }
+  const precedenti = salDelCliente(cliente.id);
+  const prima = precedenti.reduce((m, x) => Math.max(m, x.percentuale), 0);
+  let importo = importoDetto;
+  if(importo === null && Number(cliente.value) > 0 && percentuale > prima) importo = Math.round(Number(cliente.value) * (percentuale - prima)) / 100;
+  const riga = { client_id: cliente.id, numero: precedenti.length + 1, percentuale };
+  if(importo !== null) riga.importo = importo;
+  if(note) riga.note = note;
+  const creato = await dbInsert("sal", riga);
+  if(!creato) return null;
+  const nuovo = mappaSal(creato);
+  salLista.push(nuovo);
+  aggiornaAvvisoMestiere();
+  return nuovo;
+}
+async function provaSal(testo){
+  if(currentProfession !== "edile") return false;
+  const s = capisciSal(testo);
+  if(!s || !isDbReady()) return false;
+  const nuovo = await creaSal(s.cliente, s.percentuale, s.importo, "");
+  if(!nuovo) return false;
+  showAIToastConAnnulla("SAL " + nuovo.numero + " · " + escapeHtml(s.cliente.name), "Lavori al " + nuovo.percentuale + "%" + (nuovo.importo !== null ? ", rata " + euroConti(nuovo.importo) : ", importo da mettere nella scheda") + ".", async () => {
+    const i = salLista.indexOf(nuovo);
+    if(i > -1) salLista.splice(i, 1);
+    if(isDbReady()) await dbUpdate("sal", nuovo.id, { deleted_at: new Date().toISOString() });
+    aggiornaAvvisoMestiere();
+  });
+  return true;
+}
+/* La fattura d'acconto la fa il codice sul server (un solo numero nella frase) */
+function creaFatturaSal(sal){
+  const cliente = clients.find(c => c.id === sal.clientId);
+  if(!cliente || sal.importo === null) return;
+  const importo = Number.isInteger(sal.importo) ? String(sal.importo) : sal.importo.toFixed(2).replace(".", ",");
+  chiudiRisorsaCard(); navigateTo("home");
+  const campo = document.getElementById("homeHeroCampo");
+  campo.value = "fattura " + cliente.name + " SAL avanzamento lavori " + importo + " euro"; // senza "acconto": il server lo lascerebbe all'AI
+  document.getElementById("homeHeroSend").click();
+  sal.fatturato = true;
+  if(isDbReady()) dbUpdate("sal", sal.id, { fatturato: true });
+  aggiornaAvvisoMestiere();
+}
+function nuovoSalDaScheda(cliente){
+  const corpo = document.createElement("div");
+  corpo.className = "imp-form";
+  const prima = salDelCliente(cliente.id).reduce((m, x) => Math.max(m, x.percentuale), 0);
+  corpo.innerHTML = `<label class="imp-campo"><span>Avanzamento lavori (%)</span><input type="number" id="salPerc" min="1" max="100" inputmode="decimal" placeholder="Es. ${Math.min(100, prima + 30)}"></label>
+    <label class="imp-campo"><span>Importo della rata (€), se lo sai</span><input type="number" id="salImporto" min="0" step="0.01" inputmode="decimal" placeholder="${Number(cliente.value) > 0 ? "Lo calcolo dal valore del lavoro" : "Es. 3600"}"></label>
+    <label class="imp-campo"><span>Nota</span><input type="text" id="salNota" maxlength="120" placeholder="Es. fatto il tetto"></label>
+    <button type="button" class="imp-btn" id="salSalva">Salva SAL</button>`;
+  corpo.querySelector("#salSalva").addEventListener("click", async () => {
+    const perc = Number(corpo.querySelector("#salPerc").value);
+    if(!(perc > 0 && perc <= 100)){ corpo.querySelector("#salPerc").focus(); return; }
+    const v = corpo.querySelector("#salImporto").value;
+    const nuovo = await creaSal(cliente, perc, v ? Number(v) : null, corpo.querySelector("#salNota").value.trim());
+    if(nuovo) mostraSchedaCliente(cliente);
+  });
+  apriRisorsaCard("Nuovo SAL · " + cliente.name, corpo);
+}
+/* Un solo avviso del mestiere in Home, quando serve: "SAL da fatturare" */
+function aggiornaAvvisoMestiere(){
+  let box = document.getElementById("avvisoMestiere");
+  const dopo = document.getElementById("comeAndatoBox") || document.getElementById("homeHeroOggiBox");
+  if(!box && dopo){ box = document.createElement("div"); box.className = "come-andato"; box.id = "avvisoMestiere"; dopo.after(box); }
+  if(!box) return;
+  let chiuso = "";
+  try{ chiuso = localStorage.getItem("eon-avviso-sal-chiuso") || ""; }catch(e){}
+  // Un avviso alla volta: se c'è "Com'è andato?", questo aspetta
+  const altro = document.getElementById("comeAndatoBox");
+  const sal = currentProfession === "edile" && !(altro && !altro.hidden) ? salLista.find(x => !x.fatturato && x.importo !== null && x.id !== chiuso && clients.some(c => c.id === x.clientId)) : null;
+  if(!sal){ box.hidden = true; box.innerHTML = ""; return; }
+  const cliente = clients.find(c => c.id === sal.clientId);
+  box.hidden = false;
+  box.innerHTML = `<div class="ca-testa"><b>SAL da fatturare</b><button type="button" class="ca-chiudi" aria-label="Non ora">✕</button></div><div class="ca-cosa"></div><div class="ca-scelte"><button type="button" data-ca="fatto">Crea fattura</button><button type="button" data-ca="apri">Apri la scheda</button></div>`;
+  box.querySelector(".ca-cosa").textContent = cliente.name + " · SAL " + sal.numero + " (" + sal.percentuale + "%) · " + euroConti(sal.importo);
+  box.querySelector(".ca-chiudi").addEventListener("click", () => { try{ localStorage.setItem("eon-avviso-sal-chiuso", sal.id); }catch(e){} aggiornaAvvisoMestiere(); });
+  box.querySelector('[data-ca="fatto"]').addEventListener("click", () => creaFatturaSal(sal));
+  box.querySelector('[data-ca="apri"]').addEventListener("click", () => mostraSchedaCliente(cliente));
+}
+
+/* ===== Urgenze (28/09/2026) =====
+   "Perdita urgente da Bianchi", "emergenza allagamento via Roma": un
+   intervento URGENTE per oggi, in cima a "Oggi" con il segno rosso, legato
+   al cliente se c'è. Col codice. Con un altro giorno → decide l'AI.
+   Odore di gas: prima la sicurezza, nessun intervento da fissare. */
+const PAROLE_URGENZA = /(?:^|\s)(?:urgent[ei]|urgenza|urgentissim[oa]|emergenza|di\s+corsa)(?=\s|$|[,.!:;])/i;
+const ODORE_GAS = /\b(?:odore|puzza|fuga|perdita|sento)\s+(?:di\s+|del\s+)?gas\b/i;
+function capisciUrgenza(testo){
+  const t = String(testo || "").trim().replace(/[.!]+$/, "");
+  if(!PAROLE_URGENZA.test(t) || /\?/.test(t) || t.length > 140) return null;
+  if(/\b(?:domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|settimana|prossim[oa]|\d{1,2}\/\d{1,2})\b/i.test(t)) return null;
+  const mOra = t.match(/\b(?:alle|ore)\s+(\d{1,2})(?:[:.](\d{2}))?\b/i);
+  const ora = mOra ? String(mOra[1]).padStart(2, "0") + ":" + (mOra[2] || "00") : null;
+  let titolo = t.replace(/(?:^|\s)(?:è\s+|e'\s+)?(?:urgent[ei]|urgenza|urgentissim[oa]|emergenza|di\s+corsa)(?=\s|$|[,.!:;])/gi, " ")
+    .replace(/\b(?:oggi|stamattina|stasera|subito|adesso|(?:alle|ore)\s+\d{1,2}(?:[:.]\d{2})?)\b/gi, " ")
+    .replace(/^\s*(?:c'?\s*[eè]\s+|ho\s+|segna(?:mi)?\s+|nuov[oa]\s+|intervento\s+)?(?:un[oa']?\s*|una\s+)?/i, "")
+    .replace(/\s+/g, " ").replace(/^[,:;\s-]+|[,:;\s-]+$/g, "").trim();
+  if(titolo.length < 3) return null;
+  const parole = new Set(normalizzaComando(t).split(" "));
+  const candidati = clients.filter(c => normalizzaComando(c.name).split(" ").some(w => w.length >= 4 && parole.has(w)));
+  const cliente = candidati.length === 1 ? candidati[0] : null;
+  if(candidati.length > 1) return null; // più clienti possibili: decide l'AI
+  return { titolo: titolo.charAt(0).toUpperCase() + titolo.slice(1), ora, cliente };
+}
+function quandoOggiTesto(ora){
+  const d = new Date();
+  return d.toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" }).replace(".", "") + (ora ? ", " + ora : "");
+}
+async function provaUrgenza(testo){
+  if(ODORE_GAS.test(String(testo || ""))){
+    const corpo = document.createElement("div");
+    corpo.className = "urgenza-gas";
+    corpo.innerHTML = '<p><b>Prima la sicurezza.</b> Non è un intervento da fissare: di\' al cliente di</p><ul><li>chiudere subito il rubinetto del gas;</li><li>aprire porte e finestre;</li><li>non toccare interruttori, non accendere fiamme, non usare il telefono in casa;</li><li>uscire e chiamare il pronto intervento gas del suo fornitore, o il <b>112</b>.</li></ul>';
+    apriRisorsaCard("Odore di gas", corpo);
+    return true;
+  }
+  const u = capisciUrgenza(testo);
+  if(!u || !isDbReady()) return false;
+  const oggiIso = new Date().toISOString().slice(0, 10);
+  const riga = { title: u.titolo, owner_type: "user", status: "todo", time: quandoOggiTesto(u.ora), scheduled_at: oggiIso + "T" + (u.ora || "00:00") + ":00", urgente: true };
+  if(u.cliente) riga.client_id = u.cliente.id;
+  const creato = await dbInsert("tasks", riga);
+  if(!creato) return false;
+  const nuovo = { id: creato.id, title: u.titolo, owner: "user", status: "todo", time: riga.time, urgente: true, clientId: u.cliente ? u.cliente.id : null };
+  tasks.push(nuovo);
+  renderTasks(); renderCalendar();
+  showAIToastConAnnulla("Urgente, in cima a oggi", "«" + escapeHtml(u.titolo) + "»" + (u.cliente ? " · " + escapeHtml(u.cliente.name) : ""), async () => {
+    const i = tasks.indexOf(nuovo);
+    if(i > -1) tasks.splice(i, 1);
+    if(isDbReady()) await dbUpdate("tasks", nuovo.id, { deleted_at: new Date().toISOString() });
+    renderTasks(); renderCalendar();
+  });
+  return true;
+}
+function apriUrgenze(){
+  const aperte = tasks.filter(t => t.urgente && t.status !== "done");
+  const corpo = document.createElement("div");
+  if(!aperte.length) corpo.innerHTML = '<div class="risorsa-vuoto">Nessuna urgenza aperta.</div>';
+  aperte.forEach(t => {
+    const r = document.createElement("div");
+    r.className = "home-hero-oggi-riga";
+    const u = document.createElement("span"); u.className = "home-oggi-urgente"; u.textContent = "Urgente";
+    const testo = document.createElement("span");
+    const cliente = t.clientId ? (clients.find(c => c.id === t.clientId) || {}).name : null;
+    testo.textContent = t.title + (cliente ? " · " + cliente : "");
+    r.appendChild(u); r.appendChild(testo);
+    corpo.appendChild(r);
+  });
+  apriRisorsaCard("Urgenze", corpo);
+}
+
+/* ===== Dichiarazione di conformità, DM 37/2008 (elettricista, 28/09/2026) =====
+   "Fai la DiCo per l'impianto Verdi": modulo già compilato con i dati del
+   cliente e dell'impresa (quelli dell'ultima dichiarazione), poi il
+   documento da stampare o salvare in PDF, sul modello dell'allegato I.
+   Resta nella scheda del cliente e in "Certificazioni e documenti".
+   È una bozza da controllare prima della firma: lo dice anche il foglio. */
+const FRASE_DICO = /^(?:(?:fai|fammi|prepara|preparami|crea|creami|compila|compilami|scrivi|scrivimi|nuova)\s+(?:la\s+|una\s+)?(?:nuova\s+)?(?:dico|di\.\s*co\.?|dichiarazione\s+di\s+conformit[aà])|(?:nuova\s+)?dichiarazione\s+di\s+conformit[aà])(?:\s+(.*))?$/i;
+const DICO_TIPI = [["nuovo", "nuovo impianto"], ["trasformazione", "trasformazione"], ["ampliamento", "ampliamento"], ["manutenzione", "manutenzione straordinaria"], ["altro", "altro"]];
+const DICO_USI = [["civile", "civile"], ["commercio", "commercio"], ["industriale", "industriale"], ["altri", "altri usi"]];
+const DICO_ALLEGATI = [
+  ["progetto", "progetto ai sensi degli articoli 5 e 7"],
+  ["relazione", "relazione con tipologie dei materiali utilizzati"],
+  ["schema", "schema di impianto realizzato"],
+  ["precedenti", "riferimento a dichiarazioni di conformità precedenti o parziali, già esistenti"],
+  ["certificato", "copia del certificato di riconoscimento dei requisiti tecnico-professionali"],
+  ["non_normalizzati", "attestazione di conformità per impianto realizzato con materiali o sistemi non normalizzati"],
+];
+function capisciDico(testo){
+  const m = String(testo || "").trim().replace(/[.!]+$/, "").match(FRASE_DICO);
+  if(!m) return null;
+  const resto = String(m[1] || "")
+    .replace(/^(?:(?:per|del|della|dello|di|a|al|alla|da|dal)\s+)?(?:(?:l\s*'\s*|il\s+|la\s+)?(?:impianto|lavoro|cliente|casa|appartamento|negozio|ufficio)\s+)?(?:(?:del|della|dei|di|da|dal|per|a)\s+)?(?:(?:sig|signor|signora|sigra)\.?\s+)?/i, "")
+    .trim();
+  if(!resto) return { cliente: null, nomeDetto: "" };
+  return { cliente: clienteDaNomeDetto(resto), nomeDetto: resto };
+}
+async function provaDico(testo){
+  if(currentProfession !== "elettricista") return false;
+  const d = capisciDico(testo);
+  if(!d) return false;
+  chiudiRisorsaCard();
+  apriDico(d.cliente, d.cliente ? "" : d.nomeDetto);
+  return true;
+}
+function dicoDelCliente(clientId){ return dichiarazioni.filter(x => x.clientId === clientId).sort((a, b) => String(b.created).localeCompare(String(a.created))); }
+function prossimoNumeroDico(){
+  const anno = new Date().getFullYear();
+  const n = dichiarazioni.filter(x => String(x.numero || "").endsWith("/" + anno)).reduce((m, x) => Math.max(m, parseInt(x.numero, 10) || 0), 0);
+  return (n + 1) + "/" + anno;
+}
+function apriDico(cliente, nomeDetto){
+  const intest = aziendaIntestazione || {};
+  const p = profiloSicuro() || {};
+  // L'impresa non cambia: si riprendono i dati dell'ultima dichiarazione
+  const ultima = dichiarazioni.slice().sort((a, b) => String(b.created).localeCompare(String(a.created)))[0];
+  const imp = (ultima && ultima.dati && ultima.dati.impresa) || {};
+  const val = (a, b) => escapeHtml(String(a || b || ""));
+  const committente = cliente ? cliente.name : (nomeDetto ? nomeDetto.charAt(0).toUpperCase() + nomeDetto.slice(1) : "");
+  const oggi = new Date().toISOString().slice(0, 10);
+  const corpo = document.createElement("div");
+  corpo.className = "imp-form dico-form";
+  const impresaCompleta = (imp.ragione || intest.nome_azienda || p.business_name) && (imp.cciaa || imp.albo) && (imp.piva || intest.piva);
+  corpo.innerHTML = `
+    <div class="dico-nota">Bozza sul modello del DM 37/2008: controlla i dati prima di firmarla.</div>
+    <label class="imp-campo"><span>Committente</span><input type="text" id="dicoCommittente" maxlength="120" value="${escapeHtml(committente)}" placeholder="Nome e cognome o ragione sociale"></label>
+    <label class="imp-campo"><span>Indirizzo dell'impianto</span><input type="text" id="dicoIndirizzo" maxlength="200" value="${escapeHtml(cliente && cliente.address || "")}" placeholder="Via, numero, comune (prov.), piano, interno"></label>
+    <label class="imp-campo"><span>Proprietario (se diverso dal committente)</span><input type="text" id="dicoProprietario" maxlength="160" placeholder="Nome e indirizzo"></label>
+    <div class="imp-campo"><span>Intervento</span><div class="dico-scelte" id="dicoTipo">${DICO_TIPI.map(([k, t], i) => `<label><input type="radio" name="dicoTipo" value="${k}"${i === 0 ? " checked" : ""}> ${t}</label>`).join("")}</div></div>
+    <div class="imp-campo"><span>Edificio a uso</span><div class="dico-scelte" id="dicoUso">${DICO_USI.map(([k, t], i) => `<label><input type="radio" name="dicoUso" value="${k}"${i === 0 ? " checked" : ""}> ${t}</label>`).join("")}</div></div>
+    <label class="imp-campo"><span>Impianto (descrizione)</span><textarea id="dicoDescrizione" rows="3" maxlength="600" placeholder="Es. impianto elettrico dell'appartamento: quadro, 12 punti luce, 20 prese"></textarea></label>
+    <label class="imp-campo"><span>Norma tecnica seguita</span><input type="text" id="dicoNorma" maxlength="120" value="CEI 64-8"></label>
+    <label class="imp-campo"><span>Progetto redatto da (se c'è)</span><input type="text" id="dicoProgettista" maxlength="120" placeholder="Nome del progettista, o vuoto"></label>
+    <div class="imp-campo"><span>Allegati</span><div class="dico-scelte dico-allegati" id="dicoAllegati">${DICO_ALLEGATI.map(([k, t]) => `<label><input type="checkbox" value="${k}"${k === "relazione" || k === "schema" || k === "certificato" ? " checked" : ""}> ${t}</label>`).join("")}</div></div>
+    <div class="imp-campo"><span>Lo dichiari tu (EON non lo segna al posto tuo)</span><div class="dico-scelte dico-allegati" id="dicoDichiaro">
+      <label><input type="checkbox" value="materiali"> ho installato componenti e materiali adatti al luogo di installazione</label>
+      <label><input type="checkbox" value="verifiche"> ho controllato l'impianto (sicurezza e funzionalità) con esito positivo, con le verifiche richieste</label>
+    </div></div>
+    <label class="imp-campo"><span>Data</span><input type="date" id="dicoData" value="${oggi}"></label>
+    <details class="dico-impresa"${impresaCompleta ? "" : " open"}><summary>Dati dell'impresa</summary>
+      <label class="imp-campo"><span>Il sottoscritto (titolare)</span><input type="text" id="dicoTitolare" maxlength="120" value="${val(imp.titolare, p.full_name)}"></label>
+      <label class="imp-campo"><span>Impresa</span><input type="text" id="dicoRagione" maxlength="160" value="${val(imp.ragione, intest.nome_azienda || p.business_name)}"></label>
+      <label class="imp-campo"><span>Sede</span><input type="text" id="dicoSede" maxlength="200" value="${val(imp.sede, intest.indirizzo)}"></label>
+      <label class="imp-campo"><span>Telefono</span><input type="text" id="dicoTel" maxlength="40" value="${val(imp.tel, intest.telefono)}"></label>
+      <label class="imp-campo"><span>Partita IVA</span><input type="text" id="dicoPiva" maxlength="20" value="${val(imp.piva, intest.piva)}"></label>
+      <label class="imp-campo"><span>Registro imprese, CCIAA di … n. …</span><input type="text" id="dicoCciaa" maxlength="120" value="${val(imp.cciaa)}" placeholder="Es. Roma n. RM-123456"></label>
+      <label class="imp-campo"><span>Albo imprese artigiane di … n. … (se iscritta)</span><input type="text" id="dicoAlbo" maxlength="120" value="${val(imp.albo)}"></label>
+      <label class="imp-campo"><span>Responsabile tecnico</span><input type="text" id="dicoResponsabile" maxlength="120" value="${val(imp.responsabile, imp.titolare || p.full_name)}"></label>
+    </details>
+    <button type="button" class="imp-btn" id="dicoSalva">Salva e apri il documento</button>`;
+  corpo.querySelector("#dicoSalva").addEventListener("click", async () => {
+    const v = id => corpo.querySelector("#" + id).value.trim();
+    if(!v("dicoCommittente")){ corpo.querySelector("#dicoCommittente").focus(); return; }
+    if(!isDbReady()){ showAILanding("Non collegato", "Per salvare la dichiarazione serve la connessione."); return; }
+    const dati = {
+      committente: v("dicoCommittente"), indirizzo: v("dicoIndirizzo"), proprietario: v("dicoProprietario"),
+      tipo: (corpo.querySelector('input[name="dicoTipo"]:checked') || {}).value || "nuovo",
+      uso: (corpo.querySelector('input[name="dicoUso"]:checked') || {}).value || "civile",
+      descrizione: v("dicoDescrizione"), norma: v("dicoNorma"), progettista: v("dicoProgettista"),
+      allegati: [...corpo.querySelectorAll("#dicoAllegati input:checked")].map(x => x.value),
+      materiali: !!corpo.querySelector('#dicoDichiaro input[value="materiali"]').checked,
+      verifiche: !!corpo.querySelector('#dicoDichiaro input[value="verifiche"]').checked,
+      data: v("dicoData") || oggi,
+      impresa: { titolare: v("dicoTitolare"), ragione: v("dicoRagione"), sede: v("dicoSede"), tel: v("dicoTel"), piva: v("dicoPiva"), cciaa: v("dicoCciaa"), albo: v("dicoAlbo"), responsabile: v("dicoResponsabile") },
+    };
+    if(dati.progettista && !dati.allegati.includes("progetto")) dati.allegati.unshift("progetto");
+    // La finestra si apre subito, al tocco: dopo, il telefono la bloccherebbe
+    const finestra = window.open("", "_blank");
+    const riga = { numero: prossimoNumeroDico(), dati };
+    if(cliente) riga.client_id = cliente.id;
+    const creata = await dbInsert("dichiarazioni_conformita", riga);
+    if(!creata){ if(finestra) finestra.close(); return; }
+    const nuova = { id: creata.id, clientId: creata.client_id || null, numero: creata.numero || riga.numero, dati: creata.dati || dati, created: creata.created_at || new Date().toISOString() };
+    dichiarazioni.push(nuova);
+    chiudiRisorsaCard();
+    stampaDico(nuova, finestra);
+    showAIToastConAnnulla("Dichiarazione n. " + escapeHtml(nuova.numero), escapeHtml(dati.committente) + " · salvata" + (cliente ? " nella sua scheda" : "") + ".", async () => {
+      const i = dichiarazioni.indexOf(nuova);
+      if(i > -1) dichiarazioni.splice(i, 1);
+      if(isDbReady()) await dbUpdate("dichiarazioni_conformita", nuova.id, { deleted_at: new Date().toISOString() });
+    });
+  });
+  apriRisorsaCard("Dichiarazione di conformità", corpo);
+}
+function stampaDico(d, finestraGiaAperta){
+  const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  const x = d.dati || {}, imp = x.impresa || {};
+  const casella = si => si ? "&#9746;" : "&#9744;";
+  const riga = (v, largo) => v ? `<b>${esc(v)}</b>` : `<span class="vuoto${largo ? " largo" : ""}"></span>`;
+  const data = x.data ? new Date(x.data + "T12:00:00").toLocaleDateString("it-IT") : "";
+  const allegati = x.allegati || [];
+  const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dichiarazione di conformità n. ${esc(d.numero)}</title>
+<style>
+  @page { size:A4; margin:16mm; }
+  *{ box-sizing:border-box; }
+  body{ font-family:-apple-system,'Helvetica Neue',Arial,sans-serif; color:#141726; margin:0 auto; max-width:760px; padding:18px; font-size:12.5px; line-height:1.55; }
+  h1{ font-size:15px; text-align:center; margin:0 0 2px; letter-spacing:.03em; }
+  .sotto{ text-align:center; font-size:11px; color:#5F667C; margin:0 0 16px; }
+  .num{ text-align:right; font-size:11.5px; color:#5F667C; margin-bottom:10px; }
+  p{ margin:0 0 8px; }
+  .vuoto{ display:inline-block; min-width:120px; border-bottom:1px dotted #9AA1B4; height:1em; }
+  .vuoto.largo{ min-width:260px; }
+  .scelte span{ margin-right:14px; white-space:nowrap; }
+  h2{ font-size:13px; text-align:center; letter-spacing:.2em; margin:16px 0 8px; }
+  ul{ list-style:none; padding:0; margin:0 0 10px; }
+  li{ margin:0 0 5px; padding-left:22px; text-indent:-22px; }
+  .firme{ display:flex; justify-content:space-between; gap:20px; margin-top:26px; }
+  .firme div{ flex:1; text-align:center; font-size:11.5px; color:#5F667C; }
+  .firme div i{ display:block; border-bottom:1px solid #141726; height:40px; margin-bottom:5px; }
+  .avvertenze{ margin-top:20px; padding-top:10px; border-top:1px solid #E2E5EC; font-size:10.5px; color:#5F667C; }
+  .piede{ margin-top:12px; font-size:10.5px; color:#9AA1B4; text-align:center; }
+  @media print{ .stampa{ display:none; } body{ padding:0; } }
+  .stampa{ position:fixed; bottom:20px; right:20px; padding:13px 22px; border-radius:11px; background:#3B6FFF; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 6px 18px rgba(59,111,255,.35); }
+</style></head><body>
+  <div class="num">n. ${esc(d.numero)}</div>
+  <h1>DICHIARAZIONE DI CONFORMITÀ DELL'IMPIANTO ALLA REGOLA DELL'ARTE</h1>
+  <p class="sotto">(Decreto del Ministro dello sviluppo economico 22 gennaio 2008, n. 37, allegato I)</p>
+  <p>Il sottoscritto ${riga(imp.titolare, true)} titolare o legale rappresentante dell'impresa ${riga(imp.ragione, true)}
+  operante nel settore <b>impianti elettrici (art. 1, comma 2, lettera a)</b>, con sede in ${riga(imp.sede, true)}, tel. ${riga(imp.tel)}, part. IVA ${riga(imp.piva)}</p>
+  <p>${casella(imp.cciaa)} iscritta nel registro delle imprese (d.P.R. 7/12/1995, n. 581) della Camera C.I.A.A. di ${riga(imp.cciaa)}<br>
+  ${casella(imp.albo)} iscritta all'Albo Provinciale delle imprese artigiane (l. 8/8/1985, n. 443) di ${riga(imp.albo)}</p>
+  <p>esecutrice dell'impianto (descrizione schematica): ${riga(x.descrizione, true)}</p>
+  <p class="scelte">inteso come: ${DICO_TIPI.map(([k, t]) => `<span>${casella(x.tipo === k)} ${t}</span>`).join("")}</p>
+  <p>commissionato da: ${riga(x.committente, true)}<br>installato nei locali siti in ${riga(x.indirizzo, true)}<br>
+  di proprietà di: ${riga(x.proprietario || x.committente, true)}</p>
+  <p class="scelte">in edificio adibito ad uso: ${DICO_USI.map(([k, t]) => `<span>${casella(x.uso === k)} ${t}</span>`).join("")}</p>
+  <h2>DICHIARA</h2>
+  <p>sotto la propria personale responsabilità, che l'impianto è stato realizzato in modo conforme alla regola dell'arte, secondo quanto previsto dall'art. 6, tenuto conto delle condizioni di esercizio e degli usi a cui è destinato l'edificio, avendo in particolare:</p>
+  <ul>
+    <li>${casella(!!x.progettista)} rispettato il progetto redatto ai sensi dell'art. 5 da ${riga(x.progettista)};</li>
+    <li>${casella(!!x.norma)} seguito la norma tecnica applicabile all'impiego: ${riga(x.norma)};</li>
+    <li>${casella(!!x.materiali)} installato componenti e materiali adatti al luogo di installazione (artt. 5 e 6);</li>
+    <li>${casella(!!x.verifiche)} controllato l'impianto ai fini della sicurezza e della funzionalità con esito positivo, avendo eseguito le verifiche richieste dalle norme e dalle disposizioni di legge.</li>
+  </ul>
+  <p><b>Allegati obbligatori:</b></p>
+  <ul>${DICO_ALLEGATI.map(([k, t]) => `<li>${casella(allegati.includes(k))} ${t};</li>`).join("")}</ul>
+  <h2>DECLINA</h2>
+  <p>ogni responsabilità per sinistri a persone o a cose derivanti da manomissione dell'impianto da parte di terzi ovvero da carenze di manutenzione o riparazione.</p>
+  <p>Data: ${riga(data)}</p>
+  <div class="firme">
+    <div><i></i>Il responsabile tecnico${imp.responsabile ? "<br><b>" + esc(imp.responsabile) + "</b>" : ""}</div>
+    <div><i></i>Il dichiarante (timbro e firma)${imp.titolare ? "<br><b>" + esc(imp.titolare) + "</b>" : ""}</div>
+  </div>
+  <div class="avvertenze"><b>Avvertenze per il committente:</b> responsabilità del committente o del proprietario, art. 8 del DM 37/2008. Conservare questa dichiarazione con i suoi allegati.</div>
+  <div class="piede">Documento preparato con EON: verificare i dati prima della firma.</div>
+  <button class="stampa" onclick="window.print()">Salva come PDF</button>
+</body></html>`;
+  const w = finestraGiaAperta || window.open("", "_blank");
+  if(!w){ showAILanding("Apertura bloccata", "Il browser ha bloccato la nuova finestra. Consenti le finestre pop-up per aprire il documento."); return; }
+  w.document.write(html);
+  w.document.close();
+}
+/* "Certificazioni e documenti" → Dichiarazioni di conformità: l'elenco e "+ Nuova" */
+function apriElencoDico(){
+  const corpo = document.createElement("div");
+  const lista = document.createElement("div");
+  lista.className = "sc-lista";
+  const tutte = dichiarazioni.slice().sort((a, b) => String(b.created).localeCompare(String(a.created)));
+  if(!tutte.length) lista.innerHTML = '<div class="sc-vuoto">Nessuna dichiarazione. Dimmi "fai la DiCo per l\'impianto Verdi".</div>';
+  tutte.forEach(x => lista.appendChild(rigaDico(x, true)));
+  const nuova = document.createElement("button");
+  nuova.type = "button"; nuova.className = "sc-sal-nuovo"; nuova.textContent = "+ Nuova dichiarazione";
+  nuova.addEventListener("click", () => { chiudiRisorsaCard(); apriDico(null, ""); });
+  lista.appendChild(nuova);
+  corpo.appendChild(lista);
+  apriRisorsaCard("Dichiarazioni di conformità", corpo);
+}
+function rigaDico(x, conCliente){
+  const r = document.createElement("button");
+  r.type = "button"; r.className = "sc-riga sc-dico";
+  r.innerHTML = `<span class="sc-riga-punto"></span><span class="sc-riga-testo"></span><span class="sc-riga-quando"></span>`;
+  const dati = x.dati || {};
+  r.querySelector(".sc-riga-testo").textContent = "n. " + x.numero + (conCliente && dati.committente ? " · " + dati.committente : "") + (dati.descrizione ? " · " + dati.descrizione : "");
+  r.querySelector(".sc-riga-quando").textContent = x.created ? new Date(x.created).toLocaleDateString("it-IT", { day: "2-digit", month: "short" }) : "";
+  r.addEventListener("click", () => stampaDico(x));
+  return r;
+}
+(function(){ const c = document.getElementById("cardDico"); if(c) c.addEventListener("click", apriElencoDico); })();
 
 function apriSeNomeDiPagina(testo, domandaEON){
   /* Se EON ha appena chiesto "in calendario o negli appunti?", la parola
@@ -13889,6 +14309,24 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
        anche se EON aveva appena fatto una domanda (tranne quando la
        parola era proprio nella domanda: allora è la risposta) */
+    if(testo && !inCorso && !inContinuazione && await provaUrgenza(testo)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "urgenza");
+      return;
+    }
+    if(testo && !inCorso && !inContinuazione && await provaSal(testo)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "sal");
+      return;
+    }
+    if(testo && !inCorso && !inContinuazione && await provaDico(testo)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "dico");
+      return;
+    }
     if(testo && !inCorso && !inContinuazione && await provaCreaCartella(testo)){
       campo.value = "";
       hint.textContent = hintBaseDi();
@@ -14506,8 +14944,10 @@ function aggiornaHomeHero(gruppiPerGiorno){
   aggiornaComeAndato(voci);
   /* Calendario vivo (28/09/2026): in Home solo quello che deve ancora
      succedere; finita la giornata, si guarda a domani. */
-  const giaPassati = voci.filter(voceGiaPassata).length;
-  voci = voci.filter(v => !voceGiaPassata(v));
+  const giaPassati = voci.filter(v => voceGiaPassata(v) && !v.urgente).length;
+  // Le urgenze restano finché non sono fatte, e vanno in cima (28/09/2026)
+  voci = voci.filter(v => v.urgente || !voceGiaPassata(v));
+  voci.sort((a, b) => (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0));
   const domani = (gruppiPerGiorno || []).find(g => g.et === "Domani");
   const titoloBox = document.querySelector("#homeHeroOggiBox .home-box-testa b");
   const mostraDomani = voci.length === 0 && domani && domani.voci.length;
@@ -14566,6 +15006,7 @@ function aggiornaHomeHero(gruppiPerGiorno){
     const testo = document.createElement("span");
     testo.textContent = it.title;
     riga.appendChild(segno);
+    if(it.urgente){ const u = document.createElement("span"); u.className = "home-oggi-urgente"; u.textContent = "Urgente"; riga.appendChild(u); }
     const ora = estraiOra(it.when || "");
     if(ora){ const o = document.createElement("span"); o.className = "home-oggi-ora"; o.textContent = ora; riga.appendChild(o); }
     riga.appendChild(testo);
@@ -14601,9 +15042,10 @@ function aggiornaComeAndato(vociOggi){
   if(!box && oggiBox){ box = document.createElement("div"); box.className = "come-andato"; box.id = "comeAndatoBox"; oggiBox.after(box); }
   if(!box) return;
   const it = (vociOggi || []).find(v => voceGiaPassata(v) && clienteDellaVoce(v) && !comeAndatoFatto(v) && !(v.tabella === "tasks" && (tasks.find(t => t.id === v.id) || {}).status === "done"));
-  if(!it){ box.hidden = true; box.innerHTML = ""; return; }
+  if(!it){ box.hidden = true; box.innerHTML = ""; aggiornaAvvisoMestiere(); return; }
   const cliente = clienteDellaVoce(it);
   box.hidden = false;
+  aggiornaAvvisoMestiere(); // un avviso alla volta
   box.innerHTML = `<div class="ca-testa"><b>Com'è andato?</b><button type="button" class="ca-chiudi" aria-label="Non ora">✕</button></div>
     <div class="ca-cosa"></div>
     <div class="ca-scelte"><button type="button" data-ca="fatto">Fatto</button><button type="button" data-ca="rifare">Da rifare</button><button type="button" data-ca="rimandato">Rimandato</button></div>
@@ -15112,6 +15554,7 @@ function apriRisorsaCard(titolo, corpoEl, piedeEl){
   if(piedeEl){ piede.appendChild(piedeEl); piede.style.display = ""; }
   else piede.style.display = "none";
   document.getElementById("risorsaOverlay").style.display = "flex";
+  corpo.scrollTop = 0; // una card nuova parte dall'inizio, non da dove era la precedente
 }
 function chiudiRisorsaCard(){
   document.getElementById("risorsaOverlay").style.display = "none";
@@ -15274,6 +15717,47 @@ function mostraSchedaCliente(c, opzioni){
   });
   else listaImpegni.innerHTML = '<div class="sc-vuoto">Nessun impegno. Dimmi "domani alle 9 sopralluogo" qui sotto.</div>';
   corpo.appendChild(listaImpegni);
+
+  // Edile: i SAL del cantiere (28/09/2026)
+  if(currentProfession === "edile"){
+    sezione("SAL");
+    const listaSal = document.createElement("div");
+    listaSal.className = "sc-lista"; listaSal.id = "scSal";
+    const suoi = salDelCliente(c.id);
+    if(!suoi.length) listaSal.innerHTML = '<div class="sc-vuoto">Nessun SAL. Dimmi "SAL 30% ' + escapeHtml(c.name) + '".</div>';
+    suoi.forEach(x => {
+      const r = document.createElement("div"); r.className = "sc-riga sc-sal";
+      r.innerHTML = `<span class="sc-riga-punto"></span><span class="sc-riga-testo"></span><span class="sc-riga-quando"></span>`;
+      r.querySelector(".sc-riga-testo").textContent = "SAL " + x.numero + " · " + x.percentuale + "%" + (x.importo !== null ? " · " + euroConti(x.importo) : "") + (x.note ? " · " + x.note : "");
+      r.querySelector(".sc-riga-quando").textContent = x.fatturato ? "fatturato" : x.importo !== null ? "da fatturare" : "senza importo";
+      if(!x.fatturato && x.importo !== null){
+        const b = document.createElement("button"); b.type = "button"; b.className = "sc-sal-fattura"; b.textContent = "Crea fattura";
+        b.addEventListener("click", () => creaFatturaSal(x));
+        r.appendChild(b);
+      }
+      listaSal.appendChild(r);
+    });
+    const nuovo = document.createElement("button");
+    nuovo.type = "button"; nuovo.className = "sc-sal-nuovo"; nuovo.textContent = "+ Nuovo SAL";
+    nuovo.addEventListener("click", () => nuovoSalDaScheda(c));
+    listaSal.appendChild(nuovo);
+    corpo.appendChild(listaSal);
+  }
+
+  // Elettricista: le dichiarazioni di conformità del cliente (28/09/2026)
+  if(currentProfession === "elettricista"){
+    sezione("Dichiarazioni di conformità");
+    const listaDico = document.createElement("div");
+    listaDico.className = "sc-lista"; listaDico.id = "scDico";
+    const sue = dicoDelCliente(c.id);
+    if(!sue.length) listaDico.innerHTML = '<div class="sc-vuoto">Nessuna. Dimmi "fai la DiCo per ' + escapeHtml(c.name) + '".</div>';
+    sue.forEach(x => listaDico.appendChild(rigaDico(x, false)));
+    const nuova = document.createElement("button");
+    nuova.type = "button"; nuova.className = "sc-sal-nuovo"; nuova.textContent = "+ Nuova dichiarazione";
+    nuova.addEventListener("click", () => { chiudiRisorsaCard(); apriDico(c, ""); });
+    listaDico.appendChild(nuova);
+    corpo.appendChild(listaDico);
+  }
 
   sezione("Appunti");
   const listaAppunti = document.createElement("div");
@@ -18088,7 +18572,7 @@ suTocco("impVoceAiuto", () => {
    di avere una copia dei propri dati (art. 20 GDPR) con un tocco. */
 const TABELLE_MIEI_DATI = ["profiles", "clients", "conversations", "messages", "tasks", "incomes", "payments",
   "opportunities", "goals", "employees", "assigned_tasks", "cantieri", "cantiere_foto", "cantiere_documenti",
-  "cantiere_appunti", "cartelle", "assemblee", "condomini", "documents", "azienda_intestazione", "feedback"];
+  "cantiere_appunti", "cartelle", "assemblee", "sal", "dichiarazioni_conformita", "condomini", "documents", "azienda_intestazione", "feedback"];
 async function scaricaIMieiDati(){
   if(!isDbReady()){ showAILanding("Non collegato", "Per scaricare i tuoi dati serve la connessione."); return; }
   const dati = { app: "EON", creato_il: new Date().toISOString(), account: (currentSession.user && currentSession.user.email) || "",

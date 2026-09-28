@@ -25,7 +25,7 @@
 const CONTRATTO = {
   profiles: ["id", "full_name", "business_name", "profession", "created_at", "attivita_tipo", "attivita_modo", "attivita_persone"],
   clients: ["id", "owner_id", "name", "status", "value", "phone", "deleted_at", "address"],
-  tasks: ["id", "owner_id", "title", "owner_type", "status", "time", "scheduled_at", "deleted_at"],
+  tasks: ["id", "owner_id", "title", "owner_type", "status", "time", "scheduled_at", "deleted_at", "urgente", "client_id"],
   conversations: ["id", "owner_id", "contact_name", "deleted_at", "ultimo_analizzato", "ultimo_esito"],
   messages: ["id", "conversation_id", "sender", "event_type", "title", "body", "amount", "file_url", "file_name", "scheduled_at", "deleted_at"],
   documents: ["id", "owner_id", "doc_type", "client_name", "amount", "content"],
@@ -35,6 +35,8 @@ const CONTRATTO = {
   uso_codice: ["id", "owner_id", "tipo", "created_at"],
   cartelle: ["id", "owner_id", "nome", "icona", "ordine", "created_at", "deleted_at"],
   assemblee: ["id", "owner_id", "condominio", "client_id", "quando", "tipo", "stato", "created_at", "deleted_at"],
+  sal: ["id", "owner_id", "client_id", "numero", "percentuale", "importo", "note", "fatturato", "created_at", "deleted_at"],
+  dichiarazioni_conformita: ["id", "owner_id", "client_id", "numero", "dati", "created_at", "deleted_at"],
   cantieri: ["id", "owner_id", "client_id", "nome", "stato", "created_at", "deleted_at"],
   condomini: ["id", "owner_id", "client_id", "nome", "ruolo", "unita_immobiliare", "quota_millesimale", "telefono", "morosita_importo", "morosita_da", "created_at", "deleted_at"],
   incomes: ["id", "owner_id", "client_name", "client_id", "description", "amount", "due_date", "status", "created_at", "deleted_at"],
