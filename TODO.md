@@ -4588,3 +4588,24 @@ solo conteggi (mai frasi né risposte degli utenti):
   produzione il 28/09; RLS attiva senza policy: solo il server). Nella pulizia
   notturna dei 12 mesi.
 - Test: `admin.test.mjs` (+10), `admin-app.test.js` (+1).
+
+### Costi: istruzioni di EON in cache per 1 ora (28/09/2026)
+
+Andrea: "abbassare i costi senza toccare la qualità" → punto 1 della proposta.
+- Il motore completo (`proseguiAssistente`) mette le istruzioni (~24 mila
+  token, strumenti compresi) in cache per **1 ora** invece di 5 minuti
+  (`cache_control: { type: "ephemeral", ttl: "1h" }`). Scrittura 2× invece di
+  1,25×, lettura 0,1×. Stessa AI, stesse istruzioni: qualità identica.
+- `sommaConsumo`: le scritture di 1 ora contate 2× (dal dettaglio
+  `usage.cache_creation.ephemeral_1h_input_tokens`), così il costo nel
+  registro resta vero.
+- **Misura sui tempi veri** del registro (ultimi 30 giorni, simulazione della
+  sola parte istruzioni): Haiku −19% (scritture da 57 a 27), Sonnet −15% (da
+  46 a 23). Meno della stima iniziale ("4 volte meno"): l'uso di prova è a
+  raffiche con pause oltre l'ora. Con più artigiani lo stesso mestiere
+  condivide la stessa cache (istruzioni identiche), quindi il risparmio
+  dovrebbe crescere: da rimisurare con il registro quando ci sono utenti veri.
+- Prossimi passi possibili (non fatti): accorciare le istruzioni con test
+  dedicati; le risposte a una domanda di EON oggi vanno su Sonnet (~10
+  centesimi): passarle a Haiku solo dopo prove, può toccare la qualità.
+- Test: `memoria-conversazione` (+3).

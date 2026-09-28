@@ -206,5 +206,20 @@ copione = [
 r = await chiedi("segnami di comprare il silicone");
 verifica("ripiego su Sonnet come prima", chiamateAI.length === 3 && chiamateAI[2].model !== HAIKU, JSON.stringify(chiamateAI.map((c) => c.model)));
 
+console.log("\n=== Cache di 1 ora per le istruzioni, e costo giusto nel registro (28/09/2026) ===");
+databaseVuoto();
+chiamateAI = [];
+copione = [
+  () => ({ ...usaStrumento("interpreta_richiesta", { operazione: "consulta", oggetto: "nessuno" }), usage: { input_tokens: 100, output_tokens: 50, cache_creation_input_tokens: 24000, cache_creation: { ephemeral_1h_input_tokens: 24000, ephemeral_5m_input_tokens: 0 }, cache_read_input_tokens: 0 } }),
+  () => ({ ...rispondiTesto("Buona serata!"), usage: { input_tokens: 100, output_tokens: 50, cache_creation_input_tokens: 0, cache_read_input_tokens: 24000 } }),
+];
+r = await chiedi("vado a casa");
+const sistemaPrimo = chiamateAI[0] && chiamateAI[0].system;
+verifica("istruzioni in cache per 1 ora; data e ora fuori dalla cache", Array.isArray(sistemaPrimo) && sistemaPrimo[0].cache_control && sistemaPrimo[0].cache_control.type === "ephemeral" && sistemaPrimo[0].cache_control.ttl === "1h" && !sistemaPrimo[1].cache_control, JSON.stringify(sistemaPrimo && sistemaPrimo.map((b) => b.cache_control || null)));
+verifica("stessa cache anche al secondo giro (nessun cambio alle istruzioni)", chiamateAI[1] && JSON.stringify(chiamateAI[1].system[0]) === JSON.stringify(sistemaPrimo[0]));
+const rigaCosto = tabelle.ai_request_log[tabelle.ai_request_log.length - 1];
+// Haiku: 100×1 + 50×5 + 24000×2 (scrittura 1 ora) + poi 100×1 + 50×5 + 24000×0,1 = 0,0511 $
+verifica("costo nel registro: scrittura di 1 ora contata 2×, lettura 0,1× ($0,0511)", rigaCosto && Number(rigaCosto.costo_usd) === 0.0511, rigaCosto && rigaCosto.costo_usd);
+
 console.log(falliti ? `\n${falliti} controlli FALLITI.` : "\nTutti i controlli passati.");
 if (falliti) process.exitCode = 1;
