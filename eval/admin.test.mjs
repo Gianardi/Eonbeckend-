@@ -149,5 +149,39 @@ verifica("\"Segna come visti\": aggiorna la data", r.status === 200 && tabelle.e
 r = await chiama({}, "admin_errori_visti", "t", "POST");
 verifica("un utente normale non può segnare niente", r.status === 403);
 
+// 8 — Cosa può fare il codice (28/09/2026): il contatore dell'app
+tabelle.uso_codice = [];
+r = await chiama({ tipo: "lettura_disponibilita" }, "uso_codice", "t", "POST");
+verifica("uso_codice: salva solo tipo e utente", r.status === 200 && tabelle.uso_codice.length === 1 && tabelle.uso_codice[0].tipo === "lettura_disponibilita" && tabelle.uso_codice[0].owner_id === UTENTE.id && Object.keys(tabelle.uso_codice[0]).sort().join() === "created_at,deleted_at,id,owner_id,tipo", JSON.stringify(tabelle.uso_codice));
+r = await chiama({ tipo: "Ciao Rita, ci vediamo alle 15" }, "uso_codice", "t", "POST");
+verifica("uso_codice: una frase al posto del tipo viene rifiutata", r.status === 400 && tabelle.uso_codice.length === 1, String(r.status));
+r = await chiama({ tipo: "pagina" }, "uso_codice", null, "POST");
+verifica("uso_codice senza login: 401", r.status === 401 && tabelle.uso_codice.length === 1);
+await chiama({ tipo: "pagina" }, "uso_codice", "t", "POST");
+await chiama({ tipo: "pagina" }, "uso_codice", "t", "POST");
+
+// 9 — il riepilogo per il pannello
+const riga = (x) => ({ id: randomUUID(), created_at: new Date().toISOString(), owner_id: UTENTE.id, tipo: "nuovo", messaggio: PREFISSO + "\"FRASE-SEGRETA\"", risposta: "RISPOSTA-SEGRETA", costo_usd: 0.04, durata_ms: 8000, ...x });
+tabelle.ai_request_log = [
+  riga({ modello: "claude-haiku-4-5", strumenti: ["interpreta_richiesta", "elenca_appuntamenti"], intento: "consulta/azione/appuntamento" }),
+  riga({ modello: "claude-haiku-4-5", strumenti: ["interpreta_richiesta", "elenca_appuntamenti"], intento: "consulta/azione/appuntamento", durata_ms: 10000 }),
+  riga({ modello: "claude-haiku-4-5", strumenti: ["interpreta_richiesta"], intento: "consulta/nessuno" }),
+  riga({ modello: "claude-sonnet-4-5", strumenti: [], intento: "mostra/risorsa" }),
+  riga({ modello: "claude-haiku-4-5", strumenti: ["interpreta_richiesta", "crea_impegno"], intento: "crea/azione/appuntamento", costo_usd: 0.005 }),
+  riga({ modello: "codice", strumenti: ["crea_impegno"], intento: null, costo_usd: 0 }),
+];
+r = await chiama(undefined, "admin_codice", "t", "GET");
+verifica("admin_codice per un utente normale: 403", r.status === 403, String(r.status));
+r = await chiama(undefined, "admin_codice", "admin", "GET");
+const cod = r.corpo || {};
+const gruppo = (nome) => (cod.gruppi || []).find((g) => g.nome === nome);
+verifica("admin_codice: 3 risposte del codice nell'app + 1 del server su 9 in tutto (44%)", r.status === 200 && cod.totale === 9 && cod.dal_codice === 4 && cod.con_ai === 5 && cod.codice_pct === 44, JSON.stringify(cod));
+verifica("per tipo: \"pagina\" 2, \"lettura_disponibilita\" 1", JSON.stringify(cod.codice_per_tipo) === '[{"tipo":"pagina","n":2},{"tipo":"lettura_disponibilita","n":1}]', JSON.stringify(cod.codice_per_tipo));
+const lettura = gruppo("Chiedere · appuntamento");
+verifica("l'AI che ha solo letto dati: in cima, \"da passare al codice\", 2 volte, 9 s di media", cod.gruppi[0] === lettura && lettura.n === 2 && lettura.consiglio.livello === "codice" && lettura.secondi_medi === 9, JSON.stringify(cod.gruppi));
+verifica("senza strumenti: chiacchiera ok, \"vedere risorsa\" da guardare", gruppo("Chiedere").consiglio.livello === "ok" && gruppo("Vedere · risorsa").consiglio.livello === "guardare", JSON.stringify(cod.gruppi));
+verifica("un'azione vera resta all'AI", gruppo("Creare · appuntamento").consiglio.livello === "ok");
+verifica("nel riepilogo nessuna frase né risposta degli utenti", !/SEGRETA/.test(JSON.stringify(cod)));
+
 console.log(falliti ? `\n${falliti} controlli falliti.` : "\nTutti i controlli passati.");
 if (falliti) process.exitCode = 1;

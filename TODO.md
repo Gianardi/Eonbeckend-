@@ -4567,3 +4567,24 @@ Divisione: l'AI è il cervello (capire, parlare, ricordare), il codice le mani
 - Non provato con l'AI vera (qui non c'è la chiave): tono e memoria sono
   provati con l'AI simulata; si vedono in produzione dopo il merge.
 - Test: nuovo `eval/memoria-conversazione.test.mjs` (13), `pacchetto-27-09` (+3).
+
+### Sistema: cosa può fare il codice senza AI (28/09/2026)
+
+Andrea: "un sistema per capire tutte le cose in cui può lavorare il codice
+senza l'AI". Nel pannello EON Admin, sezione **"Cosa può fare il codice"**
+(`action=admin_codice`, `riepilogoCodice` in api/index.js), ultimi 30 giorni,
+solo conteggi (mai frasi né risposte degli utenti):
+- **% di risposte date dal codice**: quelle dell'app (nuova tabella
+  `uso_codice`: solo tipo e data, mandati da `contaUsoCodice` a ogni risposta
+  senza AI, `action=uso_codice`, tipo `[a-z_]` o rifiutato) + quelle del
+  server (`ai_request_log.modello = 'codice'`).
+- **Cosa fa già il codice**, per tipo (pagina, sono libero?, incassi…).
+- **Richieste finite all'AI**, raggruppate per intento dichiarato (es.
+  "Chiedere · appuntamento") e per strumenti usati, con attesa e costo medi:
+  AL CODICE = l'AI ha solo letto dati (candidato sicuro); DA GUARDARE = nessuno
+  strumento e non è conversazione (frase non capita); OK = conversazione o
+  azione vera. Le "AL CODICE" in cima: sono la lista di lavoro.
+- Migrazione `supabase/uso_codice.sql` (solo aggiunta; applicata su staging e
+  produzione il 28/09; RLS attiva senza policy: solo il server). Nella pulizia
+  notturna dei 12 mesi.
+- Test: `admin.test.mjs` (+10), `admin-app.test.js` (+1).

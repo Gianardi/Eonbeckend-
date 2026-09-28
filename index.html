@@ -5684,7 +5684,8 @@ function ricordaTurnoLocale(domanda, risposta){
 }
 /* Cosa ha fatto il codice, letto da quello che si vede: la card aperta
    (titolo e contenuto) o la pagina aperta */
-function ricordaEsitoCodice(domanda){
+function ricordaEsitoCodice(domanda, tipo){
+  contaUsoCodice(tipo);
   setTimeout(() => {
     const overlay = document.getElementById("risorsaOverlay");
     let esito;
@@ -5698,6 +5699,16 @@ function ricordaEsitoCodice(domanda){
     }
     ricordaTurnoLocale(domanda, esito);
   }, 0);
+}
+/* Il pannello admin conta le risposte date dal codice (senza AI): si manda
+   SOLO il tipo di risposta, mai la frase. Senza login o senza rete: niente. */
+function contaUsoCodice(tipo){
+  if(!tipo || !BACKEND_CONFIGURED || !currentSession) return;
+  tokenValido().then(token => fetch(ASSISTANT_ENDPOINT_URL.replace("action=assistant", "action=uso_codice"), {
+    method: "POST", keepalive: true,
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+    body: JSON.stringify({ tipo })
+  })).catch(() => {});
 }
 function recentiLocaliDaMandare(){
   const da = Date.now() - 12 * 3600 * 1000;
@@ -11988,24 +11999,25 @@ function provaLetturaLocale(testo){
     const voci = impegniDelGiorno(letturaGiorno.data);
     navigateTo("calendario");
     const quando = letturaGiorno.etichetta;
-    if(!voci.length) return { titolo: quando.charAt(0).toUpperCase() + quando.slice(1), testo: "Niente in programma per " + quando + "." };
+    if(!voci.length) return { titolo: quando.charAt(0).toUpperCase() + quando.slice(1), testo: "Niente in programma per " + quando + ".", tipo: "giorno" };
     return {
+      tipo: "giorno",
       titolo: (voci.length === 1 ? "1 impegno " : voci.length + " impegni ") + quando,
       testo: voci.map(v => v.ora ? "**" + v.ora + "** – " + v.titolo : v.titolo).join("\n"),
     };
   }
 
   const soldi = capisciDomandaSoldi(t);
-  if(soldi) return soldi;
+  if(soldi) return { ...soldi, tipo: "soldi" };
   const libero = capisciDisponibilita(t);
-  if(libero) return libero;
+  if(libero) return { ...libero, tipo: "disponibilita" };
   const suCliente = capisciDomandaCliente(t);
-  if(suCliente) return suCliente;
+  if(suCliente) return { ...suCliente, tipo: "cliente" };
 
   if(["quanti clienti ho", "quanti clienti", "quanti sono i miei clienti", "quanti clienti ho in anagrafica"].includes(t)){
     const attivi = clients.filter(c => !c.archived).length;
     navigateTo("clienti");
-    return { titolo: "Clienti", testo: attivi === 1 ? "Hai 1 cliente in anagrafica." : `Hai ${attivi} clienti in anagrafica.` };
+    return { titolo: "Clienti", testo: attivi === 1 ? "Hai 1 cliente in anagrafica." : `Hai ${attivi} clienti in anagrafica.`, tipo: "clienti" };
   }
 
   if(["chi mi ha scritto", "chi mi ha scritto oggi", "messaggi non letti", "ho messaggi non letti", "quanti messaggi non letti", "quanti messaggi non letti ho"].includes(t)){
@@ -12019,8 +12031,9 @@ function provaLetturaLocale(testo){
     const conNonLetti = chats.filter(c => !c.archived && c.unread > 0);
     const totaleNonLetti = conNonLetti.reduce((s, c) => s + c.unread, 0);
     navigateTo("chat");
-    if(!conNonLetti.length) return { titolo: "Messaggi", testo: "Nessuno, hai letto tutto." };
+    if(!conNonLetti.length) return { titolo: "Messaggi", testo: "Nessuno, hai letto tutto.", tipo: "messaggi" };
     return {
+      tipo: "messaggi",
       titolo: totaleNonLetti === 1 ? "1 messaggio da leggere" : totaleNonLetti + " messaggi da leggere",
       testo: "Da " + conNonLetti.map(c => c.name).join(", ") + ".",
     };
@@ -12749,7 +12762,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       runIdAperto = null;
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "pagina");
       return;
     }
     // La pagina può completare la frase (es. in Fatture: "Rossi, 300" → "Fattura per Rossi, 300")
@@ -12766,7 +12779,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaNavigazioneDiretta(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "pagina");
       return;
     }
     /* "Voglio cambiare password", "manda un feedback", "assegna un compito",
@@ -12774,14 +12787,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaAzioneDiretta(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "azione_diretta");
       return;
     }
     /* "Chiama Rita", "scrivi a Rita", "nuovo cliente": subito, senza AI */
     if(!inContinuazione && provaComandiSemplici(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "comando");
       return;
     }
     /* "Invia il preventivo a Rossi": WhatsApp o Mail già pronti, senza AI.
@@ -12790,7 +12803,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaInvioDocumento(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "invio_documento");
       return;
     }
 
@@ -12803,7 +12816,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(lettura){
         campo.value = "";
         hint.textContent = TESTO_HINT_BASE;
-        ricordaEsitoCodice(testo);
+        ricordaEsitoCodice(testo, "lettura_" + (lettura.tipo || "altro"));
         const righeLettura = (lettura.testo || "").split("\n").filter(Boolean);
         mostraRispostaEON(testo, righeLettura.length > 1 ? righeLettura.map(r => "- " + r).join("\n") : lettura.testo, { titolo: lettura.titolo });
         if(viaVoce) parlaRisposta(lettura.titolo + (lettura.testo ? ": " + lettura.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
@@ -12817,7 +12830,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       if(saluto){
         campo.value = "";
         hint.textContent = TESTO_HINT_BASE;
-        ricordaEsitoCodice(testo);
+        ricordaEsitoCodice(testo, "saluto");
         mostraRispostaEON(testo, saluto.testo, { titolo: saluto.titolo });
         if(viaVoce) parlaRisposta(saluto.titolo + ". " + saluto.testo.split("\n")[0]);
         return;
@@ -12829,7 +12842,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaCancellaAppunto(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "cancella_appunto");
       return;
     }
 
@@ -12837,7 +12850,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaAnnullaImmediato(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "annulla_impegni");
       return;
     }
 
@@ -12846,7 +12859,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaFotoImmediata(testo, viaVoce)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "foto");
       return;
     }
 
@@ -12855,7 +12868,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaSchedaCliente(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "scheda_cliente");
       return;
     }
 
@@ -12863,7 +12876,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && (provaMeteo(testo, viaVoce) || provaPercorso(testo))){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "meteo_percorso");
       return;
     }
 
@@ -12871,7 +12884,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaDocumentoImpresa(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "documento_impresa");
       if(viaVoce) parlaRisposta("Ecco il documento");
       return;
     }
@@ -12882,7 +12895,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && provaRisorsaImmediata(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "risorsa");
       if(viaVoce) parlaRisposta("Ecco quello che hai chiesto");
       return;
     }
@@ -12892,7 +12905,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && await provaAppuntoImmediato(testo)){
       campo.value = "";
       hint.textContent = TESTO_HINT_BASE;
-      ricordaEsitoCodice(testo);
+      ricordaEsitoCodice(testo, "appunto");
       if(viaVoce) parlaRisposta("Appunto aggiunto");
       return;
     }

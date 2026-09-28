@@ -2834,7 +2834,95 @@ async function handleAdmin(action, req, res, user) {
     await servizio(`eon_admin?user_id=eq.${user.id}`, { method: "PATCH", body: JSON.stringify({ errori_visti_fino: new Date().toISOString() }), headers: { Prefer: "return=minimal" } });
     return send(res, 200, { ok: true });
   }
+  if (action === "admin_codice") return send(res, 200, await riepilogoCodice());
   throw fail("Richiesta non riconosciuta");
+}
+
+/* ------------------------------------------------------------
+   Cosa può fare il codice, senza AI (28/09/2026)
+   ------------------------------------------------------------
+   Andrea: "un sistema per capire tutte le cose in cui può lavorare il
+   codice senza l'AI". Due fonti, mai le frasi degli utenti:
+   - uso_codice: ogni volta che l'app risponde da sola, solo il TIPO di
+     risposta ("disponibilita", "pagina"…), mandato dall'app;
+   - ai_request_log: le richieste finite all'AI, raggruppate per quello
+     che l'AI ha dichiarato di dover fare (intento) e per gli strumenti
+     che ha usato davvero.
+   Una richiesta che l'AI ha risolto SOLO leggendo dati è il candidato
+   più sicuro da passare al codice; una senza nessuno strumento è una
+   chiacchiera (giusto con l'AI) o una frase non capita (da guardare). */
+const STRUMENTI_SOLA_LETTURA = new Set(["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa", "leggi_impegno"]);
+const NOMI_OPERAZIONE = { mostra: "Vedere", crea: "Creare", modifica: "Modificare", cancella: "Cancellare", invia: "Inviare", contatta: "Contattare", consulta: "Chiedere" };
+function categoriaRichiesta(r) {
+  if (r.modello === "codice") return "codice";
+  const strumenti = (Array.isArray(r.strumenti) ? r.strumenti : []).filter((s) => s !== "interpreta_richiesta");
+  if (!strumenti.length) return "senza_strumenti";
+  return strumenti.every((s) => STRUMENTI_SOLA_LETTURA.has(s)) ? "sola_lettura" : "azioni";
+}
+function nomeIntento(intento) {
+  const [op, oggetto, tipo] = String(intento || "").split("/");
+  if (!op) return "Non dichiarato";
+  return [NOMI_OPERAZIONE[op] || op, tipo || (oggetto && oggetto !== "nessuno" ? oggetto : "")].filter(Boolean).join(" · ");
+}
+function consiglioCodice(categoria, intento) {
+  if (categoria === "sola_lettura") return { livello: "codice", testo: "Da passare al codice: l'AI ha solo letto dati" };
+  if (categoria === "senza_strumenti") {
+    return /^consulta\/nessuno/.test(intento || "")
+      ? { livello: "ok", testo: "Conversazione: giusto con l'AI" }
+      : { livello: "guardare", testo: "Non capita o senza risposta: da guardare" };
+  }
+  if (categoria === "codice") return { livello: "ok", testo: "Già fatto dal codice (server)" };
+  return { livello: "ok", testo: "Azione con l'AI" };
+}
+async function riepilogoCodice() {
+  const da = new Date(Date.now() - 30 * 86400000).toISOString();
+  const [richieste, usi] = await Promise.all([
+    servizio(`ai_request_log?select=tipo,modello,strumenti,intento,costo_usd,durata_ms&tipo=in.(nuovo,continuazione)&created_at=gte.${encodeURIComponent(da)}&limit=20000`, { method: "GET" }).catch(() => []),
+    servizio(`uso_codice?select=tipo&created_at=gte.${encodeURIComponent(da)}&limit=50000`, { method: "GET" }).catch(() => []),
+  ]);
+  const gruppi = new Map();
+  (richieste || []).forEach((r) => {
+    const categoria = categoriaRichiesta(r);
+    const chiave = categoria + "|" + (r.intento || "");
+    const g = gruppi.get(chiave) || { categoria, intento: r.intento || null, nome: nomeIntento(r.intento), n: 0, durata: 0, nDurata: 0, costo: 0, nCosto: 0 };
+    g.n++;
+    if (r.durata_ms != null) { g.durata += Number(r.durata_ms); g.nDurata++; }
+    if (r.costo_usd != null) { g.costo += Number(r.costo_usd); g.nCosto++; }
+    gruppi.set(chiave, g);
+  });
+  const ordineLivello = { codice: 0, guardare: 1, ok: 2 };
+  const elenco = [...gruppi.values()].map((g) => ({
+    categoria: g.categoria, intento: g.intento, nome: g.nome, n: g.n,
+    secondi_medi: g.nDurata ? Math.round(g.durata / g.nDurata / 100) / 10 : null,
+    costo_medio_usd: g.nCosto ? Math.round(g.costo / g.nCosto * 10000) / 10000 : null,
+    consiglio: consiglioCodice(g.categoria, g.intento),
+  })).sort((a, b) => ordineLivello[a.consiglio.livello] - ordineLivello[b.consiglio.livello] || b.n - a.n);
+  const perTipo = {};
+  (usi || []).forEach((u) => { perTipo[u.tipo] = (perTipo[u.tipo] || 0) + 1; });
+  const conAI = (richieste || []).filter((r) => r.modello !== "codice").length;
+  const dalCodiceServer = (richieste || []).length - conAI;
+  const dalCodiceApp = (usi || []).length;
+  const totale = conAI + dalCodiceServer + dalCodiceApp;
+  return {
+    giorni: 30,
+    totale,
+    con_ai: conAI,
+    dal_codice: dalCodiceServer + dalCodiceApp,
+    codice_pct: totale ? Math.round((dalCodiceServer + dalCodiceApp) / totale * 100) : null,
+    codice_per_tipo: Object.entries(perTipo).map(([tipo, n]) => ({ tipo, n })).sort((a, b) => b.n - a.n),
+    gruppi: elenco,
+  };
+}
+
+/* L'app ha risposto da sola: si conta solo il tipo di risposta */
+async function handleUsoCodice(req, res, user) {
+  if (req.method !== "POST") throw fail("Usa POST per questo endpoint", 405);
+  const body = await readBody(req);
+  const tipo = typeof body.tipo === "string" ? body.tipo.trim() : "";
+  if (!/^[a-z_]{2,30}$/.test(tipo)) throw fail("Campo 'tipo' non valido");
+  if (troppeSegnalazioni("codice:" + user.id)) return send(res, 200, { ok: true, ignorato: true });
+  await servizio("uso_codice", { method: "POST", body: JSON.stringify({ owner_id: user.id, tipo }), headers: { Prefer: "return=minimal" } }).catch((err) => console.warn("uso_codice non scritto:", err.message));
+  return send(res, 200, { ok: true });
 }
 
 /* ------------------------------------------------------------
@@ -6264,7 +6352,8 @@ export default async function handler(req, res) {
 
     const { user, accessToken } = await requireUser(req);
 
-    if (action === "admin_stato" || action === "admin_riepilogo" || action === "admin_errori_visti") return await handleAdmin(action, req, res, user);
+    if (action === "admin_stato" || action === "admin_riepilogo" || action === "admin_errori_visti" || action === "admin_codice") return await handleAdmin(action, req, res, user);
+    if (action === "uso_codice") return await handleUsoCodice(req, res, user);
     if (/^passkey_(opzioni_registrazione|registra|stato|disattiva)$/.test(action)) return await handlePasskey(action, req, res, user);
     if (action === "ai") return await handleAI(req, res);
     if (action === "assistant") return await handleAssistant(req, res, user, accessToken);
