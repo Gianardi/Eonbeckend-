@@ -16258,6 +16258,8 @@ function messaggioErroreAccesso(err){
   if(/already registered|already been registered/i.test(m)) return "C'è già un account con questa email: accedi, oppure usa \"Password dimenticata?\".";
   if(/password should be at least|weak password/i.test(m)) return "Password troppo debole: usa almeno 8 caratteri.";
   if(/rate limit|too many/i.test(m)) return "Troppi tentativi: aspetta qualche minuto e riprova.";
+  // Iscrizioni chiuse in Supabase (28/09/2026: il server rispondeva in inglese)
+  if(/signups? not allowed|signup_disabled/i.test(m)) return "Le iscrizioni a EON sono chiuse in questo momento. Riprova tra poco o scrivici per entrare.";
   if(/invalid email|unable to validate email/i.test(m)) return "Controlla l'indirizzo email.";
   return m || "Qualcosa è andato storto, riprova.";
 }

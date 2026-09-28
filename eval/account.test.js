@@ -155,6 +155,8 @@ async function main() {
     await page.waitForTimeout(300);
     const dopo = await page.evaluate(() => ({ fuori: !document.getElementById("onboardingScreen").classList.contains("hidden") }));
     verifica("eliminato: chiamato il server con la conferma, poi fuori alla schermata iniziale", richiestaElimina && richiestaElimina.conferma === "ELIMINA" && dopo.fuori, JSON.stringify({ richiestaElimina, dopo }));
+    const chiuse = await page.evaluate(() => messaggioErroreAccesso({ message: "Signups not allowed for this instance" }));
+    verifica("iscrizioni chiuse in Supabase: messaggio in italiano, non l'errore inglese", /iscrizioni a EON sono chiuse/.test(chiuse), chiuse);
     verifica("nessun errore nella pagina", errori.length === 0, errori.join(" | "));
   } finally {
     await browser.close();
