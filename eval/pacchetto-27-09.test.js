@@ -288,7 +288,7 @@ async function main() {
     const tutteLePagine = await page.evaluate(() => {
       const casi = [["Chiamate", "chiamate"], ["chi devo chiamare", "chiamate"], ["Cestino", "cestino"], ["spazzatura", "cestino"],
         ["Impostazione", "impostazioni"], ["Profilo", "impostazioni"], ["Menu", "gestisci-azienda"], ["Compiti", "assegna-compiti"],
-        ["Squadra", "assegna-compiti"], ["Registro", "ai-request-log"], ["Assemblee", "assemblee"], ["Cresci", "cresci"],
+        ["Squadra", "assegna-compiti"], ["Registro", "ai-request-log"], ["Cresci", "cresci"],
         ["messaggio", "chat"], ["Appuntamento", "calendario"], ["Preventivo", "fatture-preventivi"], ["Documenti", "cantiere-documenti"],
         ["Foto", "cantiere-foto"], ["Lettere", "crea-lettera"], ["Pagamenti", "pagamenti"],
         ["Entrate", "entrate"], ["Conti", "azienda"], ["Casa", "home"], ["apri le chiamate", "chiamate"], ["Chiamate per favore", "chiamate"]];
@@ -303,6 +303,11 @@ async function main() {
       provaNavigazioneDiretta("Privacy");
       const privacy = document.getElementById("risorsaTitolo").textContent;
       chiudiRisorsaCard();
+      // 28/09: Assemblee solo per l'amministratore (ognuno vede solo il suo mestiere)
+      if (provaNavigazioneDiretta("Assemblee")) sbagliati.push("Assemblee aperta da un edile");
+      const mestierePrima = currentProfession; currentProfession = "amministratore";
+      if (!provaNavigazioneDiretta("Assemblee") || paginaAttuale !== "assemblee") sbagliati.push("Assemblee non aperta dall'amministratore");
+      currentProfession = mestierePrima; navigateTo("home");
       // 28/09: "Appunti" apre la card degli appunti, non più la vecchia pagina
       if (!provaNavigazioneDiretta("Appunti") || document.getElementById("risorsaTitolo").textContent !== "Appunti") sbagliati.push("Appunti → niente card");
       chiudiRisorsaCard();

@@ -253,6 +253,25 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
 
+### 0b.6 Ognuno vede solo il suo mestiere; il fondatore li prova tutti — FATTO il 28/09
+Andrea: "io con la mia email devo poter accedere a tutto per fare le
+simulazioni; un cliente che si registra come edile vede solo le sezioni
+edile e nient'altro, come le grandi app".
+- **Clienti**: il mestiere è legato all'account e non si cambia (blocco nel
+  database dal 25/09). In più ora le sezioni di un altro mestiere non si
+  aprono né col tocco né a voce: **Assemblee** solo amministratore,
+  **Cartello fine lavori** solo edile (sparisce anche dai Documenti degli
+  altri). Regola per il futuro: ogni sezione nuova solo di un mestiere va
+  in `SEZIONI_DEL_MESTIERE`.
+- **Fondatore** (account in `eon_admin`, oggi solo Andrea): in Impostazioni
+  **"Prova come…"** (Edile, Idraulico, Elettricista, Amministratore, Altra
+  attività). Striscia in alto "Modalità prova: …" con "Torna al tuo
+  account". Il profilo non cambia mai; si vedono i dati veri di Andrea con
+  la grafica di quel mestiere; anche l'AI risponde come quel mestiere (il
+  server lo accetta solo se l'account è in `eon_admin`).
+- Da decidere più avanti: dati di esempio separati per ogni mestiere
+  durante la prova (oggi i dati veri di Andrea).
+
 ### 0b.5 Amministratori di condominio: EON accanto al gestionale (28/09/2026)
 **Cosa è successo**: un amministratore di condominio usa EON per il lavoro
 di tutti i giorni (chiamare, assemblee, appunti, cosa è successo in
