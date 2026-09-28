@@ -10409,6 +10409,8 @@ function apriCardAppunti(cartella){
     const testo = String(t || campo.value || "").trim();
     if(!testo) return;
     campo.value = "";
+    // "Calendario", "Fornitori": il nome di una pagina o di una cartella la apre anche da qui
+    if(apriSeNomeDiPagina(testo)) return;
     await aggiungiAppuntoDaCard(testo, cartella ? cartella.id : null);
     disegnaListaAppunti(lista, cartella ? cartella.id : null);
   };
@@ -11453,7 +11455,7 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "chiamate": ["chiamate", "le chiamate", "chiamata", "telefonate", "le telefonate", "da chiamare", "chi devo chiamare", "registro chiamate", "il registro chiamate"],
   "cestino": ["cestino", "spazzatura", "eliminati", "le cose eliminate"],
   "gestisci-azienda": ["menu", "menù", "il menu", "il menù"],
-  "cresci": ["cresci"],
+  "cresci": ["cresci", "lavori in corso", "i lavori in corso", "obiettivi", "gli obiettivi", "i miei obiettivi", "i tuoi obiettivi"],
   "assegna-compiti": ["compiti", "i compiti", "assegna compiti", "assegna compito", "compito", "squadra", "la squadra", "team", "il team", "dipendenti", "i dipendenti"],
   "documenti-impresa": ["durc e documenti", "durc e documenti impresa", "documenti impresa", "documenti dell'impresa", "documenti azienda", "documenti aziendali", "documenti dell'azienda", "i documenti dell'impresa", "i documenti dell'azienda"],
   "cantiere-documenti": ["documenti", "i documenti", "i miei documenti", "documento", "certificazioni", "le certificazioni", "certificazioni e documenti", "le mie certificazioni"],
@@ -11473,7 +11475,7 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "ai-request-log": ["registro ai", "registro", "registro dell'assistente", "il registro"],
 };
 /* Voci delle Impostazioni che si aprono dicendo solo il nome */
-const VOCI_IMPOSTAZIONI_A_VOCE = { "privacy": "impVocePrivacy", "privacy e dati": "impVocePrivacy", "i miei dati": "impVocePrivacy", "aiuto": "impVoceAiuto", "sicurezza": "impVocePassword" };
+const VOCI_IMPOSTAZIONI_A_VOCE = { "face id": "impVoceFaceId", "faceid": "impVoceFaceId", "privacy": "impVocePrivacy", "privacy e dati": "impVocePrivacy", "i miei dati": "impVocePrivacy", "aiuto": "impVoceAiuto", "sicurezza": "impVocePassword" };
 
 /* Apertura riconosciuta: solo il verbo di navigazione (con la sua
    preposizione per "vai"/"portami", che nell'italiano corretto include
@@ -11504,6 +11506,8 @@ function provaNavigazioneDiretta(testo){
      senza un eventuale articolo iniziale (copre "apri il calendario"
      quando in elenco c'è solo "calendario"). */
   const restoSenzaArticolo = resto.replace(/^(?:il|lo|la|i|gli|le)\s+/, "");
+  const card = cardDaAprireAVoce(t, resto, restoSenzaArticolo);
+  if(card){ chiudiRisorsaCard(); card(); return true; }
   for(const pagina in PAGINE_NAVIGABILI_A_VOCE){
     const sinonimi = PAGINE_NAVIGABILI_A_VOCE[pagina];
     if(sinonimi.includes(resto) || sinonimi.includes(restoSenzaArticolo)){
@@ -11520,13 +11524,37 @@ function provaNavigazioneDiretta(testo){
    per tutte"): nella Home, nelle altre pagine, dentro una card (anche la
    scheda del cliente) e anche quando EON ha appena fatto una domanda. È un
    comando chiaro, non una risposta: la card si chiude e si va lì. */
+/* Le cose che si aprono in una card e non in una pagina (29/09/2026,
+   Andrea: "apri appunti", "apri fornitori" — "tutto deve aprirsi con il
+   codice, non con l'AI"). Le cartelle vengono prima delle pagine: in
+   "Altra attività" "Incassi" o "Clienti" sono le cartelle. */
+const APPUNTI_A_VOCE = ["appunti", "gli appunti", "i miei appunti", "note", "le note", "le mie note", "appunto", "nota", "da fare", "le cose da fare", "cose da fare"];
+const FEEDBACK_A_VOCE = ["feedback", "il feedback", "manda un feedback", "un feedback"];
+const NUOVA_CARTELLA_A_VOCE = ["nuova cartella", "una nuova cartella", "crea una cartella", "crea una nuova cartella", "crea cartella", "aggiungi una cartella", "fai una cartella", "fai una nuova cartella"];
+function cardDaAprireAVoce(frase, resto, restoSenzaArticolo){
+  const forme = [resto, restoSenzaArticolo];
+  if(currentProfession === "artigiano" && cartelle.length){
+    const nome = normalizzaComando(restoSenzaArticolo.replace(/^cartella\s+/, "").replace(/^(?:il|lo|la|i|gli|le)\s+/, ""));
+    const c = cartelle.find(x => normalizzaComando(x.nome) === nome);
+    if(c) return () => apriCardAppunti(c);
+  }
+  if(forme.some(f => APPUNTI_A_VOCE.includes(f))) return () => apriCardAppunti(null);
+  if(forme.some(f => FEEDBACK_A_VOCE.includes(f))) return () => apriFeedback();
+  if(currentProfession === "artigiano" && (NUOVA_CARTELLA_A_VOCE.includes(frase) || forme.some(f => NUOVA_CARTELLA_A_VOCE.includes(f)))) return () => { navigateTo("home"); chiediNomeCartella(null); };
+  if(currentProfession === "artigiano" && forme.some(f => ["cartelle", "le cartelle", "le mie cartelle"].includes(f))) return () => navigateTo("home");
+  return null;
+}
+
 function apriSeNomeDiPagina(testo, domandaEON){
   /* Se EON ha appena chiesto "in calendario o negli appunti?", la parola
      detta è la risposta, non un cambio di pagina */
   const parola = String(testo || "").trim().toLowerCase().replace(/[.!?,]+$/, "");
   if(domandaEON && parola && String(domandaEON).toLowerCase().includes(parola)) return false;
+  /* Si chiude la card che era aperta, non quella appena aperta dal nome
+     ("apri appunti", "sicurezza", "apri Fornitori") */
+  const aperture = risorsaCardAperture;
   if(!provaNavigazioneDiretta(testo)) return false;
-  if(document.getElementById("risorsaOverlay").style.display !== "none" && !document.querySelector("#risorsaCorpo .imp-form")) chiudiRisorsaCard();
+  if(document.getElementById("risorsaOverlay").style.display !== "none" && risorsaCardAperture === aperture) chiudiRisorsaCard();
   return true;
 }
 
@@ -14393,7 +14421,9 @@ function mostraRispostaEON(domanda, testo, opzioni){
   apriRisorsaCard(opzioni.titolo || titoloDallaDomanda(domanda), formattaRispostaEON(testo), piede);
 }
 
+var risorsaCardAperture = 0;
 function apriRisorsaCard(titolo, corpoEl, piedeEl){
+  risorsaCardAperture++;
   document.getElementById("risorsaTitolo").textContent = titolo;
   const corpo = document.getElementById("risorsaCorpo");
   corpo.innerHTML = "";

@@ -290,7 +290,7 @@ async function main() {
         ["Impostazione", "impostazioni"], ["Profilo", "impostazioni"], ["Menu", "gestisci-azienda"], ["Compiti", "assegna-compiti"],
         ["Squadra", "assegna-compiti"], ["Registro", "ai-request-log"], ["Assemblee", "assemblee"], ["Cresci", "cresci"],
         ["messaggio", "chat"], ["Appuntamento", "calendario"], ["Preventivo", "fatture-preventivi"], ["Documenti", "cantiere-documenti"],
-        ["Foto", "cantiere-foto"], ["Appunti", "cantiere-appunti"], ["Lettere", "crea-lettera"], ["Pagamenti", "pagamenti"],
+        ["Foto", "cantiere-foto"], ["Lettere", "crea-lettera"], ["Pagamenti", "pagamenti"],
         ["Entrate", "entrate"], ["Conti", "azienda"], ["Casa", "home"], ["apri le chiamate", "chiamate"], ["Chiamate per favore", "chiamate"]];
       const sbagliati = [];
       for (const [frase, pagina] of casi) {
@@ -302,6 +302,9 @@ async function main() {
       for (const frase of ["Chiama Rita", "Cestino di Rita", "appuntamento con Rita domani"]) if (provaNavigazioneDiretta(frase)) sbagliati.push("intercettato: " + frase);
       provaNavigazioneDiretta("Privacy");
       const privacy = document.getElementById("risorsaTitolo").textContent;
+      chiudiRisorsaCard();
+      // 29/09: "Appunti" apre la card degli appunti, non più la vecchia pagina
+      if (!provaNavigazioneDiretta("Appunti") || document.getElementById("risorsaTitolo").textContent !== "Appunti") sbagliati.push("Appunti → niente card");
       chiudiRisorsaCard();
       return { sbagliati, privacy };
     });
