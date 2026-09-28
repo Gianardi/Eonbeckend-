@@ -36,6 +36,16 @@ const RIEPILOGO = {
   ],
 };
 
+const CODICE = {
+  giorni: 30, totale: 200, con_ai: 150, dal_codice: 50, codice_pct: 25,
+  codice_per_tipo: [{ tipo: "pagina", n: 30 }, { tipo: "lettura_disponibilita", n: 20 }],
+  gruppi: [
+    { categoria: "sola_lettura", intento: "consulta/azione/appuntamento", nome: "Chiedere · appuntamento", n: 21, secondi_medi: 9.8, costo_medio_usd: 0.0483, consiglio: { livello: "codice", testo: "Da passare al codice: l'AI ha solo letto dati" } },
+    { categoria: "senza_strumenti", intento: "mostra/risorsa", nome: "Vedere · risorsa", n: 12, secondi_medi: 7.1, costo_medio_usd: 0.03, consiglio: { livello: "guardare", testo: "Non capita o senza risposta: da guardare" } },
+    { categoria: "azioni", intento: "crea/azione/appuntamento", nome: "Creare · appuntamento", n: 40, secondi_medi: 2.1, costo_medio_usd: 0.0055, consiglio: { livello: "ok", testo: "Azione con l'AI" } },
+  ],
+};
+
 async function main() {
   const server = spawn("python3", ["-m", "http.server", String(PORT)], { cwd: ROOT, stdio: "ignore" });
   await new Promise((r) => setTimeout(r, 800));
@@ -88,6 +98,7 @@ async function main() {
         const azione = new URL(route.request().url()).searchParams.get("action");
         chiamate.push({ azione, auth: route.request().headers().authorization });
         if (azione === "admin_errori_visti") return route.fulfill({ status: 200, contentType: "application/json", body: "{\"ok\":true}" });
+        if (azione === "admin_codice" && !risposta.status) return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(CODICE) });
         route.fulfill({ status: risposta.status || 200, contentType: "application/json", body: JSON.stringify(risposta.corpo || {}) });
       });
       const errP = [];
@@ -135,6 +146,11 @@ async function main() {
     verifica("errori: il nuovo segnato NUOVO, il ripetuto con ×3, il vecchio no", vista.nuovi === 1 && /×3/.test(vista.testo) && /Database: 502/.test(vista.testo), JSON.stringify(vista.errori));
     verifica("errori dell'AI: l'errore e il modello, mai la frase dell'utente", /AI non raggiunta/.test(vista.testo) && /claude-haiku-4-5/.test(vista.testo));
     verifica("utenti: nome o email, clienti, spazio", JSON.stringify(vista.utenti) === '["Andrea Gianardi","simone@esempio.it"]' && /38,2 MB/.test(vista.testo), JSON.stringify(vista.utenti));
+    const codice = await a.p.evaluate(() => {
+      const sez = [...document.querySelectorAll(".sezione")].find((x) => /Cosa può fare il codice/.test(x.textContent));
+      return sez ? { quota: sez.querySelector(".quota b").textContent, chips: [...sez.querySelectorAll(".chip")].map((c) => c.textContent), pill: [...sez.querySelectorAll(".voce .pill")].map((c) => c.textContent), testo: sez.textContent } : null;
+    });
+    verifica("\"Cosa può fare il codice\": 25% dal codice, cosa fa già, e le richieste all'AI da passare al codice in cima", codice && codice.quota === "25%" && JSON.stringify(codice.chips) === '["Aprire una pagina · 30","Sono libero? · 20"]' && JSON.stringify(codice.pill) === '["AL CODICE","DA GUARDARE","OK"]' && /21 da passare al codice/.test(codice.testo) && /\$0,048 l'una/.test(codice.testo), JSON.stringify(codice));
     await a.p.click(".barra:nth-child(12)");
     const sugg = await a.p.textContent("#suggerimento");
     verifica("tocco su una barra: giorno, richieste, costo, errori", /31 richieste/.test(sugg) && /\$/.test(sugg), sugg);

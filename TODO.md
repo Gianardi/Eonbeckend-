@@ -4524,3 +4524,67 @@ Andrea: "falle tutte" (la lista proposta di cose che il codice fa da solo).
   primo, i titoli (sig., dott., geom.) ora si tolgono nel secondo.
 - Test: `eval/pacchetto-27-09.test.js` (+4); `router` usava "quanto ho
   incassato" come frase per l'AI, sostituita.
+
+### Conversazione: memoria, tono e più domande al codice (27/09/2026, notte tardi)
+
+Andrea: "EON deve fare una conversazione normale con l'artigiano ed essere
+intelligente… col codice dove basta ('domani alle 15 sono libero?'), l'AI per
+i casi complessi. Come si estende a tutto quello che può fare il codice?"
+Divisione: l'AI è il cervello (capire, parlare, ricordare), il codice le mani
+(eseguire, e rispondere da solo quando la domanda è chiara).
+- **Memoria della giornata** (`memoriaDellaGiornata` in api/index.js): un
+  messaggio nuovo arriva all'AI con le ultime 8 frasi delle ultime 12 ore e le
+  risposte di EON: dal registro (`ai_request_log`, frase ripulita da note e
+  cornice con `fraseDalRegistro`) e dall'app (`recentiLocali`: le risposte
+  date dal codice, che non passano dal server — `memoriaLocale`,
+  `ricordaEsitoCodice` in index.html). Nel prompt: "MEMORIA DELLA GIORNATA",
+  sono solo contesto, le azioni lì sono già fatte, non rifarle.
+- **Tono** ("COME PARLI" nel prompt): collaboratore di fiducia, frasi normali;
+  un parere lo dà davvero guardando i dati; chiacchiere e sfoghi in una riga;
+  niente elenchi "vuoi A, B o C?" quando la conversazione basta; mai numeri
+  inventati.
+- **Chiacchiere senza Sonnet**: dichiarato consulta/nessuno e risposta senza
+  numeri → va bene Haiku (prima veniva rifatta con Sonnet: "Esci" costava 9
+  centesimi). Con un numero dentro si ricontrolla come prima.
+- **Codice: "domani alle 15 sono libero?"** (`capisciDisponibilita`): capisce i
+  pezzi (giorno, ora, "alle 3 e mezza", "dalle 10 alle 12", mattina/pomeriggio/
+  sera, "quando sono libero") invece di frasi fisse; un impegno conta un'ora;
+  ogni parola deve essere capita, altrimenti AI ("poi giornata libera?" va
+  all'AI, che ora ha la memoria). Anche "quando vado da Rita?", "prossimo
+  appuntamento", "numero/indirizzo di Rita", "dove abita Rossi"
+  (`capisciDomandaCliente`).
+- **Metodo per estendere il codice**: 1) regole a pezzi, non frasi; 2) il
+  registro dice dove: al 27/09 su 166 richieste all'AI, 90 senza nessuno
+  strumento (molti nomi di pagina, ora al codice) e 21 di sola lettura
+  (candidate per il codice); ogni tanto si rifà la stessa conta e si spostano
+  al codice le domande che tornano.
+- **Costi veri (misurati, non stime)**: una domanda all'AI senza azioni costa
+  oggi 3-5 centesimi, una lettura circa 5, un'azione dal percorso rapido mezzo
+  centesimo. Il grosso è riscrivere ogni volta le istruzioni lunghe (~24 mila
+  token) perché la cache dura 5 minuti e l'artigiano scrive più di rado.
+  PROPOSTA non fatta: cache di 1 ora (scrittura costa il doppio, le letture un
+  decimo) → da misurare.
+- Non provato con l'AI vera (qui non c'è la chiave): tono e memoria sono
+  provati con l'AI simulata; si vedono in produzione dopo il merge.
+- Test: nuovo `eval/memoria-conversazione.test.mjs` (13), `pacchetto-27-09` (+3).
+
+### Sistema: cosa può fare il codice senza AI (28/09/2026)
+
+Andrea: "un sistema per capire tutte le cose in cui può lavorare il codice
+senza l'AI". Nel pannello EON Admin, sezione **"Cosa può fare il codice"**
+(`action=admin_codice`, `riepilogoCodice` in api/index.js), ultimi 30 giorni,
+solo conteggi (mai frasi né risposte degli utenti):
+- **% di risposte date dal codice**: quelle dell'app (nuova tabella
+  `uso_codice`: solo tipo e data, mandati da `contaUsoCodice` a ogni risposta
+  senza AI, `action=uso_codice`, tipo `[a-z_]` o rifiutato) + quelle del
+  server (`ai_request_log.modello = 'codice'`).
+- **Cosa fa già il codice**, per tipo (pagina, sono libero?, incassi…).
+- **Richieste finite all'AI**, raggruppate per intento dichiarato (es.
+  "Chiedere · appuntamento") e per strumenti usati, con attesa e costo medi:
+  AL CODICE = l'AI ha solo letto dati (candidato sicuro); DA GUARDARE = nessuno
+  strumento e non è conversazione (frase non capita); OK = conversazione o
+  azione vera. Le "AL CODICE" in cima: sono la lista di lavoro.
+- Migrazione `supabase/uso_codice.sql` (solo aggiunta; applicata su staging e
+  produzione il 28/09; RLS attiva senza policy: solo il server). Nella pulizia
+  notturna dei 12 mesi.
+- Test: `admin.test.mjs` (+10), `admin-app.test.js` (+1).

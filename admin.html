@@ -85,6 +85,19 @@
   .vuoto{ font-size:13.5px; color:var(--muted); padding:6px 0; }
   .vuoto.ok{ color:var(--green); font-weight:600; }
 
+  /* Cosa può fare il codice (28/09/2026) */
+  .quota{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .quota b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .quota span{ font-size:13px; color:var(--muted); }
+  .quota-barra{ height:8px; border-radius:999px; background:var(--indigo-soft); overflow:hidden; margin-bottom:12px; }
+  .quota-barra i{ display:block; height:100%; background:var(--indigo); border-radius:999px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .chip{ font-size:12px; font-weight:600; background:var(--bg); border:1px solid var(--border); border-radius:999px; padding:4px 10px; font-variant-numeric:tabular-nums; }
+  .sottotitolo{ font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); margin:4px 0 2px; }
+  .pill.codice{ background:var(--indigo); color:#fff; }
+  .pill.guardare{ background:var(--amber-soft); color:var(--amber); }
+  .pill.ok{ background:var(--bg); color:var(--muted); }
+
   .utente{ padding:12px 0; border-top:1px solid var(--border); }
   .utente:first-child{ border-top:none; }
   .utente-nome{ font-size:15px; font-weight:700; }
@@ -145,6 +158,8 @@ function quando(iso){
 
 let token = null;
 let dati = null;
+let codice = null;
+const NOMI_TIPO_CODICE = { pagina: "Aprire una pagina", azione_diretta: "Impostazioni e account", comando: "Chiama, scrivi, fatto, link, archivia", invio_documento: "Invio documenti", lettura_giorno: "Cosa ho da fare", lettura_soldi: "Incassi e crediti", lettura_disponibilita: "Sono libero?", lettura_cliente: "Info sui clienti", lettura_clienti: "Quanti clienti", lettura_messaggi: "Messaggi non letti", lettura_altro: "Altre letture", saluto: "Saluti", cancella_appunto: "Cancella appunto", annulla_impegni: "Annulla impegni", foto: "Foto", scheda_cliente: "Scheda cliente", meteo_percorso: "Meteo e strade", documento_impresa: "Documenti impresa", risorsa: "Foto e documenti dei clienti", appunto: "Appunti" };
 
 function statoPagina(titolo, testo, link){
   $("sotto").textContent = "";
@@ -191,6 +206,12 @@ async function carica(){
   if(r.status === 403){ statoPagina("Pagina riservata", "Questo pannello è solo per l'amministratore di EON.", true); return; }
   if(!r.ok){ statoPagina("Qualcosa non va", "Il server ha risposto con un errore (" + r.status + "). Riprova tra poco."); return; }
   dati = await r.json();
+  // Cosa può fare il codice: a parte, se non risponde il resto del pannello si vede lo stesso
+  codice = null;
+  try{
+    const rc = await fetch(API + "admin_codice", { headers: { Authorization: "Bearer " + token } });
+    if(rc.ok) codice = await rc.json();
+  }catch(e){ /* sezione non disponibile */ }
   disegna();
 }
 
@@ -232,6 +253,8 @@ function disegna(){
         <div class="suggerimento" id="suggerimento" hidden></div>
       </div>
     </div>
+
+    ${sezioneCodice()}
 
     <div class="sezione">
       <div class="riga-azioni"><h2>Errori dell'app e del server</h2><button type="button" class="bottone" id="visti" ${t.errori_nuovi ? "" : "disabled"}>Segna come visti</button></div>
@@ -296,6 +319,26 @@ function disegna(){
     const r = await fetch(API + "admin_errori_visti", { method: "POST", headers: { Authorization: "Bearer " + token } }).catch(() => null);
     if(r && r.ok) carica(); else visto.disabled = false;
   });
+}
+/* Quante richieste risolve già il codice, e quali fra quelle finite all'AI
+   si possono passare al codice. Solo conteggi: le frasi restano private. */
+function sezioneCodice(){
+  if(!codice) return "";
+  const pct = codice.codice_pct == null ? 0 : codice.codice_pct;
+  const gruppi = codice.gruppi || [];
+  const daPassare = gruppi.filter((g) => g.consiglio.livello === "codice").reduce((s, g) => s + g.n, 0);
+  return `<div class="sezione">
+      <h2>Cosa può fare il codice</h2>
+      <p class="desc">Ultimi ${esc(codice.giorni)} giorni. Il codice risponde subito e gratis; l'AI serve per i casi complessi. Solo conteggi: le frasi degli utenti restano private.</p>
+      <div class="quota"><b>${numero(pct)}%</b><span>risposte date dal codice · ${numero(codice.dal_codice)} su ${numero(codice.totale)}</span></div>
+      <div class="quota-barra"><i style="width:${Math.min(100, pct)}%"></i></div>
+      ${(codice.codice_per_tipo || []).length ? `<div class="sottotitolo">Cosa fa già il codice</div><div class="chips">${codice.codice_per_tipo.map((x) => `<span class="chip">${esc(NOMI_TIPO_CODICE[x.tipo] || x.tipo)} · ${numero(x.n)}</span>`).join("")}</div>` : ""}
+      <div class="sottotitolo">Richieste finite all'AI${daPassare ? " · " + numero(daPassare) + " da passare al codice" : ""}</div>
+      <div class="elenco">${gruppi.length ? gruppi.filter((g) => g.categoria !== "codice").map((g) => `<div class="voce">
+          <div class="voce-testa"><div class="voce-titolo"><span class="pill ${esc(g.consiglio.livello)}">${g.consiglio.livello === "codice" ? "AL CODICE" : g.consiglio.livello === "guardare" ? "DA GUARDARE" : "OK"}</span>${esc(g.nome)}</div><div class="voce-quando">${numero(g.n)}×</div></div>
+          <div class="voce-meta">${esc([g.consiglio.testo, g.secondi_medi != null ? numero(g.secondi_medi, 1) + " s di attesa" : "", g.costo_medio_usd != null ? "$" + Number(g.costo_medio_usd).toLocaleString("it-IT", { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + " l'una" : ""].filter(Boolean).join(" · "))}</div>
+        </div>`).join("") : '<div class="vuoto">Nessuna richiesta all\'AI in questo periodo.</div>'}</div>
+    </div>`;
 }
 function dispositivoBreve(ua){
   if(/iPhone/.test(ua)) return "iPhone";
