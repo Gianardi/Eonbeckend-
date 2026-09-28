@@ -530,19 +530,22 @@ async function main() {
     await page.waitForTimeout(250);
     const salvatoDaFare = await page.evaluate(() => ({
       insert: window.__scritture.filter((w) => w.tipo === "insert").map((w) => ({ tabella: w.tabella, riga: w.riga })),
-      box: !document.getElementById("homeHeroDaFareBox").hidden,
-      lista: document.getElementById("homeHeroDaFareLista").textContent,
+      box: true,
+      lista: document.getElementById("homeAppuntiSub").textContent,
       toast: document.getElementById("aiToastContainer").textContent,
     }));
-    verifica("detto in Home: salvato negli appunti come da fare (niente calendario), lista \"Da fare\" in Home", salvatoDaFare.insert.length === 1 && salvatoDaFare.insert[0].tabella === "cantiere_appunti" && salvatoDaFare.insert[0].riga.da_fare === true && salvatoDaFare.insert[0].riga.testo === "Chiamare Pedro" && salvatoDaFare.box && /Chiamare Pedro/.test(salvatoDaFare.lista) && /Da fare/.test(salvatoDaFare.toast), JSON.stringify(salvatoDaFare));
-    await page.click("#homeHeroDaFareLista .home-hero-oggi-check");
-    const spuntato = await page.evaluate(() => ({ update: window.__scritture.filter((w) => w.tipo === "update" && w.tabella === "cantiere_appunti").map((w) => w.patch), nascosto: document.getElementById("homeHeroDaFareBox").hidden }));
-    verifica("spunta in Home: fatto (data salvata), la lista sparisce", spuntato.update.length === 1 && !!spuntato.update[0].fatto_il && spuntato.nascosto, JSON.stringify(spuntato));
+    verifica("detto in Home: salvato negli appunti come da fare (niente calendario), il tasto Appunti lo mostra", salvatoDaFare.insert.length === 1 && salvatoDaFare.insert[0].tabella === "cantiere_appunti" && salvatoDaFare.insert[0].riga.da_fare === true && salvatoDaFare.insert[0].riga.testo === "Chiamare Pedro" && salvatoDaFare.box && /Chiamare Pedro/.test(salvatoDaFare.lista) && /Da fare/.test(salvatoDaFare.toast), JSON.stringify(salvatoDaFare));
+    await page.click("#homeAppuntiBtn");
+    await page.click("#apLista .ap-cerchio");
+    await page.waitForTimeout(150);
+    const spuntato = await page.evaluate(() => ({ update: window.__scritture.filter((w) => w.tipo === "update" && w.tabella === "cantiere_appunti").map((w) => w.patch), nascosto: !/Chiamare Pedro/.test(document.getElementById("homeAppuntiSub").textContent) && !document.querySelector("#apLista .ap-cerchio") }));
+    await page.evaluate(() => chiudiRisorsaCard());
+    verifica("spunta nella card Appunti: fatto (data salvata), sparisce dal tasto e dalla card", spuntato.update.length === 1 && !!spuntato.update[0].fatto_il && spuntato.nascosto, JSON.stringify(spuntato));
     const conVoce = await page.evaluate(async () => {
       const r = {};
       document.getElementById("aiToastContainer").innerHTML = "";
       const a = cantiereAppunti[0]; rimettiAppuntoDaFare(a);
-      r.ancoraDaFare = !document.getElementById("homeHeroDaFareBox").hidden;
+      r.ancoraDaFare = /Chiamare Pedro/.test(document.getElementById("homeAppuntiSub").textContent);
       r.hoChiamato = provaComandiSemplici("ho chiamato Pedro", false) && !!a.fattoIl;
       rimettiAppuntoDaFare(a);
       r.hoFinito = provaComandiSemplici("ho finito di chiamare Pedro", false) && !!a.fattoIl;

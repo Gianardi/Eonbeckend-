@@ -4649,3 +4649,51 @@ cambia:
 - Restano dentro il vecchio `aside.rail`/`aside.sidebar` nascosti (dati di
   prova "Marco Rossi"): da togliere in una pulizia.
 - Test: nuovo `eval/pc.test.js` (12).
+
+### Mestieri, "Altra attività" e Home semplice (28/09/2026)
+
+Andrea, dopo le simulazioni: "si procediamo così", poi "più semplice, più
+chiara, più lineare, più stilosa" e "aprirla e ci sono gli appunti stile
+card e puoi parlare con microfono o scrivere". Ok a mostrare la prima cosa
+da fare nel tasto.
+- **Database** (`supabase/mestieri_e_cartelle.sql`, staging e produzione):
+  vincolo `profiles_profession_check` con `elettricista` (in produzione
+  mancava: l'iscrizione da elettricista falliva); `profiles.attivita_tipo /
+  attivita_modo / attivita_persone`; `handle_new_user` le copia dai metadati
+  (solo produzione: staging non ha il trigger, `to_regproc`); tabella
+  `cartelle` (RLS sul proprietario, cestino con `deleted_at`);
+  `cantiere_appunti.cartella_id`.
+- **Mestieri**: `MESTIERI_HOME` (nome, icona, esempio a voce, 4 card) +
+  `applicaMestiereHome` chiamato da `applyProfession`; colore con le
+  variabili `--acc/--acc-soft/--acc-txt/--acc-ink` su `body.mestiere-*`;
+  chip in alto (`aggiornaAvatarHome`). `profiloSicuro()` perché
+  `profiloUtente` è dichiarato più avanti nel file.
+- **Home**: riquadro "Oggi" (`#homeHeroOggiBox`, orari nel colore del mestiere)
+  con "Calendario →"; tasto `#homeAppuntiBtn` (sottotitolo da
+  `renderDaFare`: prima cosa da fare senza cartella + "· e altre N").
+  Card `apriCardAppunti(cartella)`: da fare con `.ap-cerchio`, note con
+  matita e giorno (`quandoAppunto`), tocco sul testo = modifica; in fondo
+  microfono + `#apCampo` (`aggiungiAppuntoDaCard`: `capisciDaFare` decide
+  da fare o nota).
+- **Altra attività**: scelta all'iscrizione + `#obStepAttivita` (3 gruppi di
+  chip); risposte in `signUp.options.data` e nel profilo. Cartelle:
+  `CARTELLE_PROPOSTE` / `cartelleProposte`, create una volta sola da
+  `proponiCartelleSeServe` (solo se non ne è mai esistita nessuna, anche
+  cancellata; guardia contro la doppia creazione all'avvio);
+  `renderCartelle`, `chiediNomeCartella` (crea/rinomina), `eliminaCartella`
+  (cestino, appunti di nuovo liberi). Voce: `provaAppuntoInCartella`
+  ("segna in Fornitori di …" = da fare; "metti nella cartella X: …" = nota),
+  primo passo di `provaAppuntoImmediato`.
+- **Stesse pagine, nomi del mestiere** (Andrea: "se Cantieri si chiama
+  Condomini la funzionalità è la stessa?" — sì): `applicaMestiereHome`
+  cambia anche `pageMeta[...].title` delle 4 pagine (i titoli di sempre
+  salvati in `applicaMestiereHome.titoli`); in `PAGINE_NAVIGABILI_A_VOCE`
+  aggiunti cantieri/interventi/impianti/condomini (→ `cantiere-cliente`),
+  certificazioni (→ `cantiere-documenti`), foto impianti/quadri. **Non**
+  "il durc" da solo: "mi dai il DURC" deve aprire il documento DURC.
+- Da valutare: "apri gli appunti" a voce apre ancora la vecchia pagina
+  Appunti, non la card; "apri Fornitori" non apre la cartella.
+- **Manca**: l'AI non conosce le cartelle; funzioni vere per SAL, urgenze,
+  DiCo, morosità (oggi le card aprono pagine esistenti).
+- Test: nuovo `eval/mestieri-altra.test.js` (28), `pacchetto-27-09`
+  aggiornato (tasto e card Appunti), `check-schema` (colonne nuove).

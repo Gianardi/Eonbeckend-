@@ -23,7 +23,7 @@
    non solo per lettura umana. */
 
 const CONTRATTO = {
-  profiles: ["id", "full_name", "business_name", "profession", "created_at"],
+  profiles: ["id", "full_name", "business_name", "profession", "created_at", "attivita_tipo", "attivita_modo", "attivita_persone"],
   clients: ["id", "owner_id", "name", "status", "value", "phone", "deleted_at", "address"],
   tasks: ["id", "owner_id", "title", "owner_type", "status", "time", "scheduled_at", "deleted_at"],
   conversations: ["id", "owner_id", "contact_name", "deleted_at", "ultimo_analizzato", "ultimo_esito"],
@@ -31,8 +31,9 @@ const CONTRATTO = {
   documents: ["id", "owner_id", "doc_type", "client_name", "amount", "content"],
   cantiere_foto: ["id", "owner_id", "url", "client_id", "cantiere_id", "nota", "descrizione", "created_at", "deleted_at"],
   cantiere_documenti: ["id", "owner_id", "url", "nome", "tipo", "created_at", "deleted_at"],
-  cantiere_appunti: ["id", "owner_id", "testo", "created_at", "deleted_at", "da_fare", "fatto_il"],
+  cantiere_appunti: ["id", "owner_id", "testo", "created_at", "deleted_at", "da_fare", "fatto_il", "cartella_id"],
   uso_codice: ["id", "owner_id", "tipo", "created_at"],
+  cartelle: ["id", "owner_id", "nome", "icona", "ordine", "created_at", "deleted_at"],
   cantieri: ["id", "owner_id", "client_id", "nome", "stato", "created_at", "deleted_at"],
   condomini: ["id", "owner_id", "client_id", "nome", "ruolo", "unita_immobiliare", "quota_millesimale", "telefono", "morosita_importo", "morosita_da", "created_at", "deleted_at"],
   incomes: ["id", "owner_id", "client_name", "client_id", "description", "amount", "due_date", "status", "created_at", "deleted_at"],

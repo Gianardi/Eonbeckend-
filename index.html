@@ -2330,6 +2330,79 @@
   }
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
 
+  /* ================= HOME SEMPLICE E MESTIERI (28/09/2026) =================
+     Andrea: "più semplice, più chiara, più lineare, più stilosa". Ogni
+     mestiere ha il suo colore (--acc) su marchio, microfono, card e tasti;
+     "Altra attività" resta blu EON. Righe tutte uguali, cerchi da spuntare. */
+  :root{ --acc:var(--indigo); --acc-soft:var(--indigo-soft); --acc-txt:var(--indigo-dark); --acc-ink:#fff; }
+  body.mestiere-edile{ --acc:#E8742A; --acc-soft:rgba(232,116,42,.13); --acc-txt:#C45A14; --acc-ink:#fff; }
+  body.mestiere-idraulico{ --acc:#0E8FB8; --acc-soft:rgba(14,143,184,.13); --acc-txt:#0B7596; --acc-ink:#fff; }
+  body.mestiere-elettricista{ --acc:#F2B705; --acc-soft:rgba(242,183,5,.18); --acc-txt:#8A6500; --acc-ink:#0E1424; }
+  body.mestiere-amministratore{ --acc:#17A06B; --acc-soft:rgba(23,160,107,.13); --acc-txt:#0F7E53; --acc-ink:#fff; }
+  .brand-hero-wordmark .logo-o{ background:var(--acc); color:var(--acc-ink); }
+  .home-hero-mic{ box-shadow:0 0 0 7px var(--acc-soft), 0 16px 34px rgba(14,20,36,.22); }
+  .home-oggi-pill{ color:var(--acc-txt); background:var(--acc-soft); }
+  #homeCarteMestiere .cantiere-card-icon{ background:var(--acc); }
+  #homeCarteMestiere .cantiere-card-icon svg{ stroke:var(--acc-ink); }
+  .brand-avatar.brand-chip{ width:auto; height:36px; border-radius:999px; padding:0 13px 0 5px; gap:8px; background:var(--acc-soft); color:var(--text); font-size:13px; letter-spacing:0; }
+  .brand-chip i{ width:26px; height:26px; border-radius:50%; background:var(--acc); display:flex; align-items:center; justify-content:center; }
+  .brand-chip i svg{ width:14px; height:14px; stroke:var(--acc-ink); }
+
+  .home-oggi-box{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:4px 16px 4px; margin-bottom:12px; cursor:pointer; }
+  .home-box-testa{ display:flex; align-items:center; justify-content:space-between; padding:12px 0 6px; }
+  .home-box-testa b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:15px; font-weight:800; letter-spacing:-.01em; }
+  .home-box-link{ border:none; background:none; padding:4px 0; font:inherit; font-size:13px; font-weight:700; color:var(--acc-txt); cursor:pointer; }
+  .home-oggi-box .home-hero-oggi-riga{ gap:12px; padding:12px 0; border-top:1px solid var(--border); font-size:14px; }
+  .home-oggi-box .home-hero-oggi-vuoto{ border-top:1px solid var(--border); padding:12px 0; }
+  .home-hero-oggi-check{ border-radius:50%; width:22px; height:22px; }
+  .home-oggi-ora{ font-variant-numeric:tabular-nums; font-weight:700; color:var(--acc-txt); width:42px; flex:none; }
+  .home-appunti{
+    width:100%; display:flex; align-items:center; gap:13px; text-align:left; cursor:pointer; font-family:inherit; color:var(--text);
+    background:var(--card); border:1px solid var(--border); border-radius:20px; padding:13px 15px; margin-bottom:12px;
+  }
+  .home-appunti-ico{ width:40px; height:40px; border-radius:13px; background:var(--acc); color:var(--acc-ink); display:flex; align-items:center; justify-content:center; flex:none; }
+  .home-appunti-ico svg{ width:19px; height:19px; }
+  .home-appunti-testo{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .home-appunti-testo b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:15px; font-weight:800; }
+  .home-appunti-testo small{ font-size:12.5px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .home-appunti-freccia{ width:16px; height:16px; color:var(--faint); flex:none; }
+
+  /* Card degli appunti: righe uguali, cerchio per le cose da fare, matita per le note */
+  .ap-lista{ display:flex; flex-direction:column; }
+  .ap-riga{ display:flex; align-items:center; gap:12px; padding:13px 0; border-top:1px solid var(--border); font-size:14.5px; line-height:1.35; }
+  .ap-riga:first-child{ border-top:none; }
+  .ap-cerchio{ width:22px; height:22px; border-radius:50%; border:1.8px solid var(--border-strong); background:var(--card); flex:none; cursor:pointer; padding:0; }
+  .ap-matita{ width:22px; height:22px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--faint); }
+  .ap-matita svg{ width:15px; height:15px; }
+  .ap-testo{ flex:1; min-width:0; overflow-wrap:anywhere; cursor:pointer; }
+  .ap-riga.nota .ap-testo{ color:var(--muted); }
+  .ap-quando{ font-size:12px; color:var(--faint); flex:none; }
+  .ap-vuoto{ padding:18px 0; color:var(--muted); font-size:13.5px; text-align:center; }
+  #homeCarteMestiere[hidden], .cartelle-griglia[hidden]{ display:none !important; }
+  .scheda-invia.ap-invia{ background:var(--acc); color:var(--acc-ink); }
+  .ap-azioni{ display:flex; gap:16px; padding:2px 0 8px; }
+  .ap-azioni button{ border:none; background:none; padding:0; font:inherit; font-size:12.5px; font-weight:700; color:var(--acc-txt); cursor:pointer; }
+  .ap-azioni button.pericolo{ color:var(--coral); }
+
+  /* Cartelle di "Altra attività" */
+  .cartelle-griglia{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; margin:6px 0 18px; }
+  .cartelle-griglia[hidden]{ display:none; }
+  .cartella{ background:var(--card); border:1px solid var(--border); border-radius:22px; padding:16px 15px; display:flex; flex-direction:column; gap:9px; text-align:left; cursor:pointer; font-family:inherit; color:var(--text); box-shadow:0 6px 18px rgba(14,20,36,.08); min-height:118px; }
+  .cartella .cantiere-card-icon{ width:40px; height:40px; border-radius:14px; background:var(--acc); }
+  .cartella .cantiere-card-icon svg{ width:19px; height:19px; stroke:var(--acc-ink); }
+  .cartella b{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:13.5px; font-weight:800; }
+  .cartella small{ font-size:11.5px; color:var(--muted); margin-top:-5px; }
+  .cartella-nuova{ grid-column:1 / -1; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; border:1.5px dashed var(--border-strong); border-radius:18px; background:transparent; font:inherit; font-size:13.5px; font-weight:700; color:var(--muted); cursor:pointer; }
+
+  /* Iscrizione: "Altra attività" e mini questionario */
+  .ob-mini{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+  .ob-mini span{ font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; }
+  .ob-domanda{ margin-bottom:18px; }
+  .ob-domanda-titolo{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:14.5px; font-weight:800; margin-bottom:10px; }
+  .ob-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .ob-chip{ border:1.5px solid var(--border); background:var(--card); border-radius:999px; padding:9px 14px; font:inherit; font-size:13.5px; font-weight:600; color:var(--text); cursor:pointer; }
+  .ob-chip.on{ background:var(--text); color:#fff; border-color:var(--text); }
+
   /* ================= VERSIONE DA COMPUTER (28/09/2026) =================
      Andrea: "versione PC si può fare già ora?". Da 1024 px in su: la barra
      in basso diventa il menu a sinistra (con Calendario e Messaggi), i
@@ -2366,6 +2439,7 @@
     .home-hero-lato > *{ margin:0 !important; }
     .home-hero-dafare{ margin-top:0; }
     .cantiere-grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); gap:16px; margin-top:28px; }
+    .cartelle-griglia{ grid-template-columns:repeat(4, minmax(0, 1fr)); gap:16px; margin-top:28px; }
 
     /* Avvisi e tasti flottanti: in basso a destra dello schermo, non sopra il menu */
     .ai-toast-container{ left:auto; right:24px; top:24px; bottom:auto; width:400px; max-width:calc(100vw - 280px); margin:0; }
@@ -2686,24 +2760,25 @@
       </div>
       <div class="ob-tagline">L'assistente che organizza la giornata di chi ha una professione o un'impresa.</div>
 
-      <div class="ob-label">Come vuoi usare EON?</div>
+      <div class="ob-label">Che lavoro fai?</div>
       <div class="ob-cards" id="obTypeCards" style="grid-template-columns:1fr;">
         <div class="ob-card" data-type="professioni">
           <div class="ob-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg>
           </div>
           <div class="ob-card-body">
-            <div class="ob-card-title">Artigiani e Professioni</div>
-            <div class="ob-card-sub">Edile, Idraulico, Avvocato, Amministratore di Condominio</div>
+            <div class="ob-card-title">Artigiani</div>
+            <div class="ob-card-sub">EON parla la lingua del tuo mestiere.</div>
+            <div class="ob-mini"><span style="background:rgba(232,116,42,.13);color:#C45A14">Edile</span><span style="background:rgba(14,143,184,.13);color:#0B7596">Idraulico</span><span style="background:rgba(242,183,5,.2);color:#8A6500">Elettricista</span><span style="background:rgba(23,160,107,.13);color:#0F7E53">Amministratore di condominio</span></div>
           </div>
         </div>
         <div class="ob-card" data-type="generico">
           <div class="ob-card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 12v8h14v-8"/></svg>
           </div>
           <div class="ob-card-body">
-            <div class="ob-card-title">Organizza la giornata e aumenta la produttività</div>
-            <div class="ob-card-sub">Piano Free</div>
+            <div class="ob-card-title">Altra attività</div>
+            <div class="ob-card-sub">Negozi, bar, studi, professionisti, servizi: tutte le partite IVA.</div>
           </div>
         </div>
       </div>
@@ -2713,6 +2788,26 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
       <button type="button" class="ob-link-accedi" id="obVaiAccedi">Hai già un account? <b>Accedi</b></button>
+    </div>
+
+    <!-- STEP "Altra attività" (28/09/2026): tre tocchi, poi EON propone le cartelle -->
+    <div class="ob-step" id="obStepAttivita">
+      <button class="ob-back" id="obBackAttivita">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Indietro
+      </button>
+      <div class="ob-label" style="margin-bottom:4px;">La tua attività</div>
+      <div class="ob-tagline" style="text-align:left; margin:0 0 18px;">Tre tocchi e EON prepara le cartelle giuste per te. Le puoi cambiare quando vuoi.</div>
+      <div class="ob-domanda"><div class="ob-domanda-titolo">Che attività hai?</div>
+        <div class="ob-chips" data-domanda="tipo"><button type="button" class="ob-chip" data-v="negozio">Negozio</button><button type="button" class="ob-chip" data-v="bar">Bar o ristorante</button><button type="button" class="ob-chip" data-v="studio">Studio professionale</button><button type="button" class="ob-chip" data-v="servizi">Servizi a domicilio</button><button type="button" class="ob-chip" data-v="altro">Altro</button></div></div>
+      <div class="ob-domanda"><div class="ob-domanda-titolo">Come lavori?</div>
+        <div class="ob-chips" data-domanda="modo"><button type="button" class="ob-chip" data-v="fissi">Clienti fissi</button><button type="button" class="ob-chip" data-v="passaggio">Clienti di passaggio</button><button type="button" class="ob-chip" data-v="appuntamento">Su appuntamento</button></div></div>
+      <div class="ob-domanda"><div class="ob-domanda-titolo">Chi lavora con te?</div>
+        <div class="ob-chips" data-domanda="persone"><button type="button" class="ob-chip" data-v="solo">Solo io</button><button type="button" class="ob-chip" data-v="2-5">Da 2 a 5 persone</button><button type="button" class="ob-chip" data-v="piu-5">Più di 5</button></div></div>
+      <button class="primary-btn ob-continue-btn" id="obAttivitaContinua" disabled>
+        Continua
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
     </div>
 
     <!-- STEP 1: scelta professione specifica -->
@@ -2968,29 +3063,25 @@
         </div>
 
         <div class="home-hero-lato">
-        <button class="home-hero-cal" id="homeHeroCal" type="button" data-page="calendario">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          <div class="home-hero-cal-testo">
-            <b>Calendario attività</b>
-            <span id="homeHeroCalSub">Nessun impegno oggi</span>
-          </div>
-          <svg class="home-hero-cal-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-
-        <div class="home-hero-oggi" id="homeHeroOggiBox" role="button" tabindex="0">
-          <div class="home-hero-oggi-titolo">Cosa devo fare oggi</div>
+        <!-- Home semplice (28/09/2026, Andrea: "più semplice, più chiara, più
+             lineare"): un riquadro "Oggi" con il calendario a un tocco, e un
+             solo tasto "Appunti" che apre la card con microfono e casella. -->
+        <span id="homeHeroCalSub" hidden></span>
+        <div class="home-oggi-box" id="homeHeroOggiBox" role="button" tabindex="0">
+          <div class="home-box-testa"><b>Oggi</b><button type="button" class="home-box-link" id="homeOggiCalendario" data-page="calendario">Calendario →</button></div>
           <div id="homeHeroOggiLista"><div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div></div>
         </div>
-
-        <!-- Da fare (28/09/2026): "ricordami di chiamare Pedro" senza giorno né ora -->
-        <div class="home-hero-oggi home-hero-dafare" id="homeHeroDaFareBox" hidden>
-          <div class="home-hero-oggi-titolo">Da fare <span class="home-hero-dafare-n" id="homeHeroDaFareN"></span></div>
-          <div id="homeHeroDaFareLista"></div>
-        </div>
+        <button type="button" class="home-appunti" id="homeAppuntiBtn">
+          <span class="home-appunti-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+          <span class="home-appunti-testo"><b>Appunti</b><small id="homeAppuntiSub">Parla o scrivi un appunto</small></span>
+          <svg class="home-appunti-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
         </div>
       </div>
 
-      <div class="cantiere-grid">
+      <!-- Cartelle di "Altra attività" (28/09/2026): al posto delle card dei mestieri -->
+      <div class="cartelle-griglia" id="cartelleGriglia" hidden></div>
+      <div class="cantiere-grid" id="homeCarteMestiere">
         <button class="cantiere-card" type="button" data-page="cantiere-cliente">
           <div class="cantiere-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -2998,13 +3089,14 @@
           <div class="cantiere-card-title">Cliente cantiere</div>
           <div class="cantiere-card-sub" id="cantiereClienteSub">Nessun cliente collegato</div>
         </button>
-        <button class="cantiere-card" type="button" data-page="cantiere-appunti">
+        <button class="cantiere-card" type="button" data-page="documenti-impresa" id="homeCartaMestiere">
           <div class="cantiere-card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg>
           </div>
-          <div class="cantiere-card-title">Appunti</div>
-          <div class="cantiere-card-sub" id="cantiereAppuntiSub">Nessun appunto</div>
+          <div class="cantiere-card-title">Documenti impresa</div>
+          <div class="cantiere-card-sub" id="homeCartaMestiereSub">DURC, visure, assicurazioni</div>
         </button>
+        <span id="cantiereAppuntiSub" hidden></span>
         <button class="cantiere-card" type="button" data-page="cantiere-documenti">
           <div class="cantiere-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/></svg>
@@ -4610,7 +4702,7 @@ function isDbReady(){
 const TABELLE_CON_CESTINO = new Set([
   "clients", "opportunities", "employees", "tasks", "assigned_tasks",
   "payments", "incomes", "goals", "conversations", "messages",
-  "cantiere_foto", "cantiere_documenti", "cantiere_appunti",
+  "cantiere_foto", "cantiere_documenti", "cantiere_appunti", "cartelle",
 ]);
 
 /* Riprova automatica per problemi di rete passeggeri (come fanno
@@ -4732,7 +4824,7 @@ function mappaImpegno(t){
   return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
 }
 function mappaAppunto(a){
-  return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null, daFare:!!a.da_fare, fattoIl:a.fatto_il || null };
+  return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null, daFare:!!a.da_fare, fattoIl:a.fatto_il || null, cartellaId:a.cartella_id || null };
 }
 
 /* Carica i dati veri di un utente già registrato, sostituendo il contenuto
@@ -4769,6 +4861,9 @@ async function loadUserDataFromDB(){
   cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "", descrizione:f.descrizione || "" }));
   cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push(mappaAppunto(a)));
+  // Cartelle di "Altra attività" (28/09/2026): a parte, un errore qui non blocca il resto
+  const dbCartelle = await dbSelect("cartelle").catch(() => []);
+  cartelle.length = 0; (dbCartelle || []).slice().sort((a, b) => (a.ordine || 0) - (b.ordine || 0)).forEach(c => cartelle.push({ id: c.id, nome: c.nome, icona: c.icona || null }));
   aggiornaCantiereSottotitoli();
 
   const rigaIntestazione = dbIntestazione[0];
@@ -5921,6 +6016,7 @@ const assignedTasks = [];
 const cantiereFoto = [];
 const cantiereDocumenti = [];
 const cantiereAppunti = [];
+const cartelle = []; // "Altra attività": { id, nome, icona }
 let aziendaIntestazione = null; // { nome_azienda, indirizzo, piva, telefono, email, logo_url }, o null se non ancora configurata
 
 const payments = [
@@ -6746,6 +6842,78 @@ function renderChiamate(){
   document.getElementById("callRecentCount").textContent = recentCalls.length;
 }
 
+/* ===== Mestieri (28/09/2026) =====
+   Ogni mestiere si riconosce subito: colore (classe mestiere-* sul body),
+   icona e nome in alto a destra, esempio a voce, e le 4 card della Home con
+   le parole del mestiere. Le card aprono funzioni che esistono già: niente
+   card finte. "artigiano" = "Altra attività": al posto delle card, le
+   cartelle. */
+const ICONE_MESTIERE = {
+  casco: '<path d="M2 18h20"/><path d="M4 18v-2a8 8 0 0 1 16 0v2"/><path d="M10 8V5h4v3"/>',
+  goccia: '<path d="M12 2.7C9 6.5 6 10 6 14a6 6 0 0 0 12 0c0-4-3-7.5-6-11.3z"/>',
+  fulmine: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  palazzo: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>',
+  negozio: '<path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 12v8h14v-8"/>',
+  persone: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
+  chiave: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
+  quadro: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h3M13 11h3M8 15h3M13 15h3"/>',
+  timbro: '<path d="M9 3h6v6l3 3v3H6v-3l3-3z"/><path d="M5 21h14"/>',
+  euro: '<path d="M18 7a7 7 0 1 0 0 10"/><path d="M4 10h9M4 14h9"/>',
+  riunione: '<circle cx="12" cy="7" r="3"/><path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/>',
+  doc: '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/>',
+  foto: '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  scudo: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+};
+/* Le 4 card: [lavori, card del mestiere, documenti, foto] */
+const MESTIERI_HOME = {
+  edile: { nome: "Impresa edile", icona: "casco", hint: "Es. «domani alle 7 getto del solaio da Rossi»",
+    carte: [["Cantieri", "casco"], ["DURC e documenti impresa", "scudo", "documenti-impresa", "Scadenze e rinnovi"], ["Documenti", "doc"], ["Foto cantiere", "foto"]] },
+  idraulico: { nome: "Idraulico", icona: "goccia", hint: "Es. «perdita in bagno da Bianchi, domani alle 8»",
+    carte: [["Interventi", "chiave"], ["Preventivi e fatture", "euro", "fatture-preventivi", "Da mandare e da incassare"], ["Documenti", "doc"], ["Foto impianti", "foto"]] },
+  elettricista: { nome: "Elettricista", icona: "fulmine", hint: "Es. «dichiarazione di conformità per l'impianto Verdi»",
+    carte: [["Impianti", "quadro"], ["Preventivi e fatture", "euro", "fatture-preventivi", "Da mandare e da incassare"], ["Certificazioni e documenti", "timbro"], ["Foto quadri", "foto"]] },
+  amministratore: { nome: "Amministratore", icona: "palazzo", hint: "Es. «assemblea in via Roma 12 giovedì alle 21»",
+    carte: [["Condomini", "palazzo"], ["Assemblee", "riunione", "assemblee", "Convocazioni e verbali"], ["Documenti", "doc"], ["Foto", "foto"]] },
+  artigiano: { nome: "La mia attività", icona: "negozio", hint: "Es. «segna in Fornitori di chiamare la Peroni»", cartelle: true },
+};
+/* profiloUtente è dichiarato più avanti nel file: letto prima, darebbe errore */
+function profiloSicuro(){ try{ return profiloUtente; }catch(e){ return null; } }
+function svgMestiere(k){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (ICONE_MESTIERE[k] || ICONE_MESTIERE.doc) + '</svg>'; }
+function mestiereHome(){ return MESTIERI_HOME[currentProfession] || MESTIERI_HOME.artigiano; }
+function applicaMestiereHome(key){
+  const m = MESTIERI_HOME[key] || MESTIERI_HOME.artigiano;
+  Object.keys(MESTIERI_HOME).forEach(k => document.body.classList.toggle("mestiere-" + k, k === key));
+  const hint = document.getElementById("homeHeroHint");
+  if(hint) hint.textContent = m.hint;
+  const carte = document.querySelectorAll("#homeCarteMestiere > .cantiere-card");
+  if(m.carte){
+    m.carte.forEach(([titolo, icona, pagina, sotto], i) => {
+      const c = carte[i];
+      if(!c) return;
+      c.querySelector(".cantiere-card-title").textContent = titolo;
+      c.querySelector(".cantiere-card-icon").innerHTML = svgMestiere(icona);
+      if(pagina){ c.dataset.page = pagina; const sub = c.querySelector(".cantiere-card-sub"); if(sub) sub.textContent = sotto || ""; }
+    });
+  }
+  /* Il titolo della pagina aperta segue il nome sulla card */
+  try{
+    const pagine = ["cantiere-cliente", "documenti-impresa", "cantiere-documenti", "cantiere-foto"];
+    if(!applicaMestiereHome.titoli) applicaMestiereHome.titoli = Object.fromEntries(pagine.map(pg => [pg, pageMeta[pg].title]));
+    pagine.forEach(pg => { pageMeta[pg].title = applicaMestiereHome.titoli[pg]; });
+    (m.carte || []).forEach(([titolo, , pagina], i) => {
+      const pg = pagina || ["cantiere-cliente", null, "cantiere-documenti", "cantiere-foto"][i];
+      if(pagine.includes(pg)) pageMeta[pg].title = titolo;
+    });
+  }catch(e){ /* pageMeta non ancora pronto: restano i titoli di sempre */ }
+  document.getElementById("homeCarteMestiere").hidden = !!m.cartelle;
+  document.getElementById("cartelleGriglia").hidden = !m.cartelle;
+  if(m.cartelle && typeof renderCartelle === "function"){
+    renderCartelle();
+    proponiCartelleSeServe(profiloSicuro());
+  }
+  aggiornaAvatarHome();
+}
+
 /* ---- Cambia professione: aggiorna etichette, dati e sesta card Home ---- */
 async function applyProfession(key, skipDemoData){
   currentProfession = key;
@@ -6795,6 +6963,7 @@ async function applyProfession(key, skipDemoData){
   renderEmployeeChips();
   if(typeof populateClientDropdowns === "function") populateClientDropdowns();
   if(typeof populateEmployeeDropdown === "function") populateEmployeeDropdown();
+  applicaMestiereHome(key);
   saveState("eon-profession", { key: currentProfession });
 }
 
@@ -10124,36 +10293,275 @@ function rigaFotoAppunto(f){
 function appuntiDaFare(){
   return cantiereAppunti.filter(a => a.daFare && !a.fattoIl).slice().sort((x, y) => String(y.created || "").localeCompare(String(x.created || "")));
 }
+/* Il tasto "Appunti" in Home (28/09/2026): mostra la prima cosa da fare,
+   così non si dimentica anche con la Home pulita ("Chiamare Pedro · e
+   altre 2"); senza cose da fare, quante note ci sono. */
 function renderDaFare(){
-  const box = document.getElementById("homeHeroDaFareBox");
-  const lista = document.getElementById("homeHeroDaFareLista");
-  if(!box || !lista) return;
-  const voci = appuntiDaFare();
-  box.hidden = !voci.length;
-  document.getElementById("homeHeroDaFareN").textContent = voci.length > 1 ? voci.length : "";
+  const sub = document.getElementById("homeAppuntiSub");
+  if(!sub) return;
+  const daFare = appuntiDaFare().filter(a => !a.cartellaId);
+  const note = cantiereAppunti.filter(a => !a.daFare && !a.cartellaId).length;
+  sub.textContent = daFare.length ? daFare[0].testo + (daFare.length > 1 ? " · e altre " + (daFare.length - 1) : "")
+    : note ? (note === 1 ? "1 nota" : note + " note")
+    : "Parla o scrivi un appunto";
+  const card = document.getElementById("apLista");
+  if(card && card.dataset.cartella !== undefined) disegnaListaAppunti(card, card.dataset.cartella || null);
+}
+
+/* ===== Card degli appunti (28/09/2026) =====
+   Si apre dal tasto "Appunti" (o da una cartella di "Altra attività"): in
+   alto le cose da fare con il cerchio da spuntare, sotto le note con la
+   matita e il giorno; in fondo microfono e casella per aggiungerne uno.
+   Un tocco sul testo lo modifica (modificaAppuntoInCard). */
+const ICONA_MATITA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+function quandoAppunto(iso){
+  if(!iso) return "";
+  const d = new Date(iso), oggi = new Date(); oggi.setHours(0,0,0,0);
+  const g = new Date(d); g.setHours(0,0,0,0);
+  const diff = Math.round((oggi - g) / 86400000);
+  if(diff <= 0) return d.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" });
+  if(diff === 1) return "ieri";
+  if(diff < 7) return d.toLocaleDateString("it-IT", { weekday:"short" }).replace(".", "");
+  return d.toLocaleDateString("it-IT", { day:"numeric", month:"short" }).replace(".", "");
+}
+function disegnaListaAppunti(lista, cartellaId){
   lista.innerHTML = "";
-  voci.slice(0, 5).forEach(a => {
+  const dentro = a => cartellaId ? a.cartellaId === cartellaId : !a.cartellaId;
+  const perData = (x, y) => String(y.created || "").localeCompare(String(x.created || ""));
+  const daFare = cantiereAppunti.filter(a => dentro(a) && a.daFare && !a.fattoIl).sort(perData);
+  const note = cantiereAppunti.filter(a => dentro(a) && !a.daFare).sort(perData);
+  if(!daFare.length && !note.length){
+    lista.innerHTML = '<div class="ap-vuoto">Nessun appunto. Parla o scrivi qui sotto.</div>';
+    return;
+  }
+  daFare.concat(note).slice(0, 60).forEach(a => {
     const riga = document.createElement("div");
-    riga.className = "home-hero-oggi-riga";
-    const segno = document.createElement("span");
-    segno.className = "home-hero-oggi-check cliccabile";
-    segno.setAttribute("role", "button");
-    segno.setAttribute("aria-label", "Segna come fatto");
-    segno.addEventListener("click", () => segnaAppuntoFatto(a));
+    riga.className = "ap-riga" + (a.daFare ? "" : " nota");
+    if(a.daFare){
+      const cerchio = document.createElement("button");
+      cerchio.type = "button"; cerchio.className = "ap-cerchio"; cerchio.setAttribute("aria-label", "Segna come fatto");
+      cerchio.addEventListener("click", () => segnaAppuntoFatto(a));
+      riga.appendChild(cerchio);
+    } else {
+      const matita = document.createElement("span");
+      matita.className = "ap-matita"; matita.innerHTML = ICONA_MATITA;
+      riga.appendChild(matita);
+    }
     const testo = document.createElement("span");
-    testo.textContent = a.testo;
+    testo.className = "ap-testo"; testo.textContent = a.testo;
     testo.addEventListener("click", () => modificaAppuntoInCard(a));
-    riga.appendChild(segno); riga.appendChild(testo);
+    riga.appendChild(testo);
+    if(!a.daFare){
+      const quando = document.createElement("span");
+      quando.className = "ap-quando"; quando.textContent = quandoAppunto(a.created);
+      riga.appendChild(quando);
+    }
     lista.appendChild(riga);
   });
-  if(voci.length > 5){
-    const altri = document.createElement("button");
-    altri.type = "button"; altri.className = "home-hero-dafare-altri";
-    altri.textContent = "Altre " + (voci.length - 5) + " negli Appunti →";
-    altri.addEventListener("click", () => navigateTo("cantiere-appunti"));
-    lista.appendChild(altri);
-  }
 }
+/* Un appunto scritto o detto nella card: "ricordami di…" / "da fare: …"
+   diventa una cosa da fare, il resto una nota */
+async function aggiungiAppuntoDaCard(testo, cartellaId){
+  testo = String(testo || "").trim();
+  if(testo.length < 2) return false;
+  if(!isDbReady()){ showAILanding("Non collegato", "Per salvare gli appunti serve la connessione."); return false; }
+  const daFare = capisciDaFare(testo);
+  const riga = { testo: daFare || testo.charAt(0).toUpperCase() + testo.slice(1) };
+  if(daFare) riga.da_fare = true;
+  if(cartellaId) riga.cartella_id = cartellaId;
+  const creato = await dbInsert("cantiere_appunti", riga);
+  if(!creato) { showAIToast("Non salvato", "Non sono riuscita a salvare l'appunto: riprova."); return false; }
+  cantiereAppunti.push(mappaAppunto(creato));
+  aggiornaCantiereSottotitoli();
+  renderCantiereAppunti();
+  if(typeof renderCartelle === "function") renderCartelle();
+  return true;
+}
+function apriCardAppunti(cartella){
+  const corpo = document.createElement("div");
+  if(cartella){
+    const azioni = document.createElement("div");
+    azioni.className = "ap-azioni";
+    azioni.innerHTML = '<button type="button" data-az="rinomina">Rinomina</button><button type="button" class="pericolo" data-az="elimina">Elimina cartella</button>';
+    azioni.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-az]");
+      if(!b) return;
+      if(b.dataset.az === "rinomina") rinominaCartella(cartella);
+      else eliminaCartella(cartella);
+    });
+    corpo.appendChild(azioni);
+  }
+  const lista = document.createElement("div");
+  lista.className = "ap-lista"; lista.id = "apLista";
+  lista.dataset.cartella = cartella ? cartella.id : "";
+  corpo.appendChild(lista);
+  disegnaListaAppunti(lista, cartella ? cartella.id : null);
+
+  const piede = document.createElement("div");
+  piede.className = "scheda-composer";
+  const campo = document.createElement("textarea");
+  campo.rows = 1; campo.className = "scheda-campo"; campo.id = "apCampo";
+  campo.placeholder = cartella ? "Scrivi o detta in " + cartella.nome + "…" : "Scrivi o detta un appunto…";
+  const invia = document.createElement("button");
+  invia.type = "button"; invia.className = "scheda-invia ap-invia"; invia.setAttribute("aria-label", "Aggiungi appunto");
+  invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const manda = async (t) => {
+    const testo = String(t || campo.value || "").trim();
+    if(!testo) return;
+    campo.value = "";
+    await aggiungiAppuntoDaCard(testo, cartella ? cartella.id : null);
+    disegnaListaAppunti(lista, cartella ? cartella.id : null);
+  };
+  invia.addEventListener("click", () => manda());
+  campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(); } });
+  const mic = creaMicRapido((t) => manda(t));
+  mic.classList.add("scheda-mic");
+  mic.setAttribute("aria-label", "Detta un appunto");
+  piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
+  apriRisorsaCard(cartella ? cartella.nome : "Appunti", corpo, piede);
+}
+document.getElementById("homeAppuntiBtn").addEventListener("click", () => apriCardAppunti(null));
+
+/* ===== Cartelle di "Altra attività" (28/09/2026) =====
+   Raccoglitori con un nome (Fornitori, Personale, Scadenze…): proposti dal
+   questionario all'iscrizione, rinominabili, eliminabili, "+ Nuova
+   cartella". Dentro ci sono appunti, con la stessa card (microfono e
+   casella). A voce: "segna in Fornitori di chiamare la Peroni". */
+const CARTELLE_PROPOSTE = {
+  negozio: ["Fornitori", "Ordini", "Scadenze", "Incassi"],
+  bar: ["Fornitori", "Personale", "Scadenze", "Incassi"],
+  studio: ["Clienti", "Pratiche", "Scadenze", "Incassi"],
+  servizi: ["Clienti", "Interventi", "Materiale", "Incassi"],
+  altro: ["Clienti", "Fornitori", "Scadenze", "Idee"],
+};
+function cartelleProposte(tipo, persone){
+  const base = (CARTELLE_PROPOSTE[tipo] || CARTELLE_PROPOSTE.altro).slice();
+  // Chi lavora da solo non ha bisogno di "Personale"
+  if(persone === "solo" && base.includes("Personale")) base[base.indexOf("Personale")] = "Idee";
+  return base;
+}
+function iconaCartella(nome){
+  const n = normalizzaComando(nome);
+  if(/fornit|ordin|merc|magazz/.test(n)) return "negozio";
+  if(/personal|turni|squadr|dipend|client/.test(n)) return "persone";
+  if(/scadenz|pratic|burocr|document/.test(n)) return "timbro";
+  if(/incass|cass|soldi|conti|pagament|spes/.test(n)) return "euro";
+  if(/intervent|lavor|manutenz/.test(n)) return "chiave";
+  if(/materi|attrezz/.test(n)) return "quadro";
+  return "doc";
+}
+function renderCartelle(){
+  const griglia = document.getElementById("cartelleGriglia");
+  if(!griglia) return;
+  griglia.innerHTML = "";
+  cartelle.forEach(c => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "cartella"; b.dataset.cartella = c.id;
+    const dentro = cantiereAppunti.filter(a => a.cartellaId === c.id);
+    const daFare = dentro.filter(a => a.daFare && !a.fattoIl).length;
+    const sotto = daFare ? (daFare === 1 ? "1 da fare" : daFare + " da fare") : dentro.length ? (dentro.length === 1 ? "1 appunto" : dentro.length + " appunti") : "Vuota";
+    b.innerHTML = '<div class="cantiere-card-icon">' + svgMestiere(c.icona || iconaCartella(c.nome)) + '</div><b></b><small></small>';
+    b.querySelector("b").textContent = c.nome;
+    b.querySelector("small").textContent = sotto;
+    b.addEventListener("click", () => apriCardAppunti(c));
+    griglia.appendChild(b);
+  });
+  const nuova = document.createElement("button");
+  nuova.type = "button"; nuova.className = "cartella-nuova"; nuova.id = "cartellaNuova";
+  nuova.textContent = "+ Nuova cartella";
+  nuova.addEventListener("click", () => chiediNomeCartella(null));
+  griglia.appendChild(nuova);
+}
+/* Una piccola card con il nome da scrivere: per crearne una o rinominarla */
+function chiediNomeCartella(cartella){
+  const corpo = document.createElement("div");
+  corpo.className = "imp-form";
+  corpo.innerHTML = '<label class="imp-campo"><span>Nome della cartella</span><input type="text" id="cartellaNome" maxlength="40" autocomplete="off"></label><button type="button" class="imp-btn" id="cartellaNomeSalva"></button>';
+  const campo = corpo.querySelector("#cartellaNome");
+  campo.value = cartella ? cartella.nome : "";
+  campo.placeholder = "Es. Fornitori, Personale, Idee";
+  const salva = corpo.querySelector("#cartellaNomeSalva");
+  salva.textContent = cartella ? "Rinomina" : "Crea cartella";
+  const conferma = async () => {
+    const nome = campo.value.trim().replace(/\s+/g, " ");
+    if(!nome) return;
+    const nomeBello = nome.charAt(0).toUpperCase() + nome.slice(1);
+    if(cartella){
+      cartella.nome = nomeBello;
+      if(isDbReady()) dbUpdate("cartelle", cartella.id, { nome: nomeBello });
+    } else {
+      if(!isDbReady()){ showAILanding("Non collegato", "Per creare una cartella serve la connessione."); return; }
+      const creata = await dbInsert("cartelle", { nome: nomeBello, ordine: cartelle.length });
+      if(!creata) return;
+      cartelle.push({ id: creata.id, nome: creata.nome, icona: null });
+    }
+    chiudiRisorsaCard();
+    renderCartelle();
+  };
+  salva.addEventListener("click", conferma);
+  campo.addEventListener("keydown", (e) => { if(e.key === "Enter"){ e.preventDefault(); conferma(); } });
+  apriRisorsaCard(cartella ? "Rinomina cartella" : "Nuova cartella", corpo);
+  setTimeout(() => campo.focus(), 50);
+}
+function rinominaCartella(c){ chiediNomeCartella(c); }
+function eliminaCartella(c){
+  showAIToastConDecisione("Eliminare la cartella?", 'La cartella "' + escapeHtml(c.nome) + '" sparisce; i suoi appunti restano negli Appunti.', async () => {
+    const quando = new Date().toISOString();
+    if(isDbReady()){
+      await dbUpdate("cartelle", c.id, { deleted_at: quando });
+      for(const a of cantiereAppunti.filter(x => x.cartellaId === c.id)) await dbUpdate("cantiere_appunti", a.id, { cartella_id: null });
+    }
+    cantiereAppunti.forEach(a => { if(a.cartellaId === c.id) a.cartellaId = null; });
+    const i = cartelle.indexOf(c);
+    if(i > -1) cartelle.splice(i, 1);
+    chiudiRisorsaCard();
+    renderCartelle(); renderDaFare();
+  }, null, "Elimina", "Annulla");
+}
+/* Alla prima apertura di "Altra attività": le cartelle proposte dal
+   questionario. Solo se non ce n'è mai stata nessuna (anche cancellata):
+   chi le ha tolte tutte non se le ritrova. */
+/* Una sola proposta alla volta: all'avvio la Home si ridisegna più volte */
+let proponendoCartelle = false;
+async function proponiCartelleSeServe(profilo){
+  if(currentProfession !== "artigiano" || cartelle.length || !isDbReady() || proponendoCartelle) return;
+  proponendoCartelle = true;
+  try{
+    const { data } = await supabaseClient.from("cartelle").select("id").limit(1);
+    if(Array.isArray(data) && data.length) return;
+    const nomi = cartelleProposte((profilo && profilo.attivita_tipo) || "altro", profilo && profilo.attivita_persone);
+    const create = await dbInsertMany("cartelle", nomi.map((nome, i) => ({ nome, ordine: i })));
+    if(cartelle.length) return;
+    (create || []).sort((a, b) => (a.ordine || 0) - (b.ordine || 0)).forEach(c => cartelle.push({ id: c.id, nome: c.nome, icona: null }));
+    renderCartelle();
+  } finally { proponendoCartelle = false; }
+}
+/* "Segna in Fornitori di chiamare la Peroni", "metti in Idee: menu autunnale" */
+const TRIGGER_CARTELLA = /^(?:(?:ehi\s+)?eon\s*,?\s+)?(?:segna(?:mi)?|metti(?:mi)?|scrivi(?:mi)?|aggiungi|annota|salva)\s+(?:in|nella(?:\s+cartella)?|nel|su|tra\s+(?:i|le|gli)|nei|negli|nelle)\s+(.+)$/i;
+async function provaAppuntoInCartella(testo){
+  if(!cartelle.length) return false;
+  const m = String(testo || "").trim().replace(/[.!?]+$/, "").match(TRIGGER_CARTELLA);
+  if(!m) return false;
+  const resto = m[1];
+  const c = cartelle.slice().sort((a, b) => b.nome.length - a.nome.length)
+    .find(x => normalizzaComando(resto).startsWith(normalizzaComando(x.nome) + " ") || normalizzaComando(resto) === normalizzaComando(x.nome));
+  if(!c) return false;
+  let cosa = resto.slice(c.nome.length).replace(/^[\s:,-]+/, "").replace(/^che\s+/i, "");
+  if(!cosa) return false;
+  const daFare = /^di\s+/i.test(cosa) || /^(?:devo|da)\s+/i.test(cosa);
+  cosa = cosa.replace(/^(?:di|devo|da\s+fare:?)\s+/i, "");
+  if(!isDbReady()) return false;
+  const riga = { testo: cosa.charAt(0).toUpperCase() + cosa.slice(1), cartella_id: c.id };
+  if(daFare) riga.da_fare = true;
+  const creato = await dbInsert("cantiere_appunti", riga);
+  if(!creato) return false;
+  const nuovo = mappaAppunto(creato);
+  cantiereAppunti.push(nuovo);
+  renderCartelle(); renderCantiereAppunti();
+  showAIToastConAnnulla("In " + escapeHtml(c.nome), "«" + escapeHtml(nuovo.testo) + "»" + (daFare ? ", da fare." : "."), async () => { await cancellaAppuntiSenzaAvviso([nuovo]); renderCartelle(); });
+  return true;
+}
+
 function segnaAppuntoFatto(a){
   a.fattoIl = new Date().toISOString();
   if(isDbReady() && a.id) dbUpdate("cantiere_appunti", a.id, { fatto_il: a.fattoIl });
@@ -11047,14 +11455,15 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "gestisci-azienda": ["menu", "menù", "il menu", "il menù"],
   "cresci": ["cresci"],
   "assegna-compiti": ["compiti", "i compiti", "assegna compiti", "assegna compito", "compito", "squadra", "la squadra", "team", "il team", "dipendenti", "i dipendenti"],
-  "documenti-impresa": ["documenti impresa", "documenti dell'impresa", "documenti azienda", "documenti aziendali", "documenti dell'azienda", "i documenti dell'impresa", "i documenti dell'azienda"],
-  "cantiere-documenti": ["documenti", "i documenti", "i miei documenti", "documento"],
+  "documenti-impresa": ["durc e documenti", "durc e documenti impresa", "documenti impresa", "documenti dell'impresa", "documenti azienda", "documenti aziendali", "documenti dell'azienda", "i documenti dell'impresa", "i documenti dell'azienda"],
+  "cantiere-documenti": ["documenti", "i documenti", "i miei documenti", "documento", "certificazioni", "le certificazioni", "certificazioni e documenti", "le mie certificazioni"],
   "carta-intestata": ["carta intestata", "la carta intestata", "la mia carta intestata"],
   "crea-lettera": ["lettera", "la lettera", "lettere"],
   "crea-cartello": ["cartello", "il cartello", "cartello fine lavori", "il cartello fine lavori", "cartello di fine lavori"],
   "cantiere-appunti": ["appunti", "gli appunti", "i miei appunti", "note", "le note", "appunto", "nota"],
-  "cantiere-foto": ["foto", "le foto", "foto cantiere", "le foto del cantiere", "foto del cantiere", "galleria", "fotografie", "le fotografie"],
-  "cantiere-cliente": ["cliente cantiere"],
+  "cantiere-foto": ["foto", "le foto", "foto cantiere", "le foto del cantiere", "foto del cantiere", "galleria", "fotografie", "le fotografie", "foto impianti", "le foto degli impianti", "foto quadri", "le foto dei quadri"],
+  /* La prima card della Home ha il nome del mestiere (28/09/2026) */
+  "cantiere-cliente": ["cliente cantiere", "cantieri", "i cantieri", "i miei cantieri", "interventi", "gli interventi", "i miei interventi", "impianti", "gli impianti", "i miei impianti", "condomini", "i condomini", "i miei condomini"],
   "impostazioni": ["impostazioni", "le impostazioni", "impostazione", "opzioni", "settings", "account", "il mio account", "profilo", "il mio profilo"],
   "fatture-preventivi": ["fatture", "preventivi", "fatture e preventivi", "preventivi e fatture", "le fatture", "i preventivi", "le mie fatture", "i miei preventivi", "fattura", "preventivo"],
   "azienda": ["azienda", "la mia azienda", "la tua azienda", "cruscotto", "il cruscotto", "i conti", "i miei conti", "conti"],
@@ -12782,6 +13191,7 @@ function nominaUnCliente(testo){
   return maiuscole.some(w => clients.some(c => normalizzaComando(c.name).split(" ").includes(w)));
 }
 async function provaAppuntoImmediato(testo){
+  if(await provaAppuntoInCartella(testo)) return true;
   if(await provaDaFareImmediato(testo)) return true;
   const appunti = estraiAppunti(testo); // null se non è un appunto, o se ha un orario/data (resta all'AI: potrebbe essere un impegno)
   if(!appunti) return false;
@@ -13543,6 +13953,8 @@ function aggiornaHomeHero(gruppiPerGiorno){
     const testo = document.createElement("span");
     testo.textContent = it.title;
     riga.appendChild(segno);
+    const ora = estraiOra(it.when || "");
+    if(ora){ const o = document.createElement("span"); o.className = "home-oggi-ora"; o.textContent = ora; riga.appendChild(o); }
     riga.appendChild(testo);
 
     if(t){
@@ -13564,7 +13976,7 @@ function aggiornaHomeHero(gruppiPerGiorno){
    scheda). Sola lettura qui: per spuntare un impegno si resta sul
    riquadro di casa o si va in Calendario. */
 document.getElementById("homeHeroOggiBox").addEventListener("click", (e) => {
-  if(e.target.closest(".home-hero-oggi-check")) return;
+  if(e.target.closest(".home-hero-oggi-check") || e.target.closest("[data-page]")) return;
   const righeOrig = document.querySelectorAll("#homeHeroOggiLista .home-hero-oggi-riga");
   const corpo = document.createElement("div");
   if(!righeOrig.length){
@@ -13582,7 +13994,7 @@ document.getElementById("homeHeroOggiBox").addEventListener("click", (e) => {
       corpo.appendChild(riga);
     });
   }
-  apriRisorsaCard("Cosa devo fare oggi", corpo);
+  apriRisorsaCard("Oggi", corpo);
 });
 
 /* Organizza la giornata: la stessa cosa dell'orologio nel logo */
@@ -16182,10 +16594,17 @@ aggiornaSalutoHome("");
 function aggiornaAvatarHome(){
   const el = document.getElementById("brandAvatar");
   if(!el) return;
-  const p = (typeof profiloUtente !== "undefined" && profiloUtente) || {};
+  const p = profiloSicuro() || {};
   const nome = String(p.full_name || p.business_name || "").trim();
   const iniziali = nome ? nome.split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() : "";
-  el.textContent = iniziali || "EON";
+  /* Il mestiere in alto a destra, con la sua icona (28/09/2026); per
+     "Altra attività" il nome dell'attività */
+  const m = typeof mestiereHome === "function" ? mestiereHome() : null;
+  if(m){
+    const etichetta = currentProfession === "artigiano" ? (String(p.business_name || "").trim() || m.nome) : m.nome;
+    el.classList.add("brand-chip");
+    el.innerHTML = "<i>" + svgMestiere(m.icona) + "</i>" + escapeHtml(etichetta);
+  } else el.textContent = iniziali || "EON";
   el.setAttribute("aria-label", "Impostazioni" + (nome ? " di " + nome : ""));
   const primo = p.full_name ? String(p.full_name).trim().split(/\s+/)[0] : "";
   aggiornaSalutoHome(primo ? primo.charAt(0).toUpperCase() + primo.slice(1) : "");
@@ -16226,10 +16645,29 @@ document.getElementById("obType0ContinueBtn").addEventListener("click", () => {
   document.getElementById("obStep0").classList.remove("visible");
   if(obSelectedType === "generico"){
     obSelectedProfession = "artigiano";
-    document.getElementById("obStep2").classList.add("visible");
+    document.getElementById("obStepAttivita").classList.add("visible");
   } else {
     document.getElementById("obStep1").classList.add("visible");
   }
+});
+
+/* Mini questionario di "Altra attività": una risposta per domanda */
+const obAttivita = { tipo: null, modo: null, persone: null };
+document.getElementById("obStepAttivita").addEventListener("click", (e) => {
+  const chip = e.target.closest(".ob-chip");
+  if(!chip) return;
+  const gruppo = chip.closest("[data-domanda]");
+  gruppo.querySelectorAll(".ob-chip").forEach(c => c.classList.toggle("on", c === chip));
+  obAttivita[gruppo.dataset.domanda] = chip.dataset.v;
+  document.getElementById("obAttivitaContinua").disabled = !(obAttivita.tipo && obAttivita.modo && obAttivita.persone);
+});
+document.getElementById("obAttivitaContinua").addEventListener("click", () => {
+  document.getElementById("obStepAttivita").classList.remove("visible");
+  document.getElementById("obStep2").classList.add("visible");
+});
+document.getElementById("obBackAttivita").addEventListener("click", () => {
+  document.getElementById("obStepAttivita").classList.remove("visible");
+  document.getElementById("obStep0").classList.add("visible");
 });
 
 document.getElementById("obBackBtn0").addEventListener("click", () => {
@@ -16252,6 +16690,12 @@ document.getElementById("obContinueBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.add("visible");
 });
 
+/* Le risposte del questionario, solo per "Altra attività" */
+function rispostePerIscrizione(){
+  if(obSelectedProfession !== "artigiano" || !obAttivita.tipo) return {};
+  return { attivita_tipo: obAttivita.tipo, attivita_modo: obAttivita.modo, attivita_persone: obAttivita.persone };
+}
+
 /* Chi ha già un account non sceglie di nuovo la professione: è legata al
    suo account e arriva dal profilo quando accede (25/09/2026). */
 let obSoloAccesso = false;
@@ -16265,7 +16709,7 @@ document.getElementById("obBackBtn").addEventListener("click", () => {
   document.getElementById("obStep2").classList.remove("visible");
   if(obSoloAccesso){ obSoloAccesso = false; setObAuthMode("signup"); document.getElementById("obStep0").classList.add("visible"); return; }
   if(obSelectedType === "generico"){
-    document.getElementById("obStep0").classList.add("visible");
+    document.getElementById("obStepAttivita").classList.add("visible");
   } else {
     document.getElementById("obStep1").classList.add("visible");
   }
@@ -16354,7 +16798,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       const { data, error } = await supabaseClient.auth.signUp({
         email, password,
         options: {
-          data: { full_name: name, business_name: businessName, profession: obSelectedProfession, termini_versione: TERMINI_VERSIONE, termini_accettati_il: accettatiIl },
+          data: { full_name: name, business_name: businessName, profession: obSelectedProfession, termini_versione: TERMINI_VERSIONE, termini_accettati_il: accettatiIl, ...rispostePerIscrizione() },
           emailRedirectTo: indirizzoApp()
         }
       });
@@ -16373,10 +16817,10 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
       if(data.user){
         const { error: profErr } = await supabaseClient.from("profiles").update({
           full_name: name, business_name: businessName, profession: obSelectedProfession,
-          termini_versione: TERMINI_VERSIONE, termini_accettati_il: accettatiIl
+          termini_versione: TERMINI_VERSIONE, termini_accettati_il: accettatiIl, ...rispostePerIscrizione()
         }).eq("id", data.user.id);
         if(profErr) throw profErr;
-        ricordaProfilo({ full_name: name, business_name: businessName, profession: obSelectedProfession }, email);
+        ricordaProfilo({ full_name: name, business_name: businessName, profession: obSelectedProfession, ...rispostePerIscrizione() }, email);
 
         /* Un account nuovo parte vuoto (25/09/2026): prima ci venivano
            scritti clienti, pagamenti e impegni di esempio, finti ma nel suo
@@ -16781,9 +17225,10 @@ function controllaTerminiAccettati(profilo, utente){
 
 /* ---- Impostazioni: account e voci a card (25/09/2026) ---- */
 let profiloUtente = null;
-const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", elettricista:"Elettricista", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Organizza la giornata" };
+const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", elettricista:"Elettricista", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Altra attività" };
 function ricordaProfilo(profilo, email){
-  profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "" };
+  profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "",
+    attivita_tipo: (profilo && profilo.attivita_tipo) || null, attivita_persone: (profilo && profilo.attivita_persone) || null };
   aggiornaAvatarHome();
   try{ if(currentSession && currentSession.user) localStorage.setItem("eon-profilo", JSON.stringify({ ...profiloUtente, id: currentSession.user.id })); }catch(e){}
 }
@@ -16916,7 +17361,7 @@ suTocco("impVoceAiuto", () => {
    di avere una copia dei propri dati (art. 20 GDPR) con un tocco. */
 const TABELLE_MIEI_DATI = ["profiles", "clients", "conversations", "messages", "tasks", "incomes", "payments",
   "opportunities", "goals", "employees", "assigned_tasks", "cantieri", "cantiere_foto", "cantiere_documenti",
-  "cantiere_appunti", "condomini", "documents", "azienda_intestazione", "feedback"];
+  "cantiere_appunti", "cartelle", "condomini", "documents", "azienda_intestazione", "feedback"];
 async function scaricaIMieiDati(){
   if(!isDbReady()){ showAILanding("Non collegato", "Per scaricare i tuoi dati serve la connessione."); return; }
   const dati = { app: "EON", creato_il: new Date().toISOString(), account: (currentSession.user && currentSession.user.email) || "",
