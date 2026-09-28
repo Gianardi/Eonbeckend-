@@ -272,6 +272,27 @@ alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
 
+### 0b.13 Frasi di esempio, frasi vere e un "cervello" nostro — IN PROGRAMMA (deciso il 29/09)
+Andrea: "se ci mettessimo 1 milione di frasi esempi?". Risposta onesta: un
+milione di frasi **inventate** serve poco, perché si somigliano tutte. Contano
+**varietà** e **frasi vere**. Le grandi app (Siri, Alexa, Google) usano milioni
+di frasi vere, etichettate, per addestrare un piccolo modello loro. Piano in 3 passi:
+
+1. **Subito, quando c'è il credito dell'AI**: far scrivere all'AI 10–20 mila
+   frasi realistiche e diverse per ogni professione (dialetto, errori della
+   dettatura, frasi lunghe e confuse, più cose insieme) e farle girare nel
+   simulatore (`eval/simulatore.test.mjs`) per trovare i buchi veri del
+   lettore. Costo: pochi euro (stima).
+2. **Con i tester**: salvare le frasi che il codice non capisce e che vanno
+   all'AI, **solo col consenso** (da aggiungere all'informativa privacy; mai
+   visibili nel pannello admin come messaggi). L'AI le classifica; ogni
+   settimana diventano vocabolario del lettore e nuove prove del simulatore.
+3. **Più avanti**: con 20–50 mila frasi vere etichettate, addestrare un
+   piccolo modello nostro (come Snips) che gira sul telefono: gratis e
+   istantaneo. Le regole di oggi restano come rete di sicurezza.
+
+Pilastri: *tempo* (capisce al primo colpo) e *soldi* (meno AI, meno costi).
+
 ### 0b.11 Utente virtuale per ogni professione, promemoria, incassi, cartelle — FATTO il 29/09 (sera)
 - **Utente virtuale per ogni professione** (`eval/utente-virtuale-mestieri.test.js`):
   edile, idraulico, elettricista, amministratore e "Altra attività", circa
