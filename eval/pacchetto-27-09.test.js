@@ -309,7 +309,7 @@ async function main() {
       if (!provaNavigazioneDiretta("Assemblee") || paginaAttuale !== "assemblee") sbagliati.push("Assemblee non aperta dall'amministratore");
       currentProfession = mestierePrima; navigateTo("home");
       // 28/09: "Appunti" apre la card degli appunti, non più la vecchia pagina
-      if (!provaNavigazioneDiretta("Appunti") || document.getElementById("risorsaTitolo").textContent !== "Appunti") sbagliati.push("Appunti → niente card");
+      if (!provaNavigazioneDiretta("Appunti") || document.getElementById("risorsaTitolo").textContent !== "Mente") sbagliati.push("Appunti → niente card Mente");
       chiudiRisorsaCard();
       return { sbagliati, privacy };
     });

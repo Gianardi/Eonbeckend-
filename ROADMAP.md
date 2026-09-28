@@ -253,6 +253,42 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
 
+### 0b.7 EON svuota la testa: la Mente, cartelle per tutti, calendario vivo — FATTO il 28/09
+Andrea: "al professionista EON deve servire a svuotare la testa: ogni cosa
+che dico deve segnarla negli appunti, salvo le funzioni di EON".
+- **Un solo avviso**: "Segnato domani ore 11:30" (prima due avvisi, uno con
+  "segnati 1 impegni": un difetto).
+- **La Mente** al posto di "Appunti" (icona del cervello, "Svuota la testa:
+  parla o scrivi"). **Regola**, tutta col codice: azione chiara → la fa;
+  domanda → risponde; giorno o ora → calendario (AI); nomina un cliente →
+  AI (lo lega alla scheda e al prossimo appuntamento); **tutto il resto →
+  Mente**. "Devo…", "controllare…", "comprare…" → cosa da fare; il resto →
+  nota. Esempi: "Devo chiamare Fini Alessio", "controllare assicurazioni
+  infortunio", "controllare PAC totali".
+- **Meteo e incassi** ("quanto ho incassato questo mese", "chi mi deve
+  soldi") erano già col codice, senza AI.
+- **"Aggiungi cartella EON"** crea la cartella col codice (prima diventava un
+  cliente, con l'AI).
+- **Cartelle per tutti i mestieri**: sotto le 4 card, "+ Nuova cartella".
+  A voce: "segna in X…", "apri X", **"aggiungi in X queste foto"** (foto
+  nella cartella; nuova colonna `cantiere_foto.cartella_id`, staging e
+  produzione). Nella cartella: "Aggiungi foto", Rinomina, Elimina.
+- **Calendario vivo**: in Home solo quello che deve ancora succedere
+  (passato = un'ora dopo l'inizio), "N già passati oggi"; finita la
+  giornata → **Domani**; serata libera → "Per oggi hai finito. Stacca la
+  testa…". In Calendario i passati di oggi in una riga chiusa. Si aggiorna
+  da solo ogni 5 minuti e quando si torna nell'app.
+- **Prossimi** (proposti, da fare):
+  1. **"Com'è andato?"**: finito un appuntamento con un cliente, una sola
+     domanda in Home (fatto / da rifare / rimandato, anche a voce); EON lo
+     segna nella scheda e sposta l'impegno se serve. Solo appuntamenti con
+     un cliente; se ignorata sparisce a fine giornata.
+  2. **Promemoria degli appuntamenti** (oggi NON esistono): notifica ad es.
+     30 minuti prima; su iPhone solo con EON installata sulla Home; serve
+     una parte nuova sul server. Stima 2–3 giorni. Pacchetto a sé.
+- Da sapere: una frase che nomina un cliente va ancora all'AI (per legarla
+  al suo prossimo appuntamento); si può portare al codice più avanti.
+
 ### 0b.6 Ognuno vede solo il suo mestiere; il fondatore li prova tutti — FATTO il 28/09
 Andrea: "io con la mia email devo poter accedere a tutto per fare le
 simulazioni; un cliente che si registra come edile vede solo le sezioni

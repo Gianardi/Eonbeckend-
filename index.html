@@ -2390,6 +2390,17 @@
 
   /* Cartelle di "Altra attività" */
   .cartelle-griglia{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; margin:6px 0 18px; }
+  .cartelle-griglia.sotto-mestiere{ margin-top:-6px; }
+  .home-oggi-finito{ font-size:12.5px; font-weight:600; color:var(--muted); padding:2px 0 8px; }
+  .cal-passati-riga{ display:block; width:100%; text-align:left; border:none; background:none; font:inherit; font-size:13px; font-weight:700; color:var(--muted); padding:8px 2px; cursor:pointer; }
+  .cal-passati-riga::after{ content:" ▾"; }
+  .cal-passati-riga.aperta::after{ content:" ▴"; }
+  .cal-passati-lista[hidden]{ display:none; }
+  .cal-voce.passato{ opacity:.55; }
+  .cal-finito{ font-size:14px; color:var(--muted); padding:6px 2px 14px; }
+  .ap-foto{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; padding:2px 0 10px; }
+  .ap-foto button{ border:none; padding:0; background:#EEF0F5; border-radius:10px; overflow:hidden; aspect-ratio:1; cursor:pointer; }
+  .ap-foto img{ width:100%; height:100%; object-fit:cover; display:block; }
   .cartelle-griglia[hidden]{ display:none; }
   .cartella{ background:var(--card); border:1px solid var(--border); border-radius:22px; padding:16px 15px; display:flex; flex-direction:column; gap:9px; text-align:left; cursor:pointer; font-family:inherit; color:var(--text); box-shadow:0 6px 18px rgba(14,20,36,.08); min-height:118px; }
   .cartella .cantiere-card-icon{ width:40px; height:40px; border-radius:14px; background:var(--acc); }
@@ -3082,8 +3093,8 @@
           <div id="homeHeroOggiLista"><div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div></div>
         </div>
         <button type="button" class="home-appunti" id="homeAppuntiBtn">
-          <span class="home-appunti-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
-          <span class="home-appunti-testo"><b>Appunti</b><small id="homeAppuntiSub">Parla o scrivi un appunto</small></span>
+          <span class="home-appunti-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3A2.5 2.5 0 0 1 12 5.5v13a2.5 2.5 0 0 1-4.9.6 2.6 2.6 0 0 1-3-3.1 3 3 0 0 1-.4-5.4 2.6 2.6 0 0 1 1.3-4.2 2.5 2.5 0 0 1 2-3A2.5 2.5 0 0 1 9.5 3z"/><path d="M14.5 3A2.5 2.5 0 0 0 12 5.5v13a2.5 2.5 0 0 0 4.9.6 2.6 2.6 0 0 0 3-3.1 3 3 0 0 0 .4-5.4 2.6 2.6 0 0 0-1.3-4.2 2.5 2.5 0 0 0-2-3A2.5 2.5 0 0 0 14.5 3z"/></svg></span>
+          <span class="home-appunti-testo"><b>Mente</b><small id="homeAppuntiSub">Svuota la testa: parla o scrivi</small></span>
           <svg class="home-appunti-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </button>
         </div>
@@ -4878,7 +4889,7 @@ async function loadUserDataFromDB(){
     id:a.id, title:a.title, deadline:a.deadline, employees:a.employee_names || []
   }));
 
-  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "", descrizione:f.descrizione || "" }));
+  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "", descrizione:f.descrizione || "", cartellaId:f.cartella_id || null }));
   cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push(mappaAppunto(a)));
   // Cartelle di "Altra attività" (28/09/2026): a parte, un errore qui non blocca il resto
@@ -6658,6 +6669,26 @@ function renderCalendar(){
     intest.innerHTML = `<span class="cal-giorno-nome">${g.et}</span>${dataEstesa ? `<span class="cal-giorno-data">${dataEstesa}</span>` : ""}<i>${g.voci.length}</i>`;
     wrap.appendChild(intest);
 
+    /* Calendario vivo (28/09/2026, Andrea: "alle 19 mi mostra gli
+       appuntamenti dalle 8 del mattino: sono cose già fatte"): quelli di
+       oggi già passati stanno in una riga chiusa, "3 già passati oggi". */
+    let contPassati = null;
+    const passateOggi = g.oggi ? g.voci.filter(voceGiaPassata) : [];
+    if(passateOggi.length){
+      const apri = document.createElement("button");
+      apri.type = "button"; apri.className = "cal-passati-riga";
+      apri.textContent = (passateOggi.length === 1 ? "1 già passato oggi" : passateOggi.length + " già passati oggi");
+      contPassati = document.createElement("div");
+      contPassati.className = "cal-passati-lista"; contPassati.hidden = true;
+      apri.addEventListener("click", () => { contPassati.hidden = !contPassati.hidden; apri.classList.toggle("aperta", !contPassati.hidden); });
+      wrap.appendChild(apri); wrap.appendChild(contPassati);
+      if(passateOggi.length === g.voci.length){
+        const fine = document.createElement("div");
+        fine.className = "cal-finito"; fine.textContent = fraseGiornataFinita();
+        wrap.appendChild(fine);
+      }
+    }
+
     g.voci.forEach(it => {
       const row = document.createElement("div");
       const tipo = ETICHETTE_CALENDARIO[it.icon] ? it.icon : "appt";
@@ -6747,7 +6778,9 @@ function renderCalendar(){
       });
 
       // Anche qui si elimina scorrendo a sinistra, come in Messaggi
-      wrap.appendChild(it.id ? rendiScorrevole(row, () => eliminaVoceCalendario(it)) : row);
+      const dest = contPassati && voceGiaPassata(it) ? contPassati : wrap;
+      if(dest === contPassati) row.classList.add("passato");
+      dest.appendChild(it.id ? rendiScorrevole(row, () => eliminaVoceCalendario(it)) : row);
     });
   });
 
@@ -6809,6 +6842,22 @@ function etichettaGiorno(data, testoGrezzo){
 }
 
 /* Estrae "16:00" da "gio 8 ago, 16:00" */
+/* Un impegno di oggi è "passato" un'ora dopo il suo inizio (prima può
+   essere ancora in corso). Senza ora non passa mai: resta per tutto il giorno. */
+function voceGiaPassata(it){
+  const ora = estraiOra(it.when || "");
+  if(!ora) return false;
+  const [h, m] = ora.split(":").map(Number);
+  const adesso = new Date();
+  return h * 60 + m + 60 <= adesso.getHours() * 60 + adesso.getMinutes();
+}
+function fraseGiornataFinita(){
+  const h = new Date().getHours();
+  if(h >= 21) return "Per oggi hai finito. Riposa: domani ci pensa EON.";
+  if(h >= 17) return "Per oggi hai finito. Stacca la testa: una pausa, due passi, un film.";
+  if(h >= 13) return "Pomeriggio libero: il momento giusto per le cose nella Mente.";
+  return "Mattina libera: il momento giusto per le cose nella Mente.";
+}
 function estraiOra(testo){
   if(!testo) return "";
   const m = String(testo).match(/(\d{1,2})[:.](\d{2})/);
@@ -6931,10 +6980,18 @@ function applicaMestiereHome(key){
   const cartello = document.querySelector('#page-cantiere-documenti [data-page="crea-cartello"]');
   if(cartello) cartello.style.display = sezionePermessa("crea-cartello") ? "" : "none";
   document.getElementById("homeCarteMestiere").hidden = !!m.cartelle;
-  document.getElementById("cartelleGriglia").hidden = !m.cartelle;
-  if(m.cartelle && typeof renderCartelle === "function"){
+  /* Cartelle per tutti (28/09/2026): gli artigiani le hanno sotto le 4
+     card del mestiere ("+ Nuova cartella"); "Altra attività" le ha al loro
+     posto, con quelle proposte dal questionario. */
+  const griglia = document.getElementById("cartelleGriglia"), grigliaMestiere = document.getElementById("homeCarteMestiere");
+  griglia.hidden = false;
+  griglia.classList.toggle("sotto-mestiere", !m.cartelle);
+  // Per gli artigiani le cartelle stanno SOTTO le card del mestiere
+  if(!m.cartelle && grigliaMestiere.nextElementSibling !== griglia) grigliaMestiere.after(griglia);
+  if(m.cartelle && griglia.nextElementSibling !== grigliaMestiere) grigliaMestiere.before(griglia);
+  if(typeof renderCartelle === "function"){
     renderCartelle();
-    proponiCartelleSeServe(profiloSicuro());
+    if(m.cartelle) proponiCartelleSeServe(profiloSicuro());
   }
   aggiornaAvatarHome();
 }
@@ -10130,7 +10187,7 @@ function collegaHubRacconta(){
       } else if(a.tool === "manda_messaggio"){
         showAIToast("Messaggio inviato", "A " + a.esito.inviato_a);
       } else if(a.tool === "crea_appunto"){
-        showAIToast(a.esito.cliente ? "Appunto su " + escapeHtml(a.esito.cliente) : "Appunto aggiunto", a.esito.testo + (a.esito.appuntamento ? "\nAnche sull'appuntamento di " + a.esito.appuntamento.quando_visualizzato : ""));
+        showAIToast(a.esito.cliente ? "Appunto su " + escapeHtml(a.esito.cliente) : "In Mente", a.esito.testo + (a.esito.appuntamento ? "\nAnche sull'appuntamento di " + a.esito.appuntamento.quando_visualizzato : ""));
       } else if(a.tool === "correggi_appunto"){
         showAIToast("Appunto corretto", a.esito.testo);
       } else if(a.tool === "crea_preventivo_o_fattura"){
@@ -10375,7 +10432,7 @@ function renderDaFare(){
   const note = cantiereAppunti.filter(a => !a.daFare && !a.cartellaId).length;
   sub.textContent = daFare.length ? daFare[0].testo + (daFare.length > 1 ? " · e altre " + (daFare.length - 1) : "")
     : note ? (note === 1 ? "1 nota" : note + " note")
-    : "Parla o scrivi un appunto";
+    : "Svuota la testa: parla o scrivi";
   const card = document.getElementById("apLista");
   if(card && card.dataset.cartella !== undefined) disegnaListaAppunti(card, card.dataset.cartella || null);
 }
@@ -10403,7 +10460,7 @@ function disegnaListaAppunti(lista, cartellaId){
   const daFare = cantiereAppunti.filter(a => dentro(a) && a.daFare && !a.fattoIl).sort(perData);
   const note = cantiereAppunti.filter(a => dentro(a) && !a.daFare).sort(perData);
   if(!daFare.length && !note.length){
-    lista.innerHTML = '<div class="ap-vuoto">Nessun appunto. Parla o scrivi qui sotto.</div>';
+    lista.innerHTML = '<div class="ap-vuoto">Niente in testa? Parla o scrivi qui sotto: pensieri, cose da fare, idee.</div>';
     return;
   }
   daFare.concat(note).slice(0, 60).forEach(a => {
@@ -10454,14 +10511,31 @@ function apriCardAppunti(cartella){
   if(cartella){
     const azioni = document.createElement("div");
     azioni.className = "ap-azioni";
-    azioni.innerHTML = '<button type="button" data-az="rinomina">Rinomina</button><button type="button" class="pericolo" data-az="elimina">Elimina cartella</button>';
+    azioni.innerHTML = '<button type="button" data-az="foto">Aggiungi foto</button><button type="button" data-az="rinomina">Rinomina</button><button type="button" class="pericolo" data-az="elimina">Elimina cartella</button>';
     azioni.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-az]");
       if(!b) return;
-      if(b.dataset.az === "rinomina") rinominaCartella(cartella);
+      if(b.dataset.az === "foto") scattaFotoInCartella(cartella, false);
+      else if(b.dataset.az === "rinomina") rinominaCartella(cartella);
       else eliminaCartella(cartella);
     });
     corpo.appendChild(azioni);
+    // Le foto della cartella, in alto, dalla più recente
+    const foto = cantiereFoto.filter(f => f.cartellaId === cartella.id).sort((x, y) => String(y.created || "").localeCompare(String(x.created || "")));
+    if(foto.length){
+      const griglia = document.createElement("div");
+      griglia.className = "ap-foto"; griglia.id = "apFoto";
+      foto.forEach(f => {
+        const b = document.createElement("button");
+        b.type = "button";
+        const img = document.createElement("img");
+        img.src = f.url; img.alt = f.nota || "Foto"; img.loading = "lazy";
+        b.appendChild(img);
+        b.addEventListener("click", () => mostraSchedaFoto(f, null));
+        griglia.appendChild(b);
+      });
+      corpo.appendChild(griglia);
+    }
   }
   const lista = document.createElement("div");
   lista.className = "ap-lista"; lista.id = "apLista";
@@ -10473,7 +10547,7 @@ function apriCardAppunti(cartella){
   piede.className = "scheda-composer";
   const campo = document.createElement("textarea");
   campo.rows = 1; campo.className = "scheda-campo"; campo.id = "apCampo";
-  campo.placeholder = cartella ? "Scrivi o detta in " + cartella.nome + "…" : "Scrivi o detta un appunto…";
+  campo.placeholder = cartella ? "Scrivi o detta in " + cartella.nome + "…" : "Cosa hai in testa?";
   const invia = document.createElement("button");
   invia.type = "button"; invia.className = "scheda-invia ap-invia"; invia.setAttribute("aria-label", "Aggiungi appunto");
   invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
@@ -10492,7 +10566,7 @@ function apriCardAppunti(cartella){
   mic.classList.add("scheda-mic");
   mic.setAttribute("aria-label", "Detta un appunto");
   piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
-  apriRisorsaCard(cartella ? cartella.nome : "Appunti", corpo, piede);
+  apriRisorsaCard(cartella ? cartella.nome : "Mente", corpo, piede);
 }
 document.getElementById("homeAppuntiBtn").addEventListener("click", () => apriCardAppunti(null));
 
@@ -10533,7 +10607,9 @@ function renderCartelle(){
     b.type = "button"; b.className = "cartella"; b.dataset.cartella = c.id;
     const dentro = cantiereAppunti.filter(a => a.cartellaId === c.id);
     const daFare = dentro.filter(a => a.daFare && !a.fattoIl).length;
-    const sotto = daFare ? (daFare === 1 ? "1 da fare" : daFare + " da fare") : dentro.length ? (dentro.length === 1 ? "1 appunto" : dentro.length + " appunti") : "Vuota";
+    const nFoto = cantiereFoto.filter(f => f.cartellaId === c.id).length;
+    const parti = [daFare ? (daFare === 1 ? "1 da fare" : daFare + " da fare") : dentro.length ? (dentro.length === 1 ? "1 appunto" : dentro.length + " appunti") : "", nFoto ? (nFoto === 1 ? "1 foto" : nFoto + " foto") : ""].filter(Boolean);
+    const sotto = parti.length ? parti.join(" · ") : "Vuota";
     b.innerHTML = '<div class="cantiere-card-icon">' + svgMestiere(c.icona || iconaCartella(c.nome)) + '</div><b></b><small></small>';
     b.querySelector("b").textContent = c.nome;
     b.querySelector("small").textContent = sotto;
@@ -10579,13 +10655,15 @@ function chiediNomeCartella(cartella){
 }
 function rinominaCartella(c){ chiediNomeCartella(c); }
 function eliminaCartella(c){
-  showAIToastConDecisione("Eliminare la cartella?", 'La cartella "' + escapeHtml(c.nome) + '" sparisce; i suoi appunti restano negli Appunti.', async () => {
+  showAIToastConDecisione("Eliminare la cartella?", 'La cartella "' + escapeHtml(c.nome) + '" sparisce; i suoi appunti tornano nella Mente, le foto restano in Foto.', async () => {
     const quando = new Date().toISOString();
     if(isDbReady()){
       await dbUpdate("cartelle", c.id, { deleted_at: quando });
       for(const a of cantiereAppunti.filter(x => x.cartellaId === c.id)) await dbUpdate("cantiere_appunti", a.id, { cartella_id: null });
+      for(const f of cantiereFoto.filter(x => x.cartellaId === c.id)) await dbUpdate("cantiere_foto", f.id, { cartella_id: null });
     }
     cantiereAppunti.forEach(a => { if(a.cartellaId === c.id) a.cartellaId = null; });
+    cantiereFoto.forEach(f => { if(f.cartellaId === c.id) f.cartellaId = null; });
     const i = cartelle.indexOf(c);
     if(i > -1) cartelle.splice(i, 1);
     chiudiRisorsaCard();
@@ -10612,7 +10690,7 @@ async function proponiCartelleSeServe(profilo){
 }
 /* "Segna in Fornitori di chiamare la Peroni", "metti in Idee: menu autunnale" */
 const TRIGGER_CARTELLA = /^(?:(?:ehi\s+)?eon\s*,?\s+)?(?:segna(?:mi)?|metti(?:mi)?|scrivi(?:mi)?|aggiungi|annota|salva)\s+(?:in|nella(?:\s+cartella)?|nel|su|tra\s+(?:i|le|gli)|nei|negli|nelle)\s+(.+)$/i;
-async function provaAppuntoInCartella(testo){
+async function provaAppuntoInCartella(testo, viaVoce){
   if(!cartelle.length) return false;
   const m = String(testo || "").trim().replace(/[.!?]+$/, "").match(TRIGGER_CARTELLA);
   if(!m) return false;
@@ -10622,6 +10700,8 @@ async function provaAppuntoInCartella(testo){
   if(!c) return false;
   let cosa = resto.slice(c.nome.length).replace(/^[\s:,-]+/, "").replace(/^che\s+/i, "");
   if(!cosa) return false;
+  // "segna in Lavori con assicurazioni queste foto": una foto, non un appunto
+  if(/^(?:una|delle|le|queste|la|questa|qualche|un'?)?\s*(?:foto|fotografi[ae])\b/i.test(cosa)){ scattaFotoInCartella(c, !!viaVoce); return true; }
   const daFare = /^di\s+/i.test(cosa) || /^(?:devo|da)\s+/i.test(cosa);
   cosa = cosa.replace(/^(?:di|devo|da\s+fare:?)\s+/i, "");
   if(!isDbReady()) return false;
@@ -10672,7 +10752,7 @@ async function provaDaFareImmediato(testo){
   aggiornaCantiereSottotitoli();
   renderCantiereAppunti();
   ricordaAppuntoCreato(nuovo.id);
-  showAIToastConAnnulla("Da fare", "«" + escapeHtml(cosa) + "»: negli appunti, in Home.", async () => { await cancellaAppuntiSenzaAvviso([nuovo]); });
+  showAIToastConAnnulla("Da fare", "«" + escapeHtml(cosa) + "»: nella Mente, in Home.", async () => { await cancellaAppuntiSenzaAvviso([nuovo]); });
   return true;
 }
 
@@ -11206,15 +11286,25 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
       .from("eon-files").upload(percorso, file, { contentType:file.type, upsert:false });
     if(upErr) throw upErr;
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
-    const creato = await dbInsert("cantiere_foto", { url:pub.publicUrl });
+    const cartellaId = opzioni && opzioni.cartellaId ? opzioni.cartellaId : null;
+    const creato = await dbInsert("cantiere_foto", cartellaId ? { url:pub.publicUrl, cartella_id:cartellaId } : { url:pub.publicUrl });
     if(!creato) throw new Error("scrittura non riuscita");
-    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"" };
+    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"", cartellaId };
     cantiereFoto.push(nuovaFoto);
     // Nota già detta nella frase ("fai foto a pavimenti" → "Pavimenti")
     const notaDetta = opzioni && opzioni.nota ? String(opzioni.nota).trim() : "";
     if(notaDetta){ nuovaFoto.nota = notaDetta; await dbUpdate("cantiere_foto", creato.id, { nota: notaDetta }); }
     descriviFoto(nuovaFoto); // in sottofondo: EON guarda la foto e ne scrive una descrizione
-    if(daAppunti){
+    if(cartellaId){
+      /* In una cartella ("aggiungi in Lavori con assicurazioni queste
+         foto"): niente "a quale cliente?", si riapre la cartella. */
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      renderCartelle();
+      const c = cartelle.find(x => x.id === cartellaId);
+      if(c) apriCardAppunti(c);
+      showAIToast("Foto in " + (c ? c.nome : "cartella"), "Salvata.");
+    } else if(daAppunti){
       /* Da Appunti: niente "a quale cliente?", si apre subito la scheda
          della foto per dettare o scrivere la nota. */
       aggiornaCantiereSottotitoli();
@@ -11601,21 +11691,48 @@ function provaNavigazioneDiretta(testo){
    Andrea: "apri appunti", "apri fornitori" — "tutto deve aprirsi con il
    codice, non con l'AI"). Le cartelle vengono prima delle pagine: in
    "Altra attività" "Incassi" o "Clienti" sono le cartelle. */
-const APPUNTI_A_VOCE = ["appunti", "gli appunti", "i miei appunti", "note", "le note", "le mie note", "appunto", "nota", "da fare", "le cose da fare", "cose da fare"];
+const APPUNTI_A_VOCE = ["mente", "la mente", "la mia mente", "pensieri", "i miei pensieri", "i pensieri", "appunti", "gli appunti", "i miei appunti", "note", "le note", "le mie note", "appunto", "nota", "da fare", "le cose da fare", "cose da fare"];
 const FEEDBACK_A_VOCE = ["feedback", "il feedback", "manda un feedback", "un feedback"];
 const NUOVA_CARTELLA_A_VOCE = ["nuova cartella", "una nuova cartella", "crea una cartella", "crea una nuova cartella", "crea cartella", "aggiungi una cartella", "fai una cartella", "fai una nuova cartella"];
 function cardDaAprireAVoce(frase, resto, restoSenzaArticolo){
   const forme = [resto, restoSenzaArticolo];
-  if(currentProfession === "artigiano" && cartelle.length){
+  if(cartelle.length){
     const nome = normalizzaComando(restoSenzaArticolo.replace(/^cartella\s+/, "").replace(/^(?:il|lo|la|i|gli|le)\s+/, ""));
     const c = cartelle.find(x => normalizzaComando(x.nome) === nome);
     if(c) return () => apriCardAppunti(c);
   }
   if(forme.some(f => APPUNTI_A_VOCE.includes(f))) return () => apriCardAppunti(null);
   if(forme.some(f => FEEDBACK_A_VOCE.includes(f))) return () => apriFeedback();
-  if(currentProfession === "artigiano" && (NUOVA_CARTELLA_A_VOCE.includes(frase) || forme.some(f => NUOVA_CARTELLA_A_VOCE.includes(f)))) return () => { navigateTo("home"); chiediNomeCartella(null); };
-  if(currentProfession === "artigiano" && forme.some(f => ["cartelle", "le cartelle", "le mie cartelle"].includes(f))) return () => navigateTo("home");
+  if(NUOVA_CARTELLA_A_VOCE.includes(frase) || forme.some(f => NUOVA_CARTELLA_A_VOCE.includes(f))) return () => { navigateTo("home"); chiediNomeCartella(null); };
+  if(forme.some(f => ["cartelle", "le cartelle", "le mie cartelle"].includes(f))) return () => navigateTo("home");
   return null;
+}
+
+/* "Aggiungi cartella EON", "crea una cartella Fornitori" (28/09/2026):
+   la crea il codice, mai un cliente con quel nome. Se c'è già, la apre. */
+const CREA_CARTELLA = /^(?:(?:ehi\s+)?eon\s*,?\s+)?(?:aggiungi|aggiungimi|crea|creami|fai|fammi|apri|aprimi|metti)\s+(?:una\s+)?(?:nuova\s+)?cartella\s+(?:che\s+si\s+chiama\s+|chiamata\s+|di\s+nome\s+|con\s+(?:il\s+)?nome\s+|per\s+(?:il|la|i|le|gli)?\s*)?(.+)$|^(?:una\s+)?nuova\s+cartella\s+(?:che\s+si\s+chiama\s+|chiamata\s+)?(.+)$/i;
+async function provaCreaCartella(testo){
+  const m = String(testo || "").trim().replace(/[.!]+$/, "").match(CREA_CARTELLA);
+  if(!m) return false;
+  const nome = (m[1] || m[2] || "").replace(/^[«"'“]+|[»"'”]+$/g, "").trim();
+  if(!nome || nome.split(" ").length > 6) return false;
+  const esiste = cartelle.find(c => normalizzaComando(c.nome) === normalizzaComando(nome));
+  if(esiste){ chiudiRisorsaCard(); apriCardAppunti(esiste); return true; }
+  if(!isDbReady()){ showAILanding("Non collegato", "Per creare una cartella serve la connessione."); return true; }
+  const nomeBello = nome.length <= 4 && nome === nome.toUpperCase() ? nome : nome.charAt(0).toUpperCase() + nome.slice(1);
+  const creata = await dbInsert("cartelle", { nome: nomeBello, ordine: cartelle.length });
+  if(!creata) return false;
+  const nuova = { id: creata.id, nome: creata.nome, icona: null };
+  cartelle.push(nuova);
+  renderCartelle();
+  navigateTo("home");
+  showAIToastConAnnulla("Cartella creata", "«" + escapeHtml(nuova.nome) + "», in Home.", async () => {
+    const i = cartelle.indexOf(nuova);
+    if(i > -1) cartelle.splice(i, 1);
+    if(isDbReady()) await dbUpdate("cartelle", nuova.id, { deleted_at: new Date().toISOString() });
+    renderCartelle();
+  });
+  return true;
 }
 
 function apriSeNomeDiPagina(testo, domandaEON){
@@ -13139,12 +13256,38 @@ function provaFotoImmediata(testo, viaVoce){
   apriRisorsaCard("Foto", corpo);
   return true;
 }
+/* Una foto dentro una cartella: scritta col tasto apre subito la
+   fotocamera; a voce serve un tocco ("Scatta la foto"), perché il telefono
+   apre la fotocamera solo dopo un tocco. */
+function scattaFotoInCartella(c, viaVoce){
+  fotoRapidaDaSalvare = { cartellaId: c.id };
+  const input = document.getElementById("fotoRapidaInput");
+  if(!viaVoce){ input.click(); return; }
+  const corpo = document.createElement("div");
+  corpo.className = "foto-rapida-card";
+  corpo.innerHTML = `<button type="button" class="foto-rapida-btn" id="fotoRapidaScatta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span>Scatta la foto</span></button><p class="foto-rapida-nota"></p>`;
+  corpo.querySelector(".foto-rapida-nota").textContent = "in " + c.nome;
+  corpo.querySelector("#fotoRapidaScatta").addEventListener("click", () => input.click());
+  apriRisorsaCard("Foto", corpo);
+}
+/* "Aggiungi foto in Fornitori", "fai delle foto nella cartella Idee" */
+const FOTO_IN_CARTELLA = /^(?:(?:ehi\s+)?eon\s*,?\s+)?(?:aggiungi|aggiungimi|metti|salva|fai|fammi|scatta|carica)\s+(?:una|delle|le|queste|la|questa|qualche|un'?)?\s*(?:foto|fotografi[ae])\s+(?:in|nella|nel|dentro|su)\s+(?:cartella\s+)?(.+)$/i;
+function provaFotoInCartella(testo, viaVoce){
+  if(!cartelle.length) return false;
+  const m = String(testo || "").trim().replace(/[.!]+$/, "").match(FOTO_IN_CARTELLA);
+  if(!m) return false;
+  const nome = normalizzaComando(m[1].replace(/^(?:la\s+)?cartella\s+/i, ""));
+  const c = cartelle.find(x => normalizzaComando(x.nome) === nome);
+  if(!c) return false;
+  scattaFotoInCartella(c, viaVoce);
+  return true;
+}
 document.getElementById("fotoRapidaInput").addEventListener("change", (e) => {
   const f = e.target.files && e.target.files[0];
   const dati = fotoRapidaDaSalvare || {};
   fotoRapidaDaSalvare = null;
   e.target.value = "";
-  if(f){ chiudiRisorsaCard(); caricaCantiereFoto(f, dati.clienteId || null, { nota: dati.nota }); }
+  if(f){ chiudiRisorsaCard(); caricaCantiereFoto(f, dati.clienteId || null, { nota: dati.nota, cartellaId: dati.cartellaId || null }); }
 });
 
 function provaRisorsaImmediata(testo){
@@ -13291,8 +13434,8 @@ function nominaUnCliente(testo){
   const maiuscole = String(testo || "").split(/[\s,;!?.]+/).filter(Boolean).slice(1).filter(o => /^[A-ZÀ-Ý][a-zà-ÿ'’-]{2,}$/.test(o)).map(normalizzaComando);
   return maiuscole.some(w => clients.some(c => normalizzaComando(c.name).split(" ").includes(w)));
 }
-async function provaAppuntoImmediato(testo){
-  if(await provaAppuntoInCartella(testo)) return true;
+async function provaAppuntoImmediato(testo, viaVoce){
+  if(await provaAppuntoInCartella(testo, viaVoce)) return true;
   if(await provaDaFareImmediato(testo)) return true;
   const appunti = estraiAppunti(testo); // null se non è un appunto, o se ha un orario/data (resta all'AI: potrebbe essere un impegno)
   if(!appunti) return false;
@@ -13316,9 +13459,57 @@ async function provaAppuntoImmediato(testo){
   const nuovi = cantiereAppunti.slice(-salvati.length);
   ricordaAppuntoCreato(nuovi.length === 1 ? nuovi[0].id : null);
   // Con Annulla: l'appunto appena salvato si toglie con un tocco (27/09/2026)
-  showAIToastConAnnulla(salvati.length === 1 ? "Appunto aggiunto" : salvati.length + " appunti aggiunti",
+  showAIToastConAnnulla(salvati.length === 1 ? "In Mente" : salvati.length + " cose in Mente",
     escapeHtml(salvati.join("\n") + (mancanti ? `\n(${mancanti} non salvat${mancanti === 1 ? "o" : "i"}: riprova)` : "")),
     async () => { await cancellaAppuntiSenzaAvviso(nuovi); });
+  return true;
+}
+
+/* ===== La Mente: tutto quello che non è un comando (28/09/2026) =====
+   Andrea: "al professionista EON deve servire a svuotare la testa: ogni
+   cosa che dico deve segnarla negli appunti, salvo che non riguardi una
+   funzione di EON (preventivo, messaggio, segna per domani alle 10,
+   chiama Tizio)". Ultimo passo del codice prima dell'AI: se la frase non
+   è una domanda, non ha un giorno o un'ora, non è un ordine a EON, non
+   parla di soldi e non nomina un cliente, va nella Mente. "Devo…",
+   "controllare…", "comprare…" → cosa da fare (con il cerchio); il resto
+   → nota. Zero AI, subito, con Annulla. */
+const DOMANDA_PER_MENTE = /\?|^(?:come|quanto|quanti|quante|quando|chi|cosa|che\s+cosa|dove|perch[eé]|qual[ei]?|quale|hai|ho\s+(?:qualche|degli|delle|appuntamenti|impegni)|c'?\s*[eè]|ci\s+sono|mi\s+(?:dici|sai|spieghi|consigli)|dimmi|sai|spiegami|consigliami|secondo\s+te|posso|puoi|potresti|riesci|conviene|devo\s+(?:fare\s+)?(?:la|il)\s+(?:scia|cila|dico)\b)/i;
+const TEMPO_PER_MENTE = /\b(?:stasera|stamattina|stamani|domattina|stanotte|pomeriggio|questa\s+sera|in\s+mattinata|alle\s+\d|all'\s*\d|ore\s+\d|verso\s+le|fra\s+(?:un|una|\d|poco|mezz)|tra\s+(?:un|una|\d|poco|mezz)|pi[uù]\s+tardi|entro|settimana\s+prossima|prossima\s+settimana|mese\s+prossimo|prossimo\s+mese|weekend|fine\s+settimana|\d{1,2}\s+(?:gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre))\b/i;
+const ORDINE_A_EON = /^(?:(?:ehi\s+)?eon\s*,?\s+)?(?:mi\s+(?:aiuti|aiuteresti|dai|daresti|passi|mandi|mostri|trovi|prepari|fai|leggi|dici|spieghi|consigli|serve\s+(?:il|la|lo|i|gli|le)\s+(?:documento|foto|file|pdf|visura|durc))|aiutami|fai|fammi|facciamo|crea|creami|prepara|preparami|manda|mandami|invia|inviami|scrivi\s+(?:a|al|alla|allo|ai|agli|alle)\b|scrivigli|rispondi|chiama|chiamami|telefona\s+a|sposta|spostami|rimanda|cancella|cancellami|annulla|elimina|togli|rinomina|registra|apri|aprimi|mostra|mostrami|fammi\s+vedere|dammi|dimmi|leggi|leggimi|cerca|trova|trovami|portami|vai|calcola|aggiungi|metti|imposta|attiva|disattiva|cambia|modifica|correggi|segna\s+(?:in|nel|nella|per)\b)\b/i;
+const PAROLE_DI_FUNZIONE = /\b(?:preventiv[oi]|fattur[ae]|messaggio|messaggi|whatsapp|e-?mail|mail|appuntament[oi]|calendario|€|euro|pagat[oaie]|pagamento|incassat[oaie]|bonifico|acconto|saldo)\b|€/i;
+const CHIACCHIERE = /^(?:ciao|grazie|ok|okay|va\s+bene|perfetto|buongiorno|buonasera|buonanotte|salve|s[iì]|no|bravo|brava|ottimo|come\s+stai)\b/i;
+const INIZIO_DA_FARE = /^(?:devo|dovrei|dobbiamo|bisogna|bisognerebbe|serve|servono|mi\s+serve|mi\s+servono|manca|mancano|ricordarsi\s+di|ricordarmi\s+di)\s+/i;
+function capisciPensiero(testo){
+  const t = String(testo || "").trim().replace(/\s+/g, " ").replace(/[.!;]+$/, "");
+  const parole = t.split(" ").filter(Boolean);
+  if(parole.length < 2 || parole.length > 30) return null;
+  if(DOMANDA_PER_MENTE.test(t) || CHIACCHIERE.test(t)) return null;
+  // Il seguito di un discorso ("e quelle di ieri", "no, a Rossi", "mandalo"): decide l'AI
+  if(/^(?:e|ed|anche|invece|pure|poi|allora|no|non|quell[aoie]|quest[aoie])\b/i.test(t)) return null;
+  if(RIFERIMENTO_TEMPO.test(t) || TEMPO_PER_MENTE.test(t)) return null; // un giorno o un'ora: decide l'AI (può essere un impegno)
+  if(ORDINE_A_EON.test(t) || PAROLE_DI_FUNZIONE.test(t)) return null;
+  if(nominaUnCliente(t)) return null; // il server lo lega alla scheda e al prossimo appuntamento del cliente
+  let cosa = t, daFare = false;
+  if(INIZIO_DA_FARE.test(cosa)){ cosa = cosa.replace(INIZIO_DA_FARE, ""); daFare = true; }
+  else if(/^[a-zà-ù]+(?:are|ere|ire|arsi|ersi|irsi|arlo|arla|arli|arle|erlo|erla|irlo|irla)\b/i.test(cosa) && !/^(?:essere|avere|ieri|stare|sere|mare|pare)\b/i.test(cosa)) daFare = true;
+  cosa = cosa.trim();
+  if(cosa.length < 3) return null;
+  return { testo: cosa.charAt(0).toUpperCase() + cosa.slice(1), daFare };
+}
+async function provaPensieroInMente(testo){
+  const p = capisciPensiero(testo);
+  if(!p || !isDbReady()) return false;
+  const riga = { testo: p.testo };
+  if(p.daFare) riga.da_fare = true;
+  const creato = await dbInsert("cantiere_appunti", riga);
+  if(!creato) return false; // l'AI ci riprova come sempre
+  const nuovo = mappaAppunto(creato);
+  cantiereAppunti.push(nuovo);
+  aggiornaCantiereSottotitoli();
+  renderCantiereAppunti();
+  ricordaAppuntoCreato(nuovo.id);
+  showAIToastConAnnulla("In Mente", "«" + escapeHtml(nuovo.testo) + "»" + (p.daFare ? ", da fare." : "."), async () => { await cancellaAppuntiSenzaAvviso([nuovo]); });
   return true;
 }
 
@@ -13409,7 +13600,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
   const hint = document.getElementById(hintId);
   if(!mic || !campo || !send) return;
 
-  const TESTO_HINT_BASE = hintBase;
+  /* In Home la frase sotto il microfono è l'esempio del mestiere
+     (28/09/2026: dopo un invio tornava la frase generica) */
+  const hintBaseDi = () => (hintId === "homeHeroHint" ? mestiereHome().hint : hintBase);
   let inCorso = false;
   /* Se EON ha appena fatto una domanda (es. "te lo segno fra un'ora?")
      e sta aspettando la risposta, l'id della conversazione resta qui:
@@ -13445,10 +13638,16 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
        anche se EON aveva appena fatto una domanda (tranne quando la
        parola era proprio nella domanda: allora è la risposta) */
+    if(testo && !inCorso && !inContinuazione && await provaCreaCartella(testo)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "cartella");
+      return;
+    }
     if(testo && !inCorso && apriSeNomeDiPagina(testo, inContinuazione ? testoDomandaAperta : "")){
       runIdAperto = null;
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "pagina");
       return;
     }
@@ -13465,7 +13664,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        qui — zero chiamata all'AI. */
     if(!inContinuazione && provaNavigazioneDiretta(testo)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "pagina");
       return;
     }
@@ -13473,14 +13672,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        "dovreste aggiungere…": la schermata giusta, subito, senza AI */
     if(!inContinuazione && provaAzioneDiretta(testo)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "azione_diretta");
       return;
     }
     /* "Chiama Rita", "scrivi a Rita", "nuovo cliente": subito, senza AI */
     if(!inContinuazione && provaComandiSemplici(testo, viaVoce)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "comando");
       return;
     }
@@ -13489,7 +13688,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        aprire l'altra app. */
     if(!inContinuazione && provaInvioDocumento(testo)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "invio_documento");
       return;
     }
@@ -13502,7 +13701,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       const lettura = provaLetturaLocale(testo);
       if(lettura){
         campo.value = "";
-        hint.textContent = TESTO_HINT_BASE;
+        hint.textContent = hintBaseDi();
         ricordaEsitoCodice(testo, "lettura_" + (lettura.tipo || "altro"));
         const righeLettura = (lettura.testo || "").split("\n").filter(Boolean);
         mostraRispostaEON(testo, righeLettura.length > 1 ? righeLettura.map(r => "- " + r).join("\n") : lettura.testo, { titolo: lettura.titolo });
@@ -13516,7 +13715,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       const saluto = rispostaSaluto(testo);
       if(saluto){
         campo.value = "";
-        hint.textContent = TESTO_HINT_BASE;
+        hint.textContent = hintBaseDi();
         ricordaEsitoCodice(testo, "saluto");
         mostraRispostaEON(testo, saluto.testo, { titolo: saluto.titolo });
         if(viaVoce) parlaRisposta(saluto.titolo + ". " + saluto.testo.split("\n")[0]);
@@ -13528,7 +13727,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        subito dopo un appunto: senza AI (27/09/2026) */
     if(!inContinuazione && provaCancellaAppunto(testo, viaVoce)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "cancella_appunto");
       return;
     }
@@ -13536,16 +13735,22 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* "Annulla gli appuntamenti di domani": lista e conferma, senza AI */
     if(!inContinuazione && provaAnnullaImmediato(testo, viaVoce)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "annulla_impegni");
       return;
     }
 
     /* "Fai foto a pavimenti": fotocamera subito (prima di ogni attesa,
        così il tocco sul tasto vale ancora per aprirla) */
+    if(!inContinuazione && provaFotoInCartella(testo, viaVoce)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "foto");
+      return;
+    }
     if(!inContinuazione && provaFotoImmediata(testo, viaVoce)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "foto");
       return;
     }
@@ -13554,7 +13759,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        apre subito la sua scheda, senza AI (26/09/2026). */
     if(!inContinuazione && provaSchedaCliente(testo)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "scheda_cliente");
       return;
     }
@@ -13562,7 +13767,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Meteo e strade: subito, in una card */
     if(!inContinuazione && (provaMeteo(testo, viaVoce) || provaPercorso(testo))){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "meteo_percorso");
       return;
     }
@@ -13570,7 +13775,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Un documento dell'impresa chiamato per nome ("mi dai il DURC"). */
     if(!inContinuazione && provaDocumentoImpresa(testo)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "documento_impresa");
       if(viaVoce) parlaRisposta("Ecco il documento");
       return;
@@ -13581,7 +13786,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        subito la card risorsa, senza passare dall'AI. */
     if(!inContinuazione && provaRisorsaImmediata(testo)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "risorsa");
       if(viaVoce) parlaRisposta("Ecco quello che hai chiesto");
       return;
@@ -13589,11 +13794,19 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     /* Fase 1d: un appunto libero senza data si può salvare davvero senza
        passare dall'AI (stessa identica scrittura di sempre). */
-    if(!inContinuazione && await provaAppuntoImmediato(testo)){
+    if(!inContinuazione && await provaAppuntoImmediato(testo, viaVoce)){
       campo.value = "";
-      hint.textContent = TESTO_HINT_BASE;
+      hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "appunto");
-      if(viaVoce) parlaRisposta("Appunto aggiunto");
+      if(viaVoce) parlaRisposta("Segnato");
+      return;
+    }
+    // Tutto il resto che non è un comando, una domanda o un impegno: nella Mente
+    if(!inContinuazione && await provaPensieroInMente(testo)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "appunto");
+      if(viaVoce) parlaRisposta("Segnato");
       return;
     }
 
@@ -13680,7 +13893,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     send.disabled = false;
     mic.disabled = false;
     inCorso = false;
-    hint.textContent = TESTO_HINT_BASE;
+    hint.textContent = hintBaseDi();
 
     if(risposta.stato === "incompleto"){
       mostra("Non ho fatto in tempo a finire", risposta.testo);
@@ -13779,7 +13992,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
          Con più impegni, uno per riga: "lunedì ore 09:00 · Chiamare Walter". */
       const clienteNato = risultatiVisibili.find(a => a.tool === "trova_o_crea_cliente" && a.esito && a.esito.creato);
       const daConfermare = impegniCreati.length === 1 && /\(da confermare\)$/.test(impegniCreati[0].esito.titolo || "");
-      if(impegniCreati.length === 1) mostra("Ok, segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato) + (daConfermare ? ", da confermare" : ""), clienteNato ? "Nuovo cliente: " + clienteNato.esito.nome : daConfermare ? "Se risponde sì lo confermo, se dice no lo tolgo." : "");
+      /* Un solo avviso, corto (28/09/2026, Andrea: "basta dire segnato e il
+         giorno e ora"): prima un "else" legato all'if sbagliato ne faceva
+         comparire due ("Ok, segnato…" e "Ok, segnati 1 impegni"). */
+      if(impegniCreati.length === 1) mostra("Segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato) + (daConfermare ? ", da confermare" : ""), daConfermare ? "Se risponde sì lo confermo, se dice no lo tolgo." : "");
+      else mostra("Segnati " + impegniCreati.length + " impegni", impegniCreati.map(a => quandoBreve(a.esito.quando_visualizzato) + " · " + a.esito.titolo).join("\n"));
       /* Il cliente nato con il lavoro ("Caldaia Baudi venerdì ore 15"): se
          il nome non era un cliente, un tocco lo toglie (l'appuntamento resta) */
       if(clienteNato){
@@ -13791,7 +14008,6 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
           ridisegnaClientiEChat();
         });
       }
-      else mostra("Ok, segnati " + impegniCreati.length + " impegni", impegniCreati.map(a => quandoBreve(a.esito.quando_visualizzato) + " · " + a.esito.titolo).join("\n"));
     }
 
     /* Come in organizza(): un solo avviso con "Annulla" anche per più
@@ -13839,7 +14055,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         mostra("Messaggio inviato", "A " + a.esito.inviato_a + (a.esito.testo ? ": “" + a.esito.testo + "”" : ""));
       } else if(a.tool === "crea_appunto"){
         if(a.esito.cliente) mostra("Appunto su " + a.esito.cliente, a.esito.testo + (a.esito.appuntamento ? "\nAnche sull'appuntamento di " + quandoBreve(a.esito.appuntamento.quando_visualizzato) : ""));
-        else mostra("Appunto aggiunto", a.esito.testo);
+        else mostra("In Mente", a.esito.testo);
       } else if(a.tool === "correggi_appunto"){
         mostra("Appunto corretto", a.esito.testo);
       } else if(a.tool === "crea_preventivo_o_fattura"){
@@ -13908,7 +14124,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        meta' frase — lasciamo che onend() decida se riavviare. */
     if(e.error === "no-speech" || e.error === "aborted") return;
     mic.classList.remove("ascolto");
-    hint.textContent = TESTO_HINT_BASE;
+    hint.textContent = hintBaseDi();
     attivo = false;
     if(e.error === "not-allowed" || e.error === "service-not-allowed"){
       showAILanding("Microfono non autorizzato", "Per parlare con l'assistente, consenti l'accesso al microfono nelle impostazioni del browser per questa pagina.");
@@ -13924,13 +14140,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        secondo tocco sul microfono, quando "attivo" e' gia' false. */
     if(attivo){
       try{ riconoscitore.start(); }
-      catch(err){ attivo = false; hint.textContent = TESTO_HINT_BASE; }
+      catch(err){ attivo = false; hint.textContent = hintBaseDi(); }
       return;
     }
     const finale = testoAccumulato.trim();
     testoAccumulato = "";
     if(finale.length >= 3) elabora(finale, true);
-    else hint.textContent = TESTO_HINT_BASE;
+    else hint.textContent = hintBaseDi();
   };
 
   mic.addEventListener("click", () => {
@@ -14016,7 +14232,15 @@ function aggiornaHomeHero(gruppiPerGiorno){
   if(!sub || !lista) return;
 
   const oggi = (gruppiPerGiorno || []).find(g => g.et === "Oggi");
-  const voci = oggi ? oggi.voci.slice() : [];
+  let voci = oggi ? oggi.voci.slice() : [];
+  /* Calendario vivo (28/09/2026): in Home solo quello che deve ancora
+     succedere; finita la giornata, si guarda a domani. */
+  const giaPassati = voci.filter(voceGiaPassata).length;
+  voci = voci.filter(v => !voceGiaPassata(v));
+  const domani = (gruppiPerGiorno || []).find(g => g.et === "Domani");
+  const titoloBox = document.querySelector("#homeHeroOggiBox .home-box-testa b");
+  const mostraDomani = voci.length === 0 && domani && domani.voci.length;
+  if(titoloBox) titoloBox.textContent = mostraDomani ? "Domani" : "Oggi";
 
   /* renderCalendar() esclude di proposito i task già fatti (non sono
      più "da fare"): qui invece un task appena spuntato deve restare
@@ -14030,16 +14254,33 @@ function aggiornaHomeHero(gruppiPerGiorno){
 
   sub.textContent = voci.length === 0 ? "Nessun impegno oggi"
     : (voci.length === 1 ? "1 impegno oggi" : voci.length + " impegni oggi");
-  // L'etichetta sotto "Oggi", in cima alla Home: stessi impegni
+  // L'etichetta sotto "Oggi", in cima alla Home: quelli che restano
   const conta = document.getElementById("homeOggiConta");
-  if(conta) conta.textContent = voci.length === 0 ? "Nessun impegno" : (voci.length === 1 ? "1 impegno" : voci.length + " impegni");
+  if(conta) conta.textContent = voci.length ? (voci.length === 1 ? "1 impegno" : voci.length + " impegni")
+    : mostraDomani ? "Domani " + (domani.voci.length === 1 ? "1 impegno" : domani.voci.length + " impegni")
+    : "Nessun impegno";
 
   if(voci.length === 0){
-    lista.innerHTML = '<div class="home-hero-oggi-vuoto">Niente in programma per oggi.</div>';
-    return;
+    const finito = giaPassati ? fraseGiornataFinita() : (new Date().getHours() >= 17 ? fraseGiornataFinita() : "Niente in programma per oggi.");
+    if(!mostraDomani){
+      lista.innerHTML = '<div class="home-hero-oggi-vuoto"></div>';
+      lista.firstChild.textContent = finito;
+      return;
+    }
+    // Oggi è finito: le cose di domani, con una riga per dirlo
+    lista.innerHTML = '<div class="home-oggi-finito"></div>';
+    lista.firstChild.textContent = giaPassati ? "Per oggi hai finito." : "Oggi niente in programma.";
+    voci = domani.voci.slice();
+  } else {
+    lista.innerHTML = "";
+    if(giaPassati){
+      const r = document.createElement("div");
+      r.className = "home-oggi-finito";
+      r.textContent = giaPassati === 1 ? "1 già passato oggi" : giaPassati + " già passati oggi";
+      lista.appendChild(r);
+    }
   }
 
-  lista.innerHTML = "";
   voci.forEach(it => {
     const riga = document.createElement("div");
     const t = it.tabella === "tasks" ? tasks.find(x => x.id === it.id) : null;
@@ -14095,8 +14336,12 @@ document.getElementById("homeHeroOggiBox").addEventListener("click", (e) => {
       corpo.appendChild(riga);
     });
   }
-  apriRisorsaCard("Oggi", corpo);
+  apriRisorsaCard((document.querySelector("#homeHeroOggiBox .home-box-testa b") || {}).textContent || "Oggi", corpo);
 });
+/* Il calendario si aggiorna da solo mentre l'app è aperta (ogni 5 minuti)
+   e quando si torna nell'app: un impegno finito esce dalla Home. */
+setInterval(() => { if(!document.hidden) renderCalendar(); }, 5 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) renderCalendar(); });
 
 /* Organizza la giornata: la stessa cosa dell'orologio nel logo */
 document.getElementById("aiHubGiornata").addEventListener("click", () => {
@@ -14763,7 +15008,7 @@ function mostraSchedaCliente(c, opzioni){
       if(documento){ mostraAnteprimaDocumento(documento.esito.dati, documento.esito.id, c.name); return; }
       if(fotoTrovate){ mostraRisorsaFoto(fotoTrovate.esito.foto || [], c.name); return; }
       if(documentiTrovati){ mostraRisorsaDocumenti(documentiTrovati.esito.documenti || [], c.name); return; }
-      const fatti = scritte.filter(a => a.tool === "crea_impegno").map(a => "Ok, segnato " + quandoBreve(a.esito.quando_visualizzato));
+      const fatti = scritte.filter(a => a.tool === "crea_impegno").map(a => "Segnato " + quandoBreve(a.esito.quando_visualizzato));
       const testoRisposta = (risposta.testo || "").trim();
       stato.runId = /\?\s*$/.test(testoRisposta) && risposta.runId ? risposta.runId : null;
       bolla("eon", [fatti.join("\n"), testoRisposta].filter(Boolean).join("\n") || (scritte.length ? "Fatto." : "Non ho capito, prova a dirlo in un altro modo."));

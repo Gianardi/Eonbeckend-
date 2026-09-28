@@ -111,7 +111,8 @@ async function main() {
           hint: document.getElementById("homeHeroHint").textContent,
           carte: [...document.querySelectorAll("#homeCarteMestiere > .cantiere-card .cantiere-card-title")].map((t) => t.textContent),
           seconda: document.getElementById("homeCartaMestiere").dataset.page,
-          cartelleNascoste: document.getElementById("cartelleGriglia").hidden,
+          // 28/09: anche gli artigiani hanno le cartelle, sotto le 4 card: all'inizio solo "+ Nuova cartella"
+          cartelleSoloNuova: !document.getElementById("cartelleGriglia").hidden && !!document.getElementById("cartellaNuova") && !document.querySelector("#cartelleGriglia .cartella"),
           carteVisibili: getComputedStyle(document.getElementById("homeCarteMestiere")).display !== "none",
         };
       }, k);
@@ -125,9 +126,9 @@ async function main() {
       && mestieri.idraulico.carte[0] === "Interventi" && mestieri.idraulico.seconda === "fatture-preventivi"
       && mestieri.elettricista.carte.join() === "Impianti,Preventivi e fatture,Certificazioni e documenti,Foto quadri"
       && mestieri.amministratore.carte[0] === "Condomini" && mestieri.amministratore.seconda === "assemblee", JSON.stringify(Object.fromEntries(Object.entries(mestieri).map(([k, m]) => [k, m.carte]))));
-    verifica("esempio vocale del mestiere sotto il microfono; niente cartelle per gli artigiani",
+    verifica("esempio vocale del mestiere sotto il microfono; sotto le card solo «+ Nuova cartella»",
       /solaio/.test(mestieri.edile.hint) && /perdita/.test(mestieri.idraulico.hint) && /conformità/.test(mestieri.elettricista.hint) && /assemblea/.test(mestieri.amministratore.hint)
-      && Object.values(mestieri).every((m) => m.cartelleNascoste && m.carteVisibili));
+      && Object.values(mestieri).every((m) => m.cartelleSoloNuova && m.carteVisibili));
 
     /* ---- Stesse pagine, nomi del mestiere: titoli e voce ---- */
     const titoli = await page.evaluate(async () => {
@@ -177,7 +178,7 @@ async function main() {
       return r;
     });
     verifica("Home: riquadro \"Oggi\" con \"Calendario →\"; spariti il vecchio riquadro \"Da fare\" e il tasto calendario", home.oggi && home.vecchi, JSON.stringify(home));
-    verifica("tasto Appunti: \"Parla o scrivi un appunto\" se vuoto, poi \"Chiamare Pedro · e altre 1\"", home.vuoto === "Parla o scrivi un appunto" && home.pieno === "Chiamare Pedro · e altre 1", JSON.stringify(home));
+    verifica("tasto Mente: \"Svuota la testa: parla o scrivi\" se vuoto, poi \"Chiamare Pedro · e altre 1\"", home.vuoto === "Svuota la testa: parla o scrivi" && home.pieno === "Chiamare Pedro · e altre 1", JSON.stringify(home));
     await page.click("#homeOggiCalendario");
     const alCalendario = await page.evaluate(() => document.getElementById("page-calendario").classList.contains("visible"));
     verifica("\"Calendario →\" porta al calendario", alCalendario);
@@ -190,7 +191,7 @@ async function main() {
       campo: !!document.getElementById("apCampo"),
     }));
     verifica("card Appunti: prima le cose da fare col cerchio, poi le note con matita e giorno; microfono e casella in fondo",
-      card.titolo === "Appunti" && card.righe.join("|") === "○ Chiamare Pedro|○ Comprare il silicone|✎ Misure bagno Bianchi [ieri]" && card.mic && card.campo, JSON.stringify(card));
+      card.titolo === "Mente" && card.righe.join("|") === "○ Chiamare Pedro|○ Comprare il silicone|✎ Misure bagno Bianchi [ieri]" && card.mic && card.campo, JSON.stringify(card));
     await page.evaluate(() => { window.__scritture.length = 0; });
     await page.fill("#apCampo", "ricordami di ordinare il cemento");
     await page.keyboard.press("Enter");
@@ -261,7 +262,7 @@ async function main() {
       azioni: [...document.querySelectorAll(".ap-azioni button")].map((b) => b.textContent),
     }));
     verifica("una cartella si apre come la card Appunti, con solo i suoi appunti e Rinomina / Elimina",
-      cartella.titolo === "Fornitori" && cartella.righe.join() === "Chiamare la Peroni" && cartella.azioni.join() === "Rinomina,Elimina cartella", JSON.stringify(cartella));
+      cartella.titolo === "Fornitori" && cartella.righe.join() === "Chiamare la Peroni" && cartella.azioni.join() === "Aggiungi foto,Rinomina,Elimina cartella", JSON.stringify(cartella));
     await page.fill("#apCampo", "listino nuovo dal 1 ottobre");
     await page.keyboard.press("Enter");
     await page.waitForTimeout(200);
