@@ -4093,6 +4093,16 @@
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
+        <div class="azienda-link-card" id="impVocePromemoria" role="button" tabindex="0">
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Promemoria</div>
+            <div class="module-sub" id="impPromemoriaSotto">Un avviso 30 minuti prima degli impegni</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
         <div class="azienda-link-card" id="impVoceProva" role="button" tabindex="0" hidden>
           <div class="module-icon" style="background:var(--indigo);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/></svg>
@@ -10358,7 +10368,7 @@ function collegaHubRacconta(){
        impegni. Prima ignoravamo tutto ciò che non fosse crea_impegno —
        l'azione veniva comunque eseguita sul database (dopo conferma),
        ma l'interfaccia non se ne accorgeva: sembrava non fare nulla. */
-    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa"];
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa", "leggi_cartella"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
@@ -11979,7 +11989,7 @@ const PAGINE_NAVIGABILI_A_VOCE = {
   "ai-request-log": ["registro ai", "registro", "registro dell'assistente", "il registro"],
 };
 /* Voci delle Impostazioni che si aprono dicendo solo il nome */
-const VOCI_IMPOSTAZIONI_A_VOCE = { "face id": "impVoceFaceId", "faceid": "impVoceFaceId", "privacy": "impVocePrivacy", "privacy e dati": "impVocePrivacy", "i miei dati": "impVocePrivacy", "aiuto": "impVoceAiuto", "sicurezza": "impVocePassword" };
+const VOCI_IMPOSTAZIONI_A_VOCE = { "promemoria": "impVocePromemoria", "i promemoria": "impVocePromemoria", "notifiche": "impVocePromemoria", "le notifiche": "impVocePromemoria", "face id": "impVoceFaceId", "faceid": "impVoceFaceId", "privacy": "impVocePrivacy", "privacy e dati": "impVocePrivacy", "i miei dati": "impVocePrivacy", "aiuto": "impVoceAiuto", "sicurezza": "impVocePassword" };
 
 /* Apertura riconosciuta: solo il verbo di navigazione (con la sua
    preposizione per "vai"/"portami", che nell'italiano corretto include
@@ -12807,6 +12817,112 @@ async function gestisciPiuComandi(l, testo){
   return { testo: alServer.map(p => p.originale).join(". ") };
 }
 
+/* ---- Un pagamento ricevuto: "Rita ha pagato 1.200" (29/09/2026) ----
+   Come segna_incasso_ricevuto sul server, ma subito e con i tasti: l'incasso
+   in sospeso di quel cliente diventa incassato; se sono più d'uno e
+   l'importo non basta a sceglierlo, si chiede quale; se non ce n'è nessuno,
+   se ne registra uno nuovo già incassato. */
+function incassiInSospesoDi(c){
+  return incomes.filter(i => i.status !== "incassato" && ((i.clientId && i.clientId === c.id) || nomeChiave(i.client || "") === nomeChiave(c.name)));
+}
+async function segnaIncassato(voce, importo){
+  const prima = { status: voce.status, amount: voce.amount };
+  const patch = { status: "incassato" };
+  if(importo && importo !== voce.amount) patch.amount = importo;
+  if(isDbReady() && voce.id) await dbUpdate("incomes", voce.id, patch);
+  voce.status = "incassato"; if(patch.amount) voce.amount = patch.amount;
+  renderIncomes(); renderSummary();
+  showAIToastConAnnulla("Incassato", escapeHtml(voce.client) + " · " + euroConti(voce.amount) + (voce.desc ? " · " + escapeHtml(voce.desc) : ""), async () => {
+    voce.status = prima.status; voce.amount = prima.amount;
+    if(isDbReady() && voce.id) await dbUpdate("incomes", voce.id, { status: prima.status, amount: prima.amount });
+    renderIncomes(); renderSummary();
+  });
+}
+async function registraIncassoNuovo(c, importo, descrizione){
+  const oggi = new Date().toISOString().slice(0, 10);
+  const voce = { id: null, client: c.name, clientId: c.id || null, desc: descrizione || "Pagamento", amount: importo, due: oggi, status: "incassato", created: new Date().toISOString() };
+  if(isDbReady()){
+    const salvato = await dbInsert("incomes", { client_name: c.name, client_id: c.id || null, description: voce.desc, amount: importo, due_date: oggi, status: "incassato" });
+    if(!salvato) return;
+    voce.id = salvato.id;
+  }
+  incomes.push(voce);
+  renderIncomes(); renderSummary();
+  showAIToastConAnnulla("Incassato", escapeHtml(c.name) + " · " + euroConti(importo), async () => {
+    const i = incomes.indexOf(voce); if(i > -1) incomes.splice(i, 1);
+    if(isDbReady() && voce.id) await dbUpdate("incomes", voce.id, { deleted_at: new Date().toISOString() });
+    renderIncomes(); renderSummary();
+  });
+}
+function gestisciIncasso(l, testo){
+  const conCliente = (c) => {
+    const aperti = incassiInSospesoDi(c);
+    const chiediImporto = (poi) => domandaDelCodice({ titolo: "Incasso · " + c.name, domanda: "Quanto ha pagato?", segnaposto: "Es. 1.200", onRisposta: (t) => { const v = leggiImporto(t); if(v > 0){ chiudiRisorsaCard(); poi(v); } } });
+    if(!aperti.length){
+      if(l.importo){ registraIncassoNuovo(c, l.importo); return { fatto: "incasso" }; }
+      chiediImporto((v) => registraIncassoNuovo(c, v));
+      return { fatto: "incasso_domanda" };
+    }
+    if(aperti.length === 1){
+      const v = aperti[0];
+      if(!l.importo || l.importo === v.amount){ segnaIncassato(v); return { fatto: "incasso" }; }
+      // Ha pagato una parte: acconto (resta il resto) o tutto con un importo diverso?
+      if(l.importo < v.amount){
+        domandaDelCodice({ titolo: "Incasso · " + c.name, domanda: "Aveva da pagare " + euroConti(v.amount) + (v.desc ? " (" + v.desc + ")" : "") + ": " + euroConti(l.importo) + " è un acconto?", senzaCampo: true,
+          scelte: [{ etichetta: "Sì, acconto (resta " + euroConti(v.amount - l.importo) + ")", valore: "acconto" }, { etichetta: "No, ha saldato tutto", valore: "tutto" }],
+          onRisposta: async (x) => {
+            chiudiRisorsaCard();
+            if(x === "tutto"){ segnaIncassato(v, l.importo); return; }
+            const restava = v.amount;
+            v.amount = Math.round((restava - l.importo) * 100) / 100;
+            if(isDbReady() && v.id) await dbUpdate("incomes", v.id, { amount: v.amount });
+            await registraIncassoNuovo(c, l.importo, "Acconto" + (v.desc ? " · " + v.desc : ""));
+          } });
+        return { fatto: "incasso_domanda" };
+      }
+      segnaIncassato(v, l.importo);
+      return { fatto: "incasso" };
+    }
+    const giusti = l.importo ? aperti.filter(v => v.amount === l.importo) : [];
+    if(giusti.length === 1){ segnaIncassato(giusti[0]); return { fatto: "incasso" }; }
+    domandaDelCodice({ titolo: "Incasso · " + c.name, domanda: "Ha più di un pagamento in sospeso: quale?", senzaCampo: true,
+      scelte: aperti.slice(0, 5).map((v, i) => ({ etichetta: euroConti(v.amount) + (v.desc ? " · " + v.desc : ""), valore: String(i) })),
+      onRisposta: (x) => { chiudiRisorsaCard(); segnaIncassato(aperti[Number(x)], null); } });
+    return { fatto: "incasso_domanda" };
+  };
+  if(!l.cliente && !l.candidati && !l.clienteSimile){
+    if(!l.nomeDetto) return null;
+    mostraRispostaEON(testo, l.nomeDetto + " non è tra i tuoi clienti. Aggiungilo (\"aggiungi " + l.nomeDetto + "\") e poi riprova.", { titolo: "Cliente non trovato" });
+    return { fatto: "incasso_senza_cliente" };
+  }
+  const r = risolviClienteLettura(l, "Incasso", conCliente);
+  return r && r.fatto ? r : { fatto: "incasso_scelta" };
+}
+
+/* La lettura di un impegno per il server: giorno (oggi, o domani se l'ora
+   è già passata), ora, cosa, nome detto del cliente, tipo */
+function letturaImpegnoPerServer(l){
+  if(!l || !l.quando || !l.quando.ora) return null;
+  let giorno = l.quando.giornoIso;
+  if(!giorno){
+    const d = new Date(), [h, m] = l.quando.ora.split(":").map(Number);
+    if(h * 60 + m <= d.getHours() * 60 + d.getMinutes()) d.setDate(d.getDate() + 1);
+    giorno = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  const pp = EonLettore.parole(l.testo);
+  const q = EonLettore.trovaQuando(pp, new Date());
+  const resto = pp.filter((_, i) => !q.usate.has(i));
+  // via le parole d'apertura ("segna", "metti", "ho", "c'è")
+  while(resto.length && /^(?:segna|segnami|metti|mettimi|fissa|fissami|ho|c|e|un|una|l|il|lo|la|appunta)$/.test(resto[0].n)) resto.shift();
+  const titolo = resto.map(x => x.o).join(" ").replace(/^[,.;:\s]+|[,.;:\s]+$/g, "");
+  if(titolo.length < 3) return null;
+  const cl = EonLettore.trovaCliente(pp, contestoLettore().clienti, q.usate);
+  const nome = cl.stato === "trovato" ? cl.usate.map(i => pp[i].o).join(" ") : "";
+  const tipo = /^(?:chiama|chiamare|sentire|senti|telefona|telefonare|richiama|richiamare|chiamata|telefonata)$/.test(resto[0] ? resto[0].n : "") ? "chiamata"
+    : (cl.stato === "trovato" || /\b(?:da|appuntamento|sopralluogo|incontro|visita|riunione|cantiere)\b/.test(EonLettore.norm(titolo))) ? "incontro" : "commissione";
+  return { giorno, ora: l.quando.ora, titolo: titolo.charAt(0).toUpperCase() + titolo.slice(1), nome, tipo };
+}
+
 /* ---- Regola 4: domande sui dati ---- */
 function rispondiSuiDati(l){
   const oggi = new Date();
@@ -12858,6 +12974,8 @@ function rispondiSuiDati(l){
     return { titolo: "Clienti", testo: attivi === 1 ? "Hai 1 cliente in anagrafica." : "Hai " + attivi + " clienti in anagrafica." };
   }
   if(l.tema === "urgenze"){ apriUrgenze(); return { gestito: true }; }
+  // "Cosa c'è in Fornitori?", "cosa devo fare per Lerici?": la cartella, aperta
+  if(l.tema === "cartella" && l.cartella){ apriCardAppunti(cartelle.find(c => c.id === l.cartella.id) || l.cartella); return { gestito: true }; }
   return null;
 }
 
@@ -12879,6 +12997,7 @@ async function provaLettore(testo, viaVoce, invia){
     case "messaggio": return gestisciMessaggio(l, testo, invia);
     case "email": case "whatsapp": return gestisciScrittura(l, testo, viaVoce);
     case "chiama": return gestisciChiamata(l, viaVoce);
+    case "incasso": return gestisciIncasso(l, testo);
     case "nota_cartella": return await salvaNotaCartella(l);
     case "cartello": return apriCartelloPer(l);
     case "doc_impresa": return mostraDocImpresaPer(l, testo);
@@ -12896,7 +13015,12 @@ async function provaLettore(testo, viaVoce, invia){
       return r;
     }
     case "mente": {
-      // Solo le frasi senza comando e senza cliente: le altre le sa fare già chi viene dopo
+      // Con un cliente ("Conti mi ha detto che…"): nella sua scheda, col codice sul server
+      if(l.cliente && isDbReady() && !/^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|ricordami|ricordarmi)\b/i.test(l.testo)){
+        const testoNota = l.cosa || l.testo;
+        return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: testoNota.charAt(0).toUpperCase() + testoNota.slice(1), ...(l.daFare ? { da_fare: true } : {}) } };
+      }
+      // Solo le frasi senza comando: le altre le sa fare già chi viene dopo
       if(l.cliente || /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|segna|segnami|metti|mettimi|annota|salva|appunta|appuntami|fai|fammi|ciao|grazie|ricordami|ricordarmi)\b/i.test(l.testo)) return null;
       if(!isDbReady() || l.testo.split(/\s+/).length < 2) return null;
       const riga = { testo: l.cosa || l.testo };
@@ -12912,7 +13036,13 @@ async function provaLettore(testo, viaVoce, invia){
       if(viaVoce) parlaRisposta("Segnato");
       return { fatto: "mente" };
     }
-    default: return null; // impegno con l'ora, domande libere, modifiche: come prima
+    case "impegno": {
+      /* Il percorso degli impegni sul server resta quello di sempre; in più
+         riceve la lettura del lettore, da usare invece della piccola AI */
+      const li = letturaImpegnoPerServer(l);
+      return li ? { letturaImpegno: li } : null;
+    }
+    default: return null; // domande libere, modifiche: come prima
   }
 }
 /* Rete di sicurezza (29/09/2026, credito dell'AI finito: 36 richieste
@@ -14696,6 +14826,8 @@ function capisciPensiero(testo){
   // Un ordine a EON ("svuota il cestino") non è un pensiero: lo dice il lettore unico
   const letta = leggiConLettore(t);
   if(letta && /^(?:comando|modifica|invio_documento|domanda|dati)$/.test(letta.azione)) return null;
+  // Un giorno o un'ora ("giovedì alle 21"): è un impegno, non un pensiero (il lettore legge anche "alle 21" e gli accenti)
+  if(letta && letta.quando && (letta.quando.giornoIso || letta.quando.ora)) return null;
   // Il seguito di un discorso ("e quelle di ieri", "no, a Rossi", "mandalo"): decide l'AI
   if(/^(?:e|ed|anche|invece|pure|poi|allora|no|non|quell[aoie]|quest[aoie])\b/i.test(t)) return null;
   if(RIFERIMENTO_TEMPO.test(t) || TEMPO_PER_MENTE.test(t)) return null; // un giorno o un'ora: decide l'AI (può essere un impegno)
@@ -14845,7 +14977,19 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
   async function elabora(testo, viaVoce, pronto){
     testo = (testo || "").trim();
-    const inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+    let inContinuazione = !!runIdAperto && Date.now() < runIdApertoScadenza;
+    /* EON aveva appena chiesto qualcosa, ma questa è chiaramente una cosa
+       NUOVA (una fattura intera, un messaggio a un cliente, un incasso, una
+       nota in una cartella, "devo…"): non è la risposta, si riparte da capo */
+    if(inContinuazione && !pronto && testo.split(/\s+/).length >= 3){
+      const nuova = leggiConLettore(EonLettore.togliCortesie(testo));
+      const forte = nuova && ((nuova.azione === "documento" && nuova.modo === "crea" && !(nuova.manca || []).length) || (nuova.azione === "messaggio" && nuova.cliente && nuova.messaggio)
+        || (nuova.azione === "incasso" && nuova.cliente) || nuova.azione === "nota_cartella" || (nuova.azione === "mente" && nuova.daFare && /^(?:devo|dovrei|bisogna|ricordami)\b/i.test(nuova.testo))
+        || (nuova.azione === "mente" && nuova.cliente && testo.split(/\s+/).length >= 5 && /\b(?:mi ha detto|ha detto|dice che|mi ha chiesto|vuole|preferisce)\b/i.test(testo)));
+      if(forte){ runIdAperto = null; inContinuazione = false; }
+    }
+    // "Eon, … grazie": le cortesie ai bordi non cambiano la richiesta (29/09/2026)
+    if(!inContinuazione && typeof EonLettore !== "undefined" && testo) testo = EonLettore.togliCortesie(testo);
     // Un comando già letto dal lettore (dopo le domande del codice): dritto al server, senza AI
     if(pronto && (pronto.comando || pronto.soloServer)){ if(inCorso) return; return inviaAlServer(testo, viaVoce, false, pronto.comando ? pronto : null); }
     /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
@@ -15025,6 +15169,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
     /* Il lettore unico (29/09/2026): trova cassetto e pezzi e decide con
        le 5 regole (calendario, azione, domanda del codice, dati, Mente) */
+    let letturaImpegno = null;
     if(!inContinuazione && !senzaLettore){
       const esitoLettore = await provaLettore(testo, viaVoce, (frase, p) => elabora(frase, false, p));
       if(esitoLettore && esitoLettore.fatto){
@@ -15038,6 +15183,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         return inviaAlServer(testo, viaVoce, false, esitoLettore);
       }
       if(esitoLettore && esitoLettore.testo) testo = esitoLettore.testo; // restano i pezzi con l'ora
+      if(esitoLettore && esitoLettore.letturaImpegno) letturaImpegno = esitoLettore.letturaImpegno;
     }
 
     /* Fase 1d: un appunto libero senza data si può salvare davvero senza
@@ -15058,7 +15204,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
-    return inviaAlServer(testo, viaVoce, inContinuazione, null);
+    return inviaAlServer(testo, viaVoce, inContinuazione, letturaImpegno ? { letturaImpegno } : null);
   }
 
   /* Il viaggio verso il server: il percorso del codice (anche per i
@@ -15078,7 +15224,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        richiesta sembra ferma per tutta l'attesa — una breve conferma
        parlata, subito, colma il buco senza dire nulla di non confermato
        (mai un orario, solo la ricezione). */
-    const eImpegnoInArrivo = !inContinuazione && !pronto && sembraRichiestaAppuntamento(testo);
+    const eImpegnoInArrivo = !inContinuazione && !(pronto && pronto.comando) && sembraRichiestaAppuntamento(testo);
     if(eImpegnoInArrivo){
       aggiungiImpegnoInConferma(testo);
       if(viaVoce) parlaRisposta("Ricevuto, un attimo");
@@ -15110,7 +15256,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       risposta = await chiediAssistente(
         inContinuazione ? testo : costruisciPrompt(testo) + notaContestoRecente(contestoRecente) + notaFocusCorrente(focusCorrente),
         runIdDaContinuare || undefined,
-        (contestoRecente || pronto) ? { ...(contestoRecente ? { ricordo: contestoRecente } : {}), ...(pronto && pronto.comando ? { comando: pronto.comando } : {}) } : undefined
+        (contestoRecente || pronto) ? { ...(contestoRecente ? { ricordo: contestoRecente } : {}), ...(pronto && pronto.comando ? { comando: pronto.comando } : {}), ...(pronto && pronto.letturaImpegno ? { lettura_impegno: pronto.letturaImpegno } : {}) } : undefined
       );
     }catch(err){
       console.warn("Assistente non riuscito:", err.message);
@@ -15173,7 +15319,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
-    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa"];
+    const STRUMENTI_DI_SOLA_LETTURA = ["cerca_cliente", "elenca_appuntamenti", "cerca_impegno", "storico_cliente", "leggi_conversazione", "recupera_foto_cantiere", "recupera_documenti_cliente", "recupera_documenti_impresa", "leggi_cartella"];
     const risultatiVisibili = azioni.filter(a => !STRUMENTI_DI_SOLA_LETTURA.includes(a.tool));
     if(risultatiVisibili.length === 0){
       if(risposta.stato !== "incompleto"){
@@ -15270,6 +15416,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
          comparire due ("Ok, segnato…" e "Ok, segnati 1 impegni"). */
       if(impegniCreati.length === 1) mostra("Segnato " + quandoBreve(impegniCreati[0].esito.quando_visualizzato) + (daConfermare ? ", da confermare" : ""), daConfermare ? "Se risponde sì lo confermo, se dice no lo tolgo." : "");
       else mostra("Segnati " + impegniCreati.length + " impegni", impegniCreati.map(a => quandoBreve(a.esito.quando_visualizzato) + " · " + a.esito.titolo).join("\n"));
+      proponiPromemoria(); // una volta sola: "vuoi un avviso prima?"
       /* Il cliente nato con il lavoro ("Caldaia Baudi venerdì ore 15"): se
          il nome non era un cliente, un tocco lo toglie (l'appuntamento resta) */
       if(clienteNato){
@@ -15328,7 +15475,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         mostra("Messaggio inviato", "A " + a.esito.inviato_a + (a.esito.testo ? ": “" + a.esito.testo + "”" : ""));
       } else if(a.tool === "crea_appunto"){
         if(a.esito.cliente) mostra("Appunto su " + a.esito.cliente, a.esito.testo + (a.esito.appuntamento ? "\nAnche sull'appuntamento di " + quandoBreve(a.esito.appuntamento.quando_visualizzato) : ""));
-        else mostra("In Mente", a.esito.testo);
+        else mostra(a.esito.cartella ? "In " + a.esito.cartella : "In Mente", a.esito.testo);
       } else if(a.tool === "crea_assemblea"){
         mostra("Assemblea segnata", a.esito.condominio + ", " + quandoBreve(a.esito.quando_visualizzato));
       } else if(a.tool === "correggi_appunto"){
@@ -15362,6 +15509,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
   }
 
   send.addEventListener("click", () => elabora(campo.value));
+  // Per l'utente virtuale (eval/utente-virtuale-mestieri.test.js): la frase e l'attesa della fine
+  if(sendId === "homeHeroSend") window.eonInviaHome = (t) => elabora(t, false);
 
   /* Microfono: tocca per parlare, tocca di nuovo per fermarti e inviare
      — usa lo stesso riconoscimento vocale del browser già in uso per la
@@ -18635,6 +18784,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
 
     await applyProfession(obSelectedProfession || "artigiano", true);
     controllaAdminEon();
+    ricontrollaPromemoria();
     renderPayments(); renderIncomes();
     document.getElementById("onboardingScreen").classList.add("hidden");
     if(benvenutoDaMostrare){ benvenutoDaMostrare = false; mostraBenvenuto(); }
@@ -18800,6 +18950,7 @@ async function initApp(){
       analizzaRisposteArretrate(); // risposte arrivate ad app chiusa
         await applyProfession(profile.profession, true);
         controllaAdminEon();
+        ricontrollaPromemoria();
         renderTasks(); renderDifficulty(); renderRing(); renderGoals(); renderAssignedTasks();
         renderPayments(); renderIncomes(); renderInvoices(); renderQuotes(); renderGifts();
         renderChatList(); renderChatWindow();
@@ -19020,6 +19171,7 @@ function disegnaImpostazioni(){
   const d = datiAccount();
   document.getElementById("impAccountSotto").textContent = [d.email, d.professione].filter(x => x && x !== "—").join(" · ") || "Email e professione";
   voceFaceIdImpostazioni();
+  vocePromemoriaImpostazioni();
 }
 function esitoImp(id, testo, ok){
   const e = document.getElementById(id);
@@ -19140,7 +19292,7 @@ suTocco("impVoceAiuto", () => {
    di avere una copia dei propri dati (art. 20 GDPR) con un tocco. */
 const TABELLE_MIEI_DATI = ["profiles", "clients", "conversations", "messages", "tasks", "incomes", "payments",
   "opportunities", "goals", "employees", "assigned_tasks", "cantieri", "cantiere_foto", "cantiere_documenti",
-  "cantiere_appunti", "cartelle", "assemblee", "sal", "dichiarazioni_conformita", "condomini", "documents", "azienda_intestazione", "feedback"];
+  "cantiere_appunti", "cartelle", "assemblee", "sal", "dichiarazioni_conformita", "condomini", "documents", "azienda_intestazione", "feedback", "push_iscrizioni"];
 async function scaricaIMieiDati(){
   if(!isDbReady()){ showAILanding("Non collegato", "Per scaricare i tuoi dati serve la connessione."); return; }
   const dati = { app: "EON", creato_il: new Date().toISOString(), account: (currentSession.user && currentSession.user.email) || "",
@@ -19360,6 +19512,76 @@ async function proponiFaceId(){
       b.disabled = false;
     }
   });
+}
+
+/* ===== Promemoria degli impegni sul telefono (29/09/2026) =====
+   Una notifica vera 30 minuti prima di ogni impegno con l'ora, anche ad app
+   chiusa: il server la manda (web push) quando l'orologio del database lo
+   sveglia. Qui: il permesso, il "postino" (sw.js) e l'iscrizione di questo
+   telefono. Su iPhone funziona solo con EON aggiunta alla schermata Home. */
+const VAPID_PUBBLICA = "BPDuqEMYlTdRJ1TVplWxUa3BBTlD8t6MtZISlOLaKXIivjVrt2DRaIsLGTKCBV49WUY-NkZv4RsLc3QGMQ8mFkg";
+function promemoriaPossibili(){ return "serviceWorker" in navigator && !!window.PushManager && "Notification" in window; }
+function iphoneSenzaHome(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)); }
+function promemoriaAttivi(){ return promemoriaPossibili() && Notification.permission === "granted" && !!leggiLocale("eon-promemoria"); }
+function chiaveInByte(b64){ const pad = "=".repeat((4 - b64.length % 4) % 4); const raw = atob((b64 + pad).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from([...raw].map(c => c.charCodeAt(0))); }
+async function salvaIscrizionePromemoria(sub){
+  const j = sub.toJSON();
+  if(!isDbReady() || !j.endpoint || !j.keys) return false;
+  const { error } = await supabaseClient.from("push_iscrizioni").upsert({ endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, owner_id: currentSession.user.id }, { onConflict: "endpoint" });
+  if(error){ console.warn("Iscrizione promemoria:", error.message); return false; }
+  scriviLocale("eon-promemoria", j.endpoint);
+  return true;
+}
+async function attivaPromemoria(){
+  if(iphoneSenzaHome() || !promemoriaPossibili()) throw new Error(iphoneSenzaHome() ? "Su iPhone prima aggiungi EON alla schermata Home (Condividi → Aggiungi alla schermata Home), poi riaprila da lì." : "Questo browser non manda notifiche.");
+  const permesso = await Notification.requestPermission();
+  if(permesso !== "granted") throw new Error("Notifiche non permesse: si attivano nelle impostazioni del telefono (Notifiche → EON).");
+  const reg = await navigator.serviceWorker.register("/sw.js");
+  await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chiaveInByte(VAPID_PUBBLICA) });
+  if(!(await salvaIscrizionePromemoria(sub))) throw new Error("Non salvato: controlla la connessione e riprova.");
+}
+async function disattivaPromemoria(){
+  const endpoint = leggiLocale("eon-promemoria");
+  try{ const reg = await navigator.serviceWorker.getRegistration("/sw.js"); const sub = reg && await reg.pushManager.getSubscription(); if(sub) await sub.unsubscribe(); }catch(e){}
+  if(isDbReady() && endpoint) await supabaseClient.from("push_iscrizioni").delete().eq("endpoint", endpoint);
+  scriviLocale("eon-promemoria", null);
+}
+/* All'avvio: se sono attivi, l'iscrizione di questo telefono resta salvata (il telefono a volte la cambia) */
+async function ricontrollaPromemoria(){
+  if(!promemoriaAttivi() || !isDbReady()) return;
+  try{ const reg = await navigator.serviceWorker.register("/sw.js"); const sub = await reg.pushManager.getSubscription(); if(sub) await salvaIscrizionePromemoria(sub); }catch(e){}
+}
+function vocePromemoriaImpostazioni(){
+  const sotto = document.getElementById("impPromemoriaSotto");
+  if(sotto) sotto.textContent = promemoriaAttivi() ? "Attivi: un avviso 30 minuti prima degli impegni" : "Un avviso 30 minuti prima degli impegni";
+}
+suTocco("impVocePromemoria", () => {
+  const attivi = promemoriaAttivi();
+  const corpo = schedaImpostazione("Promemoria", attivi
+    ? `<p class="imp-testo">Attivi su questo telefono: 30 minuti prima di ogni impegno con l'ora ti arriva una notifica, anche con EON chiusa.</p>
+       <button type="button" class="imp-btn imp-btn-pericolo" id="impPromemoriaSpegni">Disattiva i promemoria</button><div class="imp-esito" id="impEsitoPromemoria"></div>`
+    : `<p class="imp-testo">30 minuti prima di ogni impegno con l'ora ti arriva una notifica, come un messaggio, anche con EON chiusa.${iphoneSenzaHome() ? " Su iPhone funziona con EON aggiunta alla schermata Home (Condividi → Aggiungi alla schermata Home): poi apri EON da lì e attivali." : ""}</p>
+       <button type="button" class="imp-btn" id="impPromemoriaAccendi">Attiva i promemoria</button><div class="imp-esito" id="impEsitoPromemoria"></div>`);
+  const b = corpo.querySelector("#impPromemoriaAccendi, #impPromemoriaSpegni");
+  b.addEventListener("click", async () => {
+    b.disabled = true;
+    try{
+      if(attivi){ await disattivaPromemoria(); esitoImp("impEsitoPromemoria", "Promemoria disattivati.", true); }
+      else { await attivaPromemoria(); esitoImp("impEsitoPromemoria", "Fatto: 30 minuti prima di ogni impegno ti avviso.", true); }
+      vocePromemoriaImpostazioni();
+    }catch(e){ esitoImp("impEsitoPromemoria", e.message, false); b.disabled = false; }
+  });
+});
+/* Una volta sola, dopo il primo impegno segnato: "vuoi un avviso prima?" */
+function proponiPromemoria(){
+  if(!promemoriaPossibili() || promemoriaAttivi() || Notification.permission === "denied" || leggiLocale("eon-promemoria-proposto") || iphoneSenzaHome()) return;
+  scriviLocale("eon-promemoria-proposto", "1");
+  showAIToastConDecisione("Vuoi un avviso prima?", "30 minuti prima di ogni impegno ti arriva una notifica sul telefono.", async () => {
+    try{ await attivaPromemoria(); showAIToast("Promemoria attivi", "Ti avviso 30 minuti prima di ogni impegno."); vocePromemoriaImpostazioni(); }
+    catch(e){ showAIToast("Promemoria non attivati", e.message); }
+  }, () => {}, "Sì, avvisami", "No");
 }
 
 /* Impostazioni → "Face ID": attiva o disattiva */

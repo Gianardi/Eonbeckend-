@@ -4875,3 +4875,48 @@ Andrea: "principio logico e non sistema IF", "agisci come AD" (ROADMAP 0b.10).
 - Restano: le frasi vere dei tester da aggiungere al simulatore man mano;
   "segna 500 euro pagati da Rita" (incasso) ancora all'AI; promemoria;
   Mente-cervello; Squadra del cantiere.
+
+### Utente virtuale per professione, promemoria, incassi, cartelle (29/09/2026, sera)
+
+ROADMAP 0b.11.
+- `eval/utente-virtuale-mestieri.test.js`: per ogni professione una pagina
+  vera; `page.route` passa le richieste al VERO `handler` di `api/index.js`
+  (import dinamico) con PostgREST finto (eq/neq/gt/gte/lt/lte/ilike/in) e
+  Anthropic finto (conta le chiamate = "ha usato l'AI"). Aggancio di prova
+  nell'app: `window.eonInviaHome = (t) => elabora(t, false)` (solo la Home).
+- Server: `letturaImpegnoDallApp` (body `lettura_impegno`: giorno, ora,
+  titolo, nome, tipo; ricontrollati: parole davvero dette) usata prima di
+  `leggiImpegnoConAI`; app: `letturaImpegnoPerServer` (oggi, o domani se
+  l'ora è passata). `ESCLUSI_RAPIDO`: `\bfoto\b|\bfotograf`.
+  `leggiAppuntamentoDaCliente`: via le preposizioni in coda al lavoro.
+  Comando `appunto` (cliente_id, testo, da_fare) → `crea_appunto`.
+- App: `EonLettore.togliCortesie` all'inizio di `elabora` (non in
+  continuazione; "…, eon" solo con la virgola); in continuazione, un comando
+  chiaramente nuovo azzera `runIdAperto`; `capisciPensiero` chiede al lettore
+  anche giorno/ora.
+- Incassi: lettore `incasso` (ricevuto sì, "ho pagato" no); app
+  `gestisciIncasso`, `segnaIncassato`, `registraIncassoNuovo` (con Annulla).
+- Cartelle: lettore `dati/cartella` → `apriCardAppunti`; server
+  `trovaCartellaPerNome`, `crea_appunto.cartella`, strumento `leggi_cartella`
+  (sola lettura, anche in `STRUMENTI_DI_SOLA_LETTURA`).
+- Promemoria: `supabase/promemoria.sql` (staging e produzione):
+  `push_iscrizioni` (RLS proprietario), `promemoria_inviati` e `eon_segreti`
+  (RLS senza policy: solo chiave di servizio), `pg_net`. Segreti messi a mano
+  in entrambi (`vapid_jwk`, `cron_promemoria`); job pg_cron `eon-promemoria`
+  ogni 5 minuti **creato in produzione** (chiama
+  `action=invia_promemoria` con `x-eon-cron`). Server: `cifraWebPush`
+  (RFC 8291 aes128gcm), `firmaVapid` (RFC 8292 ES256, sub = URL di EON),
+  `handleInviaPromemoria` (ore "di Roma scritte come UTC": confronto con
+  `adessoARomaComeUtc`; impegni con l'ora in (adesso, +35 min], appuntamenti
+  `messages` appt non annullati; 404/410 → iscrizione tolta). App:
+  `VAPID_PUBBLICA`, `sw.js` (solo push e tocco), voce Impostazioni
+  `impVocePromemoria`, `attivaPromemoria`/`disattivaPromemoria`,
+  `ricontrollaPromemoria` all'avvio, `proponiPromemoria` una volta.
+  `push_iscrizioni` in `TABELLE_MIEI_DATI` e in `check-schema`.
+- Test: `utente-virtuale-mestieri` (848 frasi, 100%), `promemoria.test.mjs`
+  (12: decifrata "dal telefono", firma, orari, doppioni, 410),
+  `promemoria-app.test.js` (13), `simulatore` (2.935). Aggiornati
+  `impostazioni` e `clienti-chat` (voce Promemoria). Suite: 59 file, tutti ok.
+- **Da provare con Andrea dopo il merge**: la notifica vera su un telefono
+  (Android e iPhone con EON nella schermata Home); il registro delle
+  chiamate dell'orologio (`net._http_response`).
