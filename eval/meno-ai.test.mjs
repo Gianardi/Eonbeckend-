@@ -93,8 +93,9 @@ const D1 = giornoFra(1), D0 = giornoFra(0), D2 = giornoFra(2), LUN = prossimo(1)
 const casi = [
   ["Chiamata Valter lunedì 10:00", [], LUN && { titolo: "Chiamare Valter", quando: `${LUN}T10:00:00` }],
   ["Chiamata Valter lunedì alle 9", [], LUN && { titolo: "Chiamare Valter", quando: `${LUN}T09:00:00` }],
-  ["Segna Dini domani alle 10", ["Giampiero Dini"], { titolo: "Appuntamento con Dini", quando: `${D1}T10:00:00` }],
-  ["Segna appuntamento Dini domani alle 10", ["Giampiero Dini"], { titolo: "Appuntamento con Dini", quando: `${D1}T10:00:00` }],
+  // 28/09: nel titolo il nome completo del cliente riconosciuto
+  ["Segna Dini domani alle 10", ["Giampiero Dini"], { titolo: "Appuntamento con Giampiero Dini", quando: `${D1}T10:00:00` }],
+  ["Segna appuntamento Dini domani alle 10", ["Giampiero Dini"], { titolo: "Appuntamento con Giampiero Dini", quando: `${D1}T10:00:00` }],
   ["Segna appuntamento con Claudia Spori domani alle 10", ["Claudia Spori"], { titolo: "Appuntamento con Claudia Spori", quando: `${D1}T10:00:00` }],
   ["Chiamare Pippo domani alle 9", [], { titolo: "Chiamare Pippo", quando: `${D1}T09:00:00` }],
   ["domani mattina ore 11 appuntamento con Fregoli", [], { titolo: "Appuntamento con Fregoli", quando: `${D1}T11:00:00` }],

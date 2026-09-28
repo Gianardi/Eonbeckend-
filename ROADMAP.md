@@ -253,6 +253,44 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
 
+### 0b.8 Clienti e frasi col codice, assemblee vere, "Com'è andato?" — FATTO il 28/09 (sera)
+Andrea: "Scrivi a Machi domani alle 10: basta Machi, codice e non AI. Se ci
+sono 5 Alessio? Frase lunga: anche lì il codice?".
+- **Già col codice prima** (lato server, "percorsi rapidi"): nome esatto o
+  solo il cognome se unico ("Machi"), appunti con un cliente ("per Baudi
+  portare la chiave"), 2–4 omonimi con "Quale intendi?".
+- **Nuovo**:
+  - **nome detto un po' diverso**, anche solo il cognome ("Macchi"): "Intendi
+    Alessio Machi?" con **Sì / No** da toccare; "sì" lo segna col codice;
+  - **fino a 8 omonimi** con i nomi da toccare (oltre: AI);
+  - il titolo usa il **nome completo** del cliente scelto ("Chiamare Alessio
+    Verdi", non "Chiamare Alessio");
+  - **"Devo chiamare Machi"** → da fare nella scheda di Alessio Machi (codice);
+  - **frasi con più comandi**: il codice divide ("e", "poi", "ah e", punto,
+    virgola davanti a un comando), capisce ogni pezzo (impegno con ora,
+    anche senza giorno: oggi o **domani se l'ora è passata**; cancellazione
+    di un impegno preciso) e li fa **solo se li capisce tutti**; un solo
+    avviso con il riepilogo e **Annulla** per tutto. Un pezzo non chiaro →
+    frase intera all'AI.
+- **"Scrivi a Machi domani alle 10"** = promemoria per Andrea (non un
+  messaggio programmato: quello sarebbe una funzione nuova).
+- **Assemblee vere** (amministratore): prima la sezione mostrava **solo dati
+  di esempio**. Ora tabella `assemblee` (staging e produzione), "+ Nuova
+  assemblea", a voce "assemblea in via Roma 12 giovedì alle 21" (codice),
+  in calendario. **Scheda dell'assemblea**: data, tipo, stato (Da convocare
+  / Convocata / Fatta / Verbale da redigere), "Cosa si è detto" (microfono e
+  casella), foto, documenti. Tutto col codice.
+- **"Com'è andato?"**: un'ora dopo un appuntamento di oggi **con un
+  cliente**, una sola domanda in Home: Fatto / Da rifare / Rimandato o due
+  parole → nella scheda del cliente; "Rimandato" chiede "a quando?" e lo
+  sposta. Se ignorata resta solo per oggi.
+- **Sistemazioni**: indietro torna da dove sei venuto (DURC aperto dalla
+  Home → Home); icone delle card nel colore del mestiere ovunque (prima
+  nere in Documenti e Preventivi e fatture); in "Prova come…" non si vedono
+  le cartelle di "Altra attività" (vedi il mestiere come un cliente nuovo).
+- **Restano all'AI**: frasi che il codice non capisce, domande libere, "no"
+  a "Intendi…?", "Rimandato" (lo spostamento).
+
 ### 0b.7 EON svuota la testa: la Mente, cartelle per tutti, calendario vivo — FATTO il 28/09
 Andrea: "al professionista EON deve servire a svuotare la testa: ogni cosa
 che dico deve segnarla negli appunti, salvo le funzioni di EON".

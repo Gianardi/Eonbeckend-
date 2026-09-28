@@ -652,6 +652,15 @@ async function risolviClienteDaNome(nomeCercato, ctx) {
   if (simili.length === 1) return { stato: "simile", id: simili[0].id, nome: simili[0].name, telefono: simili[0].phone || null };
   if (simili.length > 1) return { stato: "ambiguo", candidati: simili.map((c) => ({ id: c.id, nome: c.name, telefono: c.phone || null })) };
 
+  /* Solo il cognome (o il nome), detto un po' diverso: "Macchi" per
+     "Alessio Machi" (28/09/2026). Una sola lettera di differenza, parole
+     di almeno 4 lettere: chi lo riceve chiede sempre conferma ("simile"). */
+  if (parole.length === 1 && parole[0].length >= 4) {
+    const perParola = unoPerNome(lista.filter((c) => c.name.toLowerCase().split(/\s+/).some((w) => w.length >= 4 && distanzaLevenshtein(parole[0], w) <= 1)));
+    if (perParola.length === 1) return { stato: "simile", id: perParola[0].id, nome: perParola[0].name, telefono: perParola[0].phone || null };
+    if (perParola.length > 1) return { stato: "ambiguo", candidati: perParola.map((c) => ({ id: c.id, nome: c.name, telefono: c.phone || null })) };
+  }
+
   return { stato: "non_trovato", nome_cercato: nome };
 }
 
@@ -3796,10 +3805,15 @@ function quandoValido(q) {
 /* Risposta a "quale dei due?": il candidato la cui parte di nome che lo
    distingue dagli altri compare nella risposta ("Giampiero" tra Sara e
    Giampiero Dini), oppure "il primo"/"la seconda". Solo se è uno solo. */
-function scegliCandidatoDaRisposta(candidati, risposta) {
-  if (!Array.isArray(candidati) || candidati.length < 2) return null;
+function scegliCandidatoDaRisposta(candidati, risposta, conferma) {
+  if (!Array.isArray(candidati) || !candidati.length) return null;
   const paroleRisposta = paroleNormalizzate(risposta);
-  const ordinali = [["primo", "prima"], ["secondo", "seconda"], ["terzo", "terza"], ["quarto", "quarta"]];
+  // "Intendi Alessio Machi?" → "sì" / "esatto" / "lui"
+  if (conferma || candidati.length === 1) {
+    if (/^(?:si|sì|esatto|giusto|proprio|lui|lei|certo|ok|okay|va bene|confermo|corretto)(?=[\s,.!]|$)/i.test(String(risposta || "").trim().replace(/^[^a-zàèéìòù]+/i, ""))) return candidati[0];
+    return null;
+  }
+  const ordinali = [["primo", "prima"], ["secondo", "seconda"], ["terzo", "terza"], ["quarto", "quarta"], ["quinto", "quinta"], ["sesto", "sesta"], ["settimo", "settima"], ["ottavo", "ottava"]];
   const perOrdine = ordinali.findIndex((o) => o.some((w) => paroleRisposta.includes(w)));
   if (perOrdine >= 0 && perOrdine < candidati.length) return candidati[perOrdine];
   const paroleDi = candidati.map((c) => paroleNormalizzate(c.nome));
@@ -3812,7 +3826,14 @@ function scegliCandidatoDaRisposta(candidati, risposta) {
 }
 
 async function creaImpegnoRapido(dati, cliente, user, ctx) {
-  const input = { titolo: dati.titolo, quando_iso: dati.quando_iso, tipo: dati.tipo };
+  /* "Chiamare Alessio" → "Chiamare Alessio Verdi" quando il cliente è stato
+     scelto o riconosciuto (28/09/2026) */
+  let titolo = dati.titolo;
+  if (cliente && dati.nomeDetto) {
+    const detto = dati.nomeDetto.split(" ").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+    if (titolo.includes(detto) && !titolo.includes(cliente.nome)) titolo = titolo.replace(detto, cliente.nome);
+  }
+  const input = { titolo, quando_iso: dati.quando_iso, tipo: dati.tipo };
   if (cliente) input.cliente_id = cliente.id;
   const esito = await TOOLS.crea_impegno.run(input, ctx);
   await registraOperazione(user, "crea_impegno", input, esito, "auto");
@@ -3979,13 +4000,27 @@ async function provaPercorsoRapidoImpegno(body, ctx, user) {
   }
 
   if (!eStringaNonVuota(letto.titolo) || !TIPI_IMPEGNO.has(letto.tipo)) return null;
-  const dati = { titolo: letto.titolo.trim(), tipo: letto.tipo, quando_iso: quando };
+  const dati = { titolo: letto.titolo.trim(), tipo: letto.tipo, quando_iso: quando, nomeDetto: nome || "" };
   if (!nome) return creaImpegnoRapido(dati, null, user, ctx);
 
   const risolto = await risolviClienteDaNome(nome, ctx);
   if (risolto.stato === "trovato") return creaImpegnoRapido(dati, { id: risolto.id, nome: risolto.nome }, user, ctx);
   if (risolto.stato === "non_trovato") return creaImpegnoRapido(dati, null, user, ctx);
-  if (risolto.stato === "ambiguo" && risolto.candidati.length <= 4) {
+  if (risolto.stato === "simile") {
+    /* Nome detto un po' diverso ("Macchi" per "Machi"): lo chiede il codice
+       (28/09/2026), "sì" lo segna, "no" passa al motore completo. */
+    const candidati = [{ id: risolto.id, nome: risolto.nome }];
+    const domanda = `Intendi ${risolto.nome}?`;
+    const salvato = await salvaRun(null, user, {
+      stato: "in_attesa_risposta",
+      messaggi: [{ role: "user", content: body.messaggio }, { role: "assistant", content: [{ type: "text", text: domanda }] }],
+      in_sospeso: { rapido: { ...dati, candidati, conferma: true } },
+      azioni: [],
+    });
+    ctx.lettoSenzaAI = !!lettoDalCodice;
+    return { azioni: [], payload: { stato: "concluso", runId: salvato.id, testo: domanda, azioni: [], scelte: ["Sì", "No"] } };
+  }
+  if (risolto.stato === "ambiguo" && risolto.candidati.length <= 8) {
     const candidati = risolto.candidati.map((c) => ({ id: c.id, nome: c.nome }));
     const domanda = `Ho trovato ${candidati.length} clienti con il nome ${nome}:\n` + candidati.map((c) => "- " + c.nome).join("\n") + (candidati.length === 2 ? "\n\nQuale dei due intendi?" : "\n\nQuale intendi?");
     /* La conversazione resta aperta come quelle del motore completo
@@ -3998,9 +4033,9 @@ async function provaPercorsoRapidoImpegno(body, ctx, user) {
       in_sospeso: { rapido: { ...dati, candidati } },
       azioni: [],
     });
-    return { azioni: [], payload: { stato: "concluso", runId: salvato.id, testo: domanda, azioni: [] } };
+    return { azioni: [], payload: { stato: "concluso", runId: salvato.id, testo: domanda, azioni: [], scelte: candidati.map((c) => c.nome) } };
   }
-  return null; // "simile" o troppi omonimi: chiede il motore completo, come sempre
+  return null; // troppi omonimi (più di 8): chiede il motore completo, come sempre
 }
 
 
@@ -4318,6 +4353,134 @@ async function provaPercorsoRapidoDocumento(body, ctx, user) {
   return { azioni, payload: { stato: "concluso", testo: `${esito.titolo} per ${esito.cliente}: €${totaleTesto}`, azioni } };
 }
 
+/* ---------- Assemblea di condominio, letta dal codice (28/09/2026) ----------
+   "Assemblea in via Roma 12 giovedì alle 21", "assemblea straordinaria
+   condominio Parco Verde domani ore 18": la crea il codice nella tabella
+   assemblee (solo per gli amministratori). Condominio = le parole prima del
+   giorno; giorno e ora = estraiGiornoEOra. Senza giorno o ora → come prima. */
+const FRASE_ASSEMBLEA = /^(?:(?:segna(?:mi)?|fissa|metti|crea|convoca|nuova)\s+(?:un[a']?\s*|l'\s*)?)?assemblea\s+(straordinaria\s+|ordinaria\s+)?(?:(?:in|a|al|alla|allo|del|della|dello|di|nel|nella|presso|per\s+(?:il|la))\s+)?(?:(?:condominio|condominio\s+di)\s+)?(.+)$/i;
+const INIZIO_QUANDO = /\s(?:oggi|domani|dopodomani|domattina|stasera|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)(?=\s|$)/i;
+async function provaAssemblea(body, ctx, user) {
+  if (!body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
+  const testo = String(ctx.testoUtente || "").trim().replace(/[.!]+$/, "");
+  if (testo.length > 160) return null;
+  const m = testo.match(FRASE_ASSEMBLEA);
+  if (!m) return null;
+  let resto = " " + m[2];
+  const straordinaria = !!m[1] && /^straord/i.test(m[1]) || /\bstraordinaria\b/i.test(resto);
+  resto = resto.replace(/\s(?:straordinaria|ordinaria)\b/i, " ");
+  const i = resto.search(INIZIO_QUANDO);
+  if (i < 1) return null;
+  const condominio = resto.slice(0, i).trim().replace(/^(?:via|piazza|viale|corso)\b/i, (x) => x.charAt(0).toUpperCase() + x.slice(1).toLowerCase());
+  const letto = estraiGiornoEOra(normalizzaFraseImpegno(resto.slice(i)), undefined);
+  if (!condominio || condominio.split(" ").length > 6 || !letto || !letto.giornoIso || !letto.ora || letto.resto) return null;
+  // Solo per gli amministratori (o il fondatore in prova come amministratore)
+  const profilo = await db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, ctx.accessToken).catch(() => null);
+  const mestiere = Array.isArray(profilo) && profilo[0] ? profilo[0].profession : null;
+  const inProva = body.prova_professione === "amministratore" && (await eAdmin(user).catch(() => null));
+  if (mestiere !== "amministratore" && !inProva) return null;
+  const riga = { condominio: condominio.charAt(0).toUpperCase() + condominio.slice(1), quando: `${letto.giornoIso}T${letto.ora}:00`, tipo: straordinaria ? "straordinaria" : "ordinaria", stato: "da convocare" };
+  const creato = await db("assemblee", { method: "POST", body: JSON.stringify(riga), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+  const a = Array.isArray(creato) ? creato[0] : creato;
+  if (!a || !a.id) return null;
+  const esito = { ...a, quando_visualizzato: formattaQuando(riga.quando) };
+  await registraOperazione(user, "crea_assemblea", riga, esito, "auto");
+  ctx.lettoSenzaAI = true;
+  const azioni = [{ tool: "crea_assemblea", esito }];
+  return { azioni, payload: { stato: "concluso", testo: `Assemblea segnata: ${a.condominio}, ${esito.quando_visualizzato}`, azioni } };
+}
+
+/* ---------- Più comandi in una frase, letti dal codice (28/09/2026) ----------
+   Andrea: "Sentire Machi alle 10:00 e vai da Spruzzo alle 17. Ah e cancella
+   appuntamento di domani alle 11:30 con Pierini". Il codice divide la frase
+   (punto, "e poi", "ah e", ", " o "e" davanti a un comando) e prova a
+   capire OGNI pezzo da solo: impegno con ora (anche senza giorno: oggi, o
+   domani se l'ora è già passata) o cancellazione di un impegno preciso.
+   Solo se li capisce TUTTI li fa, con un riepilogo; se anche uno solo non è
+   chiaro, la frase intera va al motore completo come prima (mai metà sì e
+   metà no). */
+const VERBO_DI_COMANDO = "(?:cancella|annulla|elimina|togli|disdici|segna|metti|fissa|vai|va|andare|passa|passare|sentire|chiama|chiamare|richiama|richiamare|telefona|telefonare|appuntamento|sopralluogo|riunione|incontro|visita)";
+const SEPARA_COMANDI = new RegExp(`\\s*(?:[.;]\\s+|,?\\s+(?:e\\s+poi|poi|ah\\s+e|e\\s+anche|inoltre)\\s+|,\\s*(?=${VERBO_DI_COMANDO}\\b)|\\s+e\\s+(?=${VERBO_DI_COMANDO}\\b))`, "i");
+const CANCELLA_IMPEGNO = /^(?:cancella|cancellami|annulla|elimina|togli|disdici)\s+(?:l\s+|il\s+|lo\s+)?(?:appuntamento|impegno|sopralluogo|incontro|chiamata|riunione|visita)?\s*(.+)$/;
+const RIEMPITIVE_CANCELLA = new Set(["di", "del", "della", "con", "da", "dal", "dalla", "a", "al", "alla", "per", "il", "lo", "la", "l", "quello", "quella"]);
+function dividiComandi(testo) {
+  if (!eStringaNonVuota(testo) || testo.length > 300) return null;
+  const parti = testo.trim().replace(/[.!]+$/, "").split(SEPARA_COMANDI)
+    .map((p) => String(p || "").trim().replace(/^(?:ah|e|poi|ok|allora)[,\s]+/i, "").replace(/^(?:ah|e|poi)[,\s]+/i, "").trim())
+    .filter((p) => p && !/^(?:ah|oh|e|poi|ok|allora|anzi)$/i.test(p));
+  return parti.length >= 2 && parti.length <= 5 ? parti : null;
+}
+function oraRoma(adesso) {
+  const f = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit", hour12: false }).format(adesso || new Date());
+  return f.replace(/^24/, "00");
+}
+async function leggiPezzo(pezzo, ctx) {
+  const n = normalizzaFraseImpegno(pezzo);
+  // Cancellazione: "cancella appuntamento di domani alle 11:30 con Pierini"
+  const c = n.match(CANCELLA_IMPEGNO);
+  if (c) {
+    const letto = estraiGiornoEOra(c[1], undefined);
+    if (!letto || !letto.giornoIso) return null;
+    const nome = letto.resto.split(" ").filter((w) => w && !RIEMPITIVE_CANCELLA.has(w)).join(" ");
+    if (!nome || nome.split(" ").length > 3) return null;
+    const trovati = await TOOLS.cerca_impegno.run({ testo: nome }, ctx).catch(() => ({ risultati: [] }));
+    const giusti = (trovati.risultati || []).filter((r) => String(r.quando || "").slice(0, 10) === letto.giornoIso && (!letto.ora || String(r.quando || "").slice(11, 16) === letto.ora));
+    if (giusti.length !== 1) return null;
+    return { tipo: "cancella", id: giusti[0].id, titolo: giusti[0].titolo };
+  }
+  // Impegno: "vai da Spruzzo alle 17" → "appuntamento Spruzzo alle 17"
+  let frase = pezzo.replace(/^(?:vai|va|andare|vado|passa|passare|passo)\s+(?:da|dal|dalla|dai|a|al|alla|allo)\s+/i, "appuntamento ");
+  let giornoAggiunto = null;
+  const nf = normalizzaFraseImpegno(frase);
+  const prova = estraiGiornoEOra(nf, undefined);
+  if (prova && prova.ora && !prova.giornoIso) {
+    // Solo l'ora: oggi, oppure domani se a quest'ora è già passata
+    giornoAggiunto = prova.ora > oraRoma() ? "oggi" : "domani";
+    frase = frase + " " + giornoAggiunto;
+  }
+  const letto = leggiImpegnoSenzaAI(frase, null);
+  if (!letto || letto.azione !== "nuovo") return null;
+  const quando = quandoValido(letto.quando_iso);
+  if (!quando) return null;
+  let cliente = null;
+  if (letto.nome_nella_frase) {
+    const r = await risolviClienteDaNome(letto.nome_nella_frase, ctx);
+    if (r.stato === "trovato") cliente = { id: r.id, nome: r.nome };
+    else if (r.stato !== "non_trovato" || letto._nomeDaVerificare) return null; // simile, omonimi o nome di più parole sconosciuto: decide il motore completo
+  }
+  const titolo = cliente ? letto.titolo.replace(letto.nome_nella_frase.split(" ").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" "), cliente.nome) : letto.titolo;
+  return { tipo: "impegno", dati: { titolo, tipo: letto.tipo, quando_iso: quando }, cliente, giornoAggiunto };
+}
+async function provaPiuComandi(body, ctx, user) {
+  if (!body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
+  const parti = dividiComandi(ctx.testoUtente);
+  if (!parti) return null;
+  const letti = [];
+  for (const p of parti) {
+    const l = await leggiPezzo(p, ctx);
+    if (!l) return null; // un pezzo non chiaro: tutta la frase al motore completo
+    letti.push(l);
+  }
+  const azioni = [], righe = [];
+  for (const l of letti) {
+    if (l.tipo === "impegno") {
+      const input = { ...l.dati };
+      if (l.cliente) input.cliente_id = l.cliente.id;
+      const esito = await TOOLS.crea_impegno.run(input, ctx);
+      await registraOperazione(user, "crea_impegno", input, esito, "auto");
+      azioni.push({ tool: "crea_impegno", esito });
+      righe.push(`Segnato ${esito.quando_visualizzato}${l.giornoAggiunto === "domani" ? " (domani: oggi a quell'ora è già passato)" : ""} · ${esito.titolo}`);
+    } else {
+      const esito = await TOOLS.elimina_impegno.run({ id: l.id }, ctx);
+      await registraOperazione(user, "elimina_impegno", { id: l.id }, esito, "auto");
+      azioni.push({ tool: "elimina_impegno", esito });
+      righe.push(`Cancellato · ${l.titolo}`);
+    }
+  }
+  ctx.lettoSenzaAI = true;
+  return { azioni, payload: { stato: "concluso", testo: righe.join("\n"), azioni, riepilogo: righe } };
+}
+
 /* Restituisce { payload, azioni } se un percorso rapido ha gestito la
    richiesta, null se va passata al motore completo. */
 /* ---------- Appunto di un cliente, letto dal codice (27/09/2026) ----------
@@ -4368,6 +4531,26 @@ function notaPerAppuntamento(testo) {
   const m = t.match(PAROLA_APPUNTO);
   const nota = m ? t.slice(m.index) : t;
   return nota.replace(/^(?:segna(?:mi|re)?|annota|appunta(?:mi)?|nota)\s+(?:che\s+)?/i, "").trim();
+}
+
+/* "Devo chiamare Machi", "sentire Rossi per il preventivo", "controllare la
+   caldaia di Baudi" (28/09/2026): una cosa da fare (senza giorno né ora)
+   che nomina UN cliente → da fare nella sua scheda, col codice. */
+const DA_FARE_CON_CLIENTE = /^(?:devo|dovrei|dobbiamo|bisogna|ricordarmi\s+di|ricordarsi\s+di|da\s+fare:?)\s+(.+)$|^((?:chiamare|richiamare|sentire|risentire|scrivere|mandare|inviare|portare|passare|andare|controllare|verificare|preparare|ordinare|comprare|pagare|sollecitare|avvisare|contattare|fare)\b.+)$/i;
+async function provaDaFareCliente(body, ctx, user) {
+  const testo = String(ctx.testoUtente || "").trim().replace(/[.!]+$/, "");
+  if (!body.messaggio.startsWith(PREFISSO_RACCONTO) || !testo || testo.length > 200 || /\?/.test(testo)) return null;
+  const m = testo.match(DA_FARE_CON_CLIENTE);
+  if (!m || TEMPO_IN_APPUNTO.test(testo) || /\b(?:fattur\w*|preventiv\w+\s+(?:da|di)\s+\d|euro)\b|€/i.test(testo) || /\d{2,}/.test(testo)) return null;
+  const tutti = await db(`clients?select=id,name,is_archived,created_at&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
+  const cliente = clienteNominatoNellaFrase(testo, Array.isArray(tutti) ? tutti : []);
+  if (!cliente) return null;
+  const cosa = (m[1] || m[2]).trim();
+  const input = { testo: cosa.charAt(0).toUpperCase() + cosa.slice(1), cliente_id: cliente.id, da_fare: true };
+  const esito = await TOOLS.crea_appunto.run(input, ctx);
+  await registraOperazione(user, "crea_appunto", input, esito, "auto");
+  ctx.lettoSenzaAI = true;
+  return { azioni: [{ tool: "crea_appunto", esito }], payload: { stato: "concluso", testo: `Da fare, su ${esito.cliente}: ${esito.testo}`, azioni: [{ tool: "crea_appunto", esito }], focus: { tipo: "cliente", riferimento: esito.cliente } } };
 }
 
 async function provaAppuntoCliente(body, ctx, user) {
@@ -4436,8 +4619,8 @@ async function provaDilloAlCliente(body, ctx, user) {
 
 async function provaPercorsoRapido(body, ctx, user) {
   if (typeof body.messaggio !== "string") return null;
-  return (await provaPercorsoRapidoDocumento(body, ctx, user)) || (await provaPercorsoRapidoCliente(body, ctx, user))
-    || (await provaDilloAlCliente(body, ctx, user)) || (await provaAppuntoCliente(body, ctx, user)) || (await provaPercorsoRapidoImpegno(body, ctx, user));
+  return (await provaPiuComandi(body, ctx, user)) || (await provaAssemblea(body, ctx, user)) || (await provaPercorsoRapidoDocumento(body, ctx, user)) || (await provaPercorsoRapidoCliente(body, ctx, user))
+    || (await provaDilloAlCliente(body, ctx, user)) || (await provaDaFareCliente(body, ctx, user)) || (await provaAppuntoCliente(body, ctx, user)) || (await provaPercorsoRapidoImpegno(body, ctx, user));
 }
 
 async function handleAssistant(req, res, user, accessToken) {
@@ -4659,7 +4842,7 @@ async function handleAssistant(req, res, user, accessToken) {
        chiaramente quale cliente, l'appuntamento lo segna il codice,
        senza AI. Altrimenti prosegue il motore completo con la cronologia. */
     const sospesoRapido = run.in_sospeso && run.in_sospeso.rapido;
-    const scelto = sospesoRapido && scegliCandidatoDaRisposta(sospesoRapido.candidati, body.messaggio);
+    const scelto = sospesoRapido && scegliCandidatoDaRisposta(sospesoRapido.candidati, testoDettoDallUtente(body.messaggio) || body.messaggio, sospesoRapido.conferma);
     if (scelto) {
       const fatto = await creaImpegnoRapido(sospesoRapido, scelto, user, ctx);
       azioniEseguite = fatto.azioni;

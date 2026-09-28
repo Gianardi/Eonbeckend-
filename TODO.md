@@ -4746,3 +4746,37 @@ da fare nel tasto.
 - Test: nuovo `eval/mente-calendario.test.js` (13, con orologio finto alle
   19:08); aggiornati apri-col-codice, mestieri-altra, pacchetto-27-09,
   router, risposte, scheda-cliente, check-schema.
+
+### Clienti e frasi col codice, assemblee vere, "Com'è andato?" (28/09/2026, sera)
+
+- Server (`api/index.js`), percorsi rapidi senza AI:
+  - `provaPiuComandi` (primo): `dividiComandi` (SEPARA_COMANDI, pezzi 2–5,
+    via "ah"/"e" da soli) + `leggiPezzo` puro per ogni pezzo: cancellazione
+    (CANCELLA_IMPEGNO + `cerca_impegno` filtrato per giorno/ora, deve essere
+    uno solo) o impegno (`leggiImpegnoSenzaAI`; "vai da X" → appuntamento;
+    solo ora → oggi o domani se passata, `oraRoma`). Tutti chiari → esegue
+    (`crea_impegno` / `elimina_impegno`) e restituisce `riepilogo`.
+  - `provaAssemblea` (FRASE_ASSEMBLEA, INIZIO_QUANDO con `(?=\s|$)`: `\b`
+    non funziona dopo "ì"); solo profilo amministratore (o fondatore in prova).
+  - `provaDaFareCliente` (DA_FARE_CON_CLIENTE) prima di `provaAppuntoCliente`.
+  - `risolviClienteDaNome`: 4° livello, una parola ≥4 lettere a distanza 1
+    da una parola del nome → "simile". Impegno rapido: "simile" → "Intendi
+    X?" (`in_sospeso.rapido.conferma`, `scelte: ["Sì","No"]`); omonimi fino
+    a 8 (`scelte`); `scegliCandidatoDaRisposta(…, conferma)` con "sì"
+    (`(?=[\s,.!]|$)`), ordinali fino a "ottavo"; `creaImpegnoRapido` mette il
+    nome completo del cliente nel titolo (`dati.nomeDetto`).
+- DB: `supabase/assemblee.sql` (tabella `assemblee` + `assemblea_id` su
+  cantiere_appunti/foto/documenti), staging e produzione.
+- App: `assemblee` + `mappaAssemblea`, `renderAssemblee` (dati di esempio solo
+  senza accesso), `nuovaAssemblea`, `apriSchedaAssemblea`, `eliminaAssemblea`,
+  in calendario; voce "apri l'assemblea di …", "nuova assemblea".
+  `aggiornaComeAndato` (da `aggiornaHomeHero`), chiave localStorage per
+  giorno. Riepilogo unico per `risposta.riepilogo` con Annulla (toglie i
+  nuovi, `dbRestore` i cancellati). `sceltaTraClienti`: "Intendi X?" → Sì/No,
+  fino a 8 righe. Indietro: `rigaTorna.dataset.page` = "home" se si arriva
+  dalla Home. `.cantiere-card-icon` nel colore `--acc`. `cartelleVisibili()`
+  vuota in prova (mestiere ≠ artigiano).
+- Test: nuovi `eval/clienti-frasi.test.mjs` (13) e
+  `eval/clienti-assemblee-app.test.js` (15); aggiornati apri-col-codice,
+  check-schema; mente-calendario: ordine delle regole finte (Playwright usa
+  per prima l'ultima registrata).

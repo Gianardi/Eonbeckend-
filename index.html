@@ -2342,8 +2342,10 @@
   .brand-hero-wordmark .logo-o{ background:var(--acc); color:var(--acc-ink); }
   .home-hero-mic{ box-shadow:0 0 0 7px var(--acc-soft), 0 16px 34px rgba(14,20,36,.22); }
   .home-oggi-pill{ color:var(--acc-txt); background:var(--acc-soft); }
-  #homeCarteMestiere .cantiere-card-icon{ background:var(--acc); }
-  #homeCarteMestiere .cantiere-card-icon svg{ stroke:var(--acc-ink); }
+  /* Tutte le card con l'icona prendono il colore del mestiere (28/09/2026,
+     Andrea: "le card di Documenti sono nere, non coerenti con il resto") */
+  .cantiere-card-icon{ background:var(--acc); color:var(--acc-ink); }
+  .cantiere-card-icon svg{ stroke:var(--acc-ink); }
   .brand-avatar.brand-chip{ width:auto; height:36px; border-radius:999px; padding:0 13px 0 5px; gap:8px; background:var(--acc-soft); color:var(--text); font-size:13px; letter-spacing:0; }
   .brand-chip i{ width:26px; height:26px; border-radius:50%; background:var(--acc); display:flex; align-items:center; justify-content:center; }
   .brand-chip i svg{ width:14px; height:14px; stroke:var(--acc-ink); }
@@ -2391,6 +2393,26 @@
   /* Cartelle di "Altra attività" */
   .cartelle-griglia{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; margin:6px 0 18px; }
   .cartelle-griglia.sotto-mestiere{ margin-top:-6px; }
+  .come-andato{ margin-top:12px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+  .come-andato[hidden]{ display:none; }
+  .ca-testa{ display:flex; align-items:center; justify-content:space-between; }
+  .ca-testa b{ font-family:'Manrope', 'Inter', sans-serif; font-size:16px; }
+  .ca-chiudi{ border:none; background:none; font-size:15px; color:var(--muted); cursor:pointer; padding:4px 6px; }
+  .ca-cosa{ font-size:14.5px; font-weight:600; color:var(--text); }
+  .ca-scelte{ display:flex; gap:8px; flex-wrap:wrap; }
+  .ca-scelte button{ border:1px solid var(--border); background:var(--card); font:inherit; font-size:13.5px; font-weight:700; padding:8px 14px; border-radius:999px; cursor:pointer; color:var(--text); }
+  .ca-scelte button[data-ca="fatto"]{ background:var(--acc); border-color:var(--acc); color:var(--acc-ink); }
+  .ca-campo{ display:flex; gap:8px; }
+  .ca-campo input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:12px; padding:9px 12px; font:inherit; font-size:14px; background:var(--bg); color:var(--text); }
+  .ca-invia{ border:none; border-radius:12px; width:40px; background:var(--text); color:#fff; font-size:16px; font-weight:800; cursor:pointer; }
+  .as-riga{ width:100%; border:none; background:none; font:inherit; text-align:left; cursor:pointer; }
+  .as-dati{ font-size:14px; font-weight:600; color:var(--muted); padding:2px 0 10px; }
+  .as-stati{ display:flex; flex-wrap:wrap; gap:6px; padding-bottom:10px; }
+  .as-stati button{ border:1px solid var(--border); background:var(--card); color:var(--text); font:inherit; font-size:12.5px; font-weight:700; padding:6px 11px; border-radius:999px; cursor:pointer; }
+  .as-stati button.on{ background:var(--acc); border-color:var(--acc); color:var(--acc-ink); }
+  .as-documenti{ display:flex; flex-direction:column; gap:6px; padding-bottom:10px; }
+  .as-documento{ text-align:left; border:1px solid var(--border); background:var(--card); border-radius:12px; padding:10px 12px; font:inherit; font-size:14px; font-weight:600; color:var(--text); cursor:pointer; }
+  .as-sezione{ font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); padding:6px 0 2px; }
   .home-oggi-finito{ font-size:12.5px; font-weight:600; color:var(--muted); padding:2px 0 8px; }
   .cal-passati-riga{ display:block; width:100%; text-align:left; border:none; background:none; font:inherit; font-size:13px; font-weight:700; color:var(--muted); padding:8px 2px; cursor:pointer; }
   .cal-passati-riga::after{ content:" ▾"; }
@@ -3603,6 +3625,7 @@
         </div>
         <div id="assembleeList" style="padding:8px 0 16px;"></div>
       </div>
+      <button type="button" class="cartella-nuova" id="assembleaNuova" style="margin-top:12px;">+ Nuova assemblea</button>
     </div>
 
     <!-- ==================== PAGINA: CLIENTI (ARCHIVIO) ==================== -->
@@ -4733,7 +4756,7 @@ function isDbReady(){
 const TABELLE_CON_CESTINO = new Set([
   "clients", "opportunities", "employees", "tasks", "assigned_tasks",
   "payments", "incomes", "goals", "conversations", "messages",
-  "cantiere_foto", "cantiere_documenti", "cantiere_appunti", "cartelle",
+  "cantiere_foto", "cantiere_documenti", "cantiere_appunti", "cartelle", "assemblee",
 ]);
 
 /* Riprova automatica per problemi di rete passeggeri (come fanno
@@ -4855,7 +4878,7 @@ function mappaImpegno(t){
   return { id:t.id, title:t.title, owner:t.owner_type, status:t.status, time:t.time || "" };
 }
 function mappaAppunto(a){
-  return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null, daFare:!!a.da_fare, fattoIl:a.fatto_il || null, cartellaId:a.cartella_id || null };
+  return { id:a.id, testo:a.testo, created:a.created_at, clientId:a.client_id || null, daFare:!!a.da_fare, fattoIl:a.fatto_il || null, cartellaId:a.cartella_id || null, assembleaId:a.assemblea_id || null };
 }
 
 /* Carica i dati veri di un utente già registrato, sostituendo il contenuto
@@ -4889,12 +4912,15 @@ async function loadUserDataFromDB(){
     id:a.id, title:a.title, deadline:a.deadline, employees:a.employee_names || []
   }));
 
-  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "", descrizione:f.descrizione || "", cartellaId:f.cartella_id || null }));
-  cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at }));
+  cantiereFoto.length = 0; dbCantiereFoto.forEach(f => cantiereFoto.push({ id:f.id, url:f.url, created:f.created_at, clientId:f.client_id || null, nota:f.nota || "", descrizione:f.descrizione || "", cartellaId:f.cartella_id || null, assembleaId:f.assemblea_id || null }));
+  cantiereDocumenti.length = 0; dbCantiereDocumenti.forEach(d => cantiereDocumenti.push({ id:d.id, url:d.url, nome:d.nome, tipo:d.tipo, created:d.created_at, assembleaId:d.assemblea_id || null }));
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push(mappaAppunto(a)));
   // Cartelle di "Altra attività" (28/09/2026): a parte, un errore qui non blocca il resto
   const dbCartelle = await dbSelect("cartelle").catch(() => []);
   cartelle.length = 0; (dbCartelle || []).slice().sort((a, b) => (a.ordine || 0) - (b.ordine || 0)).forEach(c => cartelle.push({ id: c.id, nome: c.nome, icona: c.icona || null }));
+  // Assemblee vere (28/09/2026): prima c'erano solo quelle di esempio
+  const dbAssemblee = await dbSelect("assemblee").catch(() => []);
+  assemblee.length = 0; (dbAssemblee || []).forEach(a => assemblee.push(mappaAssemblea(a)));
   aggiornaCantiereSottotitoli();
 
   const rigaIntestazione = dbIntestazione[0];
@@ -4956,6 +4982,9 @@ async function aggiornaDatiToccati(azioni){
       const appunto = cantiereAppunti.find(x => x.id === a.esito.id);
       if(appunto) appunto.testo = a.esito.testo;
       else servePienoReload = true; // non lo troviamo in locale: meglio riallinearsi del tutto
+    } else if(a.tool === "crea_assemblea"){
+      assemblee.push(mappaAssemblea(a.esito));
+      renderAssemblee();
     } else {
       servePienoReload = true; // sposta_impegno, annulla_impegno, elimina_*, svuota_cestino, manda_messaggio...
     }
@@ -6050,6 +6079,10 @@ const cantiereFoto = [];
 const cantiereDocumenti = [];
 const cantiereAppunti = [];
 const cartelle = []; // "Altra attività": { id, nome, icona }
+const assemblee = []; // amministratori: { id, condominio, quando ("2026-10-01T21:00"), tipo, stato, clientId }
+function mappaAssemblea(a){
+  return { id:a.id, condominio:a.condominio, quando:a.quando ? String(a.quando).slice(0, 16) : null, tipo:a.tipo || "ordinaria", stato:a.stato || "da convocare", clientId:a.client_id || null, created:a.created_at };
+}
 let aziendaIntestazione = null; // { nome_azienda, indirizzo, piva, telefono, email, logo_url }, o null se non ancora configurata
 
 const payments = [
@@ -6438,26 +6471,205 @@ function renderRevisioni(){
 }
 
 /* ---- Assemblee (Amministratore) ---- */
+/* Assemblee vere (28/09/2026). Senza accesso (anteprima) restano quelle
+   di esempio; con l'account, solo le proprie. Un tocco apre la scheda. */
+const STATI_ASSEMBLEA = [["da convocare", "Da convocare", "trattativa"], ["convocata", "Convocata", "attivo"], ["fatta", "Fatta", "attivo"], ["verbale da redigere", "Verbale da redigere", "late"]];
+function quandoAssemblea(a){
+  if(!a || !a.quando) return "";
+  const [d, t] = a.quando.split("T");
+  const [y, m, g] = d.split("-").map(Number);
+  const giorno = new Date(y, m - 1, g).toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short" }).replace(".", "");
+  return giorno + (t ? ", " + t.slice(0, 5) : "");
+}
 function renderAssemblee(){
   const wrap = document.getElementById("assembleeList");
   if(!wrap) return;
-  const data = (professionData.amministratore && professionData.amministratore.assemblee) || [];
   wrap.innerHTML = "";
-  const statusLbl = { "convocata":"Convocata", "da convocare":"Da convocare", "verbale da redigere":"Verbale da redigere" };
-  const statusPill = { "convocata":"attivo", "da convocare":"trattativa", "verbale da redigere":"late" };
-  data.forEach(a => {
-    const row = document.createElement("div");
-    row.className = "list-row";
+  if(!currentSession){
+    const data = (professionData.amministratore && professionData.amministratore.assemblee) || [];
+    const statusLbl = { "convocata":"Convocata", "da convocare":"Da convocare", "verbale da redigere":"Verbale da redigere" };
+    const statusPill = { "convocata":"attivo", "da convocare":"trattativa", "verbale da redigere":"late" };
+    data.forEach(a => {
+      const row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML = `
+        <div class="row-avatar" style="background:var(--acc);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--acc-ink)" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/></svg></div>
+        <div class="row-body">
+          <div class="row-name">${a.building}</div>
+          <div class="row-meta"><span class="pill ${statusPill[a.status]}">${statusLbl[a.status]}</span><span>${a.type}</span><span>· ${a.date} ore ${a.time}</span></div>
+        </div>`;
+      wrap.appendChild(row);
+    });
+    document.getElementById("assembleeCount").textContent = data.length;
+    return;
+  }
+  const lista = assemblee.slice().sort((x, y) => (x.quando ? 0 : 1) - (y.quando ? 0 : 1) || String(x.quando || "").localeCompare(String(y.quando || "")));
+  document.getElementById("assembleeCount").textContent = lista.length;
+  if(!lista.length){
+    wrap.innerHTML = '<div class="empty-hint" style="padding:12px 16px;">Nessuna assemblea. Dilla a EON: «assemblea in via Roma 12 giovedì alle 21», oppure tocca «+ Nuova assemblea».</div>';
+    return;
+  }
+  lista.forEach(a => {
+    const stato = STATI_ASSEMBLEA.find(x => x[0] === a.stato) || STATI_ASSEMBLEA[0];
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "list-row as-riga";
     row.innerHTML = `
-      <div class="row-avatar" style="background:var(--indigo);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/></svg></div>
+      <div class="row-avatar" style="background:var(--acc);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--acc-ink)" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/></svg></div>
       <div class="row-body">
-        <div class="row-name">${a.building}</div>
-        <div class="row-meta"><span class="pill ${statusPill[a.status]}">${statusLbl[a.status]}</span><span>${a.type}</span><span>· ${a.date} ore ${a.time}</span></div>
-      </div>
-    `;
+        <div class="row-name"></div>
+        <div class="row-meta"><span class="pill ${stato[2]}">${stato[1]}</span><span>${a.tipo === "straordinaria" ? "Straordinaria" : "Ordinaria"}</span>${a.quando ? `<span>· ${escapeHtml(quandoAssemblea(a))}</span>` : ""}</div>
+      </div>`;
+    row.querySelector(".row-name").textContent = a.condominio;
+    row.addEventListener("click", () => apriSchedaAssemblea(a));
     wrap.appendChild(row);
   });
-  document.getElementById("assembleeCount").textContent = data.length;
+}
+/* Nuova assemblea, a tocchi: condominio, giorno, ora, tipo */
+function nuovaAssemblea(){
+  const corpo = document.createElement("div");
+  corpo.className = "imp-form";
+  corpo.innerHTML = `<label class="imp-campo"><span>Condominio</span><input type="text" id="asNome" maxlength="80" placeholder="Es. Via Roma 12" autocomplete="off"></label>
+    <label class="imp-campo"><span>Giorno</span><input type="date" id="asGiorno"></label>
+    <label class="imp-campo"><span>Ora</span><input type="time" id="asOra" value="21:00"></label>
+    <label class="imp-campo"><span>Tipo</span><select id="asTipo"><option value="ordinaria">Ordinaria</option><option value="straordinaria">Straordinaria</option></select></label>
+    <button type="button" class="imp-btn" id="asSalva">Crea assemblea</button>`;
+  corpo.querySelector("#asSalva").addEventListener("click", async () => {
+    const nome = corpo.querySelector("#asNome").value.trim().replace(/\s+/g, " ");
+    if(!nome){ corpo.querySelector("#asNome").focus(); return; }
+    if(!isDbReady()){ showAILanding("Non collegato", "Per creare un'assemblea serve la connessione."); return; }
+    const g = corpo.querySelector("#asGiorno").value, o = corpo.querySelector("#asOra").value;
+    const riga = { condominio: nome.charAt(0).toUpperCase() + nome.slice(1), tipo: corpo.querySelector("#asTipo").value };
+    if(g) riga.quando = g + "T" + (o || "21:00") + ":00";
+    const creata = await dbInsert("assemblee", riga);
+    if(!creata) return;
+    const a = mappaAssemblea(creata);
+    assemblee.push(a);
+    renderAssemblee(); renderCalendar();
+    apriSchedaAssemblea(a);
+  });
+  apriRisorsaCard("Nuova assemblea", corpo);
+  setTimeout(() => corpo.querySelector("#asNome").focus(), 50);
+}
+document.getElementById("assembleaNuova").addEventListener("click", nuovaAssemblea);
+
+/* La scheda dell'assemblea (28/09/2026, Andrea: "clicco sull'assemblea e
+   si apre una card dove posso parlare e scrivere, con il riepilogo di
+   documenti, foto e di cosa si è detto"). Tutto col codice. */
+function apriSchedaAssemblea(a){
+  const corpo = document.createElement("div");
+  corpo.className = "as-scheda";
+  const dati = document.createElement("div");
+  dati.className = "as-dati";
+  dati.textContent = [quandoAssemblea(a) || "Senza data", a.tipo === "straordinaria" ? "Straordinaria" : "Ordinaria"].join(" · ");
+  corpo.appendChild(dati);
+  const stati = document.createElement("div");
+  stati.className = "as-stati";
+  STATI_ASSEMBLEA.forEach(([k, et]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = et; b.className = a.stato === k ? "on" : "";
+    b.addEventListener("click", async () => {
+      a.stato = k;
+      stati.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      if(isDbReady()) await dbUpdate("assemblee", a.id, { stato: k });
+      renderAssemblee(); renderCalendar();
+    });
+    stati.appendChild(b);
+  });
+  corpo.appendChild(stati);
+  const azioni = document.createElement("div");
+  azioni.className = "ap-azioni";
+  azioni.innerHTML = '<button type="button" data-az="foto">Aggiungi foto</button><button type="button" data-az="doc">Aggiungi documento</button><button type="button" class="pericolo" data-az="elimina">Elimina</button>';
+  const inputDoc = document.createElement("input");
+  inputDoc.type = "file"; inputDoc.accept = ".pdf,.doc,.docx,.xls,.xlsx,image/*"; inputDoc.hidden = true; inputDoc.id = "asDocInput";
+  inputDoc.addEventListener("change", () => { const f = inputDoc.files && inputDoc.files[0]; if(f) caricaCantiereDocumento(f, { assembleaId: a.id }); });
+  azioni.appendChild(inputDoc);
+  azioni.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-az]");
+    if(!b) return;
+    if(b.dataset.az === "foto"){ fotoRapidaDaSalvare = { assembleaId: a.id }; document.getElementById("fotoRapidaInput").click(); }
+    else if(b.dataset.az === "doc") inputDoc.click();
+    else eliminaAssemblea(a);
+  });
+  corpo.appendChild(azioni);
+
+  const foto = cantiereFoto.filter(f => f.assembleaId === a.id);
+  if(foto.length){
+    const griglia = document.createElement("div");
+    griglia.className = "ap-foto"; griglia.id = "asFoto";
+    foto.forEach(f => {
+      const b = document.createElement("button"); b.type = "button";
+      const img = document.createElement("img"); img.src = f.url; img.alt = f.nota || "Foto"; img.loading = "lazy";
+      b.appendChild(img);
+      b.addEventListener("click", () => mostraSchedaFoto(f, null));
+      griglia.appendChild(b);
+    });
+    corpo.appendChild(griglia);
+  }
+  const documenti = cantiereDocumenti.filter(d => d.assembleaId === a.id && !d.inCaricamento);
+  if(documenti.length){
+    const lista = document.createElement("div");
+    lista.className = "as-documenti"; lista.id = "asDocumenti";
+    documenti.forEach(d => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "as-documento";
+      b.textContent = d.nome || "Documento";
+      b.addEventListener("click", () => window.open(d.url, "_blank"));
+      lista.appendChild(b);
+    });
+    corpo.appendChild(lista);
+  }
+  const titolo = document.createElement("div");
+  titolo.className = "as-sezione"; titolo.textContent = "Cosa si è detto";
+  corpo.appendChild(titolo);
+  const note = document.createElement("div");
+  note.className = "ap-lista"; note.id = "asNote";
+  const sue = cantiereAppunti.filter(x => x.assembleaId === a.id).sort((x, y) => String(y.created || "").localeCompare(String(x.created || "")));
+  if(!sue.length) note.innerHTML = '<div class="ap-vuoto">Ancora niente. Detta o scrivi qui sotto: presenti, decisioni, spese.</div>';
+  sue.forEach(x => {
+    const riga = document.createElement("div");
+    riga.className = "ap-riga nota";
+    riga.innerHTML = '<span class="ap-matita">' + ICONA_MATITA + '</span><span class="ap-testo"></span><span class="ap-quando"></span>';
+    riga.querySelector(".ap-testo").textContent = x.testo;
+    riga.querySelector(".ap-quando").textContent = quandoAppunto(x.created);
+    riga.querySelector(".ap-testo").addEventListener("click", () => modificaAppuntoInCard(x));
+    note.appendChild(riga);
+  });
+  corpo.appendChild(note);
+
+  const piede = document.createElement("div");
+  piede.className = "scheda-composer";
+  const campo = document.createElement("textarea");
+  campo.rows = 1; campo.className = "scheda-campo"; campo.id = "asCampo"; campo.placeholder = "Cosa si è detto?";
+  const invia = document.createElement("button");
+  invia.type = "button"; invia.className = "scheda-invia ap-invia"; invia.setAttribute("aria-label", "Aggiungi");
+  invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const manda = async (t) => {
+    const testo = String(t || campo.value || "").trim();
+    if(testo.length < 2) return;
+    campo.value = "";
+    if(!isDbReady()){ showAILanding("Non collegato", "Per salvare serve la connessione."); return; }
+    const riga = { testo: testo.charAt(0).toUpperCase() + testo.slice(1), assemblea_id: a.id };
+    if(a.clientId) riga.client_id = a.clientId;
+    const creato = await dbInsert("cantiere_appunti", riga);
+    if(!creato) return;
+    cantiereAppunti.push(mappaAppunto(creato));
+    apriSchedaAssemblea(a);
+  };
+  invia.addEventListener("click", () => manda());
+  campo.addEventListener("keydown", (e) => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); manda(); } });
+  const mic = creaMicRapido((t) => manda(t));
+  mic.classList.add("scheda-mic");
+  piede.appendChild(mic); piede.appendChild(campo); piede.appendChild(invia);
+  apriRisorsaCard(a.condominio, corpo, piede);
+}
+function eliminaAssemblea(a){
+  showAIToastConDecisione("Eliminare l'assemblea?", "«" + escapeHtml(a.condominio) + "» va nel cestino, con le sue note.", async () => {
+    if(isDbReady()) await dbUpdate("assemblee", a.id, { deleted_at: new Date().toISOString() });
+    const i = assemblee.indexOf(a);
+    if(i > -1) assemblee.splice(i, 1);
+    chiudiRisorsaCard();
+    renderAssemblee(); renderCalendar();
+  }, null, "Elimina", "Annulla");
 }
 
 /* ---- Udienze e Scadenze (Avvocato) ---- */
@@ -6540,10 +6752,16 @@ function renderCalendar(){
 
 
 
-  if(currentProfession === "amministratore" && professionData.amministratore.assemblee){
-    professionData.amministratore.assemblee.forEach(a => {
-      items.push({ icon:"appt", title:"Assemblea — " + a.building, sub:a.type + " · ore " + a.time, when:a.date, urgent:a.status === "da convocare" });
-    });
+  if(currentProfession === "amministratore"){
+    if(currentSession){
+      assemblee.filter(a => a.quando).forEach(a => {
+        items.push({ icon:"appt", title:"Assemblea — " + a.condominio, sub:a.tipo === "straordinaria" ? "Straordinaria" : "Ordinaria", when:quandoAssemblea(a), urgent:a.stato === "da convocare", assembleaId:a.id });
+      });
+    } else if(professionData.amministratore.assemblee){
+      professionData.amministratore.assemblee.forEach(a => {
+        items.push({ icon:"appt", title:"Assemblea — " + a.building, sub:a.type + " · ore " + a.time, when:a.date, urgent:a.status === "da convocare" });
+      });
+    }
   }
   if(currentProfession === "avvocato" && professionData.avvocato.udienze){
     professionData.avvocato.udienze.forEach(u => {
@@ -10274,6 +10492,7 @@ async function esciDallaProva(){
   document.body.classList.remove("in-prova");
   document.getElementById("impVoceProvaSub").textContent = "Solo per te: vedi EON come un edile, un idraulico…";
   if(torna && torna !== currentProfession) await applyProfession(torna, true);
+  else if(typeof renderCartelle === "function") renderCartelle();
   mestiereVero = null;
 }
 document.getElementById("impVoceProva").addEventListener("click", () => {
@@ -10428,8 +10647,8 @@ function appuntiDaFare(){
 function renderDaFare(){
   const sub = document.getElementById("homeAppuntiSub");
   if(!sub) return;
-  const daFare = appuntiDaFare().filter(a => !a.cartellaId);
-  const note = cantiereAppunti.filter(a => !a.daFare && !a.cartellaId).length;
+  const daFare = appuntiDaFare().filter(a => !a.cartellaId && !a.assembleaId);
+  const note = cantiereAppunti.filter(a => !a.daFare && !a.cartellaId && !a.assembleaId).length;
   sub.textContent = daFare.length ? daFare[0].testo + (daFare.length > 1 ? " · e altre " + (daFare.length - 1) : "")
     : note ? (note === 1 ? "1 nota" : note + " note")
     : "Svuota la testa: parla o scrivi";
@@ -10455,7 +10674,7 @@ function quandoAppunto(iso){
 }
 function disegnaListaAppunti(lista, cartellaId){
   lista.innerHTML = "";
-  const dentro = a => cartellaId ? a.cartellaId === cartellaId : !a.cartellaId;
+  const dentro = a => cartellaId ? a.cartellaId === cartellaId : (!a.cartellaId && !a.assembleaId);
   const perData = (x, y) => String(y.created || "").localeCompare(String(x.created || ""));
   const daFare = cantiereAppunti.filter(a => dentro(a) && a.daFare && !a.fattoIl).sort(perData);
   const note = cantiereAppunti.filter(a => dentro(a) && !a.daFare).sort(perData);
@@ -10598,11 +10817,18 @@ function iconaCartella(nome){
   if(/materi|attrezz/.test(n)) return "quadro";
   return "doc";
 }
+/* In "Prova come…" il fondatore vede il mestiere come un cliente nuovo:
+   le sue cartelle di "Altra attività" non compaiono (28/09/2026). */
+function cartelleVisibili(){
+  let inProva = false;
+  try{ inProva = !!mestiereInProva; }catch(e){}
+  return inProva && currentProfession !== "artigiano" ? [] : cartelle;
+}
 function renderCartelle(){
   const griglia = document.getElementById("cartelleGriglia");
   if(!griglia) return;
   griglia.innerHTML = "";
-  cartelle.forEach(c => {
+  cartelleVisibili().forEach(c => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "cartella"; b.dataset.cartella = c.id;
     const dentro = cantiereAppunti.filter(a => a.cartellaId === c.id);
@@ -11088,7 +11314,8 @@ function renderCantiereDocumenti(){
    mentre il file sale in sottofondo; le foto dei documenti prima si
    alleggeriscono (leggibili, ma molto più piccole). Se il caricamento
    non riesce, la riga sparisce e lo si dice. */
-async function caricaCantiereDocumento(file){
+async function caricaCantiereDocumento(file, opzioni){
+  const assembleaId = opzioni && opzioni.assembleaId ? opzioni.assembleaId : null;
   if(!isDbReady()){
     showAILanding("Non collegato", "Per caricare documenti serve la connessione al database.");
     return;
@@ -11105,11 +11332,15 @@ async function caricaCantiereDocumento(file){
       .from("eon-files").upload(percorso, daCaricare, { contentType:daCaricare.type, upsert:false });
     if(upErr) throw upErr;
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
-    const creato = await dbInsert("cantiere_documenti", { url:pub.publicUrl, nome:file.name, tipo:daCaricare.type });
+    const rigaDoc = { url:pub.publicUrl, nome:file.name, tipo:daCaricare.type };
+    if(assembleaId) rigaDoc.assemblea_id = assembleaId;
+    const creato = await dbInsert("cantiere_documenti", rigaDoc);
     if(!creato) throw new Error("scrittura non riuscita");
     URL.revokeObjectURL(provvisorio.url);
-    Object.assign(provvisorio, { id:creato.id, url:creato.url, nome:creato.nome, tipo:creato.tipo, created:creato.created_at, inCaricamento:false });
+    Object.assign(provvisorio, { id:creato.id, url:creato.url, nome:creato.nome, tipo:creato.tipo, created:creato.created_at, inCaricamento:false, assembleaId });
     renderCantiereDocumenti();
+    const a = assembleaId ? assemblee.find(x => x.id === assembleaId) : null;
+    if(a) apriSchedaAssemblea(a);
   }catch(err){
     console.error("Caricamento documento non riuscito:", err);
     const idx = cantiereDocumenti.indexOf(provvisorio);
@@ -11287,15 +11518,25 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
     if(upErr) throw upErr;
     const { data: pub } = supabaseClient.storage.from("eon-files").getPublicUrl(percorso);
     const cartellaId = opzioni && opzioni.cartellaId ? opzioni.cartellaId : null;
-    const creato = await dbInsert("cantiere_foto", cartellaId ? { url:pub.publicUrl, cartella_id:cartellaId } : { url:pub.publicUrl });
+    const assembleaId = opzioni && opzioni.assembleaId ? opzioni.assembleaId : null;
+    const rigaFoto = { url:pub.publicUrl };
+    if(cartellaId) rigaFoto.cartella_id = cartellaId;
+    if(assembleaId) rigaFoto.assemblea_id = assembleaId;
+    const creato = await dbInsert("cantiere_foto", rigaFoto);
     if(!creato) throw new Error("scrittura non riuscita");
-    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"", cartellaId };
+    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"", cartellaId, assembleaId };
     cantiereFoto.push(nuovaFoto);
     // Nota già detta nella frase ("fai foto a pavimenti" → "Pavimenti")
     const notaDetta = opzioni && opzioni.nota ? String(opzioni.nota).trim() : "";
     if(notaDetta){ nuovaFoto.nota = notaDetta; await dbUpdate("cantiere_foto", creato.id, { nota: notaDetta }); }
     descriviFoto(nuovaFoto); // in sottofondo: EON guarda la foto e ne scrive una descrizione
-    if(cartellaId){
+    if(assembleaId){
+      // Nella scheda di un'assemblea: si riapre la scheda con la foto
+      aggiornaCantiereSottotitoli();
+      renderCantiereFoto();
+      const a = assemblee.find(x => x.id === assembleaId);
+      if(a) apriSchedaAssemblea(a);
+    } else if(cartellaId){
       /* In una cartella ("aggiungi in Lavori con assicurazioni queste
          foto"): niente "a quale cliente?", si riapre la cartella. */
       aggiornaCantiereSottotitoli();
@@ -11696,12 +11937,22 @@ const FEEDBACK_A_VOCE = ["feedback", "il feedback", "manda un feedback", "un fee
 const NUOVA_CARTELLA_A_VOCE = ["nuova cartella", "una nuova cartella", "crea una cartella", "crea una nuova cartella", "crea cartella", "aggiungi una cartella", "fai una cartella", "fai una nuova cartella"];
 function cardDaAprireAVoce(frase, resto, restoSenzaArticolo){
   const forme = [resto, restoSenzaArticolo];
-  if(cartelle.length){
+  if(cartelleVisibili().length){
     const nome = normalizzaComando(restoSenzaArticolo.replace(/^cartella\s+/, "").replace(/^(?:il|lo|la|i|gli|le)\s+/, ""));
-    const c = cartelle.find(x => normalizzaComando(x.nome) === nome);
+    const c = cartelleVisibili().find(x => normalizzaComando(x.nome) === nome);
     if(c) return () => apriCardAppunti(c);
   }
   if(forme.some(f => APPUNTI_A_VOCE.includes(f))) return () => apriCardAppunti(null);
+  // Amministratori: "apri l'assemblea di via Roma 12", "nuova assemblea"
+  if(currentProfession === "amministratore"){
+    if(forme.some(f => ["nuova assemblea", "una nuova assemblea", "crea assemblea", "crea una assemblea", "crea un assemblea"].includes(f))) return () => { navigateTo("assemblee"); nuovaAssemblea(); };
+    const ma = restoSenzaArticolo.match(/^(?:l\s*'?\s*)?assemblea\s+(?:di|del|della|dello|in|a|al|alla|nel|nella|condominio)?\s*(.+)$/);
+    if(ma){
+      const cercato = normalizzaComando(ma[1]);
+      const trovate = assemblee.filter(x => normalizzaComando(x.condominio) === cercato || normalizzaComando(x.condominio).includes(cercato));
+      if(trovate.length === 1) return () => { navigateTo("assemblee"); apriSchedaAssemblea(trovate[0]); };
+    }
+  }
   if(forme.some(f => FEEDBACK_A_VOCE.includes(f))) return () => apriFeedback();
   if(NUOVA_CARTELLA_A_VOCE.includes(frase) || forme.some(f => NUOVA_CARTELLA_A_VOCE.includes(f))) return () => { navigateTo("home"); chiediNomeCartella(null); };
   if(forme.some(f => ["cartelle", "le cartelle", "le mie cartelle"].includes(f))) return () => navigateTo("home");
@@ -13287,7 +13538,7 @@ document.getElementById("fotoRapidaInput").addEventListener("change", (e) => {
   const dati = fotoRapidaDaSalvare || {};
   fotoRapidaDaSalvare = null;
   e.target.value = "";
-  if(f){ chiudiRisorsaCard(); caricaCantiereFoto(f, dati.clienteId || null, { nota: dati.nota, cartellaId: dati.cartellaId || null }); }
+  if(f){ chiudiRisorsaCard(); caricaCantiereFoto(f, dati.clienteId || null, { nota: dati.nota, cartellaId: dati.cartellaId || null, assembleaId: dati.assembleaId || null }); }
 });
 
 function provaRisorsaImmediata(testo){
@@ -13986,6 +14237,23 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     renderClientArchive(); renderClientStats(); renderChatList(); renderChatWindow(); renderCestino(); renderCantiereClienteCruscotto();
     renderCantiereAppunti(); aggiornaCantiereSottotitoli();
 
+    /* Più comandi in una frase, fatti dal codice sul server (28/09/2026):
+       un solo riepilogo, e Annulla toglie tutto quello che è stato fatto */
+    if(risposta && Array.isArray(risposta.riepilogo) && risposta.riepilogo.length){
+      const creati = risultatiVisibili.filter(a => a.tool === "crea_impegno").map(a => a.esito);
+      const eliminati = risultatiVisibili.filter(a => a.tool === "elimina_impegno").map(a => a.esito);
+      const righe = creati.map(e => "Segnato " + quandoBreve(e.quando_visualizzato) + " · " + e.titolo)
+        .concat(eliminati.map(e => "Cancellato · " + e.titolo));
+      showAIToastConAnnulla("Fatto", escapeHtml(righe.join("\n")), async () => {
+        await Promise.all(creati.map(e => dbUpdate(e.tipo === "incontro" && e.cliente ? "messages" : "tasks", e.id, { deleted_at: new Date().toISOString() })));
+        if(eliminati.length) await Promise.all(eliminati.map(e => dbRestore(e.tabella, e.id)));
+        await ricaricaTuttoERidisegna();
+      });
+      daDire.push(righe.join(". "));
+      if(viaVoce) parlaRisposta(daDire.join(". "));
+      return;
+    }
+
     const impegniCreati = risultatiVisibili.filter(a => a.tool === "crea_impegno");
     if(impegniCreati.length){
       /* Breve, come vuole Andrea (26/09/2026): "Ok, segnato lunedì ore 09:00".
@@ -14056,6 +14324,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       } else if(a.tool === "crea_appunto"){
         if(a.esito.cliente) mostra("Appunto su " + a.esito.cliente, a.esito.testo + (a.esito.appuntamento ? "\nAnche sull'appuntamento di " + quandoBreve(a.esito.appuntamento.quando_visualizzato) : ""));
         else mostra("In Mente", a.esito.testo);
+      } else if(a.tool === "crea_assemblea"){
+        mostra("Assemblea segnata", a.esito.condominio + ", " + quandoBreve(a.esito.quando_visualizzato));
       } else if(a.tool === "correggi_appunto"){
         mostra("Appunto corretto", a.esito.testo);
       } else if(a.tool === "crea_preventivo_o_fattura"){
@@ -14233,6 +14503,7 @@ function aggiornaHomeHero(gruppiPerGiorno){
 
   const oggi = (gruppiPerGiorno || []).find(g => g.et === "Oggi");
   let voci = oggi ? oggi.voci.slice() : [];
+  aggiornaComeAndato(voci);
   /* Calendario vivo (28/09/2026): in Home solo quello che deve ancora
      succedere; finita la giornata, si guarda a domani. */
   const giaPassati = voci.filter(voceGiaPassata).length;
@@ -14308,6 +14579,92 @@ function aggiornaHomeHero(gruppiPerGiorno){
     }
     lista.appendChild(riga);
   });
+}
+
+/* ===== "Com'è andato?" (28/09/2026) =====
+   Andrea: "poter dire com'è andato l'appuntamento, così EON sa cosa è
+   successo e aggiorna, senza creare confusione". Finito un appuntamento di
+   oggi CON UN CLIENTE (un'ora dopo l'inizio), in Home compare UNA sola
+   domanda: Fatto / Da rifare / Rimandato, o due parole. Va nella scheda del
+   cliente (col codice). Se la ignori resta solo per oggi. */
+function chiaveComeAndato(it){ return "eon-come-andato-" + new Date().toISOString().slice(0, 10) + "-" + (it.id || it.title); }
+function comeAndatoFatto(it){ try{ return !!localStorage.getItem(chiaveComeAndato(it)); }catch(e){ return false; } }
+function segnaComeAndato(it){ try{ localStorage.setItem(chiaveComeAndato(it), "1"); }catch(e){} }
+function clienteDellaVoce(it){
+  const nomi = [it.contatto, it.sub].filter(Boolean);
+  for(const n of nomi){ const c = clients.find(x => nomeChiave(x.name) === nomeChiave(n)); if(c) return c; }
+  return null;
+}
+function aggiornaComeAndato(vociOggi){
+  let box = document.getElementById("comeAndatoBox");
+  const oggiBox = document.getElementById("homeHeroOggiBox");
+  if(!box && oggiBox){ box = document.createElement("div"); box.className = "come-andato"; box.id = "comeAndatoBox"; oggiBox.after(box); }
+  if(!box) return;
+  const it = (vociOggi || []).find(v => voceGiaPassata(v) && clienteDellaVoce(v) && !comeAndatoFatto(v) && !(v.tabella === "tasks" && (tasks.find(t => t.id === v.id) || {}).status === "done"));
+  if(!it){ box.hidden = true; box.innerHTML = ""; return; }
+  const cliente = clienteDellaVoce(it);
+  box.hidden = false;
+  box.innerHTML = `<div class="ca-testa"><b>Com'è andato?</b><button type="button" class="ca-chiudi" aria-label="Non ora">✕</button></div>
+    <div class="ca-cosa"></div>
+    <div class="ca-scelte"><button type="button" data-ca="fatto">Fatto</button><button type="button" data-ca="rifare">Da rifare</button><button type="button" data-ca="rimandato">Rimandato</button></div>
+    <div class="ca-campo"><input type="text" id="comeAndatoCampo" placeholder="Oppure due parole: com'è andata?" autocomplete="off"><button type="button" class="ca-invia" aria-label="Salva">↑</button></div>`;
+  box.querySelector(".ca-cosa").textContent = (estraiOra(it.when || "") ? estraiOra(it.when) + " · " : "") + it.title;
+  const chiudi = () => { segnaComeAndato(it); aggiornaComeAndato(vociOggi); };
+  box.querySelector(".ca-chiudi").addEventListener("click", chiudi);
+  const salvaNota = async (testo, daFare) => {
+    if(!isDbReady()){ showAILanding("Non collegato", "Per salvare serve la connessione."); return false; }
+    const riga = { testo, client_id: cliente.id };
+    if(daFare) riga.da_fare = true;
+    const creato = await dbInsert("cantiere_appunti", riga);
+    if(!creato) return false;
+    cantiereAppunti.push(mappaAppunto(creato));
+    renderCantiereAppunti();
+    return true;
+  };
+  box.querySelector(".ca-scelte").addEventListener("click", async (e) => {
+    const b = e.target.closest("button[data-ca]");
+    if(!b) return;
+    const quale = b.dataset.ca;
+    if(quale === "rimandato"){
+      // Si sposta: "a quando?" nella casella, poi lo sposta EON
+      const campo = box.querySelector("#comeAndatoCampo");
+      campo.placeholder = "A quando? Es. giovedì alle 10";
+      campo.dataset.rimanda = "1";
+      campo.focus();
+      return;
+    }
+    const ok = quale === "fatto"
+      ? await salvaNota("Fatto: " + it.title, false)
+      : await salvaNota("Da rifare: " + it.title, true);
+    if(!ok) return;
+    if(quale === "fatto" && it.tabella === "tasks"){
+      const t = tasks.find(x => x.id === it.id);
+      if(t){ t.status = "done"; if(isDbReady()) dbUpdate("tasks", t.id, { status: "done" }); }
+    }
+    segnaComeAndato(it);
+    showAIToast(quale === "fatto" ? "Fatto" : "Da rifare", "Segnato nella scheda di " + cliente.name + ".");
+    renderCalendar();
+  });
+  const invia = async () => {
+    const campo = box.querySelector("#comeAndatoCampo");
+    const testo = campo.value.trim();
+    if(testo.length < 2) return;
+    if(campo.dataset.rimanda){
+      segnaComeAndato(it);
+      const home = document.getElementById("homeHeroCampo");
+      home.value = "sposta " + it.title + " a " + testo;
+      document.getElementById("homeHeroSend").click();
+      aggiornaComeAndato(vociOggi);
+      return;
+    }
+    if(await salvaNota(testo.charAt(0).toUpperCase() + testo.slice(1), false)){
+      segnaComeAndato(it);
+      showAIToast("Segnato", "Nella scheda di " + cliente.name + ".");
+      aggiornaComeAndato(vociOggi);
+    }
+  };
+  box.querySelector(".ca-invia").addEventListener("click", invia);
+  box.querySelector("#comeAndatoCampo").addEventListener("keydown", (e) => { if(e.key === "Enter"){ e.preventDefault(); invia(); } });
 }
 
 /* Toccando il riquadro "Cosa devo fare oggi" si apre la stessa lista,
@@ -14630,9 +14987,12 @@ function conversazioneCardAperta(){
 function sceltaTraClienti(testo){
   const t = String(testo || "").trim();
   if(!/\?\s*$/.test(t)) return [];
+  // "Intendi Alessio Machi?" (nome detto un po' diverso): Sì / No (28/09/2026)
+  const intendi = t.match(/^Intendi\s+(.+)\?$/);
+  if(intendi && clients.some(c => nomeChiave(c.name) === nomeChiave(intendi[1]))) return ["Sì", "No"];
   const righe = t.split("\n").map(r => r.trim()).filter(r => /^[-•*]\s+/.test(r))
     .map(r => r.replace(/^[-•*]\s+/, "").replace(/\*\*/g, "").replace(/\s*\(.*\)\s*$/, "").replace(/[.,;:]+$/, "").trim());
-  if(righe.length < 2 || righe.length > 4) return [];
+  if(righe.length < 2 || righe.length > 8) return []; // fino a 8 omonimi (28/09/2026)
   const nomi = righe.map(r => { const c = clients.find(x => nomeChiave(x.name) === nomeChiave(r)); return c ? c.name : null; });
   return nomi.every(Boolean) && new Set(nomi.map(nomeChiave)).size === nomi.length ? nomi : [];
 }
@@ -16760,6 +17120,14 @@ function navigateTo(page){
   /* Tasto ← in alto: fa quello che faceva la riga "Torna a…" della pagina */
   const indietro = document.getElementById("topbarIndietro");
   const rigaTorna = target ? target.querySelector(":scope > .back-link") : null;
+  /* Indietro = da dove sei venuto (28/09/2026, Andrea: "apro DURC e
+     documenti impresa dalla Home, torno indietro e mi porta su Documenti").
+     Se si è arrivati dalla Home, si torna in Home; altrimenti alla pagina
+     "madre" di sempre. */
+  if(rigaTorna){
+    if(!rigaTorna.dataset.pageOriginale) rigaTorna.dataset.pageOriginale = rigaTorna.dataset.page;
+    rigaTorna.dataset.page = (paginaPrecedente === "home" && page !== "home") ? "home" : rigaTorna.dataset.pageOriginale;
+  }
   if(indietro){
     indietro.hidden = !rigaTorna;
     indietro.onclick = rigaTorna ? () => rigaTorna.click() : null;
@@ -17720,7 +18088,7 @@ suTocco("impVoceAiuto", () => {
    di avere una copia dei propri dati (art. 20 GDPR) con un tocco. */
 const TABELLE_MIEI_DATI = ["profiles", "clients", "conversations", "messages", "tasks", "incomes", "payments",
   "opportunities", "goals", "employees", "assigned_tasks", "cantieri", "cantiere_foto", "cantiere_documenti",
-  "cantiere_appunti", "cartelle", "condomini", "documents", "azienda_intestazione", "feedback"];
+  "cantiere_appunti", "cartelle", "assemblee", "condomini", "documents", "azienda_intestazione", "feedback"];
 async function scaricaIMieiDati(){
   if(!isDbReady()){ showAILanding("Non collegato", "Per scaricare i tuoi dati serve la connessione."); return; }
   const dati = { app: "EON", creato_il: new Date().toISOString(), account: (currentSession.user && currentSession.user.email) || "",
