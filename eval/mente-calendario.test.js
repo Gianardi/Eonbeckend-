@@ -124,7 +124,7 @@ async function main() {
     verifica("\"segna in EON di rinnovare il dominio\" → da fare nella cartella", nota.ai === 0 && nota.appunti.length === 1 && nota.appunti[0][0] === "Rinnovare il dominio", JSON.stringify(nota));
 
     /* ---- Foto nella cartella ---- */
-    await page.evaluate(() => { chiudiRisorsaCard(); navigateTo("home"); window.__scritture.length = 0; window.__scatti = 0; document.getElementById("fotoRapidaInput").click = () => { window.__scatti++; }; });
+    await page.evaluate(() => { chiudiRisorsaCard(); navigateTo("home"); document.getElementById("aiToastContainer").innerHTML = ""; window.__scritture.length = 0; window.__scatti = 0; document.getElementById("fotoRapidaInput").click = () => { window.__scatti++; }; });
     await page.fill("#homeHeroCampo", "aggiungi in EON queste foto");
     await page.click("#homeHeroSend", { force: true });
     await page.waitForTimeout(150);

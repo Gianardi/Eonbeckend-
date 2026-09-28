@@ -104,22 +104,20 @@ async function main() {
     // 28/09: un solo avviso, "Segnato domani ore 09:00" (prima ne uscivano due, uno con "segnati 1 impegni")
     verifica("appuntamento segnato: un solo avviso, \"Segnato domani ore 09:00\"", /^Segnato domani ore 09:00/.test(breve) && avvisi === 1 && !/impegni|Chiamata ·|Segnato in calendario/.test(breve), JSON.stringify({ breve, avvisi }));
 
-    // Preventivo: EON chiede le voci, si risponde nella card, il preventivo si apre lì
-    risposte = [
-      { stato: "in_attesa_risposta", runId: "r3", testo: "Ok, te lo preparo: mi dai le voci e i prezzi del preventivo?", azioni: [] },
-      { stato: "in_attesa_risposta", runId: "r3", testo: "IVA al 22%?", azioni: [] },
-      { stato: "concluso", runId: "r3", testo: "", azioni: [{ tool: "crea_preventivo_o_fattura", esito: { id: "m9", titolo: "Preventivo n. 7", totale: 366, cliente: "Lorenzo Guaschina", dati: { tipo: "preventivo", numero: "7", cliente: "Lorenzo Guaschina", voci: [{ desc: "Porta", qta: 1, prezzo: 300 }], aliquota: 22, imponibile: 300, iva: 66, totale: 366 } } }] },
-    ];
+    // Preventivo senza lavoro né importo (29/09, lettore unico): li chiede il CODICE, uno alla volta, nella card
+    const primaPrev = richieste.length;
     await chiedi("mi crei preventivo a LORENZO GUASCHINA");
     const p1 = await leggiCard();
-    verifica("preventivo: la domanda sulle voci è nella card, con la barra", /voci e i prezzi/.test(p1.testo) && p1.barra, JSON.stringify(p1));
-    await page.fill("#risorsaPiede .scheda-campo", "porta 300 euro");
+    verifica("preventivo: il codice chiede il lavoro nella card, con la barra (senza AI)", /Per quale lavoro\?/.test(p1.testo) && p1.barra && richieste.length === primaPrev, JSON.stringify(p1));
+    await page.fill("#risorsaPiede .scheda-campo", "porta");
     await page.press("#risorsaPiede .scheda-campo", "Enter");
-    await page.waitForFunction(() => /IVA al 22%/.test(document.getElementById("risorsaCorpo").innerText), null, { timeout: 4000 });
-    await page.fill("#risorsaPiede .scheda-campo", "sì");
+    await page.waitForFunction(() => /Quanto\?/.test(document.getElementById("risorsaCorpo").innerText), null, { timeout: 4000 });
+    risposte = [{ stato: "concluso", runId: "r3", testo: "", azioni: [{ tool: "crea_preventivo_o_fattura", esito: { id: "m9", titolo: "Preventivo n. 7", totale: 366, cliente: "Lorenzo Guaschina", dati: { tipo: "preventivo", numero: "7", cliente: "Lorenzo Guaschina", voci: [{ desc: "Porta", qta: 1, prezzo: 300 }], aliquota: 22, imponibile: 300, iva: 66, totale: 366 } } }] }];
+    await page.fill("#risorsaPiede .scheda-campo", "300");
     await page.press("#risorsaPiede .scheda-campo", "Enter");
     await page.waitForFunction(() => /Preventivo n\. 7/.test(document.getElementById("risorsaCorpo").innerText), null, { timeout: 4000 });
-    verifica("\"sì\" (2 lettere) vale come risposta, e alla fine il preventivo si apre nella card", richieste.at(-1).messaggio === "sì" && richieste.at(-1).runId === "r3");
+    const comandoPrev = (richieste.at(-1) || {}).comando || {};
+    verifica("\"porta\", \"300\": il preventivo lo fa il codice (cliente nuovo Lorenzo Guaschina) e si apre nella card", comandoPrev.nuovo_cliente === "Lorenzo Guaschina" && comandoPrev.lavoro === "Porta" && comandoPrev.importo === 300, JSON.stringify(comandoPrev));
     await page.click("#risorsaChiudi");
 
     // Domanda letta dai dati già in memoria (senza AI): stessa card

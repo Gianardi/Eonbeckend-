@@ -4824,3 +4824,54 @@ Andrea: "Ok falle tutte e tre", con la Home calma (ROADMAP 0b.9).
   Suite intera: 53 file, tutti ok.
 - Restano: morosità (condominio); allegare file (progetto, schema) alla DiCo;
   il SAL segnato "fatturato" anche se la fattura non riesce.
+
+### Il lettore unico e l'utente virtuale (29/09/2026)
+
+Andrea: "principio logico e non sistema IF", "agisci come AD" (ROADMAP 0b.10).
+- Diagnosi dal registro (`ai_request_log`, solo le sue righe): dal 28/09 ore
+  17 ogni richiesta all'AI falliva con "Credito dell'AI esaurito".
+- `lettore.js` (nuovo, statico come `file-privati.js`, header no-cache in
+  `vercel.json`, caricato da `index.html`, `module.exports` per i test):
+  `pulisci` (cortesie, "guarda se…" = domanda, "mi puoi…" = richiesta),
+  `trovaQuando` (oggi/domani/giorni/"il 15 ottobre"/"20/10", ore "alle 3" =
+  15, "e mezza", "del pomeriggio"), `trovaImporto` (20.000, 20mila, 80k,
+  2.450,50, € e euro), `trovaCliente` (nome completo in qualunque ordine,
+  una parola sola se unica, omonimi = ambiguo, una lettera diversa =
+  simile; il nome di battesimo da solo accanto a un cognome sconosciuto
+  "Chilosi Mario" = un'altra persona, tranne in messaggi/chiamate),
+  `trovaNomeNuovo` (elenco di nomi italiani comuni + marche "a/casa/sig."),
+  `trovaCartella`, `leggi` (cassetti, vedi ROADMAP), `leggiDidascalia`,
+  `preparaMessaggio` ("se va bene…" → "Va bene…?", "chiedendo X" → "Ti
+  chiedo X"). IMPERATIVI (ordini a EON) e verbi di modifica → non Mente.
+- App (`index.html`, blocco "LETTORE UNICO" prima di `apriSeNomeDiPagina`):
+  `provaLettore` in `elabora` dopo `provaRisorsaImmediata` e prima degli
+  appunti; `elabora(testo, viaVoce, pronto)` e il nuovo `inviaAlServer` (la
+  seconda metà di `elabora`, separata) così le risposte alle domande del
+  codice rientrano nello stesso percorso; `pronto.comando` va nel body,
+  `pronto.dopo(risposta)` (es. `offriInvioDocumento`). `domandaDelCodice`
+  (card con tasti + casella + microfono), `scegliCliente`,
+  `creaClienteDalCodice`, `gestisciDocumento` (macchina a passi: omonimi →
+  simile → dubbio → cliente → lavoro → importo), `gestisciMessaggio`,
+  `gestisciScrittura` (mailto/wa.me), `gestisciChiamata`, `salvaNotaCartella`,
+  `apriCartelloPer`, `mostraDocImpresaPer`, `salvaDaFareConGiorno` (tasks
+  senza ora, `scheduled_at` T00:00), `gestisciPiuComandi` (i pezzi con l'ora
+  proseguono verso il server), `rispondiSuiDati`, `reteDiSicurezza` (nel
+  catch di `inviaAlServer`). Foto: `leggiDidascalia` prima dell'AI in
+  `collegaTagFotoCantiere` (+ `collegaFotoAlCliente`, tasti `#cantiereFotoTagScelte`).
+  `capisciPensiero` chiede al lettore (niente ordini nella Mente).
+  `showAIToastConAnnulla(…, altro)` per il secondo tasto. `apriRisorsaCard`
+  invariata. Niente lettore nelle caselle "racconta un cliente" (`senzaLettore`).
+- Server (`api/index.js`): `eseguiComandoDiretto` (documento con
+  `cliente_id` o `nuovo_cliente` via `trova_o_crea_cliente`; messaggio) prima
+  di `provaPercorsoRapido`; `scriviAlCliente` (la logica comune di "di' a…",
+  con la domanda senza "Mi confermi?"); `creditoAIFinito()` in
+  `admin_stato`/`admin_riepilogo` (conto e ora, mai i messaggi); avviso in
+  `admin.html` e nell'app (`controllaAdminEon`).
+- Test: `eval/simulatore.test.mjs` (2.923 frasi, 100%), `eval/lettore-app.test.js`
+  (36 controlli nel browser), `eval/lettore-server.test.mjs` (12). Aggiornati
+  per scelta (ora lo fa il codice): `clienti-chat` (didascalia senza nome),
+  `risposte` (preventivo senza lavoro/importo), `mente-calendario` (avvisi
+  chiusi prima del tocco). Suite intera: 56 file, tutti ok.
+- Restano: le frasi vere dei tester da aggiungere al simulatore man mano;
+  "segna 500 euro pagati da Rita" (incasso) ancora all'AI; promemoria;
+  Mente-cervello; Squadra del cantiere.
