@@ -3092,7 +3092,8 @@ async function registraOperazione(user, tool, input, esito, stato) {
 /* Costo di una risposta dell'AI, dai token veri che Anthropic restituisce
    in "usage" (26/09/2026, "meno AI" passo 0). Prezzi per milione di token
    (listino ufficiale): Haiku 4.5 $1 in / $5 out, Sonnet 4.5 $3 / $15;
-   cache: scrittura 1,25× il prezzo di ingresso, lettura 0,1×. */
+   cache: scrittura 1,25× il prezzo di ingresso (cache di 5 minuti) o 2×
+   (cache di 1 ora, usata dal motore completo dal 28/09/2026), lettura 0,1×. */
 const PREZZI_MODELLI = { haiku: { input: 1, output: 5 }, sonnet: { input: 3, output: 15 } };
 function nuovoConsumo() { return { input: 0, output: 0, cacheScritti: 0, cacheLetti: 0, costo: 0 }; }
 function sommaConsumo(consumo, modello, usage) {
@@ -3100,8 +3101,12 @@ function sommaConsumo(consumo, modello, usage) {
   const p = /haiku/i.test(modello || "") ? PREZZI_MODELLI.haiku : PREZZI_MODELLI.sonnet;
   const inp = usage.input_tokens || 0, out = usage.output_tokens || 0;
   const cw = usage.cache_creation_input_tokens || 0, cr = usage.cache_read_input_tokens || 0;
+  // Anthropic divide le scritture per durata; senza il dettaglio si contano tutte a 5 minuti
+  const dettaglio = usage.cache_creation || {};
+  const cw1h = Math.min(cw, dettaglio.ephemeral_1h_input_tokens || 0);
+  const cw5m = cw - cw1h;
   consumo.input += inp; consumo.output += out; consumo.cacheScritti += cw; consumo.cacheLetti += cr;
-  consumo.costo += (inp * p.input + out * p.output + cw * p.input * 1.25 + cr * p.input * 0.1) / 1e6;
+  consumo.costo += (inp * p.input + out * p.output + cw5m * p.input * 1.25 + cw1h * p.input * 2 + cr * p.input * 0.1) / 1e6;
 }
 
 /* La frase detta dall'utente in una riga del registro: senza le note di
@@ -4795,9 +4800,16 @@ async function handleAssistant(req, res, user, accessToken) {
                data/ora, che cambia sempre, resta in un blocco a parte
                DOPO quello in cache, così non lo invalida mai. Haiku e
                Sonnet hanno ciascuno la propria cache separata (la cache
-               è legata al modello): è normale e non richiede altro. */
+               è legata al modello): è normale e non richiede altro.
+               Cache di 1 ORA, non 5 minuti (28/09/2026): un artigiano scrive
+               ogni 10-30 minuti, quindi con 5 minuti la cache era quasi
+               sempre scaduta e le istruzioni (~24 mila token) si pagavano
+               ogni volta per intero. Con 1 ora la prima scrittura costa 2×
+               invece di 1,25×, ma le domande dopo, entro l'ora, pagano le
+               istruzioni 0,1×. Stesse istruzioni, stessa AI: la qualità non
+               cambia. */
             system: [
-              { type: "text", text: promptStatico, cache_control: { type: "ephemeral" } },
+              { type: "text", text: promptStatico, cache_control: { type: "ephemeral", ttl: "1h" } },
               { type: "text", text: dataOraCorrente() },
             ],
             tools: schemi,
