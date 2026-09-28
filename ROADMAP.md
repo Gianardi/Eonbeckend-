@@ -253,6 +253,25 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
 
+### 0b.12 Manuali dell'AI per ogni professione — IN PROGRAMMA (deciso il 29/09: "non oggi")
+Andrea: "hai addestrato EON per ogni singola professione?". Il codice (lettore)
+è provato per tutte e 5 (0b.11); la parte dell'AI no, è sbilanciata:
+
+| | Codice | Manuale per l'AI | Prove dell'AI (casi.json) |
+|---|---|---|---|
+| Edile | provato | completo (libro/edile.md) | 3 |
+| Idraulico | provato | completo (libro/idraulico.md) | 5 |
+| Amministratore | provato | completo (libro/amministratore.md) | 7 |
+| Elettricista | provato | solo poche righe (`promptPackElettricista`) | 0 |
+| Altra attività | provato | nessuno (solo lo strato comune) | 0 |
+
+Da fare, in ordine: 1) manuale completo dell'elettricista (libro + pack:
+quadro, salvavita, differenziale, messa a terra, fotovoltaico, pericoli,
+DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
+alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
+di prova per ogni professione in `eval/casi.json`, da far girare con
+`eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
 ### 0b.11 Utente virtuale per ogni professione, promemoria, incassi, cartelle — FATTO il 29/09 (sera)
 - **Utente virtuale per ogni professione** (`eval/utente-virtuale-mestieri.test.js`):
   edile, idraulico, elettricista, amministratore e "Altra attività", circa
