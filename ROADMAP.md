@@ -89,6 +89,28 @@ pagina cliente chiusi e la professione bloccata in produzione.
 | 12 | **Tutto in roadmap** | Regola fissa: ogni considerazione di Andrea finisce qui, con stato e chi la fa. | [Claude] |
 | 13 | **Tester: "ricordami di chiamare X" negli appunti, non in calendario** | Proposta sotto (0b.3), da confermare. | [Andrea] ok · [Claude] |
 
+**Decisioni di Andrea (28/09, dopo):**
+- **1-2 Iscrizioni aperte a tutti: sì**, in quest'ordine: servizio email vero
+  (Resend o simile, account di Andrea) → captcha → tetto di spesa AI al giorno
+  per account → riaccendere "Allow new users to sign up" in Supabase.
+- **3 "Altra attività"** e **4 mestieri**: ok, simulazioni mandate il 28/09
+  (scelta, questionario, Home con cartelle proposte; Home di edile,
+  idraulico, elettricista, condominio). In attesa del parere di Andrea.
+- **5 Giro della giornata sulla mappa**: ok, da fare.
+- **6 Fattura elettronica**: Andrea chiede "entrambe o solo noi?". Consiglio:
+  **partire solo con "la facciamo noi"** (un tocco, argomento di vendita,
+  vale anche per chi non ha un programma); il collegamento a Fatture in Cloud
+  solo se i primi artigiani lo chiedono. Fare entrambe subito raddoppia il
+  lavoro. Resta: serve la società/P.IVA per il contratto con l'intermediario,
+  prove nell'ambiente di test dello SdI. In attesa di conferma.
+- **7** Dominio e sito: **più avanti**. App negli store: **più avanti**.
+  Versione da computer: **si può fare già ora** (è solo impaginazione, non
+  servono account): in attesa del via.
+- **8 Microfono**: si tiene quello attuale.
+- **9 "Ricordami di…" negli appunti**: **fatto** (28/09): senza giorno né ora
+  → appunti "da fare" con la spunta, lista "Da fare" in Home; "ho chiamato
+  Pedro" / "ho finito di…" la spunta. Con un giorno o un'ora → calendario.
+
 ### 0b.1 "Chiunque voglia organizzare la propria attività" (proposta)
 - **Nome**: al posto della frase lunga, una scelta che si capisce subito tra
   i mestieri: **"Altra attività"** con sotto "Negozi, bar, studi,

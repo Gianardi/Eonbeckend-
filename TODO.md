@@ -4609,3 +4609,23 @@ Andrea: "abbassare i costi senza toccare la qualità" → punto 1 della proposta
   dedicati; le risposte a una domanda di EON oggi vanno su Sonnet (~10
   centesimi): passarle a Haiku solo dopo prove, può toccare la qualità.
 - Test: `memoria-conversazione` (+3).
+
+### "Ricordami di…" senza quando → appunti da fare (28/09/2026)
+
+Il tester (via Andrea): "ricordami di chiamare X" lo vuole negli appunti, non
+in calendario; "lunedì chiama Pedro" / "alle 10 chiama Santa Maria" sì in
+calendario.
+- Migrazione `supabase/appunti_da_fare.sql` (staging e produzione, solo
+  aggiunte): `cantiere_appunti.da_fare`, `cantiere_appunti.fatto_il`.
+- Server: `crea_appunto` ha `da_fare` (con un cliente non tocca il titolo dei
+  suoi appuntamenti); prompt: in calendario solo con un giorno o un'ora
+  (anche vaghi), senza nessun quando → `crea_appunto` con `da_fare` (tolta
+  la vecchia regola "primo giorno utile alle 08:00" del 23/09).
+- App: "ricordami di / ricordati di / promemoria / da fare: …" senza nessuna
+  parola di tempo (`TEMPO_VAGO`) e senza clienti → salvato subito senza AI
+  (`provaDaFareImmediato`). Lista **Da fare** in Home (ultime 5, spunta con
+  Annulla, "Altre N negli Appunti"); negli Appunti la spunta accanto.
+  "Ho chiamato Pedro", "ho finito di chiamare Pedro" spuntano anche questi
+  (`provaSegnaFatto`, radice comune delle parole).
+- Test: `pacchetto-27-09` (+4), `memoria-conversazione` (+4),
+  `check-schema` (colonne nuove e `uso_codice`).

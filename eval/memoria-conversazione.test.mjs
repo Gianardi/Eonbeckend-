@@ -221,5 +221,24 @@ const rigaCosto = tabelle.ai_request_log[tabelle.ai_request_log.length - 1];
 // Haiku: 100×1 + 50×5 + 24000×2 (scrittura 1 ora) + poi 100×1 + 50×5 + 24000×0,1 = 0,0511 $
 verifica("costo nel registro: scrittura di 1 ora contata 2×, lettura 0,1× ($0,0511)", rigaCosto && Number(rigaCosto.costo_usd) === 0.0511, rigaCosto && rigaCosto.costo_usd);
 
+console.log("\n=== \"Ricordami di chiamare Pedro\" senza quando: appunto da fare, non calendario (28/09/2026) ===");
+databaseVuoto();
+chiamateAI = [];
+copione = [
+  () => usaStrumento("interpreta_richiesta", { operazione: "crea", oggetto: "azione" }),
+  () => usaStrumento("crea_appunto", { testo: "Chiamare Pedro", da_fare: true }),
+  () => rispondiTesto("Segnato negli appunti da fare."),
+];
+r = await chiedi("ricordami di chiamare Pedro");
+const istruzioni = JSON.stringify(chiamateAI[0] && chiamateAI[0].system);
+const strumentiAI = (chiamateAI[0] && chiamateAI[0].tools) || [];
+const schemaAppunto = strumentiAI.find((t) => t.name === "crea_appunto");
+verifica("regola nelle istruzioni: senza giorno né ora → crea_appunto da_fare, in calendario solo con un giorno o un'ora", /crea_appunto e da_fare: true/.test(istruzioni) && /In calendario va solo quello che ha un giorno o un'ora/.test(istruzioni) && !/primo giorno utile, alle 08:00 — non lasciare mai/.test(istruzioni));
+verifica("crea_appunto ha il campo da_fare", schemaAppunto && schemaAppunto.input_schema.properties.da_fare && schemaAppunto.input_schema.properties.da_fare.type === "boolean");
+const appunto = (tabelle.cantiere_appunti || [])[0];
+verifica("salvato negli appunti con da_fare, nessun impegno in calendario", appunto && appunto.da_fare === true && appunto.testo === "Chiamare Pedro" && !(tabelle.tasks || []).length && !(tabelle.messages || []).length, JSON.stringify({ appunto, tasks: tabelle.tasks }));
+const azioneAppunto = (r.corpo.azioni || []).find((x) => x.tool === "crea_appunto");
+verifica("l'app riceve da_fare nell'esito (per la lista in Home)", azioneAppunto && azioneAppunto.esito.da_fare === true, JSON.stringify(r.corpo));
+
 console.log(falliti ? `\n${falliti} controlli FALLITI.` : "\nTutti i controlli passati.");
 if (falliti) process.exitCode = 1;
