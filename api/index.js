@@ -2816,6 +2816,7 @@ async function handleErroreApp(req, res) {
   return send(res, 200, { ok: true });
 }
 
+const PROFESSIONI_PROVA = ["edile", "idraulico", "elettricista", "amministratore", "artigiano"];
 async function eAdmin(user) {
   if (!SERVICE_ROLE_KEY) return null;
   const righe = await servizio(`eon_admin?select=user_id,errori_visti_fino&user_id=eq.${user.id}&limit=1`, { method: "GET" });
@@ -4460,12 +4461,18 @@ async function handleAssistant(req, res, user, accessToken) {
   /* Letta in parallelo e attesa solo quando serve davvero (il prompt del
      motore completo): i percorsi rapidi non la usano e non devono
      aspettare un viaggio in più al database (25/09/2026). */
-  const professionePromessa = db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, accessToken)
+  const professioneVera = db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, accessToken)
     .then((righeProfilo) => (Array.isArray(righeProfilo) && righeProfilo[0] ? righeProfilo[0].profession : null))
     .catch((err) => {
       console.warn("Professione non recuperata, proseguo con solo lo strato comune:", err.message);
       return null;
     });
+  /* "Prova come…" del fondatore (28/09/2026): il mestiere scelto per la
+     prova vale SOLO se l'account è in eon_admin; per tutti gli altri si
+     ignora e resta quello del profilo. */
+  const provaChiesta = body && typeof body.prova_professione === "string" && PROFESSIONI_PROVA.includes(body.prova_professione) ? body.prova_professione : null;
+  const professionePromessa = !provaChiesta ? professioneVera
+    : Promise.all([professioneVera, eAdmin(user).catch(() => null)]).then(([vera, admin]) => (admin ? provaChiesta : vera));
   const runId = body.runId || null;
   let messages;
   let azioniEseguite = [];

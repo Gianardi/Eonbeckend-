@@ -4692,8 +4692,26 @@ da fare nel tasto.
   certificazioni (→ `cantiere-documenti`), foto impianti/quadri. **Non**
   "il durc" da solo: "mi dai il DURC" deve aprire il documento DURC.
 - ~~"apri gli appunti" apre la vecchia pagina; "apri Fornitori" non apre la
-  cartella~~ → sistemato il 29/09 (sezione sotto).
+  cartella~~ → sistemato il 28/09 (sezione sotto).
 - **Manca**: l'AI non conosce le cartelle; funzioni vere per SAL, urgenze,
   DiCo, morosità (oggi le card aprono pagine esistenti).
 - Test: nuovo `eval/mestieri-altra.test.js` (28), `pacchetto-27-09`
   aggiornato (tasto e card Appunti), `check-schema` (colonne nuove).
+
+### "Prova come…" del fondatore e sezioni per mestiere (28/09/2026)
+
+- App: `controllaAdminEon()` dopo il profilo (initApp e accesso) chiama
+  `action=admin_stato`; solo con `admin:true` compare `#impVoceProva`.
+  `entraInProva(key)` / `esciDallaProva()`: `applyProfession(key, true)`,
+  striscia `#provaBanner`, `sessionStorage["eon-prova-mestiere"]` (rimessa
+  solo se il server riconferma admin; tolta all'uscita dall'account);
+  `applyProfession` non salva `eon-profession` in prova. Overlay
+  `#provaComeOverlay` = il vecchio "Cambia professione" (irraggiungibile dal
+  25/09) + "Altra attività". `chiediAssistente` aggiunge
+  `prova_professione` in prova.
+- Server: `prova_professione` (solo `PROFESSIONI_PROVA`) sostituisce la
+  professione del profilo per il prompt **solo se `eAdmin(user)`**.
+- Sezioni: `SEZIONI_DEL_MESTIERE` + `sezionePermessa()`; `navigateTo` porta
+  in Home, `provaNavigazioneDiretta` salta la pagina (va all'AI);
+  `applicaMestiereHome` nasconde la card del cartello nei Documenti.
+- Test: `eval/prova-fondatore-app.test.js` (15), `eval/prova-fondatore.test.mjs` (5).

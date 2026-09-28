@@ -1,4 +1,4 @@
-/* "Apri …": tutto si apre con il codice, senza AI (29/09/2026, Andrea:
+/* "Apri …": tutto si apre con il codice, senza AI (28/09/2026, Andrea:
    "Apri appunti. Apri fornitori. CONTROLLA che tutto possa aprirsi tramite
    il codice e non tramite AI").
    Nel browser vero con Supabase finto: per ogni nome che si vede nell'app

@@ -1493,7 +1493,7 @@
   .faceid-si{ background:var(--indigo); color:#fff; }
   .faceid-esito{ min-height:18px; font-size:13px; font-weight:600; color:var(--coral); }
   .imp-testo{ margin:0 0 12px; font-size:14px; line-height:1.5; color:var(--text); }
-  #impVoceFaceId[hidden]{ display:none; }
+  #impVoceFaceId[hidden], #impVoceProva[hidden]{ display:none; }
 
   /* ===== Annullare impegni: conferma (27/09/2026) ===== */
   .annulla-lista{ display:flex; flex-direction:column; margin-bottom:14px; }
@@ -2380,6 +2380,10 @@
   .ap-vuoto{ padding:18px 0; color:var(--muted); font-size:13.5px; text-align:center; }
   #homeCarteMestiere[hidden], .cartelle-griglia[hidden]{ display:none !important; }
   .scheda-invia.ap-invia{ background:var(--acc); color:var(--acc-ink); }
+  /* Modalità prova del fondatore: una striscia in alto, sempre visibile */
+  .prova-banner{ position:sticky; top:0; z-index:60; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 14px; background:#0E1424; color:#fff; font-size:13px; font-weight:600; }
+  .prova-banner[hidden]{ display:none; }
+  .prova-banner button{ border:none; background:rgba(255,255,255,.14); color:#fff; font:inherit; font-size:12.5px; font-weight:700; padding:6px 11px; border-radius:999px; cursor:pointer; }
   .ap-azioni{ display:flex; gap:16px; padding:2px 0 8px; }
   .ap-azioni button{ border:none; background:none; padding:0; font:inherit; font-size:12.5px; font-weight:700; color:var(--acc-txt); cursor:pointer; }
   .ap-azioni button.pericolo{ color:var(--coral); }
@@ -2721,11 +2725,11 @@
      stessi qualunque professione sia selezionata: oggi un solo account
      vede tutto insieme (vedi punto 40, separazione dati per
      professione, ancora da decidere). -->
-<div class="ai-landing-overlay" id="cambiaProfessioneOverlay" style="display:none;">
+<div class="ai-landing-overlay" id="provaComeOverlay" style="display:none;">
   <div class="ai-landing-card">
-    <div class="ai-landing-title">Cambia professione</div>
-    <div class="ai-landing-text" style="margin-bottom:16px;">Cambia solo le etichette e le sezioni della tua professione — i clienti e i dati che hai già inserito restano gli stessi.</div>
-    <div class="ob-cards" id="cambiaProfessioneCards" style="margin-bottom:0;">
+    <div class="ai-landing-title">Prova come…</div>
+    <div class="ai-landing-text" style="margin-bottom:16px;">Solo per te, fondatore: vedi EON come un cliente di quel mestiere. Il tuo account non cambia e i tuoi dati restano gli stessi.</div>
+    <div class="ob-cards" id="provaComeCards" style="margin-bottom:0;">
       <div class="ob-card" data-profession="edile">
         <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20"/><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-7h6v7"/><path d="M2 8l10-6 10 6"/></svg></div>
         <div class="ob-card-body"><div class="ob-card-title">Edile</div></div>
@@ -2742,11 +2746,17 @@
         <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></div>
         <div class="ob-card-body"><div class="ob-card-title">Amministratore</div></div>
       </div>
+      <div class="ob-card" data-profession="artigiano">
+        <div class="ob-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v8h14v-8"/></svg></div>
+        <div class="ob-card-body"><div class="ob-card-title">Altra attività</div></div>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="app">
+<!-- Modalità prova del fondatore (28/09/2026): si vede solo in prova -->
+<div class="prova-banner" id="provaBanner" hidden><span id="provaBannerTesto">Modalità prova</span><button type="button" id="provaEsci">Torna al tuo account</button></div>
 
 <div class="onboarding" id="onboardingScreen">
   <div class="onboarding-inner">
@@ -4021,6 +4031,16 @@
           <div class="azienda-link-card-body">
             <div class="module-title">Face ID</div>
             <div class="module-sub" id="impFaceIdSotto">Entra senza password</div>
+          </div>
+          <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="azienda-link-card" id="impVoceProva" role="button" tabindex="0" hidden>
+          <div class="module-icon" style="background:var(--indigo);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/></svg>
+          </div>
+          <div class="azienda-link-card-body">
+            <div class="module-title">Prova come…</div>
+            <div class="module-sub" id="impVoceProvaSub">Solo per te: vedi EON come un edile, un idraulico…</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -5897,6 +5917,8 @@ async function chiediAssistente(messaggio, runId, extra, opzioni){
   }
 
   async function chiamaBackend(payload){
+    // Il fondatore in "Prova come…": l'AI parla come quel mestiere (il server lo ricontrolla)
+    if(mestiereInProva) payload = { ...payload, prova_professione: mestiereInProva };
     const response = await fetch(ASSISTANT_ENDPOINT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (await tokenValido()) },
@@ -6905,6 +6927,9 @@ function applicaMestiereHome(key){
       if(pagine.includes(pg)) pageMeta[pg].title = titolo;
     });
   }catch(e){ /* pageMeta non ancora pronto: restano i titoli di sempre */ }
+  // Il cartello di fine lavori è solo dell'edile
+  const cartello = document.querySelector('#page-cantiere-documenti [data-page="crea-cartello"]');
+  if(cartello) cartello.style.display = sezionePermessa("crea-cartello") ? "" : "none";
   document.getElementById("homeCarteMestiere").hidden = !!m.cartelle;
   document.getElementById("cartelleGriglia").hidden = !m.cartelle;
   if(m.cartelle && typeof renderCartelle === "function"){
@@ -6964,7 +6989,7 @@ async function applyProfession(key, skipDemoData){
   if(typeof populateClientDropdowns === "function") populateClientDropdowns();
   if(typeof populateEmployeeDropdown === "function") populateEmployeeDropdown();
   applicaMestiereHome(key);
-  saveState("eon-profession", { key: currentProfession });
+  if(!mestiereInProva) saveState("eon-profession", { key: currentProfession }); // la prova del fondatore non si ricorda sul telefono
 }
 
 function renderClientStats(){
@@ -10145,24 +10170,71 @@ function collegaHubRacconta(){
 
 function chiudiHubAI(){ document.getElementById("aiHubOverlay").style.display = "none"; }
 
-document.getElementById("cambiaProfessioneCard")?.addEventListener("click", () => { // voce tolta dal Menu il 25/09/2026
-  document.querySelectorAll("#cambiaProfessioneCards .ob-card").forEach(c => {
+/* ===== "Prova come…": solo per il fondatore (28/09/2026) =====
+   Andrea: "io con la mia email dovrei poter accedere a tutto per fare le
+   simulazioni; un cliente che si registra come idraulico vede solo
+   idraulico". La voce compare solo se il server conferma che l'account è
+   in eon_admin; la prova cambia solo quello che si vede (e il mestiere
+   che l'AI usa, se il server conferma di nuovo), mai il profilo: il
+   blocco nel database (profilo_professione_fissa) resta per tutti. */
+let eonAdmin = false;
+let mestiereInProva = null;
+let mestiereVero = null;
+const NOMI_PROVA = { edile:"Edile", idraulico:"Idraulico", elettricista:"Elettricista", amministratore:"Amministratore", artigiano:"Altra attività" };
+async function controllaAdminEon(){
+  eonAdmin = false;
+  document.getElementById("impVoceProva").hidden = true;
+  if(!BACKEND_CONFIGURED || !currentSession) return;
+  try{
+    const token = await tokenValido();
+    const r = await fetch(ASSISTANT_ENDPOINT_URL.replace("action=assistant", "action=admin_stato"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: "{}" });
+    const j = await r.json().catch(() => ({}));
+    eonAdmin = !!(r.ok && j && j.admin === true);
+  }catch(e){ eonAdmin = false; }
+  document.getElementById("impVoceProva").hidden = !eonAdmin;
+  let salvata = null;
+  try{ salvata = sessionStorage.getItem("eon-prova-mestiere"); }catch(e){}
+  if(eonAdmin && salvata && NOMI_PROVA[salvata]) await entraInProva(salvata);
+  else if(!eonAdmin && mestiereInProva) await esciDallaProva();
+}
+async function entraInProva(key){
+  if(!eonAdmin || !NOMI_PROVA[key]) return;
+  if(!mestiereInProva) mestiereVero = currentProfession;
+  if(key === mestiereVero){ await esciDallaProva(); return; }
+  mestiereInProva = key;
+  try{ sessionStorage.setItem("eon-prova-mestiere", key); }catch(e){}
+  await applyProfession(key, true);
+  document.getElementById("provaBannerTesto").textContent = "Modalità prova: " + NOMI_PROVA[key];
+  document.getElementById("provaBanner").hidden = false;
+  document.body.classList.add("in-prova");
+  document.getElementById("impVoceProvaSub").textContent = "Ora: " + NOMI_PROVA[key];
+}
+async function esciDallaProva(){
+  const torna = mestiereVero || currentProfession;
+  mestiereInProva = null;
+  try{ sessionStorage.removeItem("eon-prova-mestiere"); }catch(e){}
+  document.getElementById("provaBanner").hidden = true;
+  document.body.classList.remove("in-prova");
+  document.getElementById("impVoceProvaSub").textContent = "Solo per te: vedi EON come un edile, un idraulico…";
+  if(torna && torna !== currentProfession) await applyProfession(torna, true);
+  mestiereVero = null;
+}
+document.getElementById("impVoceProva").addEventListener("click", () => {
+  if(!eonAdmin) return;
+  document.querySelectorAll("#provaComeCards .ob-card").forEach(c => {
     c.classList.toggle("selected", c.dataset.profession === currentProfession);
   });
-  document.getElementById("cambiaProfessioneOverlay").style.display = "flex";
+  document.getElementById("provaComeOverlay").style.display = "flex";
 });
-document.getElementById("cambiaProfessioneOverlay").addEventListener("click", (e) => {
-  if(e.target.id === "cambiaProfessioneOverlay") document.getElementById("cambiaProfessioneOverlay").style.display = "none";
+document.getElementById("provaComeOverlay").addEventListener("click", async (e) => {
+  if(e.target.id === "provaComeOverlay") document.getElementById("provaComeOverlay").style.display = "none";
   const card = e.target.closest(".ob-card");
   if(!card) return;
-  document.getElementById("cambiaProfessioneOverlay").style.display = "none";
-  if(card.dataset.profession === currentProfession) return;
-  /* skipDemoData sempre true qui: cambia solo etichette e sezioni
-     profession-specific, mai i dati veri già inseriti (vedi nota HTML
-     sopra e la conferma di Gianardi sul punto 39). */
-  applyProfession(card.dataset.profession, true);
-  showAIToast("Professione cambiata", "Etichette e sezioni aggiornate — i tuoi dati sono rimasti gli stessi.");
+  document.getElementById("provaComeOverlay").style.display = "none";
+  await entraInProva(card.dataset.profession);
+  navigateTo("home");
 });
+document.getElementById("provaEsci").addEventListener("click", async () => { await esciDallaProva(); navigateTo("home"); });
 document.getElementById("feedbackCard").addEventListener("click", () => apriFeedback(""));
 function apriFeedback(testoIniziale){
   const corpo = document.createElement("div");
@@ -11509,6 +11581,7 @@ function provaNavigazioneDiretta(testo){
   const card = cardDaAprireAVoce(t, resto, restoSenzaArticolo);
   if(card){ chiudiRisorsaCard(); card(); return true; }
   for(const pagina in PAGINE_NAVIGABILI_A_VOCE){
+    if(!sezionePermessa(pagina)) continue; // la sezione di un altro mestiere non si apre
     const sinonimi = PAGINE_NAVIGABILI_A_VOCE[pagina];
     if(sinonimi.includes(resto) || sinonimi.includes(restoSenzaArticolo)){
       // "apri le fatture" / "mostrami i preventivi": la cartella già filtrata
@@ -11524,7 +11597,7 @@ function provaNavigazioneDiretta(testo){
    per tutte"): nella Home, nelle altre pagine, dentro una card (anche la
    scheda del cliente) e anche quando EON ha appena fatto una domanda. È un
    comando chiaro, non una risposta: la card si chiude e si va lì. */
-/* Le cose che si aprono in una card e non in una pagina (29/09/2026,
+/* Le cose che si aprono in una card e non in una pagina (28/09/2026,
    Andrea: "apri appunti", "apri fornitori" — "tutto deve aprirsi con il
    codice, non con l'AI"). Le cartelle vengono prima delle pagine: in
    "Altra attività" "Incassi" o "Clienti" sono le cartelle. */
@@ -16412,7 +16485,16 @@ const tabForPage = {
 const TAB_SOLO_PC = { calendario: "calendario", chat: "chat" };
 function daComputer(){ return !!(window.matchMedia && window.matchMedia("(min-width: 1024px)").matches); }
 var paginaAttuale = "home", paginaPrecedente = "home"; // var: navigateTo può partire prima di questa riga
+/* Sezioni che esistono solo per un mestiere (28/09/2026, Andrea: "un
+   cliente che si registra come edile vede solo le sezioni edile e
+   nient'altro"): per gli altri non si aprono, né col tocco né a voce. */
+var SEZIONI_DEL_MESTIERE = { "assemblee": ["amministratore"], "crea-cartello": ["edile"], "udienze": ["avvocato"], "revisioni": ["consulente"] };
+function sezionePermessa(pagina){
+  const solo = SEZIONI_DEL_MESTIERE[pagina];
+  return !solo || solo.includes(currentProfession);
+}
 function navigateTo(page){
+  if(!sezionePermessa(page)) page = "home";
   if(page !== paginaAttuale){ paginaPrecedente = paginaAttuale; paginaAttuale = page; }
   document.querySelectorAll(".page").forEach(p => p.classList.remove("visible"));
   const target = document.getElementById("page-" + page);
@@ -16887,6 +16969,7 @@ document.getElementById("obFinishBtn").addEventListener("click", async () => {
     }
 
     await applyProfession(obSelectedProfession || "artigiano", true);
+    controllaAdminEon();
     renderPayments(); renderIncomes();
     document.getElementById("onboardingScreen").classList.add("hidden");
     if(benvenutoDaMostrare){ benvenutoDaMostrare = false; mostraBenvenuto(); }
@@ -17051,6 +17134,7 @@ async function initApp(){
       subscribeToMessages();
       analizzaRisposteArretrate(); // risposte arrivate ad app chiusa
         await applyProfession(profile.profession, true);
+        controllaAdminEon();
         renderTasks(); renderDifficulty(); renderRing(); renderGoals(); renderAssignedTasks();
         renderPayments(); renderIncomes(); renderInvoices(); renderQuotes(); renderGifts();
         renderChatList(); renderChatWindow();
@@ -17482,6 +17566,7 @@ suTocco("impVocePassword", () => {
    memoria non resta nulla dell'account appena chiuso. */
 async function esciDallAccount(){
   if(!confirm("Vuoi uscire dal tuo account? Per rientrare ti serviranno email e password.")) return;
+  try{ sessionStorage.removeItem("eon-prova-mestiere"); }catch(e){}
   try{ if(supabaseClient && supabaseClient.auth) await supabaseClient.auth.signOut(); }
   catch(e){ console.warn("Uscita non completa:", e.message); }
   currentSession = null;
