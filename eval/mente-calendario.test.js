@@ -52,8 +52,9 @@ async function apri(browser, ora) {
     }) };
   });
   let ai = 0;
-  await page.route("**/api?action=assistant", (route) => { ai++; route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ testo: "Ok.", azioni: [] }) }); });
+  // Playwright prova per prima l'ultima regola registrata: quella generica va prima
   await page.route("**/api?action=*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "{}" }));
+  await page.route("**/api?action=assistant", (route) => { ai++; route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ testo: "Ok.", azioni: [] }) }); });
   await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: "networkidle" });
   await page.evaluate(() => {
     document.getElementById("onboardingScreen").style.display = "none";

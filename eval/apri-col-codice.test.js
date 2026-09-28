@@ -38,7 +38,7 @@ const MESTIERI = {
   edile: [["cantieri", "cantiere-cliente"], ["durc e documenti impresa", "documenti-impresa"], ["foto cantiere", "cantiere-foto"]],
   idraulico: [["interventi", "cantiere-cliente"], ["preventivi e fatture", "fatture-preventivi"], ["foto impianti", "cantiere-foto"]],
   elettricista: [["impianti", "cantiere-cliente"], ["certificazioni e documenti", "cantiere-documenti"], ["certificazioni", "cantiere-documenti"], ["foto quadri", "cantiere-foto"]],
-  amministratore: [["condomini", "cantiere-cliente"], ["assemblee", "assemblee"], ["foto", "cantiere-foto"]],
+  amministratore: [["condomini", "cantiere-cliente"], ["assemblee", "assemblee"], ["foto", "cantiere-foto"], ["nuova assemblea", "assemblee", "Nuova assemblea"]],
   artigiano: [["fornitori", null, "Fornitori"], ["la cartella fornitori", null, "Fornitori"], ["personale", null, "Personale"], ["scadenze", null, "Scadenze"],
     ["incassi", null, "Incassi"], ["clienti", null, "Clienti"], ["nuova cartella", "home", "Nuova cartella"], ["crea una cartella", "home", "Nuova cartella"], ["le cartelle", "home"]],
 };

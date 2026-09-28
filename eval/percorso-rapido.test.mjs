@@ -295,11 +295,11 @@ await scenario(
 );
 
 await scenario(
-  "Nome simile a un cliente (\"Tabri\" / \"Fabbri\") → motore completo, che chiede",
+  "Nome simile a un cliente (\"Tabri\" / \"Fabbri\") → chiede il codice \"Intendi Fabbri?\" (28/09)",
   () => ({ c: aggiungiCliente("Fabbri") }),
-  [{ body: nuovo("Appuntamento Tabri domani alle 10"), copione: [...motore] }],
+  [{ body: nuovo("Appuntamento Tabri domani alle 10"), copione: [] }],
   ([r], [ai]) => {
-    verifica("letto dal codice, poi motore completo (niente scritto)", ai.length === 2 && eMotoreCompleto(ai[0]) && appuntamenti().length === 0 && tabelle.tasks.length === 0, ai.length);
+    verifica("chiede il codice, senza AI, niente scritto", ai.length === 0 && r.corpo.testo === "Intendi Fabbri?" && JSON.stringify(r.corpo.scelte) === '["Sì","No"]' && appuntamenti().length === 0 && tabelle.tasks.length === 0, JSON.stringify({ ai: ai.length, r }));
   }
 );
 
