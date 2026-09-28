@@ -77,25 +77,33 @@ pagina cliente chiusi e la professione bloccata in produzione.
 |---|---|---|---|
 | 1 | **Registrazione bloccata** ("non mi fa registrare") | Causa trovata: in Supabase le iscrizioni sono **spente** (errore `signup_disabled`, 27/09 sera). L'app ora lo dice in italiano. Per riaprire: Supabase → Authentication → Sign In / Providers → "Allow new users to sign up" acceso. **Ma** le email di conferma oggi arrivano solo al team (serve il servizio email vero, sezione 1): senza, chi si iscrive non riesce a confermare. | [Andrea] interruttore · [insieme] email |
 | 2 | **Chiunque, infinite persone?** | Oggi **no** (iscrizioni spente + email solo al team). Con tutto aperto: una persona per email, conferma obbligatoria, limite AI 20 richieste ogni 10 minuti per account; **manca** un captcha (Cloudflare Turnstile, gratis) e un tetto di spesa AI giornaliero per account. Da fare **prima** di aprire a tutti. | [Claude] |
-| 3 | **"Chiunque voglia organizzare la propria attività"** → nome più bello, mini questionario, cartelle | Proposta sotto (0b.1). | [insieme] |
-| 4 | **Tratti distintivi per mestiere** (edile, idraulico, elettricista, condominio) | **Non fatto** (chiesto il 27/09, rimasto indietro). Proposta sotto (0b.2), con simulazioni prima di toccare l'app. | [Claude] |
+| 3 | **"Chiunque voglia organizzare la propria attività"** → nome più bello, mini questionario, cartelle | **Fatto** (28/09): "Altra attività", questionario a 3 tocchi, cartelle proposte (0b.1). | fatto |
+| 4 | **Tratti distintivi per mestiere** (edile, idraulico, elettricista, condominio) | **Fatto** (28/09): colore, icona, esempio a voce e card per mestiere (0b.2). Mancano le funzioni dedicate (SAL, urgenze, DiCo, morosità). | fatto · [Claude] il resto |
 | 5 | **Percorsi con la mappa** | Oggi "Portami lì" apre Mappe/Google Maps. Proposta: **il giro della giornata** su una mappa dentro EON (tappe in ordine, tempi, "Avvia" apre il navigatore). Traffico vero: Google Maps (account di Andrea, gratis fino a qualche migliaio di calcoli al mese, stima). | [insieme] |
 | 6 | **Fattura elettronica valida con un tocco o a voce. Gratis?** | Possibile: EON crea l'XML e lo manda allo SdI tramite un intermediario accreditato (strada A, sezione 4). **Non gratis ma pochi centesimi** a fattura (Openapi da ~0,015-0,07 € l'invio + conservazione ~0,035 €, listini da riverificare). Serve: delega dell'artigiano all'intermediario (una volta), dati completi del cliente (CF/P.IVA, codice destinatario o PEC, indirizzo: EON li chiede se mancano), regime giusto (forfettario, bollo, ritenuta…). Il portale gratis dell'Agenzia non si collega alle app. Il 27/09 si era scelta la strada B (collegarsi a Fatture in Cloud): **da ridecidere** — la A è l'argomento di vendita "EON fa la fattura vera". | [Andrea] decide · poi [insieme] |
 | 7 | **Sito di presentazione** con "Entra in EON" | Da fare: una pagina sul dominio (eon.it o simile) con cosa fa EON, prova gratuita, "Entra". Serve il dominio. | [Andrea] dominio · [Claude] sito |
 | 8 | **EON come app** | Oggi: installabile dal browser ("Aggiungi a Home"), icona e Face ID. | fatto |
-| 9 | **EON da computer** | Da fare: oggi colonna stretta su schermo largo. Versione PC con menu laterale e più colonne. | [Claude] |
+| 9 | **EON da computer** | **Fatto** (28/09): menu laterale e più colonne. | fatto |
 | 10 | **App vera negli store** | Si "impacchetta" la stessa app (es. Capacitor) per App Store e Google Play: stesso codice, in più notifiche vere e microfono nativo. Servono gli account sviluppatore (Apple 99 $/anno, Google 25 $ una volta) e la revisione di Apple. | [insieme] |
 | 11 | **Microfono nell'app vera: serve OpenAI?** | **No.** Oggi EON usa il riconoscimento vocale del telefono (Apple/Google), gratis. Nell'app vera si usa quello nativo di iPhone/Android, sempre gratis. OpenAI (o simili) solo se vogliamo di più: voce più umana, trascrivere telefonate e vocali lunghi. | — |
 | 12 | **Tutto in roadmap** | Regola fissa: ogni considerazione di Andrea finisce qui, con stato e chi la fa. | [Claude] |
-| 13 | **Tester: "ricordami di chiamare X" negli appunti, non in calendario** | Proposta sotto (0b.3), da confermare. | [Andrea] ok · [Claude] |
+| 13 | **Tester: "ricordami di chiamare X" negli appunti, non in calendario** | **Fatto** (28/09), vedi 0b.3. | fatto |
 
 **Decisioni di Andrea (28/09, dopo):**
 - **1-2 Iscrizioni aperte a tutti: sì**, in quest'ordine: servizio email vero
   (Resend o simile, account di Andrea) → captcha → tetto di spesa AI al giorno
   per account → riaccendere "Allow new users to sign up" in Supabase.
-- **3 "Altra attività"** e **4 mestieri**: ok, simulazioni mandate il 28/09
-  (scelta, questionario, Home con cartelle proposte; Home di edile,
-  idraulico, elettricista, condominio). In attesa del parere di Andrea.
+- **3 "Altra attività"** e **4 mestieri**: **fatti il 28/09** (dopo le
+  simulazioni approvate). Vedi 0b.1 e 0b.2 per cosa c'è e cosa manca.
+- **Home più semplice** (28/09, Andrea: "più semplice, più chiara, più
+  lineare, più stilosa"): riquadro **"Oggi"** con "Calendario →"; un solo
+  tasto **"Appunti"** che mostra la prima cosa da fare ("Chiamare Pedro · e
+  altre 2") e apre la **card degli appunti**: cose da fare con il cerchio,
+  note con la matita e il giorno, in fondo microfono e casella. Tolti il
+  tasto calendario e il riquadro "Da fare" separato.
+- **Bug trovato e sistemato (28/09)**: il database di produzione rifiutava
+  la professione "elettricista" (regola vecchia) → chi si iscriveva come
+  elettricista non riusciva. Corretto con `supabase/mestieri_e_cartelle.sql`.
 - **5 Giro della giornata sulla mappa**: ok, da fare.
 - **6 Fattura elettronica**: Andrea chiede "entrambe o solo noi?". Consiglio:
   **partire solo con "la facciamo noi"** (un tocco, argomento di vendita,
@@ -110,7 +118,23 @@ pagina cliente chiusi e la professione bloccata in produzione.
   → appunti "da fare" con la spunta, lista "Da fare" in Home; "ho chiamato
   Pedro" / "ho finito di…" la spunta. Con un giorno o un'ora → calendario.
 
-### 0b.1 "Chiunque voglia organizzare la propria attività" (proposta)
+### 0b.1 "Altra attività" — FATTO il 28/09
+Cosa c'è ora nell'app:
+- all'iscrizione due scelte: **"Artigiani"** e **"Altra attività"**;
+- "Altra attività" → **3 domande a tocchi** (che attività, come lavori, chi
+  lavora con te); le risposte restano nell'account (`profiles.attivita_*`);
+- in Home, al posto delle card dei mestieri, le **cartelle proposte** (es.
+  bar: Fornitori, Personale, Scadenze, Incassi; da solo niente "Personale"),
+  create una volta sola; **+ Nuova cartella**, **Rinomina**, **Elimina** (gli
+  appunti tornano negli Appunti); ogni cartella si apre come la card Appunti;
+- a voce o scritto: **"segna in Fornitori di chiamare la Peroni"** → da fare
+  in Fornitori (lo fa il codice, senza AI).
+Manca / da sapere:
+- l'AI non conosce ancora le cartelle (frasi diverse da "segna in X…" non
+  finiscono nella cartella);
+- resta da decidere se "Altra attività" è il Piano Free o a pagamento.
+
+Proposta originale:
 - **Nome**: al posto della frase lunga, una scelta che si capisce subito tra
   i mestieri: **"Altra attività"** con sotto "Negozi, bar, studi,
   professionisti, servizi". (Alternative: "La mia attività", "Ogni partita
@@ -128,7 +152,19 @@ pagina cliente chiusi e la professione bloccata in produzione.
 - Da decidere prima: se questa parte è il **Piano Free** (sezione 2) o un
   piano a pagamento come gli altri.
 
-### 0b.2 Tratti distintivi per mestiere (proposta)
+### 0b.2 Tratti distintivi per mestiere — FATTO il 28/09
+Cosa c'è ora: colore proprio (edile arancio, idraulico azzurro, elettricista
+giallo, amministratore verde) su logo, microfono, card e tasti; chip in alto
+con icona e nome del mestiere; esempio a voce del mestiere sotto il
+microfono; card: edile Cantieri · DURC e documenti impresa · Documenti ·
+Foto cantiere; idraulico Interventi · Preventivi e fatture; elettricista
+Impianti · Preventivi e fatture · Certificazioni e documenti · Foto quadri;
+amministratore Condomini · Assemblee.
+**Manca**: le card aprono pagine che già esistevano; **SAL** (edile),
+**urgenze** (idraulico), **dichiarazione di conformità** (elettricista) e
+**morosità** (condominio) come funzioni vere sono ancora da fare.
+
+Proposta originale:
 Stessa app, ma ogni mestiere si riconosce subito:
 - **colore e icona propri** (es. edile arancio/cantiere, idraulico blu/goccia,
   elettricista giallo/fulmine, condominio verde/palazzo);
@@ -138,7 +174,7 @@ Stessa app, ma ogni mestiere si riconosce subito:
   condominio: assemblee e scadenze; idraulico: urgenze; edile: SAL).
 Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 
-### 0b.3 "Ricordami di chiamare…": calendario o appunti (proposta)
+### 0b.3 "Ricordami di chiamare…": calendario o appunti — FATTO il 28/09
 - **Con un giorno o un'ora** ("lunedì chiama Pedro", "alle 10 chiama Santa
   Maria", "domani", "stasera") → **calendario**, come oggi.
 - **Senza nessun quando** ("ricordami di chiamare Pedro", "ricordami di
