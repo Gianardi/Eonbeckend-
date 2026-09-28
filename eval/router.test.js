@@ -279,7 +279,7 @@ async function main() {
       return { esito1, scrittiPrima, esito2, scritti, avvisi };
     });
     verifica("due appunti salvati davvero, nella tabella giusta", salvataggi.esito1 === true && salvataggi.scrittiPrima.length === 2 && salvataggi.scrittiPrima.every((r) => r.tabella === "cantiere_appunti"), JSON.stringify(salvataggi.scrittiPrima));
-    verifica("avviso \"2 appunti aggiunti\"", salvataggi.avvisi[0] && salvataggi.avvisi[0].titolo === "2 appunti aggiunti", JSON.stringify(salvataggi.avvisi[0]));
+    verifica("avviso \"2 cose in Mente\"", salvataggi.avvisi[0] && salvataggi.avvisi[0].titolo === "2 cose in Mente", JSON.stringify(salvataggi.avvisi[0]));
     verifica("salvataggio a metà: lo dice (mai un \"fatto\" finto) e non manda all'AI il resto", salvataggi.esito2 === true && salvataggi.scritti.length === 3 && /1 non salvato/.test(salvataggi.avvisi[1] && salvataggi.avvisi[1].testo), JSON.stringify(salvataggi.avvisi[1]));
 
     console.log("\n--- Router: stratagemma appuntamenti, avviso di ricezione (EON BRAIN 17/09/2026) ---");

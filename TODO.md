@@ -4715,3 +4715,34 @@ da fare nel tasto.
   in Home, `provaNavigazioneDiretta` salta la pagina (va all'AI);
   `applicaMestiereHome` nasconde la card del cartello nei Documenti.
 - Test: `eval/prova-fondatore-app.test.js` (15), `eval/prova-fondatore.test.mjs` (5).
+
+### La Mente, cartelle per tutti, calendario vivo (28/09/2026)
+
+- Avviso doppio: in `elabora` l'`else` di "Ok, segnati N impegni" era legato
+  a `if(clienteNato)`; ora un solo avviso "Segnato …" / "Segnati N impegni".
+- `capisciPensiero` / `provaPensieroInMente`: ultimo passo del codice prima
+  dell'AI in `elabora`. Esclusi: domande (`DOMANDA_PER_MENTE`), chiacchiere,
+  tempo (`RIFERIMENTO_TEMPO`, `TEMPO_PER_MENTE`), ordini a EON
+  (`ORDINE_A_EON`, anche "mi dai / mi aiuti"), parole di funzione
+  (preventivo, fattura, messaggio, euro, pagato…), seguiti di discorso ("e
+  quelle di ieri", "no…"), frasi che nominano un cliente, <2 o >30 parole.
+  Da fare: `INIZIO_DA_FARE` o primo verbo all'infinito.
+- `provaCreaCartella` (CREA_CARTELLA) prima di tutto in `elabora`; se la
+  cartella c'è già la apre. Cartelle per tutti: `applicaMestiereHome`
+  sposta `#cartelleGriglia` sotto `#homeCarteMestiere` (classe
+  `sotto-mestiere`); proposte del questionario solo per `artigiano`.
+- Foto: `supabase/foto_in_cartella.sql`; `caricaCantiereFoto(…, {cartellaId})`,
+  `scattaFotoInCartella`, `provaFotoInCartella` (FOTO_IN_CARTELLA) e "segna
+  in X queste foto" dentro `provaAppuntoInCartella(testo, viaVoce)`;
+  `#apFoto` miniature nella card della cartella.
+- Mente: tasto, titolo card, segnaposto "Cosa hai in testa?", avvisi "In
+  Mente"; `APPUNTI_A_VOCE` + mente/pensieri.
+- Calendario: `voceGiaPassata`, `fraseGiornataFinita`; `aggiornaHomeHero`
+  (titolo Oggi/Domani, "N già passati oggi"); `renderCalendar` (riga
+  `.cal-passati-riga` chiusa, `.cal-finito`); `setInterval` 5 min +
+  `visibilitychange`.
+- Hint della Home: `collegaMicTesto` usa `hintBaseDi()` (esempio del mestiere
+  dopo ogni invio, prima tornava la frase generica).
+- Test: nuovo `eval/mente-calendario.test.js` (13, con orologio finto alle
+  19:08); aggiornati apri-col-codice, mestieri-altra, pacchetto-27-09,
+  router, risposte, scheda-cliente, check-schema.

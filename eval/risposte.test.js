@@ -100,7 +100,9 @@ async function main() {
     await page.click("#homeHeroSend");
     await page.waitForTimeout(500);
     const breve = await page.evaluate(() => document.getElementById("aiToastContainer").innerText.replace(/\s+/g, " ").trim());
-    verifica("appuntamento segnato: solo \"Ok, segnato domani ore 09:00\"", /Ok, segnato domani ore 09:00/.test(breve) && !/Chiamata ·|Segnato in calendario/.test(breve), breve);
+    const avvisi = await page.evaluate(() => document.querySelectorAll("#aiToastContainer .ai-toast").length);
+    // 28/09: un solo avviso, "Segnato domani ore 09:00" (prima ne uscivano due, uno con "segnati 1 impegni")
+    verifica("appuntamento segnato: un solo avviso, \"Segnato domani ore 09:00\"", /^Segnato domani ore 09:00/.test(breve) && avvisi === 1 && !/impegni|Chiamata ·|Segnato in calendario/.test(breve), JSON.stringify({ breve, avvisi }));
 
     // Preventivo: EON chiede le voci, si risponde nella card, il preventivo si apre lì
     risposte = [

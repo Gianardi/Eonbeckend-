@@ -32,7 +32,7 @@ const COMUNI = [
   ["account", "impostazioni"], ["profilo", "impostazioni"], ["sicurezza", "impostazioni", "Sicurezza"], ["aiuto", "impostazioni", "Aiuto"],
   ["privacy e dati", "impostazioni", "Privacy e dati"], ["registro ai", "ai-request-log"],
   ["feedback", null, "Manda un feedback"], ["manda un feedback", null, "Manda un feedback"],
-  ["appunti", null, "Appunti"], ["gli appunti", null, "Appunti"], ["le cose da fare", null, "Appunti"],
+  ["appunti", null, "Mente"], ["gli appunti", null, "Mente"], ["le cose da fare", null, "Mente"], ["mente", null, "Mente"], ["la mente", null, "Mente"], ["i miei pensieri", null, "Mente"],
 ];
 const MESTIERI = {
   edile: [["cantieri", "cantiere-cliente"], ["durc e documenti impresa", "documenti-impresa"], ["foto cantiere", "cantiere-foto"]],
@@ -123,7 +123,7 @@ async function main() {
       const r = { righe: [...document.querySelectorAll("#apLista .ap-testo")].map((t) => t.textContent), azioni: !!document.querySelector(".ap-azioni") };
       chiudiRisorsaCard();
       provaNavigazioneDiretta("apri appunti");
-      r.appunti = document.getElementById("risorsaTitolo").textContent === "Appunti" && !!document.getElementById("apCampo") && paginaAttuale !== "cantiere-appunti";
+      r.appunti = document.getElementById("risorsaTitolo").textContent === "Mente" && !!document.getElementById("apCampo") && paginaAttuale !== "cantiere-appunti";
       return r;
     });
     verifica("\"apri Fornitori\" apre la cartella con i suoi appunti; \"apri appunti\" apre la card (non la vecchia pagina)", cartella.righe.join() === "Chiamare la Peroni" && cartella.azioni && cartella.appunti, JSON.stringify(cartella));
@@ -158,8 +158,8 @@ async function main() {
       cartella: provaNavigazioneDiretta("nuova cartella clienti vip"),
     }));
     verifica("frasi con qualcosa in più non vengono scambiate per \"apri\"", !vanno.nota && !vanno.fornitori && !vanno.cartella, JSON.stringify(vanno));
-    const cartelleSoloAltra = await page.evaluate(async () => { await applyProfession("edile", true); chiudiRisorsaCard(); const r = provaNavigazioneDiretta("nuova cartella"); chiudiRisorsaCard(); return r; });
-    verifica("\"nuova cartella\" solo in Altra attività (per gli artigiani non ci sono cartelle)", cartelleSoloAltra === false);
+    const cartellePerTutti = await page.evaluate(async () => { await applyProfession("edile", true); chiudiRisorsaCard(); const r = provaNavigazioneDiretta("nuova cartella") && document.getElementById("risorsaTitolo").textContent === "Nuova cartella"; chiudiRisorsaCard(); return r; });
+    verifica("\"nuova cartella\" vale per tutti i mestieri (28/09: cartelle anche per gli artigiani)", cartellePerTutti === true);
 
     verifica("nessun errore nella pagina", errori.length === 0, JSON.stringify(errori));
   } finally {
