@@ -104,8 +104,7 @@ pagina cliente chiusi e la professione bloccata in produzione.
   lavoro. Resta: serve la società/P.IVA per il contratto con l'intermediario,
   prove nell'ambiente di test dello SdI. In attesa di conferma.
 - **7** Dominio e sito: **più avanti**. App negli store: **più avanti**.
-  Versione da computer: **si può fare già ora** (è solo impaginazione, non
-  servono account): in attesa del via.
+  Versione da computer: **fatta il 28/09** (sezione 3).
 - **8 Microfono**: si tiene quello attuale.
 - **9 "Ricordami di…" negli appunti**: **fatto** (28/09): senza giorno né ora
   → appunti "da fare" con la spunta, lista "Da fare" in Home; "ho chiamato
@@ -308,8 +307,11 @@ principale per pagare resta il tempo risparmiato e il lavoro fatto.
   schermata di avvio.
 - **[insieme] App Store e Google Play** (dopo): servono gli account
   sviluppatore (Apple 99 $/anno, Google 25 $ una volta).
-- **[Claude] Versione da computer**: oggi l'app è pensata solo per il
-  telefono (colonna stretta su schermo largo).
+- **[fatto 28/09] Versione da computer**: da 1024 px in su menu a sinistra
+  (con Calendario e Messaggi), Home su due colonne, card su 4 colonne,
+  Messaggi come WhatsApp Web, avvisi in alto a destra. Sul telefono uguale.
+  Prossimo passo possibile: le altre pagine (Calendario, Azienda) con più
+  colonne dove serve.
 - **[fatto 27/09] Accesso con Face ID senza password** (passkey, standard
   delle banche): dopo il primo accesso EON propone "Entra con Face ID";
   poi si entra guardando il telefono. Impostazioni → Face ID per attivarlo

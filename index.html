@@ -108,6 +108,7 @@
 
   /* rail e sidebar: navigazione desktop, sostituita dalla tab bar in basso */
   .rail, .sidebar{ display:none; }
+  .solo-pc{ display:none !important; }
 
   /* tab bar in basso, stile app mobile */
   .tabbar{
@@ -2328,6 +2329,59 @@
     .row-value{ display:none; }
   }
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
+
+  /* ================= VERSIONE DA COMPUTER (28/09/2026) =================
+     Andrea: "versione PC si può fare già ora?". Da 1024 px in su: la barra
+     in basso diventa il menu a sinistra (con Calendario e Messaggi), i
+     contenuti si allargano, la Home va su due colonne, Messaggi come
+     WhatsApp Web (elenco a sinistra, chat a destra). Sul telefono non
+     cambia niente: tutto è dentro questo blocco. */
+  @media (min-width: 1024px){
+    .solo-pc{ display:flex !important; }
+    .app{ max-width:none; margin:0; padding-left:240px; box-shadow:none; background:transparent; }
+    .tabbar{
+      position:fixed; top:0; bottom:0; left:0; width:240px; z-index:30;
+      flex-direction:column; justify-content:flex-start; align-items:stretch; gap:4px;
+      padding:26px 14px; border-top:none; border-right:1px solid var(--border);
+      background:rgba(255,255,255,.9);
+    }
+    .tabbar-marchio{ align-items:center; gap:2px; padding:0 12px 22px; font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-size:24px; font-weight:800; letter-spacing:.02em; color:var(--text); cursor:pointer; }
+    .tabbar-marchio .logo-o{ width:22px; height:22px; color:var(--indigo); margin:0 1px; }
+    .tabbar-marchio .logo-o svg{ width:22px; height:22px; }
+    .tab-item{ flex:none; flex-direction:row; justify-content:flex-start; gap:12px; padding:11px 14px; border-radius:12px; color:var(--muted); }
+    .tab-item:hover{ background:rgba(14,20,36,.04); color:var(--text); }
+    .tab-item svg{ width:19px; height:19px; }
+    .tab-item span{ font-size:14px; font-weight:700; }
+    .tab-item.active{ background:var(--indigo-soft); color:var(--indigo); }
+    main{ width:100%; max-width:880px; margin:0 auto; padding:32px 40px 48px; }
+    main:has(#page-home.visible){ max-width:1120px; }
+    /* Il marchio è già nel menu: in Home resta solo il tasto del profilo */
+    .brand-hero{ padding-left:0; padding-right:0; }
+    .brand-hero-wordmark{ visibility:hidden; }
+
+    /* Home: a sinistra parli o scrivi, a destra la giornata */
+    .home-hero{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); column-gap:36px; align-items:start; }
+    .home-hero > :not(.home-hero-lato){ grid-column:1; }
+    .home-hero-lato{ grid-column:2; grid-row:1 / span 6; display:flex; flex-direction:column; gap:12px; }
+    .home-hero-lato > *{ margin:0 !important; }
+    .home-hero-dafare{ margin-top:0; }
+    .cantiere-grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); gap:16px; margin-top:28px; }
+
+    /* Avvisi e tasti flottanti: in basso a destra dello schermo, non sopra il menu */
+    .ai-toast-container{ left:auto; right:24px; top:24px; bottom:auto; width:400px; max-width:calc(100vw - 280px); margin:0; }
+    .cl-nuovo{ right:max(24px, calc((100vw - 240px - 880px) / 2 + 40px)); bottom:32px; }
+
+    /* Messaggi come WhatsApp Web: elenco a sinistra, chat aperta a destra */
+    #page-chat.visible{ left:240px; max-width:none; margin:0; }
+    .chat-list-panel{ right:auto; width:380px; transform:none !important; border-right:1px solid var(--border); }
+    .chat-conv-panel{ left:380px; transform:none !important; }
+    .chat-slider:not(.show-conv) .chat-conv-panel > *{ visibility:hidden; }
+    .chat-slider:not(.show-conv) .chat-conv-panel::after{
+      content:"Scegli una conversazione a sinistra"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      color:var(--muted); font-size:14px; background:var(--bg);
+    }
+    .chat-conv-panel .chat-fs-back{ visibility:hidden; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <!-- File privati: foto e documenti con link che scadono (27/09/2026) -->
@@ -2913,6 +2967,7 @@
           </button>
         </div>
 
+        <div class="home-hero-lato">
         <button class="home-hero-cal" id="homeHeroCal" type="button" data-page="calendario">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <div class="home-hero-cal-testo">
@@ -2931,6 +2986,7 @@
         <div class="home-hero-oggi home-hero-dafare" id="homeHeroDaFareBox" hidden>
           <div class="home-hero-oggi-titolo">Da fare <span class="home-hero-dafare-n" id="homeHeroDaFareN"></span></div>
           <div id="homeHeroDaFareLista"></div>
+        </div>
         </div>
       </div>
 
@@ -4398,6 +4454,8 @@
   </main>
 
   <nav class="tabbar">
+    <!-- Da computer (28/09/2026) la barra diventa il menu a sinistra: marchio in alto e due voci in più -->
+    <div class="tabbar-marchio solo-pc" data-page="home" aria-hidden="true">E<span class="logo-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2v5l3.6 2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>N</div>
     <div class="tab-item active" data-tab="home" data-page="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
       <span>Home</span>
@@ -4409,6 +4467,14 @@
     <div class="tab-item" data-tab="cresci" data-page="cresci">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg>
       <span>Cresci</span>
+    </div>
+    <div class="tab-item solo-pc" data-tab="calendario" data-page="calendario">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Calendario</span>
+    </div>
+    <div class="tab-item solo-pc" data-tab="chat" data-page="chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.3A8 8 0 1 1 21 12z"/></svg>
+      <span>Messaggi</span>
     </div>
     <div class="tab-item" data-tab="azienda" data-page="gestisci-azienda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -15900,6 +15966,9 @@ const tabForPage = {
   "documenti-impresa":"home", "fatture-preventivi":"home", "crea-cartello":"home", "crea-lettera":"home", "carta-intestata":"home"
 };
 
+/* Da computer il menu a sinistra ha anche Calendario e Messaggi (28/09/2026) */
+const TAB_SOLO_PC = { calendario: "calendario", chat: "chat" };
+function daComputer(){ return !!(window.matchMedia && window.matchMedia("(min-width: 1024px)").matches); }
 var paginaAttuale = "home", paginaPrecedente = "home"; // var: navigateTo può partire prima di questa riga
 function navigateTo(page){
   if(page !== paginaAttuale){ paginaPrecedente = paginaAttuale; paginaAttuale = page; }
@@ -15911,7 +15980,7 @@ function navigateTo(page){
     el.classList.toggle("active", el.dataset.page === page);
   });
 
-  const activeTab = tabForPage[page] || null;
+  const activeTab = (daComputer() && TAB_SOLO_PC[page]) || tabForPage[page] || null;
   document.querySelectorAll(".tab-item[data-tab]").forEach(el => {
     el.classList.toggle("active", el.dataset.tab === activeTab);
   });
