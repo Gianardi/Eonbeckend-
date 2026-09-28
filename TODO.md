@@ -4629,3 +4629,23 @@ calendario.
   (`provaSegnaFatto`, radice comune delle parole).
 - Test: `pacchetto-27-09` (+4), `memoria-conversazione` (+4),
   `check-schema` (colonne nuove e `uso_codice`).
+
+### Versione da computer (28/09/2026)
+
+Andrea: "sì, fai la versione da computer". Tutto in un solo blocco CSS
+`@media (min-width: 1024px)` in fondo al primo `<style>`, così il telefono non
+cambia:
+- la `.tabbar` diventa il menu a sinistra (240 px) con il marchio
+  (`.tabbar-marchio`) e due voci solo da computer (`.solo-pc`: Calendario,
+  Messaggi); voce accesa con `TAB_SOLO_PC` + `daComputer()` in `navigateTo`
+  (sul telefono in Calendario resta accesa Home, come prima);
+- `main` largo 880 px (1120 in Home); Home su due colonne (`.home-hero-lato`:
+  calendario, oggi, da fare); card su 4 colonne; marchio in alto nascosto
+  (c'è nel menu), resta il tasto del profilo;
+- Messaggi come WhatsApp Web: elenco 380 px a sinistra, chat a destra
+  ("Scegli una conversazione a sinistra" quando nessuna è aperta);
+- avvisi in alto a destra (in basso coprivano la casella della chat);
+  "Nuovo cliente" dentro l'area della pagina.
+- Restano dentro il vecchio `aside.rail`/`aside.sidebar` nascosti (dati di
+  prova "Marco Rossi"): da togliere in una pulizia.
+- Test: nuovo `eval/pc.test.js` (12).
