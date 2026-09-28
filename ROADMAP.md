@@ -114,6 +114,16 @@ pagina cliente chiusi e la professione bloccata in produzione.
 - **7** Dominio e sito: **più avanti**. App negli store: **più avanti**.
   Versione da computer: **fatta il 28/09** (sezione 3).
 - **8 Microfono**: si tiene quello attuale.
+- **"Apri …" sempre con il codice** (29/09, Andrea: "apri appunti, apri
+  fornitori, controlla che tutto possa aprirsi tramite il codice e non
+  tramite AI"): **fatto**. Controllati uno a uno tutti i nomi che si vedono
+  nell'app (menu, Home e card di ogni mestiere, Menu, Cresci, La tua
+  azienda, Documenti, Impostazioni, cartelle). Mancavano: le cartelle
+  ("apri Fornitori"), "nuova cartella", la card Appunti ("apri appunti"
+  apriva la vecchia pagina), "lavori in corso", "obiettivi", "apri Face ID",
+  "apri feedback". Ora tutti col codice; una prova automatica li ripassa
+  tutti a ogni pacchetto (`eval/apri-col-codice.test.js`). Regola fissa: ogni
+  card o cartella nuova va aggiunta a quella prova.
 - **9 "Ricordami di…" negli appunti**: **fatto** (28/09): senza giorno né ora
   → appunti "da fare" con la spunta, lista "Da fare" in Home; "ho chiamato
   Pedro" / "ho finito di…" la spunta. Con un giorno o un'ora → calendario.

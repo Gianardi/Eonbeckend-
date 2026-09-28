@@ -96,7 +96,7 @@ async function main() {
     await chiedi("fammi un documento per il DURC");
     verifica("una richiesta di FARE qualcosa non si intercetta", richiesteAI === 1);
 
-    for (const [frase, pagina] of [["mi dai la carta intestata", "carta-intestata"], ["apri la lettera", "crea-lettera"], ["apri il cartello fine lavori", "crea-cartello"], ["mostrami gli appunti", "cantiere-appunti"], ["apri le foto", "cantiere-foto"], ["dammi i documenti dell'impresa", "documenti-impresa"]]) {
+    for (const [frase, pagina] of [["mi dai la carta intestata", "carta-intestata"], ["apri la lettera", "crea-lettera"], ["apri il cartello fine lavori", "crea-cartello"], ["apri le foto", "cantiere-foto"], ["dammi i documenti dell'impresa", "documenti-impresa"]]) {
       await prepara(); richiesteAI = 0;
       await chiedi(frase);
       s = await stato();
