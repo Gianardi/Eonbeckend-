@@ -4693,8 +4693,8 @@ da fare nel tasto.
   "il durc" da solo: "mi dai il DURC" deve aprire il documento DURC.
 - ~~"apri gli appunti" apre la vecchia pagina; "apri Fornitori" non apre la
   cartella~~ → sistemato il 28/09 (sezione sotto).
-- **Manca**: l'AI non conosce le cartelle; funzioni vere per SAL, urgenze,
-  DiCo, morosità (oggi le card aprono pagine esistenti).
+- **Manca**: l'AI non conosce le cartelle; morosità (SAL, urgenze e DiCo
+  fatte il 28/09, sezione "Funzioni vere dei mestieri").
 - Test: nuovo `eval/mestieri-altra.test.js` (28), `pacchetto-27-09`
   aggiornato (tasto e card Appunti), `check-schema` (colonne nuove).
 
@@ -4780,3 +4780,47 @@ da fare nel tasto.
   `eval/clienti-assemblee-app.test.js` (15); aggiornati apri-col-codice,
   check-schema; mente-calendario: ordine delle regole finte (Playwright usa
   per prima l'ultima registrata).
+
+### Funzioni vere dei mestieri: urgenze, SAL, DiCo (28/09/2026, notte)
+
+Andrea: "Ok falle tutte e tre", con la Home calma (ROADMAP 0b.9).
+- Migrazione `supabase/funzioni_mestieri.sql` (staging e produzione,
+  verificata): `tasks.urgente` (bool, default false), `tasks.client_id`;
+  tabelle `sal` (numero, percentuale 0-100, importo, note, fatturato) e
+  `dichiarazioni_conformita` (numero "n/anno", `dati` jsonb), RLS sul
+  proprietario, `deleted_at` (cestino). In `TABELLE_CON_CESTINO`,
+  `TABELLE_MIEI_DATI` e `eval/check-schema.js`.
+- App (`index.html`), nella catena di `elabora` subito dopo il controllo
+  della conversazione aperta: `provaUrgenza` → `provaSal` → `provaDico` →
+  `provaCreaCartella` → …
+  - **Urgenze**: `PAROLE_URGENZA`, `ODORE_GAS`, `capisciUrgenza` (niente "?",
+    niente altro giorno, max 140 caratteri, ora "alle 15" facoltativa, un
+    solo cliente da una parola di 4+ lettere), `quandoOggiTesto`,
+    `apriUrgenze` ("le urgenze"). `mappaImpegno` porta `urgente`/`clientId`;
+    `aggiornaHomeHero` tiene le urgenze anche passate e le mette in cima,
+    `.home-oggi-urgente`.
+  - **SAL**: `FRASE_SAL`, `capisciSal`, `creaSal` (rata = valore × (perc −
+    max precedente)/100, oppure l'importo detto), `creaFatturaSal` (scrive
+    nella casella della Home "fattura <nome> SAL avanzamento lavori <importo>
+    euro": senza "acconto", che `BLOCCA_DOC_RAPIDO` lascerebbe all'AI; un
+    solo numero → `leggiDocumentoSenzaAI`), `nuovoSalDaScheda`, sezione
+    `#scSal` nella scheda (solo edile), `aggiornaAvvisoMestiere` (box
+    `#avvisoMestiere`, un avviso alla volta: aspetta se `#comeAndatoBox` è
+    visibile; ✕ salva l'id in `eon-avviso-sal-chiuso`).
+  - **DiCo**: `FRASE_DICO`, `capisciDico`, `provaDico` (solo elettricista),
+    `apriDico` (modulo; dati impresa dall'ultima dichiarazione, altrimenti da
+    `aziendaIntestazione`/profilo; `<details>` chiuso se completi), salvataggio
+    con `window.open` **al tocco** (dopo l'`await` iPhone blocca la
+    finestra), `stampaDico` (allegato I DM 37/2008; ☒ materiali/verifiche
+    solo se spuntati da lui), `apriElencoDico`, `rigaDico`, card `#cardDico`
+    in `#page-cantiere-documenti` (nascosta se non elettricista), sezione
+    `#scDico` nella scheda, a voce "dichiarazioni di conformità", "le dico".
+  - `apriRisorsaCard` ora riporta la card in cima (`scrollTop = 0` dopo
+    averla mostrata): prima una card nuova si apriva scorsa dove era la
+    precedente.
+- Test: nuovo `eval/funzioni-mestieri.test.js` (30 controlli);
+  `meno-ai-documenti` (+2: la fattura del SAL col codice);
+  `apri-col-codice` (+ "urgenze", "dichiarazioni di conformità", "le dico").
+  Suite intera: 53 file, tutti ok.
+- Restano: morosità (condominio); allegare file (progetto, schema) alla DiCo;
+  il SAL segnato "fatturato" anche se la fattura non riesce.

@@ -78,7 +78,7 @@ pagina cliente chiusi e la professione bloccata in produzione.
 | 1 | **Registrazione bloccata** ("non mi fa registrare") | Causa trovata: in Supabase le iscrizioni sono **spente** (errore `signup_disabled`, 27/09 sera). L'app ora lo dice in italiano. Per riaprire: Supabase → Authentication → Sign In / Providers → "Allow new users to sign up" acceso. **Ma** le email di conferma oggi arrivano solo al team (serve il servizio email vero, sezione 1): senza, chi si iscrive non riesce a confermare. | [Andrea] interruttore · [insieme] email |
 | 2 | **Chiunque, infinite persone?** | Oggi **no** (iscrizioni spente + email solo al team). Con tutto aperto: una persona per email, conferma obbligatoria, limite AI 20 richieste ogni 10 minuti per account; **manca** un captcha (Cloudflare Turnstile, gratis) e un tetto di spesa AI giornaliero per account. Da fare **prima** di aprire a tutti. | [Claude] |
 | 3 | **"Chiunque voglia organizzare la propria attività"** → nome più bello, mini questionario, cartelle | **Fatto** (28/09): "Altra attività", questionario a 3 tocchi, cartelle proposte (0b.1). | fatto |
-| 4 | **Tratti distintivi per mestiere** (edile, idraulico, elettricista, condominio) | **Fatto** (28/09): colore, icona, esempio a voce e card per mestiere (0b.2). Mancano le funzioni dedicate (SAL, urgenze, DiCo, morosità). | fatto · [Claude] il resto |
+| 4 | **Tratti distintivi per mestiere** (edile, idraulico, elettricista, condominio) | **Fatto** (28/09): colore, icona, esempio a voce e card per mestiere (0b.2). Funzioni vere **urgenze, SAL, DiCo fatte il 28/09** (0b.9). Manca la morosità (condominio, dopo il collegamento al gestionale). | fatto · morosità dopo |
 | 5 | **Percorsi con la mappa** | Oggi "Portami lì" apre Mappe/Google Maps. Proposta: **il giro della giornata** su una mappa dentro EON (tappe in ordine, tempi, "Avvia" apre il navigatore). Traffico vero: Google Maps (account di Andrea, gratis fino a qualche migliaio di calcoli al mese, stima). | [insieme] |
 | 6 | **Fattura elettronica valida con un tocco o a voce. Gratis?** | Possibile: EON crea l'XML e lo manda allo SdI tramite un intermediario accreditato (strada A, sezione 4). **Non gratis ma pochi centesimi** a fattura (Openapi da ~0,015-0,07 € l'invio + conservazione ~0,035 €, listini da riverificare). Serve: delega dell'artigiano all'intermediario (una volta), dati completi del cliente (CF/P.IVA, codice destinatario o PEC, indirizzo: EON li chiede se mancano), regime giusto (forfettario, bollo, ritenuta…). Il portale gratis dell'Agenzia non si collega alle app. Il 27/09 si era scelta la strada B (collegarsi a Fatture in Cloud): **da ridecidere** — la A è l'argomento di vendita "EON fa la fattura vera". **28/09: dopo la costituzione della società**, piano completo in 0b.4. | [Andrea] società · poi [insieme] |
 | 7 | **Sito di presentazione** con "Entra in EON" | Da fare: una pagina sul dominio (eon.it o simile) con cosa fa EON, prova gratuita, "Entra". Serve il dominio. | [Andrea] dominio · [Claude] sito |
@@ -177,9 +177,9 @@ nome, e da allora (28/09) anche il **titolo della pagina aperta** ("Foto
 impianti", "Condomini"…) e **la voce**: "apri i condomini", "apri gli
 interventi", "apri gli impianti", "apri le certificazioni", "apri le foto
 dei quadri" aprono la pagina senza AI.
-**Manca**: **SAL** (edile),
-**urgenze** (idraulico), **dichiarazione di conformità** (elettricista) e
-**morosità** (condominio) come funzioni vere sono ancora da fare.
+**SAL** (edile), **urgenze** (idraulico) e **dichiarazione di conformità**
+(elettricista): **fatte il 28/09**, vedi 0b.9. **Manca** la **morosità**
+(condominio): rimandata a dopo il collegamento al gestionale (0b.5).
 
 Proposta originale:
 Stessa app, ma ogni mestiere si riconosce subito:
@@ -252,6 +252,54 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
+
+### 0b.9 Funzioni vere dei mestieri: urgenze, SAL, DiCo — FATTO il 28/09 (notte)
+Andrea: "vorrei mantenere un tono semplice e calmo, non incasinare la testa
+appena entri nell'app". **Regola decisa**: la Home non cambia; le funzioni
+stanno **dentro le card che ci sono già**, si chiamano **a voce** e in Home
+compare **al massimo un avviso alla volta**, solo quando c'è qualcosa da fare.
+Tutto col codice, niente AI.
+- **Urgenze** (pensate per l'idraulico, valgono per tutti): "perdita urgente
+  da Bianchi", "emergenza allagamento cantina Neri alle 15" → impegno di
+  oggi **in cima a "Oggi" con il segno rosso "Urgente"**, legato al cliente;
+  resta finché non è fatto (anche se l'ora è passata). "Le urgenze" apre
+  l'elenco. **Odore di gas** → nessun intervento da fissare, card di
+  sicurezza (chiudere il gas, aprire le finestre, niente interruttori o
+  fiamme, uscire e chiamare il pronto intervento gas o il 112). Con un altro
+  giorno ("domani"), una domanda o due clienti possibili → decide l'AI.
+- **SAL** (edile): "SAL 30% cantiere Rossi" = lavori al 30%. La rata è la
+  parte nuova del **valore del lavoro** scritto nel cliente (30% di 12.000 =
+  3.600; il SAL dopo al 50% = 20% = 2.400), oppure l'importo detto ("SAL 50%
+  Rossi 2.000 euro"). Nella **scheda del cliente** la sezione SAL (numero,
+  %, importo, fatturato o no, "Crea fattura", "+ Nuovo SAL"). In Home
+  l'avviso **"SAL da fatturare"** (con "Crea fattura", "Apri la scheda", ✕
+  "non ora"); se c'è già "Com'è andato?", aspetta. "Crea fattura" fa la
+  fattura col percorso del codice ("fattura Mario Rossi SAL avanzamento
+  lavori 3600 euro").
+- **Dichiarazione di conformità** (elettricista, DM 37/2008): "fai la DiCo
+  per l'impianto Verdi" → modulo già compilato (committente e indirizzo dal
+  cliente, dati dell'impresa ripresi dall'ultima dichiarazione, norma CEI
+  64-8, allegati) → **documento da stampare / salvare in PDF** sul modello
+  dell'allegato I, numerato (1/2026, 2/2026…), salvato nella **scheda del
+  cliente** e nella card **"Dichiarazione di conformità"** dentro
+  "Certificazioni e documenti". "Dichiarazioni di conformità" a voce apre
+  l'elenco. Le due spunte che contano (materiali adatti, impianto
+  controllato con esito positivo) **le mette l'elettricista**: EON non le
+  segna al suo posto (regola già scritta per l'AI: la DiCo la firma lui).
+- Database: colonne `tasks.urgente`, `tasks.client_id`; tabelle `sal` e
+  `dichiarazioni_conformita` (`supabase/funzioni_mestieri.sql`, staging e
+  produzione, solo aggiunte, con cestino).
+- **Da sapere (onesto)**:
+  - la DiCo è una **bozza sul modello di legge**: va fatta controllare a un
+    elettricista vero prima di darla ai clienti (testo dell'allegato I
+    riportato a memoria, non confrontato riga per riga con la Gazzetta);
+    mancano progetto e schema come file allegati (si segnano solo);
+  - il SAL "fatturato" si segna appena si tocca "Crea fattura", anche se la
+    fattura poi non va a buon fine (raro; si può ricreare dalla scheda);
+  - la fattura del SAL è quella di EON, **non** la fattura elettronica
+    (0b.4);
+  - l'importo del SAL viene dal "valore" del cliente: se è sbagliato, è
+    sbagliata la rata.
 
 ### 0b.8 Clienti e frasi col codice, assemblee vere, "Com'è andato?" — FATTO il 28/09 (sera)
 Andrea: "Scrivi a Machi domani alle 10: basta Machi, codice e non AI. Se ci
