@@ -261,8 +261,8 @@ async function main() {
       righe: [...document.querySelectorAll("#apLista .ap-testo")].map((t) => t.textContent),
       azioni: [...document.querySelectorAll(".ap-azioni button")].map((b) => b.textContent),
     }));
-    verifica("una cartella si apre come la card Appunti, con solo i suoi appunti e Rinomina / Elimina",
-      cartella.titolo === "Fornitori" && cartella.righe.join() === "Chiamare la Peroni" && cartella.azioni.join() === "Aggiungi foto,Rinomina,Elimina cartella", JSON.stringify(cartella));
+    verifica("una cartella si apre come la card Appunti, con solo i suoi appunti, «‹ Mente» (30/09) e Rinomina / Elimina",
+      cartella.titolo === "Fornitori" && cartella.righe.join() === "Chiamare la Peroni" && cartella.azioni.join() === "‹ Mente,Aggiungi foto,Rinomina,Elimina cartella", JSON.stringify(cartella));
     await page.fill("#apCampo", "listino nuovo dal 1 ottobre");
     await page.keyboard.press("Enter");
     await page.waitForTimeout(200);
