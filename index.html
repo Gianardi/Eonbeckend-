@@ -13053,6 +13053,13 @@ function rispondiSuiDati(l){
   if(l.tema === "agenda"){
     const libero = capisciDisponibilita(l.testo);
     if(libero) return libero;
+    // "Quando devo vedere Belle?": i prossimi impegni con quel cliente (29/09/2026)
+    if(l.cliente && !(l.quando && l.quando.giornoIso)){
+      const nome = EonLettore.norm(l.cliente.name).split(" ").filter(w => w.length > 1);
+      const voci = impegniDaAnnullare({ data: null, ora: null, nome: nome.length > 1 ? [nome[nome.length - 1]] : nome, oggetto: null }).filter(v => EonLettore.norm(v.titolo).split(" ").some(w => nome.includes(w)));
+      if(!voci.length) return { titolo: l.cliente.name, testo: "Non hai impegni in programma con " + l.cliente.name + "." };
+      return { titolo: l.cliente.name, testo: voci.slice(0, 5).map(v => "**" + quandoBreve(v.quando) + "** – " + v.titolo).join("\n") };
+    }
     const data = l.quando && l.quando.giornoIso ? new Date(l.quando.giornoIso + "T00:00:00") : (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
     const quando = l.quando && l.quando.etichetta || "oggi";
     const voci = impegniDelGiorno(data);
@@ -14544,7 +14551,14 @@ const METEO_URL = "https://eonbeckend.vercel.app/api?action=meteo";
 
 function capisciRichiestaMeteo(testo){
   const t = String(testo || "").trim().toLowerCase().replace(/[?!.]+$/, "").replace(/\s+/g, " ");
-  const m = t.match(TRIGGER_METEO);
+  let m = t.match(TRIGGER_METEO);
+  /* Detto dentro un discorso (29/09/2026): "Domani ho un lavoro all'aperto.
+     Ho problemi con il meteo?", "pioverà sabato sul cantiere?" → il meteo di
+     quel giorno, qui (una domanda, con il meteo o la pioggia nominati) */
+  if(!m && /\?\s*$/.test(String(testo || "").trim()) && /\b(?:meteo|pioggia|piov\w*|nev\w*|maltempo|temporal\w*|vento)\b/.test(t) && t.length <= 160){
+    const giorno = (t.match(/\b(oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)\b/) || [])[1] || "";
+    m = [t, " " + giorno + " "];
+  }
   if(!m) return null;
   let resto = " " + (m[1] || "") + " ";
   let giorno = "oggi";
@@ -14658,11 +14672,13 @@ function provaMeteo(testo, viaVoce){
 /* Tempi di viaggio: col traffico serve Google Maps (da collegare, con
    un account Google Cloud). Intanto EON apre subito il percorso nelle
    Mappe del telefono, che mostrano il tempo col traffico vero. */
-const TRIGGER_PERCORSO = /^(?:quanto (?:tempo )?ci metto|ci metto di (?:più|piu|meno)|quanto ci vuole|quanto tempo ci vuole|quanto è lontan[oa]|quanto e lontan[oa]|come arrivo|strada per|percorso per|portami)\s+(.*)$/i;
+const TRIGGER_PERCORSO = /^(?:quanto (?:tempo )?ci metto|ci metto di (?:più|piu|meno)|quanto ci vuole|quanto tempo ci vuole|quanto è lontan[oa]|quanto e lontan[oa]|come arrivo|strada per|percorso per|portami|devo andare|dobbiamo andare|come ci arrivo|come si arriva|indicazioni per)\s+(.*)$/i;
 function capisciRichiestaPercorso(testo){
   const t = String(testo || "").trim().replace(/[?!.]+$/, "").replace(/\s+/g, " ");
   const m = t.match(TRIGGER_PERCORSO);
   if(!m) return null;
+  // "Devo andare in via Roma 36?" sì; "devo andare da Rossi domani alle 9" è un appuntamento
+  if(/^(?:devo|dobbiamo)\s+andare/i.test(t) && (!/\?\s*$/.test(String(testo || "").trim()) || /\b(?:oggi|domani|dopodomani|alle|ore|luned|marted|mercoled|gioved|venerd|sabato|domenica|stasera|stamattina)\b/i.test(t))) return null;
   let resto = m[1].replace(/^(?:ad? arrivare|per arrivare|ad andare|per andare|a andare)\s+/i, "").replace(/^(?:a|ad|in|al|alla|allo|fino a|verso|da qui a)\s+/i, "");
   const mete = resto.split(/\s+(?:o|oppure|o a|o ad|o in)\s+/i).map(x => x.replace(/^(?:a|ad|in|al|alla|allo)\s+/i, "").trim()).filter(Boolean);
   return mete.length && mete.length <= 3 ? mete : null;
@@ -14735,7 +14751,24 @@ function provaPercorso(testo){
 const TRIGGER_FOTO_RAPIDA = /^(?:mi\s+)?(?:fai|fammi|fare|scatta|scattami|scatto|prendi|fotografa|fotografami)\s+(?:(?:una|la|le|delle|un'?|qualche)\s+)?(?:foto|fotografia|fotografie)?\b\s*(.*)$/;
 let fotoRapidaDaSalvare = null; // { clienteId, nota } per il prossimo scatto
 function capisciFotoRapida(testo){
-  const t = String(testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  let t = String(testo || "").trim().toLowerCase().replace(/[.!?]+$/, "");
+  /* "Fammi la foto a questo e creami il cantiere Pinko", "fai la foto al
+     cantiere e crea il cliente Pinco Pallino" (29/09/2026): la foto per un
+     cliente nuovo (o già esistente con quel nome) */
+  let creaCliente = null;
+  const cc = t.match(/^(.*\bfot\w*.*?)\s*,?\s+e\s+(?:crea|creami|aggiungi|aggiungimi)\s+(?:(?:il|un|anche\s+il)\s+)?(?:nuovo\s+)?(?:cliente|cantiere)\s+([a-zà-ù' ]{2,40})$/);
+  if(cc){
+    const nome = cc[2].trim().split(/\s+/);
+    if(!nome.length || nome.length > 3) return null;
+    creaCliente = nome.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    t = cc[1].trim();
+  }
+  const letta = capisciFotoRapidaSemplice(t);
+  if(!letta || !creaCliente) return letta;
+  const esiste = clients.find(c => nomeChiave(c.name) === nomeChiave(creaCliente));
+  return { ...letta, clienteId: esiste ? esiste.id : null, clienteNome: creaCliente, creaCliente: esiste ? null : creaCliente, nota: letta.nota.replace(/^(?:Questo|Questa)$/i, "") };
+}
+function capisciFotoRapidaSemplice(t){
   if(!/\bfot/.test(t) || /\b(vedere|mostra|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|recupera)\b/.test(t)) return null;
   const m = t.match(TRIGGER_FOTO_RAPIDA);
   if(!m) return null;
@@ -14755,6 +14788,23 @@ function provaFotoImmediata(testo, viaVoce){
   if(!foto) return false;
   fotoRapidaDaSalvare = foto;
   const input = document.getElementById("fotoRapidaInput");
+  /* Con un cliente da creare: prima il cliente, poi un tocco su "Scatta la
+     foto" (il telefono apre la fotocamera solo subito dopo un tocco) */
+  if(foto.creaCliente){
+    (async () => {
+      const c = await creaClienteDalCodice(foto.creaCliente);
+      if(!c){ showAIToast("Non salvato", "Non sono riuscita a creare " + foto.creaCliente + ": riprova."); return; }
+      foto.clienteId = c.id; foto.creaCliente = null;
+      fotoRapidaDaSalvare = foto;
+      const corpo = document.createElement("div");
+      corpo.className = "foto-rapida-card";
+      corpo.innerHTML = `<button type="button" class="foto-rapida-btn" id="fotoRapidaScatta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span>Scatta la foto</span></button><p class="foto-rapida-nota"></p>`;
+      corpo.querySelector(".foto-rapida-nota").textContent = "Cliente nuovo: " + c.name + (foto.nota ? " · " + foto.nota : "");
+      corpo.querySelector("#fotoRapidaScatta").addEventListener("click", () => input.click());
+      apriRisorsaCard("Foto", corpo);
+    })();
+    return true;
+  }
   if(!viaVoce){ input.click(); return true; } // scritta e inviata col tasto: fotocamera subito
   const corpo = document.createElement("div");
   corpo.className = "foto-rapida-card";

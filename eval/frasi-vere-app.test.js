@@ -166,6 +166,9 @@ async function main() {
         const si = [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, sposta$/.test(b.textContent)) || document.getElementById("annullaConferma");
         let confermato = "";
         if (si && !si.disabled) { confermato = document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); si.click(); await new Promise((r) => setTimeout(r, 250)); }
+        await new Promise((r) => setTimeout(r, 120));
+        const scatta = document.getElementById("fotoRapidaScatta");
+        if (scatta) { confermato = confermato || document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); scatta.click(); }
         const landing = [...document.querySelectorAll(".ai-landing-overlay")].filter((o) => o.style.display !== "none" && o.offsetParent !== null).map((o) => o.textContent.replace(/\s+/g, " ").trim()).join(" ");
         return {
           card: (document.getElementById("risorsaOverlay").style.display === "flex" ? document.getElementById("risorsaTitolo").textContent + " | " + document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 140) : "") + (confermato ? " [confermato: " + confermato + "]" : ""),
