@@ -44,6 +44,7 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
     const errori = [];
     page.on("pageerror", (e) => errori.push(e.message));
+    await page.addInitScript(() => { try { localStorage.setItem("eon-scorri-accennato", "1"); } catch (e) {} }); // niente accenno dello scorrimento: disturberebbe le misure
     await page.addInitScript(preparaPagina);
     await page.route("**/api?action=*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "{}" }));
     await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: "networkidle" });

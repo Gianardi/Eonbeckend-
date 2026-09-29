@@ -75,7 +75,20 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
-**Fatto il 30/09, nel prossimo pacchetto:** il cervello perfezionato (0b.17):
+**Fatto il 30/09 (pomeriggio), nel prossimo pacchetto:** scorri a sinistra
+per eliminare in TUTTI gli elenchi (Andrea: "il tester non la vede. Io la voglio
+in tutte le funzioni"): impegni (Oggi), clienti (con la sua chat), entrate,
+pagamenti, documenti dell'impresa, assemblee, urgenze, dichiarazioni di
+conformità e, nella scheda del cliente, impegni, SAL, DiCo e appunti; oltre a
+chat, messaggi, calendario, documenti e Mente che c'erano già. Sempre nel
+Cestino con "Annulla". **La prima volta** la prima riga "accenna" da sola lo
+scorrimento e torna (come Mail su iPhone), così si scopre che c'è. Restano col
+tasto (non scorrono) le griglie: foto (la ✕) e cartelle (dal menu della
+cartella). Prova: `eval/scorri-ovunque.test.js` (13 controlli). Da verificare
+sul telefono vero di Simone: se ancora non lo vede, chiudere e riaprire EON
+(versione vecchia in memoria).
+
+**Fatto il 30/09, già online (PR #141):** il cervello perfezionato (0b.17):
 frasario con ~19 mila frasi nuove, cervello da solo 98% su 991 frasi mai viste
 (99,5% quando è sicuro), arbitro nell'app, "Cosa faccio?" con i tasti quando
 non è sicuro; giro 12 alla cieca 58/60 (97%) al primo colpo.

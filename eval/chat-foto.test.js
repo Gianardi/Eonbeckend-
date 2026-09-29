@@ -36,6 +36,7 @@ async function main() {
     page.on("pageerror", (e) => errori.push(e.message));
     const analisi = [];
     await page.route("https://eonbeckend.vercel.app/api?action=analizza_messaggio", (route) => { analisi.push(JSON.parse(route.request().postData() || "{}")); route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ azioni: [] }) }); });
+    await page.addInitScript(() => { try { localStorage.setItem("eon-scorri-accennato", "1"); } catch (e) {} }); // niente accenno dello scorrimento: disturberebbe le misure
     await page.addInitScript((PUB) => {
       window.__caricati = []; window.__inseriti = [];
       const catena = (tabella) => {

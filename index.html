@@ -1459,7 +1459,7 @@
   /* flex-shrink:0: dentro la chat (una colonna che scorre) una riga con
      overflow:hidden si lascerebbe schiacciare quando i messaggi sono tanti */
   .scorri-wrap{ position:relative; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; flex-shrink:0; }
-  .scorri-contenuto{ position:relative; z-index:1; touch-action:pan-y; }
+  .scorri-contenuto{ position:relative; z-index:1; touch-action:pan-y; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
   .chat-list .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
   .doc-scorri{ margin:6px; }
   .doc-scorri .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
@@ -6603,7 +6603,7 @@ function renderAssemblee(){
       </div>`;
     row.querySelector(".row-name").textContent = a.condominio;
     row.addEventListener("click", () => apriSchedaAssemblea(a));
-    wrap.appendChild(row);
+    wrap.appendChild(a.id ? rendiScorrevole(row, () => cestinaConAnnulla({ array: assemblee, voce: a, tabella: "assemblee", ridisegna: () => { renderAssemblee(); renderCalendar(); }, titolo: "Assemblea nel cestino", testo: a.condominio })) : row);
   });
 }
 /* Nuova assemblea, a tocchi: condominio, giorno, ora, tipo */
@@ -7581,8 +7581,10 @@ function renderTasks(){
   listAI.innerHTML = ""; listUser.innerHTML = "";
   impegniInConferma.forEach(p => listUser.appendChild(buildImpegnoInConfermaRow(p)));
   const sorted = tasks.slice().sort((a,b) => a.time.localeCompare(b.time));
-  sorted.filter(t => t.owner === "ai").forEach(t => listAI.appendChild(buildTaskRow(t)));
-  sorted.filter(t => t.owner === "user").forEach(t => listUser.appendChild(buildTaskRow(t)));
+  // scorri a sinistra per eliminare (30/09/2026)
+  const rigaTask = t => t.id ? rendiScorrevole(buildTaskRow(t), () => eliminaVoceCalendario({ tabella: "tasks", id: t.id, title: t.title })) : buildTaskRow(t);
+  sorted.filter(t => t.owner === "ai").forEach(t => listAI.appendChild(rigaTask(t)));
+  sorted.filter(t => t.owner === "user").forEach(t => listUser.appendChild(rigaTask(t)));
   renderSummary();
   saveState("eon-tasks", tasks);
 }
@@ -7706,7 +7708,7 @@ function renderClientArchive(){
         : '<div class="empty-hint"><b>Nessun cliente ancora</b>Dimmelo qui sopra a voce, oppure tocca "Nuovo cliente".</div>';
     return;
   }
-  scelti.forEach(c => wrap.appendChild(buildClientCard(c)));
+  scelti.forEach(c => wrap.appendChild(c.id ? rendiScorrevole(buildClientCard(c), () => eliminaClienteConAnnulla(c)) : buildClientCard(c)));
 }
 
 document.getElementById("clientiHeroCampo").addEventListener("input", renderClientArchive);
@@ -8825,7 +8827,7 @@ function renderPayments(){
       renderPayments();
     });
     row.addEventListener("click", () => openSheet("pagamento", p));
-    wrap.appendChild(row);
+    wrap.appendChild(p.id ? rendiScorrevole(row, () => cestinaConAnnulla({ array: payments, voce: p, tabella: "payments", ridisegna: renderPayments, titolo: "Pagamento nel cestino", testo: p.supplier })) : row);
   });
   document.getElementById("payCount").textContent = payments.length;
   const totalDue = payments.filter(p => p.status !== "pagato").reduce((s,p)=>s+p.amount,0);
@@ -8857,7 +8859,7 @@ function renderIncomes(){
       <div class="row-value">€${i.amount.toLocaleString("it-IT")}</div>
     `;
     row.addEventListener("click", () => openSheet("entrata", i));
-    wrap.appendChild(row);
+    wrap.appendChild(i.id ? rendiScorrevole(row, () => cestinaConAnnulla({ array: incomes, voce: i, tabella: "incomes", ridisegna: () => { renderIncomes(); renderSummary(); }, titolo: "Entrata nel cestino", testo: i.client + " · €" + Number(i.amount || 0).toLocaleString("it-IT") })) : row);
   });
   document.getElementById("incCount").textContent = incomes.length;
   document.getElementById("incTotal").textContent = "€" + incomes.reduce((s,i)=>s+i.amount,0).toLocaleString("it-IT");
@@ -9722,7 +9724,44 @@ function rendiScorrevole(contenuto, onElimina){
     chiudi();
     onElimina();
   });
+  /* La prima volta che si vede un elenco scorrevole, la prima riga "accenna"
+     lo scorrimento e torna al suo posto (come Mail su iPhone): così si scopre
+     che si può eliminare scorrendo (30/09/2026: il tester non lo vedeva). */
+  if(!scorriAccennato){
+    setTimeout(() => {
+      if(scorriAccennato || !wrap.isConnected || !wrap.offsetParent || base) return;
+      const r = wrap.getBoundingClientRect();
+      if(r.top < 0 || r.bottom > window.innerHeight || r.height < 20) return;
+      scorriAccennato = true;
+      try{ localStorage.setItem("eon-scorri-accennato", "1"); }catch(_){}
+      sposta(-56, true);
+      setTimeout(() => { if(!base) sposta(0, true); }, 750);
+    }, 900);
+  }
   return wrap;
+}
+let scorriAccennato = (() => { try{ return localStorage.getItem("eon-scorri-accennato") === "1"; }catch(_){ return true; } })();
+
+/* Nel cestino con "Annulla", per ogni elenco (30/09/2026, Andrea: "la voglio
+   in tutte le funzioni"): toglie la voce, ridisegna, la segna nel Cestino
+   (deleted_at); "Annulla" la rimette al suo posto. */
+async function cestinaConAnnulla({ array, voce, tabella, ridisegna, titolo, testo }){
+  const idx = array.indexOf(voce);
+  if(idx < 0) return;
+  array.splice(idx, 1);
+  ridisegna();
+  if(isDbReady() && voce.id) await dbDelete(tabella, voce.id);
+  showAIToastConAnnulla(titolo || "Nel cestino", escapeHtml(testo || ""), async () => {
+    array.splice(Math.min(idx, array.length), 0, voce);
+    if(isDbReady() && voce.id) await dbRestore(tabella, voce.id);
+    ridisegna();
+  });
+}
+/* Un cliente dalla lista Clienti: con la sua chat, come dalla lista delle chat */
+async function eliminaClienteConAnnulla(c){
+  const chat = chatDelCliente(c);
+  if(chat) return eliminaChatConAnnulla(chat);
+  return cestinaConAnnulla({ array: clients, voce: c, tabella: "clients", ridisegna: ridisegnaClientiEChat, titolo: "Cliente nel cestino", testo: c.name });
 }
 
 /* Messaggio nel cestino con "Annulla" (niente domanda prima). */
@@ -11120,7 +11159,7 @@ function renderCantiereAppunti(){
 
     riga.appendChild(corpo);
     riga.appendChild(elimina);
-    wrap.appendChild(riga);
+    wrap.appendChild(a.id ? rendiScorrevole(riga, () => cancellaAppuntiScelti([a])) : riga);
   });
 }
 
@@ -11394,7 +11433,7 @@ function renderCantiereDocumenti(){
 
     card.appendChild(icon); card.appendChild(body); card.appendChild(elimina);
     card.addEventListener("click", () => apriFile(d.url));
-    wrap.appendChild(card);
+    wrap.appendChild(d.id ? rendiScorrevole(card, () => cestinaConAnnulla({ array: cantiereDocumenti, voce: d, tabella: "cantiere_documenti", ridisegna: () => { aggiornaCantiereSottotitoli(); renderCantiereDocumenti(); }, titolo: "Documento nel cestino", testo: d.nome })) : card);
   });
 }
 
@@ -12318,7 +12357,8 @@ function apriUrgenze(){
     const cliente = t.clientId ? (clients.find(c => c.id === t.clientId) || {}).name : null;
     testo.textContent = t.title + (cliente ? " · " + cliente : "");
     r.appendChild(u); r.appendChild(testo);
-    corpo.appendChild(r);
+    const w = t.id ? rendiScorrevole(r, () => { w.remove(); eliminaVoceCalendario({ tabella: "tasks", id: t.id, title: t.title }); }) : r;
+    corpo.appendChild(w);
   });
   apriRisorsaCard("Urgenze", corpo);
 }
@@ -12512,7 +12552,7 @@ function apriElencoDico(){
   lista.className = "sc-lista";
   const tutte = dichiarazioni.slice().sort((a, b) => String(b.created).localeCompare(String(a.created)));
   if(!tutte.length) lista.innerHTML = '<div class="sc-vuoto">Nessuna dichiarazione. Dimmi "fai la DiCo per l\'impianto Verdi".</div>';
-  tutte.forEach(x => lista.appendChild(rigaDico(x, true)));
+  tutte.forEach(x => { const r = rigaDico(x, true); const w = x.id ? rendiScorrevole(r, () => { w.remove(); cestinaConAnnulla({ array: dichiarazioni, voce: x, tabella: "dichiarazioni_conformita", ridisegna: () => {}, titolo: "Dichiarazione nel cestino", testo: "n. " + x.numero }); }) : r; lista.appendChild(w); });
   const nuova = document.createElement("button");
   nuova.type = "button"; nuova.className = "sc-sal-nuovo"; nuova.textContent = "+ Nuova dichiarazione";
   nuova.addEventListener("click", () => { chiudiRisorsaCard(); apriDico(null, ""); });
@@ -16890,12 +16930,12 @@ const numeroPerLink = tel => {
 function impegniDelCliente(c){
   const voci = [];
   const chat = chatDelCliente(c);
-  if(chat) chat.messages.forEach(m => { if(m.eventType === "appt" && !m.annullato) voci.push({ titolo: m.title || "Appuntamento", quando: m.text || m.time || "" }); });
+  if(chat) chat.messages.forEach(m => { if(m.eventType === "appt" && !m.annullato) voci.push({ titolo: m.title || "Appuntamento", quando: m.text || m.time || "", tabella: "messages", id: m.id }); });
   const parole = c.name.toLowerCase().split(/\s+/).filter(p => p.length > 2);
   tasks.forEach(t => {
     if(t.status === "done" || t.status === "annullato") return;
     const titolo = String(t.title || "").toLowerCase();
-    if(parole.some(p => new RegExp("\\b" + p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(titolo))) voci.push({ titolo: t.title, quando: t.time || "" });
+    if(parole.some(p => new RegExp("\\b" + p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(titolo))) voci.push({ titolo: t.title, quando: t.time || "", tabella: "tasks", id: t.id });
   });
   return voci;
 }
@@ -16985,7 +17025,9 @@ function mostraSchedaCliente(c, opzioni){
   if(impegni.length) impegni.slice(0, 5).forEach(i => {
     const r = document.createElement("div"); r.className = "sc-riga";
     r.innerHTML = `<span class="sc-riga-punto"></span><span class="sc-riga-testo">${escapeHtml(i.titolo)}</span><span class="sc-riga-quando">${escapeHtml(i.quando)}</span>`;
-    listaImpegni.appendChild(r);
+    // scorri a sinistra per eliminare, anche nella scheda (30/09/2026)
+    const w = i.id ? rendiScorrevole(r, () => { w.remove(); eliminaVoceCalendario({ tabella: i.tabella, id: i.id, title: i.titolo }); }) : r;
+    listaImpegni.appendChild(w);
   });
   else listaImpegni.innerHTML = '<div class="sc-vuoto">Nessun impegno. Dimmi "domani alle 9 sopralluogo" qui sotto.</div>';
   corpo.appendChild(listaImpegni);
@@ -17007,7 +17049,8 @@ function mostraSchedaCliente(c, opzioni){
         b.addEventListener("click", () => creaFatturaSal(x));
         r.appendChild(b);
       }
-      listaSal.appendChild(r);
+      const w = x.id ? rendiScorrevole(r, () => { w.remove(); cestinaConAnnulla({ array: salLista, voce: x, tabella: "sal", ridisegna: () => aggiornaAvvisoMestiere(), titolo: "SAL nel cestino", testo: "SAL " + x.numero + " · " + c.name }); }) : r;
+      listaSal.appendChild(w);
     });
     const nuovo = document.createElement("button");
     nuovo.type = "button"; nuovo.className = "sc-sal-nuovo"; nuovo.textContent = "+ Nuovo SAL";
@@ -17023,7 +17066,7 @@ function mostraSchedaCliente(c, opzioni){
     listaDico.className = "sc-lista"; listaDico.id = "scDico";
     const sue = dicoDelCliente(c.id);
     if(!sue.length) listaDico.innerHTML = '<div class="sc-vuoto">Nessuna. Dimmi "fai la DiCo per ' + escapeHtml(c.name) + '".</div>';
-    sue.forEach(x => listaDico.appendChild(rigaDico(x, false)));
+    sue.forEach(x => { const r = rigaDico(x, false); const w = x.id ? rendiScorrevole(r, () => { w.remove(); cestinaConAnnulla({ array: dichiarazioni, voce: x, tabella: "dichiarazioni_conformita", ridisegna: () => {}, titolo: "Dichiarazione nel cestino", testo: "n. " + x.numero + " · " + c.name }); }) : r; listaDico.appendChild(w); });
     const nuova = document.createElement("button");
     nuova.type = "button"; nuova.className = "sc-sal-nuovo"; nuova.textContent = "+ Nuova dichiarazione";
     nuova.addEventListener("click", () => { chiudiRisorsaCard(); apriDico(c, ""); });
@@ -17041,7 +17084,7 @@ function mostraSchedaCliente(c, opzioni){
     elenco.slice(0, 5).forEach(a => {
       const r = document.createElement("div"); r.className = "sc-riga";
       r.innerHTML = `<span class="sc-riga-punto appunto"></span><span class="sc-riga-testo">${escapeHtml(a.testo)}</span><span class="sc-riga-quando">${a.created ? new Date(a.created).toLocaleDateString("it-IT", { day: "2-digit", month: "short" }) : ""}</span>`;
-      listaAppunti.appendChild(r);
+      listaAppunti.appendChild(a.id ? rendiScorrevole(r, async () => { await cancellaAppuntiScelti([a]); disegnaAppunti(); }) : r);
     });
   };
   disegnaAppunti();
