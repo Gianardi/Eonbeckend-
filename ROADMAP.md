@@ -82,8 +82,12 @@ quanti appunti hanno e "+ Cartella" (nasce e si apre); dentro una cartella
 "‹ Mente" per tornare; toccando un appunto, "Cartella: Mente / … / + Nuova" lo
 sposta con un tocco (con "Annulla"). A voce resta "segna in Fornitori di…".
 Prova: `eval/mente-cartelle.test.js` (8 controlli, 2 foto).
-**Proposta in attesa di Andrea:** tasto fotocamera nella Home accanto al
-microfono (più piccolo, solo edile/idraulico/elettricista/amministratore).
+**Fatto il 30/09 (sera), nel prossimo pacchetto:** nella Home "Parla" e "Foto",
+due tasti uguali con la scritta (Andrea ha scelto la simulazione D fra 4:
+solo microfono / fotocamera piccola / grande uguale / uguali con scritta).
+Solo edile, idraulico, elettricista e amministratore; "La mia attività" resta
+col solo microfono grande. Foto = come "fai una foto": scatti, poi EON chiede
+di quale cliente è. Prova: `eval/home-foto.test.js` (7 controlli, foto).
 
 **Fatto il 30/09 (pomeriggio), già online (PR #142):** scorri a sinistra
 per eliminare in TUTTI gli elenchi (Andrea: "il tester non la vede. Io la voglio
