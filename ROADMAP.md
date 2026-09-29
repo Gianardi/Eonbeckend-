@@ -75,7 +75,17 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
-**Fatto il 30/09 (pomeriggio), nel prossimo pacchetto:** scorri a sinistra
+**Fatto il 30/09 (sera), nel prossimo pacchetto:** le cartelle nella Mente
+(Andrea: "se uno crea appunti deve poterli raggruppare per cartelle,
+semplicemente"). Come le Note di iPhone: in alto nella Mente le cartelle con
+quanti appunti hanno e "+ Cartella" (nasce e si apre); dentro una cartella
+"‹ Mente" per tornare; toccando un appunto, "Cartella: Mente / … / + Nuova" lo
+sposta con un tocco (con "Annulla"). A voce resta "segna in Fornitori di…".
+Prova: `eval/mente-cartelle.test.js` (8 controlli, 2 foto).
+**Proposta in attesa di Andrea:** tasto fotocamera nella Home accanto al
+microfono (più piccolo, solo edile/idraulico/elettricista/amministratore).
+
+**Fatto il 30/09 (pomeriggio), già online (PR #142):** scorri a sinistra
 per eliminare in TUTTI gli elenchi (Andrea: "il tester non la vede. Io la voglio
 in tutte le funzioni"): impegni (Oggi), clienti (con la sua chat), entrate,
 pagamenti, documenti dell'impresa, assemblee, urgenze, dichiarazioni di
