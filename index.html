@@ -2540,6 +2540,15 @@
 <!-- File privati: foto e documenti con link che scadono (27/09/2026) -->
 <script src="/file-privati.js"></script>
 <script src="/lettore.js"></script>
+<script>
+/* Il modello di EON (29/09/2026): piccolo, nostro, dentro l'app. Si carica
+   dopo l'avvio, senza bloccare niente; finché non c'è, decidono le regole. */
+(function(){
+  if(typeof EonLettore === "undefined") return;
+  const carica = () => fetch("/modello-eon.json").then(r => r.ok ? r.json() : null).then(m => { if(m) EonLettore.caricaModello(m); }).catch(() => {});
+  if(document.readyState === "complete") carica(); else window.addEventListener("load", carica);
+})();
+</script>
 </head>
 <body>
 
@@ -13101,8 +13110,30 @@ function rispondiSuiDati(l){
   return null;
 }
 
-async function provaLettore(testo, viaVoce, invia){
+/* Il modello aiuta le regole (29/09/2026): quando le regole non capiscono
+   (Mente, "comando", domanda, niente) e il modello è sicuro di cosa vuoi,
+   la frase si riscrive nella forma normale di quel cassetto e si rilegge.
+   Una domanda o un saluto che le regole mettevano nella Mente va invece a
+   chi risponde. Mai due volte di fila (niente giri a vuoto). */
+function provaModello(l, testo){
+  if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
+  const ctx = contestoLettore();
+  const r = EonLettore.classifica(testo, ctx);
+  if(!r || r.p < 0.85) return null;
+  if(/^(?:mente|cartella|calendario|documento|dati)$/.test(r.intento)) return null; // quelli li leggono già le regole
+  if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" ? { alServer: true, intento: r.intento } : null;
+  // Scrivere a un cliente partendo da una nota: solo se il modello è sicurissimo (e il messaggio chiede sempre conferma)
+  if((r.intento === "messaggio" || r.intento === "email") && l && l.azione === "mente" && r.p < 0.95) return null;
+  const x = EonLettore.riscrivi(r.intento, testo, ctx);
+  if(!x || EonLettore.norm(x) === EonLettore.norm(testo)) return null;
+  return { rifai: x, intento: r.intento };
+}
+async function provaLettore(testo, viaVoce, invia, senzaModello){
   const l = leggiConLettore(testo);
+  if(!senzaModello && (!l || !l.azione || /^(?:mente|comando|domanda)$/.test(l.azione))){
+    const m = provaModello(l, testo);
+    if(m) return m;
+  }
   if(!l || !l.azione) return null;
   switch(l.azione){
     case "dati": {
@@ -14413,7 +14444,7 @@ function rispostaSaluto(testo){
     const saluto = /sera/.test(n) ? "Buonasera" : /pomeriggio/.test(n) ? "Buon pomeriggio" : /giorno|buondi/.test(n) ? "Buongiorno" : "Ciao";
     return { titolo: saluto + conNome, testo: cosa };
   }
-  if(/^(grazie|grazie mille|ok grazie|perfetto grazie|grazie tante|bravo|brava|bravissimo|bravissima|ottimo lavoro|sei grande)$/.test(n))
+  if(/^(grazie|grazie mille|ok grazie|perfetto grazie|grazie tante|bravo|brava|bravissimo|bravissima|ottimo lavoro|sei grande)$/.test(n) || /^(?:ok\s+)?(?:grazie|perfetto|benissimo|ottimo|grande|top|fantastico)(?:\s+(?:grazie|perfetto|mille|tante|davvero|eon))*$/.test(n))
     return { titolo: "Figurati" + conNome + "!", testo: "Sono qui quando ti serve." };
   if(/^(chi sei|cosa sai fare|che cosa sai fare|cosa puoi fare|che cosa puoi fare|come funzioni|come funziona|aiuto|help|cosa fai)$/.test(n))
     return { titolo: "Sono EON", testo: "Il tuo assistente di lavoro. Dimmelo a voce o scrivilo:\n- «Domani alle 9 sopralluogo da Rossi»\n- «Fattura da 500 per Bianchi per pitturazione»\n- «Fai foto al bagno di Rita»\n- «Cosa ho da fare domani?»\n- «Annulla gli appuntamenti di lunedì»" };
@@ -15325,6 +15356,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
     // "Eon, … grazie": le cortesie ai bordi non cambiano la richiesta (29/09/2026)
     if(!inContinuazione && typeof EonLettore !== "undefined" && testo) testo = EonLettore.togliCortesie(testo);
+    // I modi di dire nella forma che il codice conosce ("fai il numero di Rossi" = "chiama Rossi") (29/09/2026)
+    if(!inContinuazione && typeof EonLettore !== "undefined" && EonLettore.parafrasi && testo) testo = EonLettore.parafrasi(testo);
     // Un comando già letto dal lettore (dopo le domande del codice): dritto al server, senza AI
     if(pronto && (pronto.comando || pronto.soloServer)){ if(inCorso) return; return inviaAlServer(testo, viaVoce, false, pronto.comando ? pronto : null); }
     /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
@@ -15516,7 +15549,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        le 5 regole (calendario, azione, domanda del codice, dati, Mente) */
     let letturaImpegno = null;
     if(!inContinuazione && !senzaLettore){
-      const esitoLettore = await provaLettore(testo, viaVoce, (frase, p) => elabora(frase, false, p));
+      const esitoLettore = await provaLettore(testo, viaVoce, (frase, p) => elabora(frase, false, p), !!(pronto && pronto.daModello));
+      // Il modello ha capito cosa vuoi: si rilegge la frase nella forma normale
+      if(esitoLettore && esitoLettore.rifai){ ricordaEsitoCodice(testo, "modello_" + esitoLettore.intento); return elabora(esitoLettore.rifai, viaVoce, { daModello: true }); }
+      if(esitoLettore && esitoLettore.alServer){ ricordaEsitoCodice(testo, "modello_" + esitoLettore.intento); return inviaAlServer(testo, viaVoce, false, null); }
       if(esitoLettore && esitoLettore.fatto){
         campo.value = "";
         hint.textContent = hintBaseDi();
@@ -17598,8 +17634,11 @@ function capisciInvioDocumento(testo){
   const tel = !mail && t.match(/\+?\d[\d ./-]{7,}\d/);
   if(tel) t = t.replace(tel[0], " ");
   if(mail || tel) t = t.replace(/\s+(?:a|al|alla|ad|allo|per|su|via|tramite|all'indirizzo|al numero)\s*$/i, "");
-  const n = normalizzaComando(t);
-  let m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:(?:il|la|l|lo|un|una)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:(?:a|al|alla|allo|ad|per|di|del|della|dello)\\s+)?(.+?))?" + CANALE_INVIO + "$"));
+  let n = normalizzaComando(t);
+  // "manda il preventivo per whatsapp a Sartori" = "manda il preventivo a Sartori su whatsapp" (29/09/2026)
+  const perCanale = n.match(/^(.*?)\s+(?:su|per|via|con|tramite|col)\s+(whatsapp|whats app|wa|email|mail|posta)\s+((?:a|al|alla|allo|all|ad)\s+.+)$/);
+  if(perCanale) n = perCanale[1] + " " + perCanale[3] + " su " + perCanale[2];
+  let m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:(?:il|la|l|lo|un|una)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:(?:a|al|alla|allo|all|ad|per|di|del|della|dello)\\s+)?(.+?))?" + CANALE_INVIO + "$"));
   let tipo, numero, nome, canale;
   if(m){ [, , tipo, numero, nome, canale] = m; }
   else {
@@ -17611,7 +17650,7 @@ function capisciInvioDocumento(testo){
   const soloCanale = nome && nome.match(/^(?:su|con|per|via|tramite|in|col)\s+(whatsapp|whats app|wa|email|mail|posta|eon|chat)$/);
   if(soloCanale){ canale = soloCanale[1]; nome = ""; }
   if(nome && /\d/.test(nome)) return null; // "manda la fattura da 500 a Rossi": è un documento nuovo, decide chi lo crea
-  const parole = (nome || "").split(" ").filter(p => p && !/^(il|la|lo|i|gli|le|sig|signor|signora|cliente)$/.test(p));
+  const parole = (nome || "").split(" ").filter(p => p && !/^(il|la|lo|i|gli|le|l|all|sig|signor|signora|cliente)$/.test(p));
   if(!parole.length && !numero && !mail && !tel) return null;
   let c = canale ? (/whats|^wa$/.test(canale) ? "whatsapp" : /mail|posta/.test(canale) ? "email" : "eon") : "";
   if(mail) c = "email"; else if(tel && !c) c = "whatsapp";

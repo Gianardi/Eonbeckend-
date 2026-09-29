@@ -32,8 +32,10 @@ const id = (nome) => CLIENTI.find((c) => c.name === nome).id;
 
 let totale = 0, giuste = 0;
 const sbagliate = [];
+const esportate = []; // ESPORTA_FRASI=file.json: le frasi con la risposta giusta, per allenare il modello (eval/modello/)
 function prova(frase, atteso, gruppo) {
   totale++;
+  if (atteso && atteso.azione) esportate.push({ frase, azione: atteso.azione, gruppo });
   let l;
   try { l = L.leggi(frase, CTX); } catch (e) { sbagliate.push({ gruppo, frase, motivo: "errore: " + e.message }); return; }
   const problemi = [];
@@ -259,6 +261,11 @@ QUANDO.forEach(([q, g, o]) => ["sopralluogo da Rossi", "chiamare il fornitore", 
   prova(`${q} ${cosa}`, { azione: "impegno", giorno: g, ora: o }, "giorni e ore");
   prova(`${cosa} ${q}`, { azione: "impegno", giorno: g, ora: o }, "giorni e ore");
 }));
+
+if (process.env.ESPORTA_FRASI) {
+  const fs = require("fs");
+  fs.writeFileSync(process.env.ESPORTA_FRASI, JSON.stringify(esportate));
+}
 
 /* ---------- Risultato ---------- */
 const perGruppo = {};

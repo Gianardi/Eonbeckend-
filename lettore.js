@@ -165,7 +165,8 @@
     // L'ora: "alle 11", "ore 11:30", "11:30", "alle 3 e mezza", "alle 15 in punto"
     for (let i = 0; i < pp.length && !ora; i++) {
       const n = pp[i].n;
-      const conMarca = i > 0 && /^(?:alle|all|ore|dalle|verso|per|entro)$/.test(pp[i - 1].n);
+      // "per le 17", "verso le 9", "entro le 18": come "alle"
+      const conMarca = i > 0 && (/^(?:alle|all|ore|dalle|verso|per|entro)$/.test(pp[i - 1].n) || (pp[i - 1].n === "le" && i > 1 && /^(?:per|verso|entro|dopo|fino|prima)$/.test(pp[i - 2].n)));
       const m = n.match(/^(\d{1,2})(?:[:.](\d{2}))?$/);
       if (!m || (!conMarca && !m[2])) continue;
       let h = Number(m[1]), mi = Number(m[2] || 0);
@@ -173,7 +174,7 @@
       if (conMarca && !m[2] && pp[i + 1] && MESI.includes(pp[i + 1].n)) continue; // "per 5 ottobre"
       if (conMarca && !m[2] && pp[i + 1] && /^(?:euro|€|mila|k|%|percento)$/.test(pp[i + 1].n)) continue;
       if (!m[2] && /^(?:per|entro)$/.test(pp[i - 1].n) && pp[i + 1] && UNITA.test(pp[i + 1].n)) continue; // "per 3 giorni", "per 50 persone": non è un'ora ("alle 8 punti luce" sì)
-      usate.add(i); if (conMarca) usate.add(i - 1);
+      usate.add(i); if (conMarca) { usate.add(i - 1); if (pp[i - 1].n === "le") usate.add(i - 2); }
       let j = i + 1;
       if (pp[j] && pp[j].n === "e" && pp[j + 1] && /^(?:mezza|mezzo|trenta|un|quarto)$/.test(pp[j + 1].n)) {
         mi = /^(?:un|quarto)$/.test(pp[j + 1].n) ? 15 : 30; usate.add(j); usate.add(j + 1); if (pp[j + 1].n === "un" && pp[j + 2] && pp[j + 2].n === "quarto") usate.add(j + 2);
@@ -450,6 +451,134 @@
     return { voci: lista, aliquota, totaleDetto, titolo };
   }
 
+  /* ---------------- Il modello di EON (29/09/2026) ----------------
+     Un modello NOSTRO, piccolo, che gira dentro l'app: dalla frase decide il
+     cassetto (calendario, preventivo, messaggio, incasso…) quando le regole
+     non bastano. Come i modelli degli assistenti (Snips, fastText): legge le
+     parole, le coppie di parole e i PEZZI di parola (così regge "prevendivo",
+     "apuntamento"), con nomi, giorni, ore, importi e telefoni sostituiti da
+     segnaposto (impara la forma della richiesta, non i nomi). Allenato su
+     migliaia di frasi (eval/modello/allena.mjs), misurato su frasi vere mai
+     viste. I pezzi (chi, quando, quanto) li legge sempre il lettore. */
+  let MODELLO = null;
+  function caricaModello(m) {
+    if (!m || !Array.isArray(m.intenti) || !m.feat || !m.W) { MODELLO = null; return false; }
+    const K = m.intenti.length;
+    const raw = typeof m.W === "string" ? (typeof Buffer !== "undefined" ? Uint8Array.from(Buffer.from(m.W, "base64")) : Uint8Array.from(atob(m.W), (c) => c.charCodeAt(0))) : Uint8Array.from(m.W);
+    const W = new Int8Array(raw.buffer, raw.byteOffset, raw.length);
+    MODELLO = { intenti: m.intenti, K, feat: m.feat, W, scala: m.scala, b: m.b, versione: m.versione || "" };
+    return true;
+  }
+  function caratteristiche(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const p = pulisci(testoOriginale);
+    const pp = parole(p.testo);
+    const out = [];
+    if (!pp.length) return out;
+    const q = trovaQuando(pp, ctx.oggi);
+    const segno = pp.map((x) => x.n);
+    q.usate.forEach((i) => { segno[i] = "<tempo>"; });
+    const cl = trovaCliente(pp, ctx.clienti, q.usate);
+    if (cl.stato === "trovato" || cl.stato === "ambiguo" || cl.stato === "simile") (cl.usate || []).forEach((i) => { segno[i] = "<cl>"; });
+    pp.forEach((x, i) => {
+      if (segno[i].startsWith("<")) return;
+      if (/^\+?\d[\d.\s]{7,}$/.test(x.o) || /^3\d{8,9}$/.test(x.n)) segno[i] = "<tel>";
+      else if (/€/.test(x.o) || (pp[i + 1] && /^(?:euro|eur|mila|k)$/.test(pp[i + 1].n)) || /^\d{1,3}(?:\.\d{3})+$/.test(x.o) || /^\d+(?:k|mila)$/.test(x.n)) segno[i] = "<soldi>";
+      else if (/\d/.test(x.n)) segno[i] = "<num>";
+    });
+    // segnaposto uguali di fila = uno solo
+    const t = segno.filter((w, i) => !(w.startsWith("<") && segno[i - 1] === w));
+    if (p.domanda) out.push("?");
+    if (q.ora) out.push("#ora");
+    if (q.giornoIso) out.push("#giorno");
+    out.push("f:" + t[0]);
+    if (t[1]) out.push("f2:" + t[0] + "_" + t[1]);
+    t.forEach((w, i) => {
+      out.push("w:" + w);
+      if (i > 0) out.push("b:" + t[i - 1] + "_" + w);
+      if (!w.startsWith("<") && w.length >= 3) {
+        const x = "<" + w + ">";
+        for (let n = 3; n <= 5; n++) for (let k = 0; k + n <= x.length; k++) out.push("c:" + x.slice(k, k + n));
+      }
+    });
+    return out;
+  }
+  function classifica(testo, ctx) {
+    if (!MODELLO) return null;
+    const f = caratteristiche(testo, ctx);
+    if (!f.length) return null;
+    const { K, W, scala, b, feat } = MODELLO;
+    const z = b.slice();
+    const viste = new Set();
+    f.forEach((x) => {
+      const i = feat[x];
+      if (i === undefined || viste.has(i)) return;
+      viste.add(i);
+      for (let k = 0; k < K; k++) z[k] += W[i * K + k] * scala[k];
+    });
+    const m = Math.max(...z);
+    const e = z.map((v) => Math.exp(v - m));
+    const s = e.reduce((a, c) => a + c, 0);
+    const pr = e.map((v) => v / s);
+    const ordine = pr.map((v, k) => k).sort((a, c) => pr[c] - pr[a]);
+    return { intento: MODELLO.intenti[ordine[0]], p: pr[ordine[0]], secondo: MODELLO.intenti[ordine[1]], p2: pr[ordine[1]] };
+  }
+
+  /* ---------------- Modi di dire → forma normale (29/09/2026) ----------------
+     Come i "sinonimi" degli assistenti: lo stesso significato detto in un
+     altro modo diventa la forma che il codice conosce. Vale per tutta l'app
+     (si applica all'inizio di ogni frase). */
+  const PARAFRASI = [
+    [/^(?:fai|fammi|componi|chiama)\s+(?:il|al)\s+numero\s+(?:di|del|della|dello|dei|delle)\s+/i, "chiama "],
+    [/^(?:salva|salvami|segna|segnami|memorizza|registra|aggiungi)\s+(?:il|un)\s+(?:numero|telefono|cellulare|contatto)\s+(?:di|del|della|dello|nuovo\s+di)\s+/i, "aggiungi "],
+    [/^(?:mettimi|fammi|mi\s+metti|imposta(?:mi)?)\s+(?:un\s+)?(?:promemoria|avviso|sveglia)\s+(?:per\s+)?/i, "segna per "],
+    [/^(?:e\s+)?(?:arrivato|arrivata|entrato|entrata|ricevuto|ricevuta)\s+(?:il\s+|l\s*'\s*)?(?:bonifico|pagamento|saldo|acconto)\s+(?:di|del|della|dello|dal|dalla|dallo|da)\s+(.+)$/i, "$1 ha pagato"],
+    [/^dove\s+(?:ho\s+messo|è|e|sta|trovo|si\s+trova|ho\s+salvato)\s+(il|la|lo|l\s*'|i|le|gli)\s*/i, "mostrami $1 "],
+    [/^(?:chiedi|chiedigli|chiedile|domanda)\s+(?:a|ad|al|alla|allo)\s+/i, "scrivi a "],
+    [/^(?:spedisci|inoltra|giragli|girale|gira|inviagli|inviale)\s+/i, "manda "],
+    [/^foto\s+(?:al|alla|allo|ai|agli|alle|a|all\s*')\s*/i, "fai foto al "],
+    [/^(?:fammi|fai|prepara|preparami|crea|nuovo)?\s*(?:lo\s+|il\s+|uno\s+|un\s+)?stato\s+(?:di\s+)?avanzamento(?:\s+(?:dei\s+)?lavori)?\s*/i, "fai il SAL "],
+    [/^(?:crea|creami|fai|fammi|apri)\s+(?:la\s+|una\s+)?(?:nuova\s+)?cartella\s+/i, "aggiungi cartella "],
+  ];
+  function parafrasi(testo) {
+    let t = String(testo || "").trim();
+    const fine = (t.match(/[?!.]+$/) || [""])[0];
+    let x = t.slice(0, t.length - fine.length).trim();
+    for (const [re, sost] of PARAFRASI) {
+      if (re.test(x)) { x = x.replace(re, sost).replace(/\s+/g, " ").trim(); break; }
+    }
+    if (x === t.slice(0, t.length - fine.length).trim()) return t;
+    // "dove ho messo…?" diventa un comando: il "?" non serve più
+    return /^mostrami\b/i.test(x) ? x : x + fine;
+  }
+  /* Il modello ha capito COSA vuoi, le regole non ci sono arrivate: la frase
+     riscritta nella forma normale di quel cassetto, così le regole leggono
+     i pezzi (chi, quando, quanto). null = non si sa riscrivere. */
+  function riscrivi(intento, testoOriginale, ctx) {
+    ctx = ctx || {};
+    const t = pulisci(testoOriginale).testo;
+    const pp = parole(t);
+    if (!pp.length) return null;
+    const cl = trovaCliente(pp, ctx.clienti, new Set(), { nomeSolo: true });
+    const nome = cl.stato === "trovato" ? cl.cliente.name : null;
+    const dopoNome = cl.stato === "trovato" ? pp.slice(Math.max(...cl.usate) + 1).map((x) => x.o).join(" ").replace(/^(?:che|di|:|,)\s*/i, "") : "";
+    const daParola = (re) => { const i = pp.findIndex((x) => re.test(x.n)); return i >= 0 ? pp.slice(i).map((x) => x.o).join(" ") : null; };
+    const importo = trovaImporto(pp, new Set())[0];
+    switch (intento) {
+      case "chiamata": return nome ? "chiama " + nome : null;
+      case "messaggio": return nome && dopoNome.length >= 3 ? "scrivi a " + nome + " che " + dopoNome : null;
+      case "email": return nome ? "manda una mail a " + nome + (dopoNome ? " " + dopoNome : "") : null;
+      case "incasso": return nome && importo ? nome + " ha pagato " + importo.valore + " euro" : nome ? nome + " ha pagato" : null;
+      case "cerca_documento": { const d = daParola(/^(?:foto|fotografi[ae]|preventiv[oi]|fattur[ae]|document[oi]|durc|visura|polizza|contratt[oi]|dico)$/); return d ? "mostrami " + d : null; }
+      case "invio_documento": { const d = daParola(/^(?:preventiv[oi]|fattur[ae]|documento|pdf)$/); return d ? "manda il " + d.replace(/^(?:il|la|lo|i|le)\s+/i, "") : null; }
+      case "foto": { const i = pp.findIndex((x) => /^(?:foto|fotografi[ae]|fotografa)$/.test(x.n)); return "fai foto " + (i >= 0 ? pp.slice(i + 1).map((x) => x.o).join(" ") : "").trim(); }
+      case "cliente": { const x = t.replace(/^(?:\p{L}+\s+){0,4}?(?:numero|telefono|cellulare|contatto|cliente)\s+(?:di|del|della|dello|nuovo)?\s*/iu, ""); return /\d{6,}|\d{3}\s?\d{6,7}/.test(x) || x.split(/\s+/).length <= 3 ? "aggiungi " + x : null; }
+      case "urgenza": return /^urgent/i.test(t) ? null : "urgente " + t;
+      case "dico": return nome ? "fammi la dico per " + nome : null;
+      default: return null;
+    }
+  }
+
   /* ---------------- Correggere a voce un documento già fatto ----------------
      (29/09/2026, frasi vere di Andrea finite all'AI: "non 10000 ma 15000",
      "cambia e fai 12000", "metti 2500", "fammela da 57.000", "modificalo a 21
@@ -714,7 +843,7 @@
     if (/\biva\b/.test(n)) return "iva";
     if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|deve|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
     if (/\b(?:incassato|incassi|entrat[oaie]|guadagnat[oaie]|guadagno|fatturato)\b/.test(n)) return "incassi";
-    if (/\b(?:cantier[ie]|interventi|impianti|condomini|lavori\s+(?:in\s+corso|aperti|attivi))\b/.test(n)) return "cantieri";
+    if (/\b(?:cantier[ie]|interventi|impianti|condomini|lavori\s+(?:in\s+corso|aperti|attivi)|lavori\s+(?:ho|abbiamo)\s+(?:in\s+corso|aperti|attivi))\b/.test(n)) return "cantieri";
     if (/\b(?:impegn[oi]|appuntament[oi]|programma|agenda|liber[oaie]|occupat[oa]|da\s+fare|calendario|giornata)\b/.test(n)) return "agenda";
     if (/^quando\s+(?:devo|dovrei|ho|vedo|incontro|vado|passo|sento|chiamo)\b|\bdevo\s+vedere\b/.test(n)) return "agenda";
     if (/\b(?:clienti)\b/.test(n)) return "clienti";
@@ -807,7 +936,7 @@
       }
     }
     /* Uno sfogo o due chiacchiere ("che palle, non so cosa fare"): risponde, non si salva */
-    if (/^(?:che\s+palle|uffa|che\s+noia|mi\s+annoio|sono\s+stanc[oa]|che\s+giornata|non\s+so\s+(?:cosa|che)\s+fare|boh|mah|come\s+stai|che\s+fai|tutto\s+bene)\b/.test(n) && !q.ora && !q.giornoIso) return { ...base, azione: "domanda", quando };
+    if (/^(?:che\s+palle|uffa|che\s+noia|mi\s+annoio|sono\s+(?:stanc[oa]|giu|triste|nervos[oa]|stress\w*)|mi\s+sento\s+(?:un\s+po\s+)?(?:giu|stanc[oa]|male|solo|sola|triste|stress\w*)|che\s+giornata|non\s+so\s+(?:cosa|che)\s+fare|boh|mah|come\s+stai|che\s+fai|tutto\s+bene)\b/.test(n) && !q.ora) return { ...base, azione: "domanda", quando };
 
     /* Documento: fattura o preventivo */
     const iDoc = indice(/^(?:fattur[ae]|preventiv[oi])$/);
@@ -1146,7 +1275,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, trovaVoci, leggiModifica, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

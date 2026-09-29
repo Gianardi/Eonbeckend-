@@ -4130,7 +4130,8 @@ async function provaAppuntamentoDaCliente(testo, user, ctx) {
 async function provaPercorsoRapidoImpegno(body, ctx, user) {
   if (!body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
   const testo = ctx.testoUtente;
-  if (!candidatoPercorsoRapido(testo)) return null;
+  // La lettura del lettore dell'app (parole ricontrollate qui sotto) basta anche quando la frase ha parole "escluse" ("…per il preventivo") o l'ora detta "per le 17"
+  if (!candidatoPercorsoRapido(testo) && !(body.lettura_impegno && eStringaNonVuota(testo) && testo.length <= 200)) return null;
 
   let ultimo = ultimoImpegnoDalRicordo(body.ricordo);
   if (ultimo) {

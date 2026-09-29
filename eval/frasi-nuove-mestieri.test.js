@@ -26,7 +26,8 @@ const PORT = 9025;
 const ROOT = path.resolve(__dirname, "..");
 const ELENCO = process.argv.includes("--elenco");
 const MINIMO = Number((process.argv.find((a) => a.startsWith("--minimo=")) || "").split("=")[1] || 135); // oggi 140/143 (al primo colpo erano 108)
-const TUTTI = JSON.parse(fs.readFileSync(path.join(__dirname, "dati", "frasi-nuove-mestieri.json"), "utf8"));
+// FRASI=altro-file.json per misurare un'altra serie nello stesso formato (es. frasi-prova-finale-app.json)
+const TUTTI = JSON.parse(fs.readFileSync(path.join(__dirname, "dati", process.env.FRASI || "frasi-nuove-mestieri.json"), "utf8"));
 let DATI = null;
 
 /* ---------- Il server vero, con database e AI finti ---------- */
@@ -149,7 +150,15 @@ async function main() {
         { id: randomUUID(), owner_id: UTENTE.id, title: "Appuntamento " + clienti[1].name, type: "appuntamento", scheduled_at: giorno(domani, "15:00"), time: "Domani, 15:00", status: "todo", deleted_at: null, client_id: clienti[1].id },
         { id: randomUUID(), owner_id: UTENTE.id, title: "Verifica " + clienti[2].name, type: "appuntamento", scheduled_at: giorno(domani, "16:00"), time: "Domani, 16:00", status: "todo", deleted_at: null, client_id: clienti[2].id },
       );
-      await page.evaluate(async ([clienti, tasksIniziali, mestiere]) => {
+      // Appuntamenti di cui parlano le frasi (se il file li dà): come nel calendario vero
+    const giornoDi = (g) => { const d = new Date(); d.setHours(0, 0, 0, 0); if (g === "domani") d.setDate(d.getDate() + 1); else if (g === "sabato") d.setDate(d.getDate() + (((6 - d.getDay()) + 7) % 7 || 7)); return d; };
+    (m.impegni || []).forEach(([titolo, g, ora]) => {
+      const d = giornoDi(g);
+      const iso = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + "T" + ora + ":00";
+      const tempo = g === "domani" ? "Domani, " + ora : d.getDate() + " " + ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"][d.getMonth()] + ", " + ora;
+      tabelle.tasks.push({ id: randomUUID(), owner_id: UTENTE.id, title: titolo, type: "appuntamento", scheduled_at: iso, time: tempo, status: "todo", deleted_at: null, client_id: null });
+    });
+    await page.evaluate(async ([clienti, tasksIniziali, mestiere]) => {
         document.getElementById("onboardingScreen").style.display = "none";
         currentSession = { access_token: "t", user: { id: "11111111-1111-4111-8111-111111111111", email: "a@b.it" } };
         loadUserDataFromDB = async () => {}; tokenValido = async () => "t";
