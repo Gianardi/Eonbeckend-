@@ -13165,6 +13165,20 @@ async function provaLettore(testo, viaVoce, invia){
     }
     case "incasso": return gestisciIncasso(l, testo);
     case "nota_cartella": return await salvaNotaCartella(l);
+    case "nota_cartella_nuova": {
+      if(!isDbReady()) return null;
+      domandaDelCodice({ titolo: "Cartella " + l.nomeCartella, domanda: "La cartella «" + l.nomeCartella + "» non c'è ancora: la creo e ci metto la nota?", senzaCampo: true,
+        scelte: [{ etichetta: "Sì, creala", valore: "si" }, { etichetta: "No", valore: "no" }], onRisposta: async (v) => {
+          chiudiRisorsaCard();
+          if(v !== "si") return;
+          const creata = await dbInsert("cartelle", { nome: l.nomeCartella, ordine: cartelle.length });
+          if(!creata){ showAIToast("Non salvato", "Non sono riuscita a creare la cartella: riprova."); return; }
+          const nuova = { id: creata.id, nome: creata.nome || l.nomeCartella };
+          cartelle.push(nuova); renderCartelle();
+          await salvaNotaCartella({ ...l, cartella: nuova, daFare: false });
+        } });
+      return { fatto: "cartella_nuova" };
+    }
     case "cartello": return apriCartelloPer(l);
     case "doc_impresa": return mostraDocImpresaPer(l, testo);
     case "piu": return await gestisciPiuComandi(l, testo);

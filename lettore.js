@@ -1008,6 +1008,16 @@
       }
     }
 
+    /* Una cartella che non c'è ancora: "metti nella cartella Fornitori che il
+       prezzo del ferro è salito" → si chiede se crearla (29/09/2026) */
+    const mNuova = testo.match(/^(?:metti|mettimi|segna|segnami|scrivi|scrivimi|aggiungi|annota|salva|appunta)\s+(?:nella|in|dentro\s+la)\s+cartella\s+([\p{L}\d'-]+(?:\s+[\p{L}\d'-]+)?)\s*[:,-]?\s+(?:che\s+|di\s+)?(.{3,})$/iu);
+    if (mNuova && !trovaCartella(pp, ctx.cartelle, new Set())) {
+      // il nome della cartella: una parola (due se la seconda ha la maiuscola)
+      const [a, b] = mNuova[1].split(/\s+/);
+      const nomeC = b && /^\p{Lu}/u.test(b) ? a + " " + b : a;
+      const nota = (b && !/^\p{Lu}/u.test(b) ? b + " " : "") + mNuova[2];
+      return { ...base, azione: "nota_cartella_nuova", nomeCartella: nomeBello(nomeC), nota: maiuscola(nota.replace(/^(?:che|di)\s+/i, "")), quando };
+    }
     /* Nota in una cartella: "metti in cartella Lerici sentire Overa…" */
     const cart = trovaCartella(pp, ctx.cartelle, usate);
     // "aggiungi in EON queste foto": è la fotocamera, non una nota (la fa chi viene dopo)

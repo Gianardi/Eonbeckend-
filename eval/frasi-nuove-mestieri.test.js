@@ -173,9 +173,9 @@ async function main() {
           try { await eonInviaHome(frase); } catch (e) { return { errore: e.message }; }
           await new Promise((r) => setTimeout(r, 60));
           // Una conferma del codice ("Sposto…?", "Annulla 1 impegno"): si tocca Sì, come farebbe l'utente
-          const si = [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, (?:sposta|aggiorna)$/.test(b.textContent)) || document.getElementById("annullaConferma");
+          const si = [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, (?:sposta|aggiorna|creala)$/.test(b.textContent)) || document.getElementById("annullaConferma");
           let confermato = "";
-          if (si && !si.disabled && (atteso === "calendario_modifica" || atteso === "cliente")) { confermato = document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); si.click(); await new Promise((r) => setTimeout(r, 250)); }
+          if (si && !si.disabled && (atteso === "calendario_modifica" || atteso === "cliente" || atteso === "mente")) { confermato = document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); si.click(); await new Promise((r) => setTimeout(r, 250)); }
           // "Con quale Dini?": si sceglie il primo, come farebbe l'utente
           const quale = /Con quale|Quale /.test(document.getElementById("risorsaCorpo").textContent) && document.querySelector("#risorsaCorpo .scheda-scelta");
           if (quale && document.getElementById("risorsaOverlay").style.display === "flex") { confermato = "scelto " + quale.textContent; quale.click(); await new Promise((r) => setTimeout(r, 300)); }
