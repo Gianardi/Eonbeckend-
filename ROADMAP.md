@@ -46,6 +46,48 @@ pilastri, altrimenti non si fa.
 
 ---
 
+## Domani si riparte da qui (riepilogo del 29/09/2026, notte)
+
+**Online** (PR #136, #137, #138): urgenze, SAL, DiCo; il lettore unico
+(0b.10); utente virtuale per ogni professione, promemoria, incassi e
+cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
+(200, 23:35 UTC) e c'è già 1 telefono iscritto.
+
+**Da fare per Andrea**
+1. Ricaricare il credito dell'AI (Anthropic) e attivare la ricarica
+   automatica: il 28/09 i "niente" venivano da lì.
+2. Provare un promemoria vero: segnare un impegno tra circa 40 minuti e
+   vedere se arriva l'avviso 30 minuti prima (su iPhone EON deve essere
+   aperta dalla schermata Home).
+
+**Da fare per Claude, in ordine**
+1. Controllare con Andrea il primo promemoria vero (non ancora provato su
+   un telefono vero).
+2. 0b.12 Manuali dell'AI per ogni professione (elettricista, Altra
+   attività, 15 casi di prova per mestiere): serve il credito.
+3. 0b.13 Frasi di esempio e frasi vere (passo 1): serve il credito.
+4. Mente-cervello al posto di Cresci (prima le simulazioni); squadra del
+   cantiere (versione semplice); giro della giornata sulla mappa.
+5. Prima di riaprire le iscrizioni: account email (Resend, Andrea),
+   captcha, tetto di spesa dell'AI.
+6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
+   gestionale dell'amministratore (0b.5), morosità.
+
+**Fatto il 29/09 (mattina), nel prossimo pacchetto:** nella Mente si cancella un
+appunto scorrendo il dito verso sinistra ("Elimina" in rosso → Cestino, con
+"Annulla"), come già per chat e documenti. Prova: `eval/mente-scorri.test.js`.
+
+**Fatto il 29/09, nel prossimo pacchetto:** la barra in basso (Home, Clienti,
+Cresci, Menu) è fissata allo schermo: su iPhone, scorrendo la Home, restava a
+metà (foto di Andrea). Prova: `eval/barra-fissa.test.js` (la misura, non
+l'iPhone vero: da ricontrollare sul telefono).
+
+Tester: il 29/09 l'account di Simone (Massari) passato da "Altra attività"
+a "Amministratore di condominio" (a mano nel database, su richiesta di Andrea).
+
+Sul ramo `claude/ciao-ipc3fm`, non ancora in una PR: ROADMAP 0b.12 e
+0b.13. Andranno col prossimo pacchetto.
+
 ## 0. Adesso, in quest'ordine (deciso con Andrea, 26/09/2026)
 
 1. **[Claude]** Sistemare i problemi trovati da Andrea nei test del 26/09.
@@ -252,6 +294,46 @@ Prima 4 simulazioni (screenshot) ad Andrea, poi l'app.
 
 Fonti: fattureincloud.it/costo, teamsystem.com (listino Fatture in Cloud),
 openapi.com (fatturazione elettronica SdI e prezzi).
+
+### 0b.12 Manuali dell'AI per ogni professione — IN PROGRAMMA (deciso il 29/09: "non oggi")
+Andrea: "hai addestrato EON per ogni singola professione?". Il codice (lettore)
+è provato per tutte e 5 (0b.11); la parte dell'AI no, è sbilanciata:
+
+| | Codice | Manuale per l'AI | Prove dell'AI (casi.json) |
+|---|---|---|---|
+| Edile | provato | completo (libro/edile.md) | 3 |
+| Idraulico | provato | completo (libro/idraulico.md) | 5 |
+| Amministratore | provato | completo (libro/amministratore.md) | 7 |
+| Elettricista | provato | solo poche righe (`promptPackElettricista`) | 0 |
+| Altra attività | provato | nessuno (solo lo strato comune) | 0 |
+
+Da fare, in ordine: 1) manuale completo dell'elettricista (libro + pack:
+quadro, salvavita, differenziale, messa a terra, fotovoltaico, pericoli,
+DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
+alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
+di prova per ogni professione in `eval/casi.json`, da far girare con
+`eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.13 Frasi di esempio, frasi vere e un "cervello" nostro — IN PROGRAMMA (deciso il 29/09)
+Andrea: "se ci mettessimo 1 milione di frasi esempi?". Risposta onesta: un
+milione di frasi **inventate** serve poco, perché si somigliano tutte. Contano
+**varietà** e **frasi vere**. Le grandi app (Siri, Alexa, Google) usano milioni
+di frasi vere, etichettate, per addestrare un piccolo modello loro. Piano in 3 passi:
+
+1. **Subito, quando c'è il credito dell'AI**: far scrivere all'AI 10–20 mila
+   frasi realistiche e diverse per ogni professione (dialetto, errori della
+   dettatura, frasi lunghe e confuse, più cose insieme) e farle girare nel
+   simulatore (`eval/simulatore.test.mjs`) per trovare i buchi veri del
+   lettore. Costo: pochi euro (stima).
+2. **Con i tester**: salvare le frasi che il codice non capisce e che vanno
+   all'AI, **solo col consenso** (da aggiungere all'informativa privacy; mai
+   visibili nel pannello admin come messaggi). L'AI le classifica; ogni
+   settimana diventano vocabolario del lettore e nuove prove del simulatore.
+3. **Più avanti**: con 20–50 mila frasi vere etichettate, addestrare un
+   piccolo modello nostro (come Snips) che gira sul telefono: gratis e
+   istantaneo. Le regole di oggi restano come rete di sicurezza.
+
+Pilastri: *tempo* (capisce al primo colpo) e *soldi* (meno AI, meno costi).
 
 ### 0b.11 Utente virtuale per ogni professione, promemoria, incassi, cartelle — FATTO il 29/09 (sera)
 - **Utente virtuale per ogni professione** (`eval/utente-virtuale-mestieri.test.js`):

@@ -2094,6 +2094,21 @@ da fare da Gianardi:
    intero, non solo un caso) prima di essere sicuri che non introduca
    regressioni sulla qualità delle risposte.
 
+7. **IN PROGRAMMA — Frasi di esempio, frasi vere e un modello nostro
+   (29/09/2026, ROADMAP 0b.13).** Come fanno Siri/Alexa/Google: non
+   milioni di frasi inventate (si somigliano, servono poco) ma frasi
+   **varie** e soprattutto **vere**, etichettate. Tre passi: (a) col
+   credito dell'AI, 10–20 mila frasi realistiche per professione (dialetto,
+   errori di dettatura, frasi lunghe, più richieste insieme) dentro
+   `eval/simulatore.test.mjs` per trovare i buchi del lettore — pochi
+   euro, stima; (b) coi tester, solo con consenso scritto nell'informativa
+   privacy, salvare le frasi che il lettore non capisce e che vanno
+   all'AI: l'AI le classifica, ogni settimana diventano vocabolario e
+   prove (mai mostrate come messaggi nel pannello admin); (c) con 20–50
+   mila frasi vere etichettate, addestrare un piccolo modello nostro sul
+   telefono (tipo Snips): gratis e istantaneo, le regole restano come
+   rete di sicurezza.
+
 ## Visione: EON come "mente" personalizzata del professionista (17/09/2026)
 
 Gianardi, testuale: "EON deve essere la mente del professionista ed

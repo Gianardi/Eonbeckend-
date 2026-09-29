@@ -206,7 +206,7 @@ async function main() {
     }));
     verifica("scritto nella card: \"ricordami di…\" diventa da fare, il resto una nota; compaiono subito",
       JSON.stringify(aggiunti.ins) === JSON.stringify([["Ordinare il cemento", true, null], ["Cancello Rossi codice 4412", false, null]]) && aggiunti.righe.includes("Ordinare il cemento") && aggiunti.righe.includes("Cancello Rossi codice 4412") && aggiunti.vuoto === "", JSON.stringify(aggiunti));
-    await page.click("#apLista .ap-riga:first-child .ap-cerchio");
+    await page.click("#apLista > :first-child .ap-cerchio");
     await page.waitForTimeout(150);
     const spunta = await page.evaluate(() => ({
       patch: window.__scritture.filter((w) => w.tipo === "update" && w.tabella === "cantiere_appunti").map((w) => w.patch),

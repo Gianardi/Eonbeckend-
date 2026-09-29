@@ -111,8 +111,13 @@
   .solo-pc{ display:none !important; }
 
   /* tab bar in basso, stile app mobile */
+  /* Fissata allo schermo (29/09/2026, foto di Andrea): "appoggiata" alla
+     pagina (sticky) su iPhone, scorrendo la Home, restava a metà schermo.
+     Lo spazio sotto il contenuto lo lascia .app (padding-bottom). */
+  .app{ padding-bottom:calc(64px + env(safe-area-inset-bottom, 0px)); }
   .tabbar{
-    position:sticky; bottom:0; z-index:20;
+    position:fixed; left:0; right:0; bottom:0; z-index:20;
+    max-width:460px; margin:0 auto; transform:translateZ(0);
     display:flex; align-items:stretch; justify-content:space-around;
     background:rgba(255,255,255,.92); backdrop-filter:blur(18px);
     border-top:1px solid var(--border);
@@ -2379,6 +2384,11 @@
   .ap-testo{ flex:1; min-width:0; overflow-wrap:anywhere; cursor:pointer; }
   .ap-riga.nota .ap-testo{ color:var(--muted); }
   .ap-quando{ font-size:12px; color:var(--faint); flex:none; }
+  .ap-lista .scorri-wrap{ border-radius:0; border-top:1px solid var(--border); }
+  .ap-lista .scorri-wrap:first-child{ border-top:none; }
+  .ap-lista .scorri-wrap .ap-riga{ border-top:none; }
+  .ap-lista .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
+  .ap-lista .scorri-elimina{ border-radius:10px; }
   .ap-vuoto{ padding:18px 0; color:var(--muted); font-size:13.5px; text-align:center; }
   #homeCarteMestiere[hidden], .cartelle-griglia[hidden]{ display:none !important; }
   .scheda-invia.ap-invia{ background:var(--acc); color:var(--acc-ink); }
@@ -2466,9 +2476,9 @@
      cambia niente: tutto è dentro questo blocco. */
   @media (min-width: 1024px){
     .solo-pc{ display:flex !important; }
-    .app{ max-width:none; margin:0; padding-left:240px; box-shadow:none; background:transparent; }
+    .app{ max-width:none; margin:0; padding-left:240px; padding-bottom:0; box-shadow:none; background:transparent; }
     .tabbar{
-      position:fixed; top:0; bottom:0; left:0; width:240px; z-index:30;
+      position:fixed; top:0; bottom:0; left:0; right:auto; width:240px; max-width:none; margin:0; z-index:30;
       flex-direction:column; justify-content:flex-start; align-items:stretch; gap:4px;
       padding:26px 14px; border-top:none; border-right:1px solid var(--border);
       background:rgba(255,255,255,.9);
@@ -10759,7 +10769,8 @@ function disegnaListaAppunti(lista, cartellaId){
       quando.className = "ap-quando"; quando.textContent = quandoAppunto(a.created);
       riga.appendChild(quando);
     }
-    lista.appendChild(riga);
+    // Scorri a sinistra per cancellarlo (29/09/2026, Andrea): va nel Cestino, con "Annulla"
+    lista.appendChild(a.id ? rendiScorrevole(riga, () => cancellaAppuntiScelti([a])) : riga);
   });
 }
 /* Un appunto scritto o detto nella card: "ricordami di…" / "da fare: …"
