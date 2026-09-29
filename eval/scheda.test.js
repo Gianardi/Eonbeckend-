@@ -76,8 +76,9 @@ async function main() {
       campo: document.querySelector("#risorsaPiede textarea").value,
       aperta: document.getElementById("risorsaOverlay").style.display === "flex",
     }));
-    verifica("la modifica parte con i dati attuali del documento (niente passaggi in più)", /Dati attuali del documento/.test(richieste[0].messaggio) && /"prezzo":100/.test(richieste[0].messaggio) && /aggiungi 100 euro per smaltimento/.test(richieste[0].messaggio) && /doc1/.test(richieste[0].messaggio), richieste[0].messaggio);
-    verifica("regole nel messaggio: \"da 57.000\" = imponibile, una voce si cambia senza chiedere, risposta di una frase", /nuovo imponibile IVA esclusa/.test(richieste[0].messaggio) && /non chiedere, fallo/.test(richieste[0].messaggio) && /una sola frase breve/.test(richieste[0].messaggio));
+    // Dal 29/09 una modifica chiara la fa il codice (leggiModifica): voci nuove al server, senza AI
+    const cmd0 = richieste[0].comando || {};
+    verifica("\"aggiungi 100 euro per smaltimento\": la fa il codice (voce in più), senza AI", cmd0.azione === "modifica_documento" && cmd0.documento_id === "doc1" && JSON.stringify(cmd0.voci) === JSON.stringify([{ descrizione: "Prova", quantita: 1, prezzo: 100 }, { descrizione: "Smaltimento", quantita: 1, prezzo: 100 }]), JSON.stringify(richieste[0]));
     verifica("il documento si aggiorna lì davanti (nuova voce, nuovo totale)", /Smaltimento/.test(dopo1.documento) && dopo1.memoria === 244, JSON.stringify(dopo1));
     verifica("in chat: la mia richiesta e la risposta di EON", JSON.stringify(dopo1.bolle) === JSON.stringify(["me: aggiungi 100 euro per smaltimento", "eon: Fatto. Totale €244."]), JSON.stringify(dopo1.bolle));
     verifica("la scheda resta aperta e il campo si svuota", dopo1.aperta && dopo1.campo === "");
@@ -91,6 +92,8 @@ async function main() {
     await page.fill("#risorsaPiede textarea", "300");
     await page.press("#risorsaPiede textarea", "Enter");
     await page.waitForFunction(() => /Totale €366/.test(document.getElementById("risorsaCorpo").textContent), null, { timeout: 5000 });
+    verifica("una modifica che il codice non sa fare (\"aggiungi la posa\", senza prezzo) va all'AI con i dati attuali del documento", /Dati attuali del documento/.test(richieste[1].messaggio) && /"prezzo":100/.test(richieste[1].messaggio) && /aggiungi la posa/.test(richieste[1].messaggio) && /doc1/.test(richieste[1].messaggio), richieste[1].messaggio);
+    verifica("regole nel messaggio: \"da 57.000\" = imponibile, una voce si cambia senza chiedere, risposta di una frase", /nuovo imponibile IVA esclusa/.test(richieste[1].messaggio) && /non chiedere, fallo/.test(richieste[1].messaggio) && /una sola frase breve/.test(richieste[1].messaggio));
     verifica("la domanda di EON compare nella scheda, e la risposta \"300\" va nello stesso filo (runId)", richieste[2].runId === "run-domanda" && richieste[2].messaggio === "300", JSON.stringify(richieste[2]));
     verifica("dopo la risposta il documento è aggiornato", await page.evaluate(() => /Posa/.test(document.querySelector(".scheda-anteprima").textContent)));
 
@@ -106,7 +109,7 @@ async function main() {
 
     // 4. Errore del server: detto chiaramente nella chat
     risposte.push({ __status: 502, error: "Credito dell'AI esaurito" });
-    await page.fill("#risorsaPiede textarea", "togli l'IVA");
+    await page.fill("#risorsaPiede textarea", "scrivi nelle note che il pagamento è a 30 giorni"); // ("togli l'IVA" dal 29/09 lo fa il codice)
     await page.press("#risorsaPiede textarea", "Enter");
     await page.waitForFunction(() => /Non ci sono riuscita/.test(document.querySelector(".scheda-chat").textContent), null, { timeout: 5000 });
     verifica("errore: lo dice nella chat, la scheda resta aperta", await page.evaluate(() => document.getElementById("risorsaOverlay").style.display === "flex"));

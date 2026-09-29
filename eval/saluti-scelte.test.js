@@ -65,15 +65,28 @@ async function main() {
     await chiedi("Ciao come stai domani mattina ore 11 appuntamento con Fregoli");
     verifica("saluto con dentro un appuntamento: va avanti come sempre (non è solo un saluto)", richieste.length === 1);
 
-    /* Pulsanti per scegliere tra omonimi */
+    /* Pulsanti per scegliere tra omonimi.
+       Se i due omonimi sono tra i clienti dell'app, dal 29/09 chiede il
+       codice ("Con quale Dini?") e segna l'impegno senza AI; se li trova
+       la domanda la fa l'AI (qui una domanda libera), i pulsanti vengono
+       dalla sua risposta come prima. */
+    richieste.length = 0;
+    await chiedi("Segna appuntamento Dini domani alle 10");
+    let pulsantiCodice = await page.evaluate(() => [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].map((b) => b.textContent));
+    verifica("omonimi tra i clienti: \"Con quale Dini?\" dal codice, senza AI", richieste.length === 0 && pulsantiCodice.includes("Sara Dini") && pulsantiCodice.includes("Giampiero Dini"), JSON.stringify({ r: richieste.length, pulsantiCodice }));
+    risposte = [{ stato: "concluso", testo: "Fatto.", azioni: [] }];
+    await page.click('#risorsaCorpo .scheda-scelta:text-is("Giampiero Dini")');
+    await page.waitForTimeout(400);
+    const impegnoDini = richieste[0] && richieste[0].comando;
+    verifica("un tocco su \"Giampiero Dini\": l'impegno col suo cliente, col codice", !!impegnoDini && impegnoDini.azione === "impegni" && impegnoDini.impegni.length === 1 && /Giampiero Dini/.test(impegnoDini.impegni[0].titolo) && !!impegnoDini.impegni[0].cliente_id, JSON.stringify(richieste.map((r) => r.comando || r.messaggio)));
     risposte = [
       { stato: "concluso", runId: "run-1", testo: "Ho trovato 2 clienti con il nome Dini:\n- Sara Dini\n- Giampiero Dini\n\nQuale dei due intendi?", azioni: [] },
       { stato: "concluso", testo: "Fatto.", azioni: [] },
     ];
     richieste.length = 0;
-    await chiedi("Segna appuntamento Dini domani alle 10");
+    await chiedi("Quale Dini mi aveva chiesto il preventivo?"); // una domanda: la fa l'AI, che chiede quale
     const pulsanti = await page.evaluate(() => [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].map((b) => b.textContent));
-    verifica("\"quale dei due?\": un pulsante per ogni Dini", JSON.stringify(pulsanti) === '["Sara Dini","Giampiero Dini"]', JSON.stringify(pulsanti));
+    verifica("\"quale dei due?\" dall'AI: un pulsante per ogni Dini", JSON.stringify(pulsanti) === '["Sara Dini","Giampiero Dini"]', JSON.stringify(pulsanti));
     await page.click('#risorsaCorpo .scheda-scelta:text-is("Giampiero Dini")');
     await page.waitForTimeout(400);
     verifica("un tocco su \"Giampiero Dini\" manda la risposta a EON", richieste.length === 2 && /Giampiero Dini/.test(richieste[1].messaggio) && richieste[1].runId === "run-1", JSON.stringify(richieste.map((r) => [r.messaggio && r.messaggio.slice(0, 60), r.runId])));

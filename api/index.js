@@ -4916,6 +4916,29 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     const azioni = [{ tool: "sposta_impegno", esito }];
     return { azioni, payload: { stato: "concluso", testo: "Fatto.", azioni } };
   }
+  /* L'assemblea letta dal lettore dell'app (29/09/2026): "convoca l'assemblea
+     del condominio Il Glicine per il 20 ottobre alle 18". Solo per gli amministratori. */
+  if (comando.azione === "assemblea") {
+    const quando = /^\d{4}-\d{2}-\d{2}$/.test(String(comando.giorno || "")) && /^\d{2}:\d{2}$/.test(String(comando.ora || "")) ? quandoValido(`${comando.giorno}T${comando.ora}:00`) : null;
+    const condominio = eStringaNonVuota(comando.condominio) ? comando.condominio.trim().slice(0, 80) : "";
+    if (!quando || !condominio) return null;
+    const profilo = await db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, ctx.accessToken).catch(() => null);
+    const mestiere = Array.isArray(profilo) && profilo[0] ? profilo[0].profession : null;
+    const inProva = comando.prova === true && (await eAdmin(user).catch(() => null));
+    if (mestiere !== "amministratore" && !inProva) return null;
+    const riga = { condominio, quando, tipo: comando.tipo === "straordinaria" ? "straordinaria" : "ordinaria", stato: "da convocare" };
+    if (eUuid(comando.cliente_id)) { const c = await trovaProprio("clients", comando.cliente_id, ctx); if (c) riga.client_id = c.id; }
+    const creato = await db("assemblee", { method: "POST", body: JSON.stringify(riga), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+    const a = Array.isArray(creato) ? creato[0] : creato;
+    if (!a || !a.id) return null;
+    const motivo = eStringaNonVuota(comando.motivo) ? comando.motivo.trim().slice(0, 300) : "";
+    if (motivo) await db("cantiere_appunti", { method: "POST", body: JSON.stringify({ testo: "Ordine del giorno: " + motivo, assemblea_id: a.id, ...(riga.client_id ? { client_id: riga.client_id } : {}) }), headers: { Prefer: "return=minimal" } }, ctx.accessToken).catch(() => null);
+    const esito = { ...a, quando_visualizzato: formattaQuando(riga.quando) };
+    await registraOperazione(user, "crea_assemblea", riga, esito, "auto");
+    ctx.lettoSenzaAI = true;
+    const azioni = [{ tool: "crea_assemblea", esito }];
+    return { azioni, payload: { stato: "concluso", testo: `Assemblea segnata: ${a.condominio}, ${esito.quando_visualizzato}`, azioni } };
+  }
   if (comando.azione === "appunto") {
     // "Conti mi ha detto che paga a fine mese": nella scheda del cliente (e sul suo prossimo appuntamento)
     if (!eUuid(comando.cliente_id) || !eStringaNonVuota(comando.testo) || comando.testo.length > 600) return null;

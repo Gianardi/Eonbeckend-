@@ -179,7 +179,7 @@ async function main() {
           toast: document.getElementById("aiToastContainer").textContent.replace(/\s+/g, " ").trim().slice(0, 140),
           landing: landing.slice(0, 140),
           scritture: window.__scritture.map((s) => s.tabella),
-          aperti: window.__aperti.slice(), foto: window.__fotoScatta,
+          aperti: window.__aperti.slice(), foto: window.__fotoScatta + (document.querySelector('.sc-azione[data-azione="foto"].evidenziata') ? 1 : 0),
           pagina: paginaAttuale, cambiata: paginaAttuale !== paginaPrima,
         };
       }, [frase, atteso]);

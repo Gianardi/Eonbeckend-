@@ -185,7 +185,8 @@ async function main() {
     const aVoce = await page.evaluate(() => { const ok = provaFotoImmediata("fai foto a pavimenti", true); return { ok, titolo: document.getElementById("risorsaTitolo").textContent, bottone: !!document.getElementById("fotoRapidaScatta") }; });
     const [sceltaV] = await Promise.all([page.waitForEvent("filechooser", { timeout: 2000 }).catch(() => null), page.click("#fotoRapidaScatta")]);
     verifica("a voce: card con \"Scatta la foto\" (il telefono vuole un tocco), che apre la fotocamera", aVoce.ok && aVoce.bottone && !!sceltaV, JSON.stringify(aVoce));
-    const nonFoto = await page.evaluate(() => ["fammi vedere le foto di Rita", "fammi la foto al cantiere e crea il cliente pinco", "fai fattura a Rossi da 300"].map((f) => !!capisciFotoRapida(f)));
+    // "...e crea il cliente": non uno scatto subito, ma prima il cliente (creaCliente) e la sua scheda
+    const nonFoto = await page.evaluate(() => ["fammi vedere le foto di Rita", "fammi la foto al cantiere e crea il cliente pinco", "fai fattura a Rossi da 300"].map((f) => { const r = capisciFotoRapida(f); return !!r && !r.creaCliente; }));
     verifica("\"fammi vedere le foto\", \"...e crea il cliente\", fatture: non sono scatti", nonFoto.every((x) => !x), JSON.stringify(nonFoto));
 
     verifica("nessun errore nella pagina", errori.length === 0, errori.join(" | "));

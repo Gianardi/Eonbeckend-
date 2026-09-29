@@ -12164,7 +12164,22 @@ async function creaSal(cliente, percentuale, importoDetto, note){
 }
 async function provaSal(testo){
   if(currentProfession !== "edile") return false;
-  const s = capisciSal(testo);
+  let s = capisciSal(testo);
+  /* "Fammi il SAL numero 2 del cantiere Ferraro" senza la percentuale: la chiede (29/09/2026) */
+  if(!s && isDbReady()){
+    const m = String(testo || "").trim().replace(/[.!?]+$/, "").match(/^(?:(?:fai|fammi|segna|segnami|registra|crea|nuovo|metti|prepara|preparami)\s+(?:il\s+|un\s+|lo\s+)?)?s\.?a\.?l\.?\b\s*(?:(?:n\.?|numero)\s*\d+\s*)?(.*)$/i);
+    const resto = m ? m[1].replace(/^(?:(?:del|dei|della|dello|per|di|da|dal|al|a|il|lo|la)\s+)*(?:cantiere|lavori|lavoro|cliente)?\s*(?:(?:del|della|di|da|dal|per)\s+)?/i, "").trim() : "";
+    const cliente = resto && !/\d/.test(resto) ? clienteDaNomeDetto(resto) : null;
+    if(cliente){
+      domandaDelCodice({ titolo: "SAL · " + cliente.name, domanda: "A che punto sono i lavori? (percentuale, es. 40%)", segnaposto: "Es. 40%", onRisposta: async (t) => {
+        const n = Number(String(t).replace(",", ".").replace(/[^\d.]/g, ""));
+        if(!(n > 0 && n <= 100)) return;
+        chiudiRisorsaCard();
+        await provaSal("sal " + n + "% " + cliente.name);
+      } });
+      return true;
+    }
+  }
   if(!s || !isDbReady()) return false;
   const nuovo = await creaSal(s.cliente, s.percentuale, s.importo, "");
   if(!nuovo) return false;
@@ -12304,7 +12319,7 @@ function apriUrgenze(){
    documento da stampare o salvare in PDF, sul modello dell'allegato I.
    Resta nella scheda del cliente e in "Certificazioni e documenti".
    È una bozza da controllare prima della firma: lo dice anche il foglio. */
-const FRASE_DICO = /^(?:(?:fai|fammi|prepara|preparami|crea|creami|compila|compilami|scrivi|scrivimi|nuova)\s+(?:la\s+|una\s+)?(?:nuova\s+)?(?:dico|di\.\s*co\.?|dichiarazione\s+di\s+conformit[aà])|(?:nuova\s+)?dichiarazione\s+di\s+conformit[aà])(?:\s+(.*))?$/i;
+const FRASE_DICO = /^(?:(?:fai|fammi|prepara|preparami|crea|creami|compila|compilami|scrivi|scrivimi|nuova)\s+(?:la\s+|una\s+)?(?:nuova\s+)?(?:dico|di\.\s*co\.?|dichiarazione\s+di\s+conformit[aà])|(?:nuova\s+)?dichiarazione\s+di\s+conformit[aà]|(?:la\s+)?dico(?=\s+(?:per|dell|dell'|della|del|impianto)\b))(?:\s+(.*))?$/i;
 const DICO_TIPI = [["nuovo", "nuovo impianto"], ["trasformazione", "trasformazione"], ["ampliamento", "ampliamento"], ["manutenzione", "manutenzione straordinaria"], ["altro", "altro"]];
 const DICO_USI = [["civile", "civile"], ["commercio", "commercio"], ["industriale", "industriale"], ["altri", "altri usi"]];
 const DICO_ALLEGATI = [
@@ -13019,12 +13034,20 @@ function letturaImpegnoPerServer(l){
 function rispondiSuiDati(l){
   const oggi = new Date();
   const n = EonLettore.norm(l.testo);
+  const soldiDi = (cl) => {
+    const sue = incomes.filter(i => (i.clientId && i.clientId === cl.id) || nomeChiave(i.client || "") === nomeChiave(cl.name));
+    const pagato = sue.filter(i => i.status === "incassato").reduce((t, i) => t + (Number(i.amount) || 0), 0);
+    const deve = sue.filter(i => i.status !== "incassato").reduce((t, i) => t + (Number(i.amount) || 0), 0);
+    navigateTo("entrate");
+    if(!sue.length) return { titolo: cl.name, testo: "Nessuna entrata per " + cl.name + "." };
+    return { titolo: cl.name, testo: (deve > 0 ? "Ti deve ancora **" + euroConti(deve) + "**" : "Ha pagato tutto") + "\nIncassati " + euroConti(pagato) };
+  };
   if(l.tema === "crediti"){
-    if(l.cliente) return capisciDomandaSoldi("quanto ho incassato da " + l.cliente.name);
+    if(l.cliente) return soldiDi(l.cliente);
     return capisciDomandaSoldi("chi mi deve");
   }
   if(l.tema === "incassi"){
-    if(l.cliente) return capisciDomandaSoldi("quanto ho incassato da " + l.cliente.name);
+    if(l.cliente) return soldiDi(l.cliente);
     const mese = MESI_LUNGHI.find(m => new RegExp("\\b" + m + "\\b").test(n));
     const periodo = /\bmese\s+scorso|scorso\s+mese\b/.test(n) ? "il mese scorso" : /\banno\b/.test(n) ? "quest anno" : mese ? mese : "questo mese";
     return capisciDomandaSoldi("quanto ho incassato " + periodo);
@@ -13103,6 +13126,26 @@ async function provaLettore(testo, viaVoce, invia){
     case "cliente": {
       /* C'è già, con un altro telefono: "Aggiorno il numero?" (29/09/2026). Il resto lo scrive il server col codice */
       const tel = (l.testo.match(/(?:\+?39\s?)?(?:3\d{2}[\s.]?\d{3}[\s.]?\d{3,4}|3\d{8,9}|0\d{1,3}[\s.]?\d{5,8})/) || [""])[0].replace(/[\s.]/g, "");
+      /* "Nuovo cliente Condominio Le Rose 010 234567": il nome dopo "nuovo cliente/aggiungi",
+         fino al telefono; quello che viene dopo è la nota. Lo crea il codice qui. */
+      if(!l.cliente && isDbReady()){
+        const m = l.testo.match(/^(?:(?:nuov[oa]\s+cliente|aggiungi(?:\s+(?:il|un|una|nuovo|la))?(?:\s+cliente)?|inserisci(?:\s+cliente)?)\s+)(.+?)(?:\s+((?:\+?39\s?)?(?:3\d{2}[\s.]?\d{3}[\s.]?\d{3,4}|3\d{8,9}|0\d{1,3}[\s.]?\d{5,8})))(?:\s+(.*))?$/i);
+        if(m && m[1].split(/\s+/).length <= 5 && !/\d/.test(m[1])){
+          const nome = m[1].trim().split(/\s+/).map(w => w.length <= 2 && /^(?:le|la|il|lo|di|da|de|del)$/i.test(w) ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+          if(clients.some(c => nomeChiave(c.name) === nomeChiave(nome))) return null; // c'è già: decide il server
+          const c = await creaClienteDalCodice(nome);
+          if(!c) return null;
+          const numero = m[2].replace(/[\s.]/g, "");
+          c.phone = numero; if(m[3]) c.desc = m[3].charAt(0).toUpperCase() + m[3].slice(1);
+          await dbUpdate("clients", c.id, { phone: numero, ...(m[3] ? { description: c.desc } : {}) });
+          renderClientArchive();
+          showAIToastConAnnulla("Cliente aggiunto", escapeHtml(nome) + " · " + escapeHtml(numero) + (m[3] ? " · " + escapeHtml(c.desc) : ""), async () => {
+            const i = clients.indexOf(c); if(i > -1) clients.splice(i, 1);
+            await dbUpdate("clients", c.id, { deleted_at: new Date().toISOString() }); renderClientArchive();
+          });
+          return { fatto: "cliente_nuovo" };
+        }
+      }
       if(!l.cliente || !tel) return null;
       const c = clients.find(x => x.id === l.cliente.id);
       if(!c) return null;
@@ -13138,16 +13181,23 @@ async function provaLettore(testo, viaVoce, invia){
       return r;
     }
     case "mente": {
+      // "Ricordami di mandare i solleciti ai morosi del Parco Sole": da fare, nella scheda del cliente
+      if(l.cliente && isDbReady() && /^(?:ricordami|ricordarmi|ricorda|promemoria)\b/i.test(l.testo)){
+        const cosa = String(l.cosa || l.testo).replace(/^(?:ricordami|ricordarmi|ricorda|promemoria)\s*(?:di|che|:)?\s*/i, "");
+        if(cosa.length >= 3) return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: cosa.charAt(0).toUpperCase() + cosa.slice(1), da_fare: true } };
+      }
       // Con un cliente ("Conti mi ha detto che…"): nella sua scheda, col codice sul server
       if(l.cliente && isDbReady() && !/^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|ricordami|ricordarmi)\b/i.test(l.testo)){
         const testoNota = l.cosa || l.testo;
         return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: testoNota.charAt(0).toUpperCase() + testoNota.slice(1), ...(l.daFare ? { da_fare: true } : {}) } };
       }
+      // "Ricordami di comprare raccordi da 3/4 e teflon" (senza giorno né ora): da fare nella Mente
+      const ricorda = !l.cliente && /^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i.test(l.testo) && !(l.quando && (l.quando.giornoIso || l.quando.ora));
       // Solo le frasi senza comando: le altre le sa fare già chi viene dopo
-      if(l.cliente || /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|segna|segnami|metti|mettimi|annota|salva|appunta|appuntami|fai|fammi|ciao|grazie|ricordami|ricordarmi)\b/i.test(l.testo)) return null;
+      if(!ricorda && (l.cliente || /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|segna|segnami|metti|mettimi|annota|salva|appunta|appuntami|fai|fammi|ciao|grazie|ricordami|ricordarmi)\b/i.test(l.testo))) return null;
       if(!isDbReady() || l.testo.split(/\s+/).length < 2) return null;
-      const riga = { testo: l.cosa || l.testo };
-      if(l.daFare) riga.da_fare = true;
+      const riga = { testo: ricorda ? (() => { const c = l.testo.replace(/^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i, ""); return c.charAt(0).toUpperCase() + c.slice(1); })() : (l.cosa || l.testo) };
+      if(l.daFare || ricorda) riga.da_fare = true;
       const creato = await dbInsert("cantiere_appunti", riga);
       if(!creato) return null;
       const nuovo = mappaAppunto(creato);
@@ -13166,7 +13216,7 @@ async function provaLettore(testo, viaVoce, invia){
       /* "Segna appuntamento Dini domani alle 10" con due Dini: quale? (29/09/2026) */
       const pp = EonLettore.parole(l.testo);
       const cl = EonLettore.trovaCliente(pp, contestoLettore().clienti, EonLettore.trovaQuando(pp, new Date()).usate);
-      if(li && cl.stato === "ambiguo" && cl.candidati && cl.candidati.length <= 5){
+      if(li && cl.stato === "ambiguo" && cl.candidati && cl.candidati.length <= 5 && !/^(?:no|anzi|meglio|invece)\b/i.test(l.testo)){ // "no, Mario alle 11" corregge l'ultimo: niente scelta
         const detto = cl.usate.map(i => pp[i].o).join(" ");
         scegliCliente("Nuovo impegno", "Con quale " + detto + "?", cl.candidati, (c) => {
           if(!c) return;
@@ -13177,6 +13227,11 @@ async function provaLettore(testo, viaVoce, invia){
         return { fatto: "impegno_scelta_cliente" };
       }
       return li ? { letturaImpegno: li } : null;
+    }
+    case "assemblea": {
+      // Solo per gli amministratori; per gli altri è un impegno come un altro
+      if(currentProfession !== "amministratore"){ const li = letturaImpegnoPerServer(l); return li ? { letturaImpegno: li } : null; }
+      return { comando: { azione: "assemblea", condominio: l.condominio, giorno: l.quando.giornoIso, ora: l.quando.ora, tipo: l.tipo, motivo: l.motivo || "", ...(l.cliente ? { cliente_id: l.cliente.id } : {}), ...(mestiereInProva === "amministratore" ? { prova: true } : {}) } };
     }
     case "cestino": {
       navigateTo("cestino");
@@ -13858,8 +13913,8 @@ function capisciSpostaImpegno(testo){
   const m = n.match(/^(?:sposta|spostami|spostare|rimanda|rimandami|posticipa|anticipa|rinvia)\s+(.+)$/);
   if(!m) return null;
   const parole = m[1].split(" ");
-  // l'ultima "a/alle/al/per/ad" dopo la quale c'è solo un giorno o un'ora
-  for(let k = parole.length - 2; k >= 0; k--){
+  // la prima "a/alle/al/per/ad" dopo la quale c'è solo un giorno o un'ora ("…della Conti a martedì alle 10")
+  for(let k = 1; k <= parole.length - 2; k++){
     if(!/^(?:a|alle|al|all|ad|per|verso|le)$/.test(parole[k])) continue;
     const coda = parole.slice(k).join(" ");
     const pp = EonLettore.parole(coda);
@@ -13878,7 +13933,14 @@ function provaSpostaImmediato(testo, viaVoce){
   if(!isDbReady()) return false;
   const letto = capisciSpostaImpegno(testo);
   if(!letto) return false;
-  const voci = impegniDaAnnullare(letto.richiesta);
+  /* Quale impegno: prima con tutte le parole; se non c'è, solo con il nome
+     del cliente ("la revisione della Galli" → quello di Maria Galli), poi
+     senza il tipo ("il sopralluogo della Conti" → l'appuntamento con Conti) */
+  const r = letto.richiesta;
+  const nomiClienti = r.nome.filter(w => clients.some(c => EonLettore.norm(c.name).split(" ").includes(w)));
+  let voci = impegniDaAnnullare(r);
+  if(!voci.length && nomiClienti.length && nomiClienti.length < r.nome.length) voci = impegniDaAnnullare({ ...r, nome: nomiClienti });
+  if(!voci.length && r.oggetto) voci = impegniDaAnnullare({ ...r, nome: nomiClienti.length ? nomiClienti : r.nome, oggetto: null });
   if(!voci.length || voci.length > 6) return false; // non lo trovo: forse l'ho letto male, decide l'AI
   const nuovoIso = (v) => {
     const d = interpretaQuando(v.quando);
@@ -14828,20 +14890,15 @@ function provaFotoImmediata(testo, viaVoce){
   if(!foto) return false;
   fotoRapidaDaSalvare = foto;
   const input = document.getElementById("fotoRapidaInput");
-  /* Con un cliente da creare: prima il cliente, poi un tocco su "Scatta la
-     foto" (il telefono apre la fotocamera solo subito dopo un tocco) */
+  /* Con un cliente da creare (29/09/2026, prima lo faceva l'AI): il cliente
+     col codice, poi la sua scheda col tasto "Scatta foto" in evidenza (il
+     telefono apre la fotocamera solo subito dopo un tocco) */
   if(foto.creaCliente){
+    fotoRapidaDaSalvare = null;
     (async () => {
       const c = await creaClienteDalCodice(foto.creaCliente);
       if(!c){ showAIToast("Non salvato", "Non sono riuscita a creare " + foto.creaCliente + ": riprova."); return; }
-      foto.clienteId = c.id; foto.creaCliente = null;
-      fotoRapidaDaSalvare = foto;
-      const corpo = document.createElement("div");
-      corpo.className = "foto-rapida-card";
-      corpo.innerHTML = `<button type="button" class="foto-rapida-btn" id="fotoRapidaScatta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span>Scatta la foto</span></button><p class="foto-rapida-nota"></p>`;
-      corpo.querySelector(".foto-rapida-nota").textContent = "Cliente nuovo: " + c.name + (foto.nota ? " · " + foto.nota : "");
-      corpo.querySelector("#fotoRapidaScatta").addEventListener("click", () => input.click());
-      apriRisorsaCard("Foto", corpo);
+      mostraSchedaCliente(c, { messaggio: "Cliente aggiunto. Tocca \"Scatta foto\" per la foto.", evidenziaFoto: true });
     })();
     return true;
   }
@@ -14958,8 +15015,11 @@ function provaRisorsaImmediata(testo){
     /* Al plurale e solo il nome ("preventivi di Rossi") è una domanda, non
        un documento da fare: se non ce ne sono, lo diciamo */
     const soloNome = !paroleFiltro.some(p => !/^(per|di|del|della|dello|dei|il|la|lo|i|gli|le|a|al|alla|e|che|un|una)$/.test(p));
-    if(!documenti.length && /^(preventivi|fatture)$/.test(tipoRichiesto) && soloNome){
-      mostraRispostaEON(testo, cliente.name + " non ha ancora " + tipoRichiesto + ". Per farne " + (tipoDoc === "fattura" ? "una: «fattura" : "uno: «preventivo") + " per " + cliente.name + ", lavoro e importo».", { titolo: tipoRichiesto.charAt(0).toUpperCase() + tipoRichiesto.slice(1) + " di " + cliente.name });
+    // "Mandami il preventivo di Bruni" e non ce n'è nessuno: lo diciamo (non va creato) (29/09/2026)
+    const chiedeDiVedere = /^(?:mi serve|mi servirebbe|dammi|mandami|mi mandi|mi manderesti|manda|inviami|mi invii|mi dai|mi daresti|fammi avere|fammi vedere|mi fai vedere|voglio vedere|vorrei vedere|mostrami|mostra|recupera|cerca|trova|apri)\b/.test(t);
+    if(!documenti.length && (/^(preventivi|fatture)$/.test(tipoRichiesto) || chiedeDiVedere) && soloNome){
+      const plurale = tipoDoc === "fattura" ? "fatture" : "preventivi";
+      mostraRispostaEON(testo, cliente.name + " non ha ancora " + plurale + ". Per farne " + (tipoDoc === "fattura" ? "una: «fattura" : "uno: «preventivo") + " per " + cliente.name + ", lavoro e importo».", { titolo: plurale.charAt(0).toUpperCase() + plurale.slice(1) + " di " + cliente.name });
       return true;
     }
     if(!documenti.length) return false;
@@ -15450,7 +15510,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       }
       if(esitoLettore && esitoLettore.comando){
         ricordaEsitoCodice(testo, "lettore_comando");
-        return inviaAlServer(testo, viaVoce, false, esitoLettore);
+        // più impegni già letti: al server va solo il pezzo che li riguarda (gli altri sono già fatti qui)
+        return inviaAlServer(esitoLettore.testoServer || testo, viaVoce, false, esitoLettore);
       }
       if(esitoLettore && esitoLettore.testo) testo = esitoLettore.testo; // restano i pezzi con l'ora
       if(esitoLettore && esitoLettore.letturaImpegno) letturaImpegno = esitoLettore.letturaImpegno;

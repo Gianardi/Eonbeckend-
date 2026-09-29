@@ -334,7 +334,7 @@ async function main() {
         }
         return { stato: "concluso", testo: "Fatto.", azioni: [] };
       };
-      document.getElementById("homeHeroCampo").value = "segna Mario alle 9";
+      document.getElementById("homeHeroCampo").value = "segna dentista alle 9"; // (con un nome di cliente ambiguo, dal 29/09, EON chiede "con quale?")
       document.getElementById("homeHeroSend").click();
       await new Promise((r) => setTimeout(r, 300));
       document.getElementById("homeHeroCampo").value = "no, alle 10";
@@ -343,7 +343,7 @@ async function main() {
       return { turno1: payloads[0], turno2: payloads[1] };
     });
     verifica("il primo turno non ha nota di contesto (niente da correggere ancora)", contesto.turno1 && !contesto.turno1.msg.includes("Contesto:"));
-    verifica("la correzione include il contesto dell'azione precedente", contesto.turno2 && contesto.turno2.msg.includes("Contesto:") && contesto.turno2.msg.includes("imp1"));
+    verifica("la correzione include il contesto dell'azione precedente", contesto.turno2 && contesto.turno2.msg.includes("Contesto:") && contesto.turno2.msg.includes("imp1"), JSON.stringify(contesto).slice(0, 400));
 
     /* Un turno con PIÙ azioni insieme deve ricordarle TUTTE, non solo
        l'ultima (vedi il commento in index.html accanto a
@@ -365,10 +365,10 @@ async function main() {
         }
         return { stato: "concluso", testo: "Fatto.", azioni: [] };
       };
-      document.getElementById("homeHeroCampo").value = "segna Mario alle 9 e Luca alle 10";
+      document.getElementById("homeHeroCampo").value = "segna dentista alle 9 e commercialista alle 10";
       document.getElementById("homeHeroSend").click();
       await new Promise((r) => setTimeout(r, 300));
-      document.getElementById("homeHeroCampo").value = "no, Mario alle 11";
+      document.getElementById("homeHeroCampo").value = "no, dentista alle 11";
       document.getElementById("homeHeroSend").click();
       await new Promise((r) => setTimeout(r, 300));
       return payloads[1];
