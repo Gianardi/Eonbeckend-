@@ -23,7 +23,8 @@ from tokenizers import Tokenizer, models, pre_tokenizers, trainers
 RADICE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DATI = os.path.join(RADICE, "eval", "neurale", "dati")
 SALVA = "--salva" in sys.argv
-random.seed(7); np.random.seed(7); torch.manual_seed(7)
+SEME = int(os.environ.get("SEME", "7"))
+random.seed(SEME); np.random.seed(SEME); torch.manual_seed(SEME)
 torch.set_num_threads(4)
 
 INTENTI = json.load(open(os.path.join(DATI, "intenti.json")))
@@ -31,6 +32,9 @@ K = len(INTENTI)
 leggi = lambda f: [json.loads(r) for r in open(os.path.join(DATI, f)) if r.strip()]
 allena, esame = leggi("allenamento.jsonl"), leggi("esame.jsonl")
 allena = [x for x in allena if x["segni"]]
+# l'esame vero (giro 16/17) non si guarda mentre si scelgono le varianti: NASCONDI_ESAME=1
+NASCONDI = os.environ.get("NASCONDI_ESAME") == "1"
+palestra = [x for x in esame if not x["insieme"].startswith(("giro 16", "giro 17"))]
 
 # la maestra pesa di più: frasi scritte a mano, più varie del frasario
 PESO_FONTE = {"maestra": float(os.environ.get("PESO_MAESTRA", "3")), "frasario": 1.0, "generatore": 0.7, "simulatore": 1.0}
@@ -136,7 +140,7 @@ for ep in range(EPOCHE):
         loss = (F.cross_entropy(modello(ids, m), y, reduction="none", label_smoothing=0.05) * w).sum() / w.sum()
         opt.zero_grad(); loss.backward(); nn.utils.clip_grad_norm_(modello.parameters(), 1.0); opt.step(); sched.step()
         tot += loss.item() * len(b)
-    print(f"epoca {ep + 1}: perdita {tot / len(tr):.3f} · da parte {accuratezza(val):.3f} · esame (tutto) {accuratezza(esame):.3f} · {time.time() - t0:.0f}s", flush=True)
+    print(f"epoca {ep + 1}: perdita {tot / len(tr):.3f} · da parte {accuratezza(val):.3f} · palestra {accuratezza(palestra):.3f} · {time.time() - t0:.0f}s", flush=True)
 
 # ---------- Temperatura ----------
 # Tarata sul giro 15 (la "palestra": frasi di scrittori indipendenti, mai in
@@ -158,6 +162,7 @@ pred = p.argmax(-1); conf = p.max(-1).values
 ys = torch.tensor([x["y"] for x in esame])
 print(f"\nTemperatura {Tbest:.1f}")
 for ins in dict.fromkeys(x["insieme"] for x in esame):
+    if NASCONDI and ins.startswith(("giro 16", "giro 17")): continue
     idx = [i for i, x in enumerate(esame) if x["insieme"] == ins]
     g = (pred[idx] == ys[idx]).float()
     sic = [i for i in idx if conf[i] >= 0.8]
