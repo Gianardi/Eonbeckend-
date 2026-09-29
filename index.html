@@ -14170,7 +14170,7 @@ function giraComandoImpegno(n){
      "Benedetti domani non c'è, spostalo a venerdì alle 16", "Scaglia domani il montaggio
      anticipiamolo alle 8 e mezza", "la Pellizzari ha chiamato, sabato non può, annulla l'incontro" */
   else if(!/^(?:sposta|annulla|annullami|cancella|cancellami|elimina|disdici|togli|rimanda|anticipa|posticipa|rinvia)\b/.test(t)){
-    const mv = t.match(/^(.+?)\s+(?:(?:me\s+)?(?:lo|la|li|le)\s+)?(spost\w*|anticip\w*|posticip\w*|rimand\w*|mettil[oaie]|mettiamol[oaie]|annull\w*|cancell\w*|disdic\w*)(?:\s+(.*))?$/);
+    const mv = t.match(/^(.+?)\s+(?:(?:me\s+)?(?:lo|la|li|le)\s+)?((?:spost|anticip|posticip|rimand)(?:a|al[oaie]|amel[oaie]|iamo|iamol[oaie]|are)|mettil[oaie]|mettiamol[oaie]|(?:annull|cancell)(?:a|al[oaie]|amel[oaie]|iamo|iamol[oaie])|disdic(?:i|il[oaie]))(?:\s+(.*))?$/);
     if(mv){
       const testa = mv[1].replace(/,/g, " ").replace(COMMENTI_IMPEGNO, " ").replace(/\s+/g, " ").trim();
       if(testa && !/\b(?:preventiv|fattur|appunt|nota|cartell|foto|messaggi|mail)\w*/.test(testa) && nominaImpegno(testa)) t = verbo(mv[2]) + " " + testa + (mv[3] ? " " + mv[3] : "");
@@ -15320,7 +15320,7 @@ function capisciFotoRapida(testo){
   return { ...letta, clienteId: esiste ? esiste.id : null, clienteNome: creaCliente, creaCliente: esiste ? null : creaCliente, nota: letta.nota.replace(/^(?:Questo|Questa)$/i, "") };
 }
 function capisciFotoRapidaSemplice(t){
-  if(!/\bfot/.test(t) || /\b(vedere|mostra|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|recupera)\b/.test(t)) return null;
+  if(!/\bfot/.test(t) || /\b(vedere|rivedere|rivedi|vedi|guarda|guardare|mostra|mostrami|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|trovami|recupera|dove|quali|ultime)\b/.test(t)) return null;
   /* Giro 15: "aspetta prima di smontare fai una foto a…", "EON fai una foto al colore
      della Colombo adesso che è finito", "scatta 'na foto all'unità esterna", "apri la
      fotocamera che fotografo il salvavita": il comando anche a metà, il perché si toglie */
