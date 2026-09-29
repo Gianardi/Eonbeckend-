@@ -4973,3 +4973,26 @@ ROADMAP 0b.11.
   tornano nella memoria dell'app finta (nel telefono sì, si ricarica la
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
+
+### Il modello di EON (29/09/2026, ROADMAP 0b.15)
+
+- `lettore.js`: `caratteristiche(testo, ctx)` (f:/f2: prime parole, w:, b:,
+  c: n-grammi 3-5 di caratteri, `<cl>` `<tempo>` `<soldi>` `<tel>` `<num>`,
+  `?`, `#ora`, `#giorno`), `caricaModello(json)`, `classifica(testo, ctx)` →
+  `{intento, p, secondo, p2}`; `parafrasi(testo)` (tabella `PARAFRASI`);
+  `riscrivi(intento, testo, ctx)`.
+- `modello-eon.json`: `{versione, intenti, feat: {nome: indice}, W: base64
+  int8 [F×K], scala[K], b[K], temperatura}` (scala e b già divisi per la
+  temperatura). Rifarlo: `node eval/modello/allena.mjs --salva`.
+- App: carica il modello al `load`; `parafrasi` all'inizio di `elabora`;
+  `provaModello(l, testo)` in `provaLettore` quando l'azione è mente /
+  comando / domanda / niente: `{rifai}` → `elabora(riscritta, …, {daModello:
+  true})` (mai due volte), `{alServer}` per domanda/saluto che sarebbero
+  finiti nella Mente. Messaggi/email da una nota solo con p ≥ 0.95.
+- Prove: `eval/frasi-nuove-mestieri.test.js` accetta `FRASI=file.json`
+  (`frasi-prova-finale-app.json`, `frasi-prova-cieca.json`) e `impegni` da
+  mettere in calendario prima delle frasi.
+- Soglie per i 50 tester (da Andrea, 29/09): attivazione 1a settimana ≥70%;
+  uso settimanale a 4 settimane ≥30% = si continua, 15-30% = si corregge,
+  <10% dopo due giri = si cambia strada; test di Sean Ellis ≥40% "molto
+  dispiaciuto"; 5-10 disposti a pagare. Dati dal registro, mai i messaggi.

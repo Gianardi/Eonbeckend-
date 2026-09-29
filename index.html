@@ -13860,6 +13860,9 @@ function capisciAnnullaImpegni(testo){
   // "Cancella tutto il calendario", "annulla tutti gli appuntamenti": tutti quelli in programma, da scegliere
   const tutto = parole.includes("calendario") || ((parole.includes("tutti") || parole.includes("tutte") || parole.includes("tutto")) && !!oggetto);
   if(!oggetto && parole.includes("calendario")) oggetto = "impegni";
+  /* "Annulla il rilievo alla Vela", "annulla la verifica della farmacia" (29/09/2026): senza la parola
+     "appuntamento", basta il nome di un cliente; il resto ("rilievo", "verifica") si cerca nel titolo */
+  if(!oggetto && nome.length && nome.length <= 3 && nome.some(w => clients.some(c => normalizzaComando(c.name).split(" ").includes(w)))) oggetto = "impegno";
   if(!oggetto || nome.length > 3) return null;
   if(!giorno && !ora && !nome.length && !tutto) return null; // "annulla gli appuntamenti": troppo vago
   let data = null;

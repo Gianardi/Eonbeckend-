@@ -75,6 +75,9 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
+**Fatto il 29/09 (sera), nel prossimo pacchetto:** il modello di EON (0b.15),
+nostro, dentro l'app: prova cieca 74/77 (96%) al primo colpo.
+
 **Fatto il 29/09 (pomeriggio), nel prossimo pacchetto:** EON capisce col codice
 anche le frasi lunghe (0b.14): preventivo dettato voce per voce, correzioni a
 voce, 136/136 frasi vere di Andrea, 140/143 frasi nuove per i 5 mestieri.
@@ -319,6 +322,42 @@ DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
 alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.15 Il modello di EON — FATTO il 29/09 (sera), versione 1
+Andrea: "ci serve per forza il modello funzionante… arrivare ai tester con il
+modello già avanzato". Deciso con lui: un modello **nostro**, non pagato a
+nessuno, piccolo, **dentro l'app** (funziona anche senza campo); sul server
+arriverà un modello "di significato" più grande quando ci saranno le frasi
+vere dei tester.
+
+- **Com'è fatto**: legge parole, coppie di parole e pezzi di parola (regge
+  gli errori di dettatura), con nomi/giorni/ore/importi/telefoni al posto
+  di segnaposto; decide il cassetto tra 20 (calendario, preventivo, cerca
+  documento, invio, sposta/annulla, messaggio, email, chiamata, cliente,
+  domanda sui dati, domanda all'AI, incasso, foto, cartella, urgenza, SAL,
+  DiCo, assemblea, saluto, Mente). 332 KB (`modello-eon.json`), sicurezza
+  tarata (quando dice "sono sicuro" ha ragione il 96%).
+- **Come lavora con le regole**: prima i **modi di dire → forma normale**
+  ("fai il numero di X" = chiama X, "salvami il numero di…" = aggiungi,
+  "arrivato il bonifico di X" = X ha pagato, "dove ho messo il…?" = mostrami);
+  poi le regole; se non capiscono e il modello è sicuro (≥85%), la frase si
+  riscrive nella forma del suo cassetto e si rilegge. Domande e saluti non
+  finiscono più nella Mente.
+- **Allenamento**: 12 mila frasi generate (`eval/modello/genera-frasi.mjs`:
+  5 mestieri, errori di dettatura, riempitivi) + simulatore;
+  `node eval/modello/allena.mjs --salva` rifà il modello e lo misura.
+- **Numeri onesti** (frasi mai viste): modello da solo 91%; prova finale
+  nell'app 79 → 88 col modello al primo colpo (99 dopo le correzioni);
+  **prova cieca finale (77 frasi, 5 mestieri, mai toccate prima): 74/77
+  (96%) al primo colpo**, 0 sbagliate gravi (1 nota presa per preventivo,
+  2 annullamenti all'AI; corretti dopo, con regole generali).
+- **Prossimi passi**: (1) coi tester, raccogliere col consenso le frasi che
+  non capisce e riallenarlo ogni settimana (0b.13 passo 2); (2) sul server
+  il modello "di significato" (serve accesso a Hugging Face, qui bloccato);
+  (3) nell'app per App Store, una copia dentro il telefono (Core ML).
+- **Per quando partiamo coi tester** (Andrea, 29/09): nel pannello admin la
+  pagina dei 4 numeri (attivazione, uso a 4 settimane, "quanto ti
+  dispiacerebbe", chi pagherebbe) — soglie in TODO.
 
 ### 0b.14 EON capisce col codice, misurato sulle frasi vere — FATTO il 29/09 (primo passo di 0b.13)
 Andrea: "doveva funzionare con il codice e non con l'AI… va esteso a tutti

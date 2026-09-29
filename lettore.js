@@ -946,7 +946,8 @@
     const docInTesta = iDoc >= 0 && (iDoc <= 1 || pp.slice(0, iDoc).every((x) => V.crea.test(x.n) || V.cerca.test(x.n) || VUOTE.has(x.n) || /^(?:mi|ci|serve|servono|nuov[oa]|devo|voglio|vorrei)$/.test(x.n)));
     /* "Devo chiedere tre preventivi per il tetto" (li chiedo io ai fornitori) e
        "manda una mail a X con il preventivo" (è una mail): non è un documento da fare */
-    const chiedoPreventivi = iDoc >= 0 && /^(?:preventivi|fatture)$/.test(pp[iDoc].n) && pp.slice(Math.max(0, iDoc - 4), iDoc).some((x) => /^(?:chiedere|richiedere|chiedi|richiedi|raccogliere|confrontare|farmi|farsi|aspetto|aspettare|ricevere|arrivati|arrivano)$/.test(x.n));
+    // (anche al singolare: "ricordami di chiedere il preventivo per le grondaie")
+    const chiedoPreventivi = iDoc >= 0 && pp.slice(Math.max(0, iDoc - 4), iDoc).some((x) => /^(?:chiedere|richiedere|chiedi|richiedi|raccogliere|confrontare|farmi|farsi|aspetto|aspettare|ricevere|arrivati|arrivano|arrivato|sollecitare|sollecita)$/.test(x.n) || (/^(?:preventivi|fatture)$/.test(pp[iDoc].n) && /^(?:chiedere|richiedere)$/.test(x.n)));
     const iCanale = indice(/^(?:mail|email|e-mail|whatsapp|messaggio|sms)$/);
     const canalePrima = iDoc >= 0 && iCanale >= 0 && iCanale < iDoc;
     if (iDoc >= 0 && !chiedoPreventivi && !canalePrima && (docInTesta || (!q.ora && !q.giornoIso)) && !ha(/^(?:modifica|correggi|cambia|annulla|cancella|elimina|togli|sposta|rinomina|duplica|copia)$/)) {
