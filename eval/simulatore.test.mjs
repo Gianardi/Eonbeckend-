@@ -85,7 +85,7 @@ VERE.forEach(([f, a]) => prova(f, a, "frasi vere di Andrea"));
 
 /* ---------- 2. Frasi che NON devono finire nel cassetto sbagliato ---------- */
 const NON_SBAGLIARE = [
-  ["Svuota il cestino", { azione: "comando" }],
+  ["Svuota il cestino", { azione: "cestino" }],
   ["Sposta l'appuntamento di Rossi a giovedì", { azione: "modifica" }],
   ["Cancella l'appuntamento di domani", { azione: "modifica" }],
   ["Modifica la fattura di Rossi", { azione: /^(?:modifica|documento)$/ }],

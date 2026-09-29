@@ -713,7 +713,16 @@
   const VERBI_COMANDO = "(?:cancella|annulla|elimina|segna|segnami|metti|fissa|vai|andare|passa|passare|sentire|senti|chiama|chiamare|richiama|telefona|telefonare|manda|mandare|inviare|invia|scrivi|scrivere|fai|fare|crea|prepara|compra|comprare|ritira|ritirare|porta|portare|ricordami|devo|appuntamento|sopralluogo|riunione|incontro|visita)";
   const SEPARA = new RegExp(`\\s*(?:[.;]\\s+|,?\\s+(?:e\\s+poi|poi|ah\\s+e|e\\s+anche|inoltre)\\s+|,\\s*(?=${VERBI_COMANDO}\\b)|\\s+e\\s+(?=${VERBI_COMANDO}\\b))`, "i");
   function dividi(testo) {
-    const parti = String(testo || "").trim().replace(/[.!]+$/, "").split(SEPARA)
+    /* Un elenco di impegni con le virgole (29/09/2026): "domani mattina sentire
+       prospect, sentite clienti per aggiuntivi, Brigida alle 18 per…, 18:30
+       Ferraresi e Albe" — con almeno due orari, ogni virgola separa */
+    const t0 = String(testo || "").trim().replace(/[.!]+$/, "");
+    const orari = (t0.match(/\b(?:alle|ore|all)\s+\d{1,2}(?:[:.]\d{2})?\b|\b\d{1,2}:\d{2}\b/gi) || []).length;
+    if (orari >= 2 && /,/.test(t0) && !/\b(?:preventiv|fattur)/i.test(t0)) {
+      const perVirgola = t0.split(/\s*[,;.]\s+|\s+(?:e\s+poi|poi)\s+/i).map((p) => p.trim()).filter((p) => p && !/^(?:e|poi)$/i.test(p));
+      if (perVirgola.length >= 2 && perVirgola.length <= 6) return perVirgola;
+    }
+    const parti = t0.split(SEPARA)
       .map((p) => String(p || "").trim().replace(/^(?:ah|e|poi|ok|allora)[,\s]+/i, "").trim())
       .filter((p) => p && !/^(?:ah|oh|e|poi|ok|allora|anzi)$/i.test(p));
     return parti.length >= 2 && parti.length <= 5 ? parti : null;
@@ -756,6 +765,7 @@
       return { ...base, domanda: true, azione: "domanda", quando };
     }
 
+    if (/^(?:svuota|svuotami|vuota|pulisci)\s+(?:il\s+)?cestino$/.test(n)) return { ...base, azione: "cestino", quando };
     /* Solo il nome di un cliente ("Steve Rob", "Franco bi"): la sua scheda (29/09/2026) */
     if (pp.length <= 4 && !q.ora && !q.giornoIso) {
       const cl = trovaCliente(pp, ctx.clienti, usate);

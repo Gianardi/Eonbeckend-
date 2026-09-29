@@ -9,7 +9,7 @@
        finito = "non riesco");
      - sbagliata: il codice ha fatto una cosa diversa da quella attesa.
    Stampa i tre numeri e l'elenco. Uso:
-   NODE_PATH=/opt/node22/lib/node_modules node eval/frasi-vere-app.test.js [--elenco] [--minimo=N] */
+   NODE_PATH=/opt/node22/lib/node_modules node eval/frasi-vere-app.test.js [--elenco] [--minimo=N] (nella suite: --minimo=130) */
 
 const { chromium } = require("playwright");
 const { spawn } = require("child_process");
@@ -20,7 +20,7 @@ const fs = require("fs");
 const PORT = 9024;
 const ROOT = path.resolve(__dirname, "..");
 const ELENCO = process.argv.includes("--elenco");
-const MINIMO = Number((process.argv.find((a) => a.startsWith("--minimo=")) || "").split("=")[1] || 0);
+const MINIMO = Number((process.argv.find((a) => a.startsWith("--minimo=")) || "").split("=")[1] || 130); // oggi 136/136: sotto 130 qualcosa si è rotto
 const DATI = JSON.parse(fs.readFileSync(path.join(__dirname, "dati", "frasi-vere-andrea.json"), "utf8"));
 
 /* ---------- Il server vero, con database e AI finti ---------- */
@@ -154,7 +154,7 @@ async function main() {
 
     for (const [frase, atteso] of DATI.frasi) {
       const ai0 = chiamateAI, prima = conta();
-      const st = await page.evaluate(async (frase) => {
+      const st = await page.evaluate(async ([frase, atteso]) => {
         chiudiRisorsaCard(); navigateTo("home");
         document.getElementById("aiToastContainer").innerHTML = "";
         document.querySelectorAll(".ai-landing-overlay").forEach((o) => { o.style.display = "none"; });
@@ -163,9 +163,12 @@ async function main() {
         try { await eonInviaHome(frase); } catch (e) { return { errore: e.message }; }
         await new Promise((r) => setTimeout(r, 60));
         // Una conferma del codice ("Sposto…?", "Annulla 1 impegno"): si tocca Sì, come farebbe l'utente
-        const si = [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, sposta$/.test(b.textContent)) || document.getElementById("annullaConferma");
+        const si = [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, (?:sposta|aggiorna)$/.test(b.textContent)) || document.getElementById("annullaConferma");
         let confermato = "";
-        if (si && !si.disabled) { confermato = document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); si.click(); await new Promise((r) => setTimeout(r, 250)); }
+        if (si && !si.disabled && (atteso === "calendario_modifica" || atteso === "cliente")) { confermato = document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); si.click(); await new Promise((r) => setTimeout(r, 250)); }
+        // "Con quale Dini?": si sceglie il primo, come farebbe l'utente
+        const quale = /Con quale|Quale /.test(document.getElementById("risorsaCorpo").textContent) && document.querySelector("#risorsaCorpo .scheda-scelta");
+        if (quale && document.getElementById("risorsaOverlay").style.display === "flex") { confermato = "scelto " + quale.textContent; quale.click(); await new Promise((r) => setTimeout(r, 300)); }
         await new Promise((r) => setTimeout(r, 120));
         const scatta = document.getElementById("fotoRapidaScatta");
         if (scatta) { confermato = confermato || document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); scatta.click(); }
@@ -179,7 +182,7 @@ async function main() {
           aperti: window.__aperti.slice(), foto: window.__fotoScatta,
           pagina: paginaAttuale, cambiata: paginaAttuale !== paginaPrima,
         };
-      }, frase);
+      }, [frase, atteso]);
       const dopo = conta();
       st.scritture = st.scritture || []; st.aperti = st.aperti || []; st.card = st.card || ""; st.toast = st.toast || ""; st.landing = st.landing || "";
       const ai = chiamateAI > ai0;

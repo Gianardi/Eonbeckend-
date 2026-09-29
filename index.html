@@ -13100,7 +13100,26 @@ async function provaLettore(testo, viaVoce, invia){
       const r = risolviClienteLettura(l, "Cliente", (c) => { chiudiRisorsaCard(); mostraSchedaCliente(c); return { fatto: "apri_cliente" }; });
       return r && r.fatto ? r : (r === null ? null : { fatto: "apri_cliente_scelta" });
     }
-    case "cliente": return null; // un cliente da aggiungere: lo scrive il server col codice
+    case "cliente": {
+      /* C'è già, con un altro telefono: "Aggiorno il numero?" (29/09/2026). Il resto lo scrive il server col codice */
+      const tel = (l.testo.match(/(?:\+?39\s?)?(?:3\d{2}[\s.]?\d{3}[\s.]?\d{3,4}|3\d{8,9}|0\d{1,3}[\s.]?\d{5,8})/) || [""])[0].replace(/[\s.]/g, "");
+      if(!l.cliente || !tel) return null;
+      const c = clients.find(x => x.id === l.cliente.id);
+      if(!c) return null;
+      const vecchio = String(c.phone || "").replace(/\D/g, "");
+      if(vecchio && vecchio.slice(-9) === tel.replace(/\D/g, "").slice(-9)){ mostraSchedaCliente(c); showAIToast("Già tra i clienti", c.name + " c'è già, con questo numero."); return { fatto: "cliente_gia" }; }
+      domandaDelCodice({ titolo: c.name, domanda: c.name + " è già tra i tuoi clienti" + (vecchio ? " con il numero " + c.phone : ", senza telefono") + ". Metto il numero " + tel + "?", senzaCampo: true,
+        scelte: [{ etichetta: "Sì, aggiorna", valore: "si" }, { etichetta: "No", valore: "no" }], onRisposta: async (v) => {
+          chiudiRisorsaCard();
+          if(v !== "si") return;
+          const prima = c.phone;
+          c.phone = tel;
+          if(isDbReady()) await dbUpdate("clients", c.id, { phone: tel });
+          renderClientArchive();
+          showAIToastConAnnulla("Numero aggiornato", escapeHtml(c.name) + " · " + escapeHtml(tel), async () => { c.phone = prima; if(isDbReady()) await dbUpdate("clients", c.id, { phone: prima || "" }); renderClientArchive(); });
+        } });
+      return { fatto: "cliente_telefono" };
+    }
     case "incasso": return gestisciIncasso(l, testo);
     case "nota_cartella": return await salvaNotaCartella(l);
     case "cartello": return apriCartelloPer(l);
@@ -13144,7 +13163,25 @@ async function provaLettore(testo, viaVoce, invia){
       /* Il percorso degli impegni sul server resta quello di sempre; in più
          riceve la lettura del lettore, da usare invece della piccola AI */
       const li = letturaImpegnoPerServer(l);
+      /* "Segna appuntamento Dini domani alle 10" con due Dini: quale? (29/09/2026) */
+      const pp = EonLettore.parole(l.testo);
+      const cl = EonLettore.trovaCliente(pp, contestoLettore().clienti, EonLettore.trovaQuando(pp, new Date()).usate);
+      if(li && cl.stato === "ambiguo" && cl.candidati && cl.candidati.length <= 5){
+        const detto = cl.usate.map(i => pp[i].o).join(" ");
+        scegliCliente("Nuovo impegno", "Con quale " + detto + "?", cl.candidati, (c) => {
+          if(!c) return;
+          chiudiRisorsaCard();
+          const titolo = detto && li.titolo.includes(detto) ? li.titolo.replace(detto, c.name) : li.titolo;
+          invia(testo, { comando: { azione: "impegni", impegni: [{ giorno: li.giorno, ora: li.ora, titolo, tipo: "incontro", cliente_id: c.id }] } });
+        });
+        return { fatto: "impegno_scelta_cliente" };
+      }
       return li ? { letturaImpegno: li } : null;
+    }
+    case "cestino": {
+      navigateTo("cestino");
+      showAIToast("Cestino", "Tocca «Svuota cestino» per eliminare tutto per sempre.");
+      return { fatto: "cestino" };
     }
     default: return null; // domande libere, modifiche: come prima
   }
@@ -13719,8 +13756,11 @@ function capisciAnnullaImpegni(testo){
     if(p.length < 2) return null;
     nome.push(p);
   }
+  // "Cancella tutto il calendario", "annulla tutti gli appuntamenti": tutti quelli in programma, da scegliere
+  const tutto = parole.includes("calendario") || ((parole.includes("tutti") || parole.includes("tutte") || parole.includes("tutto")) && !!oggetto);
+  if(!oggetto && parole.includes("calendario")) oggetto = "impegni";
   if(!oggetto || nome.length > 3) return null;
-  if(!giorno && !ora && !nome.length) return null; // "annulla gli appuntamenti": troppo vago
+  if(!giorno && !ora && !nome.length && !tutto) return null; // "annulla gli appuntamenti": troppo vago
   let data = null;
   if(giorno){
     const oggi = new Date(); oggi.setHours(0,0,0,0);
