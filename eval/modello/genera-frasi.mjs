@@ -99,6 +99,7 @@ const INTENTI = {
     "mi sono ricordato che {nome} ha il cane", "il muratore domani non viene", "pensare a un nuovo listino", "cercare un aiutante per l'estate", "{nome} è un cliente difficile, chiedere acconto",
     "scrivi negli appunti che {lavoro} costa di più", "mettilo nella mente: rivedere i prezzi", "da fare: {lavoro} per {nome}", "cose da comprare: tasselli, silicone, guanti",
     "il fornitore nuovo fa sconti sul cartongesso", "devo sentire {nome} per il saldo", "segnati di chiedere a {nome} le foto del prima", "ricorda che {nome} ha pagato metà",
+    "segnami che devo richiamare {nome} per il saldo", "segna che devo ordinare {lavoro}", "prendi nota che devo passare da {nome}",
   ],
   documento: [
     "crea preventivo da {importo} per {lavoro} e mandalo a {nome}", "fai la fattura a {nome} di {importo} e mandagliela", "preventivo {importo} per {lavoro} e invialo a {nome}", "preventivo per l'impianto di {nome} {importo}",
@@ -124,6 +125,9 @@ const INTENTI = {
     "mi sposti l'incontro con {nome} {ora}", "mi cancelli appuntamento {nome}", "disdici {nome} di {giorno}", "togli dal calendario {nome}", "anticipa {nome} alle 8",
     "posticipa la riunione {ora}", "annulla gli appuntamenti di {giorno}", "sposta il {lavoro} di {nome} {ora}", "elimina l'impegno con {nome}", "no, {nome} spostalo {ora}",
     "cancella tutto il calendario di {giorno}", "rinvia il sopralluogo da {nome} a giovedì", "cambia l'orario di {nome} {ora}",
+    // giro 5 (29/09/2026): l'impegno detto prima del verbo, e il perché in coda
+    "l'appuntamento con {nome} lo sposti {ora}", "il sopralluogo di {nome} fallo slittare {ora}", "la verifica di {nome} spostala a {giorno}", "l'incontro con {nome} rimandalo a {giorno}",
+    "cancella il {lavoro} da {nome} che è saltato", "togli l'appuntamento con {nome}, piove", "il sopralluogo da {nome} cancellalo", "fai slittare {nome} {ora}",
   ],
   messaggio: [
     "di' a {nome} che ci vediamo {quando}", "di a {nome} che arrivo {quando}", "scrivi a {nome} che {quando} ci sono", "dì a {nome} che passo {quando} per l'impianto",
@@ -149,6 +153,7 @@ const INTENTI = {
     "sono libero {quando}?", "cosa c'è in agenda {giorno}?", "quando devo vedere {nome}?", "quanti clienti ho?", "quanto ho fatturato quest'anno?", "che programma ho {giorno}?",
     "ho impegni sabato?", "chi non ha pagato?", "quanta iva devo pagare?", "quante urgenze ho?", "cosa c'è nella cartella {cartella}?", "quanto ho incassato da {nome}?",
     "fammi vedere l'agenda di {giorno}", "dimmi i miei impegni di {giorno}", "mi dici cosa ho {giorno}?", "guarda se ho qualcosa {giorno}",
+    "che lavori ho {giorno}?", "cosa ho la prossima settimana?", "cosa ho questa settimana", "cosa devo fare {giorno}", "quante fatture ho fatto quest'anno?", "quanti preventivi ho mandato?",
   ],
   domanda: [
     "ogni quanto va fatta la verifica dell'impianto di terra?", "come si fa la messa a terra di un impianto?", "che potenza serve per un impianto fotovoltaico?", "quanto costa rifare un impianto elettrico?", "serve la dico per cambiare una presa?",
@@ -158,11 +163,13 @@ const INTENTI = {
     "serve la SCIA per rifare il bagno?", "quanto devo mettere da parte per le tasse?", "mi consigli come organizzare la settimana?", "che ne pensi del nuovo listino?", "come si fa un preventivo fatto bene?",
     "che fai?", "chi sei?", "come stai?", "che palle non so cosa fare", "sono stanco oggi", "mi spieghi il superbonus?", "qual è il prezzo medio al metro per una tinteggiatura?",
     "devo chiedere l'autorizzazione al condominio per il ponteggio?", "come mi comporto con un cliente che non paga?",
+    "che pressione deve avere la caldaia", "che colla uso per il gres", "che spessore deve avere il massetto", "che cavo serve per il forno", "quale tassello va bene per il cartongesso",
   ],
   incasso: [
     "{nome} ha pagato {importo}", "{nome} mi ha pagato l'acconto di {importo}", "ho incassato {importo} da {nome}", "segna che {nome} ha saldato", "ricevuto bonifico da {nome} di {importo}",
     "{nome} ha pagato", "incassati {importo} da {nome}", "{nome} mi ha dato {importo} in contanti", "pagato {nome} {importo}", "ho sostituito il {lavoro}, {importo} pagati in contanti",
     "{nome} ha fatto il bonifico", "la signora ha pagato la rata di {importo}",
+    "{nome} mi ha pagato la fattura {importo}", "{nome} ha saldato il preventivo", "{nome} ha pagato la fattura", "mi ha pagato la fattura {nome}, {importo}",
   ],
   foto: [
     "fai la foto a cantiere", "fai la foto al cantiere", "foto all'impianto di {nome}", "scatta una foto all'impianto",

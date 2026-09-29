@@ -4974,6 +4974,35 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Giri alla cieca prima dei tester (29/09/2026 notte, ROADMAP 0b.16)
+Metodo: file `eval/dati/frasi-giroN.json` scritto PRIMA di guardare il
+codice, misurato una volta (`FRASI=frasi-giroN.json PORTA=9045 node
+eval/frasi-nuove-mestieri.test.js --elenco --minimo=0`), poi correzioni
+generali, poi giro nuovo. `SOLO=regex` rifà solo alcune frasi.
+- Terzo campo di una frase: per calendario/sposta l'ora attesa ("07:00", o
+  "08:00,11:00,15:00" = tutti), per i documenti l'imponibile atteso ("5440").
+  Il test tocca "Crea" sulla card delle voci come l'utente.
+- lettore.js: `togliRipensamenti` (ore/giorni con anzi/no/scusa), `ORE_PAROLE`/
+  `MINUTI_PAROLE` (+ "meno un quarto", "mezzogiorno"), "alle 7" = mattina
+  (1-6 = pomeriggio), giorni abituali (ogni/solo di/tutti i), `dividi` anche su
+  "e alle N", "posta" = email solo come canale, `di all'…` = messaggio,
+  `pagatoPrima`/`vuolePrima` nel ramo documento, aliquota con un solo importo
+  (`aliquotaDetta`, anche "iva inclusa al 10"), "iva 10" non è un importo,
+  PARAFRASI: "N per cento" → "N%", "segnami che devo" → "ricordami di",
+  bonifico arrivato con importo, "fammi parlare con" → chiama; temi dati
+  "documenti" e agenda ("che lavori ho", "cosa ho la prossima settimana");
+  PAROLE_DOMANDA: "che X deve/serve…", "ogni quanto".
+- index.html: `giraComandoImpegno` (impegno prima del verbo), `togliPerche`,
+  numeri nei nomi dei clienti ("via Verdi 14") per annullare e cercare,
+  annullare: fino a 5 parole col nome del cliente, ripiego sul solo cliente,
+  "non trovo X in calendario" con giorno/ora, senza giorno solo se c'è davvero,
+  mai per fatture/appunti/foto; `trovaClienteDaParole` conta le parole che
+  distinguono (non "condominio"); SAL con "per l'hotel"; agenda della
+  settimana; conteggio preventivi/fatture; `mi serve il preventivo di X` senza
+  preventivi = si prepara (come deciso), non "non ne ha".
+- Limite noto della prova: gli appuntamenti creati dal server non tornano
+  nella memoria dell'app finta (nel telefono vero sì: `aggiornaDatiToccati`).
+
 ### Il modello di EON (29/09/2026, ROADMAP 0b.15)
 
 - `lettore.js`: `caratteristiche(testo, ctx)` (f:/f2: prime parole, w:, b:,

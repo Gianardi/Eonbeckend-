@@ -75,6 +75,13 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
+**Fatto il 29/09 (notte), nel prossimo pacchetto:** pronta prima dei tester
+(0b.16): 5 giri di frasi nuove alla cieca (652 frasi, 5 mestieri + "La mia
+attività"): 95% al primo colpo, 651/652 dopo le correzioni. Prove più severe
+(ora giusta, tutti gli appuntamenti, totale del preventivo): trovati e
+corretti errori veri ("alle 7" finiva alle 19, "anzi", orari a parole, IVA 10
+con un importo solo, "Hotel Posta" letto come email).
+
 **Fatto il 29/09 (sera), nel prossimo pacchetto:** il modello di EON (0b.15),
 nostro, dentro l'app: prova cieca 74/77 (96%) al primo colpo.
 
@@ -322,6 +329,68 @@ DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
 alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.16 Pronta PRIMA dei tester: giri alla cieca — FATTO il 29/09 (notte)
+Andrea: "Io devo darla già pronta ai tester… non posso aspettare i tester".
+Quindi niente "migliora coi dati dei tester": giri di frasi nuove scritte da
+me, per ogni mestiere, **misurate una volta sola prima di toccare il codice**
+(il numero vero), poi corretti con regole generali, poi un giro nuovo.
+
+| Giro | Frasi | Al primo colpo (numero vero) | Dopo le correzioni |
+|---|---|---|---|
+| 5 (lunghe, dettate, "allora… praticamente…") | 186 | 171 (92%) | 186 |
+| 6 (nuove, dopo le correzioni del 5) | 175 | 171 (98%) | 175 |
+| 7 (la prova cattiva: "anzi", numeri a parole, niente accenti) | 123 | 117 (95%) | 123 |
+| 8 (preventivi lunghi dettati, col TOTALE controllato) | 120 | 114 (95%) | 120 |
+| 9 ("La mia attività": parrucchiera, meccanico, giardiniere, fotografo…) | 48 | 47 (98%) | 47 (*) |
+
+(*) L'unica che manca ("sposta l'appuntamento con Marta Galli alle 16") è un
+limite della prova: l'appuntamento creato un attimo prima, nella prova finta,
+non viene ricaricato; sul telefono vero sì (dopo ogni impegno EON ricarica le
+conversazioni dal database).
+
+**In tutto: 652 frasi nuove alla cieca, 620 giuste al primo colpo (95%);
+dopo le correzioni 651/652.**
+
+Più le prove di prima, rifatte con le regole nuove: frasi vere di Andrea
+136/136, prova cieca 77/77, frasi per mestiere 143/143, prova finale 99/100
+(l'unica all'AI è "mandale un messaggio…" senza dire a chi: giusto così).
+
+- **Prove più severe** (29/09): prima controllavano solo *che* un
+  appuntamento venisse creato; ora controllano anche **l'ora** (107 frasi) e,
+  con più appuntamenti in una frase, che ci siano **tutti**; per i preventivi
+  dettati, che il **totale** sia quello giusto (14 preventivi). Così sono
+  venuti fuori errori che prima passavano.
+- **Errori veri trovati e corretti** (i più importanti):
+  - "alle 7" veniva segnato alle **19** (anche l'esempio dentro EON dice
+    "domani alle 7 getto del solaio"): ora alle 7 è mattina (da 1 a 6 resta
+    pomeriggio: "alle 3" = 15).
+  - Orari a parole: "alle nove e un quarto", "alle sette e mezza", "alle dieci
+    meno un quarto", "a mezzogiorno", "alle 15 e 30".
+  - Il ripensamento: "domani alle 8 **anzi** alle 9", "giovedì anzi venerdì".
+  - Tre appuntamenti in una frase ("alle 8 Bruni poi alle 11 Tosi **e alle 16**
+    pizzeria"): ne segnava due.
+  - "posta" (Hotel Posta, cassetta della posta) veniva letta come **email**.
+  - "iva 10" con un solo importo: l'IVA restava al 22% e il "10" finiva nella
+    descrizione.
+  - L'impegno detto prima del verbo: "l'appuntamento con la Marchetti **lo
+    sposti** alle 17", "il sopralluogo di Lodi **fallo slittare**", "…
+    **cancellalo**"; il perché in coda ("…che è saltata", "…, piove").
+  - "Anna mi ha pagato **la fattura** 180 euro" = incasso (non una fattura nuova);
+    "è arrivato il bonifico della Moretti 2.000 euro"; "fammi parlare con…" = chiama.
+  - "il cliente **vuole** un preventivo…" = nota (non un preventivo da fare subito).
+  - "solo di sabato", "ogni lunedì" = abitudine, non un giorno da segnare.
+  - Domande senza punto interrogativo: "che pressione deve avere…", "ogni quanto…".
+  - Risposte col codice: "cosa ho **la prossima settimana**", "**quanti preventivi**
+    ho fatto questo mese", "che lavori ho domani"; "i documenti del condominio
+    Girasole" con più condomìni in rubrica (conta la parola che distingue).
+  - Annullare: "non trovo «getto» in calendario per domani" invece dell'AI.
+- **Cosa NON è provato**: tutto gira nell'app vera sul computer (browser vero,
+  server vero, database e AI finti), non su un telefono vero; le frasi le ho
+  scritte io, non artigiani veri. Il credito dell'AI resta da ricaricare (per
+  le domande tecniche e i casi che il codice non capisce).
+- File: `eval/dati/frasi-giro5.json` … `frasi-giro8.json`; si misurano con
+  `FRASI=frasi-giro8.json node eval/frasi-nuove-mestieri.test.js --elenco`.
 
 ### 0b.15 Il modello di EON — FATTO il 29/09 (sera), versione 1
 Andrea: "ci serve per forza il modello funzionante… arrivare ai tester con il

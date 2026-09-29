@@ -22,7 +22,7 @@ const { randomUUID } = require("crypto");
 const path = require("path");
 const fs = require("fs");
 
-const PORT = 9025;
+const PORT = Number(process.env.PORTA || 9025);
 const ROOT = path.resolve(__dirname, "..");
 const ELENCO = process.argv.includes("--elenco");
 const MINIMO = Number((process.argv.find((a) => a.startsWith("--minimo=")) || "").split("=")[1] || 135); // oggi 140/143 (al primo colpo erano 108)
@@ -88,7 +88,9 @@ globalThis.fetch = async (url, init) => {
 const conta = () => ({
   tasks: (tabelle.tasks || []).filter((t) => !t.deleted_at).length,
   tasksJson: JSON.stringify((tabelle.tasks || []).map((t) => [t.id, t.scheduled_at, t.deleted_at, t.status])),
+  quando: [...(tabelle.tasks || []), ...(tabelle.messages || []).filter((m) => m.event_type === "appt")].map((t) => String(t.scheduled_at || "")),
   doc: (tabelle.messages || []).filter((m) => m.event_type === "doc").length,
+  imponibili: (tabelle.messages || []).filter((m) => m.event_type === "doc").map((m) => { try { return JSON.parse(m.file_name).imponibile; } catch (e) { return null; } }),
   appt: (tabelle.messages || []).filter((m) => m.event_type === "appt").length,
   testo: (tabelle.messages || []).filter((m) => !m.event_type || m.event_type === "text").length,
   clients: (tabelle.clients || []).length,
@@ -171,7 +173,8 @@ async function main() {
         apriLinkEsterno = (u) => window.__aperti.push(String(u));
       }, [clienti, tabelle.tasks, mestiere]);
 
-      for (const [frase, atteso] of DATI.frasi) {
+      // SOLO=parola per rifare solo alcune frasi mentre si corregge
+      for (const [frase, atteso, oraAttesa] of DATI.frasi.filter(([f]) => !process.env.SOLO || new RegExp(process.env.SOLO, "i").test(f))) {
         const ai0 = chiamateAI, prima = conta();
         const st = await page.evaluate(async ([frase, atteso]) => {
           chiudiRisorsaCard(); navigateTo("home");
@@ -189,6 +192,9 @@ async function main() {
           const quale = /Con quale|Quale /.test(document.getElementById("risorsaCorpo").textContent) && document.querySelector("#risorsaCorpo .scheda-scelta");
           if (quale && document.getElementById("risorsaOverlay").style.display === "flex") { confermato = "scelto " + quale.textContent; quale.click(); await new Promise((r) => setTimeout(r, 300)); }
           await new Promise((r) => setTimeout(r, 120));
+          // Il preventivo con più voci: si tocca "Crea" sulla card delle voci, come l'utente
+          const crea = document.getElementById("vociCrea");
+          if (crea && atteso === "documento") { confermato = confermato || "voci: " + document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); crea.click(); await new Promise((r) => setTimeout(r, 500)); }
           const scatta = document.getElementById("fotoRapidaScatta");
           if (scatta) { confermato = confermato || document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); scatta.click(); }
           const landing = [...document.querySelectorAll(".ai-landing-overlay")].filter((o) => o.style.display !== "none" && o.offsetParent !== null).map((o) => o.textContent.replace(/\s+/g, " ").trim()).join(" ");
@@ -198,6 +204,7 @@ async function main() {
             toast: document.getElementById("aiToastContainer").textContent.replace(/\s+/g, " ").trim().slice(0, 140),
             landing: landing.slice(0, 140),
             scritture: window.__scritture.map((s) => s.tabella),
+            orari: window.__scritture.map((s) => String((s.riga && s.riga.scheduled_at) || (s.patch && s.patch.scheduled_at) || "")).filter(Boolean),
             aperti: window.__aperti.slice(), foto: window.__fotoScatta + (document.querySelector('.sc-azione[data-azione="foto"].evidenziata') ? 1 : 0),
             pagina: paginaAttuale, cambiata: paginaAttuale !== paginaPrima,
           };
@@ -228,26 +235,36 @@ async function main() {
           risposta: !!(st.card || st.toast || st.landing),
           ai: ai,
           incasso: scritto("incomes") || /incassat|acconto|pagat/i.test(vis),
-          urgenza: /urgen/i.test(vis) || scritto("tasks"),
+          urgenza: /urgen/i.test(vis) || scritto("tasks") || /Prima la sicurezza/.test(vis), // odore di gas: prima la sicurezza (voluto)
           sal: /SAL|stato di avanzamento/i.test(vis) || scritto("sal") || /sal/i.test(st.pagina || ""),
           dico: /conformit/i.test(vis) || scritto("dichiarazioni_conformita"),
           assemblea: dopo.assemblee > prima.assemblee || scritto("assemblee"),
         };
         const scrittoQualcosa = dopo.tasks > prima.tasks || dopo.doc > prima.doc || dopo.appunti > prima.appunti || dopo.clients > prima.clients || st.scritture.length > 0;
+        /* L'ORA giusta, non solo "un impegno" (29/09/2026: "alle 7" finiva alle 19
+           e le prove non se ne accorgevano). Terzo campo della frase: "07:00". */
+        const resti = [...prima.quando]; // i nuovi orari, anche se uguali a uno che c'era già
+        const nuovi = dopo.quando.filter((x) => { const k = resti.indexOf(x); if (k >= 0) { resti.splice(k, 1); return false; } return true; });
+        const orari = [...nuovi, ...(st.orari || [])];
+        // Per i documenti il terzo campo è l'imponibile atteso (somma delle voci): il totale giusto, non solo "un preventivo"
+        const imponibileAtteso = atteso === "documento" && oraAttesa ? Number(oraAttesa) : null;
+        const nuoviImponibili = dopo.imponibili.slice(prima.imponibili.length);
+        const oraSbagliata = imponibileAtteso !== null ? !nuoviImponibili.some((x) => Math.abs(Number(x) - imponibileAtteso) < 0.01) : !!oraAttesa && !oraAttesa.split(",").every((o) => orari.some((x) => x.includes("T" + o))); // "08:00,11:00,15:00": tutti e tre
         let esito;
         if (st.errore) esito = "sbagliata";
         else if (atteso === "ai") esito = scrittoQualcosa ? "sbagliata" : "giusta";
+        else if (fatto[atteso] && !ai && oraSbagliata) esito = "sbagliata";
         else if (fatto[atteso] && !ai) esito = "giusta";
         else if (!ai && !scrittoQualcosa && /Ho trovato \d+ clienti|Quale |Intendi |Per quale cliente/.test(st.card)) esito = "giusta"; // chiede quale: giusto
         else if (ai && !scrittoQualcosa) esito = "ai";
         else esito = "sbagliata";
         perMestiere[mestiere][esito]++;
-        risultati[esito].push(`[${mestiere}] «${frase}» atteso ${atteso}${ai ? " [AI]" : ""} — ${JSON.stringify({ card: st.card.slice(0, 70), toast: st.toast.slice(0, 60), landing: st.landing.slice(0, 50), scritture: st.scritture, pagina: st.cambiata ? st.pagina : undefined, errore: st.errore })}`);
+        risultati[esito].push(`[${mestiere}] «${frase}» atteso ${atteso}${oraAttesa ? " alle " + oraAttesa : ""}${oraSbagliata ? (imponibileAtteso !== null ? " [IMPONIBILE SBAGLIATO: " + nuoviImponibili.join(",") + "]" : " [ORA SBAGLIATA: " + orari.slice(-2).join(",") + "]") : ""}${ai ? " [AI]" : ""} — ${JSON.stringify({ card: st.card.slice(0, 70), toast: st.toast.slice(0, 60), landing: st.landing.slice(0, 50), scritture: st.scritture, pagina: st.cambiata ? st.pagina : undefined, errore: st.errore })}`);
       }
 
       await page.close();
     }
-    const tot = Object.values(TUTTI.mestieri).reduce((t, m) => t + m.frasi.length, 0);
+    const tot = Object.values(perMestiere).reduce((t, v) => t + v.giusta + v.ai + v.sbagliata, 0);
     const pc = (n) => Math.round((n / tot) * 100);
     console.log(`Frasi nuove per mestiere nell'app: ${tot}`);
     Object.entries(perMestiere).forEach(([k, v]) => console.log(`  ${k.padEnd(15)} giuste ${v.giusta}/${v.giusta + v.ai + v.sbagliata} · all'AI ${v.ai} · sbagliate ${v.sbagliata}`));

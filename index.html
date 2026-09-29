@@ -12149,6 +12149,7 @@ function capisciSal(testo){
   const mi = resto.match(/(?:,?\s*(?:di|da|per|importo|rata)?\s*)(?:€\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2}))?\s*(?:euro|€)\s*$/i);
   if(mi){ importo = Number(mi[1].replace(/\./g, "") + (mi[2] ? "." + mi[2] : "")); resto = resto.slice(0, mi.index).trim(); }
   resto = resto.replace(/^(?:(?:del|dei|della|dello|per|di|da|dal|al|a|il|lo|la)\s+)*(?:cantiere|lavori|lavoro|cliente)?\s*(?:(?:del|della|di|da|dal|per)\s+)?/i, "").trim();
+  resto = resto.replace(/^(?:l|all|dell|dall|nell)['’]\s*/i, "").trim(); // "per l'hotel Miramare"
   if(!resto || /\d/.test(resto)) return null;
   const cliente = clienteDaNomeDetto(resto);
   if(!cliente) return null;
@@ -12676,7 +12677,8 @@ function gestisciDocumento(l, testo, invia){
     }
     // Tutto pronto: lo fa il codice sul server
     const comando = { azione: "documento", tipo: s.tipo, importo: s.importo, lavoro: s.lavoro };
-    if(s.voci){ comando.voci = s.voci.map(v => ({ descrizione: v.descrizione, quantita: v.quantita, prezzo: v.prezzo })); if(s.aliquota) comando.aliquota_iva = s.aliquota; }
+    if(s.voci) comando.voci = s.voci.map(v => ({ descrizione: v.descrizione, quantita: v.quantita, prezzo: v.prezzo }));
+    if(s.aliquota !== null && s.aliquota !== undefined) comando.aliquota_iva = s.aliquota; // anche con un solo importo: "2.900 euro iva 10"
     if(s.cliente) comando.cliente_id = s.cliente.id; else comando.nuovo_cliente = s.clienteNuovo;
     const dopo = s.invio ? (risposta) => offriInvioDocumento(risposta) : null;
     if(prima) return { comando, dopo };
@@ -13092,12 +13094,39 @@ function rispondiSuiDati(l){
       if(!voci.length) return { titolo: l.cliente.name, testo: "Non hai impegni in programma con " + l.cliente.name + "." };
       return { titolo: l.cliente.name, testo: voci.slice(0, 5).map(v => "**" + quandoBreve(v.quando) + "** – " + v.titolo).join("\n") };
     }
+    /* "Cosa ho la prossima settimana?", "cosa ho questa settimana?" (giro 5):
+       i giorni della settimana, uno per riga, solo quelli con qualcosa */
+    if(!(l.quando && l.quando.giornoIso) && /\bsettimana\b/.test(n)){
+      const prossima = /\b(?:prossima|prossime|ventura)\b/.test(n);
+      const inizio = new Date(); inizio.setHours(0, 0, 0, 0);
+      const lun = new Date(inizio); lun.setDate(lun.getDate() - ((lun.getDay() + 6) % 7) + (prossima ? 7 : 0));
+      const da = prossima ? lun : inizio, a = new Date(lun); a.setDate(a.getDate() + 7);
+      const righe = [];
+      for(const d = new Date(da); d < a; d.setDate(d.getDate() + 1)){
+        const v = impegniDelGiorno(new Date(d));
+        if(v.length) righe.push("**" + d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric" }) + "**: " + v.map(x => (x.ora ? x.ora + " " : "") + x.titolo).join(" · "));
+      }
+      const et = prossima ? "la prossima settimana" : "questa settimana";
+      navigateTo("calendario");
+      return righe.length ? { titolo: "Impegni " + et, testo: righe.join("\n") } : { titolo: "Settimana libera", testo: "Niente in programma " + et + "." };
+    }
     const data = l.quando && l.quando.giornoIso ? new Date(l.quando.giornoIso + "T00:00:00") : (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
     const quando = l.quando && l.quando.etichetta || "oggi";
     const voci = impegniDelGiorno(data);
     navigateTo("calendario");
     if(!voci.length) return { titolo: quando.charAt(0).toUpperCase() + quando.slice(1), testo: "Niente in programma per " + quando + "." };
     return { titolo: (voci.length === 1 ? "1 impegno " : voci.length + " impegni ") + quando, testo: voci.map(v => v.ora ? "**" + v.ora + "** – " + v.titolo : v.titolo).join("\n") };
+  }
+  /* "Quanti preventivi ho fatto questo mese?" (giro 5): contati dai documenti fatti con EON */
+  if(l.tema === "documenti"){
+    const tipo = /\bfattur/.test(n) ? "fattura" : "preventivo";
+    const scorso = /\bmese\s+scorso|scorso\s+mese\b/.test(n), anno = /\banno\b/.test(n), tutti = !scorso && !anno && !/\bmese\b/.test(n);
+    const rif = scorso ? new Date(oggi.getFullYear(), oggi.getMonth() - 1, 15) : oggi;
+    const docs = documentiVeri().filter(d => d.dati && d.dati.tipo === tipo && (tutti || (() => { const x = d.createdAt ? new Date(d.createdAt) : null; if(!x || isNaN(x)) return false; return anno ? x.getFullYear() === oggi.getFullYear() : x.getFullYear() === rif.getFullYear() && x.getMonth() === rif.getMonth(); })()));
+    const et = tutti ? "in tutto" : anno ? "quest'anno" : "a " + MESI_LUNGHI[rif.getMonth()];
+    const nome = tipo === "fattura" ? (docs.length === 1 ? "fattura" : "fatture") : (docs.length === 1 ? "preventivo" : "preventivi");
+    const totale = docs.reduce((t, d) => t + (Number(d.dati.totale) || 0), 0);
+    return { titolo: docs.length + " " + nome + " " + et, testo: docs.length ? "Per un totale di " + euroConti(totale) + ".\n" + docs.slice(0, 8).map(d => "**" + (d.clienteChat || "") + "** – " + euroConti(Number(d.dati.totale) || 0)).join("\n") : "Nessun " + (tipo === "fattura" ? "fattura" : "preventivo") + " fatto con EON " + et + "." };
   }
   if(l.tema === "clienti"){
     const attivi = clients.filter(c => !c.archived).length;
@@ -13837,18 +13866,46 @@ function quandoBreve(quandoVisualizzato){
    il cliente nel portale vede l'appuntamento annullato. Nel dubbio → AI. */
 const VERBI_ANNULLA = new Set(["annulla","annullami","annullare","cancella","cancellami","cancellare","elimina","eliminami","eliminare","disdici","disdire","togli","toglimi","leva","levami","rimuovi"]);
 const OGGETTI_ANNULLA = /^(appuntament[oi]|impegn[oi]|chiamat[ae]|telefonat[ae]|sopralluog(?:o|hi)|incontr[oi]|riunion[ei])$/;
-const PAROLE_ANNULLA = new Set(["mi","l","lo","la","gli","i","le","il","un","una","tutti","tutte","tutto","di","del","della","dei","delle","per","con","a","al","alla","ai","da","miei","mio","mia","ho","che","segnato","segnati","segnata","segnate","in","calendario","programma","eon","ehi","ore","alle","e","quello","quelli","quella","quelle","previsto","previsti","prevista","previste"]);
+const PAROLE_ANNULLA = new Set(["mi","l","lo","la","gli","i","le","il","un","una","tutti","tutte","tutto","di","del","della","dei","delle","per","con","a","al","alla","ai","da","miei","mio","mia","ho","che","segnato","segnati","segnata","segnate","in","calendario","programma","eon","ehi","ore","alle","e","quello","quelli","quella","quelle","previsto","previsti","prevista","previste","all","dall","dell","nell","sull","dal","dalla","dello","sul","sulla","nel","nella"]);
 
+/* Giro 5 (29/09/2026): l'impegno detto PRIMA del verbo ("l'appuntamento con
+   la Marchetti lo sposti alle 17", "il sopralluogo di Lodi fallo slittare
+   alle 10", "la verifica spostala alle 16") diventa "sposta …"/"annulla …";
+   e la coda che spiega il perché ("…che è saltata", "…, piove") si toglie. */
+function giraComandoImpegno(n){
+  let t = n.replace(/^(?:fai|fammi)\s+slittare\s+/, "sposta ").replace(/^slitta\s+/, "sposta ");
+  const verbo = (v) => /^(?:spost|rimand|anticip|posticip|slitt)/.test(v) ? "sposta" : "annulla";
+  const testaBuona = (h) => /^(?:l|il|lo|la|i|gli|le|quello|quella|un|una|appuntament|impegn|sopralluog|incontr|riunion|chiamat|telefonat|verific)/.test(h) && !/\bche\b/.test(h);
+  let m = t.match(/^(.+?)\s+(?:me\s+)?(?:lo|la|li|le|mi)\s+(sposti|spostiamo|rimandi|anticipi|posticipi|cancelli|annulli|togli|levi)(?:\s+(.*))?$/);
+  if(!m) m = t.match(/^(.+?)\s+(spostal[oaie]|rimandal[oaie]|anticipal[oaie]|posticipal[oaie]|cancellal[oaie]|annullal[oaie]|togli(?:el)?[oaie]|leval[oaie]|fall[oaie]\s+slittare|fai\s+slittare)(?:\s+(.*))?$/);
+  if(m && testaBuona(m[1])) t = verbo(m[2].replace(/^fa\w*\s+/, "")) + " " + m[1] + (m[3] ? " " + m[3] : "");
+  return t;
+}
+function togliPerche(n){
+  /* dopo la virgola si taglia solo un commento ("…, piove"), mai altri nomi,
+     giorni o ore ("annulla Rossi, Bianchi e Verdi") */
+  const virgola = n.match(/^(.*?)\s*,\s*(.*)$/);
+  if(virgola){
+    const coda = virgola[2];
+    const nomi = clients.some(c => normalizzaComando(c.name).split(" ").some(w => w.length > 2 && (" " + coda + " ").includes(" " + w + " ")));
+    if(!nomi && !/\d|\b(?:oggi|domani|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|tutti|tutte|tutto|anche)\b/.test(coda)) n = virgola[1];
+  }
+  return n.replace(/\s+(?:che\s+(?:e|si\s+e|hanno|ha|non)|perche|poiche|siccome|tanto|visto\s+che|dato\s+che)\s.*$/, "").trim();
+}
 function capisciAnnullaImpegni(testo){
-  const n = String(testo || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’'?!.,;]/g, " ").replace(/\s+/g, " ").trim();
+  const n0 = String(testo || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’'?!.;]/g, " ").replace(/\s+/g, " ").trim();
+  const n = togliPerche(giraComandoImpegno(n0)).replace(/,/g, " ").replace(/\s+/g, " ").trim();
   const parole = n.split(" ").filter(Boolean);
+  // "via Verdi 14": un numero che fa parte del nome di un cliente è nome, non ora
+  const nomiConNumero = clients.map(c => normalizzaComando(c.name)).filter(x => /\d/.test(x));
   while(parole.length && (parole[0] === "ehi" || parole[0] === "eon")) parole.shift();
   if(!parole.length || !VERBI_ANNULLA.has(parole[0])) return null;
   let giorno = null, ora = null, oggetto = null;
   const nome = [];
-  for(const p of parole.slice(1)){
+  for(const [i, p] of parole.slice(1).entries()){
     if(VERBI_ANNULLA.has(p)) return null; // due azioni
     if(OGGETTI_ANNULLA.test(p)){ oggetto = oggetto || p; continue; }
+    if(/^\d+$/.test(p) && i > 0 && nomiConNumero.some(x => (" " + x + " ").includes(" " + parole[i] + " " + p + " "))){ nome.push(p); continue; }
     if(p === "oggi" || p === "domani" || p === "dopodomani" || GIORNI_LETTURA.includes(p)){ if(giorno && giorno !== p) return null; giorno = p; continue; }
     const o = p.match(/^(\d{1,2})(?::(\d{2}))?$/);
     if(o){ if(ora) return null; const h = +o[1]; if(h < 1 || h > 23) return null; ora = { h, m: o[2] ? +o[2] : null }; continue; }
@@ -13862,8 +13919,19 @@ function capisciAnnullaImpegni(testo){
   if(!oggetto && parole.includes("calendario")) oggetto = "impegni";
   /* "Annulla il rilievo alla Vela", "annulla la verifica della farmacia" (29/09/2026): senza la parola
      "appuntamento", basta il nome di un cliente; il resto ("rilievo", "verifica") si cerca nel titolo */
-  if(!oggetto && nome.length && nome.length <= 3 && nome.some(w => clients.some(c => normalizzaComando(c.name).split(" ").includes(w)))) oggetto = "impegno";
-  if(!oggetto || nome.length > 3) return null;
+  // "domani mattina": la parte della giornata non la filtro qui, decide l'AI (come prima)
+  if(nome.some(w => /^(?:mattina|mattinata|pomeriggio|sera|serata)$/.test(w))) return null;
+  // "annulla la fattura di Rossi", "cancella l'appunto…": non è un impegno
+  if(nome.some(w => /^(?:fattur|preventiv|appunt|not[ae]$|foto|document|cartell|messagg|client|sal$|dico$|incass|pagament|entrat|mail|email)/.test(w))) return null;
+  // con il nome di un cliente ("la verifica del negozio Moda Lia") si arriva a 5 parole
+  const conCliente = nome.some(w => clients.some(c => normalizzaComando(c.name).split(" ").includes(w)));
+  const massimo = conCliente ? 5 : 3;
+  if(!oggetto && nome.length && nome.length <= massimo && conCliente) oggetto = "impegno";
+  // "annulla il getto di domani": con il giorno o l'ora, una o due parole bastano (si cercano nel titolo)
+  if(!oggetto && (giorno || ora) && nome.length && nome.length <= 2) oggetto = "impegno";
+  // "annulla la consegna delle piastrelle": senza giorno, solo se in calendario c'è davvero (giro 8)
+  if(!oggetto && !giorno && !ora && nome.length && nome.length <= 2 && typeof impegniDaAnnullare === "function" && impegniDaAnnullare({ data: null, ora: null, nome, oggetto: null }).length) oggetto = "impegno";
+  if(!oggetto || nome.length > massimo) return null;
   if(!giorno && !ora && !nome.length && !tutto) return null; // "annulla gli appuntamenti": troppo vago
   let data = null;
   if(giorno){
@@ -13959,7 +14027,7 @@ async function annullaImpegniScelti(voci){
    (sposta_impegno), con "Annulla" per rimetterlo com'era. */
 function capisciSpostaImpegno(testo){
   const n = String(testo || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’'?!,;]/g, " ").replace(/\s+/g, " ").trim();
-  const m = n.match(/^(?:sposta|spostami|spostare|rimanda|rimandami|posticipa|anticipa|rinvia)\s+(.+)$/);
+  const m = giraComandoImpegno(n).match(/^(?:sposta|spostami|spostare|rimanda|rimandami|posticipa|anticipa|rinvia)\s+(.+)$/);
   if(!m) return null;
   const parole = m[1].split(" ");
   // la prima "a/alle/al/per/ad" dopo la quale c'è solo un giorno o un'ora ("…della Conti a martedì alle 10")
@@ -14034,8 +14102,23 @@ function provaSpostaImmediato(testo, viaVoce){
 function provaAnnullaImmediato(testo, viaVoce){
   const richiesta = capisciAnnullaImpegni(testo);
   if(!richiesta) return false;
-  const voci = impegniDaAnnullare(richiesta);
+  let voci = impegniDaAnnullare(richiesta);
+  /* Come per spostare: "la verifica del Condominio Aurora" trova anche
+     l'impegno che nel titolo non ha "verifica", purché col nome del cliente */
+  const nomiClienti = richiesta.nome.filter(w => clients.some(c => EonLettore.norm(c.name).split(" ").includes(w)));
+  if(!voci.length && nomiClienti.length && nomiClienti.length < richiesta.nome.length) voci = impegniDaAnnullare({ ...richiesta, nome: nomiClienti });
+  // "il sopralluogo all'Hotel Posta" quando in calendario c'è "Appuntamento Hotel Posta": conta il cliente, non il tipo
+  if(!voci.length && nomiClienti.length && richiesta.oggetto) voci = impegniDaAnnullare({ ...richiesta, nome: nomiClienti, oggetto: null });
   if(!voci.length){
+    /* Giro 7: "annulla il getto di domani" e in calendario non c'è: lo dice
+       subito (l'AI non ne saprebbe di più). Senza giorno né ora il nome
+       potrebbe essere letto male: decide l'AI come prima. */
+    if(richiesta.nome.length && (richiesta.giorno || richiesta.ora) && !richiesta.nome.some(w => clients.some(c => EonLettore.norm(c.name).split(" ").includes(w)))){
+      const quando = richiesta.giorno === "oggi" || richiesta.giorno === "domani" || richiesta.giorno === "dopodomani" ? richiesta.giorno : richiesta.data ? richiesta.data.toLocaleDateString("it-IT", { weekday:"long", day:"numeric" }) : "";
+      mostraRispostaEON(testo, "Non trovo «" + richiesta.nome.join(" ") + "» in calendario" + (quando ? " per " + quando : "") + ": niente da annullare.", { titolo: "Non lo trovo" });
+      if(viaVoce) parlaRisposta("Non lo trovo in calendario");
+      return true;
+    }
     if(richiesta.nome.length) return false; // un nome che non trovo: forse l'ho letto male, decide l'AI
     const quando = richiesta.giorno === "oggi" || richiesta.giorno === "domani" || richiesta.giorno === "dopodomani" ? richiesta.giorno
       : richiesta.data ? richiesta.data.toLocaleDateString("it-IT", { weekday:"long", day:"numeric" }) : "";
@@ -14591,15 +14674,19 @@ const TRIGGER_RISORSA = /^(?:(?:mi serve|mi servirebbe|mi servono|ho bisogno (?:
    e veniva capita come "crea una fattura" — solo perché Testolina era
    archiviato: i suoi documenti restano suoi e vanno ritrovati). */
 function trovaClienteDaParole(parole){
+  /* Giro 5 (29/09/2026): "i documenti del condominio Girasole" con più
+     condomìni in rubrica: conta la parola che distingue (Girasole), non
+     "condominio" che hanno tutti. Vince chi ha più parole distintive. */
+  const GENERICHE = /^(?:condominio|supercondominio|ditta|impresa|signor|signora|sig|bar|hotel|albergo|ristorante|pizzeria|studio|negozio|officina|farmacia|palestra|via|piazza|srl|spa|snc|il|la|lo|le|i|gli|di|del|della|da)$/;
   const cerca = (archiviati) => {
-    let trovato = null, corrispondenze = 0;
+    let trovato = null, corrispondenze = 0, meglio = 0;
     for(const c of clients){
       if(!!c.archived !== archiviati) continue;
       const tokenNome = c.name.toLowerCase().split(/\s+/).filter(Boolean);
-      if(tokenNome.some(tok => parole.includes(tok))){
-        corrispondenze++;
-        trovato = c;
-      }
+      if(!tokenNome.some(tok => parole.includes(tok))) continue;
+      const punti = tokenNome.filter(tok => parole.includes(tok) && !GENERICHE.test(tok)).length;
+      if(punti > meglio){ meglio = punti; trovato = c; corrispondenze = 1; }
+      else if(punti === meglio){ corrispondenze++; trovato = c; }
     }
     return { trovato, corrispondenze };
   };
@@ -15000,7 +15087,9 @@ function provaRisorsaImmediata(testo){
   /* Con un importo o una parola da creazione è una richiesta di FARE un
      documento ("fattura testolina 300 per porte", "fammi un preventivo
      per Rossi"): mai intercettarla qui, la crea l'AI. */
-  if(/\d/.test(t) || /\b(crea|creami|fai(?!\s+vedere)|fammi un|fammi una|prepara|preparami|nuov[oa]|emetti)\b/.test(t)) return false;
+  // i numeri nel nome di un cliente ("condominio via Verdi 12") non sono un importo
+  const senzaNomi = clients.reduce((x, c) => { if(!/\d/.test(c.name)) return x; const w = c.name.toLowerCase().split(/\s+/); for(let k = 1; k < w.length; k++) if(/\d/.test(w[k])) x = x.split(w[k - 1] + " " + w[k]).join(w[k - 1]); return x; }, t); // "via Manzoni 9"
+  if(/\d/.test(senzaNomi) || /\b(crea|creami|fai(?!\s+vedere)|fammi un|fammi una|prepara|preparami|nuov[oa]|emetti)\b/.test(t)) return false;
   const m = t.match(TRIGGER_RISORSA);
   if(!m) return false;
   const tipoRichiesto = m[1];
@@ -15065,7 +15154,8 @@ function provaRisorsaImmediata(testo){
        un documento da fare: se non ce ne sono, lo diciamo */
     const soloNome = !paroleFiltro.some(p => !/^(per|di|del|della|dello|dei|il|la|lo|i|gli|le|a|al|alla|e|che|un|una)$/.test(p));
     // "Mandami il preventivo di Bruni" e non ce n'è nessuno: lo diciamo (non va creato) (29/09/2026)
-    const chiedeDiVedere = /^(?:mi serve|mi servirebbe|dammi|mandami|mi mandi|mi manderesti|manda|inviami|mi invii|mi dai|mi daresti|fammi avere|fammi vedere|mi fai vedere|voglio vedere|vorrei vedere|mostrami|mostra|recupera|cerca|trova|apri)\b/.test(t);
+    // ("mi serve il preventivo di X" senza preventivi: si prepara, deciso il 29/09 — non qui)
+    const chiedeDiVedere = /^(?:dammi|mandami|mi mandi|mi manderesti|manda|inviami|mi invii|mi dai|mi daresti|fammi avere|fammi vedere|mi fai vedere|voglio vedere|vorrei vedere|mostrami|mostra|recupera|cerca|trova|apri)\b/.test(t);
     if(!documenti.length && (/^(preventivi|fatture)$/.test(tipoRichiesto) || chiedeDiVedere) && soloNome){
       const plurale = tipoDoc === "fattura" ? "fatture" : "preventivi";
       mostraRispostaEON(testo, cliente.name + " non ha ancora " + plurale + ". Per farne " + (tipoDoc === "fattura" ? "una: «fattura" : "uno: «preventivo") + " per " + cliente.name + ", lavoro e importo».", { titolo: plurale.charAt(0).toUpperCase() + plurale.slice(1) + " di " + cliente.name });
