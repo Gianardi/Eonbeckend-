@@ -85,7 +85,7 @@
   const ORA_DETTA = "(?:alle|le|ore|per\\s+le|verso\\s+le)\\s+[\\w:.]+(?:\\s+e\\s+(?:mezza|mezzo|un\\s+quarto|\\w+))?";
   const GIORNO_DETTO = "(?:oggi|domani|dopodomani|stasera|(?:luned|marted|mercoled|gioved|venerd)[iì]|sabato|domenica)";
   // "no aspetta, volevo dire…", "anzi no", "cioè", "intendevo" (giro 13)
-  const RIPENSO = "(?:no\\s*,?\\s*)?(?:aspetta\\s*,?\\s*)?(?:anzi(?:\\s+no)?|no|scusa|cioe|cioè|meglio|volevo\\s+dire|intendevo|aspetta)";
+  const RIPENSO = "(?:no\\s*,?\\s*)?(?:aspetta\\s*,?\\s*)?(?:anzi(?:\\s+no)?|no|scusa|cioe|cioè|meglio|volevo\\s+dire|intendevo|aspetta|facciamo|diciamo)";
   const RIPENSA_ORA = new RegExp(ORA_DETTA + "\\s*,?\\s+" + RIPENSO + "\\s*,?\\s+(?=(?:alle|le|ore|per\\s+le|verso\\s+le)\\s)", "gi");
   const RIPENSA_GIORNO = new RegExp("\\b" + GIORNO_DETTO + "(?:\\s+" + ORA_DETTA + ")?\\s*,?\\s+" + RIPENSO + "\\s*,?\\s+(?=" + GIORNO_DETTO + "(?![a-z]))", "gi");
   /* Le abbreviazioni da chat (giro 13, 30/09/2026): "app.to x domani ke nn
@@ -98,12 +98,35 @@
     [/\bqlc(?:s|osa)?\b/gi, "qualcosa"], [/\bmsg\b/gi, "messaggio"], [/\btt\b/gi, "tutto"], [/\bcn\b/gi, "con"], [/\bsn\b/gi, "sono"],
     [/\bapp(?:\.to|\.|untam\.?)(?=\s|$)/gi, "appuntamento"], [/\bprev\.?(?=\s|$)/gi, "preventivo"], [/\bfatt\.?(?=\s|$)/gi, "fattura"], [/\bsopr\.?(?=\s)/gi, "sopralluogo"],
     [/\bcash\b/gi, "in contanti"], [/([!?])\1+/g, "$1"],
+    [/(^|[\s,])(?:eh+|ehm+|uhm+|mh+|ehh+)(?=[\s,.!?]|$),?/gi, "$1"], // i versi della dettatura (giro 15)
+    // giro 15: "dai/ohi/annamo, chiama…", "mettimi in linea con X", "chiamami un attimo X", "no non scrivere, chiamalo…"
+    [/^\s*(?:dai|ohi|oh|ué|ue|uè|annamo|forza|su)\s*,?\s+(?=\S)/i, ""],
+    [/^\s*mettimi\s+in\s+linea\s+con\s+/i, "chiama "],
+    // "mo' dimmi un po' chi è che non ha pagato", "fammi un riepilogo di quanto ho incassato": sono domande
+    [/^\s*mo'?\s+(?=\S)/i, ""],
+    [/^\s*(?:dimmi|sai\s+dirmi|fammi\s+sapere)\s+(?:un\s+po'?\s+)?(?=(?:chi|cosa|quanto|quanti|quante|quali?|quando|dove|come|se)\b)/i, ""],
+    [/^\s*(?:fammi|dammi|fai)\s+(?:un\s+)?(?:riepilogo|resoconto|riassunto|conto)\s+(?:di\s+)?(?=(?:quanto|quanti|quante|chi|cosa)\b)/i, ""],
+    [/\bprende'/gi, "prendere"],
+    [/^\s*chiamami\s+(?:un\s+attimo\s+|subito\s+)(?:sto\s+|questo\s+)?/i, "chiama "],
+    [/^\s*(?:no\s*,?\s*)?non\s+scrivere\s*,?\s*chiamal[oa]\s+(?:direttamente\s+|subito\s+)?/i, "chiama "],
+    [/^\s*(?:no\s*,?\s*)?(?:aspetta\s*,?\s*)?non\s+(?:su|per|via|con)\s+whatsapp\s*,\s*/i, ""],
+    [/^[^,]{0,40}?\bno\s+(scrivi|chiama|manda|telefona)\s*,\s*(?=\1\b)/i, ""],
     [/(\d+(?:[.,]\d+)?)\s?k\b/gi, (m, n) => String(Math.round(parseFloat(n.replace(",", ".")) * 1000))],
     [/^tel\.?\s+(?:a\s+|ad\s+)?/i, "chiama "],
     [new RegExp("\\bprimo\\s+(?=" + MESI_RE + ")", "gi"), "1 "],
+    /* Giro 15: "mille e due", "duemila e cinque" come si dice in cantiere =
+       1.200, 2.500 (le centinaia). Non "mille e due cassetti". */
+    [/\b(mille|(?:due|tre|quattro|cinque|sei|sette|otto|nove|dieci)mila)\s+e\s+(due|tre|quattro|cinque|sei|sette|otto|nove)\b(?=\s*(?:$|[,.;:!]|euro|€|di\s|per\s|e\s|più\s|piu\s|tutto|iva|in\s+contanti|cash))/gi,
+      (m, mila, cento) => String((mila.toLowerCase() === "mille" ? 1000 : 1000 * ({ due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10 })[mila.toLowerCase().replace(/mila$/, "")]) + 100 * ({ due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9 })[cento.toLowerCase()])],
   ];
   function espandiAbbreviazioni(t) { let x = String(t || ""); for (const [re, sost] of ABBREVIAZIONI) x = x.replace(re, sost); return x.replace(/\s+/g, " ").trim(); }
-  function togliRipensamenti(t) { return String(t || "").replace(RIPENSA_ORA, "").replace(RIPENSA_GIORNO, ""); }
+  /* Giro 15: la cifra corretta a metà ("imbiancatura 1.500 cioè no 1.400",
+     "800 di manodopera, no aspetta 750", "2.400, anzi 2.200"): resta l'ultima */
+  const CIFRA = "\\d[\\d.,]*(?:\\s*(?:euro|€))?";
+  const RIPENSA_IMPORTO = new RegExp("\\b" + CIFRA + "(\\s+(?:di|per)\\s+[a-zàèéìòù']+(?:\\s+[a-zàèéìòù']+){0,2})?\\s*,?\\s+(?:no\\s*,?\\s*aspetta|cioè\\s+no|cioe\\s+no|anzi(?:\\s+no)?|no\\s+scusa|volevo\\s+dire)\\s*,?\\s+(" + CIFRA + ")", "gi");
+  // "domenica no... lunedì 5 alle 9", "la settimana prossima... no aspetta, martedì 6 ottobre alle 10" (giro 15)
+  const RIPENSA_PUNTINI = new RegExp("^[^.…]{0,40}?\\b(?:no\\s*)?(?:\\.{2,}|…)\\s*(?:no\\s*,?\\s*)?(?:aspetta\\s*,?\\s*)?(?=(?:" + GIORNO_DETTO + "|\\d{1,2}\\s+(?:" + "gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre" + ")|(?:alle|le|ore)\\s))", "i");
+  function togliRipensamenti(t) { return String(t || "").replace(RIPENSA_PUNTINI, "").replace(RIPENSA_ORA, "").replace(RIPENSA_GIORNO, "").replace(RIPENSA_IMPORTO, (m, descr, nuova) => nuova + (descr || "")); }
   function pulisci(testo) {
     let t = togliRipensamenti(espandiAbbreviazioni(String(testo || "").trim().replace(/\s+/g, " ")));
     let domanda = /\?/.test(t);
@@ -123,7 +146,7 @@
     return { testo: t.trim(), domanda, richiesta };
   }
 
-  const PAROLE_DOMANDA = /^(?:ogni\s+quant[oi]|quanto|quanta|quanti|quante|chi|cosa|che\s+cosa|che\s+(?:programma|impegni|appuntamenti|lavori|cantieri|clienti|fatture|preventivi|ore|giorno|tempo)|che\s+differenza|che\s+\w+(?:\s+\w+){0,2}\s+(?:deve|devo|devono|serve|servono|bisogna|ci\s+vuole|ci\s+vogliono|conviene|va|vanno|si\s+usa|si\s+mette|uso|metto)|quale|quali|quando|dove|come|perche|c\s*e|ci\s+sono|mi\s+deve|mi\s+devono)\b/;
+  const PAROLE_DOMANDA = /^(?:(?:ma\s+)?(?:io\s+)?a\s+che\s+ora\s+(?:ho|devo|c\s*ho|e|sono|vado|passo|arriva|viene)|ogni\s+quant[oi]|quanto|quanta|quanti|quante|chi|cosa|che\s+cosa|che\s+(?:programma|impegni|appuntamenti|lavori|cantieri|clienti|fatture|preventivi|ore|giorno|tempo)|che\s+differenza|che\s+\w+(?:\s+\w+){0,2}\s+(?:deve|devo|devono|serve|servono|bisogna|ci\s+vuole|ci\s+vogliono|conviene|va|vanno|si\s+usa|si\s+mette|uso|metto)|quale|quali|quando|dove|come|perche|c\s*e|ci\s+sono|mi\s+deve|mi\s+devono)\b/;
 
   /* ---------------- Quando ---------------- */
   const GIORNI = ["domenica", "lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato"];
@@ -227,24 +250,32 @@
       if (!giorno) { const g = new Date(t); g.setHours(0, 0, 0, 0); giorno = g; }
       ora = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
     }
+    // "domattina alle sei e mezza", "domani mattina alle 6", "presto alle 5": di mattina (giro 15)
+    const diMattina = pp.some((x) => /^(?:domattina|stamattina|stamani|mattina|mattino|mattinata|alba|presto)$/.test(x.n)) && !pp.some((x) => /^(?:pomeriggio|sera|stasera|serata|notte)$/.test(x.n));
+    const diSera = pp.some((x) => /^(?:sera|stasera|serata|pomeriggio)$/.test(x.n)) && !pp.some((x) => /^(?:domattina|stamattina|mattina|mattino|mattinata)$/.test(x.n));
     // L'ora: "alle 11", "ore 11:30", "11:30", "alle 3 e mezza", "alle 15 in punto"
     for (let i = 0; i < pp.length && !ora; i++) {
       // "a mezzogiorno" (giro 7)
       if (pp[i].n === "mezzogiorno" && !(i > 0 && /^(?:dopo|prima|verso)$/.test(pp[i - 1].n))) { usate.add(i); if (i > 0 && /^(?:a|alle|verso)$/.test(pp[i - 1].n)) usate.add(i - 1); ora = "12:00"; break; }
       // "per le 17", "verso le 9", "entro le 18": come "alle"
-      const conMarca = i > 0 && (/^(?:alle|all|ore|dalle|verso|per|entro)$/.test(pp[i - 1].n) || (pp[i - 1].n === "le" && i > 1 && /^(?:per|verso|entro|dopo|fino|prima)$/.test(pp[i - 2].n)));
+      // "verso l'una", "per l'una" (giro 15)
+      const lUna = pp[i].n === "una" && i > 1 && pp[i - 1].n === "l" && /^(?:verso|per|entro|dopo|prima|alle)$/.test(pp[i - 2].n);
+      const conMarca = i > 0 && (/^(?:alle|all|ore|dalle|verso|per|entro)$/.test(pp[i - 1].n) || (pp[i - 1].n === "le" && i > 1 && /^(?:per|verso|entro|dopo|fino|prima)$/.test(pp[i - 2].n)) || lUna);
       // l'ora detta a parole ("alle nove e un quarto", "alle sette e mezza"): giro 7, 29/09/2026
       // (solo dopo "alle/ore/dalle/per le": "preventivo per due bagni" non è un'ora)
-      const marcaForte = i > 0 && (/^(?:alle|all|ore|dalle)$/.test(pp[i - 1].n) || pp[i - 1].n === "le");
-      const n = conMarca && marcaForte && ORE_PAROLE[pp[i].n] ? String(ORE_PAROLE[pp[i].n]) : pp[i].n;
+      const marcaForte = i > 0 && (/^(?:alle|all|ore|dalle)$/.test(pp[i - 1].n) || pp[i - 1].n === "le") || lUna;
+      const n = lUna ? "1" : conMarca && marcaForte && ORE_PAROLE[pp[i].n] ? String(ORE_PAROLE[pp[i].n]) : pp[i].n;
       const m = n.match(/^(\d{1,2})(?:[:.](\d{2}))?$/);
       if (!m || (!conMarca && !m[2])) continue;
       let h = Number(m[1]), mi = Number(m[2] || 0);
       if (h > 23 || mi > 59) continue;
       if (conMarca && !m[2] && pp[i + 1] && MESI.includes(pp[i + 1].n)) continue; // "per 5 ottobre"
       if (conMarca && !m[2] && pp[i + 1] && /^(?:euro|€|mila|k|%|percento)$/.test(pp[i + 1].n)) continue;
-      if (!m[2] && /^(?:per|entro)$/.test(pp[i - 1].n) && pp[i + 1] && UNITA.test(pp[i + 1].n)) continue; // "per 3 giorni", "per 50 persone": non è un'ora ("alle 8 punti luce" sì)
-      usate.add(i); if (conMarca) { usate.add(i - 1); if (pp[i - 1].n === "le") usate.add(i - 2); }
+      if (!m[2] && /^(?:per|entro)$/.test(pp[i - 1].n) && pp[i + 1] && UNITA.test(pp[i + 1].n)) continue;
+      if (i > 1 && pp[i - 1].n === "per" && /^\d/.test(pp[i - 2].n)) continue; // "2 e 40 per 1 e 80": una misura (giro 15)
+      if (i > 1 && pp[i - 1].n === "alle" && pp[i - 2].n === "fino") continue; // "rumore solo fino alle 11": non è un appuntamento // "per 3 giorni", "per 50 persone": non è un'ora ("alle 8 punti luce" sì)
+      usate.add(i); if (conMarca) { usate.add(i - 1); if (pp[i - 1].n === "le" || lUna) usate.add(i - 2); }
+      const hDetta = h; // "alle sette meno un quarto" di mattina resta di mattina
       let j = i + 1;
       if (pp[j] && pp[j].n === "e" && pp[j + 1] && /^(?:mezza|mezzo|trenta|un|quarto)$/.test(pp[j + 1].n)) {
         mi = /^(?:un|quarto)$/.test(pp[j + 1].n) ? 15 : 30; usate.add(j); usate.add(j + 1); if (pp[j + 1].n === "un" && pp[j + 2] && pp[j + 2].n === "quarto") { usate.add(j + 2); j++; }
@@ -261,7 +292,8 @@
         if (/pomeriggio|sera/.test(pp[j + 1].n) && h < 12) h += 12;
         usate.add(j); usate.add(j + 1);
       } else if (pp[j] && /^(?:in\s*punto|precise)$/.test(pp[j].n)) usate.add(j);
-      else if (!m[2] && h >= 1 && h <= 6) h += 12; // "alle 3" = 15; "alle 7" è di mattina (i cantieri partono alle 7)
+      else if (!m[2] && diSera && h >= 1 && h < 12) h += 12; // "domani sera alle 8" = 20
+      else if (!m[2] && hDetta >= 1 && hDetta <= 6 && !diMattina) h += 12; // "alle 3" = 15; "alle 7" è di mattina (i cantieri partono alle 7); "domattina alle 6" = 6
       ora = String(h).padStart(2, "0") + ":" + String(mi).padStart(2, "0");
     }
     /* L'ora detta nuda subito dopo il giorno, stile telegramma (giro 11):
@@ -273,8 +305,11 @@
         if (pp[i + 1] && /^(?:euro|€|%|mila|metri|mq|pezzi|giorni|ore|minuti|persone|operai)$/.test(pp[i + 1].n) || (pp[i + 1] && MESI.includes(pp[i + 1].n))) continue;
         let h = Number(pp[i].n);
         if (h < 1 || h > 23) continue;
-        if (h >= 1 && h <= 6) h += 12;
-        ora = String(h).padStart(2, "0") + ":00"; usate.add(i);
+        if (h >= 1 && h <= 6 && !diMattina) h += 12;
+        // "Brambati venerdì 8 e mezza revisione" (giro 15)
+        let mi = 0;
+        if (pp[i + 1] && pp[i + 1].n === "e" && pp[i + 2] && /^(?:mezza|mezzo|un|quarto)$/.test(pp[i + 2].n)) { mi = /^(?:un|quarto)$/.test(pp[i + 2].n) ? 15 : 30; usate.add(i + 1); usate.add(i + 2); if (pp[i + 2].n === "un" && pp[i + 3] && pp[i + 3].n === "quarto") usate.add(i + 3); }
+        ora = String(h).padStart(2, "0") + ":" + String(mi).padStart(2, "0"); usate.add(i);
         break;
       }
     }
@@ -384,7 +419,22 @@
   }
   function trovaVoci(pp, escludi) {
     const libero = (i) => i >= 0 && i < pp.length && !escludi.has(i);
-    const numero = (i) => (libero(i) ? valoreDi(pp[i], pp[i + 1] && pp[i + 1].n, pp[i - 1] && pp[i - 1].n) : null);
+    /* Giro 15: "tre docce a 280 l'una", "due colonnine da 22 kW a 2.300": un numero
+       piccolo in lettere è la quantità se poco dopo c'è "a/da" + cifra.
+       "via dei Mille", "Hotel Tre Stelle": col maiuscolo è un nome, non un numero. */
+    const numero = (i) => {
+      if (!libero(i)) return null;
+      if (i > 0 && /^\p{Lu}\p{Ll}+$/u.test(pp[i].o) && numeroParola(pp[i].n) !== null) return null;
+      const v = valoreDi(pp[i], pp[i + 1] && pp[i + 1].n, pp[i - 1] && pp[i - 1].n);
+      if (v !== null || /^(?:un|uno|una)$/.test(pp[i].n)) return v;
+      const w = numeroParola(pp[i].n);
+      if (w === null || w > 10 || pp[i].sep) return null;
+      for (let j = i + 1; j <= i + 4 && j + 1 < pp.length; j++) {
+        if (/^(?:a|da)$/.test(pp[j].n) && /^\d/.test(pp[j + 1].n)) return w;
+        if (pp[j].sep || /\d/.test(pp[j].n)) break;
+      }
+      return null;
+    };
     const conEuro = (i) => /€/.test(pp[i].o) || (pp[i + 1] && /^(?:euro|eur|€)$/.test(pp[i + 1].n)) || (pp[i + 1] && /^(?:mila|k)$/.test(pp[i + 1].n) && pp[i + 2] && /^(?:euro|eur|€)$/.test(pp[i + 2].n));
     const percento = (i) => /%$/.test(pp[i].o) || (pp[i + 1] && PERCENTO.test(pp[i + 1].n)) || (pp[i + 1] && pp[i + 1].n === "per" && pp[i + 2] && pp[i + 2].n === "cento");
     const vicinoIva = (i) => [1, 2, 3].some((d) => pp[i - d] && pp[i - d].n === "iva");
@@ -396,9 +446,10 @@
        sanitari"): il primo numero non ha parole davanti e dopo ha "per/di" */
     const dopoPerDi = (i) => { let j = i + 1; if (pp[j] && /^(?:mila|k)$/.test(pp[j].n)) j++; if (pp[j] && /^(?:euro|eur|€)$/.test(pp[j].n)) j++; return pp[j] && /^(?:per|di)$/.test(pp[j].n); };
     const primoNumero = pp.findIndex((_, i) => numero(i) !== null);
-    const prezzoPrima = primoNumero >= 0 && pp.slice(0, primoNumero).every((x, k) => !libero(k) || VUOTE.has(x.n) || /^(?:allora|ci|mettiamo|metti|voce)$/.test(x.n)) && dopoPerDi(primoNumero);
+    const prezzoPrima = primoNumero >= 0 && pp.slice(0, primoNumero).every((x, k) => !libero(k) || VUOTE.has(x.n) || /^(?:allora|ci|mettiamo|metti|voce|sono|erano|fanno|mettici)$/.test(x.n)) && dopoPerDi(primoNumero);
     // Una quantità: "6 a 45", "25 punti luce a 55", "8 pezzi da 90" (un "a/da + numero" poco dopo, prima di un altro prezzo)
     const quantitaDavanti = (i) => {
+      if (pp[i].sep) return false; // "centrale 900, sei sensori a 80": la virgola chiude il prezzo
       for (let j = i + 1; j <= i + 5 && j < pp.length; j++) {
         if (!libero(j)) return false;
         if (/^(?:a|da)$/.test(pp[j].n) && numero(j + 1) !== null && !percento(j + 1)) return true;
@@ -414,6 +465,8 @@
       if (quantitaDavanti(i)) return false;
       if (i > 0 && /^(?:a|da)$/.test(pp[i - 1].n)) return true;
       if (prezzoPrima && dopoPerDi(i)) return true;
+      // giro 15: "4.800 euro, e aggiungi 250 per la gestione", "più 400 per la tenuta del registro"
+      if (dopoPerDi(i) && i > 0 && /^(?:e|piu|poi|aggiungi|aggiungici|metti|mettici|anche|altri|altre|sono|erano|fanno)$/.test(pp[i - 1].n)) return true;
       if (!stileEuro) return true;
       return !dopo || pp[i].sep || SEPARATORI.test(dopo) || /^(?:totale|sconto|iva)$/.test(dopo);
     };
@@ -474,13 +527,20 @@
       }
       // Il totale detto alla fine: solo per controllo
       const prima = corrente.slice(-4).map((x) => x.n).join(" ");
-      if (/(?:^|\s)(?:totale|tot|complessivo|complessivi|totali|in tutto|tutto compreso)(?:\s+(?:di|del|della|e|sono|fa|fanno|viene))*$/.test(prima)) {
-        totaleDetto = v * (pp[i + 1] && /^(?:mila|k)$/.test(pp[i + 1].n) ? 1000 : 1);
-        corrente = [];
-        while (pp[i + 1] && /^(?:mila|k|euro|eur|€)$/.test(pp[i + 1].n)) i++;
-        continue;
+      let forzaPrezzo = false;
+      if (/(?:^|\s)(?:totale|tot|complessivo|complessivi|totali|in tutto|tutto compreso|tutto)(?:\s+(?:di|del|della|e|sono|fa|fanno|viene))*$/.test(prima)) {
+        if (voci.length) {
+          totaleDetto = v * (pp[i + 1] && /^(?:mila|k)$/.test(pp[i + 1].n) ? 1000 : 1);
+          corrente = [];
+          while (pp[i + 1] && /^(?:mila|k|euro|eur|€)$/.test(pp[i + 1].n)) i++;
+          continue;
+        }
+        // "24 bignè e una crostata, tutto 58 euro": nessuna voce prima = il prezzo di quello che ha detto
+        while (corrente.length && /^(?:totale|tot|complessivo|complessivi|totali|in|tutto|compreso|di|del|della|e|sono|fa|fanno|viene)$/.test(corrente[corrente.length - 1].n)) corrente.pop();
+        corrente.forEach((x) => { delete x.q; });
+        forzaPrezzo = true;
       }
-      if (!ePrezzo(i)) { corrente.push({ n: pp[i].n, o: pp[i].o, q: v, sep: pp[i].sep }); continue; }
+      if (!forzaPrezzo && !ePrezzo(i)) { corrente.push({ n: pp[i].n, o: pp[i].o, q: v, sep: pp[i].sep }); continue; }
       // È un prezzo: si chiude la voce
       let prezzo = v;
       if (pp[i + 1] && pp[i + 1].n === "virgola" && /^\d{1,2}$/.test((pp[i + 2] || {}).n || "")) { prezzo = Number(v + "." + pp[i + 2].n); i += 2; }
@@ -505,6 +565,7 @@
         }
         if (/^(?:a|al)$/.test(a) && b === "corpo") { j += 2; continue; }
         if (/^(?:circa|netti|totali|esclusa|escluso)$/.test(a)) { j++; continue; }
+        if (a === "tutto" && /^(?:compreso|incluso)$/.test(b)) { j += 2; continue; } // "1.650 tutto compreso più iva"
         break;
       }
       chiudi(prezzo, unitarioPrima || perUnita, j - 1, unitaPrezzo);
@@ -536,6 +597,8 @@
     if (!descr[0] && coda && (voci.slice(1).every(iniziaConPer) && /^(?:per|di)$/.test((resto.find((x) => x.n) || {}).n || "") || descr.slice(1).every(Boolean))) {
       descr = descr.slice(1).concat([coda]);
     }
+    // "4.800 euro, e aggiungi 250 per la gestione del portierato": l'ultima voce ha la descrizione dopo il prezzo
+    if (descr.length > 1 && !descr[descr.length - 1] && coda && /^(?:per|di)$/.test((resto.find((x) => x.n) || {}).n || "")) descr[descr.length - 1] = coda;
     const lista = voci.map((v, k) => {
       let d = descr[k] || "";
       let prezzo = v.prezzo;
@@ -888,7 +951,9 @@
     const parolaDiUnCliente = (w) => attivi.some((c) => tokenNome(c.name).includes(w));
     const sconosciuta = (j) => j >= 0 && j < liberi.length && liberi[j] && /^\p{L}{3,}$/u.test(liberi[j]) && !VUOTE.has(liberi[j]) && !PAROLE_COMANDO.has(liberi[j]) && !parolaDiUnCliente(liberi[j]);
     liberi.forEach((w, i) => {
-      if (!w || w.length < 3 || VUOTE.has(w) || PAROLE_COMANDO.has(w)) return;
+      // "Da Nello" (Ristorante Da Nello): "nello" è anche una preposizione, ma col maiuscolo dopo "Da" è il nome (giro 15)
+      const nomeMaiuscolo = VUOTE.has(w || "") && /^\p{Lu}/u.test(pp[i].o) && i > 0 && /^(?:da|di|del|dal)$/.test(pp[i - 1].n);
+      if (!w || w.length < 3 || (VUOTE.has(w) && !nomeMaiuscolo) || PAROLE_COMANDO.has(w)) return;
       /* Solo il nome di battesimo ("Mario") accanto a un cognome che non
          conosciamo ("Chilosi Mario", "Fini Alessio") è un'altra persona */
       if (NOMI.has(w) && !(opzioni && opzioni.nomeSolo) && (sconosciuta(i - 1) || sconosciuta(i + 1))) return;
@@ -921,6 +986,77 @@
      "casa", "sig."; oppure un nome proprio conosciuto ("Luca") con la
      parola accanto ("Liverani"). Restituisce le parole usate. */
   const MARCHE_NOME = /^(?:a|ad|al|alla|cliente|sig|signor|signore|signora|sigra|casa|famiglia|ditta|condominio|dott|ing|geom|arch)$/;
+  /* Il telefono in una frase (giro 15, 29/09/2026): anche a gruppi
+     ("0187 55 12 34", "340 998 1122") o detto a parole ("tre tre nove
+     cinque…"). 8-13 cifre che cominciano con 0 o 3 (dopo un +39). */
+  const CIFRE_PAROLE = { zero: 0, uno: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9 };
+  function trovaTelefono(testo) {
+    const t = String(testo || "").replace(/\b(?:(?:zero|uno|due|tre|quattro|cinque|sei|sette|otto|nove)\s+){7,12}(?:zero|uno|due|tre|quattro|cinque|sei|sette|otto|nove)\b/gi,
+      (m) => m.toLowerCase().split(/\s+/).map((w) => CIFRE_PAROLE[w]).join(""));
+    const re = /(?:\+\s?39[\s.]?)?\d+(?:[\s./-]\d+)*/g;
+    let m;
+    while ((m = re.exec(t))) {
+      let cifre = m[0].replace(/\D/g, "");
+      if (m[0].trim().startsWith("+")) cifre = cifre.replace(/^39/, "");
+      if (cifre.length >= 8 && cifre.length <= 13 && /^[03]/.test(cifre)) return { testo: t, inizio: m.index, fine: m.index + m[0].length, cifre };
+    }
+    return null;
+  }
+
+  /* Un cliente nuovo detto come viene (giro 15): "nuovo cliente: Bar Sport,
+     telefono 0341 552908", "salva la signora Rosa Esposito 3389876543",
+     "c'ho una cliente nuova, Chiara Bellotti, 333 22 44 551, salvala",
+     "aggiungi cliente Condominio I Glicini, amministratore Sergio Lotti, 02…".
+     Il nome = le parole con la maiuscola di fila (con "di", "la", "Il"…
+     in mezzo); se è tutto minuscolo, le parole dopo "cliente"/"aggiungi".
+     Quello che resta dopo il nome (indirizzo, referente) è la nota. */
+  const NON_NOME_NUOVO = new Set(("aggiungi aggiungilo aggiungila aggiungimi salva salvala salvalo salvami metti mettilo mettila mettimi registra registrala registralo inserisci " +
+    "inseriscilo inseriscila nuovo nuova cliente clienti c c'e ce c'ho cho ho mi eon allora ok senti eh ehm be beh e ma poi un una il la lo le i gli signor signora sig sigra dottor dottoressa " +
+    "dott ing ingegner avv avvocato geom geometra telefono tel numero cell cellulare cel via piazza corso viale rubrica anagrafica ditta come amministratore referente si chiama " +
+    "ciao ecco guarda scusa per favore grazie tra fra ai nei in è venuta venuto oggi ieri stamattina mi hanno affidato palazzo").split(" "));
+  const LEGA_NOME = new Set("di da del della dello dei degli delle la le il lo i gli d de".split(" "));
+  function leggiNuovoCliente(testo) {
+    const tel = trovaTelefono(testo);
+    let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
+    t = t.replace(/\b(?:il\s+)?(?:suo\s+)?(?:numero(?:\s+di\s+telefono)?|telefono|tel|cellulare|cell|cel)\.?(?:\s+(?:è|e'|:))?\s*(?=;)/gi, " ");
+    const pezzi = t.split(/\s*[,;:()]\s*|\s+-\s+|\.\s+/).map((x) => x.trim()).filter(Boolean);
+    const chiave = (w) => norm(w).replace(/\s+/g, "");
+    let nome = null, dove = -1;
+    // 1) le parole con la maiuscola, di fila
+    for (let k = 0; k < pezzi.length && !nome; k++) {
+      const w = pezzi[k].split(/\s+/);
+      for (let i = 0; i < w.length && !nome; i++) {
+        if (!/^\p{Lu}[\p{L}'’.-]*$/u.test(w[i]) || NON_NOME_NUOVO.has(chiave(w[i]))) continue;
+        const run = [w[i]];
+        for (let j = i + 1; j < w.length && run.length < 6; j++) {
+          if (/^\p{Lu}[\p{L}'’.-]*$/u.test(w[j]) && !/^(?:telefono|tel|numero|cell|cellulare|salvala|salvalo|mettila|mettilo)$/i.test(w[j])) run.push(w[j]);
+          else if (/^(?:Il|La|Le|Lo|I|Gli|Da|Di|Del|Della|Dei|De)$/.test(w[j]) || LEGA_NOME.has(w[j].toLowerCase()) && j + 1 < w.length && /^\p{Lu}/u.test(w[j + 1])) run.push(w[j]);
+          else break;
+        }
+        while (run.length > 1 && LEGA_NOME.has(run[run.length - 1].toLowerCase())) run.pop();
+        nome = run.join(" "); dove = k;
+      }
+    }
+    // 2) tutto minuscolo: le parole dopo "cliente"/"aggiungi"/"salva" (fino a 4)
+    if (!nome) {
+      for (let k = 0; k < pezzi.length && !nome; k++) {
+        const w = pezzi[k].split(/\s+/);
+        const da = w.findIndex((x) => /^(?:cliente|aggiungi|salva|registra|inserisci|rubrica)$/i.test(x));
+        if (da < 0 && k === 0) continue;
+        const resto = w.slice(da + 1).filter((x, i, a) => !(i === 0 && NON_NOME_NUOVO.has(chiave(x))));
+        while (resto.length && NON_NOME_NUOVO.has(chiave(resto[0]))) resto.shift();
+        const run = [];
+        for (const x of resto) { if (/\d/.test(x) || NON_NOME_NUOVO.has(chiave(x)) && !LEGA_NOME.has(x.toLowerCase())) break; run.push(x); if (run.length === 4) break; }
+        while (run.length && LEGA_NOME.has(run[run.length - 1].toLowerCase())) run.pop();
+        if (run.length) { nome = run.map((x) => LEGA_NOME.has(x.toLowerCase()) ? x.toLowerCase() : x.charAt(0).toUpperCase() + x.slice(1)).join(" "); dove = k; }
+      }
+    }
+    if (!nome || nome.replace(/[^\p{L}]/gu, "").length < 3) return null;
+    // la nota: indirizzo o referente detti dopo il nome
+    const nota = pezzi.slice(dove + 1).filter((x) => /^(?:in\s+)?(?:via|piazza|corso|viale|amministratore|referente|riferimento)\b/i.test(x)).map((x) => x.replace(/^in\s+/i, "")).join(", ");
+    return { nome, telefono: tel ? tel.cifre : "", nota: nota ? nota.charAt(0).toUpperCase() + nota.slice(1) : "" };
+  }
+
   function trovaNomeNuovo(pp, giaUsate, opzioni) {
     const libero = (i) => i >= 0 && i < pp.length && !giaUsate.has(i) && !VUOTE.has(pp[i].n) && !PAROLE_COMANDO.has(pp[i].n) && /^\p{L}[\p{L}'-]*$/u.test(pp[i].o);
     // 1) nome proprio conosciuto + la parola vicina (prima o dopo)
@@ -982,8 +1118,12 @@
   /* Temi delle domande sui dati: basta che ci sia la parola del tema */
   function temaDomanda(n) {
     if (/\biva\b/.test(n)) return "iva";
-    if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|quanto\s+(?:mi\s+|ci\s+|m\s+)?dev(?:e|ono)|(?:mi|ci)\s+dev(?:e|ono)|dev(?:e|ono)\s+(?:ancora|dare|pagare|saldare)|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|prendere\s+ancora|ancora\s+da\s+prendere|moros\w*|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
-    if (/\b(?:incassato|incassi|entrat[oaie]|guadagnat[oaie]|guadagno|fatturato)\b/.test(n)) return "incassi";
+    if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|quanto\s+(?:mi\s+|ci\s+|m\s+)?dev(?:e|ono)|(?:mi|ci)\s+dev(?:e|ono)|dev(?:e|ono)\s+(?:ancora|dare|pagare|saldare)|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|prendere\s+ancora|ancora\s+da\s+prendere|devo\s+(?:ancora\s+)?prendere|moros\w*|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
+    if (/\b(?:incassato|incassi|entrat[oaie]|guadagnat[oaie]|guadagno|fatturato|tirato\s+su|preso\s+di\s+acconto|acconti?\s+(?:ho|mi)\b)\b/.test(n)) return "incassi";
+    // giro 15: "quali preventivi ho ancora aperti", "il preventivo più alto", "ho già fatto la fattura a…?"
+    if (/\b(?:preventiv[oi]|fattur[ae])\s+(?:(?:sono|ho|abbiamo)\s+)?(?:ancora\s+)?(?:aperti|apert[oa]|in\s+attesa|da\s+accettare|non\s+accettat\w*)\b|\b(?:preventiv[oi]|fattur[ae])\s+piu\s+(?:alt[oa]|grande|car[oa])\b|^ho\s+(?:gia\s+)?fatto\s+(?:la|il)\s+(?:fattura|preventivo)\b|\bquanto\s+valgono\b.*\bpreventiv|\b(?:a\s+)?quanto\s+(?:era|e|viene|veniva|avevo\s+fatto)\s+(?:il|la)\s+(?:preventivo|fattura)\b/.test(n)) return "documenti";
+    // "a che ora devo essere dal Gabbiano domani?", "c'ho qualcosa venerdì?", "a che ora è il getto di sabato?"
+    if (/^(?:ma\s+)?(?:io\s+)?a\s+che\s+ora\b|\b(?:c\s*ho|ho)\s+qualcosa\b|\bsono\s+liber[oa]\b/.test(n)) return "agenda";
     if (/\b(?:cantier[ie]|interventi|impianti|condomini|lavori\s+(?:in\s+corso|aperti|attivi)|lavori\s+(?:ho|abbiamo)\s+(?:in\s+corso|aperti|attivi))\b/.test(n)) return "cantieri";
     // "quanti preventivi ho fatto questo mese?", "quante fatture ho fatto?" (giro 5)
     if (/^(?:quanti|quante)\s+(?:preventivi|fatture)\b|\b(?:preventivi|fatture)\s+(?:ho|abbiamo)\s+(?:fatto|fatte|mandato|mandate|emesso|emesse)\b/.test(n)) return "documenti";
@@ -1040,7 +1180,29 @@
     const indice = (re) => pp.findIndex((x) => re.test(x.n));
     const primo = pp[0].n;
     // "ho sostituito il miscelatore, pagati in contanti": un fatto, non una domanda (ho + participio)
-    const domanda = p.domanda || PAROLE_DOMANDA.test(n) || (/^(?:ho|sono|hai|e)\b/.test(n) && !!temaDomanda(n) && !/^(?:ho|abbiamo)\s+(?:gia\s+)?\w+(?:ato|uto|ito|ata|uta|ita|ati|iti|ute)\b/.test(n) && !/^sono\s+(?:stato|stata|andato|andata|passato|passata)\b/.test(n));
+    const canaleInTesta = /^(?:whatsapp|sms|messaggio|mail|email|scrivi|scrivigli|scrivile|manda\s+(?:un|una)\s+(?:messaggio|whatsapp|sms|mail|email))\b/.test(n) && /\b(?:a|al|alla|ad|allo)\b/.test(n);
+    const domanda = !canaleInTesta && (p.domanda || PAROLE_DOMANDA.test(n)) || (/^(?:ho|sono|hai|e)\b/.test(n) && !!temaDomanda(n) && !/^(?:ho|abbiamo)\s+(?:gia\s+)?\w+(?:ato|uto|ito|ata|uta|ita|ati|iti|ute)\b/.test(n) && !/^sono\s+(?:stato|stata|andato|andata|passato|passata)\b/.test(n));
+
+    /* Un cliente nuovo (giro 15): "metti in rubrica…", "salva la signora X
+       339…", "c'è un cliente nuovo, X, 0521…", "registra la ditta X come
+       nuovo cliente", "…mettila tra i clienti". Nome, telefono e nota li
+       legge leggiNuovoCliente; il cliente lo crea l'app. Prima delle
+       domande: "c'è un cliente nuovo" non è una domanda. */
+    const conVerboCliente = /\b(?:aggiung|inserisc|mett|salv|registr)\w*\b/.test(n);
+    const cueCliente = /\b(?:nuov[oa]\s+cliente|cliente\s+nuov[oa]|in\s+rubrica|in\s+anagrafica|(?:signora|signore?)\s+nuov[oa])\b/.test(n)
+      || conVerboCliente && /\b(?:come\s+(?:nuov[oa]\s+)?client[ei]|(?:tra|fra|ai|nei)\s+(?:miei\s+)?clienti|cliente)\b/.test(n)
+      || /^(?:salva|salvami|registra|aggiungi|inserisci)$/.test(primo) && !!trovaTelefono(testo);
+    if (cueCliente && !p.domanda && !q.ora && !/^(?:scrivi|manda|invia|chiama|telefona|di|dì|quant\w*|chi|cosa|che|quali?)$/.test(primo)) {
+      const nc = leggiNuovoCliente(testo);
+      if (nc) {
+        const k = norm(nc.nome);
+        const gia = (ctx.clienti || []).find((c) => { const x = norm(c.name || ""); return x === k || x.length > 4 && (x.includes(k) || k.includes(x)); });
+        return { ...base, azione: "cliente", cliente: gia || null, telefono: !!nc.telefono, nuovoCliente: gia ? null : nc, quando };
+      }
+    }
+
+    // "quando vado da Bortolin portare la scala lunga": un promemoria per quella volta, non una domanda (giro 15)
+    if (/^quando\s+(?:vado|passo|torno|arrivo|vai)\s+(?:da|dal|dalla|dai|al|alla|in|a)\b/.test(n) && !p.domanda && !q.giornoIso) { const clQ = trovaCliente(pp, ctx.clienti, usate); return { ...base, azione: "mente", cosa: maiuscola(testo), cliente: clQ.stato === "trovato" ? clQ.cliente : null, quando }; }
 
     /* Domanda sui dati (regola 4) */
     if (domanda) {
@@ -1063,11 +1225,21 @@
     }
 
     if (/^(?:svuota|svuotami|vuota|pulisci)\s+(?:il\s+)?cestino$/.test(n)) return { ...base, azione: "cestino", quando };
+    /* Giro 15: una preferenza o un'abitudine del cliente è una nota, anche con un'ora
+       dentro ("la Benvenuti preferisce che la chiami dopo le sei di sera", "Pagnoni
+       preferisce essere contattata solo su WhatsApp", "Tommasini paga solo con
+       bonifico a fine mese"); così "quando vado da Bortolin portare la scala" e
+       "segna che la pizzeria ha l'impianto vecchio" */
+    const preferenza = /^(?:\S+\s+){0,5}(?:preferisc\w*|vuole\s+essere|vogliono\s+essere|va\s+(?:chiamat|contattat|sentit)\w*|paga(?:no)?\s+(?:solo|sempre)|ricev\w+\s+solo)\b/.test(n) && !p.domanda && !/^(?:chiama|telefona|scrivi|manda|invia|segna(?:mi)?\s+(?:un|l)\s*appuntamento)\b/.test(n);
+    const segnaChe = /^(?:segna(?:ti|mi)?|annota(?:ti|mi)?|appunta(?:ti|mi)?|scriviti|nota)\s+che\b/.test(n) && !q.giornoIso && !q.ora && !/\b(?:pagat|saldat|incassat|versat|caparra|acconto|anticipo|bonifico|lasciato|dato)\w*/.test(n);
+    if (preferenza || segnaChe) { const clP = trovaCliente(pp, ctx.clienti, usate); return { ...base, azione: "mente", cosa: maiuscola(testo), cliente: clP.stato === "trovato" ? clP.cliente : null, quando: { giornoIso: null, etichetta: null, ora: null, fascia: null } }; }
     // "Conti mi ha detto che paga a fine mese": quello che ha detto un cliente è una nota, anche con una data dentro
     if (!q.ora && !V.chiama.test(primo) && !V.manda.test(primo) && !V.messaggio.test(primo) && /^(?:eon\s+)?(?:\S+\s+){0,3}(?:mi|ci)\s+ha(?:nno)?\s+(?:detto|scritto|fatto\s+sapere|promesso)\s+che\b/.test(n)) { const clD = trovaCliente(pp, ctx.clienti, usate); return { ...base, azione: "mente", cosa: maiuscola(testo), cliente: clD.stato === "trovato" ? clD.cliente : null, quando }; }
     /* Un racconto al passato ("oggi sono stato dall'Esposito e il bagno è quasi
        finito", "stamattina ho parlato con Rossi…"): una nota, non una cosa da fare oggi (giro 11) */
-    if (!q.ora && /^(?:(?:oggi|ieri|stamattina|stamani|stasera|prima|poco\s+fa)\s+)?(?:sono\s+(?:stato|stata|andato|andata|passato|passata)|siamo\s+(?:stati|andati|passati)|ho\s+(?:fatto|finito|visto|parlato|sentito|montato|sistemato|chiuso|consegnato|incontrato|controllato)|abbiamo\s+(?:fatto|finito|montato|consegnato|chiuso))\b/.test(n) && !/^(?:ho|abbiamo)\s+(?:fatto|finito)\s+(?:il|la|un|una)?\s*(?:preventiv|fattur)/.test(n)) { const clR = trovaCliente(pp, ctx.clienti, usate); return { ...base, azione: "mente", cosa: maiuscola(testo), cliente: clR.stato === "trovato" ? clR.cliente : null, quando }; }
+    // "…sono stato da Pagano e m'ha dato 1200 in contanti": dentro il racconto c'è un incasso (giro 15)
+    const soldiNelRacconto = /\b(?:mi|m)\s+ha(?:nno)?\s+(?:dato|pagato|saldato|lasciato)\s+(?:\d|mille|cento|un\s+acconto|il\s+saldo|l\s+acconto)/.test(n);
+    if (!q.ora && !soldiNelRacconto && /^(?:(?:oggi|ieri|stamattina|stamani|stasera|prima|poco\s+fa)\s+)?(?:sono\s+(?:stato|stata|andato|andata|passato|passata)|siamo\s+(?:stati|andati|passati)|ho\s+(?:fatto|finito|visto|parlato|sentito|montato|sistemato|chiuso|consegnato|incontrato|controllato)|abbiamo\s+(?:fatto|finito|montato|consegnato|chiuso))\b/.test(n) && !/^(?:ho|abbiamo)\s+(?:fatto|finito)\s+(?:il|la|un|una)?\s*(?:preventiv|fattur)/.test(n)) { const clR = trovaCliente(pp, ctx.clienti, usate); return { ...base, azione: "mente", cosa: maiuscola(testo), cliente: clR.stato === "trovato" ? clR.cliente : null, quando }; }
     /* L'assemblea di condominio (amministratori, 29/09/2026): "convoca
        l'assemblea ordinaria del condominio Il Glicine per il 20 ottobre alle
        18", "assemblea straordinaria Parco Sole per il rifacimento del tetto
@@ -1075,7 +1247,13 @@
     let iAss = pp.findIndex((x) => /^assemble[ae]$/.test(x.n));
     // "convoca straordinaria Sole Mare lunedì 9 novembre alle 18" (giro 11): la parola "assemblea" sottintesa
     if (iAss < 0 && /^(?:convoca|convocare)$/.test(primo) && pp[1] && /^(?:straordinari[ae]|ordinari[ae])$/.test(pp[1].n)) iAss = 1;
-    if (iAss >= 0 && iAss <= 3 && pp.slice(0, iAss).every((x) => /^(?:convoca|convocare|segna|segnami|fissa|fissare|metti|crea|nuova|l|un|una|la|devo|dobbiamo|bisogna|fare|organizza|organizzare|segnare)$/.test(x.n)) && q.giornoIso && q.ora) {
+    /* Giro 15: "bisogna convocare i condòmini delle Magnolie in assemblea per…", "prepara la
+       convocazione dell'assemblea del Parco dei Tigli", "vogliono un'assemblea urgente…,
+       convocala per giovedì 15 alle 21": con "convoca/convocazione" l'assemblea è ovunque,
+       e senza giorno e ora l'app li chiede */
+    const convocaA = iAss >= 0 && pp.some((x) => /^(?:convoca\w*|convocazione|convocare)$/.test(x.n));
+    const prefissoA = iAss >= 0 && iAss <= 3 && pp.slice(0, iAss).every((x) => /^(?:convoca|convocare|segna|segnami|fissa|fissare|metti|crea|nuova|l|un|una|la|devo|dobbiamo|bisogna|fare|organizza|organizzare|segnare)$/.test(x.n));
+    if (iAss >= 0 && ((prefissoA && q.giornoIso && q.ora) || convocaA)) {
       const tipoA = ha(/^straordinari[ae]$/) ? "straordinaria" : "ordinaria";
       const cl = trovaCliente(pp, ctx.clienti, usate);
       let condominio = cl.stato === "trovato" ? cl.cliente.name : "";
@@ -1097,6 +1275,9 @@
       }
     }
     /* Uno sfogo o due chiacchiere ("che palle, non so cosa fare"): risponde, non si salva */
+    // domande tecniche dette senza "?" (giro 15): "differenza tra differenziale di tipo A e AC", "il prato si può seminare a ottobre o è tardi"
+    if (/^(?:ma\s+)?(?:in\s+generale|differenza\s+tra|che\s+differenza|un\s+cliente\s+mi\s+chiede\s+se|secondo\s+te|per\s+legge|e\s+vero\s+che)\b/.test(n) || /\bsi\s+puo\b.*\bo\s+(?:e\s+tardi|no|basta|si\s+puo\s+fare\s+e\s+basta|e\s+obbligatori\w*)\b/.test(n) || /\bda\s+cosa\s+(?:puo|potrebbe)\s+dipendere\b/.test(n)) return { ...base, azione: "domanda", domanda: true, quando: { giornoIso: null, etichetta: null, ora: null, fascia: null } };
+    if (/^(?:(?:ciao|buongiorno|buonasera|ehi|ehila)\s+(?:eon\s+)?(?:come\s+(?:va|stai|andiamo)|tutto\s+(?:bene|ok))|come\s+(?:va|stai)\s+(?:eon|oggi)?)/.test(n) && pp.length <= 6) return { ...base, azione: "domanda", quando: { giornoIso: null, etichetta: null, ora: null, fascia: null } }; // "ciao EON come va oggi" (giro 15)
     if (/^(?:che\s+palle|uffa|che\s+noia|mi\s+annoio|sono\s+(?:stanc[oa]|giu|triste|nervos[oa]|stress\w*)|mi\s+sento\s+(?:un\s+po\s+)?(?:giu|stanc[oa]|male|solo|sola|triste|stress\w*)|che\s+giornata|non\s+so\s+(?:cosa|che)\s+fare|boh|mah|come\s+stai|che\s+fai|tutto\s+bene)\b/.test(n) && !q.ora) return { ...base, azione: "domanda", quando };
 
     /* Documento: fattura o preventivo */
@@ -1118,7 +1299,10 @@
     if (vuolePrima) return { ...base, azione: "mente", cosa: maiuscola(testo), quando };
     // "Anna mi ha pagato la fattura 180 euro": è un incasso, la fattura è già fatta
     const pagatoPrima = iDoc >= 0 && pp.slice(Math.max(0, iDoc - 4), iDoc).some((x) => /^(?:pagato|pagata|saldato|saldata|versato|onorato)$/.test(x.n));
-    if (iDoc >= 0 && !chiedoPreventivi && !canalePrima && !pagatoPrima && (docInTesta || (!q.ora && !q.giornoIso)) && !ha(/^(?:modifica|correggi|cambia|annulla|cancella|elimina|togli|sposta|rinomina|duplica|copia)$/)) {
+    // "scrivi a Pagano che la fattura è pronta": il documento è nel testo del messaggio (giro 15)
+    const iCheDoc = pp.findIndex((x) => x.n === "che");
+    const docNelMessaggio = iDoc > 0 && iCheDoc > 0 && iCheDoc < iDoc && /^(?:scrivi|scrivigli|scrivile|messaggio|whatsapp|sms|mail|email|di|dì|avvisa|avvisalo|avvisala)$/.test(primo);
+    if (iDoc >= 0 && !docNelMessaggio && !chiedoPreventivi && !canalePrima && !pagatoPrima && (docInTesta || (!q.ora && !q.giornoIso)) && !ha(/^(?:modifica|correggi|cambia|annulla|cancella|elimina|togli|sposta|rinomina|duplica|copia)$/)) {
       const tipo = /^fattur/.test(pp[iDoc].n) ? "fattura" : "preventivo";
       usate.add(iDoc);
       const verbiCrea = pp.map((x, i) => (V.crea.test(x.n) ? i : -1)).filter((i) => i >= 0 && i < iDoc + 2);
@@ -1200,7 +1384,7 @@
       const escludiVoci = new Set([...usate].filter((i) => !q.usate.has(i) || /^(?:fattur[ae]|preventiv[oi])$/.test(pp[i].n)));
       importi.forEach((x) => { if (importi.length === 1) x.usate.forEach((i) => escludiVoci.delete(i)); });
       const lettura = trovaVoci(pp, escludiVoci);
-      const conVoci = lettura && (lettura.voci.length >= 2 || (lettura.voci.length === 1 && (lettura.voci[0].quantita !== 1 || !importi.length)));
+      const conVoci = lettura && (lettura.voci.length >= 2 || (lettura.voci.length === 1 && (lettura.voci[0].quantita !== 1 || importi.length !== 1)));
       if (conVoci) {
         const somma = Math.round(lettura.voci.reduce((t, v) => t + v.quantita * v.prezzo, 0) * 100) / 100;
         const manca = [];
@@ -1223,7 +1407,7 @@
       }
       if (lavoro && !/[a-z]{3}/i.test(senzaAccenti(lavoro))) lavoro = "";
       const cerca = verbiCerca.length > 0 && importo === null && !verbiCrea.length;
-      if (importo === null && !verbiCrea.length && pp.slice(0, iDoc).some((x) => V.manda.test(x.n) || /^(?:mandami|inviami|mandalo|invialo)$/.test(x.n))) return { ...base, azione: "invio_documento", tipo, quando };
+      if (importo === null && !verbiCrea.length && pp.slice(0, iDoc).some((x) => V.manda.test(x.n) || /^(?:mandami|inviami|mandalo|invialo)$/.test(x.n))) return { ...base, azione: "invio_documento", tipo, cliente: cliente || null, quando };
       const manca = [];
       if (!cerca) {
         if (!cliente && !clienteNuovo) manca.push("cliente");
@@ -1259,7 +1443,7 @@
     /* Un pagamento RICEVUTO: "Rita ha pagato 1.200", "segna 500 euro pagati
        da Rita", "ho incassato 300 da Bianchi" ("ho pagato il fornitore" è
        un pagamento tuo: non è questo) */
-    const ricevuto = /\b(?:pagat[oiae]|incassat[oiae]|saldat[oiae])\s+(?:in\s+contanti|con\s+(?:il\s+)?bonifico|con\s+(?:l\s+)?assegno|col\s+pos|subito|cash)\b|\b(?:ha|hanno)\s+(?:gia\s+)?(?:pagato|saldato|versato|fatto\s+il\s+bonifico|dato)\b|\b(?:pagat[oiae]|saldat[oiae]|incassat[oiae]|ricevut[oiae]|versat[oiae])\s+(?:da|dal|dalla)\b|^(?:ho|abbiamo)\s+(?:incassato|ricevuto|preso)\b|^(?:incassati|incassato|ricevuti|ricevuto)\b|\bmi\s+ha\s+(?:pagato|dato|saldato)\b/;
+    const ricevuto = /\b(?:pagat[oiae]|incassat[oiae]|saldat[oiae])\s+(?:in\s+contanti|con\s+(?:il\s+)?bonifico|con\s+(?:l\s+)?assegno|col\s+pos|subito|cash)\b|\b(?:ha|hanno)\s+(?:gia\s+)?(?:pagato|saldato|versato|fatto\s+il\s+bonifico|dato)\b|\b(?:pagat[oiae]|saldat[oiae]|incassat[oiae]|ricevut[oiae]|versat[oiae])\s+(?:da|dal|dalla)\b|^(?:ho|abbiamo)\s+(?:incassato|ricevuto|preso)\b|^(?:incassati|incassato|ricevuti|ricevuto)\b|\b(?:mi|m)\s+ha(?:nno)?\s+(?:pagato|dato|saldato)\b|\b(?:ha|hanno)\s+lasciato\s+(?:\d|un|una|mille|cento)[^,]{0,25}\b(?:caparra|acconto|anticipo|euro)\b/;
     // "mi ha dato il numero del fornitore", "mi ha dato la chiave": non sono soldi
     const datoAltro = /\b(?:mi\s+ha|hanno)\s+dato\b/.test(n) && !/\b(?:mi\s+ha|hanno)\s+dato\s+(?:(?:i|gli|un|l|il|la)\s+)?(?:\d|soldi|acconto|anticipo|saldo|bonifico|contanti|assegno|euro|€)/.test(n);
     if (ricevuto.test(n) && !datoAltro && !/^(?:ho|abbiamo)\s+pagato\b/.test(n) && !q.ora) {
@@ -1292,7 +1476,10 @@
     const iWa = indice(/^(?:whatsapp|wapp|whats)$/);
     const verboIniziale = V.manda.test(primo) || V.messaggio.test(primo) || V.chiama.test(primo) || primo === "di" && pp[1] && /^(?:a|ad|al|alla|all|allo|ai|agli|alle)$/.test(pp[1].n);
     const canaleIniziale = /^(?:messaggio|sms|email|mail|whatsapp)$/.test(primo);
-    if ((iEmail >= 0 || iWa >= 0 || canaleIniziale || V.messaggio.test(primo) || (primo === "di" && verboIniziale) || (V.manda.test(primo) && ha(/^(?:messaggio|messaggi|sms|email|mail|whatsapp)$/))) && !(indice(/^(?:fattur[ae]|preventiv[oi]|foto|link|durc|documento)$/) >= 0 && !(Math.max(iEmail, iWa, indice(/^(?:messaggio|messaggi|sms)$/)) >= 0 && Math.max(iEmail, iWa, indice(/^(?:messaggio|messaggi|sms)$/)) < indice(/^(?:fattur[ae]|preventiv[oi]|foto|link|durc|documento)$/)))) {
+    // "scrivi a Pagano che mi serve la foto del contatore": la foto è DENTRO il messaggio (dopo "che"), non da mandare (giro 15)
+    const iChe = indice(/^(?:che|:)$/);
+    const docNelTesto = iChe > 0 && indice(/^(?:fattur[ae]|preventiv[oi]|foto|link|durc|documento)$/) > iChe;
+    if ((iEmail >= 0 || iWa >= 0 || canaleIniziale || V.messaggio.test(primo) || (primo === "di" && verboIniziale) || (V.manda.test(primo) && ha(/^(?:messaggio|messaggi|sms|email|mail|whatsapp)$/))) && !(indice(/^(?:fattur[ae]|preventiv[oi]|foto|link|durc|documento)$/) >= 0 && !docNelTesto && !(Math.max(iEmail, iWa, indice(/^(?:messaggio|messaggi|sms)$/)) >= 0 && Math.max(iEmail, iWa, indice(/^(?:messaggio|messaggi|sms)$/)) < indice(/^(?:fattur[ae]|preventiv[oi]|foto|link|durc|documento)$/)))) {
       const canale = iEmail >= 0 ? "email" : iWa >= 0 ? "whatsapp" : "messaggio";
       // Le parole del comando
       for (let i = 0; i < pp.length; i++) {
@@ -1304,8 +1491,11 @@
       if (cl.stato !== "nessuno") cl.usate.forEach((i) => usate.add(i));
       const primaDelNome = cl.usate.length ? Math.min(...cl.usate) - 1 : -1;
       if (primaDelNome >= 0 && /^(?:a|ad|al|alla|allo|per|con)$/.test(pp[primaDelNome].n)) usate.add(primaDelNome);
-      const dopoNome = cl.usate.length ? Math.max(...cl.usate) + 1 : pp.length;
+      // chi non è tra i clienti: il nome dopo "a/al" e poi il messaggio (giro 15)
+      const fuori = cl.stato === "nessuno" ? nomeDopoASpan(pp, null) : null;
+      const dopoNome = cl.usate.length ? Math.max(...cl.usate) + 1 : fuori ? fuori.fine + 1 : pp.length;
       const restoIdx = pp.map((_, i) => i).filter((i) => i >= dopoNome && !cl.usate.includes(i));
+      if (fuori) while (restoIdx.length && /^(?:su|via|tramite|con|col|per)$/.test(pp[restoIdx[0]].n) && pp[restoIdx[1]] && /^(?:whatsapp|wapp|whats|sms|messaggio|email|mail|posta)$/.test(pp[restoIdx[1]].n)) restoIdx.splice(0, 2);
       /* "Scrivi a Machi domani alle 10": dopo il nome solo il quando = un
          promemoria per te (deciso il 28/09), non un messaggio da mandare */
       if (canale === "messaggio" && (q.ora || q.giornoIso) && restoIdx.length && restoIdx.every((i) => q.usate.has(i) || VUOTE.has(pp[i].n))) {
@@ -1314,17 +1504,19 @@
       const testoMsg = preparaMessaggio(pp, restoIdx);
       return {
         ...base, azione: canale, cliente: cl.stato === "trovato" ? cl.cliente : null, clienteSimile: cl.stato === "simile" ? cl.cliente : null,
-        candidati: cl.stato === "ambiguo" ? cl.candidati : null, nomeDetto: cl.stato === "nessuno" ? nomeDopoA(pp, usate) : null,
+        candidati: cl.stato === "ambiguo" ? cl.candidati : null, nomeDetto: cl.stato === "nessuno" ? (fuori ? fuori.nome : nomeDopoA(pp, usate)) : null,
         messaggio: testoMsg, quando, manca: [cl.stato === "trovato" || cl.stato === "simile" || cl.stato === "ambiguo" ? null : "cliente", testoMsg ? null : "testo"].filter(Boolean),
       };
     }
     if (V.chiama.test(primo) && !q.ora && !q.giornoIso) {
       usate.add(0);
       const cl = trovaCliente(pp, ctx.clienti, usate, { nomeSolo: true });
-      const resto = pp.filter((_, i) => i > 0 && !cl.usate.includes(i) && !VUOTE.has(pp[i].n));
+      // "chiama la Pagnoni che non risponde ai messaggi", "telefona alla Benvenuti che le devo dire del pezzo": il perché non conta (giro 15)
+      const iPerche = pp.findIndex((x, i) => i > 0 && /^(?:che|perche|cosi|siccome|visto)$/.test(x.n) && (cl.stato !== "nessuno" ? i > Math.max(...cl.usate) : i > 1));
+      const resto = pp.filter((_, i) => i > 0 && (iPerche < 0 || i < iPerche) && !cl.usate.includes(i) && !VUOTE.has(pp[i].n) && !/^(?:un|attimo|subito|adesso|ora|direttamente|per|favore|sto|questo|quello)$/.test(pp[i].n));
       if (resto.length <= 2) {
         return { ...base, azione: "chiama", cliente: cl.stato === "trovato" ? cl.cliente : null, clienteSimile: cl.stato === "simile" ? cl.cliente : null,
-          candidati: cl.stato === "ambiguo" ? cl.candidati : null, nomeDetto: cl.stato === "nessuno" ? nomeBello(pp.slice(1).filter((x) => !VUOTE.has(x.n)).map((x) => x.o).join(" ")) : null, quando };
+          candidati: cl.stato === "ambiguo" ? cl.candidati : null, nomeDetto: cl.stato === "nessuno" ? nomeBello(pp.slice(1, iPerche < 0 ? pp.length : iPerche).filter((x) => !VUOTE.has(x.n)).map((x) => x.o).join(" ")) : null, quando };
       }
     }
 
@@ -1421,18 +1613,26 @@
     return maiuscola(t) + (domanda ? "?" : ".");
   }
   /* "scrivi a Mario Bianchi che…" con un nome che non è in anagrafica */
-  function nomeDopoA(pp, usate) {
+  /* Il nome di chi non è tra i clienti, dopo "a/al/alla": "scrivi al geometra Rovelli su
+     whatsapp che…" = "Geometra Rovelli"; "messaggio al mio operaio Davide: domani…" =
+     "Operaio Davide"; "sms a Tiziana Mancuso: ricordati…" = "Tiziana Mancuso" (giro 15).
+     Si ferma a "che/su/con/per", ai due punti, a un giorno o a un numero. */
+  function nomeDopoASpan(pp, usate) {
     for (let i = 0; i < pp.length; i++) {
-      if (!/^(?:a|ad|al|alla)$/.test(pp[i].n)) continue;
+      if (!/^(?:a|ad|al|alla|allo|all|ai|agli)$/.test(pp[i].n) || (usate && usate.has(i + 1))) continue;
       const nome = [];
-      for (let j = i + 1; j < pp.length && nome.length < 3; j++) {
-        if (/^(?:che|se|per|di|chiedendo|dicendo|e)$/.test(pp[j].n) || /\d/.test(pp[j].n)) break;
-        nome.push(pp[j].o);
+      let j = i + 1;
+      while (j < pp.length && /^(?:mio|mia|miei|mie|nostro|nostra|il|la|lo|l)$/.test(pp[j].n)) j++;
+      for (; j < pp.length && nome.length < 3; j++) {
+        if (/^(?:che|se|per|di|chiedendo|dicendo|e|su|con|via|tramite|col|grazie|ricordati|ricordagli|vi|ti|gli|le|mi|domani|oggi|dopodomani|stasera|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|quando|come|dove|perche|se)$/.test(pp[j].n) || /\d/.test(pp[j].n)) break;
+        nome.push(j);
+        if (pp[j].sep) break; // "Tiziana: grazie per…"
       }
-      if (nome.length) return nomeBello(nome.join(" "));
+      if (nome.length) return { nome: nomeBello(nome.map((k) => pp[k].o).join(" ")), idx: nome, fine: nome[nome.length - 1] };
     }
     return null;
   }
+  function nomeDopoA(pp, usate) { const x = nomeDopoASpan(pp, usate); return x ? x.nome : null; }
 
   /* Didascalia di una foto appena scattata: "TV casa Machi" = cliente
      Machi, nota "TV casa"; "finestre Luca Liverani" = cliente NUOVO Luca
@@ -1466,7 +1666,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

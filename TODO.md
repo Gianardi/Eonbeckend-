@@ -4974,6 +4974,58 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Giro 15: 5 scrittori indipendenti (30/09/2026 notte, ROADMAP 0b.18)
+
+- Dati: `eval/dati/frasi-giro15.json` (1.062 frasi, 5 mestieri), scritte da 5
+  agenti che vedevano solo le istruzioni con le etichette (niente codice,
+  niente giri precedenti). Messe nel repository PRIMA di misurare.
+- Prova: `FRASI=frasi-giro15.json node eval/frasi-nuove-mestieri.test.js`;
+  accetta come giusta anche la domanda "Per quando la convoco?" (assemblea
+  senza data), come già "Quale…?"/"Per quale cliente?".
+- `lettore.js`: `trovaTelefono` (a gruppi, a parole), `leggiNuovoCliente`
+  (nome con le maiuscole o dopo "cliente/aggiungi", nota = indirizzo o
+  referente) → `azione: "cliente"` con `nuovoCliente`, prima delle domande
+  ("c'è un cliente nuovo"); `RIPENSA_IMPORTO` ("1.500 cioè no 1.400"),
+  `RIPENSA_PUNTINI` ("domenica no... lunedì 5"), "facciamo/diciamo" come
+  ripensamento dell'ora; "mille e due" = 1.200 (centinaia, come in cantiere);
+  `trovaVoci`: quantità a parole con "a/da N" poco dopo, la virgola chiude il
+  prezzo, i numeri col maiuscolo sono nomi ("via dei Mille"), "e aggiungi
+  250 per…", "tutto 58 euro" senza voci = prezzo, "1.650 tutto compreso",
+  descrizione dopo il prezzo sull'ultima voce; `trovaQuando`: "domattina/
+  mattina/presto" tengono l'ora di mattina, "sera/pomeriggio" la spostano,
+  "verso l'una", "venerdì 8 e mezza", "fino alle 11" e "2 e 40 per 1 e 80"
+  non sono appuntamenti; preferenze e "quando vado da X…" e "segna che…" =
+  nota; "chiama X che …" (il perché non conta), "mettimi in linea con",
+  "chiamami un attimo X", "no non scrivere, chiamalo"; messaggi a chi non è
+  cliente (`nomeDopoASpan`: nome e testo separati); "whatsapp a X: …?" non è
+  una domanda; il documento dopo "che" è il testo del messaggio; "Da Nello"
+  (maiuscolo dopo "da") è il cliente; temi domanda: preventivi aperti, "a che
+  ora…", "c'ho qualcosa", "tirato su", "a quanto era il preventivo"; domande
+  tecniche senza "?" e "ciao EON come va" = domanda; assemblea con
+  "convoca/convocazione" ovunque; soldi dentro un racconto = incasso.
+- `index.html`: cliente nuovo creato dal codice con telefono e nota;
+  `SITUAZIONE_URGENTE` (perdita, allagato, blackout, cortocircuito, fumo,
+  ascensore bloccato, crollo…) solo se sta succedendo (niente riparato/
+  preventivi/altri giorni, niente "non è urgente", niente assemblee); il
+  cliente dell'urgenza per parola che distingue; `invioDalLettore` per le
+  frasi d'invio libere; spostare/annullare col verbo a metà (`COMMENTI_IMPEGNO`,
+  `nominaImpegno`), "mettila", "invece che alle 16" senza verbo, "stessa ora",
+  il perché in coda; annullare per parte della giornata (`fascia`); foto con
+  il comando a metà e "'na foto"/"apri la fotocamera"; SAL con la percentuale
+  ovunque (`normalizzaSal`, "a metà" = 50); assemblea senza data → chiede
+  quando; `scriviAChiNonECliente` (WhatsApp/mail con il testo pronto, il
+  contatto lo sceglie lui).
+- Frasario: nuovi stili in `eval/modello/frasario.mjs` (commenti "giro 15");
+  `allena.mjs` misura anche il giro 15 (per il modello non è più alla cieca).
+- Bug trovato dal riallenamento e corretto: un'ora in testa alla frase
+  ("11:30 riunione") faceva leggere `pp[-1]` in `trovaQuando`.
+- Limiti noti: due appuntamenti in una frase senza virgole ("alle 8 alle
+  Magnolie e l'altro alle 3 in Via Garibaldi") ne segna uno; chiamare chi non
+  è in rubrica non si può (manca il numero: EON lo dice); "fattura per il bar
+  Aurora di 3000 euro" chiede il lavoro (voluto); nella prova resta aperta la
+  card della frase prima e la prova la conferma ("Tommasini paga solo con
+  bonifico" risulta sbagliata per questo, il lettore dice nota).
+
 ### Il cervello perfezionato (30/09/2026, ROADMAP 0b.17)
 - `eval/modello/frasario.mjs`: grammatica per azione ({a|b} alternative, [x]
   facoltativo, <SLOT> dal vocabolario: clienti con le forme a/da/di/con,
