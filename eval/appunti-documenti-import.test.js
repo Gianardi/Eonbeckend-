@@ -52,6 +52,7 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const erroriPagina = [];
     page.on("pageerror", (e) => erroriPagina.push(e.message));
+    await page.addInitScript(() => { try { localStorage.setItem("eon-scorri-accennato", "1"); } catch (e) {} }); // niente accenno dello scorrimento: disturberebbe le misure
     await page.addInitScript(() => {
       window.__chiamateAI = 0;
       window.__scritture = [];

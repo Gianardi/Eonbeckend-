@@ -24,6 +24,7 @@ async function main() {
   try {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
     const page = await ctx.newPage();
+    await page.addInitScript(() => { try { localStorage.setItem("eon-scorri-accennato", "1"); } catch (e) {} }); // niente accenno dello scorrimento: disturberebbe le misure
     const errori = [];
     page.on("pageerror", (e) => errori.push(e.message));
     await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: "networkidle" });

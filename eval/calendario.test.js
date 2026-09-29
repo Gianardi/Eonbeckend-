@@ -24,6 +24,7 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const errori = [];
     page.on("pageerror", (e) => errori.push(e.message));
+    await page.addInitScript(() => { try { localStorage.setItem("eon-scorri-accennato", "1"); } catch (e) {} }); // niente accenno dello scorrimento: disturberebbe le misure
     await page.addInitScript(() => {
       window.__scritture = [];
       const catena = (tabella) => {
