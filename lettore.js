@@ -142,7 +142,12 @@
         if (num >= 1 && num <= 31 && !(pp[i + 2] && /^(?:euro|€|%|mila|ore|minuti|:)$/.test(pp[i + 2].n))) {
           let d = new Date(oggi.getFullYear(), oggi.getMonth(), num);
           if (d < oggi) d = new Date(oggi.getFullYear(), oggi.getMonth() + 1, num);
-          if (d.getDate() === num) { giorno = d; usate.add(i + 1); if (pp[i + 2] && MESI.includes(pp[i + 2].n)) { const dm = new Date(oggi.getFullYear(), MESI.indexOf(pp[i + 2].n), num); if (dm < oggi) dm.setFullYear(dm.getFullYear() + 1); giorno = dm; usate.add(i + 2); } }
+          const conMese = pp[i + 2] && MESI.includes(pp[i + 2].n);
+          /* "Mazza caldaia giovedì 9" (giro 11): se il 9 del mese non cade di
+             giovedì e non c'è un'altra ora, il 9 è l'ORA, non il giorno */
+          const altraOra = pp.some((x, k) => k !== i + 1 && (/^(?:alle|ore|all)$/.test(x.n) || /^\d{1,2}:\d{2}$/.test(x.n)));
+          if (!conMese && d.getDay() !== GIORNI.indexOf(n) && !altraOra && num >= 6 && num <= 21) { /* resta il giorno della settimana: l'ora la legge "oraNuda" */ }
+          else if (d.getDate() === num) { giorno = d; usate.add(i + 1); if (conMese) { const dm = new Date(oggi.getFullYear(), MESI.indexOf(pp[i + 2].n), num); if (dm < oggi) dm.setFullYear(dm.getFullYear() + 1); giorno = dm; usate.add(i + 2); } }
         }
       } else if (/^\d{1,2}\/\d{1,2}(?:\/\d{2,4})?$/.test(n) && !(i > 0 && /^(?:da|di|a|tubo|tubi|raccordo|raccordi|valvola|valvole|attacco|attacchi|filetto)$/.test(pp[i - 1].n)) && !(pp[i + 1] && /^(?:pollic\w*|mm|cm)$/.test(pp[i + 1].n))) {
         const [g, m, a] = n.split("/").map(Number);
@@ -212,6 +217,20 @@
       } else if (pp[j] && /^(?:in\s*punto|precise)$/.test(pp[j].n)) usate.add(j);
       else if (!m[2] && h >= 1 && h <= 6) h += 12; // "alle 3" = 15; "alle 7" è di mattina (i cantieri partono alle 7)
       ora = String(h).padStart(2, "0") + ":" + String(mi).padStart(2, "0");
+    }
+    /* L'ora detta nuda subito dopo il giorno, stile telegramma (giro 11):
+       "Esposito domani 8 getto", "Mazza caldaia giovedì 9", "Neri logo venerdì 11" */
+    if (!ora && giorno) {
+      for (let i = 1; i < pp.length; i++) {
+        if (!/^\d{1,2}$/.test(pp[i].n) || usate.has(i) || !usate.has(i - 1)) continue;
+        if (!/^(?:oggi|domani|dopodomani|domattina|stasera|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|prossimo|prossima)$/.test(pp[i - 1].n)) continue;
+        if (pp[i + 1] && /^(?:euro|€|%|mila|metri|mq|pezzi|giorni|ore|minuti|persone|operai)$/.test(pp[i + 1].n) || (pp[i + 1] && MESI.includes(pp[i + 1].n))) continue;
+        let h = Number(pp[i].n);
+        if (h < 1 || h > 23) continue;
+        if (h >= 1 && h <= 6) h += 12;
+        ora = String(h).padStart(2, "0") + ":00"; usate.add(i);
+        break;
+      }
     }
     for (let i = 0; i < pp.length; i++) if (/^(?:mattina|mattinata|pomeriggio|sera|serata)$/.test(pp[i].n) && (giorno || ora)) { fascia = fascia || pp[i].n; usate.add(i); if (i > 0 && /^(?:di|in|nel|nella|la|il)$/.test(pp[i - 1].n)) usate.add(i - 1); }
     if (!giorno && ora) giorno = null;
@@ -564,6 +583,13 @@
     // "è arrivato il bonifico della Moretti 2.000 euro" → "Moretti ha pagato 2.000 euro"
     [/^(?:(?:e|è|é|mi\s+(?:e|è)|ho)\s+)?(?:arrivato|arrivata|entrato|entrata|ricevuto|ricevuta)\s+(?:il\s+|l\s*'\s*)?(?:bonifico|pagamento|saldo|acconto)\s+(?:di|del|della|dello|dal|dalla|dallo|da|dei|delle|dall\s*'\s*|dell\s*'\s*)\s*(.+?)(?:\s+(?:di\s+)?((?:€\s*)?\d[\d.,]*\s*(?:euro|€)?))?$/i, (x, chi, soldi) => chi + " ha pagato" + (soldi ? " " + soldi : "")],
     [/^(?:fammi\s+parlare|passami|mettimi\s+in\s+contatto|fammi\s+sentire)\s+con\s+/i, "chiama "],
+    // giro 10 (30/09/2026)
+    [/^(?:fai|fagli|falle|fate)\s+sapere\s+/i, "scrivi "],
+    [/^(?:bisogna|bisognerebbe|c\s*'?\s*e\s+da|c'è\s+da|ci\s+sarebbe\s+da|occorre|dobbiamo|dovrei)\s+(?=\p{L}+(?:are|ere|ire)\b)/iu, "devo "],
+    [/^(?:ho|abbiamo)\s+(?:preso|fissato|messo)\s+(?:un\s+|l\s*'\s*)?appuntamento\s+/i, "segna appuntamento "],
+    [/^(?:mi\s+)?(?:sono\s+arrivati|ho\s+ricevuto|ho\s+preso|ho\s+incassato)\s+i\s+soldi\s+(?:di|del|della|dello|dei|delle|dal|dalla|dallo|da|dell\s*'\s*|dall\s*'\s*)\s*(.+?)(?:\s*,?\s+(?:di\s+|sono\s+)?((?:€\s*)?\d[\d.,]*\s*(?:euro|€)?))?$/i, (x, chi, soldi) => chi + " ha pagato" + (soldi ? " " + soldi : "")],
+    // "Vitale ha disdetto, cancella la manutenzione": il motivo davanti non serve
+    [/^[^,]{2,50}\b(?:ha|hanno)\s+(?:disdetto|annullato|rinviato|chiamato|avvisato|detto\s+che\s+non\s+può)[^,]*,\s*(?=(?:cancella|annulla|elimina|togli|sposta|rimanda|anticipa)\b)/i, ""],
     [/^dove\s+(?:ho\s+messo|è|e|sta|trovo|si\s+trova|ho\s+salvato)\s+(il|la|lo|l\s*'|i|le|gli)\s*/i, "mostrami $1 "],
     [/^(?:chiedi|chiedigli|chiedile|domanda)\s+(?:a|ad|al|alla|allo)\s+/i, "scrivi a "],
     [/^(?:spedisci|inoltra|giragli|girale|gira|inviagli|inviale)\s+/i, "manda "],
@@ -572,18 +598,48 @@
     [/^(?:crea|creami|fai|fammi|apri)\s+(?:la\s+|una\s+)?(?:nuova\s+)?cartella\s+/i, "aggiungi cartella "],
     [/^(?:segnami|segna|scrivimi|annotami|annota|prendi\s+nota|metti\s+in\s+mente)\s+che\s+(?:devo|dobbiamo|bisogna|devi)\s+/i, "ricordami di "],
   ];
+  /* Le richieste indirette diventano il comando (giro 10, 30/09/2026):
+     "me lo segni? giovedì alle 10 riunione…", "…, me lo segni?", "puoi
+     telefonare all'osteria?", "mandi un messaggio a X che…?", "mi ricordi
+     di…?", "fai sapere a X che…", "bisogna comprare…", "ho preso
+     appuntamento con X…", "mi sono arrivati i soldi di X, 1.500 euro". */
+  function infinitoAlComando(w) {
+    const x = String(w || "").toLowerCase();
+    if (x === "fare") return "fai";
+    if (/are$/.test(x) && IMPERATIVI_BASE.test(x.slice(0, -2))) return x.slice(0, -2);
+    if (/(?:ere|ire)$/.test(x) && IMPERATIVI_BASE.test(x.slice(0, -3) + "i")) return x.slice(0, -3) + "i";
+    return null;
+  }
+  const AGENDA_TU = "(?:me\\s+lo|me\\s+la|mi|ce\\s+lo)\\s+(?:segni|metti\\s+in\\s+agenda|metti\\s+in\\s+calendario|segni\\s+in\\s+agenda|scrivi\\s+in\\s+agenda|metti)";
+  const RICHIESTA_PRIMA = new RegExp("^" + AGENDA_TU + "\\s*[?,:]?\\s+(?=\\S)", "i");
+  const RICHIESTA_DOPO = new RegExp("\\s*[,.]?\\s*" + AGENDA_TU + "\\s*[?!.]*$", "i");
+  function richiestaAlComando(x, conDomanda) {
+    let t = x, comando = false;
+    if (RICHIESTA_PRIMA.test(t)) { t = "segna " + t.replace(RICHIESTA_PRIMA, ""); comando = true; }
+    else if (RICHIESTA_DOPO.test(t) && t.replace(RICHIESTA_DOPO, "").split(/\s+/).length >= 3) { t = "segna " + t.replace(RICHIESTA_DOPO, ""); comando = true; }
+    // "puoi telefonare a…", "potresti segnare…", "mi fai il piacere di chiamare…"
+    const c = t.match(/^(?:mi\s+)?(?:puoi|potresti|riesci\s+a|riusciresti\s+a|mi\s+fai\s+il\s+piacere\s+di)\s+(\p{L}+)\b/iu);
+    if (c) { const v = infinitoAlComando(c[1]); if (v) { t = v + t.slice(c[0].length); comando = true; } }
+    // "mandi un messaggio…?", "mi chiami Rossi?", "mi ricordi di…?"
+    if (!comando) { const d = /^(?:mi\s+)?ricordi\s+di\b/i.test(t) ? t.replace(/^(?:mi\s+)?ricordi\s+di\b/i, "ricordami di") : comandoDaTu(t, !!conDomanda); if (d && d !== t) { t = d; comando = true; } }
+    // "mi prepari la fattura…? riparazione 220 euro": diventato un comando, il "?" in mezzo non serve
+    if (comando) t = t.replace(/\s*\?\s*/g, " ").trim();
+    return { t, comando };
+  }
   function parafrasi(testo) {
     let t = togliRipensamenti(String(testo || "").trim());
     const fine = (t.match(/[?!.]+$/) || [""])[0];
     let x = t.slice(0, t.length - fine.length).trim();
+    const r = richiestaAlComando(x, /\?/.test(fine));
+    x = r.t;
     for (const [re, sost] of PARAFRASI) {
       if (re.test(x)) { x = x.replace(re, sost).replace(/\s+/g, " ").trim(); break; }
     }
     // "70 per cento" detto a voce = "70%" (giro 5, 29/09/2026)
     x = x.replace(/\b(\d+(?:[.,]\d+)?)\s+per\s*cento\b/gi, "$1%");
     if (x === t.slice(0, t.length - fine.length).trim()) return t;
-    // "dove ho messo…?" diventa un comando: il "?" non serve più
-    return /^mostrami\b/i.test(x) ? x : x + fine;
+    // "dove ho messo…?" diventa un comando: il "?" non serve più; e così ogni richiesta indiretta
+    return /^mostrami\b/i.test(x) || r.comando || /^(?:ricordami|chiama|scrivi|segna|devo)\b/i.test(x) ? x : x + fine;
   }
   /* Il modello ha capito COSA vuoi, le regole non ci sono arrivate: la frase
      riscritta nella forma normale di quel cassetto, così le regole leggono
@@ -600,6 +656,7 @@
     const importo = trovaImporto(pp, new Set())[0];
     switch (intento) {
       case "chiamata": return nome ? "chiama " + nome : null;
+      case "calendario": { const q = trovaQuando(pp, ctx.oggi); return (q.ora || q.giornoIso) && !/^(?:segna|segnami)\b/i.test(t) ? "segna " + t.replace(/^(?:me\s+lo|me\s+la|mi)\s+(?:metti|segni)\s+(?:in\s+agenda\s+)?/i, "") : null; }
       case "messaggio": return nome && dopoNome.length >= 3 ? "scrivi a " + nome + " che " + dopoNome : null;
       case "email": return nome ? "manda una mail a " + nome + (dopoNome ? " " + dopoNome : "") : null;
       case "incasso": return nome && importo ? nome + " ha pagato " + importo.valore + " euro" : nome ? nome + " ha pagato" : null;
@@ -875,14 +932,15 @@
   /* Temi delle domande sui dati: basta che ci sia la parola del tema */
   function temaDomanda(n) {
     if (/\biva\b/.test(n)) return "iva";
-    if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|quanto\s+(?:mi\s+|ci\s+)?dev(?:e|ono)|(?:mi|ci)\s+dev(?:e|ono)|dev(?:e|ono)\s+(?:ancora|dare|pagare|saldare)|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
+    if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|quanto\s+(?:mi\s+|ci\s+|m\s+)?dev(?:e|ono)|(?:mi|ci)\s+dev(?:e|ono)|dev(?:e|ono)\s+(?:ancora|dare|pagare|saldare)|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|prendere\s+ancora|ancora\s+da\s+prendere|moros\w*|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
     if (/\b(?:incassato|incassi|entrat[oaie]|guadagnat[oaie]|guadagno|fatturato)\b/.test(n)) return "incassi";
     if (/\b(?:cantier[ie]|interventi|impianti|condomini|lavori\s+(?:in\s+corso|aperti|attivi)|lavori\s+(?:ho|abbiamo)\s+(?:in\s+corso|aperti|attivi))\b/.test(n)) return "cantieri";
     // "quanti preventivi ho fatto questo mese?", "quante fatture ho fatto?" (giro 5)
     if (/^(?:quanti|quante)\s+(?:preventivi|fatture)\b|\b(?:preventivi|fatture)\s+(?:ho|abbiamo)\s+(?:fatto|fatte|mandato|mandate|emesso|emesse)\b/.test(n)) return "documenti";
     if (/\b(?:impegn[oi]|appuntament[oi]|programma|agenda|liber[oaie]|occupat[oa]|da\s+fare|calendario|giornata)\b/.test(n)) return "agenda";
     // "che lavori ho domani?", "cosa ho la prossima settimana?", "cosa devo fare dopodomani?"
-    if (/^(?:cosa|che\s+cosa|che\s+lavori|che\s+impegni|che\s+giri)\s+(?:ho|abbiamo|devo\s+fare|dobbiamo\s+fare|faccio|facciamo)\b/.test(n)) return "agenda";
+    if (/^(?:cosa|che\s+cosa|che|che\s+lavori|che\s+impegni|che\s+giri)\s+(?:ho|abbiamo|devo\s+fare|dobbiamo\s+fare|faccio|facciamo)\b/.test(n)) return "agenda";
+    if (/^(?:\w+\s+)?(?:cosa|che)\s+c\s*e\s*$/.test(n) || /^(?:domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\s+(?:cosa|che)\s+(?:c\s*e|ho)\b/.test(n)) return "agenda"; // "domani cosa c'è?"
     if (/^quando\s+(?:devo|dovrei|ho|vedo|incontro|vado|passo|sento|chiamo)\b|\bdevo\s+vedere\b/.test(n)) return "agenda";
     if (/\b(?:clienti)\b/.test(n)) return "clienti";
     if (/\b(?:urgenz[ae]|urgenti)\b/.test(n)) return "urgenze";
@@ -947,12 +1005,17 @@
     }
 
     if (/^(?:svuota|svuotami|vuota|pulisci)\s+(?:il\s+)?cestino$/.test(n)) return { ...base, azione: "cestino", quando };
+    /* Un racconto al passato ("oggi sono stato dall'Esposito e il bagno è quasi
+       finito", "stamattina ho parlato con Rossi…"): una nota, non una cosa da fare oggi (giro 11) */
+    if (!q.ora && /^(?:(?:oggi|ieri|stamattina|stamani|stasera|prima|poco\s+fa)\s+)?(?:sono\s+(?:stato|stata|andato|andata|passato|passata)|siamo\s+(?:stati|andati|passati)|ho\s+(?:fatto|finito|visto|parlato|sentito|montato|sistemato|chiuso|consegnato|incontrato|controllato)|abbiamo\s+(?:fatto|finito|montato|consegnato|chiuso))\b/.test(n) && !/^(?:ho|abbiamo)\s+(?:fatto|finito)\s+(?:il|la|un|una)?\s*(?:preventiv|fattur)/.test(n)) return { ...base, azione: "mente", cosa: maiuscola(testo), quando };
     /* L'assemblea di condominio (amministratori, 29/09/2026): "convoca
        l'assemblea ordinaria del condominio Il Glicine per il 20 ottobre alle
        18", "assemblea straordinaria Parco Sole per il rifacimento del tetto
        giovedì 15 alle 21". Il condominio, il giorno e l'ora; il motivo, se c'è. */
-    const iAss = pp.findIndex((x) => /^assemble[ae]$/.test(x.n));
-    if (iAss >= 0 && iAss <= 3 && pp.slice(0, iAss).every((x) => /^(?:convoca|convocare|segna|segnami|fissa|metti|crea|nuova|l|un|una|la|devo|fare|organizza)$/.test(x.n)) && q.giornoIso && q.ora) {
+    let iAss = pp.findIndex((x) => /^assemble[ae]$/.test(x.n));
+    // "convoca straordinaria Sole Mare lunedì 9 novembre alle 18" (giro 11): la parola "assemblea" sottintesa
+    if (iAss < 0 && /^(?:convoca|convocare)$/.test(primo) && pp[1] && /^(?:straordinari[ae]|ordinari[ae])$/.test(pp[1].n)) iAss = 1;
+    if (iAss >= 0 && iAss <= 3 && pp.slice(0, iAss).every((x) => /^(?:convoca|convocare|segna|segnami|fissa|fissare|metti|crea|nuova|l|un|una|la|devo|dobbiamo|bisogna|fare|organizza|organizzare|segnare)$/.test(x.n)) && q.giornoIso && q.ora) {
       const tipoA = ha(/^straordinari[ae]$/) ? "straordinaria" : "ordinaria";
       const cl = trovaCliente(pp, ctx.clienti, usate);
       let condominio = cl.stato === "trovato" ? cl.cliente.name : "";
@@ -1011,7 +1074,13 @@
         if (iInvio > 0 && pp[iInvio - 1].n === "e") usate.add(iInvio - 1);
         if (pp[iInvio + 1] && /^(?:a|ad|al|alla|anche|subito)$/.test(pp[iInvio + 1].n)) usate.add(iInvio + 1);
       }
-      const importi = trovaImporto(pp, usate);
+      // "via Mazzini 18": il numero nel nome del cliente non è un importo (giro 10)
+      const clPrima = trovaCliente(pp, ctx.clienti, new Set(usate));
+      const nelNome = new Set(clPrima.stato === "trovato" ? clPrima.usate.filter((i) => /^\d+$/.test(pp[i].n)) : []);
+      // "via Leopardi 7" senza "condominio": il 7 dopo il nome, se è nel nome del cliente
+      if (clPrima.stato === "trovato") clPrima.usate.forEach((i) => { const k = i + 1; if (pp[k] && /^\d+$/.test(pp[k].n) && norm(clPrima.cliente.name).split(" ").includes(pp[k].n)) nelNome.add(k); });
+      const importi = trovaImporto(pp, new Set([...usate, ...nelNome]));
+      nelNome.forEach((i) => usate.add(i)); // fa parte del nome: nemmeno una voce del preventivo
       let importo = null;
       if (importi.length === 1) { importo = importi[0].valore; importi[0].usate.forEach((i) => usate.add(i)); }
       // IVA: "+ iva", "più iva", "iva esclusa" = come sempre; "iva inclusa/compresa" = da scorporare
