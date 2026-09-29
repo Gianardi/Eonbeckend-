@@ -13206,7 +13206,8 @@ async function provaLettore(testo, viaVoce, invia){
         return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: testoNota.charAt(0).toUpperCase() + testoNota.slice(1), ...(l.daFare ? { da_fare: true } : {}) } };
       }
       // "Ricordami di comprare raccordi da 3/4 e teflon" (senza giorno né ora): da fare nella Mente
-      const ricorda = !l.cliente && /^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i.test(l.testo) && !(l.quando && (l.quando.giornoIso || l.quando.ora));
+      // (quelli senza numeri li fa già provaDaFareImmediato, con il suo avviso)
+      const ricorda = !l.cliente && /^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i.test(l.testo) && !(l.quando && (l.quando.giornoIso || l.quando.ora)) && !(typeof capisciDaFare === "function" && capisciDaFare(l.testo));
       // Solo le frasi senza comando: le altre le sa fare già chi viene dopo
       if(!ricorda && (l.cliente || /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|segna|segnami|metti|mettimi|annota|salva|appunta|appuntami|fai|fammi|ciao|grazie|ricordami|ricordarmi)\b/i.test(l.testo))) return null;
       if(!isDbReady() || l.testo.split(/\s+/).length < 2) return null;
