@@ -53,14 +53,42 @@
   /* "Guarda se ho impegni sabato" = domanda "ho impegni sabato?" */
   const INIZIO_DOMANDA = /^(?:(?:mi\s+)?(?:guardi|guarda|controlla|controlli|vedi|verifica|verifichi|dimmi|mi\s+dici|mi\s+sai\s+dire|sai|fammi\s+sapere)\s+(?:un\s+po\s+)?(?:se|quanto|quanti|quante|chi|cosa|quando|che)\b\s*)/i;
 
+  /* Il verbo detto dando del tu diventa il comando (29/09/2026, frasi vere:
+     "mi cancelli appuntamento Belle", "mi sposti l'incontro alle 17",
+     "mandi e-mail a Rita…?", "mi crei preventivo…?"): come la
+     lemmatizzazione degli assistenti, una regola per tutti i verbi in -are
+     ("cancelli" → "cancella", "modifichi" → "modifica") e per il
+     condizionale ("manderesti" → "manda"). */
+  const IMPERATIVI_BASE = /^(?:cancella|sposta|rimanda|posticipa|anticipa|annulla|elimina|modifica|correggi|cambia|rinomina|archivia|manda|invia|crea|prepara|segna|chiama|richiama|telefona|mostra|trova|cerca|fissa|prenota|aggiorna|registra|salva|ricorda|appunta|annota|inserisci|aggiungi|metti|scrivi|fai|apri|togli|leggi|calcola|controlla|verifica|stampa|scarica|carica|condividi|compila|emetti|genera|programma|organizza|porta|passa|scatta|fotografa|svuota|recupera|ripristina|archivia|segnala|avvisa|ricordami)$/;
+  function verboAlComando(w) {
+    const x = w.toLowerCase();
+    if (IMPERATIVI_BASE.test(x)) return x;
+    if (x === "faresti" || x === "fareste") return "fai";
+    if (/eresti$/.test(x)) { const r = x.replace(/eresti$/, "a"); if (IMPERATIVI_BASE.test(r)) return r; if (IMPERATIVI_BASE.test(r.replace(/a$/, "i"))) return r.replace(/a$/, "i"); }
+    if (/(?:chi|ghi)$/.test(x)) { const r = x.replace(/hi$/, "a"); if (IMPERATIVI_BASE.test(r)) return r; }
+    if (/i$/.test(x)) { const r = x.slice(0, -1) + "a"; if (IMPERATIVI_BASE.test(r)) return r; }
+    return null;
+  }
+  function comandoDaTu(t, conDomanda) {
+    const m = t.match(/^((?:(?:mi|ci)\s+)?)(\p{L}+)(\s|$)/iu);
+    if (!m) return null;
+    const verbo = verboAlComando(m[2]);
+    if (!verbo || verbo === m[2].toLowerCase() && !m[1]) return null;
+    // senza "mi/ci" davanti e senza "?", solo i verbi che non sono anche nomi ("cancelli da montare", "porti", "segni")
+    if (!m[1] && !conDomanda && !/^(?:mandi|crei|prepari|sposti|annulli|elimini|modifichi|invii|chiami|fissi|prenoti|registri|aggiorni|manderesti|faresti|creeresti|prepareresti)$/i.test(m[2])) return null;
+    if (/^(?:fai|faresti)$/i.test(m[2]) && /^\s*(?:vedere|sapere)\b/i.test(t.slice(m[0].length))) return null; // "mi fai vedere…?" è una domanda
+    return verbo + m[3] + t.slice(m[0].length);
+  }
   function pulisci(testo) {
     let t = String(testo || "").trim().replace(/\s+/g, " ");
     let domanda = /\?/.test(t);
     t = t.replace(/[?!.]+$/, "").trim();
     let prima;
     // "mi puoi…", "potresti…": è una richiesta a EON, non una cosa da fare tua
-    const richiesta = /^(?:(?:ehi|hey|ok|allora|senti|eon)\W+)*(?:(?:per\s+favore|perfavore)\W+)?(?:mi\s+)?(?:puoi|potresti|riesci\s+a|riusciresti\s+a)\b/i.test(t);
+    let richiesta = /^(?:(?:ehi|hey|ok|allora|senti|eon)\W+)*(?:(?:per\s+favore|perfavore)\W+)?(?:mi\s+)?(?:puoi|potresti|riesci\s+a|riusciresti\s+a)\b/i.test(t);
     do { prima = t; t = t.replace(INIZIO_CORTESIA, "").replace(FINE_CORTESIA, "").trim(); } while (t !== prima && t);
+    const comeComando = comandoDaTu(t, domanda);
+    if (comeComando) { t = comeComando; richiesta = true; domanda = false; }
     const d = t.match(INIZIO_DOMANDA);
     if (d) {
       domanda = true;
@@ -106,6 +134,26 @@
         giorno = d; usate.add(i); usate.add(i + 1);
         if (i > 0 && /^(?:il|per|entro)$/.test(pp[i - 1].n)) usate.add(i - 1);
       }
+    }
+    /* Fra poco: "fra un'ora", "tra mezz'ora", "tra 2 ore", "fra 20 minuti",
+       "tra un quarto d'ora" (29/09/2026, "Fra un ora incontro con Giulia") */
+    for (let i = 0; i < pp.length - 1 && !ora; i++) {
+      if (!/^(?:fra|tra)$/.test(pp[i].n)) continue;
+      let j = i + 1, minuti = null;
+      const a = pp[j] ? pp[j].n : "", b = pp[j + 1] ? pp[j + 1].n : "", c = pp[j + 2] ? pp[j + 2].n : "";
+      const num = /^\d{1,3}$/.test(a) ? Number(a) : /^(?:un|una|uno)$/.test(a) ? 1 : /^due$/.test(a) ? 2 : /^tre$/.test(a) ? 3 : /^dieci$/.test(a) ? 10 : /^venti$/.test(a) ? 20 : /^trenta$/.test(a) ? 30 : /^quaranta$/.test(a) ? 40 : null;
+      if (/^(?:mezzora|mezz)$/.test(a)) { minuti = 30; j += a === "mezz" && b === "ora" ? 2 : 1; }
+      else if (a === "un" && b === "quarto") { minuti = 15; j += 2; if (pp[j] && pp[j].n === "d") j++; if (pp[j] && pp[j].n === "ora") j++; }
+      else if (num !== null && /^(?:ora|ore|oretta|orette|h)$/.test(b)) { minuti = num * 60; j += 2; if (c === "e" && pp[j + 1] && /^(?:mezza|mezzo)$/.test(pp[j + 1].n)) { minuti += 30; j += 2; } }
+      else if (num !== null && /^(?:minuti|minuto|min)$/.test(b)) { minuti = num; j += 2; }
+      if (minuti === null || minuti > 24 * 60) continue;
+      const adesso = new Date(oggiRif || Date.now());
+      const t = new Date(adesso.getTime() + minuti * 60000);
+      // arrotondato ai 5 minuti, come si segna un appuntamento
+      t.setMinutes(Math.round(t.getMinutes() / 5) * 5, 0, 0);
+      for (let k = i; k < j; k++) usate.add(k);
+      if (!giorno) { const g = new Date(t); g.setHours(0, 0, 0, 0); giorno = g; }
+      ora = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
     }
     // L'ora: "alle 11", "ore 11:30", "11:30", "alle 3 e mezza", "alle 15 in punto"
     for (let i = 0; i < pp.length && !ora; i++) {
@@ -692,8 +740,13 @@
       const tema = temaDomanda(n);
       /* Una domanda che chiede un giudizio ("è pesante?", "conviene?",
          "cosa mi consigli?") non è solo un dato: la fa l'AI */
-      const giudizio = /\b(?:pesante|pesanti|leggera|tranquill[ao]|conviene|convien\w*|consigl\w*|secondo\s+te|meglio|peggio|perche|come\s+mai|dovrei|potrei|riesco|faccio\s+in\s+tempo|ce\s+la\s+faccio|organizz\w*|priorit\w*|spieg\w*|pensi|credi)\b/.test(n);
-      const cartDom = trovaCartella(pp, ctx.cartelle, usate);
+      /* ...e anche un consiglio ("come posso aumentare il guadagno?") o un
+         calcolo con i numeri detti ("incasso 20.000… quanto guadagno?") */
+      const numeriDetti = pp.filter((x, i) => !q.usate.has(i) && /\d/.test(x.n)).length;
+      const giudizio = /\b(?:pesante|pesanti|leggera|tranquill[ao]|conviene|convien\w*|consigl\w*|secondo\s+te|meglio|peggio|perche|come\s+mai|dovrei|potrei|riesco|faccio\s+in\s+tempo|ce\s+la\s+faccio|organizz\w*|priorit\w*|spieg\w*|pensi|credi|come\s+(?:posso|faccio|potrei|si\s+fa|devo)|cosa\s+(?:posso|dovrei)|aumentar\w*|migliorar\w*|guadagnerei|calcol\w*|valere|vale)\b/.test(n) || numeriDetti >= 2;
+      // la cartella solo se si chiede cosa c'è dentro ("cosa c'è in Lerici?"), non "quanto può valere EON?"
+      let cartDom = trovaCartella(pp, ctx.cartelle, usate);
+      if (cartDom && !(cartDom.usate[0] > 0 && /^(?:cartella|per|in|nella|nel|di|della|del|dentro|su|sulla|sul|da)$/.test(pp[cartDom.usate[0] - 1].n))) cartDom = null;
       if (cartDom && !giudizio && (!tema || tema === "agenda")) return { ...base, domanda: true, azione: "dati", tema: "cartella", cartella: cartDom.cartella, quando };
       if (tema && !giudizio) {
         const cl = trovaCliente(pp, ctx.clienti, usate);
@@ -701,6 +754,17 @@
       }
       return { ...base, domanda: true, azione: "domanda", quando };
     }
+
+    /* Solo il nome di un cliente ("Steve Rob", "Franco bi"): la sua scheda (29/09/2026) */
+    if (pp.length <= 4 && !q.ora && !q.giornoIso) {
+      const cl = trovaCliente(pp, ctx.clienti, usate);
+      if (cl.stato === "trovato" || cl.stato === "simile") {
+        const resto = pp.filter((x, i) => !cl.usate.includes(i) && !VUOTE.has(x.n) && !/^(?:cliente|scheda|apri|aprimi|mostra|mostrami|vedi)$/.test(x.n));
+        if (resto.every((x) => x.n.length <= 2)) return { ...base, azione: "apri_cliente", cliente: cl.stato === "trovato" ? cl.cliente : null, clienteSimile: cl.stato === "simile" ? cl.cliente : null, quando };
+      }
+    }
+    /* Uno sfogo o due chiacchiere ("che palle, non so cosa fare"): risponde, non si salva */
+    if (/^(?:che\s+palle|uffa|che\s+noia|mi\s+annoio|sono\s+stanc[oa]|che\s+giornata|non\s+so\s+(?:cosa|che)\s+fare|boh|mah|come\s+stai|che\s+fai|tutto\s+bene)\b/.test(n) && !q.ora && !q.giornoIso) return { ...base, azione: "domanda", quando };
 
     /* Documento: fattura o preventivo */
     const iDoc = indice(/^(?:fattur[ae]|preventiv[oi])$/);
@@ -810,11 +874,29 @@
       };
     }
 
+    /* Un cliente da aggiungere (29/09/2026, frasi vere): un nome con un
+       telefono ("Luca Ferrero 333 1234567 bagno"), "Mario Prova nuovo
+       cliente", "Rita Ambrosini aggiungi clienti". Lo scrive il server. */
+    const telefono = /(?:^|\s)(?:\+?39\s?)?(?:3\d{2}[\s.]?\d{3}[\s.]?\d{3,4}|3\d{8,9}|0\d{1,3}[\s.]?\d{5,8})(?:\s|$)/.test(testo);
+    const paroleCliente = /\b(?:nuov[oa]\s+cliente|cliente\s+nuov[oa]|aggiung\w*\s+(?:ai\s+|tra\s+i\s+|nei\s+|alla\s+lista\s+(?:dei\s+)?)?clienti|(?:nei|tra\s+i|ai)\s+(?:miei\s+)?clienti)\b/.test(n);
+    const aggiungiInTesta = /^(?:aggiungi|aggiungimi|inserisci|salva|registra|nuov[oa])$/.test(primo);
+    const verboAltro = V.chiama.test(primo) || V.manda.test(primo) || V.messaggio.test(primo) || /^(?:scrivi|di|dì|chiama|telefona|manda|invia)$/.test(primo);
+    if ((telefono || paroleCliente) && !q.ora && !domanda && !verboAltro) {
+      const cl = trovaCliente(pp, ctx.clienti, usate);
+      const nuovo = cl.stato !== "trovato" ? trovaNomeNuovo(pp, usate) : null;
+      const usateNome = cl.stato === "trovato" ? cl.usate : nuovo || [];
+      // col solo telefono: frase corta che comincia dal nome o da "aggiungi" (non "Rossi mi ha dato il numero del fornitore…")
+      const corta = pp.filter((x) => !/\d/.test(x.n)).length <= 6 && (aggiungiInTesta || usateNome.includes(0) || usateNome.includes(1) && VUOTE.has(pp[0].n));
+      if ((cl.stato === "trovato" || nuovo) && (paroleCliente || corta)) return { ...base, azione: "cliente", cliente: cl.stato === "trovato" ? cl.cliente : null, telefono, quando };
+    }
+
     /* Un pagamento RICEVUTO: "Rita ha pagato 1.200", "segna 500 euro pagati
        da Rita", "ho incassato 300 da Bianchi" ("ho pagato il fornitore" è
        un pagamento tuo: non è questo) */
     const ricevuto = /\b(?:ha|hanno)\s+(?:gia\s+)?(?:pagato|saldato|versato|fatto\s+il\s+bonifico|dato)\b|\b(?:pagat[oiae]|saldat[oiae]|incassat[oiae]|ricevut[oiae]|versat[oiae])\s+(?:da|dal|dalla)\b|^(?:ho|abbiamo)\s+(?:incassato|ricevuto|preso)\b|^(?:incassati|incassato|ricevuti|ricevuto)\b|\bmi\s+ha\s+(?:pagato|dato|saldato)\b/;
-    if (ricevuto.test(n) && !/^(?:ho|abbiamo)\s+pagato\b/.test(n) && !q.ora) {
+    // "mi ha dato il numero del fornitore", "mi ha dato la chiave": non sono soldi
+    const datoAltro = /\b(?:mi\s+ha|hanno)\s+dato\b/.test(n) && !/\b(?:mi\s+ha|hanno)\s+dato\s+(?:(?:i|gli|un|l|il|la)\s+)?(?:\d|soldi|acconto|anticipo|saldo|bonifico|contanti|assegno|euro|€)/.test(n);
+    if (ricevuto.test(n) && !datoAltro && !/^(?:ho|abbiamo)\s+pagato\b/.test(n) && !q.ora) {
       pp.forEach((x, i) => { if (/^(?:ha|hanno|mi|ho|abbiamo|gia|pagato|pagati|pagata|pagate|saldato|saldata|versato|versati|incassato|incassati|ricevuto|ricevuti|preso|dato|fatto|il|bonifico|da|dal|dalla|segna|segnami|registra|che|euro|di|tutto|tutti|saldo)$/.test(x.n)) usate.add(i); });
       const importi = trovaImporto(pp, new Set());
       const importo = importi.length === 1 ? importi[0].valore : null;
@@ -932,6 +1014,8 @@
 
     /* Il seguito di un discorso ("e quelle di ieri?", "no, a Rossi"): lo capisce chi ha la memoria del discorso */
     if (/^(?:e|ed|anche|invece|pure|poi|allora|no|non|quell[aoie]|quest[aoie])$/.test(primo)) return { ...base, azione: "seguito", quando };
+    // "Me la fai da 57.000", "fammela a 21 mila", "dimmelo": parla di quello appena detto
+    if (/^(?:me\s+(?:la|lo|li|le|ne)|te\s+(?:la|lo)|fammel[aoie]|fammene|fall[aoie]|portal[aoie]|mettil[aoie]|cambial[aoie]|rifall[aoie]|dimmelo|dimmi|dillo|cioe|ossia|quindi|perche|ok\s+e)\b/.test(n)) return { ...base, azione: "seguito", quando };
 
     /* Regola 5: tutto il resto nella Mente (con il cliente, se c'è) */
     const cl = trovaCliente(pp, ctx.clienti, usate);

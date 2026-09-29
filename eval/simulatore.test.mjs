@@ -95,7 +95,7 @@ const NON_SBAGLIARE = [
   ["Domani alle 9 sopralluogo da Rossi", { azione: "impegno", giorno: "2026-09-30", ora: "09:00" }],
   ["Venerdì comprare il cemento", { azione: "da_fare", giorno: "2026-10-02", cosa: "Comprare il cemento" }],
   ["Idea: fare un sito per i clienti", { azione: "mente" }],
-  ["Aggiungi Mario Bianchi 333 1234567", { azione: "comando" }],
+  ["Aggiungi Mario Bianchi 333 1234567", { azione: "cliente" }],
   ["Fatture di Rossi", { azione: "documento", modo: "crea" }], // senza verbo: si chiede cosa (lavoro, importo) o si guardano quelle fatte
   ["Mandami il DURC", { azione: "doc_impresa", documento: "durc" }],
   ["Dammi la visura camerale", { azione: "doc_impresa" }],

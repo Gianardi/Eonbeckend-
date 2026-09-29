@@ -7049,7 +7049,7 @@ function renderCalendar(){
         e.stopPropagation();
         if(cliente && cliente.phone && cliente.phone.trim()){
           chiamataInCorso = { cliente: cliente, iniziata: Date.now() };
-          window.location.href = "tel:" + cliente.phone.replace(/\s/g, "");
+          apriLinkEsterno("tel:" + cliente.phone.replace(/\s/g, ""));
         } else {
           showAILanding("Numero mancante",
             "Non ho il telefono di " + it.contatto + ". Aggiungilo alla sua scheda in Clienti e potrai chiamare da qui.");
@@ -12885,7 +12885,7 @@ async function gestisciPiuComandi(l, testo){
   const pezzi = l.pezzi || [];
   const qui = pezzi.filter(p => p.azione === "da_fare" || p.azione === "nota_cartella");
   const alServer = pezzi.filter(p => p.azione === "impegno");
-  if(!qui.length || qui.length + alServer.length !== pezzi.length) return null; // un pezzo che il codice qui non sa fare: tutto come prima
+  if(qui.length + alServer.length !== pezzi.length || (!qui.length && alServer.length < 2)) return null; // un pezzo che il codice qui non sa fare: tutto come prima
   const fatti = [];
   for(const p of qui){
     const r = p.azione === "da_fare" ? await salvaDaFareConGiorno(p) : await salvaNotaCartella(p);
@@ -12899,6 +12899,12 @@ async function gestisciPiuComandi(l, testo){
     });
   }
   if(!alServer.length) return { fatto: "piu" };
+  /* Gli impegni con l'ora li ha già letti il lettore: il server li segna uno
+     per uno senza AI (29/09/2026). Se uno non si legge bene, come prima. */
+  const letti = alServer.map(p => letturaImpegnoPerServer(p));
+  if(letti.every(Boolean)){
+    return { comando: { azione: "impegni", impegni: letti.map(x => ({ giorno: x.giorno, ora: x.ora, titolo: x.titolo, tipo: x.tipo, ...(x.clienteId ? { cliente_id: x.clienteId } : {}) })) }, testoServer: alServer.map(p => p.originale).join(". ") };
+  }
   return { testo: alServer.map(p => p.originale).join(". ") };
 }
 
@@ -13003,9 +13009,10 @@ function letturaImpegnoPerServer(l){
   if(titolo.length < 3) return null;
   const cl = EonLettore.trovaCliente(pp, contestoLettore().clienti, q.usate);
   const nome = cl.stato === "trovato" ? cl.usate.map(i => pp[i].o).join(" ") : "";
+  const clienteId = cl.stato === "trovato" && cl.cliente ? cl.cliente.id : null;
   const tipo = /^(?:chiama|chiamare|sentire|senti|telefona|telefonare|richiama|richiamare|chiamata|telefonata)$/.test(resto[0] ? resto[0].n : "") ? "chiamata"
     : (cl.stato === "trovato" || /\b(?:da|appuntamento|sopralluogo|incontro|visita|riunione|cantiere)\b/.test(EonLettore.norm(titolo))) ? "incontro" : "commissione";
-  return { giorno, ora: l.quando.ora, titolo: titolo.charAt(0).toUpperCase() + titolo.slice(1), nome, tipo };
+  return { giorno, ora: l.quando.ora, titolo: titolo.charAt(0).toUpperCase() + titolo.slice(1), nome, tipo, clienteId };
 }
 
 /* ---- Regola 4: domande sui dati ---- */
@@ -13082,6 +13089,11 @@ async function provaLettore(testo, viaVoce, invia){
     case "messaggio": return gestisciMessaggio(l, testo, invia);
     case "email": case "whatsapp": return gestisciScrittura(l, testo, viaVoce);
     case "chiama": return gestisciChiamata(l, viaVoce);
+    case "apri_cliente": {
+      const r = risolviClienteLettura(l, "Cliente", (c) => { chiudiRisorsaCard(); mostraSchedaCliente(c); return { fatto: "apri_cliente" }; });
+      return r && r.fatto ? r : (r === null ? null : { fatto: "apri_cliente_scelta" });
+    }
+    case "cliente": return null; // un cliente da aggiungere: lo scrive il server col codice
     case "incasso": return gestisciIncasso(l, testo);
     case "nota_cartella": return await salvaNotaCartella(l);
     case "cartello": return apriCartelloPer(l);
@@ -13195,7 +13207,7 @@ function provaComandiSemplici(testo, viaVoce){
       showAIToast("Numero mancante", "Non ho il telefono di " + c.name + ": aggiungilo con Modifica.");
       return true;
     }
-    if(!viaVoce){ window.location.href = "tel:" + numero; return true; }
+    if(!viaVoce){ apriLinkEsterno("tel:" + numero); return true; }
     // A voce il telefono vuole un tocco: un tasto solo
     const corpo = document.createElement("div");
     corpo.className = "percorso-card";
@@ -14341,7 +14353,7 @@ function capisciDomandaSoldi(testo){
    come sempre (falso negativo innocuo, mai un falso positivo su QUALE
    cliente). Apre direttamente la card risorsa (vedi mostraRisorsaFoto/
    mostraRisorsaDocumenti) se riconosciuta. */
-const TRIGGER_RISORSA = /^(?:(?:mi serve|mi servirebbe|mi servono|ho bisogno (?:del|della|dei|delle|di)|dammi|mandami|fammi vedere|mi fai vedere|fai vedere|voglio vedere|vorrei vedere|vorrei|mostrami|mostra|recupera|cerca|trova|apri)\s+)?(?:il|la|lo|i|gli|le|l')?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|dello|dei|per|a)?\s*(.+)$/;
+const TRIGGER_RISORSA = /^(?:(?:mi serve|mi servirebbe|mi servono|ho bisogno (?:del|della|dei|delle|di)|dammi|mandami|mi mandi|mi manderesti|manda|inviami|mi invii|mi dai|mi daresti|fammi avere|fammi vedere|mi fai vedere|fai vedere|voglio vedere|vorrei vedere|vorrei|mostrami|mostra|recupera|cerca|trova|apri)\s+)?(?:il|la|lo|i|gli|le|l')?\s*(foto|fotografia|fotografie|documento|documenti|preventivo|preventivi|fattura|fatture)\s+(?:di|del|della|dello|dei|per|a)?\s*(.+)$/;
 
 /* Prima tra i clienti attivi; se nessuno corrisponde, anche tra gli
    archiviati (25/09/2026: "mi serve fattura testolina" finiva all'AI —
@@ -14910,7 +14922,7 @@ function capisciPensiero(testo){
   if(DOMANDA_PER_MENTE.test(t) || CHIACCHIERE.test(t)) return null;
   // Un ordine a EON ("svuota il cestino") non è un pensiero: lo dice il lettore unico
   const letta = leggiConLettore(t);
-  if(letta && /^(?:comando|modifica|invio_documento|domanda|dati)$/.test(letta.azione)) return null;
+  if(letta && /^(?:comando|modifica|invio_documento|domanda|dati|cliente|seguito)$/.test(letta.azione)) return null;
   // Un giorno o un'ora ("giovedì alle 21"): è un impegno, non un pensiero (il lettore legge anche "alle 21" e gli accenti)
   if(letta && letta.quando && (letta.quando.giornoIso || letta.quando.ora)) return null;
   // Il seguito di un discorso ("e quelle di ieri", "no, a Rossi", "mandalo"): decide l'AI
@@ -18211,7 +18223,7 @@ function apriArchivio(){
       if(a === "chiama"){
         if(cliente && cliente.phone && cliente.phone.trim()){
           chiamataInCorso = { cliente, iniziata: Date.now() };
-          window.location.href = "tel:" + cliente.phone.replace(/\s/g, "");
+          apriLinkEsterno("tel:" + cliente.phone.replace(/\s/g, ""));
         } else {
           showAILanding("Numero mancante", "Non ho il telefono di " + chat.name + ". Aggiungilo alla sua scheda.");
         }

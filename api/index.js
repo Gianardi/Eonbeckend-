@@ -4883,6 +4883,27 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     const azioni = [{ tool: "modifica_preventivo_o_fattura", esito }];
     return { azioni, payload: { stato: "concluso", testo: "Fatto.", azioni } };
   }
+  /* Più impegni detti in una frase, già letti dal lettore dell'app ("Domani
+     ore 9 sveglia. Poi… Ore 17 a Falconara"): uno per uno, senza AI (29/09/2026) */
+  if (comando.azione === "impegni") {
+    if (!Array.isArray(comando.impegni) || !comando.impegni.length || comando.impegni.length > 8) return null;
+    const lista = [];
+    for (const x of comando.impegni) {
+      const quando = x && /^\d{4}-\d{2}-\d{2}$/.test(String(x.giorno || "")) && /^\d{2}:\d{2}$/.test(String(x.ora || "")) ? quandoValido(`${x.giorno}T${x.ora}:00`) : null;
+      const titolo = x && eStringaNonVuota(x.titolo) ? x.titolo.trim().slice(0, 120) : "";
+      if (!quando || titolo.length < 3) return null;
+      lista.push({ quando, titolo, tipo: TIPI_IMPEGNO.has(x.tipo) ? x.tipo : "commissione", cliente_id: eUuid(x.cliente_id) ? x.cliente_id : null });
+    }
+    const azioni = [];
+    for (const x of lista) {
+      let cliente = null;
+      if (x.cliente_id) { const c = await trovaProprio("clients", x.cliente_id, ctx); if (c) cliente = { id: c.id, nome: c.name }; }
+      const r = await creaImpegnoRapido({ titolo: x.titolo, tipo: x.tipo, quando_iso: x.quando, nomeDetto: "" }, cliente, user, ctx);
+      azioni.push(...r.azioni);
+    }
+    ctx.lettoSenzaAI = true;
+    return { azioni, payload: { stato: "concluso", testo: azioni.length === 1 ? "Fatto." : `Segnati ${azioni.length} impegni.`, azioni } };
+  }
   if (comando.azione === "appunto") {
     // "Conti mi ha detto che paga a fine mese": nella scheda del cliente (e sul suo prossimo appuntamento)
     if (!eUuid(comando.cliente_id) || !eStringaNonVuota(comando.testo) || comando.testo.length > 600) return null;
