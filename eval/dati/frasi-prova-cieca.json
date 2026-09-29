@@ -1,0 +1,112 @@
+{
+  "nota": "Quarta prova (29/09/2026, sera): frasi scritte DOPO tutte le correzioni e il modello, da misurare UNA volta senza ritocchi. Il numero di questa prova è quello da dire ad Andrea.",
+  "mestieri": {
+    "edile": {
+      "clienti": ["Roberto Gatti", "Chiara Fabbri", "Condominio San Marco", "Ristorante La Vela", "Davide Orlando", "Sonia Pace"],
+      "impegni": [["Sopralluogo Roberto Gatti", "domani", "08:30"], ["Rilievo Ristorante La Vela", "domani", "15:00"]],
+      "frasi": [
+        ["domani alle 7 arriva il ponteggio da Gatti", "calendario"],
+        ["segnami venerdì alle 16 incontro con l'architetto per il progetto della Fabbri", "calendario"],
+        ["lunedì mattina alle 8 si comincia il tetto del condominio San Marco", "calendario"],
+        ["tra un'oretta passo in ferramenta", "calendario"],
+        ["ricordati che la Fabbri vuole il parquet chiaro", "mente"],
+        ["devo ordinare le travi lamellari per Orlando", "mente"],
+        ["il geometra ha detto che la pratica è in comune", "mente"],
+        ["preventivo per Davide Orlando rifacimento terrazzo 35 metri quadri a 70 euro e ringhiera 1.200", "documento"],
+        ["fattura al ristorante la vela per il pavimento della sala 6.500 euro", "documento"],
+        ["mi prepari il preventivo di Sonia Pace per la cucina? 9.000 euro", "documento"],
+        ["fammi vedere i preventivi della Fabbri", "risorsa"],
+        ["mandami le foto del tetto di San Marco", "foto"],
+        ["manda il preventivo a Davide Orlando su whatsapp", "invio"],
+        ["sposta il sopralluogo di Gatti alle 10", "calendario_modifica"],
+        ["annulla il rilievo alla vela", "calendario_modifica"],
+        ["scrivi a Sonia Pace che domani non riesco a passare", "messaggio"],
+        ["avvisa Gatti che il ponteggio arriva alle 7", "messaggio"],
+        ["chiama Chiara Fabbri", "chiamata"],
+        ["mail a Davide Orlando con le misure del terrazzo", "email"],
+        ["nuovo cliente Paolo Serra 348 7766554 ristrutturazione casa", "cliente"],
+        ["Davide Orlando", "cliente"],
+        ["quanto mi deve il ristorante la vela?", "dati"],
+        ["cosa ho giovedì?", "dati"],
+        ["Gatti mi ha dato 3.000 euro di acconto", "incasso"],
+        ["fai una foto al solaio", "foto_scatta"],
+        ["SAL al 50% per Roberto Gatti", "sal"],
+        ["urgente crollato il controsoffitto dalla Pace", "urgenza"],
+        ["che spessore deve avere un massetto per il riscaldamento a pavimento?", "ai"],
+        ["come faccio a convincere un cliente che il preventivo è giusto?", "ai"],
+        ["crea la cartella Materiali", "cartella"]
+      ]
+    },
+    "idraulico": {
+      "clienti": ["Marta Colli", "Bar Aurora", "Condominio Le Vigne", "Ivan Rota", "Albergo Stella"],
+      "impegni": [["Manutenzione caldaia Marta Colli", "domani", "09:00"]],
+      "frasi": [
+        ["domani alle 14 sostituzione boiler all'albergo stella", "calendario"],
+        ["urgente perde il tubo della lavatrice da Ivan Rota", "urgenza"],
+        ["preventivo per il bar aurora sostituzione lavastoviglie attacchi 180 euro e scarico nuovo 90", "documento"],
+        ["fattura Marta Colli 120 euro manutenzione caldaia", "documento"],
+        ["ho incassato 250 euro dal bar aurora", "incasso"],
+        ["sposta la manutenzione della Colli a giovedì alle 9", "calendario_modifica"],
+        ["scrivi al bar aurora che passo verso le 17", "messaggio"],
+        ["chiama Ivan Rota", "chiamata"],
+        ["ricordami di comprare guarnizioni da mezzo pollice", "mente"],
+        ["la caldaia dell'albergo è una Vaillant del 2012", "mente"],
+        ["chi mi deve dei soldi?", "dati"],
+        ["come si sfiata un termosifone?", "ai"],
+        ["fai foto alla perdita", "foto_scatta"],
+        ["Albergo Stella", "cliente"],
+        ["aggiungi Nadia Ferrini 333 2233445", "cliente"]
+      ]
+    },
+    "elettricista": {
+      "clienti": ["Enrico Fumagalli", "Farmacia Centrale", "Condominio Belvedere", "Laura Sanna"],
+      "impegni": [["Verifica impianto Farmacia Centrale", "domani", "11:00"]],
+      "frasi": [
+        ["domani alle 8 e mezza montaggio lampade da Laura Sanna", "calendario"],
+        ["urgente non va la luce in farmacia", "urgenza"],
+        ["fammi la dichiarazione di conformità per Enrico Fumagalli", "dico"],
+        ["preventivo per il condominio Belvedere 18 plafoniere led a 45 euro e manodopera 600", "documento"],
+        ["annulla la verifica della farmacia", "calendario_modifica"],
+        ["scrivi a Laura Sanna che le lampade sono arrivate", "messaggio"],
+        ["Fumagalli ha pagato 1.100 euro", "incasso"],
+        ["ricordami di prendere il tester nuovo", "mente"],
+        ["quanto devo incassare in tutto?", "dati"],
+        ["che differenza c'è tra magnetotermico e differenziale?", "ai"],
+        ["foto al quadro della farmacia", "foto_scatta"],
+        ["chiama la farmacia centrale", "chiamata"]
+      ]
+    },
+    "amministratore": {
+      "clienti": ["Condominio Il Pino", "Condominio Via Dante 8", "Signor Bassi", "Ditta Verde Pulito"],
+      "impegni": [],
+      "frasi": [
+        ["convoca l'assemblea del condominio Il Pino per giovedì 22 ottobre alle 18:30", "assemblea"],
+        ["urgente perdita d'acqua nel garage di via Dante 8", "urgenza"],
+        ["scrivi al signor Bassi che la rata scade il 30", "messaggio"],
+        ["il signor Bassi ha pagato 420 euro", "incasso"],
+        ["ricordami di chiedere il preventivo per le grondaie del Pino", "mente"],
+        ["quanto deve ancora il condominio il pino?", "dati"],
+        ["domani alle 10 sopralluogo tetto via Dante 8", "calendario"],
+        ["serve l'unanimità per installare il cappotto?", "ai"],
+        ["manda una mail alla ditta verde pulito per le pulizie di ottobre", "email"],
+        ["fattura al condominio via Dante 8 per compenso trimestrale 600 euro", "documento"]
+      ]
+    },
+    "artigiano": {
+      "clienti": ["Libreria Parole", "Marco Deiana", "Gelateria Polo", "Studio Legale Ferri"],
+      "impegni": [["Consegna Gelateria Polo", "domani", "16:00"]],
+      "frasi": [
+        ["domani alle 11 shooting per la gelateria polo", "calendario"],
+        ["preventivo per la libreria parole nuovo sito 2.200 euro", "documento"],
+        ["Marco Deiana mi ha pagato 400 euro", "incasso"],
+        ["sposta la consegna della gelateria alle 18", "calendario_modifica"],
+        ["scrivi allo studio legale che le bozze sono pronte", "messaggio"],
+        ["idea: offrire un abbonamento ai negozi del quartiere", "mente"],
+        ["quanto ho incassato questo mese?", "dati"],
+        ["come si fa un contratto di collaborazione?", "ai"],
+        ["chiama Marco Deiana", "chiamata"],
+        ["fai una foto al lavoro consegnato", "foto_scatta"]
+      ]
+    }
+  }
+}
