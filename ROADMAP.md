@@ -82,7 +82,21 @@ quanti appunti hanno e "+ Cartella" (nasce e si apre); dentro una cartella
 "‹ Mente" per tornare; toccando un appunto, "Cartella: Mente / … / + Nuova" lo
 sposta con un tocco (con "Annulla"). A voce resta "segna in Fornitori di…".
 Prova: `eval/mente-cartelle.test.js` (8 controlli, 2 foto).
-**Fatto il 30/09 (sera), nel prossimo pacchetto:** nella Home "Parla" e "Foto",
+**Fatto il 30/09 (notte), nel prossimo pacchetto:** addestramento, giri 13-14
+(0b.17). Stili mai provati prima, alla cieca: **giro 13: 57/72 (79%) al primo
+colpo** → 72/72; **giro 14 (stessi stili, frasi nuove): 47/47 (100%) al primo
+colpo**. Nuovo: le abbreviazioni da chat diventano parole ("x", "ke", "nn",
+"cmq", "app.to", "prev.", "fatt.", "tel", "msg", "cash", "1,5k" = 1500); date
+lontane ("fra una settimana", "tra 3 giorni", "a fine mese", "lunedì della
+prossima settimana", "il primo dicembre", "in giornata", "a fine giornata");
+ripensamento lungo ("no aspetta, volevo dire venerdì"); "non dimenticare di…"
+= da fare, "non scordarti che…" = nota; "X mi ha detto che…" e i racconti al
+passato = nota nella scheda del cliente; "Aggiungi Nome Cognome" = cliente
+nuovo. Cervello riallenato: 98% su 1.063 frasi mai viste (99% quando è sicuro).
+Due etichette mie corrette dopo la misura (erano "nota", sono "da fare con
+scadenza", come deciso nel giro 7).
+
+**Fatto il 30/09 (sera), già online (PR #144):** nella Home "Parla" e "Foto",
 due tasti uguali con la scritta (Andrea ha scelto la simulazione D fra 4:
 solo microfono / fotocamera piccola / grande uguale / uguali con scritta).
 Solo edile, idraulico, elettricista e amministratore; "La mia attività" resta

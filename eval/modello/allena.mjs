@@ -58,8 +58,8 @@ const misura = {
 const prova = JSON.parse(fs.readFileSync(path.join(RADICE, "eval/dati/frasi-prova-modello.json"), "utf8"));
 misura["PROVA FINALE (mai usata per migliorare)"] = prova.frasi.map(([frase, intento]) => ({ frase, intento, ctx: ctxDi(prova.clienti) }));
 /* I giri alla cieca (29/09/2026, 652 frasi + prova cieca 77): il modello non li vede mai in allenamento */
-const giri = ["frasi-prova-cieca.json", "frasi-giro5.json", "frasi-giro6.json", "frasi-giro7.json", "frasi-giro8.json", "frasi-giro9.json", "frasi-giro10.json", "frasi-giro11.json", "frasi-giro12.json"].map((f) => JSON.parse(fs.readFileSync(path.join(RADICE, "eval/dati", f), "utf8")));
-misura["GIRI ALLA CIECA (991 frasi)"] = giri.flatMap((g) => Object.values(g.mestieri).flatMap((m) => m.frasi.filter(([, c]) => DA_CATEGORIA[c] || c === "risposta").map(([frase, c]) => ({ frase, intento: DA_CATEGORIA[c] || "saluto", ctx: ctxDi(m.clienti) }))));
+const giri = ["frasi-prova-cieca.json", "frasi-giro5.json", "frasi-giro6.json", "frasi-giro7.json", "frasi-giro8.json", "frasi-giro9.json", "frasi-giro10.json", "frasi-giro11.json", "frasi-giro12.json", "frasi-giro13.json"].map((f) => JSON.parse(fs.readFileSync(path.join(RADICE, "eval/dati", f), "utf8")));
+misura["GIRI ALLA CIECA (1063 frasi)"] = giri.flatMap((g) => Object.values(g.mestieri).flatMap((m) => m.frasi.filter(([, c]) => DA_CATEGORIA[c] || c === "risposta").map(([frase, c]) => ({ frase, intento: DA_CATEGORIA[c] || "saluto", ctx: ctxDi(m.clienti) }))));
 const tutteMisura = new Set(Object.values(misura).flat().map((x) => L.norm(x.frase)));
 allenamento = allenamento.filter((x) => !tutteMisura.has(L.norm(x.frase))); // mai la stessa frase in allenamento e in misura
 
