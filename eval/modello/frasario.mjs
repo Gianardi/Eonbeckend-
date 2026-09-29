@@ -101,6 +101,13 @@ const G = {
     "[<RIEMPI>]<C.nudo> ha {disdetto|annullato|chiamato}, {cancella|annulla|sposta a <GIORNO>} {l'appuntamento|il sopralluogo|la manutenzione} [di <GIORNO>]",
     "{niente|guarda|no}, {il sopralluogo|l'appuntamento|la consegna} <C.da> {salta|non si fa più|è saltato}, {toglilo|cancellalo|toglila|cancellala}",
     "{il sopralluogo|l'appuntamento|la consegna} <C.da> {spostamelo|spostamela|rimandamelo|cancellamelo|annullamelo} {a <GIORNO>|<ORA>|a <GIORNO> <ORA>|}",
+    // giro 15: il verbo a metà, dopo chi e quando
+    "<C.nudo> <GIORNO> {non ce la faccio|non c'è|non può} {spostalo|spostala|anticipiamolo} {<ORA>|a <GIORNO> <ORA>}",
+    "{il servizio fotografico|la consegna|il montaggio|la revisione} <C.di> di <GIORNO> {mettilo|mettila|spostalo|spostala|anticipiamolo} <ORA> {invece che <ORA>|per la luce|}",
+    "<C.nudo> <GIORNO> mi ha chiesto di passare <ORA> invece che <ORA>",
+    "<C.nudo> ha chiamato, <GIORNO> non può, {annulla|cancella} {l'incontro|l'appuntamento}",
+    "{cancella|annulla} l'appuntamento di {domani pomeriggio|domani mattina|sabato mattina} <C.a>{, non ci vado più|}",
+    "<C.nudo> <GIORNO> la {revisione|manutenzione} non si può fare, rimandiamo a <GIORNO> stessa ora",
   ],
   mente: [
     "[<RIEMPI>]<NOTA>",
@@ -122,6 +129,15 @@ const G = {
     "{compra|prendi|ordina} <COSA>",
     "{non dimenticare di|non scordarti di} {ordinare|comprare|prendere|chiamare} {<COSA>|<C.nudo>}",
     "{non scordarti che|non dimenticare che|ricordati che} <C.nudo> {vuole|preferisce|ha chiesto} {il box doccia in cristallo|il colore bianco|la certificazione|le prese in più}",
+    // giro 15: preferenze, promemoria per quando vai, misure
+    "<C.nudo> {preferisce|vuole} essere {chiamato|chiamata|contattato|contattata} {dopo le 5|la sera dopo le 7|solo su whatsapp|solo di mattina}",
+    "<C.nudo> {preferisce che la chiami|preferisce che lo chiami} dopo le {sei|cinque} {di sera|}",
+    "<C.nudo> paga {solo|sempre} {con bonifico|in contanti} {a fine mese|}",
+    "quando vado <C.da> {portare|ricordarsi} {la scala lunga|<COSA>|le chiavi}{, il capannone è alto 7 metri|}",
+    "{segna|annota} che <C.nudo> ha {l'impianto vecchio|il contatore in cantina|la caldaia sul balcone|il cane in giardino}",
+    "le misure {del bagno|della cucina|del vano} <C.di> sono {2 e 40 per 1 e 80|3 per 4|2 e 10 per 90}",
+    "<C.nudo> di giorno è {aperto|aperta} quindi rumore solo {di mattina fino alle 11|fino alle 12}",
+    "idea: proporre {il contratto di manutenzione|le colonnine|il pacchetto annuale} a tutti {i ristoranti della zona|i clienti|quelli del fotovoltaico}",
   ],
   documento: [
     "[<RIEMPI>]{fammi|fai|prepara|preparami|crea|creami|emetti|fammi un|mi fai un|mi prepari un} {preventivo|fattura|preventivo|fattura} {per|a} <C.nudo> {per|di} {il|la} <LAVORO> <SOLDI>",
@@ -135,6 +151,12 @@ const G = {
     "{fammi|fai} 'na {fattura|preventivo} <C.a> di <SOLDI_PAROLE> per {il|la} <LAVORO>",
     "{fattura|preventivo} <C.nudo> <LAVORO> <SOLDI>",
     "[<RIEMPI>]{fai|fammi} {un preventivo|una fattura} {per|a} <C.nudo>",
+    // giro 15: quantità a parole, mille e due, correzioni, totale detto
+    "preventivo per <C.nudo>: {mensola|centrale|gestione ordinaria} {180|900|2.100} e {due|tre|sei} {cassetti|sensori|assemblee} a {95|80|150} {l'uno|l'una|cadauno}",
+    "{preventivo|fattura} <C.a> {materiale|materiali|compenso} mille e {due|cinque|sei}, manodopera {novecento|ottocento}",
+    "{preventivo|fattura} per <C.nudo>, {imbiancatura|manodopera} 1.500 {cioè no|no aspetta} 1.400, più {la cucina|il materiale} 600",
+    "fattura per <C.nudo> {24 bignè e una crostata|il lavoro}, tutto {58|300} euro",
+    "{mi prepari|fammi} la fattura <C.a>? sono 380 euro per {le raccomandate|il sopralluogo} e 220 per {la pratica|il materiale}",
   ],
   cerca_documento: [
     "[<RIEMPI>]{fammi vedere|mostrami|mi fai vedere|apri|trova|cerca|dove sono|dove ho messo} {i preventivi|le fatture|il preventivo|la fattura|i documenti|le foto} <C.di>",
@@ -161,12 +183,19 @@ const G = {
     "[<RIEMPI>]{scrivi|manda un messaggio} <C.a>",
     "[<RIEMPI>]{fai sapere|fagli sapere|falle sapere} <C.a> che <MSG>",
     "[<RIEMPI>]{mi mandi|mandi|puoi mandare|potresti mandare} un {messaggio|whatsapp} <C.a> che <MSG>[?]",
+    // giro 15: a chi non è tra i clienti
+    "{scrivi|manda un messaggio|messaggio|sms|whatsapp} {al geometra Rovelli|al mio operaio Davide|alla squadra|al fornitore|al mio garzone Mattia|a Tiziana} {che|:} <MSG>",
+    "whatsapp <C.a>: <MSG>, quando potete passare?",
+    "manda un vocale no scrivi, scrivi <C.a> che <MSG>",
+    "scrivi <C.a> che mi serve la foto del {contatore|quadro|pezzo}",
   ],
   email: [
     "[<RIEMPI>]{manda|invia|scrivi} {una mail|una email|una e-mail|un'email} <C.a> {con|per} {il preventivo|le misure|il riepilogo|il cronoprogramma|il verbale|il bilancio|le foto|la convocazione}",
     "[<RIEMPI>]{mail|email} <C.a> {con|per} {il preventivo|le misure|il riepilogo|le foto|il verbale|la dichiarazione di conformità}",
     "[<RIEMPI>]{scrivi|rispondi} {per mail|per email|via mail|per posta elettronica} <C.a> che <MSG>",
     "[<RIEMPI>]{manda|invia} {una mail|una email} <C.a>",
+    "{scrivi una mail|manda una mail|mail|email} {al commercialista|al fornitore|all'avvocato Sartori|al grossista|a Edilcentro} {che|per|con} {gli porto le ricevute lunedì|chiedere il listino aggiornato|l'elenco dei morosi|ordinare 30 bancali}",
+    "no aspetta non su whatsapp, fai una mail formale <C.a> {col riepilogo dei lavori|con il preventivo}",
   ],
   chiamata: [
     "[<RIEMPI>]{chiama|chiamami|telefona a|telefonami|fai il numero di|componi il numero di|fammi parlare con|passami|richiama|fai partire una chiamata a} <C.nudo>",
@@ -174,6 +203,11 @@ const G = {
     "[<RIEMPI>]{chiamata|telefonata} <C.a> {adesso|subito|ora|}",
     "{puoi|potresti|mi puoi} {telefonare|chiamare} <C.a>[?]",
     "{mi chiami|chiamami|mi fai chiamare} <C.nudo>[?]",
+    // giro 15: il perché dopo il nome, i modi di dire
+    "{chiama|telefona a|telefona} <C.nudo> che {non risponde ai messaggi|le devo dire del pezzo|devo capire dove sta il contatore|faccio prima}",
+    "mettimi in linea con <C.nudo> [per favore]",
+    "{dai|ohi|annamo,} chiamami un attimo {sto|} <C.nudo>",
+    "no non scrivere, {chiamalo|chiamala} direttamente <C.nudo>",
   ],
   cliente: [
     "{<C.nudo>|<C.nudo>|<C.nudo>?|apri <C.nudo>|scheda <C.di>|il cliente <C.nudo>|fammi vedere <C.nudo>}",
@@ -182,6 +216,13 @@ const G = {
     "[<RIEMPI>]{aggiungi|salva|aggiungi il cliente|metti} <NUOVO>",
     "[<RIEMPI>]{aggiungi|salva} {<NUOVO>|<C.nudo>} [nei clienti]",
     "[<RIEMPI>]{aggiungi|salva|nuovo contatto|aggiungi il contatto} {<NUOVO>|Idraulica <NUOVO>|Edil <NUOVO>|Ferramenta <NUOVO>} {fornitore|idraulico|elettricista|muratore|commercialista|geometra|imbianchino|cliente} <TEL>",
+    // giro 15: il cliente nuovo detto come viene
+    "{c'è un cliente nuovo|ho un cliente nuovo|c'ho una cliente nuova|è venuta una signora nuova}, <NUOVO>, <TEL>{, salvala|, salvalo|, mettila tra i clienti|}",
+    "metti in rubrica {un nuovo cliente,|come cliente} <NUOVO>{, via Roma 12|}, <TEL>",
+    "salva {la signora|il signor} <NUOVO> {numero|telefono|cellulare} <TEL>",
+    "registra la ditta <NUOVO> come nuovo cliente, numero <TEL>",
+    "nuovo cliente: {Bar|Trattoria|Pizzeria|Condominio} <NUOVO>, {il numero è|telefono} <TEL>",
+    "aggiungi cliente {Ristorante|Condominio} <NUOVO>, {amministratore|referente} <NUOVO>, <TEL>",
   ],
   dati: [
     "[<RIEMPI>]{cosa|che cosa|che} {ho|devo fare|c'è in programma|ho in agenda} <GIORNO>[?]",
@@ -199,11 +240,27 @@ const G = {
     "<GIORNO> {cosa c'è|che ho|cosa devo fare}[?]",
     "{chi è moroso|chi sono i morosi|chi non paga}[?]",
     "quanto devo {prendere ancora|ancora prendere|incassare} <C.da>[?]",
+    // giro 15
+    "a che ora {devo essere|ho appuntamento|c'ho l'appuntamento} <C.da> <GIORNO>[?]",
+    "{ma io |}<GIORNO> {c'ho|ho} qualcosa[?]",
+    "quali preventivi {ho|sono} ancora aperti[?]",
+    "a quanto era il preventivo <C.di>[?]",
+    "quanto ho tirato su {questa settimana|sta settimana|questo mese}[?]",
+    "{mo'|} {dimmi un po'|dimmi} chi è che non ha pagato {da più di un mese|ancora}",
+    "{fammi un riepilogo di|dammi un resoconto di} quanto ho incassato {quest'anno|questo mese}",
+    "quanto ho preso di acconto <C.da> finora[?]",
+    "ho già fatto la fattura <C.a> per {la stampante|il bagno|il tetto}[?]",
   ],
   domanda: [
     "[<RIEMPI>]<DOMANDA>[?]",
     "[<RIEMPI>]{scusa|senti|dimmi|una domanda} <DOMANDA>[?]",
     "{mi sento un po' giù|sono stanco|che giornata|non so cosa fare|come stai|che fai|chi sei}",
+    // giro 15: domande tecniche senza punto di domanda
+    "{differenza tra|che differenza c'è tra} {differenziale di tipo A e tipo AC|intonaco e rasatura|gres e ceramica}",
+    "{ma |}{il prato|la malta|il cappotto} si può {seminare|stendere|fare} {a ottobre|col freddo|d'inverno} o è tardi",
+    "in generale un {salvavita che scatta ogni volta che piove|muro che fa la muffa} da cosa può dipendere",
+    "un cliente mi chiede se per {una pergola|una tettoia} serve il permesso del comune o si può fare e basta",
+    "ciao eon come va {oggi|}",
   ],
   incasso: [
     "[<RIEMPI>]<C.nudo> {ha pagato|mi ha pagato|ha saldato|mi ha dato|ha versato|mi ha fatto il bonifico di} <SOLDI>[ {in contanti|con bonifico|con assegno}]",
@@ -222,6 +279,11 @@ const G = {
     "[<RIEMPI>]{foto al quadro|foto alla crepa|foto al contatore|foto al tetto|foto alla caldaia|foto al lavoro} <C.di>",
     "[<RIEMPI>]{fai una foto|scatta} e {crea il cliente|aggiungi il cliente} <NUOVO>",
     "foto {massetto|contatore|caldaia|quadro|crepa|tetto|muro|scarico|boiler|vetrina|siepe}",
+    // giro 15
+    "{aspetta prima di smontare|eon} fai una foto a come sono collegati i cavi <C.di>",
+    "fai una foto {al colore|alla siepe|al muro} <C.di> {così vedono il prima e dopo|adesso che è finito}",
+    "{scatta|famme} 'na foto {all'unità esterna|a sto cancello rotto|al quadro}",
+    "apri la fotocamera che fotografo {il salvavita bruciato|il quadro|la crepa}",
   ],
   cartella: [
     "[<RIEMPI>]{crea|creami|fai|apri|aggiungi|nuova} {la cartella|una cartella|cartella} <CARTELLA>",
@@ -232,6 +294,15 @@ const G = {
     "[<RIEMPI>]{urgente|urgenza|emergenza|è urgente|corri} {<C.da>|<C.a>} {perde il tubo|è saltata la corrente|allagamento|caldaia in blocco|non c'è acqua calda|è crollato il controsoffitto|infiltrazione dal tetto|l'ascensore è bloccato|cortocircuito}",
     "[<RIEMPI>]{urgente|urgenza|emergenza} {perdita|allagamento|blackout|guasto|infiltrazione|crollo} {<C.da>|<C.a>}",
     "[<RIEMPI>]{urgente|è urgente} <C.nudo> {non ha corrente|non ha acqua|ha il tetto che perde|ha la caldaia in blocco|è senza riscaldamento}",
+    // giro 15: l'emergenza detta senza la parola "urgente"
+    "[<RIEMPI>]{perdita d'acqua|perdita grossa|infiltrazione} {dal tetto|dal soffitto|in cucina|in bagno|dal muro} <C.di>{, piove dentro|, sta allagando tutto|}",
+    "[<RIEMPI>]{si è rotto un tubo|è scoppiato un tubo|è saltato un tubo} <C.da>{, è allagato tutto|}",
+    "[<RIEMPI>]{blackout|è saltata la luce|non c'è corrente} {in cantiere|nel capannone|in cucina|nel salone|in tutto il condominio} <C.di>",
+    "[<RIEMPI>]{cortocircuito|corto circuito} <C.da>, il salvavita non riarma{ più|}",
+    "[<RIEMPI>]{mamma mia|oddio|guarda} {è venuto giù|è crollato|è caduto} {il cornicione|un pezzo di intonaco|il controsoffitto|un albero sul cancello} <C.di>",
+    "[<RIEMPI>]ascensore bloccato <C.a> {con dentro una signora|con dentro una persona|}",
+    "[<RIEMPI>]{esce fumo|c'è puzza di bruciato|c'è odore di bruciato} {dal quadro|dalla presa|dalla centrale termica|dal contatore} <C.di>",
+    "[<RIEMPI>]<C.nudo> {è senza riscaldamento|ha la casa gelata|è senza acqua|ha il garage allagato|ha la cella frigo ferma}",
   ],
   sal: [
     "[<RIEMPI>]{sal|SAL|stato avanzamento lavori|stato di avanzamento} {al|del} {20|30|40|50|60|70|80|90}{%| per cento| percento} {per <C.nudo>|<C.di>}",
@@ -246,6 +317,9 @@ const G = {
     "[<RIEMPI>]{convoca|segna|fissa|organizza|metti} {l'assemblea|un'assemblea|l'assemblea straordinaria|l'assemblea ordinaria} {del condominio|condominio|di} <COND> {per|} <GIORNO> <ORA> [per {il bilancio|il rifacimento del tetto|l'ascensore|la facciata}]",
     "[<RIEMPI>]assemblea {straordinaria|ordinaria|} {condominio|} <COND> <GIORNO> <ORA>",
     "{convoca|convocare} {straordinaria|ordinaria} <COND> <GIORNO> <ORA> [per {il bilancio|la piscina|il tetto}]",
+    "{bisogna|dobbiamo} convocare {i condòmini|l'assemblea} {del condominio|di} <COND> {in assemblea|} per {il cambio dell'ascensore|la facciata|il bilancio}",
+    "prepara la convocazione dell'assemblea {del condominio|di} <COND> per {approvare il bilancio|il tetto}",
+    "i consiglieri {del condominio|di} <COND> vogliono un'assemblea urgente per {i furti in garage|il tetto}, convocala per <GIORNO> <ORA>",
   ],
   saluto: ["{ciao|ciao eon|buongiorno|buonasera|salve|ehi eon|grazie|grazie mille|ok grazie|perfetto grazie|ciao!|buongiorno eon|tutto bene?|ok|va bene grazie}"],
 };

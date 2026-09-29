@@ -70,8 +70,9 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 1. Controllare con Andrea il primo promemoria vero (non ancora provato su
    un telefono vero).
 2. 0b.12 Manuali dell'AI per ogni professione (elettricista, Altra
-   attività, 15 casi di prova per mestiere): serve il credito.
-3. 0b.13 Frasi di esempio e frasi vere (passo 1): serve il credito.
+   attività, 15 casi di prova per mestiere): il credito ora c'è.
+3. 0b.13 Frasi vere (passo 2, con i tester e il loro consenso); il passo 1
+   (frasi scritte da altri, non da me) è fatto col giro 15 (0b.18).
 4. Mente-cervello al posto di Cresci (prima le simulazioni); squadra del
    cantiere (versione semplice); giro della giornata sulla mappa.
 5. Prima di riaprire le iscrizioni: account email (Resend, Andrea),
@@ -86,7 +87,12 @@ quanti appunti hanno e "+ Cartella" (nasce e si apre); dentro una cartella
 "‹ Mente" per tornare; toccando un appunto, "Cartella: Mente / … / + Nuova" lo
 sposta con un tocco (con "Annulla"). A voce resta "segna in Fornitori di…".
 Prova: `eval/mente-cartelle.test.js` (8 controlli, 2 foto).
-**Fatto il 30/09 (notte), nel prossimo pacchetto:** addestramento, giri 13-14
+**Fatto il 30/09 (notte, dopo il merge #145), nel prossimo pacchetto:**
+avviso "credito finito" che si spegne alla prima risposta buona (restava 24
+ore dopo la ricarica); **addestramento potenziato (0b.18)**: 1.062 frasi di 5
+scrittori indipendenti, **82% al primo colpo → 97%**, cervello riallenato,
+nessuna regressione.
+**Fatto il 30/09 (notte), già online (PR #145):** addestramento, giri 13-14
 (0b.17). Stili mai provati prima, alla cieca: **giro 13: 57/72 (79%) al primo
 colpo** → 72/72; **giro 14 (stessi stili, frasi nuove): 47/47 (100%) al primo
 colpo**. Nuovo: le abbreviazioni da chat diventano parole ("x", "ke", "nn",
@@ -379,6 +385,71 @@ DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
 alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.18 Addestramento potenziato: 5 scrittori che non conoscono EON — FATTO il 30/09 (notte)
+Andrea: "Facciamo altro addestramento potenziato?". Scelta (sua): **più
+scrittori**. Invece di scrivere io le frasi (conosco le regole, quindi la prova
+è meno onesta), 5 aiutanti indipendenti, uno per mestiere, hanno scritto
+**1.062 frasi** come le direbbe un artigiano vero (dettatura sporca, dialetto,
+frasi lunghe, correzioni a metà, gente che non è in rubrica), senza vedere il
+codice né i giri precedenti. Frasi messe nel repository **prima** di misurare
+(`eval/dati/frasi-giro15.json`).
+
+| Giro 15 | Al primo colpo | Dopo le correzioni |
+|---|---|---|
+| giuste | **874 / 1.062 (82%)** | **1.035 / 1.062 (97%)** |
+| all'AI | 75 (7%) | 14 (1%) |
+| sbagliate | 113 (11%) | 13 (1%) |
+
+I buchi più grossi trovati, tutti chiusi con regole generali:
+- **Cliente nuovo detto come viene**: "c'è un cliente nuovo, Trattoria Il
+  Gufo, telefono 0521 334455", "salva la signora Rosa Esposito 338…", numero
+  a gruppi o a parole ("tre tre nove…"), con indirizzo o referente in nota.
+- **Emergenze senza la parola "urgente"**: "perdita d'acqua dal tetto, piove
+  dentro", "blackout in cantiere", "il salvavita non riarma", "ascensore
+  bloccato con dentro una signora", "è venuto giù il cornicione" → urgenza.
+  Ma "non è urgente, ci vado giovedì" no.
+- **Preventivi**: "tre docce a 280 l'una", "mensola 180 e due cassetti a 95",
+  "mille e due" = 1.200 (come si dice in cantiere), "1.500 cioè no 1.400",
+  "800 di manodopera, no aspetta 750", "tutto 58 euro", "via dei Mille" non
+  è un importo.
+- **Spostare/annullare detto a metà**: "Ferretti domani alle 9 non ce la
+  faccio, spostalo alle 11", "mettila alle 12 invece che alle 11", "mi ha
+  chiesto di passare alle 17 invece che alle 16", "rimandiamo a venerdì
+  stessa ora", "cancella l'appuntamento di domani pomeriggio".
+- **Orari**: "domattina alle sei e mezza" = 6:30 (prima diventava 18:30!),
+  "domani sera alle 8" = 20, "verso l'una e mezza", "venerdì 8 e mezza".
+- **Messaggi e mail a chi non è cliente** (geometra, fornitore, operaio,
+  commercialista): WhatsApp o la mail con il testo pronto, il contatto lo
+  scegli tu (prima c'era solo "non è tra i tuoi clienti").
+- **Chiamate**: "chiama la Pagnoni che non risponde ai messaggi", "mettimi in
+  linea con…", "dai chiamami un attimo sto Ferrandi", "no non scrivere,
+  chiamalo".
+- **Domande sui dati**: "quali preventivi ho ancora aperti", "a che ora devo
+  essere dal Gabbiano domani", "c'ho qualcosa venerdì?", "quanto ho tirato
+  su", "mo' dimmi un po' chi non ha pagato".
+- **Note**: preferenze del cliente ("preferisce essere chiamata dopo le 5"),
+  "quando vado da Bortolin portare la scala", "segna che…", misure.
+- **Assemblee**: "bisogna convocare i condòmini delle Magnolie…", "prepara la
+  convocazione…": senza data EON chiede "Per quando la convoco?".
+- "Da Nello" riconosciuto (prima "nello" era preso per preposizione), foto con
+  il comando a metà frase, SAL "siamo a metà" = 50%, domande tecniche senza
+  punto di domanda vanno all'AI, "ciao EON come va" non diventa un da fare.
+
+**Cervello riallenato** con questi stili nel frasario: frasi vere di Andrea
+98%, prova finale 96% (100% quando è sicuro), giri alla cieca di prima 98%;
+sul giro 15 il cervello da solo fa 88% (93% quando è sicuro) — il resto lo
+fanno le regole. **Nessuna regressione**: giri 5-14 e prova cieca rifatti
+(uguali a prima; restano i 3 casi noti), suite completa verde.
+
+**Onestà**: le frasi le hanno scritte aiutanti AI, non artigiani veri: sono
+più varie delle mie, ma non sono i tester. Restano 27 casi: chiamare chi non
+è in rubrica non si può (manca il numero, EON lo dice); due appuntamenti in
+una frase senza virgole ne segna uno; "fattura per il bar Aurora di 3000
+euro" chiede il lavoro (voluto); "quante caldaie ho installato quest'anno"
+va all'AI (giusto). Un errore mio trovato e corretto durante il
+riallenamento: un'ora all'inizio della frase ("11:30 riunione") faceva
+bloccare il lettore. Non provato su un telefono vero.
 
 ### 0b.17 Il cervello perfezionato: capisce anche i modi nuovi di chiedere — FATTO il 30/09
 Andrea: "bisogna assolutamente dedicarci al perfezionamento del modello nostro

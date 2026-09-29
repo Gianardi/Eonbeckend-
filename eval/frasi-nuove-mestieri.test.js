@@ -255,7 +255,7 @@ async function main() {
         else if (atteso === "ai") esito = scrittoQualcosa ? "sbagliata" : "giusta";
         else if (fatto[atteso] && !ai && oraSbagliata) esito = "sbagliata";
         else if (fatto[atteso] && !ai) esito = "giusta";
-        else if (!ai && !scrittoQualcosa && /Ho trovato \d+ clienti|Quale |Intendi |Per quale cliente/.test(st.card)) esito = "giusta"; // chiede quale: giusto
+        else if (!ai && !scrittoQualcosa && /Ho trovato \d+ clienti|Quale |Intendi |Per quale cliente|Per quando la convoco/.test(st.card)) esito = "giusta"; // chiede quale (o, per l'assemblea senza data, quando): giusto
         else if (ai && !scrittoQualcosa) esito = "ai";
         else esito = "sbagliata";
         perMestiere[mestiere][esito]++;

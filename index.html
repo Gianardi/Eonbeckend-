@@ -12296,9 +12296,24 @@ async function creaSal(cliente, percentuale, importoDetto, note){
   aggiornaAvvisoMestiere();
   return nuovo;
 }
+/* Giro 15: "prepara lo stato avanzamento lavori della Ferraresi siamo a metà", "fammi il
+   sal del cantiere Casadei al 30%", "stato avanzamento del bar Aurora al settanta per
+   cento": la percentuale ovunque nella frase (anche a parole, "a metà" = 50%) */
+function normalizzaSal(testo){
+  let t = String(testo || "").trim().replace(/[.!]+$/, "").replace(/\bstato\s+(?:di\s+)?avanzamento(?:\s+(?:dei\s+)?lavori)?\b/i, "SAL");
+  if(!/\bs\.?a\.?l\.?(?=\s|$|,)/i.test(t)) return null;
+  const PAROLE = { dieci: 10, venti: 20, venticinque: 25, trenta: 30, quaranta: 40, cinquanta: 50, sessanta: 60, settanta: 70, settantacinque: 75, ottanta: 80, novanta: 90, cento: 100 };
+  let perc = null;
+  const mp = t.match(/\b(\d{1,3}(?:[.,]\d+)?)\s*(?:%|per\s*cento|percento)/i) || t.match(new RegExp("\\b(" + Object.keys(PAROLE).join("|") + ")\\s*(?:%|per\\s*cento|percento)", "i"));
+  if(mp){ perc = PAROLE[mp[1].toLowerCase()] || mp[1]; t = t.replace(mp[0], " "); }
+  else if(/\ba\s+met[aà]\b/i.test(t)){ perc = 50; t = t.replace(/\b(?:siamo\s+)?a\s+met[aà]\b/i, " "); }
+  if(perc === null) return null;
+  const dopo = t.replace(/^.*?\bs\.?a\.?l\.?(?=\s|$|,)/i, "").replace(/\b(?:siamo|lavori|finale|al|a)\s*$/gi, " ").replace(/\s+(?:siamo|al|a)\b\s*/gi, " ").replace(/\s+/g, " ").trim();
+  return "fai SAL al " + perc + "% " + dopo;
+}
 async function provaSal(testo){
   if(currentProfession !== "edile") return false;
-  let s = capisciSal(testo);
+  let s = capisciSal(testo) || (normalizzaSal(testo) ? capisciSal(normalizzaSal(testo)) : null);
   /* "Fammi il SAL numero 2 del cantiere Ferraro" senza la percentuale: la chiede (29/09/2026) */
   if(!s && isDbReady()){
     const m = String(testo || "").trim().replace(/[.!?]+$/, "").match(/^(?:(?:fai|fammi|segna|segnami|registra|crea|nuovo|metti|prepara|preparami)\s+(?:il\s+|un\s+|lo\s+)?)?s\.?a\.?l\.?\b\s*(?:(?:n\.?|numero)\s*\d+\s*)?(.*)$/i);
@@ -12383,9 +12398,30 @@ function aggiornaAvvisoMestiere(){
    Odore di gas: prima la sicurezza, nessun intervento da fissare. */
 const PAROLE_URGENZA = /(?:^|\s)(?:urgent[ei]|urgenza|urgentissim[oa]|emergenza|di\s+corsa)(?=\s|$|[,.!:;])/i;
 const ODORE_GAS = /\b(?:odore|puzza|fuga|perdita|sento)\s+(?:di\s+|del\s+)?gas\b/i;
+/* Giro 15 (29/09/2026, frasi di 5 scrittori): l'emergenza detta senza la
+   parola "urgente" — "perdita d'acqua dal tetto, piove dentro", "blackout in
+   cantiere", "il salvavita non riarma", "ascensore bloccato con dentro una
+   signora", "è venuto giù il cornicione", "esce fumo dalla centrale termica".
+   Solo se sta succedendo adesso: niente riparato/sistemato, niente
+   preventivi o fatture, niente altri giorni (quelli li guarda sotto). */
+const SITUAZIONE_URGENTE = new RegExp([
+  "allagat[oaie]", "allagamento", "sta\\s+allagando", "piove\\s+dentro", "(?:scende|esce|entra|cola|gocciola)\\s+(?:l'\\s*)?acqua", "acqua\\s+(?:che\\s+)?(?:esce|entra|scende|cola)",
+  "perdita\\s+(?:d'\\s*acqua|grossa|dal|dalla|dai|in\\s+cucina|in\\s+bagno)", "(?:rotto|scoppiato|spaccato)\\s+(?:un|il)\\s+tubo", "tubo\\s+(?:rotto|scoppiato|spaccato)",
+  "black\\s?out", "saltat[ao]\\s+(?:la\\s+)?(?:luce|corrente)", "non\\s+(?:va|c'è|c'e|arriva)\\s+(?:più\\s+)?(?:la\\s+)?(?:luce|corrente)", "(?:manca|senza)\\s+(?:la\\s+)?(?:luce|corrente)",
+  "cort[oa]\\s?circuito", "salvavita\\s+(?:non\\s+riarma|continua\\s+a\\s+saltare|salta)", "(?:puzza|odore)\\s+di\\s+bruciato", "esce\\s+fumo", "fumo\\s+(?:dal|dalla|dalle|dai)", "incendio", "scintille",
+  "ascensore\\s+(?:bloccato|fermo)", "bloccat[oa]\\s+(?:nell'\\s*|in\\s+)ascensore", "(?:venut[oa]|cadut[oa]|crollat[oa])\\s+giù", "è\\s+crollat[oa]", "è\\s+cadut[oa]\\s+(?:un|una|il|la)",
+  "(?:si\\s+è\\s+)?inclinat[oa]", "pericolo\\b", "in\\s+tilt", "(?:è|sono)\\s+giù(?=\\s|$|[,.!])", "cella\\s+frigo\\s+(?:è\\s+)?ferma", "casa\\s+gelata", "senza\\s+(?:acqua|riscaldamento)",
+  "allarme\\s+(?:suona|non\\s+si\\s+spegne)", "pronto\\s+intervento",
+].join("|"), "i");
+const URGENZA_PASSATA = /\b(?:sistemat|riparat|risolt|aggiustat|ripristinat|preventiv|fattur|ieri|scors[oa]|ricordami|ricordati|ho\s+(?:fatto|finito|chiuso|messo))\w*|\?/i;
 function capisciUrgenza(testo){
   const t = String(testo || "").trim().replace(/[.!]+$/, "");
-  if(!PAROLE_URGENZA.test(t) || /\?/.test(t) || t.length > 140) return null;
+  const detta = PAROLE_URGENZA.test(t) && t.length <= 140;
+  const situazione = !detta && t.length <= 240 && SITUAZIONE_URGENTE.test(t) && !URGENZA_PASSATA.test(t);
+  if(!(detta || situazione) || /\?/.test(t)) return null;
+  if(/\bassemble[ae]\b/i.test(t)) return null; // "un'assemblea urgente": è un'assemblea da convocare (giro 15)
+  // "…non è urgente, ci vado giovedì": detto proprio che NON è un'urgenza (giro 15)
+  if(/\bnon\s+(?:è\s+|e'\s+|e\s+)?(?:urgent|un'?\s*urgenza|un'?\s*emergenza|grave)|\bniente\s+di\s+urgente|\bsenza\s+urgenza|\bcon\s+calma\b/i.test(t)) return null;
   if(/\b(?:domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|settimana|prossim[oa]|\d{1,2}\/\d{1,2})\b/i.test(t)) return null;
   const mOra = t.match(/\b(?:alle|ore)\s+(\d{1,2})(?:[:.](\d{2}))?\b/i);
   const ora = mOra ? String(mOra[1]).padStart(2, "0") + ":" + (mOra[2] || "00") : null;
@@ -12395,7 +12431,11 @@ function capisciUrgenza(testo){
     .replace(/\s+/g, " ").replace(/^[,:;\s-]+|[,:;\s-]+$/g, "").trim();
   if(titolo.length < 3) return null;
   const parole = new Set(normalizzaComando(t).split(" "));
-  const candidati = clients.filter(c => normalizzaComando(c.name).split(" ").some(w => w.length >= 4 && parole.has(w)));
+  // "blackout in tutto il condominio di Via Garibaldi": conta la parola che distingue (Garibaldi), non "condominio"
+  const GENERICHE_URG = new Set(["condominio", "supercondominio", "residenza", "palazzo", "ristorante", "pizzeria", "trattoria", "hotel", "albergo", "studio", "officina", "palestra", "villa", "agriturismo", "ditta", "impresa", "signor", "signora", "negozio", "scala", "scale"]);
+  let candidati = clients.filter(c => normalizzaComando(c.name).split(" ").some(w => w.length >= 4 && parole.has(w)));
+  const distinti = candidati.filter(c => normalizzaComando(c.name).split(" ").some(w => w.length >= 4 && parole.has(w) && !GENERICHE_URG.has(w)));
+  if(distinti.length) candidati = distinti;
   const cliente = candidati.length === 1 ? candidati[0] : null;
   if(candidati.length > 1) return null; // più clienti possibili: decide l'AI
   return { titolo: titolo.charAt(0).toUpperCase() + titolo.slice(1), ora, cliente };
@@ -12891,11 +12931,33 @@ function risolviClienteLettura(l, titolo, poi){
     scelte: [{ etichetta: "Sì", valore: "si" }, { etichetta: "No", valore: "no" }], onRisposta: (v) => { if(v === "si") poi(l.clienteSimile); else chiudiRisorsaCard(); } });
   return null;
 }
+/* Giro 15: a chi non è tra i clienti (il geometra, il fornitore, l'operaio) il messaggio
+   si prepara lo stesso: WhatsApp o la mail con il testo pronto, il contatto lo sceglie
+   lui nell'altra app. */
+function scriviAChiNonECliente(l, email, viaVoce){
+  const nome = l.nomeDetto;
+  const saluto = /^(?:squadra|ragazzi|operai|tutti)$/i.test(nome) ? "Ciao a tutti, " : "Ciao " + nome.split(/\s+/).filter(w => !/^(?:geometra|operaio|garzone|fornitore|commercialista|consigliere|avvocato|ingegnere|architetto|dottor|dottore|signor|signora|grossista)$/i.test(w))[0] + ", ";
+  const corpoMsg = l.messaggio ? saluto + l.messaggio.charAt(0).toLowerCase() + l.messaggio.slice(1) : "";
+  const corpo = document.createElement("div");
+  corpo.className = "percorso-card";
+  const nota = document.createElement("p");
+  nota.textContent = nome + " non è tra i tuoi clienti: " + (email ? "apri la mail e scrivi tu l'indirizzo" : "apri WhatsApp e scegli tu il contatto") + ", il testo è pronto.";
+  corpo.appendChild(nota);
+  if(corpoMsg){ const a = document.createElement("p"); a.className = "domanda-codice-anteprima"; a.textContent = corpoMsg; corpo.appendChild(a); }
+  const link = document.createElement("a");
+  link.className = "percorso-meta";
+  link.href = email ? "mailto:?body=" + encodeURIComponent(corpoMsg) : "https://wa.me/?text=" + encodeURIComponent(corpoMsg);
+  if(!email){ link.target = "_blank"; link.rel = "noopener"; }
+  link.innerHTML = `<span>${email ? "Apri la mail" : "Apri WhatsApp"}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>`;
+  corpo.appendChild(link);
+  apriRisorsaCard((email ? "Email" : "Messaggio") + " · " + nome, corpo);
+  if(viaVoce) parlaRisposta("Pronto, tocca per aprire");
+  return { fatto: email ? "email_senza_cliente" : "messaggio_senza_cliente" };
+}
 function gestisciMessaggio(l, testo, invia){
   if(!l.cliente && !l.candidati && !l.clienteSimile){
     if(!l.nomeDetto) return null;
-    mostraRispostaEON(testo, l.nomeDetto + " non è tra i tuoi clienti. Aggiungilo (\"aggiungi " + l.nomeDetto + "\") e poi riprova.", { titolo: "Cliente non trovato" });
-    return { fatto: "messaggio_senza_cliente" };
+    return scriviAChiNonECliente(l, false);
   }
   const vai = (c, testoMsg) => {
     const comando = { azione: "messaggio", cliente_id: c.id, testo: testoMsg };
@@ -12941,8 +13003,7 @@ function gestisciScrittura(l, testo, viaVoce){
   };
   if(!l.cliente && !l.candidati && !l.clienteSimile){
     if(!l.nomeDetto) return null;
-    mostraRispostaEON(testo, l.nomeDetto + " non è tra i tuoi clienti.", { titolo: "Cliente non trovato" });
-    return { fatto: "scrittura_senza_cliente" };
+    return scriviAChiNonECliente(l, email, viaVoce);
   }
   const r = risolviClienteLettura(l, titolo, apri);
   return r && r.fatto ? r : { fatto: l.azione + "_scelta" };
@@ -13371,6 +13432,24 @@ async function provaLettore(testo, viaVoce, invia, senzaModello){
       const tel = (l.testo.match(/(?:\+?39\s?)?(?:3\d{2}[\s.]?\d{3}[\s.]?\d{3,4}|3\d{8,9}|0\d{1,3}[\s.]?\d{5,8})/) || [""])[0].replace(/[\s.]/g, "");
       /* "Nuovo cliente Condominio Le Rose 010 234567": il nome dopo "nuovo cliente/aggiungi",
          fino al telefono; quello che viene dopo è la nota. Lo crea il codice qui. */
+      /* Giro 15: nome, telefono e nota già letti dal lettore ("salva la signora Rosa Esposito 338…",
+         "c'è un cliente nuovo, Trattoria Il Gufo, telefono 0521 334455") */
+      if(!l.cliente && l.nuovoCliente && isDbReady() && !clients.some(c => nomeChiave(c.name) === nomeChiave(l.nuovoCliente.nome))){
+        const nc = l.nuovoCliente;
+        const c = await creaClienteDalCodice(nc.nome);
+        if(c){
+          const cambi = {};
+          if(nc.telefono){ c.phone = nc.telefono; cambi.phone = nc.telefono; }
+          if(nc.nota){ c.desc = nc.nota; cambi.description = nc.nota; }
+          if(Object.keys(cambi).length) await dbUpdate("clients", c.id, cambi);
+          renderClientArchive();
+          showAIToastConAnnulla("Cliente aggiunto", escapeHtml(nc.nome) + (nc.telefono ? " · " + escapeHtml(nc.telefono) : "") + (nc.nota ? " · " + escapeHtml(nc.nota) : ""), async () => {
+            const i = clients.indexOf(c); if(i > -1) clients.splice(i, 1);
+            await dbUpdate("clients", c.id, { deleted_at: new Date().toISOString() }); renderClientArchive();
+          });
+          return { fatto: "cliente_nuovo" };
+        }
+      }
       if(!l.cliente && isDbReady()){
         const m = l.testo.match(/^(?:(?:nuov[oa]\s+cliente|aggiungi(?:\s+(?:il|un|una|nuovo|la))?(?:\s+cliente)?|inserisci(?:\s+cliente)?)\s+)(.+?)(?:\s+((?:\+?39\s?)?(?:3\d{2}[\s.]?\d{3}[\s.]?\d{3,4}|3\d{8,9}|0\d{1,3}[\s.]?\d{5,8})))(?:\s+(.*))?$/i);
         if(m && m[1].split(/\s+/).length <= 5 && !/\d/.test(m[1])){
@@ -13489,6 +13568,17 @@ async function provaLettore(testo, viaVoce, invia, senzaModello){
     case "assemblea": {
       // Solo per gli amministratori; per gli altri è un impegno come un altro
       if(currentProfession !== "amministratore"){ const li = letturaImpegnoPerServer(l); return li ? { letturaImpegno: li } : null; }
+      /* Giro 15: "prepara la convocazione dell'assemblea del Parco dei Tigli" senza giorno e ora:
+         EON chiede solo quello che manca, poi la segna */
+      if(!l.quando.giornoIso || !l.quando.ora){
+        domandaDelCodice({ titolo: "Assemblea · " + l.condominio, domanda: "Per quando la convoco? (giorno e ora)", segnaposto: "Es. giovedì 15 ottobre alle 21", onRisposta: (t) => {
+          const q = EonLettore.trovaQuando(EonLettore.parole(t), new Date());
+          if(!q.giornoIso || !q.ora){ showAIToast("Mi serve giorno e ora", "Es. «giovedì 15 ottobre alle 21»."); return; }
+          chiudiRisorsaCard();
+          invia(l.originale, { comando: { azione: "assemblea", condominio: l.condominio, giorno: q.giornoIso, ora: q.ora, tipo: l.tipo, motivo: l.motivo || "", ...(l.cliente ? { cliente_id: l.cliente.id } : {}), ...(mestiereInProva === "amministratore" ? { prova: true } : {}) } });
+        } });
+        return { fatto: "assemblea_quando" };
+      }
       return { comando: { azione: "assemblea", condominio: l.condominio, giorno: l.quando.giornoIso, ora: l.quando.ora, tipo: l.tipo, motivo: l.motivo || "", ...(l.cliente ? { cliente_id: l.cliente.id } : {}), ...(mestiereInProva === "amministratore" ? { prova: true } : {}) } };
     }
     case "cestino": {
@@ -14060,15 +14150,40 @@ function giraComandoImpegno(n){
   let t = n.replace(/^(?:niente|guarda|senti|allora|ok|no|ascolta|dunque)\s*,?\s+(?=(?:l|il|lo|la|i|gli|le|appuntament|sopralluog|impegn|consegn|verific|incontr|riunion)\b)/, "");
   t = t.replace(/^(?:fai|fammi)\s+slittare\s+/, "sposta ").replace(/^slitta\s+/, "sposta ");
   const verbo = (v) => /^(?:spost|rimand|anticip|posticip|slitt|facc|fai|mett|port)/.test(v) ? "sposta" : "annulla";
+  /* Giro 15: "la Ferraresi domani mi ha chiesto di passare alle 17 invece che alle 16":
+     nessun verbo, ma "invece che alle 16" = c'è già, alle 16, e va alle 17 */
+  const inv = t.match(/^(.*?)\s*\balle\s+(\S+(?:\s+e\s+mezza)?)\s+(?:invece\s+(?:che|di)|anziche)\s+(?:alle\s+)?(\S+(?:\s+e\s+mezza)?)\s*$/);
+  if(inv && inv[1] && !/^(?:sposta|annulla|cancella|segna|segnami|metti|fissa|aggiungi)\b/.test(t) && !/\b(?:spost|anticip|posticip|rimand|mett)\w*/.test(inv[1])){
+    const testa = inv[1].replace(COMMENTI_IMPEGNO, " ").replace(/\s+/g, " ").trim();
+    if(testa && nominaImpegno(testa)) return "sposta " + testa + " alle " + inv[3] + " alle " + inv[2];
+  }
   const testaBuona = (h) => /^(?:l|il|lo|la|i|gli|le|quello|quella|un|una|appuntament|impegn|sopralluog|incontr|riunion|chiamat|telefonat|verific)/.test(h) && !/\bche\b/.test(h);
   // "…alle 15 invece che alle 11": conta la prima (giro 10)
   t = t.replace(/\s+(?:invece\s+(?:che|di)|anziche|piuttosto\s+che)\s+(?:alle|le|ore|a|il|di)?\s*\S+(?:\s+e\s+mezza)?\s*$/, "");
   let m = t.match(/^(.+?)\s+(?:me\s+)?(?:lo|la|li|le|mi)\s+(sposti|spostiamo|rimandi|rimandiamo|anticipi|anticipiamo|posticipi|posticipiamo|facciamo|fai|mettiamo|metti|cancelli|cancelliamo|annulli|annulliamo|togli|togliamo|levi)(?:\s+(.*))?$/);
-  if(!m) m = t.match(/^(.+?)\s+(spostal[oaie]|spostamel[oaie]|rimandal[oaie]|rimandamel[oaie]|anticipal[oaie]|anticipamel[oaie]|posticipal[oaie]|spostiamol[oaie]|mettiamol[oaie]|portiamol[oaie]|cancellamel[oaie]|annullamel[oaie]|toglimel[oaie]|rimandiamol[oaie]|anticipiamol[oaie]|facciamol[oaie]|cancellal[oaie]|annullal[oaie]|cancelliamol[oaie]|annulliamol[oaie]|togli(?:el)?[oaie]|toglil[oaie]|leval[oaie]|fall[oaie]\s+slittare|fai\s+slittare)(?:\s+(.*))?$/);
+  if(!m) m = t.match(/^(.+?)\s+(spostal[oaie]|spostamel[oaie]|rimandal[oaie]|rimandamel[oaie]|anticipal[oaie]|anticipamel[oaie]|posticipal[oaie]|spostiamol[oaie]|mettiamol[oaie]|mettil[oaie]|portiamol[oaie]|cancellamel[oaie]|annullamel[oaie]|toglimel[oaie]|rimandiamol[oaie]|anticipiamol[oaie]|facciamol[oaie]|cancellal[oaie]|annullal[oaie]|cancelliamol[oaie]|annulliamol[oaie]|togli(?:el)?[oaie]|toglil[oaie]|leval[oaie]|fall[oaie]\s+slittare|fai\s+slittare)(?:\s+(.*))?$/);
   // "lo facciamo/mettiamo alle 17" è spostare solo se dopo c'è un giorno o un'ora
   if(m && /^(?:facciamo|fai|mettiamo|metti|facciamol[oaie]|mettiamol[oaie]|portiamol[oaie])$/.test(m[2]) && !(m[3] && /^(?:alle|a|al|per|le|ore|luned|marted|mercoled|gioved|venerd|sabato|domenica|domani|dopodomani)\b/.test(m[3]))) m = null;
   if(m && testaBuona(m[1])) t = verbo(m[2].replace(/^fa\w*\s+/, "")) + " " + m[1] + (m[3] ? " " + m[3] : "");
+  /* Giro 15: il verbo a metà, dopo chi e quando e un commento: "Ferretti domani alle 9
+     non ce la faccio spostalo alle 11", "hotel belvedere sabato anticipa alle 7 e mezza",
+     "Benedetti domani non c'è, spostalo a venerdì alle 16", "Scaglia domani il montaggio
+     anticipiamolo alle 8 e mezza", "la Pellizzari ha chiamato, sabato non può, annulla l'incontro" */
+  else if(!/^(?:sposta|annulla|annullami|cancella|cancellami|elimina|disdici|togli|rimanda|anticipa|posticipa|rinvia)\b/.test(t)){
+    const mv = t.match(/^(.+?)\s+(?:(?:me\s+)?(?:lo|la|li|le)\s+)?((?:spost|anticip|posticip|rimand)(?:a|al[oaie]|amel[oaie]|iamo|iamol[oaie]|are)|mettil[oaie]|mettiamol[oaie]|(?:annull|cancell)(?:a|al[oaie]|amel[oaie]|iamo|iamol[oaie])|disdic(?:i|il[oaie]))(?:\s+(.*))?$/);
+    if(mv){
+      const testa = mv[1].replace(/,/g, " ").replace(COMMENTI_IMPEGNO, " ").replace(/\s+/g, " ").trim();
+      if(testa && !/\b(?:preventiv|fattur|appunt|nota|cartell|foto|messaggi|mail)\w*/.test(testa) && nominaImpegno(testa)) t = verbo(mv[2]) + " " + testa + (mv[3] ? " " + mv[3] : "");
+    }
+  }
   return t;
+}
+/* I commenti attorno a chi e quando ("non ce la faccio", "non c'è", "mi ha scritto che") */
+const COMMENTI_IMPEGNO = /\b(?:non\s+ce\s+la\s+(?:faccio|fa|fanno)|non\s+c\s*e(?:\s+piu)?|non\s+ci\s+(?:sono|sara|vado|posso\s+essere)(?:\s+piu)?|non\s+(?:puo|possono|posso|riesco|riescono)(?:\s+piu)?|non\s+si\s+puo\s+fare|(?:ha|hanno)\s+chiamato|mi\s+(?:ha|hanno)\s+(?:scritto|chiamato|detto|chiesto)(?:\s+(?:che|di\s+\w+))?|dice\s+che|e\s+chius[oa]|allora|niente|guarda)\b/g;
+function nominaImpegno(testa){
+  const h = " " + testa + " ";
+  return clients.some(c => normalizzaComando(c.name).split(" ").some(w => w.length > 3 && h.includes(" " + w + " ")))
+    || /\b(?:appuntament|sopralluog|impegn|incontr|riunion|consegn|verific|montaggi|servizio|collaud|revision|manutenzion|install|potatur|riparazion|getto)\w*/.test(testa);
 }
 function togliPerche(n){
   /* dopo la virgola si taglia solo un commento ("…, piove"), mai altri nomi,
@@ -14108,8 +14223,10 @@ function capisciAnnullaImpegni(testo){
   if(!oggetto && parole.includes("calendario")) oggetto = "impegni";
   /* "Annulla il rilievo alla Vela", "annulla la verifica della farmacia" (29/09/2026): senza la parola
      "appuntamento", basta il nome di un cliente; il resto ("rilievo", "verifica") si cerca nel titolo */
-  // "domani mattina": la parte della giornata non la filtro qui, decide l'AI (come prima)
-  if(nome.some(w => /^(?:mattina|mattinata|pomeriggio|sera|serata)$/.test(w))) return null;
+  /* "cancella l'appuntamento di domani pomeriggio al Condominio Via Garibaldi" (giro 15): la parte
+     della giornata filtra per ora (mattina fino alle 13, pomeriggio 12-19, sera dalle 18) */
+  const fasciaDetta = nome.find(w => /^(?:mattina|mattinata|pomeriggio|sera|serata)$/.test(w)) || null;
+  if(fasciaDetta){ if(!giorno) return null; for(let k = nome.length - 1; k >= 0; k--) if(nome[k] === fasciaDetta) nome.splice(k, 1); }
   // "annulla la fattura di Rossi", "cancella l'appunto…": non è un impegno
   if(nome.some(w => /^(?:fattur|preventiv|appunt|not[ae]$|foto|document|cartell|messagg|client|sal$|dico$|incass|pagament|entrat|mail|email)/.test(w))) return null;
   // con il nome di un cliente ("la verifica del negozio Moda Lia") si arriva a 5 parole
@@ -14130,7 +14247,7 @@ function capisciAnnullaImpegni(testo){
     else { diff = (GIORNI_LETTURA.indexOf(giorno) - oggi.getDay() + 7) % 7; if(diff === 0) return null; }
     data = new Date(oggi); data.setDate(data.getDate() + diff);
   }
-  return { data, giorno, ora, nome, oggetto };
+  return { data, giorno, ora, nome, oggetto, fascia: fasciaDetta };
 }
 
 /* Gli impegni che corrispondono: stesse fonti del Calendario */
@@ -14143,6 +14260,12 @@ function impegniDaAnnullare(richiesta){
     if(!d) return false;
     if(richiesta.data ? d.getTime() !== richiesta.data.getTime() : d < oggi) return false;
     if(tipo && !tipo.test(titolo)) return false;
+    if(richiesta.fascia){
+      const o = estraiOra(quando);
+      if(!o) return false;
+      const h = Number(o.split(":")[0]);
+      if(/^matt/.test(richiesta.fascia) ? h >= 13 : /^pomer/.test(richiesta.fascia) ? (h < 12 || h >= 19) : h < 18) return false;
+    }
     if(richiesta.nome.length){ const parole = norma(titolo + " " + (chi || "")); if(!richiesta.nome.every(w => parole.includes(w))) return false; }
     if(richiesta.ora){
       const o = estraiOra(quando);
@@ -14222,11 +14345,12 @@ function capisciSpostaImpegno(testo){
   // la prima "a/alle/al/per/ad" dopo la quale c'è solo un giorno o un'ora ("…della Conti a martedì alle 10")
   for(let k = 1; k <= parole.length - 2; k++){
     if(!/^(?:a|alle|al|all|ad|per|verso|le)$/.test(parole[k])) continue;
-    const coda = parole.slice(k).join(" ");
+    // "…alle sei e mezza per la luce del tramonto", "…alle 7 e mezza che devono liberare": il perché si toglie
+    const coda = parole.slice(k).join(" ").replace(/\s+(?:per\s+(?!le\b|l\b|ore\b|la\s+sera|la\s+mattina)|che\s|cosi\s|perche\s|visto\s|dato\s|tanto\s).*$/, "");
     const pp = EonLettore.parole(coda);
     const q = EonLettore.trovaQuando(pp, new Date());
     if(!q.giornoIso && !q.ora) continue;
-    const avanzo = pp.filter((x, i) => !q.usate.has(i) && !/^(?:a|alle|al|all|ad|per|verso|le|e|di|del|della|mattina|pomeriggio|sera)$/.test(x.n));
+    const avanzo = pp.filter((x, i) => !q.usate.has(i) && !/^(?:a|alle|al|all|ad|per|verso|le|e|di|del|della|mattina|pomeriggio|sera|stessa|ora|orario)$/.test(x.n));
     if(avanzo.length) continue;
     const testa = parole.slice(0, k).join(" ");
     const richiesta = capisciAnnullaImpegni("annulla impegno " + testa);
@@ -15196,13 +15320,23 @@ function capisciFotoRapida(testo){
   return { ...letta, clienteId: esiste ? esiste.id : null, clienteNome: creaCliente, creaCliente: esiste ? null : creaCliente, nota: letta.nota.replace(/^(?:Questo|Questa)$/i, "") };
 }
 function capisciFotoRapidaSemplice(t){
-  if(!/\bfot/.test(t) || /\b(vedere|mostra|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|recupera)\b/.test(t)) return null;
+  if(!/\bfot/.test(t) || /\b(vedere|rivedere|rivedi|vedi|guarda|guardare|mostra|mostrami|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|trovami|recupera|dove|quali|ultime)\b/.test(t)) return null;
+  /* Giro 15: "aspetta prima di smontare fai una foto a…", "EON fai una foto al colore
+     della Colombo adesso che è finito", "scatta 'na foto all'unità esterna", "apri la
+     fotocamera che fotografo il salvavita": il comando anche a metà, il perché si toglie */
+  t = t.replace(/[’]/g, "'").replace(/\b(?:'na|na)\s+foto\b/g, "una foto").replace(/\bfamme\b/g, "fammi");
+  const aMeta = t.match(/(?:^|[\s,])((?:mi\s+)?(?:fai|fammi|scatta|scattami|fotografa|fotografami)\s+(?:(?:una|la|un'?|qualche)\s+)?(?:foto|fotografia)\b.*)$/);
+  if(aMeta && aMeta.index > 0) t = aMeta[1].trim();
+  const camera = t.match(/^(?:eon\s+)?apri\s+(?:la\s+)?(?:fotocamera|macchina\s+fotografica)\b(?:\s+(?:che|e|così|cosi)\s+(?:fotografo|scatto|faccio\s+(?:una\s+)?foto)\s*(?:a|al|alla|allo|il|la|lo|i|le)?\s*(.*))?$/);
+  if(camera) t = "fai foto " + (camera[1] || "");
+  t = t.replace(/^eon\s+/, "").replace(/\s+(?:così|cosi|adesso\s+che|ora\s+che|prima\s+che|prima\s+di|perché|perche|che\s+(?:poi|dopo|così|cosi))\s.*$/, "").trim();
   const m = t.match(TRIGGER_FOTO_RAPIDA);
   if(!m) return null;
-  let resto = (m[1] || "").replace(/^(?:a|al|alla|allo|ai|agli|alle|del|della|dello|dei|delle|di|per|sul|sulla|sui|sulle|nel|nella|in)\s+/, "").trim();
+  let resto = (m[1] || "").replace(/^(?:adesso|ora|subito)\s+/, "").replace(/^(?:(?:a|al|alla|allo|ai|agli|alle|all|dell|nell|sull|del|della|dello|dei|delle|di|per|sul|sulla|sui|sulle|nel|nella|in)\s+|(?:all|dell|nell|sull)'\s*)/, "").trim();
   if(/\d/.test(resto)) return null; // orari, importi: decide l'AI
-  const parole = resto.split(/\s+/).filter(Boolean);
-  if(parole.length > 6) return null;
+  let parole = resto.split(/\s+/).filter(Boolean);
+  if(parole.length > 12) return null;
+  if(parole.length > 6) parole = parole.slice(0, 8); // "a come sono collegati i cavi dietro al PC di Ferretti": la nota è l'inizio
   const cliente = parole.length ? trovaClienteDaParole(parole) : null;
   const paroleCliente = cliente ? cliente.name.toLowerCase().split(/\s+/) : [];
   const GENERICHE = /^(cantiere|lavoro|questo|questa|qui|qua|a|al|alla|di|del|della|per|e|il|la|lo|le|i|gli)$/;
@@ -17968,17 +18102,31 @@ function documentoDaInviare(r){
     .filter(d => !r.numero || parseInt(d.dati.numero, 10) === r.numero)
     .find(d => r.parole.every(p => nomeDi(d).includes(p))) || null; // documentiVeri: dal più recente
 }
+/* Giro 15: "invia a Scaglia la fattura del montaggio", "spedisci la fattura del
+   getto a Tommasini", "mandale il preventivo del bagno alla Ferraresi su whatsapp":
+   la forma non è quella fissa, ma il lettore ha capito documento e cliente */
+function invioDalLettore(testo){
+  const l = leggiConLettore(testo);
+  if(!l || l.azione !== "invio_documento" || !l.cliente) return null;
+  const n = normalizzaComando(testo);
+  const tipo = l.tipo === "fattura" || (!l.tipo && /\bfattur/.test(n)) ? "fattura" : "preventivo";
+  const canale = /\bwhats ?app\b|\bwa\b/.test(n) ? "whatsapp" : /\be ?mail\b|\bposta\b/.test(n) ? "email" : "";
+  return { tipo, numero: null, parole: normalizzaComando(l.cliente.name).split(" ").filter(Boolean), canale, destEmail: "", destTel: "" };
+}
 function provaInvioDocumento(testo, primaDiAprire){
-  const r = capisciInvioDocumento(testo);
+  const r = capisciInvioDocumento(testo) || invioDalLettore(testo);
   if(!r) return false;
   const d = documentoDaInviare(r);
   // Parole che non sono un cliente né un documento ("il preventivo di ieri"): decide EON come prima
   const nominaCliente = r.parole.length && clients.some(c => r.parole.every(p => normalizzaComando(c.name).split(" ").includes(p)));
-  if(!d && r.parole.length && !nominaCliente) return false;
+  /* Giro 15: "invia a Scaglia la fattura del montaggio": c'è anche il lavoro, ma il cliente è nominato */
+  const GENERICHE_INV = new Set(["condominio", "ristorante", "pizzeria", "studio", "hotel", "officina", "palestra", "villa", "agriturismo", "signor", "signora", "residenza", "supercondominio"]);
+  const clienteNominato = !nominaCliente && r.parole.length ? (() => { const tr = clients.filter(c => normalizzaComando(c.name).split(" ").some(w => w.length >= 4 && !GENERICHE_INV.has(w) && r.parole.includes(w))); return tr.length === 1 ? tr[0] : null; })() : null;
+  if(!d && r.parole.length && !nominaCliente && !clienteNominato) return false;
   if(typeof primaDiAprire === "function") primaDiAprire();
   const cosa = r.tipo === "fattura" ? "fattura" : "preventivo";
   if(!d){
-    const chi = r.parole.length ? " per " + r.parole.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ") : "";
+    const chi = clienteNominato ? " per " + clienteNominato.name : r.parole.length ? " per " + r.parole.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ") : "";
     mostraRispostaEON(testo, "Non trovo " + (r.tipo === "fattura" ? "una fattura" : "un preventivo") + (r.numero ? " n. " + r.numero : "") + chi + ". Se vuoi, fallo prima: «" + cosa + " da 500 per" + (chi ? chi.slice(4) : " Rossi") + "».", { titolo: "Documento non trovato" });
     return true;
   }

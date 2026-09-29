@@ -135,8 +135,20 @@ async function main() {
     c = await card();
     verifica("niente in programma: lo dice, senza AI", c.aperta && /Niente da annullare/.test(c.titolo) && richiesteAI.length === 0, JSON.stringify(c));
 
+    /* 5b — la parte della giornata (giro 15): "domani mattina" = quelli di domani prima delle 13 */
+    await prepara();
+    richiesteAI.length = 0;
+    await chiedi("annulla appuntamenti domani mattina");
+    c = await card();
+    verifica("\"annulla appuntamenti domani mattina\": quelli della mattina, senza AI", c.aperta && richiesteAI.length === 0 && c.righe.length === 2 && /Chiamare Walter/.test(c.righe[0]) && /Sopralluogo bagno/.test(c.righe[1]), JSON.stringify({ c, ai: richiesteAI.length }));
+    await prepara();
+    richiesteAI.length = 0;
+    await chiedi("annulla appuntamenti domani pomeriggio");
+    c = await card();
+    verifica("\"…domani pomeriggio\": niente (sono tutti di mattina), senza AI", c.aperta && /Niente da annullare/.test(c.titolo) && richiesteAI.length === 0, JSON.stringify({ c, ai: richiesteAI.length }));
+
     /* 6 — queste NO: decide l'AI */
-    for (const frase of ["annulla gli appuntamenti", "annulla l'appuntamento con Pinco", "annulla la fattura di Rossi", "annulla appuntamenti domani mattina", "cancella la chiamata a Walter e segna Rossi domani alle 10"]) {
+    for (const frase of ["annulla gli appuntamenti", "annulla l'appuntamento con Pinco", "annulla la fattura di Rossi", "cancella la chiamata a Walter e segna Rossi domani alle 10"]) {
       await prepara();
       richiesteAI.length = 0;
       await chiedi(frase);
