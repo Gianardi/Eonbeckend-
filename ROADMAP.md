@@ -54,8 +54,12 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 (200, 23:35 UTC) e c'è già 1 telefono iscritto.
 
 **Da fare per Andrea**
-1. Ricaricare il credito dell'AI (Anthropic) e attivare la ricarica
-   automatica: il 28/09 i "niente" venivano da lì.
+1. ~~Ricaricare il credito dell'AI~~ fatto il 29/09 (dalle 16 italiane
+   l'AI risponde sempre). Resta consigliato: attivare la ricarica
+   automatica su console.anthropic.com → Plans & Billing. L'avviso
+   "credito finito" restava acceso 24 ore anche dopo la ricarica:
+   corretto, ora si spegne alla prima risposta buona dell'AI
+   (`eval/credito-ricaricato.test.js`).
 2. Provare un promemoria vero: segnare un impegno tra circa 40 minuti e
    vedere se arriva l'avviso 30 minuti prima (su iPhone EON deve essere
    aperta dalla schermata Home).

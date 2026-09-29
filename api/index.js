@@ -2995,8 +2995,13 @@ async function handleAdmin(action, req, res, user) {
 
 /* Credito dell'AI finito (29/09/2026: il 28/09 sera 36 richieste fallite
    e nessuno se n'era accorto). Solo il conto delle ultime 24 ore e l'ora
-   dell'ultima: mai i messaggi degli utenti. null = tutto a posto. */
+   dell'ultima: mai i messaggi degli utenti. null = tutto a posto.
+   29/09/2026: Andrea aveva ricaricato ma l'avviso restava per 24 ore.
+   Ora conta solo se anche l'ULTIMA richiesta all'AI è fallita per il
+   credito: dopo la ricarica, la prima risposta buona lo spegne. */
 async function creditoAIFinito() {
+  const ultima = await servizio("ai_request_log?select=errore&order=created_at.desc&limit=1", { method: "GET" }).catch(() => null);
+  if (!Array.isArray(ultima) || !ultima.length || !/credito/i.test(ultima[0].errore || "")) return null;
   const da = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const righe = await servizio(`ai_request_log?select=created_at&errore=ilike.*credito*&created_at=gt.${encodeURIComponent(da)}&order=created_at.desc&limit=500`, { method: "GET" }).catch(() => null);
   if (!Array.isArray(righe) || !righe.length) return null;
