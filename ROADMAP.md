@@ -61,6 +61,8 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
    aperta dalla schermata Home).
 
 **Da fare per Claude, in ordine**
+0. In arrivo (29/09): il socio tester scrive cosa vuole trovare in ogni sezione;
+   Andrea lo manda in un blocco unico, professione per professione → un pacchetto.
 1. Controllare con Andrea il primo promemoria vero (non ancora provato su
    un telefono vero).
 2. 0b.12 Manuali dell'AI per ogni professione (elettricista, Altra
