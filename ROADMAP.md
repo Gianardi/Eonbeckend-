@@ -386,6 +386,37 @@ alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
 
+### 0b.19 EON piccola AI specializzata: modello neurale nostro e codice pulito — PRIORITÀ 1 (deciso il 30/09, notte)
+Andrea: "EON deve funzionare perfettamente ed essere una piccola AI
+specializzata"; "vorrei un codice scritto perfettamente, lineare e pulito, e un
+modello neurale importante nostro"; "bisogna essere allineati al 100% alle grandi
+app". Nessuna funzione nuova finché questo non è finito.
+
+**Fatto (in corso di verifica):** modello neurale NOSTRO (piccolo transformer,
+~1 milione di parametri, 1,5 MB, 6 ms a frase, gira nel telefono), allenato da
+zero su ~34 mila frasi, di cui **8.000 scritte a mano da 16 "maestri"** (scrittori
+AI con personaggi diversi: muratore bergamasco, idraulico napoletano,
+amministratrice milanese, piastrellista rumeno…, `eval/neurale/maestra/`).
+Esame alla cieca (giro 16, 1.068 frasi di 5 scrittori nuovi): modello di oggi da
+solo 87%, **neurale da solo 95%**. Stessi risultati nel telefono e in PyTorch
+(`eval/neurale/verifica.mjs`). Palestra (per tarare) = giro 15; esame = giro 16;
+conferma = un giro 17 nuovo alla fine.
+
+**La strada, in ordine:**
+1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
+2. Rete di sicurezza automatica: le prove partono da sole a ogni pacchetto e
+   bloccano il merge se qualcosa si rompe (prima di toccare il codice a fondo).
+3. Codice rifatto a catena unica, un cassetto alla volta (prima gli
+   appuntamenti): pulizia della frase → **il neurale decide il cassetto** →
+   lettura dei dettagli (date, importi, cliente, telefono: un modulo ciascuno) →
+   controlli di sicurezza (conferme, "chiede se non è sicuro") → esecutore →
+   AI grande solo per consigli e casi nuovi. Via: modello vecchio, arbitro,
+   regole che indovinano il cassetto, doppioni app/server; il file unico
+   dell'app diviso in file ordinati. Ogni cassetto passa solo se le 3.600 frasi
+   etichettate e i test danno risultati uguali o migliori.
+4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
+5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
+
 ### 0b.18 Addestramento potenziato: 5 scrittori che non conoscono EON — FATTO il 30/09 (notte)
 Andrea: "Facciamo altro addestramento potenziato?". Scelta (sua): **più
 scrittori**. Invece di scrivere io le frasi (conosco le regole, quindi la prova
