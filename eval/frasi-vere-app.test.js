@@ -135,9 +135,9 @@ async function main() {
     const domani = new Date(); domani.setDate(domani.getDate() + 1);
     const giorno = (d, h) => { const x = new Date(d); return x.toISOString().slice(0, 10) + "T" + h + ":00"; };
     tabelle.tasks.push(
-      { id: randomUUID(), owner_id: UTENTE.id, title: "Sopralluogo Hunter", type: "appuntamento", scheduled_at: giorno(domani, "09:00"), status: "todo", deleted_at: null, client_id: clienti.find((c) => c.name === "Hunter").id },
-      { id: randomUUID(), owner_id: UTENTE.id, title: "Appuntamento Belle", type: "appuntamento", scheduled_at: giorno(domani, "15:00"), status: "todo", deleted_at: null, client_id: clienti.find((c) => c.name === "Belle").id },
-      { id: randomUUID(), owner_id: UTENTE.id, title: "Incontro con il dottore Rigoni", type: "appuntamento", scheduled_at: giorno(domani, "16:00"), status: "todo", deleted_at: null, client_id: clienti.find((c) => c.name === "Rigoni").id },
+      { id: randomUUID(), owner_id: UTENTE.id, title: "Sopralluogo Hunter", type: "appuntamento", scheduled_at: giorno(domani, "09:00"), time: "Domani, 09:00", status: "todo", deleted_at: null, client_id: clienti.find((c) => c.name === "Hunter").id },
+      { id: randomUUID(), owner_id: UTENTE.id, title: "Appuntamento Belle", type: "appuntamento", scheduled_at: giorno(domani, "15:00"), time: "Domani, 15:00", status: "todo", deleted_at: null, client_id: clienti.find((c) => c.name === "Belle").id },
+      { id: randomUUID(), owner_id: UTENTE.id, title: "Incontro con il dottore Rigoni", type: "appuntamento", scheduled_at: giorno(domani, "16:00"), time: "Domani, 16:00", status: "todo", deleted_at: null, client_id: clienti.find((c) => c.name === "Rigoni").id },
     );
     await page.evaluate(async ([clienti, tasksIniziali]) => {
       document.getElementById("onboardingScreen").style.display = "none";
@@ -162,9 +162,13 @@ async function main() {
         const paginaPrima = paginaAttuale;
         try { await eonInviaHome(frase); } catch (e) { return { errore: e.message }; }
         await new Promise((r) => setTimeout(r, 60));
+        // Una conferma del codice ("Sposto…?", "Annulla 1 impegno"): si tocca Sì, come farebbe l'utente
+        const si = [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, sposta$/.test(b.textContent)) || document.getElementById("annullaConferma");
+        let confermato = "";
+        if (si && !si.disabled) { confermato = document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); si.click(); await new Promise((r) => setTimeout(r, 250)); }
         const landing = [...document.querySelectorAll(".ai-landing-overlay")].filter((o) => o.style.display !== "none" && o.offsetParent !== null).map((o) => o.textContent.replace(/\s+/g, " ").trim()).join(" ");
         return {
-          card: document.getElementById("risorsaOverlay").style.display === "flex" ? document.getElementById("risorsaTitolo").textContent + " | " + document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 140) : "",
+          card: (document.getElementById("risorsaOverlay").style.display === "flex" ? document.getElementById("risorsaTitolo").textContent + " | " + document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 140) : "") + (confermato ? " [confermato: " + confermato + "]" : ""),
           schedaCliente: !!document.querySelector("#risorsaCorpo .scheda-cliente"),
           toast: document.getElementById("aiToastContainer").textContent.replace(/\s+/g, " ").trim().slice(0, 140),
           landing: landing.slice(0, 140),
@@ -180,7 +184,7 @@ async function main() {
       const scritto = (t) => st.scritture.includes(t);
       const fatto = {
         calendario: dopo.tasks > prima.tasks || dopo.appt > prima.appt || scritto("tasks"),
-        calendario_modifica: dopo.tasksJson !== prima.tasksJson || /spost|cancell|annull|elimin/i.test(vis),
+        calendario_modifica: dopo.tasksJson !== prima.tasksJson || scritto("tasks"),
         conferma: /\?|conferm|sicur|cestino|svuot|annull/i.test(vis),
         documento: dopo.doc > prima.doc || /preventivo|fattura/i.test(st.card),
         risorsa: !!st.card || st.cambiata,

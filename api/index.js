@@ -4904,6 +4904,18 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     ctx.lettoSenzaAI = true;
     return { azioni, payload: { stato: "concluso", testo: azioni.length === 1 ? "Fatto." : `Segnati ${azioni.length} impegni.`, azioni } };
   }
+  /* "Sposta Hunter alle 11": l'app ha trovato l'impegno e l'utente ha confermato col tasto (29/09/2026) */
+  if (comando.azione === "sposta_impegno") {
+    const quando = eUuid(comando.id) ? quandoValido(String(comando.nuovo_quando_iso || "")) : null;
+    if (!quando) return null;
+    const input = { id: comando.id, nuovo_quando_iso: quando };
+    let esito;
+    try { esito = await TOOLS.sposta_impegno.run(input, ctx); } catch (err) { return null; }
+    await registraOperazione(user, "sposta_impegno", input, esito, "auto");
+    ctx.lettoSenzaAI = true;
+    const azioni = [{ tool: "sposta_impegno", esito }];
+    return { azioni, payload: { stato: "concluso", testo: "Fatto.", azioni } };
+  }
   if (comando.azione === "appunto") {
     // "Conti mi ha detto che paga a fine mese": nella scheda del cliente (e sul suo prossimo appuntamento)
     if (!eUuid(comando.cliente_id) || !eStringaNonVuota(comando.testo) || comando.testo.length > 600) return null;

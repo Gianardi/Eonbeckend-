@@ -13800,6 +13800,79 @@ async function annullaImpegniScelti(voci){
   }, 10);
 }
 
+/* ===== Spostare un impegno col codice (29/09/2026) =====
+   "Sposta Hunter alle 11", "rimanda l'appuntamento di domani con Rossi a
+   giovedì alle 10": prima QUALE impegno (le parole prima dell'ultima "a/alle/
+   al/per"), poi QUANDO (quelle dopo). Uno solo → "Lo sposto?" con un tocco;
+   più d'uno → si sceglie; nessuno → come prima (AI). Lo sposta il server
+   (sposta_impegno), con "Annulla" per rimetterlo com'era. */
+function capisciSpostaImpegno(testo){
+  const n = String(testo || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’'?!,;]/g, " ").replace(/\s+/g, " ").trim();
+  const m = n.match(/^(?:sposta|spostami|spostare|rimanda|rimandami|posticipa|anticipa|rinvia)\s+(.+)$/);
+  if(!m) return null;
+  const parole = m[1].split(" ");
+  // l'ultima "a/alle/al/per/ad" dopo la quale c'è solo un giorno o un'ora
+  for(let k = parole.length - 2; k >= 0; k--){
+    if(!/^(?:a|alle|al|all|ad|per|verso|le)$/.test(parole[k])) continue;
+    const coda = parole.slice(k).join(" ");
+    const pp = EonLettore.parole(coda);
+    const q = EonLettore.trovaQuando(pp, new Date());
+    if(!q.giornoIso && !q.ora) continue;
+    const avanzo = pp.filter((x, i) => !q.usate.has(i) && !/^(?:a|alle|al|all|ad|per|verso|le|e|di|del|della|mattina|pomeriggio|sera)$/.test(x.n));
+    if(avanzo.length) continue;
+    const testa = parole.slice(0, k).join(" ");
+    const richiesta = capisciAnnullaImpegni("annulla impegno " + testa);
+    if(!richiesta) return null;
+    return { richiesta, nuovoGiorno: q.giornoIso, nuovaOra: q.ora };
+  }
+  return null;
+}
+function provaSpostaImmediato(testo, viaVoce){
+  if(!isDbReady()) return false;
+  const letto = capisciSpostaImpegno(testo);
+  if(!letto) return false;
+  const voci = impegniDaAnnullare(letto.richiesta);
+  if(!voci.length || voci.length > 6) return false; // non lo trovo: forse l'ho letto male, decide l'AI
+  const nuovoIso = (v) => {
+    const d = interpretaQuando(v.quando);
+    const giorno = letto.nuovoGiorno || (d ? d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") : null);
+    const ora = letto.nuovaOra || estraiOra(v.quando) || "09:00";
+    return giorno ? giorno + "T" + ora + ":00" : null;
+  };
+  const vecchioIso = (v) => nuovoIso({ quando: v.quando }) && (() => { const d = interpretaQuando(v.quando); const o = estraiOra(v.quando) || "09:00"; return d ? d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + "T" + o + ":00" : null; })();
+  const etichetta = (iso) => { const d = new Date(iso); const oggi = new Date(); oggi.setHours(0,0,0,0); const g = new Date(d); g.setHours(0,0,0,0); const diff = Math.round((g - oggi) / 86400000);
+    return (diff === 0 ? "oggi" : diff === 1 ? "domani" : d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric" })) + " alle " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
+  const sposta = async (v) => {
+    const iso = nuovoIso(v), prima = vecchioIso(v);
+    if(!iso) return;
+    chiudiRisorsaCard();
+    try{
+      const r = await chiediAssistente(testo, undefined, { comando: { azione: "sposta_impegno", id: v.fonte === "task" ? v.t.id : v.m.id, nuovo_quando_iso: iso } });
+      const a = (r.azioni || []).find(x => x.tool === "sposta_impegno" && x.esito);
+      if(!a){ showAIToast("Non spostato", "Non ci sono riuscita: riprova."); return; }
+      const aggiornaVista = (quando) => { if(v.fonte === "task") v.t.time = quando; else { v.m.text = quando; } ridisegnaImpegni(); };
+      aggiornaVista(a.esito.quando_visualizzato);
+      showAIToastConAnnulla("Spostato", "«" + escapeHtml(v.titolo) + "» → " + escapeHtml(a.esito.quando_visualizzato), async () => {
+        if(!prima) return;
+        const r2 = await chiediAssistente("annulla spostamento", undefined, { comando: { azione: "sposta_impegno", id: v.fonte === "task" ? v.t.id : v.m.id, nuovo_quando_iso: prima } }).catch(() => null);
+        const a2 = r2 && (r2.azioni || []).find(x => x.tool === "sposta_impegno" && x.esito);
+        if(a2) aggiornaVista(a2.esito.quando_visualizzato);
+      });
+      if(viaVoce) parlaRisposta("Spostato");
+    }catch(e){ showAIToast("Non spostato", e.message); }
+  };
+  if(voci.length === 1){
+    const v = voci[0], iso = nuovoIso(v);
+    if(!iso) return false;
+    domandaDelCodice({ titolo: "Sposta", domanda: "Sposto «" + v.titolo + "» (" + quandoBreve(v.quando) + ") a " + etichetta(iso) + "?", senzaCampo: true,
+      scelte: [{ etichetta: "Sì, sposta", valore: "si" }, { etichetta: "No", valore: "no" }], onRisposta: (x) => { if(x === "si") sposta(v); else chiudiRisorsaCard(); } });
+    return true;
+  }
+  domandaDelCodice({ titolo: "Sposta", domanda: "Quale sposto a " + (letto.nuovaOra ? "le " + letto.nuovaOra : "") + (letto.nuovoGiorno ? " " + etichetta(nuovoIso(voci[0])).split(" alle ")[0] : "") + "?", senzaCampo: true,
+    scelte: voci.map((v, i) => ({ etichetta: v.titolo + " · " + quandoBreve(v.quando), valore: String(i) })).concat([{ etichetta: "Nessuno", valore: "no" }]),
+    onRisposta: (x) => { if(x === "no") return chiudiRisorsaCard(); sposta(voci[+x]); } });
+  return true;
+}
 function provaAnnullaImmediato(testo, viaVoce){
   const richiesta = capisciAnnullaImpegni(testo);
   if(!richiesta) return false;
@@ -15204,11 +15277,21 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
-    /* "Annulla gli appuntamenti di domani": lista e conferma, senza AI */
-    if(!inContinuazione && provaAnnullaImmediato(testo, viaVoce)){
+    /* "Annulla gli appuntamenti di domani": lista e conferma, senza AI.
+       Col verbo detto dando del tu ("mi cancelli l'appuntamento con Belle")
+       letto dal lettore come comando (29/09/2026). */
+    const testoComando = !inContinuazione && typeof EonLettore !== "undefined" ? (() => { try{ return EonLettore.pulisci(testo).testo; }catch(e){ return testo; } })() : testo;
+    if(!inContinuazione && (provaAnnullaImmediato(testo, viaVoce) || (testoComando !== testo && provaAnnullaImmediato(testoComando, viaVoce)))){
       campo.value = "";
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "annulla_impegni");
+      return;
+    }
+    /* "Sposta Hunter alle 11", "mi sposti l'incontro con il dottore alle 17" */
+    if(!inContinuazione && provaSpostaImmediato(testoComando, viaVoce)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "sposta_impegno");
       return;
     }
 
