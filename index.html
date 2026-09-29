@@ -17225,6 +17225,25 @@ function mostraAnteprimaDocumento(dati, docId, clienteNome){
         voci: (stato.dati.voci || []).map(v => ({ descrizione: v.desc, quantita: v.qta, prezzo: v.prezzo })),
         aliquota_iva: stato.dati.aliquota, condizioni: stato.dati.condizioni || "", note: stato.dati.note || "",
       };
+      /* Prima il codice (29/09/2026): "non 10000 ma 15000", "5000 di bagno e
+         5000 manodopera", "fammela da 57.000", "metti la data al 27 settembre".
+         Solo se non capisce, l'AI come prima. */
+      const letta = !stato.runId && typeof EonLettore !== "undefined" ? (() => { try{ return EonLettore.leggiModifica(testo, { voci: attuali.voci, aliquota: attuali.aliquota_iva, oggi: new Date() }); }catch(e){ return null; } })() : null;
+      if(letta){
+        const comando = { azione: "modifica_documento", documento_id: docId, voci: letta.voci.map(v => ({ descrizione: v.descrizione, quantita: v.quantita, prezzo: v.prezzo })), aliquota_iva: letta.aliquota };
+        if(letta.data) comando.data = letta.data;
+        const r = await chiediAssistente(testo, undefined, { comando });
+        const fatta = (r.azioni || []).find(a => a.tool === "modifica_preventivo_o_fattura" && a.esito && a.esito.dati);
+        if(fatta){
+          attesa.remove();
+          stato.dati = fatta.esito.dati;
+          aggiornaDocumentoInMemoria(docId, stato.dati);
+          disegna();
+          document.getElementById("risorsaTitolo").textContent = titoloScheda();
+          bolla("eon", letta.cosa === "data" ? "Fatto: data " + letta.data + "." : "Fatto. Totale €" + Number(stato.dati.totale || 0).toLocaleString("it-IT", { maximumFractionDigits: 2 }) + ".");
+          return;
+        }
+      }
       const messaggio = stato.runId ? testo
         : `Il professionista sta guardando ${tipoDoc} n. ${stato.dati.numero} per ${stato.dati.cliente} (id documento: ${docId}). Dati attuali del documento: ${JSON.stringify(attuali)}. Ha chiesto questa modifica: "${testo}". Applicala subito con modifica_preventivo_o_fattura (passa TUTTE le voci, anche quelle che non cambiano). Regole: un importo detto da solo ("fammela da 57.000", "portala a 500") è il nuovo imponibile IVA esclusa, a meno che dica "totale" o "IVA inclusa" (allora è il totale con IVA); con una sola voce cambia il prezzo di quella, con più voci ricalcolale tutte in proporzione — non chiedere, fallo. Chiedi solo se manca davvero un dato indispensabile (es. il prezzo di una voce nuova). Qualunque risposta: una sola frase breve, mai spiegazioni o elenchi.`;
       const risposta = await chiediAssistente(messaggio, stato.runId || undefined, undefined, { chiediConferma: chiediConfermaInChat });

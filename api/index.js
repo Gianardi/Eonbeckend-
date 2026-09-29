@@ -2143,6 +2143,7 @@ const TOOLS = {
           aliquota_iva: { type: "number", description: "Percentuale IVA, se non detta mantieni quella già presente nel documento" },
           condizioni: { type: "string", description: "Se non detto, mantieni quelle già presenti nel documento" },
           note: { type: "string", description: "Se non detto, mantieni quelle già presenti nel documento" },
+          data: { type: "string", description: "Data del documento gg/mm/aaaa, solo se l'utente chiede di cambiarla" },
         },
         required: ["documento_id", "voci"],
       },
@@ -2178,6 +2179,7 @@ const TOOLS = {
         totale,
         condizioni: eStringaNonVuota(input.condizioni) ? input.condizioni.trim() : datiEsistenti.condizioni,
         note: eStringaNonVuota(input.note) ? input.note.trim() : datiEsistenti.note,
+        data: eStringaNonVuota(input.data) && /^\d{2}\/\d{2}\/\d{4}$/.test(input.data.trim()) ? input.data.trim() : datiEsistenti.data,
       };
 
       const riassunto = voci.map((v) => v.desc).join(" · ");
@@ -4853,6 +4855,33 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     const totaleTesto = Number(esito.totale).toLocaleString("it-IT", { maximumFractionDigits: 2 });
     const nuovo = azioni[0] && azioni[0].esito && azioni[0].esito.creato ? ` (cliente nuovo)` : "";
     return { azioni, payload: { stato: "concluso", testo: `${esito.titolo} per ${esito.cliente}${nuovo}: €${totaleTesto}`, azioni, focus: { tipo: "cliente", riferimento: esito.cliente } } };
+  }
+  /* Correzione a voce di un documento già fatto, letta dal codice nell'app
+     ("non 10000 ma 15000", "5000 di bagno e 5000 manodopera", "metti la
+     data al 27 settembre"): le voci nuove, ricontrollate qui (29/09/2026) */
+  if (comando.azione === "modifica_documento") {
+    if (!eUuid(comando.documento_id) || !Array.isArray(comando.voci) || !comando.voci.length || comando.voci.length > 60) return null;
+    const voci = [];
+    for (const v of comando.voci) {
+      const descrizione = v && eStringaNonVuota(v.descrizione) ? v.descrizione.trim().slice(0, 200) : "";
+      const quantita = Number(v && v.quantita), prezzo = Math.round(Number(v && v.prezzo) * 100) / 100;
+      if (!descrizione || !(quantita > 0) || quantita > 1000000 || !Number.isFinite(prezzo) || Math.abs(prezzo) > 10000000) return null;
+      voci.push({ descrizione, quantita, prezzo });
+    }
+    const somma = voci.reduce((t, v) => t + v.quantita * v.prezzo, 0);
+    if (!(somma > 0) || somma > 10000000) return null;
+    const input = { documento_id: comando.documento_id, voci };
+    if ([0, 4, 5, 10, 22].includes(comando.aliquota_iva)) input.aliquota_iva = comando.aliquota_iva;
+    if (eStringaNonVuota(comando.data) && /^\d{2}\/\d{2}\/\d{4}$/.test(comando.data)) input.data = comando.data;
+    let esito;
+    try { esito = await TOOLS.modifica_preventivo_o_fattura.run(input, ctx); } catch (err) {
+      await registraOperazione(user, "modifica_preventivo_o_fattura", input, { errore: err.message }, "errore");
+      return null;
+    }
+    await registraOperazione(user, "modifica_preventivo_o_fattura", input, esito, "auto");
+    ctx.lettoSenzaAI = true;
+    const azioni = [{ tool: "modifica_preventivo_o_fattura", esito }];
+    return { azioni, payload: { stato: "concluso", testo: "Fatto.", azioni } };
   }
   if (comando.azione === "appunto") {
     // "Conti mi ha detto che paga a fine mese": nella scheda del cliente (e sul suo prossimo appuntamento)

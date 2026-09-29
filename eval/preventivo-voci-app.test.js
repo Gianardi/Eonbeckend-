@@ -171,6 +171,33 @@ async function main() {
     docs = documenti();
     verifica("fattura salvata", (docs[docs.length - 1] || {}).tipo === "fattura", JSON.stringify(docs[docs.length - 1] || {}).slice(0, 200));
 
+    /* 5. Correggere a voce il preventivo appena fatto (le frasi vere di Andrea del 25-29/09) */
+    const msgDoc = (tabelle.messages || []).find((m) => m.event_type === "doc" && JSON.parse(m.file_name).cliente === "Mario Rossi");
+    const correggi = async (frase) => {
+      const dati = JSON.parse((tabelle.messages || []).find((m) => m.id === msgDoc.id).file_name);
+      await page.evaluate(([dati, id]) => { chiudiRisorsaCard(); mostraAnteprimaDocumento(dati, id, "Mario Rossi"); }, [dati, msgDoc.id]);
+      await page.fill("#risorsaPiede .scheda-campo", frase);
+      await page.click("#risorsaPiede .scheda-invia");
+      await page.waitForTimeout(400);
+      const ultima = await page.evaluate(() => [...document.querySelectorAll("#risorsaCorpo .scheda-bolla.eon")].map((b) => b.textContent).pop());
+      return { dati: JSON.parse((tabelle.messages || []).find((m) => m.id === msgDoc.id).file_name), ultima };
+    };
+    let c = await correggi("fammela da 9.900");
+    verifica('"fammela da 9.900" (5 voci): tutte in proporzione, imponibile 9.900', Math.abs(c.dati.imponibile - 9900) < 0.01 && c.dati.voci.length === 5 && /Fatto\. Totale/.test(c.ultima), JSON.stringify([c.dati.imponibile, c.ultima]));
+    c = await correggi("5000 di bagno e 5000 manodopera");
+    verifica('"5000 di bagno e 5000 manodopera": due voci nuove', c.dati.voci.length === 2 && c.dati.voci[0].desc === "Bagno" && c.dati.voci[1].desc === "Manodopera" && c.dati.imponibile === 10000, JSON.stringify(c.dati.voci));
+    c = await correggi("Non 10000 ma 15000");
+    verifica('"Non 10000 ma 15000": imponibile 15.000', Math.abs(c.dati.imponibile - 15000) < 0.01, String(c.dati.imponibile));
+    c = await correggi("aggiungi smaltimento 300");
+    verifica('"aggiungi smaltimento 300": una voce in più', c.dati.voci.length === 3 && c.dati.voci[2].desc === "Smaltimento" && c.dati.voci[2].prezzo === 300, JSON.stringify(c.dati.voci));
+    c = await correggi("la manodopera 8000");
+    verifica('"la manodopera 8000": cambia solo quella voce', c.dati.voci[1].prezzo === 8000 && c.dati.voci.length === 3, JSON.stringify(c.dati.voci));
+    c = await correggi("Metti la data però al 27 settembre");
+    verifica('"metti la data al 27 settembre": data 27/09/2026', c.dati.data === "27/09/2026" && /data 27\/09\/2026/.test(c.ultima), JSON.stringify([c.dati.data, c.ultima]));
+    c = await correggi("iva al 10%");
+    verifica('"iva al 10%": aliquota 10', c.dati.aliquota === 10, String(c.dati.aliquota));
+
+    await page.evaluate(() => chiudiRisorsaCard());
     await detta(frase1);
     await page.waitForTimeout(600);
     await page.screenshot({ path: path.join(process.env.SCREEN_DIR || "/tmp", "preventivo-voci.png") });

@@ -225,7 +225,7 @@
     if (!tok) return null;
     let v = numeroItaliano(tok.o.replace(/^€/, "").replace(/[€%]$/, ""));
     if (v === null) { const k = tok.n.match(/^(\d+(?:[.,]\d+)?)(k|mila)$/); if (k) v = Number(k[1].replace(",", ".")) * 1000; }
-    if (v === null) {
+    if (v === null && tok.n !== "mila") {
       const w = numeroParola(tok.n);
       // "un", "una", "sei", "tre": numeri solo se seguiti da euro o da un'unità, o dopo "a/da"
       if (w !== null && !/^(?:un|uno|una)$/.test(tok.n) && (w > 10 || (dopo && (/^(?:euro|eur|€)$/.test(dopo) || UNITA.test(dopo))) || (prima && /^(?:a|da)$/.test(prima)))) v = w;
@@ -383,7 +383,7 @@
     // Prezzo prima della descrizione: "800 euro per la demolizione 1.200 euro per i sanitari 600 per la manodopera"
     const coda = pulisciParti(resto).map((x) => x.o).filter(Boolean).join(" ");
     const iniziaConPer = (v) => { const t = v.parti.filter((x) => x.n); return t.length && /^(?:per|di)$/.test(t[0].n); };
-    if (!descr[0] && coda && voci.slice(1).every(iniziaConPer) && /^(?:per|di)$/.test((resto.find((x) => x.n) || {}).n || "")) {
+    if (!descr[0] && coda && (voci.slice(1).every(iniziaConPer) && /^(?:per|di)$/.test((resto.find((x) => x.n) || {}).n || "") || descr.slice(1).every(Boolean))) {
       descr = descr.slice(1).concat([coda]);
     }
     const lista = voci.map((v, k) => {
@@ -393,6 +393,131 @@
       return { descrizione: maiuscola(d) || "Lavori", quantita: v.quantita, prezzo, ...(v.unita ? { unita: v.unita } : {}) };
     });
     return { voci: lista, aliquota, totaleDetto, titolo };
+  }
+
+  /* ---------------- Correggere a voce un documento già fatto ----------------
+     (29/09/2026, frasi vere di Andrea finite all'AI: "non 10000 ma 15000",
+     "cambia e fai 12000", "metti 2500", "fammela da 57.000", "modificalo a 21
+     mila", "5000 di bagno e 5000 manodopera", "dividi i 57.000 così: 27.000
+     materiale e 30.000 manodopera", "metti la data al 27 settembre").
+     attuali = { voci: [{descrizione, quantita, prezzo}], aliquota }.
+     Torna { voci, aliquota, data, cosa } oppure null (allora decide l'AI). */
+  function importiDi(pp) {
+    const out = [];
+    for (let i = 0; i < pp.length; i++) {
+      let v = valoreDi(pp[i], pp[i + 1] && pp[i + 1].n, pp[i - 1] && pp[i - 1].n);
+      if (v === null || /%$/.test(pp[i].o) || (pp[i + 1] && PERCENTO.test(pp[i + 1].n))) continue;
+      if (pp[i + 1] && /^(?:mila|k)$/.test(pp[i + 1].n)) v *= 1000;
+      out.push({ i, v });
+    }
+    return out;
+  }
+  const PAROLE_VUOTE_MODIFICA = /^(?:ma|ascolta|senti|allora|ok|no|anzi|scusa|cambia|cambiala|cambialo|modifica|modificala|modificalo|correggi|correggila|correggilo|fai|fammi|fammela|fammelo|falla|fallo|metti|mettila|mettilo|portala|portalo|porta|rifallo|rifalla|diventa|deve|essere|venire|a|da|di|in|e|il|la|lo|le|i|l|un|una|non|invece|per|piuttosto|totale|tot|imponibile|prezzo|importo|cifra|euro|eur|€|mila|k|iva|inclusa|compresa|esclusa|piu|più|tutto|tutta|voce|al|alla|sul|sulla)$/;
+  function leggiModifica(testoOriginale, attuali) {
+    if (!attuali || !Array.isArray(attuali.voci) || !attuali.voci.length) return null;
+    let testo = pulisci(testoOriginale).testo;
+    const aliquotaAttuale = Number(attuali.aliquota) || 22;
+    const esito = { voci: attuali.voci.map((v) => ({ ...v })), aliquota: aliquotaAttuale, data: null, cosa: "" };
+    // La data: "metti la data al 27 settembre", "data 27/09/2026"
+    const nt = norm(testo);
+    if (/\bdata\b/.test(nt)) {
+      const pp = parole(testo);
+      const q = trovaQuando(pp, attuali.oggi);
+      let g = q.giornoIso;
+      // una data del documento può essere anche nel passato
+      const m = nt.match(/\b(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)(?:\s+(\d{4}))?\b/) || nt.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/);
+      if (m) {
+        const oggi = new Date(attuali.oggi || Date.now());
+        const mese = isNaN(Number(m[2])) ? MESI.indexOf(m[2]) + 1 : Number(m[2]);
+        const anno = m[3] ? (m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3])) : oggi.getFullYear();
+        g = anno + "-" + String(mese).padStart(2, "0") + "-" + String(Number(m[1])).padStart(2, "0");
+      }
+      if (g && /^\d{4}-\d{2}-\d{2}$/.test(g)) {
+        const [a, mm, d] = g.split("-");
+        esito.data = d + "/" + mm + "/" + a; esito.cosa = "data";
+        return esito;
+      }
+      return null;
+    }
+    // L'IVA: "iva al 10%", "metti l'iva al 4"
+    const iva = nt.match(/\biva\s+(?:al\s+|a\s+)?(4|5|10|22)\s*(?:%|percento|per\s+cento)?(?:\s|$)/);
+    if (iva && !/\b(?:inclusa|compresa)\b/.test(nt)) {
+      esito.aliquota = Number(iva[1]);
+      testo = testo.replace(/\b(?:e\s+)?(?:l\s*'?\s*)?iva\s+(?:al\s+|a\s+)?(?:4|5|10|22)\s*(?:%|percento|per\s+cento)?/i, " ").trim();
+      if (!/\d/.test(testo.replace(/\b(?:metti|mettila|mettilo|fai|falla|fallo)\b/gi, ""))) { esito.cosa = "iva"; return esito; }
+    }
+    // "dividi i 57.000 così: 27.000 materiale e 30.000 manodopera"
+    testo = testo.replace(/^(?:ma\s+)?(?:dividi|dividilo|dividila|dividili|separa|separalo|suddividi|spezza|spezzalo|fai)\s+(?:(?:il|i|lo|la|le|gli)\s+)?[\d.,]+\s*(?:mila|euro|€)?\s*(?:cosi|così|in|tra|fra)?\s*:?\s*/i, "");
+    const pp = parole(testo);
+    const importi = importiDi(pp);
+    if (!importi.length) {
+      // "togli lo smaltimento", "elimina la voce trasporto"
+      const t = nt.match(/^(?:togli|toglimi|elimina|leva|levami|rimuovi|cancella)\s+(?:(?:la|il|lo|le|i|gli|l)\s+)?(?:voce\s+)?(?:(?:la|il|lo|le|i|gli|l|del|della|dello)\s+)?(.{3,})$/);
+      if (t) {
+        const k = trovaVoceSimile(esito.voci, t[1]);
+        if (k >= 0 && esito.voci.length > 1) { esito.voci.splice(k, 1); esito.cosa = "tolta"; return esito; }
+      }
+      return esito.aliquota !== aliquotaAttuale ? (esito.cosa = "iva", esito) : null;
+    }
+    // "non 10000 ma 15000", "da 10000 a 15000": vale l'ultimo
+    if (importi.length === 2 && /\bnon\b.*\bma\b|\binvece\s+di\b|\bda\b.*\ba\b/.test(nt) && !trovaVoci(pp, new Set()).voci.some((v) => /[a-z]{4}/i.test(senzaAccenti(v.descrizione)) && !PAROLE_VUOTE_MODIFICA.test(norm(v.descrizione)))) {
+      return nuovoTotale(esito, importi[1].v, nt);
+    }
+    // Più voci: le voci nuove sostituiscono tutte le vecchie
+    const lettura = trovaVoci(pp, new Set());
+    const utili = lettura ? lettura.voci.filter((v) => !/^(?:lavori)$/i.test(v.descrizione) || lettura.voci.length === 1) : [];
+    if (lettura && lettura.voci.length >= 2 && lettura.voci.every((v) => parolePiene(v.descrizione).length)) {
+      esito.voci = lettura.voci.map((v) => ({ descrizione: v.descrizione, quantita: v.quantita, prezzo: v.prezzo }));
+      if (lettura.aliquota) esito.aliquota = lettura.aliquota;
+      esito.cosa = "voci";
+      return esito;
+    }
+    if (importi.length !== 1) return null;
+    const valore = importi[0].v;
+    // Con parole piene accanto all'importo: una voce da cambiare ("la manodopera 3000") o da aggiungere ("aggiungi smaltimento 300")
+    const piene = parolePiene(pp.filter((_, k) => k !== importi[0].i).map((x) => x.o).join(" "));
+    if (piene.length) {
+      const aggiungi = /^(?:aggiungi|aggiungici|aggiungere|metti\s+anche|mettici\s+anche|mettici|inserisci|e\s+poi|poi|piu|più|anche)\b/.test(nt);
+      const k = aggiungi ? -1 : trovaVoceSimile(esito.voci, piene.join(" "));
+      if (k >= 0) { esito.voci[k].prezzo = Math.round(valore / (esito.voci[k].quantita || 1) * 100) / 100; esito.cosa = "voce"; return esito; }
+      if (aggiungi && utili.length === 1) {
+        esito.voci.push({ descrizione: utili[0].descrizione.replace(/^(?:Aggiungi|Aggiungici|Aggiungere|Inserisci|Mettici|Metti)\s+(?:anche\s+)?/i, "").replace(/^./, (c) => c.toUpperCase()), quantita: utili[0].quantita, prezzo: utili[0].prezzo });
+        esito.cosa = "aggiunta";
+        return esito;
+      }
+      return null;
+    }
+    return nuovoTotale(esito, valore, nt);
+  }
+  // Le parole che dicono qualcosa ("bagno", "manodopera"), non "fammela", "da", "euro"
+  function parolePiene(t) { return norm(t).split(" ").filter((w) => w && w.length >= 3 && !PAROLE_VUOTE_MODIFICA.test(w) && !/^\d/.test(w) && numeroParola(w) === null); }
+  function trovaVoceSimile(voci, t) {
+    const cerca = parolePiene(t);
+    if (!cerca.length) return -1;
+    let migliore = -1, punti = 0;
+    voci.forEach((v, k) => {
+      const sue = parolePiene(v.descrizione);
+      const p = cerca.filter((w) => sue.some((x) => x === w || (w.length >= 5 && x.length >= 5 && (x.startsWith(w.slice(0, 5)) || w.startsWith(x.slice(0, 5)))))).length;
+      if (p > punti) { punti = p; migliore = k; }
+    });
+    return migliore;
+  }
+  // Un importo solo = il nuovo imponibile (o il totale con IVA se lo dice): una voce → quella; più voci → in proporzione
+  function nuovoTotale(esito, valore, nt) {
+    let imponibile = valore;
+    if (/\b(?:iva\s+(?:inclusa|compresa)|ivato|ivata|compresa\s+iva|incluso\s+iva|totale\s+con\s+iva|con\s+l\s*iva)\b/.test(nt)) imponibile = Math.round(valore / (1 + esito.aliquota / 100) * 100) / 100;
+    const prima = esito.voci.reduce((t, v) => t + v.quantita * v.prezzo, 0);
+    if (esito.voci.length === 1) esito.voci[0].prezzo = Math.round(imponibile / (esito.voci[0].quantita || 1) * 100) / 100;
+    else if (prima > 0) {
+      const f = imponibile / prima;
+      esito.voci.forEach((v) => { v.prezzo = Math.round(v.prezzo * f * 100) / 100; });
+      // i centesimi che avanzano sull'ultima voce, così il totale torna preciso
+      const dopo = esito.voci.reduce((t, v) => t + v.quantita * v.prezzo, 0);
+      const ultima = esito.voci[esito.voci.length - 1];
+      ultima.prezzo = Math.round((ultima.prezzo + (imponibile - dopo) / (ultima.quantita || 1)) * 100) / 100;
+    } else return null;
+    esito.cosa = "totale";
+    return esito;
   }
 
   /* ---------------- Chi ---------------- */
@@ -879,7 +1004,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, trovaVoci, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, trovaVoci, leggiModifica, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);
