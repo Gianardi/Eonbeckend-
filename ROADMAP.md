@@ -77,6 +77,11 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 appunto scorrendo il dito verso sinistra ("Elimina" in rosso → Cestino, con
 "Annulla"), come già per chat e documenti. Prova: `eval/mente-scorri.test.js`.
 
+**Fatto il 29/09, nel prossimo pacchetto:** la barra in basso (Home, Clienti,
+Cresci, Menu) è fissata allo schermo: su iPhone, scorrendo la Home, restava a
+metà (foto di Andrea). Prova: `eval/barra-fissa.test.js` (la misura, non
+l'iPhone vero: da ricontrollare sul telefono).
+
 Tester: il 29/09 l'account di Simone (Massari) passato da "Altra attività"
 a "Amministratore di condominio" (a mano nel database, su richiesta di Andrea).
 
