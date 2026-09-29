@@ -1,0 +1,95 @@
+{
+  "nota": "Giro 12 (30/09/2026): scritto prima di misurare, dopo i giri 10-11. Mescola tutti gli stili (telegramma, richieste indirette, dialetto leggero, ripensamenti, racconti al passato, domande senza '?', numeri a parole, preventivi lunghi). Serve a vedere se EON generalizza. Nomi inventati.",
+  "mestieri": {
+    "edile": {
+      "clienti": ["Gino Palermo", "Lisa Cattaneo", "Condominio Il Ponte", "Ristorante Da Beppe", "Oscar Tedesco"],
+      "impegni": [["Sopralluogo Gino Palermo", "domani", "09:00"]],
+      "frasi": [
+        ["Tedesco martedì 8 demolizione", "calendario", "08:00"],
+        ["me lo segni? venerdì alle 14 e 30 il geometra al condominio il ponte", "calendario", "14:30"],
+        ["dopodomani alle sette anzi alle otto si parte col tetto della Cattaneo", "calendario", "08:00"],
+        ["il sopralluogo di Palermo mettiamolo alle 11", "calendario_modifica", "11:00"],
+        ["preventivo ristorante da beppe: rifacimento cucina 35 metri quadri a 60 euro, cappa 1.800 euro, impianto elettrico 2.400 euro e tinteggiatura 900 euro, iva al 10", "documento", "7200"],
+        ["fammi 'na fattura a Oscar Tedesco di tremila euro per il cappotto", "documento", "3000"],
+        ["ieri sono passato dalla Cattaneo e mi ha detto che vuole anche il bagno di sotto", "mente"],
+        ["bisogna ordinare le travi per il ponte", "mente"],
+        ["fagli sapere a Gino Palermo che il ponteggio arriva lunedì", "messaggio"],
+        ["puoi chiamare il ristorante da beppe?", "chiamata"],
+        ["mi sono arrivati i soldi della Cattaneo, duemila euro", "incasso"],
+        ["quanto m deve Tedesco", "dati"],
+        ["dopodomani che ho", "dati"],
+        ["urgente al ponte si è aperta una crepa grossa nel garage", "urgenza"],
+        ["foto crepa", "foto_scatta"],
+        ["la fattura di Tedesco mandala su whatsapp", "invio"],
+        ["dove ho messo i preventivi della Cattaneo?", "risorsa"],
+        ["quanto costa più o meno un tetto ventilato al metro", "ai"]
+      ]
+    },
+    "idraulico": {
+      "clienti": ["Remo Ferrante", "Gelateria Polo Nord", "Condominio La Quercia", "Agnese Donati", "Palestra Titan"],
+      "impegni": [["Manutenzione Agnese Donati", "domani", "10:00"]],
+      "frasi": [
+        ["Ferrante boiler giovedì 10", "calendario", "10:00"],
+        ["ho fissato con la palestra titan per mercoledì alle 16 per le docce", "calendario", "16:00"],
+        ["la manutenzione della Donati spostamela a lunedì alle 9", "calendario_modifica", "09:00"],
+        ["preventivo condominio la quercia: 20 valvole termostatiche a 55 euro, bilanciamento impianto 600 euro e manodopera due giorni 900 euro", "documento", "2600"],
+        ["fattura gelateria polo nord seicento euro per il banco frigo", "documento", "600"],
+        ["alla palestra i tubi sono in rame vecchio", "mente"],
+        ["mi ricordi di comprare il flessibile da 50?", "mente"],
+        ["dì alla Donati che arrivo mezz'ora dopo", "messaggio"],
+        ["telefonami Remo Ferrante", "chiamata"],
+        ["la gelateria ha saldato 600", "incasso"],
+        ["chi è in ritardo coi pagamenti", "dati"],
+        ["urgente la gelateria è allagata", "urgenza"],
+        ["foto scarico", "foto_scatta"],
+        ["come si sostituisce una valvola di sicurezza della caldaia", "ai"]
+      ]
+    },
+    "elettricista": {
+      "clienti": ["Ugo Sartori", "Albergo Il Nido", "Condominio Monte Bianco", "Rosa Vitali", "Officina Meccanica Riva"],
+      "impegni": [],
+      "frasi": [
+        ["Sartori citofono sabato 9", "calendario", "09:00"],
+        ["mi metti in agenda l'albergo il nido lunedì alle 15?", "calendario", "15:00"],
+        ["preventivo officina meccanica riva: 10 prese industriali a 42 euro, quadro 1.600 euro e linea aria compressa 1.100 euro", "documento", "3120"],
+        ["dico Rosa Vitali", "dico"],
+        ["la Vitali vuole le prese anche in terrazza", "mente"],
+        ["scrivigli a Ugo Sartori che il citofono è arrivato", "messaggio"],
+        ["l'albergo il nido ha pagato milleduecento", "incasso"],
+        ["quanto devo prendere ancora dall'officina", "dati"],
+        ["urgente albergo il nido senza luce al secondo piano", "urgenza"],
+        ["foto quadro", "foto_scatta"],
+        ["che differenza c'è tra un cavo FG16 e un FS17", "ai"]
+      ]
+    },
+    "amministratore": {
+      "clienti": ["Condominio Le Acacie", "Condominio Viale Europa 12", "Signora Longhi", "Idraulica Nord", "Condominio Parco Verde"],
+      "impegni": [],
+      "frasi": [
+        ["convoca ordinaria le acacie giovedì 12 novembre alle 21", "assemblea"],
+        ["bisogna convocare l'assemblea straordinaria di viale Europa 12 per lunedì 16 novembre alle 18", "assemblea"],
+        ["la signora Longhi ha versato la rata 420", "incasso"],
+        ["fattura viale Europa 12 compenso 900", "documento", "900"],
+        ["fai sapere a idraulica nord che serve un sopralluogo al parco verde", "messaggio"],
+        ["chi è moroso al parco verde", "dati"],
+        ["alle acacie il citofono del civico 3 non va", "mente"],
+        ["urgente parco verde allagato il garage", "urgenza"],
+        ["mail alla signora Longhi con il verbale", "email"]
+      ]
+    },
+    "artigiano": {
+      "clienti": ["Trattoria La Pergola", "Sabrina Monti", "Negozio Scarpe Passo", "Mirko Fabbri", "Caseificio Valle"],
+      "impegni": [],
+      "frasi": [
+        ["Fabbri video giovedì 15", "calendario", "15:00"],
+        ["me lo segni? sabato alle 10 foto al caseificio", "calendario", "10:00"],
+        ["preventivo trattoria la pergola: menu 40 pezzi a 8 euro, insegna 900 euro e foto piatti 15 scatti a 30 euro", "documento", "1670"],
+        ["Sabrina Monti mi ha girato 200 euro", "incasso"],
+        ["fagli sapere a Mirko Fabbri che il video è pronto", "messaggio"],
+        ["il caseificio vuole le etichette verdi", "mente"],
+        ["quanto ho fatturato a settembre", "dati"],
+        ["urgente il negozio di scarpe ha la vetrina rotta", "urgenza"]
+      ]
+    }
+  }
+}

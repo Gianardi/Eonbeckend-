@@ -12329,7 +12329,7 @@ function apriUrgenze(){
    documento da stampare o salvare in PDF, sul modello dell'allegato I.
    Resta nella scheda del cliente e in "Certificazioni e documenti".
    È una bozza da controllare prima della firma: lo dice anche il foglio. */
-const FRASE_DICO = /^(?:(?:fai|fammi|prepara|preparami|crea|creami|compila|compilami|scrivi|scrivimi|nuova)\s+(?:la\s+|una\s+)?(?:nuova\s+)?(?:dico|di\.\s*co\.?|dichiarazione\s+di\s+conformit[aà])|(?:nuova\s+)?dichiarazione\s+di\s+conformit[aà]|(?:la\s+)?dico(?=\s+(?:per|dell|dell'|della|del|impianto)\b))(?:\s+(.*))?$/i;
+const FRASE_DICO = /^(?:(?:fai|fammi|prepara|preparami|crea|creami|compila|compilami|scrivi|scrivimi|nuova)\s+(?:la\s+|una\s+)?(?:nuova\s+)?(?:dico|di\.\s*co\.?|dichiarazione\s+di\s+conformit[aà])|(?:nuova\s+)?dichiarazione\s+di\s+conformit[aà]|(?:la\s+)?dico(?=\s+(?:per|dell|dell'|della|del|impianto)\b)|dico(?=\s+(?!(?:che|a|ad|di|io|sempre|solo|no|si|sì|la|il|le|lo|questo|questa|niente|tutto|bene|male)\b)\p{L}))(?:\s+(.*))?$/iu; // "dico Arturo Bellini" (giro 11)
 const DICO_TIPI = [["nuovo", "nuovo impianto"], ["trasformazione", "trasformazione"], ["ampliamento", "ampliamento"], ["manutenzione", "manutenzione straordinaria"], ["altro", "altro"]];
 const DICO_USI = [["civile", "civile"], ["commercio", "commercio"], ["industriale", "industriale"], ["altri", "altri usi"]];
 const DICO_ALLEGATI = [
@@ -13144,11 +13144,31 @@ function rispondiSuiDati(l){
    la frase si riscrive nella forma normale di quel cassetto e si rilegge.
    Una domanda o un saluto che le regole mettevano nella Mente va invece a
    chi risponde. Mai due volte di fila (niente giri a vuoto). */
-function provaModello(l, testo){
+function provaModello(l, testo, arbitro){
   if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
+  // "aggiungi in EON queste foto", "segna in Fornitori…": una cartella che c'è, la gestisce la sua funzione
+  const inCartella = String(testo || "").trim().match(TRIGGER_CARTELLA);
+  if(inCartella && cartelle.some(c => normalizzaComando(inCartella[1]).startsWith(normalizzaComando(c.nome)))) return null;
   const ctx = contestoLettore();
   const r = EonLettore.classifica(testo, ctx);
-  if(!r || r.p < 0.85) return null;
+  if(!r) return null;
+  /* L'arbitro (giro 10, 30/09/2026): le regole dicono "è una domanda" o "un
+     impegno", il modello è sicurissimo che è un'altra azione ("me lo metti
+     in agenda…?", "ho preso appuntamento con…", "fai sapere a X che…"): vince
+     il modello, riscrivendo la frase nella forma di quel cassetto. */
+  const AZIONI = /^(?:calendario|messaggio|email|chiamata|incasso|invio_documento|cerca_documento|urgenza|cliente)$/;
+  if(arbitro || (l && /^(?:dati|domanda|impegno|da_fare)$/.test(l.azione))){
+    const soglia = arbitro ? 0.7 : l && /^(?:impegno|da_fare)$/.test(l.azione) ? 0.95 : 0.9;
+    const stesso = l && ((l.azione === "impegno" || l.azione === "da_fare") ? r.intento === "calendario" : l.azione === "dati" ? r.intento === "dati" : r.intento === "domanda");
+    // "scrivi a Machi domani alle 10" resta un promemoria per te (deciso il 28/09): da un impegno non si passa a un messaggio
+    const vietato = l && /^(?:impegno|da_fare)$/.test(l.azione) && /^(?:messaggio|email|chiamata|calendario)$/.test(r.intento);
+    if(r.p >= soglia && AZIONI.test(r.intento) && !stesso && !vietato){
+      const x = EonLettore.riscrivi(r.intento, testo, ctx);
+      if(x && EonLettore.norm(x) !== EonLettore.norm(testo)) return { rifai: x, intento: r.intento };
+    }
+    if(arbitro || (l && /^(?:dati|impegno|da_fare)$/.test(l.azione))) return null;
+  }
+  if(r.p < 0.85) return null;
   if(/^(?:mente|cartella|calendario|documento|dati)$/.test(r.intento)) return null; // quelli li leggono già le regole
   if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" ? { alServer: true, intento: r.intento } : null;
   // Scrivere a un cliente partendo da una nota: solo se il modello è sicurissimo (e il messaggio chiede sempre conferma)
@@ -13157,9 +13177,47 @@ function provaModello(l, testo){
   if(!x || EonLettore.norm(x) === EonLettore.norm(testo)) return null;
   return { rifai: x, intento: r.intento };
 }
+/* "Chiede invece di sbagliare" (30/09/2026, Andrea: "deve funzionare per
+   tutte le richieste, in qualsiasi modo formulate"). Le regole non hanno
+   capito e il modello ha solo un'idea (40-70%): invece di passare all'AI o
+   di tirare a indovinare, EON propone le due cose più probabili, con un tasto
+   ciascuna, più "Lo chiedo a EON". Come fanno Siri e Alexa quando non sono
+   sicuri. Una domanda vera (consiglio, calcolo) va all'AI come prima. */
+const COSA_FARE = { calendario: "Lo segno in calendario", calendario_modifica: "Sposto o annullo l'impegno", messaggio: "Scrivo un messaggio", email: "Mando una mail", chiamata: "Chiamo", incasso: "Segno l'incasso", invio_documento: "Mando il documento", cerca_documento: "Cerco il documento", cliente: "Apro il cliente", urgenza: "La segno come urgenza", foto: "Faccio la foto", documento: "Preparo il documento", mente: "Lo salvo nella Mente" };
+function chiediCosaFare(testo, viaVoce, rifai){
+  if(typeof EonLettore === "undefined" || !EonLettore.classifica || !isDbReady()) return false;
+  const ctx = contestoLettore();
+  // solo se nemmeno le regole ci sono arrivate (un cliente, un impegno… li fa il codice del server)
+  const l = leggiConLettore(testo);
+  if(l && l.azione && !/^(?:comando|seguito|mente|domanda)$/.test(l.azione)) return false;
+  if(testo.split(/\s+/).length < 3) return false; // "appunti", "foto": troppo poco per proporre qualcosa
+  const r = EonLettore.classifica(testo, ctx);
+  if(!r || r.p < 0.4 || /^(?:domanda|saluto|dati)$/.test(r.intento)) return false;
+  const scelte = [];
+  [[r.intento, r.p], [r.secondo, r.p2]].forEach(([intento, p]) => {
+    if(!intento || p < 0.15 || !COSA_FARE[intento] || scelte.some(x => x.intento === intento)) return;
+    if(intento === "mente"){ scelte.push({ intento, etichetta: COSA_FARE.mente, valore: "mente" }); return; }
+    const x = EonLettore.riscrivi(intento, testo, ctx);
+    if(!x || EonLettore.norm(x) === EonLettore.norm(testo)) return;
+    const nome = (x.match(/^(?:chiama|scrivi a|manda una mail a)\s+(.+?)(?:\s+che\b|$)/i) || [])[1];
+    scelte.push({ intento, etichetta: (COSA_FARE[intento] + (nome && intento !== "email" ? " a " + nome : "")).replace(/^Chiamo a /, "Chiamo "), valore: x });
+  });
+  if(!scelte.length || (scelte.length === 1 && scelte[0].intento === "mente")) return false;
+  scelte.push({ etichetta: "Lo chiedo a EON", valore: "__ai" });
+  domandaDelCodice({ titolo: "Cosa faccio?", domanda: "Non sono sicura di aver capito «" + testo + "». Vuoi che:", senzaCampo: true, scelte,
+    onRisposta: async (v) => {
+      chiudiRisorsaCard();
+      ricordaEsitoCodice(testo, "scelta_" + (scelte.find(x => x.valore === v) || {}).intento);
+      if(v === "__ai") return rifai(testo, { soloServer: true });
+      if(v === "mente"){ const creato = await dbInsert("cantiere_appunti", { testo: testo.charAt(0).toUpperCase() + testo.slice(1) }); if(creato){ const n = mappaAppunto(creato); cantiereAppunti.push(n); renderCantiereAppunti(); showAIToastConAnnulla("In Mente", "«" + escapeHtml(n.testo) + "».", async () => { await cancellaAppuntiSenzaAvviso([n]); }); } return; }
+      return rifai(v, { daModello: true });
+    } });
+  if(viaVoce) parlaRisposta("Non sono sicura: scegli cosa faccio");
+  return true;
+}
 async function provaLettore(testo, viaVoce, invia, senzaModello){
   const l = leggiConLettore(testo);
-  if(!senzaModello && (!l || !l.azione || /^(?:mente|comando|domanda)$/.test(l.azione))){
+  if(!senzaModello && (!l || !l.azione || /^(?:mente|comando|domanda|dati|impegno|da_fare)$/.test(l.azione))){
     const m = provaModello(l, testo);
     if(m) return m;
   }
@@ -13873,11 +13931,17 @@ const PAROLE_ANNULLA = new Set(["mi","l","lo","la","gli","i","le","il","un","una
    alle 10", "la verifica spostala alle 16") diventa "sposta …"/"annulla …";
    e la coda che spiega il perché ("…che è saltata", "…, piove") si toglie. */
 function giraComandoImpegno(n){
-  let t = n.replace(/^(?:fai|fammi)\s+slittare\s+/, "sposta ").replace(/^slitta\s+/, "sposta ");
-  const verbo = (v) => /^(?:spost|rimand|anticip|posticip|slitt)/.test(v) ? "sposta" : "annulla";
+  // "niente, il sopralluogo… toglilo", "guarda, l'appuntamento… spostalo" (giro 11)
+  let t = n.replace(/^(?:niente|guarda|senti|allora|ok|no|ascolta|dunque)\s*,?\s+(?=(?:l|il|lo|la|i|gli|le|appuntament|sopralluog|impegn|consegn|verific|incontr|riunion)\b)/, "");
+  t = t.replace(/^(?:fai|fammi)\s+slittare\s+/, "sposta ").replace(/^slitta\s+/, "sposta ");
+  const verbo = (v) => /^(?:spost|rimand|anticip|posticip|slitt|facc|fai|mett|port)/.test(v) ? "sposta" : "annulla";
   const testaBuona = (h) => /^(?:l|il|lo|la|i|gli|le|quello|quella|un|una|appuntament|impegn|sopralluog|incontr|riunion|chiamat|telefonat|verific)/.test(h) && !/\bche\b/.test(h);
-  let m = t.match(/^(.+?)\s+(?:me\s+)?(?:lo|la|li|le|mi)\s+(sposti|spostiamo|rimandi|anticipi|posticipi|cancelli|annulli|togli|levi)(?:\s+(.*))?$/);
-  if(!m) m = t.match(/^(.+?)\s+(spostal[oaie]|rimandal[oaie]|anticipal[oaie]|posticipal[oaie]|cancellal[oaie]|annullal[oaie]|togli(?:el)?[oaie]|leval[oaie]|fall[oaie]\s+slittare|fai\s+slittare)(?:\s+(.*))?$/);
+  // "…alle 15 invece che alle 11": conta la prima (giro 10)
+  t = t.replace(/\s+(?:invece\s+(?:che|di)|anziche|piuttosto\s+che)\s+(?:alle|le|ore|a|il|di)?\s*\S+(?:\s+e\s+mezza)?\s*$/, "");
+  let m = t.match(/^(.+?)\s+(?:me\s+)?(?:lo|la|li|le|mi)\s+(sposti|spostiamo|rimandi|rimandiamo|anticipi|anticipiamo|posticipi|posticipiamo|facciamo|fai|mettiamo|metti|cancelli|cancelliamo|annulli|annulliamo|togli|togliamo|levi)(?:\s+(.*))?$/);
+  if(!m) m = t.match(/^(.+?)\s+(spostal[oaie]|spostamel[oaie]|rimandal[oaie]|rimandamel[oaie]|anticipal[oaie]|anticipamel[oaie]|posticipal[oaie]|spostiamol[oaie]|mettiamol[oaie]|portiamol[oaie]|cancellamel[oaie]|annullamel[oaie]|toglimel[oaie]|rimandiamol[oaie]|anticipiamol[oaie]|facciamol[oaie]|cancellal[oaie]|annullal[oaie]|cancelliamol[oaie]|annulliamol[oaie]|togli(?:el)?[oaie]|toglil[oaie]|leval[oaie]|fall[oaie]\s+slittare|fai\s+slittare)(?:\s+(.*))?$/);
+  // "lo facciamo/mettiamo alle 17" è spostare solo se dopo c'è un giorno o un'ora
+  if(m && /^(?:facciamo|fai|mettiamo|metti|facciamol[oaie]|mettiamol[oaie]|portiamol[oaie])$/.test(m[2]) && !(m[3] && /^(?:alle|a|al|per|le|ore|luned|marted|mercoled|gioved|venerd|sabato|domenica|domani|dopodomani)\b/.test(m[3]))) m = null;
   if(m && testaBuona(m[1])) t = verbo(m[2].replace(/^fa\w*\s+/, "")) + " " + m[1] + (m[3] ? " " + m[3] : "");
   return t;
 }
@@ -15451,6 +15515,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(!inContinuazione && typeof EonLettore !== "undefined" && testo) testo = EonLettore.togliCortesie(testo);
     // I modi di dire nella forma che il codice conosce ("fai il numero di Rossi" = "chiama Rossi") (29/09/2026)
     if(!inContinuazione && typeof EonLettore !== "undefined" && EonLettore.parafrasi && testo) testo = EonLettore.parafrasi(testo);
+    /* "foto massetto", "foto contatore" (giro 11, stile telegramma): scattare;
+       "foto Rossi" (un cliente) resta "le foto di Rossi" */
+    if(!inContinuazione && testo){
+      const f = testo.match(/^foto\s+(\p{L}{3,}(?:\s+\p{L}{3,})?)[.!]*$/iu);
+      if(f && !/^(?:di|del|della|dello|dei|delle|degli|da|al|alla|allo|all|ai|agli|alle)$/i.test(f[1].split(/\s+/)[0]) && !clients.some(c => normalizzaComando(c.name).split(" ").some(w => w.length > 2 && normalizzaComando(f[1]).split(" ").includes(w))) && !cartelle.some(c => normalizzaComando(c.nome) === normalizzaComando(f[1]))
+        && !Object.values(MESTIERI_HOME).some(m => (m.carte || []).some(c => normalizzaComando(c[0]) === normalizzaComando(testo)))) testo = "fai foto al " + f[1]; // "foto cantiere" è la pagina
+    }
     // Un comando già letto dal lettore (dopo le domande del codice): dritto al server, senza AI
     if(pronto && (pronto.comando || pronto.soloServer)){ if(inCorso) return; return inviaAlServer(testo, viaVoce, false, pronto.comando ? pronto : null); }
     /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
@@ -15679,6 +15750,15 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
+    /* Prima di passare all'AI: il modello è abbastanza sicuro di cosa vuoi?
+       Allora lo fa il codice (giro 10, 30/09/2026) */
+    const lettoAllaFine = !inContinuazione && !letturaImpegno ? leggiConLettore(testo) : null;
+    if(!inContinuazione && !letturaImpegno && !(pronto && pronto.daModello) && !(lettoAllaFine && lettoAllaFine.azione && !/^(?:comando|seguito|mente|domanda)$/.test(lettoAllaFine.azione))){
+      const arb = provaModello(null, testo, true);
+      if(arb && arb.rifai){ ricordaEsitoCodice(testo, "arbitro_" + arb.intento); return elabora(arb.rifai, viaVoce, { daModello: true }); }
+    }
+    // Non abbastanza sicuro, ma ha un'idea: chiede con i tasti invece di tirare a indovinare
+    if(!inContinuazione && !letturaImpegno && !(pronto && pronto.daModello) && chiediCosaFare(testo, viaVoce, (x, p) => elabora(x, viaVoce, p))) return;
     return inviaAlServer(testo, viaVoce, inContinuazione, letturaImpegno ? { letturaImpegno } : null);
   }
 
@@ -17742,7 +17822,8 @@ function capisciInvioDocumento(testo){
   // "invia il preventivo su whatsapp": è il canale, non un nome
   const soloCanale = nome && nome.match(/^(?:su|con|per|via|tramite|in|col)\s+(whatsapp|whats app|wa|email|mail|posta|eon|chat)$/);
   if(soloCanale){ canale = soloCanale[1]; nome = ""; }
-  if(nome && /\d/.test(nome)) return null; // "manda la fattura da 500 a Rossi": è un documento nuovo, decide chi lo crea
+  // "manda la fattura da 500 a Rossi": è un documento nuovo, decide chi lo crea; ma "via Roma 22" è il nome del cliente
+  if(nome && /\d/.test(nome) && !clients.some(c => /\d/.test(c.name) && (" " + nome + " ").includes(" " + normalizzaComando(c.name).split(" ").slice(-2).join(" ") + " "))) return null;
   const parole = (nome || "").split(" ").filter(p => p && !/^(il|la|lo|i|gli|le|l|all|sig|signor|signora|cliente)$/.test(p));
   if(!parole.length && !numero && !mail && !tel) return null;
   let c = canale ? (/whats|^wa$/.test(canale) ? "whatsapp" : /mail|posta/.test(canale) ? "email" : "eon") : "";

@@ -1,0 +1,110 @@
+{
+  "nota": "Giro 11 (30/09/2026): scritto dopo l'arbitro e prima di misurare. Telegrammi brevissimi, parlato regionale leggero, numeri a parole, frasi lunghe con due pensieri, errori di dettatura. Nomi inventati.",
+  "mestieri": {
+    "edile": {
+      "clienti": ["Rocco Esposito", "Ilaria Benedetti", "Condominio Il Mulino", "Hotel Diana", "Vincenzo Lupo"],
+      "impegni": [["Sopralluogo Hotel Diana", "domani", "10:00"]],
+      "frasi": [
+        ["Esposito domani 8 getto", "calendario", "08:00"],
+        ["mo' segnami che dopodomani alle nove vado dalla Benedetti pe' le piastrelle", "calendario", "09:00"],
+        ["fammi 'na fattura a Vincenzo Lupo di milleduecento euro per il muretto", "documento", "1200"],
+        ["preventivo hotel diana rifacimento facciata duecento metri quadri a quaranta euro e ponteggio tremila", "documento", "11000"],
+        ["allora oggi sono stato dall'Esposito e il bagno è quasi finito, manca solo il box doccia", "mente"],
+        ["il sopralluogo all'hotel diana spostamelo a venerdì alle 10", "calendario_modifica", "10:00"],
+        ["niente, il sopralluogo all'hotel diana salta, toglilo", "calendario_modifica"],
+        ["scrivi a Ilaria Benedetti ke domani arriviamo alle 8", "messaggio"],
+        ["chiama Lupo", "chiamata"],
+        ["Rocco Esposito ha pagato duemila in contanti", "incasso"],
+        ["quanto m deve l'hotel diana", "dati"],
+        ["domani ke ho", "dati"],
+        ["urgente al mulino si è staccato un pezzo di grondaia", "urgenza"],
+        ["foto massetto", "foto_scatta"],
+        ["le foto del mulino", "foto"],
+        ["manda il preventivo a Lupo", "invio"],
+        ["nuovo cliente Salvatore Greco 3337788990", "cliente"],
+        ["devo prendere il tassellante", "mente"],
+        ["quanto tempo ci mette un intonaco a seccare d'inverno", "ai"],
+        ["crea la cartella Mulino", "cartella"],
+        ["SAL 40% hotel diana", "sal"],
+        ["giovedì alle 7 e mezza sono dalla Benedetti e poi alle 14 all'hotel diana", "calendario", "07:30,14:00"]
+      ]
+    },
+    "idraulico": {
+      "clienti": ["Ornella Ricci", "Bar Il Chiosco", "Condominio Gli Ulivi", "Franco Mazza", "Casa Di Riposo Serena"],
+      "impegni": [["Manutenzione Franco Mazza", "domani", "15:00"]],
+      "frasi": [
+        ["Mazza caldaia giovedì 9", "calendario", "09:00"],
+        ["senti ho parlato con la Ricci e mi ha detto che vuole cambiare il boiler, fammi un preventivo di novecento euro", "documento", "900"],
+        ["preventivo casa di riposo serena: 12 termostatiche a 45 euro, 4 radiatori a 280 euro e manodopera 800", "documento", "2460"],
+        ["fattura bar il chiosco sturatura 120", "documento", "120"],
+        ["la manutenzione di Mazza facciamola alle 17", "calendario_modifica", "17:00"],
+        ["urgente perdita grossa al condominio gli ulivi", "urgenza"],
+        ["avvisa il bar il chiosco che passo verso le 11", "messaggio"],
+        ["telefona alla casa di riposo", "chiamata"],
+        ["la Ricci ha saldato 900", "incasso"],
+        ["chi deve ancora pagarmi", "dati"],
+        ["cosa ho venerdì", "dati"],
+        ["la casa di riposo vuole i lavori solo al mattino", "mente"],
+        ["compra raccordi da mezzo", "mente"],
+        ["foto caldaia", "foto_scatta"],
+        ["fammi vedere le fatture del chiosco", "risorsa"],
+        ["mail alla casa di riposo con il preventivo", "email"],
+        ["Franco Mazza", "cliente"],
+        ["come si svuota un impianto di riscaldamento", "ai"],
+        ["crea cartella Casa di riposo", "cartella"]
+      ]
+    },
+    "elettricista": {
+      "clienti": ["Arturo Bellini", "Discoteca Oasi", "Condominio Le Ginestre", "Patrizia Fumo", "Cantina Sociale"],
+      "impegni": [],
+      "frasi": [
+        ["Bellini quadro lunedì 8", "calendario", "08:00"],
+        ["preventivo discoteca oasi impianto luci 7.800 euro e impianto audio 5.200 euro", "documento", "13000"],
+        ["fattura Patrizia Fumo cinquecentocinquanta euro sostituzione prese", "documento", "550"],
+        ["dico Arturo Bellini", "dico"],
+        ["urgente in discoteca è saltato tutto stasera c'è la serata", "urgenza"],
+        ["scrivi a Patrizia Fumo che il pezzo arriva martedì", "messaggio"],
+        ["chiama la cantina sociale", "chiamata"],
+        ["la cantina sociale ha pagato 3.000", "incasso"],
+        ["quanto mi deve la discoteca", "dati"],
+        ["la cantina vuole le luci anche nel piazzale", "mente"],
+        ["foto al quadro della cantina", "foto_scatta"],
+        ["manda la fattura alla Fumo", "invio"],
+        ["nuovo cliente Pizzeria Vesuvio 3398877665", "cliente"],
+        ["serve la messa a terra per una pompa di calore?", "ai"]
+      ]
+    },
+    "amministratore": {
+      "clienti": ["Condominio Il Faggio", "Condominio Via Leopardi 7", "Signor Galli", "Ditta Pulisci Tutto", "Condominio Sole Mare"],
+      "impegni": [],
+      "frasi": [
+        ["assemblea faggio 3 novembre ore 21", "assemblea"],
+        ["convoca straordinaria sole mare lunedì 9 novembre alle 18 per la piscina", "assemblea"],
+        ["urgente sole mare ascensore fermo", "urgenza"],
+        ["scrivi al signor Galli che manca la rata di settembre", "messaggio"],
+        ["il signor Galli ha pagato 300", "incasso"],
+        ["chi non ha pagato le rate", "dati"],
+        ["fattura via Leopardi 7 compenso 650", "documento", "650"],
+        ["alla ditta pulisci tutto bisogna dire che le scale sono sporche", "mente"],
+        ["chiama la ditta pulisci tutto", "chiamata"],
+        ["come si convoca un'assemblea straordinaria", "ai"]
+      ]
+    },
+    "artigiano": {
+      "clienti": ["Parrucchiera Stella", "Giacomo Neri", "Ferramenta Bruni", "Anna Rinaldi", "Autolavaggio Splash"],
+      "impegni": [],
+      "frasi": [
+        ["Neri logo venerdì 11", "calendario", "11:00"],
+        ["preventivo ferramenta bruni volantini 1000 pezzi a 0,15 e locandine 50 pezzi a 3 euro", "documento", "300"],
+        ["fattura Anna Rinaldi quattrocento euro foto battesimo", "documento", "400"],
+        ["Giacomo Neri ha pagato 250", "incasso"],
+        ["scrivi a Anna Rinaldi che l'album è pronto", "messaggio"],
+        ["chiama l'autolavaggio", "chiamata"],
+        ["quanto ho incassato questa settimana", "dati"],
+        ["la parrucchiera vuole il logo rosa", "mente"],
+        ["urgente il sito dell'autolavaggio è giù", "urgenza"],
+        ["crea la cartella Ferramenta", "cartella"]
+      ]
+    }
+  }
+}

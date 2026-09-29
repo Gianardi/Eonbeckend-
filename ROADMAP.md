@@ -75,6 +75,11 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
+**Fatto il 30/09, nel prossimo pacchetto:** il cervello perfezionato (0b.17):
+frasario con ~19 mila frasi nuove, cervello da solo 98% su 991 frasi mai viste
+(99,5% quando è sicuro), arbitro nell'app, "Cosa faccio?" con i tasti quando
+non è sicuro; giro 12 alla cieca 58/60 (97%) al primo colpo.
+
 **Fatto il 29/09 (notte), nel prossimo pacchetto:** pronta prima dei tester
 (0b.16): 5 giri di frasi nuove alla cieca (652 frasi, 5 mestieri + "La mia
 attività"): 95% al primo colpo, 651/652 dopo le correzioni. Prove più severe
@@ -329,6 +334,54 @@ DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
 alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.17 Il cervello perfezionato: capisce anche i modi nuovi di chiedere — FATTO il 30/09
+Andrea: "bisogna assolutamente dedicarci al perfezionamento del modello nostro
+di cervello… deve arrivare ai tester pronto: per tutte le loro richieste di
+lavoro, in qualsiasi modo formulate, il sistema funzioni".
+
+Onestà detta ad Andrea: il 100% di qualsiasi frase non esiste (nemmeno Siri o
+Google). L'obiettivo: capire quasi tutto al primo colpo e **mai fare la cosa
+sbagliata**: quando non è sicuro, chiede.
+
+- **Il frasario** (`eval/modello/frasario.mjs`): una piccola grammatica per
+  ognuna delle 20 azioni (come Snips/Rasa/Alexa): verbi diversi, ordine
+  delle parole, richieste indirette, telegramma, dialetto leggero, racconti
+  al passato, errori di dettatura. Ne escono ~19 mila frasi in più per
+  allenare il cervello (in tutto ~28 mila).
+- **Il cervello da solo**, su 991 frasi mai viste: dal 95% al **98%**; quando
+  si dice sicuro (≥80%) ha ragione **il 99,5%** delle volte. Prova finale
+  (mai usata per migliorare): da 89% a 98%.
+- **L'arbitro nell'app**: prima di arrendersi (AI) o quando le regole dicono
+  "è una domanda" / "un impegno", se il cervello è sicuro vince il cervello
+  (la frase si riscrive nella forma di quel cassetto e la fa il codice).
+- **"Chiede invece di sbagliare"**: se né le regole né il cervello sono sicuri
+  (40-70%), EON mostra "Cosa faccio?" con le due azioni più probabili e "Lo
+  chiedo a EON" (foto: `eval/chiede-cosa-fare.test.js`). Una domanda vera
+  (consiglio, calcolo) va all'AI come prima.
+- **Regole nuove, generali**: richieste indirette ("me lo segni?", "puoi
+  telefonare a…?", "mi ricordi di…?", "fai sapere a X che…", "bisogna…", "ho
+  preso appuntamento con…", "mi sono arrivati i soldi di X"); stile telegramma
+  ("Mazza caldaia giovedì 9" = alle 9, perché il 9 non è giovedì; "Esposito
+  domani 8 getto"); "lo facciamo alle 15 invece che alle 11", "spostamelo",
+  "mettiamolo", "niente, … toglilo"; "Vitale ha disdetto, cancella…"; "foto
+  massetto" = scatta; "dico Bellini"; "convoca straordinaria X…"; racconti al
+  passato = nota; numeri nel nome del cliente ("via Leopardi 7") mai importi.
+
+| Giro (alla cieca) | Frasi | Al primo colpo | Dopo |
+|---|---|---|---|
+| 10 (richieste indirette, domande-comando) | 127 | 107 (84%) — il cervello da solo 119 (94%) | 127 |
+| 11 (telegramma, dialetto, numeri a parole) | 75 | 63 (84%) | 75 |
+| 12 (tutti gli stili mescolati, frasi nuove) | 60 | **58 (97%)** | 59 (*) |
+
+(*) "Fabbri video giovedì 15" resta letto come "il 15 ottobre" (che è davvero
+un giovedì): è ambiguo anche per una persona.
+
+**Cosa vuol dire**: ogni STILE nuovo di parlare, la prima volta, fa sbagliare
+circa 1 frase su 6; una volta insegnato, anche le frasi nuove in quello stile
+vanno al 97%. I tester porteranno stili che non ho previsto: per quello ci
+sono (1) "chiede invece di sbagliare", (2) il giro settimanale sulle frasi non
+capite (con il loro consenso).
 
 ### 0b.16 Pronta PRIMA dei tester: giri alla cieca — FATTO il 29/09 (notte)
 Andrea: "Io devo darla già pronta ai tester… non posso aspettare i tester".

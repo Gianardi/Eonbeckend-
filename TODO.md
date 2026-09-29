@@ -4974,6 +4974,29 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Il cervello perfezionato (30/09/2026, ROADMAP 0b.17)
+- `eval/modello/frasario.mjs`: grammatica per azione ({a|b} alternative, [x]
+  facoltativo, <SLOT> dal vocabolario: clienti con le forme a/da/di/con,
+  QUANDO/ORA/GIORNO, SOLDI, LAVORO, COSA, MSG, NOTA, DOMANDA…). `allena.mjs`
+  lo usa (FRASARIO=900 per azione; FRASARIO=0 per spegnerlo) e misura anche
+  "GIRI ALLA CIECA" (prova cieca + giri 5-12, mai in allenamento).
+- lettore.js: `richiestaAlComando` in `parafrasi` (me lo segni, puoi +
+  infinito → imperativo con `infinitoAlComando`, tu→comando solo con "mi" o
+  "?", "?" in mezzo tolto); PARAFRASI nuove (fai sapere, bisogna+inf → devo,
+  ho preso appuntamento, soldi arrivati, motivo davanti a cancella/sposta);
+  "giovedì N": se il N del mese non è quel giorno → è l'ora; ora nuda dopo il
+  giorno ("domani 8"); racconti al passato → mente; assemblea senza la parola
+  ("convoca straordinaria…"); numeri del nome cliente esclusi da importi e voci;
+  temi: "che ho giovedì", "domani cosa c'è", "moroso", "prendere ancora da".
+- index.html: `provaModello(l, testo, arbitro)` — l'arbitro (≥0.9 da
+  dati/domanda, ≥0.95 da impegno/da_fare ma mai verso messaggio/chiamata, ≥0.7
+  alla fine prima dell'AI, solo se il lettore non ha capito); cartella esistente
+  → mai il modello; `chiediCosaFare` (40-70%, ≥3 parole, lettore senza azione)
+  con `COSA_FARE`; `giraComandoImpegno` + niente/guarda davanti, -melo,
+  -iamolo, "lo facciamo alle N", "invece che alle N"; "foto X" nuda = scatta
+  (se X non è un cliente/cartella); "dico <cliente>"; invio documento con
+  numeri nel nome del cliente.
+
 ### Giri alla cieca prima dei tester (29/09/2026 notte, ROADMAP 0b.16)
 Metodo: file `eval/dati/frasi-giroN.json` scritto PRIMA di guardare il
 codice, misurato una volta (`FRASI=frasi-giroN.json PORTA=9045 node
