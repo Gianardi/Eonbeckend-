@@ -2553,12 +2553,18 @@
 <!-- File privati: foto e documenti con link che scadono (27/09/2026) -->
 <script src="/file-privati.js"></script>
 <script src="/lettore.js"></script>
+<script src="/neurale.js" defer></script>
 <script>
 /* Il modello di EON (29/09/2026): piccolo, nostro, dentro l'app. Si carica
-   dopo l'avvio, senza bloccare niente; finché non c'è, decidono le regole. */
+   dopo l'avvio, senza bloccare niente; finché non c'è, decidono le regole.
+   30/09/2026: il modello neurale (modello-neurale.json) arriva dopo, e da lì
+   decide lui il cassetto; il browser lo tiene in memoria per le volte dopo. */
 (function(){
   if(typeof EonLettore === "undefined") return;
-  const carica = () => fetch("/modello-eon.json").then(r => r.ok ? r.json() : null).then(m => { if(m) EonLettore.caricaModello(m); }).catch(() => {});
+  const carica = () => {
+    fetch("/modello-eon.json").then(r => r.ok ? r.json() : null).then(m => { if(m) EonLettore.caricaModello(m); }).catch(() => {});
+    if(typeof EonNeurale !== "undefined") fetch("/modello-neurale.json").then(r => r.ok ? r.json() : null).then(m => { if(m && EonNeurale.carica(m)) EonLettore.usaNeurale(EonNeurale); }).catch(() => {});
+  };
   if(document.readyState === "complete") carica(); else window.addEventListener("load", carica);
 })();
 </script>
@@ -13330,6 +13336,7 @@ function rispondiSuiDati(l){
    la frase si riscrive nella forma normale di quel cassetto e si rilegge.
    Una domanda o un saluto che le regole mettevano nella Mente va invece a
    chi risponde. Mai due volte di fila (niente giri a vuoto). */
+const SOGLIA_NEURALE = 0.9;
 function provaModello(l, testo, arbitro){
   if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
   // "aggiungi in EON queste foto", "segna in Fornitori…": una cartella che c'è, la gestisce la sua funzione
@@ -13338,6 +13345,26 @@ function provaModello(l, testo, arbitro){
   const ctx = contestoLettore();
   const r = EonLettore.classifica(testo, ctx);
   if(!r) return null;
+  /* Il modello neurale decide il cassetto (30/09/2026, come le grandi app): se è
+     sicurissimo e le regole dicono un'altra cosa, vince lui e la frase si riscrive
+     nella forma di quel cassetto. Tranne i casi delicati: mai da un'azione a
+     "niente" (saluto, domanda, nota: lì restano la Mente e l'AI), le urgenze le
+     riconosce il codice (niente allarmi rossi per sbaglio), un promemoria con
+     l'ora non diventa un messaggio (deciso il 28/09), un documento resta un
+     documento (al massimo "cercalo" o "mandalo"). */
+  if(l && !arbitro && EonLettore.neuraleAttivo && EonLettore.neuraleAttivo() && r.p >= SOGLIA_NEURALE){
+    const CASSETTO = { mente: "mente", domanda: "domanda", dati: "dati", impegno: "calendario", da_fare: "calendario", documento: "documento" };
+    const daRegole = CASSETTO[l.azione];
+    const conQuando = !!(l.quando && (l.quando.ora || l.quando.giornoIso));
+    const vietato = /^(?:saluto|domanda|mente|urgenza)$/.test(r.intento)
+      || (conQuando && /^(?:dati|cliente|cerca_documento|cartella|assemblea)$/.test(r.intento))
+      || (/^(?:impegno|da_fare)$/.test(l.azione) && /^(?:messaggio|email|chiamata)$/.test(r.intento))
+      || (l.azione === "documento" && !/^(?:cerca_documento|invio_documento)$/.test(r.intento));
+    if(daRegole && r.intento !== daRegole && !vietato){
+      const x = EonLettore.riscrivi(r.intento, testo, ctx);
+      if(x && EonLettore.norm(x) !== EonLettore.norm(testo)) return { rifai: x, intento: r.intento };
+    }
+  }
   /* L'arbitro (giro 10, 30/09/2026): le regole dicono "è una domanda" o "un
      impegno", il modello è sicurissimo che è un'altra azione ("me lo metti
      in agenda…?", "ho preso appuntamento con…", "fai sapere a X che…"): vince
@@ -13403,7 +13430,7 @@ function chiediCosaFare(testo, viaVoce, rifai){
 }
 async function provaLettore(testo, viaVoce, invia, senzaModello){
   const l = leggiConLettore(testo);
-  if(!senzaModello && (!l || !l.azione || /^(?:mente|comando|domanda|dati|impegno|da_fare)$/.test(l.azione))){
+  if(!senzaModello && (!l || !l.azione || /^(?:mente|comando|domanda|dati|impegno|da_fare|documento)$/.test(l.azione))){
     const m = provaModello(l, testo);
     if(m) return m;
   }

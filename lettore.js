@@ -660,7 +660,32 @@
     });
     return out;
   }
+  /* La frase come la vede il modello neurale (30/09/2026): parole normalizzate,
+     con giorni/ore, soldi, telefoni e numeri al posto dei segnaposto. I nomi dei
+     clienti restano parole (il modello impara che non contano): così è uguale in
+     allenamento e nel telefono, anche senza sapere chi sono i clienti. */
+  function segni(testoOriginale) {
+    const p = pulisci(testoOriginale);
+    const pp = parole(p.testo);
+    if (!pp.length) return "";
+    const q = trovaQuando(pp, new Date("2026-09-29T10:00:00"));
+    const s = pp.map((x) => x.n);
+    q.usate.forEach((i) => { s[i] = "<tempo>"; });
+    pp.forEach((x, i) => {
+      if (s[i].startsWith("<")) return;
+      if (/^\+?\d[\d.\s]{7,}$/.test(x.o) || /^[03]\d{7,11}$/.test(x.n)) s[i] = "<tel>";
+      else if (/€/.test(x.o) || (pp[i + 1] && /^(?:euro|eur|mila|k)$/.test(pp[i + 1].n)) || /^\d{1,3}(?:\.\d{3})+$/.test(x.o) || /^\d+(?:k|mila)$/.test(x.n)) s[i] = "<soldi>";
+      else if (/\d/.test(x.n)) s[i] = "<num>";
+    });
+    const t = s.filter((w, i) => !(w.startsWith("<") && s[i - 1] === w));
+    return (p.domanda ? "<dom> " : "") + t.join(" ");
+  }
+  /* Il modello neurale (30/09/2026): quando è caricato decide lui il cassetto;
+     finché non c'è (primi istanti dopo l'apertura) decide il modello di parole */
+  let NEURALE = null;
+  function usaNeurale(n) { NEURALE = n && n.pronto && n.pronto() ? n : null; return !!NEURALE; }
   function classifica(testo, ctx) {
+    if (NEURALE) { const r = NEURALE.classifica(segni(testo)); if (r) return r; }
     if (!MODELLO) return null;
     const f = caratteristiche(testo, ctx);
     if (!f.length) return null;
@@ -1666,7 +1691,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);
