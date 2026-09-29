@@ -4935,3 +4935,41 @@ ROADMAP 0b.11.
 - **Da provare con Andrea dopo il merge**: la notifica vera su un telefono
   (Android e iPhone con EON nella schermata Home); il registro delle
   chiamate dell'orologio (`net._http_response`).
+
+### Il lettore misurato sulle frasi vere (29/09/2026, ROADMAP 0b.14)
+
+- `lettore.js`: `trovaVoci(pp, escludi)` (voci di un preventivo: ogni prezzo
+  chiude una voce; quantità = numero + unità prima di "a/da X" o "X al
+  metro/l'uno"; `UNITA`, `PER_UNITA`, `SPEC` per le misure tecniche;
+  stile "euro" vs cifre nude; prezzo prima della descrizione; IVA, sconto,
+  totale detto; `numeroParola` per i numeri in lettere);
+  `leggiModifica(testo, {voci, aliquota, oggi})` per le correzioni a voce
+  (data, IVA, togli IVA, "non X ma Y", più voci, una voce, aggiungi,
+  togli, nuovo totale in proporzione); `comandoDaTu` in `pulisci` (verbi
+  col tu → comando; senza "mi/ci" solo i verbi che non sono nomi);
+  tempo relativo in `trovaQuando`; "giovedì 15"; "da 3/4" non è una data;
+  azioni nuove: `cliente`, `apri_cliente`, `assemblea`, `cestino`; `dividi`
+  spezza per virgole con 2+ orari.
+- Server (`eseguiComandoDiretto`): `documento` con `voci` e `aliquota_iva`,
+  `modifica_documento`, `impegni` (più impegni letti dall'app),
+  `sposta_impegno`, `assemblea` (solo amministratori). Il tool
+  `modifica_preventivo_o_fattura` accetta anche `data`.
+- App: `mostraVociDocumento` (card delle voci + "Crea"), `leggiModifica`
+  prima dell'AI nella scheda del documento, `provaSpostaImmediato` /
+  `capisciSpostaImpegno`, annulla anche col verbo detto col tu,
+  `gestisciPiuComandi` manda il comando `impegni`, omonimi negli impegni
+  ("Con quale X?"), `apriLinkEsterno` per tel:, meteo e percorso detti nel
+  discorso, SAL senza percentuale, DiCo "dico per…", foto + cliente nuovo
+  (scheda con "Scatta foto" in evidenza), "quanto mi deve X", "non trovo
+  preventivi di X", cliente nuovo con telefono creato dall'app, aggiorna il
+  telefono di un cliente che c'è già (con conferma).
+- Prove: `eval/preventivi-lunghi.test.mjs`, `eval/preventivo-voci-app.test.js`,
+  `eval/frasi-vere-app.test.js` (dati: `eval/dati/frasi-vere-andrea.json`,
+  minimo 130/136), `eval/frasi-nuove-mestieri.test.js` (dati:
+  `eval/dati/frasi-nuove-mestieri.json`, minimo 135/143). Aggiornate
+  lettore-app, router, saluti-scelte, scheda-cliente, scheda, simulatore,
+  mestieri-altra dove ora il codice fa ciò che prima faceva l'AI.
+- Limiti noti: nella prova per mestiere gli impegni creati dal server non
+  tornano nella memoria dell'app finta (nel telefono sì, si ricarica la
+  chat): "annulla il getto di domani" risulta all'AI; una cartella che non
+  esiste ("Fornitori") va all'AI invece di proporre di crearla.

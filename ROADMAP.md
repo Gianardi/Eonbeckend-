@@ -75,6 +75,10 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
+**Fatto il 29/09 (pomeriggio), nel prossimo pacchetto:** EON capisce col codice
+anche le frasi lunghe (0b.14): preventivo dettato voce per voce, correzioni a
+voce, 136/136 frasi vere di Andrea, 140/143 frasi nuove per i 5 mestieri.
+
 **Fatto il 29/09 (mattina), nel prossimo pacchetto:** nella Mente si cancella un
 appunto scorrendo il dito verso sinistra ("Elimina" in rosso → Cestino, con
 "Annulla"), come già per chat e documenti. Prova: `eval/mente-scorri.test.js`.
@@ -315,6 +319,43 @@ DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
 alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.14 EON capisce col codice, misurato sulle frasi vere — FATTO il 29/09 (primo passo di 0b.13)
+Andrea: "doveva funzionare con il codice e non con l'AI… va esteso a tutti
+anche a frasi lunghe". Il tester aveva dettato un preventivo di un minuto e
+l'AI (senza credito dal 28/09 14:48: 54 richieste fallite in 24 ore) non
+rispondeva. Fatto, come le grandi app, misurando su frasi vere:
+
+- **Preventivo lungo dettato, voce per voce, col codice**: anche senza
+  punteggiatura; quantità × prezzo (al metro, l'uno, all'ora), IVA, sconto,
+  totale detto (se non torna lo dice), numeri in lettere, centesimi, prezzo
+  prima della descrizione. Card con le voci e un tasto "Crea". Prova:
+  `eval/preventivi-lunghi.test.mjs` (52 preventivi, 25 scritti dopo il
+  codice: al primo colpo 20/25) e `eval/preventivo-voci-app.test.js`.
+- **Correggere a voce un preventivo già fatto, col codice**: "non 10000 ma
+  15000", "fammela da 57.000", "5000 di bagno e 5000 manodopera", "aggiungi
+  smaltimento 300", "togli l'IVA", "metti la data al 27 settembre".
+- **Le 136 frasi vere di Andrea** (registro 3-29/09, nomi cambiati) nell'app
+  vera: da **108 (79%) a 136 (100%)** col codice, 0 sbagliate
+  (`eval/frasi-vere-app.test.js`). Sono le frasi su cui si è corretto: il
+  100% non vale come prova da solo.
+- **143 frasi NUOVE per i 5 mestieri**, scritte senza guardare il codice
+  (`eval/frasi-nuove-mestieri.test.js`): al primo colpo **108 (76%)**, 13%
+  sbagliate; dopo le correzioni **140 (98%)**, 0 sbagliate. Le 3 che restano:
+  due limiti della prova, una cartella che non esiste.
+- Regole nuove, generali (non frase per frase): verbi detti col tu ("mi
+  cancelli", "mandi…?"), "fra un'ora", consigli e calcoli all'AI, seguiti
+  ("me la fai da 57.000"), clienti nuovi con telefono, solo il nome = scheda
+  del cliente, più impegni in una frase (anche con le virgole) segnati senza
+  AI, spostare/cancellare appuntamenti con conferma e "Annulla", nome
+  ambiguo → "con quale?", foto + cliente nuovo, meteo e percorso detti nel
+  discorso, assemblee (anche "il 20 ottobre", "giovedì 15"), DiCo, SAL
+  senza percentuale, "quanto mi deve X", "3/4" non è una data.
+
+**Onestà**: provato su Chromium con database e AI finti; non su un telefono
+vero. Le frasi nuove le ho scritte io: servono le frasi dei tester (0b.13
+passo 2) per sapere il numero vero. Resta all'AI (giusto così): consigli,
+domande tecniche, chiacchiere.
 
 ### 0b.13 Frasi di esempio, frasi vere e un "cervello" nostro — IN PROGRAMMA (deciso il 29/09)
 Andrea: "se ci mettessimo 1 milione di frasi esempi?". Risposta onesta: un
