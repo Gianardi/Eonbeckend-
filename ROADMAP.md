@@ -73,6 +73,9 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
+Tester: il 29/09 l'account di Simone (Massari) passato da "Altra attività"
+a "Amministratore di condominio" (a mano nel database, su richiesta di Andrea).
+
 Sul ramo `claude/ciao-ipc3fm`, non ancora in una PR: ROADMAP 0b.12 e
 0b.13. Andranno col prossimo pacchetto.
 
