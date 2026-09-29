@@ -2384,6 +2384,20 @@
   .ap-testo{ flex:1; min-width:0; overflow-wrap:anywhere; cursor:pointer; }
   .ap-riga.nota .ap-testo{ color:var(--muted); }
   .ap-quando{ font-size:12px; color:var(--faint); flex:none; }
+  /* Voci di un preventivo dettato, prima di crearlo */
+  .voci-lista{ display:flex; flex-direction:column; margin:10px 0 4px; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .voci-riga{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:10px 12px; border-top:1px solid var(--border); font-size:14px; }
+  .voci-riga:first-child{ border-top:none; }
+  .voci-desc{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .voci-desc small{ display:block; color:var(--muted); font-size:12px; margin-top:2px; }
+  .voci-tot{ flex:none; font-variant-numeric:tabular-nums; font-weight:600; }
+  .voci-somme{ display:flex; flex-direction:column; gap:4px; padding:10px 12px; background:var(--bg); border-top:1px solid var(--border); font-size:13px; color:var(--muted); }
+  .voci-somme div{ display:flex; justify-content:space-between; }
+  .voci-somme b{ font-variant-numeric:tabular-nums; font-weight:600; color:var(--text); }
+  .voci-somme .voci-totale{ font-size:15px; color:var(--text); }
+  .voci-somme .voci-totale b{ font-weight:800; }
+  #vociCrea{ background:var(--indigo); color:#fff; border-color:transparent; font-weight:700; }
+  .voci-avviso{ margin:8px 0 2px; padding:9px 12px; border-radius:12px; background:var(--coral-soft, #FDECEC); color:var(--text); font-size:13px; }
   .ap-lista .scorri-wrap{ border-radius:0; border-top:1px solid var(--border); }
   .ap-lista .scorri-wrap:first-child{ border-top:none; }
   .ap-lista .scorri-wrap .ap-riga{ border-top:none; }
@@ -12590,6 +12604,7 @@ function gestisciDocumento(l, testo, invia){
     if(!l.cliente) return null;
   }
   const s = { tipo: l.tipo, cliente: l.cliente, clienteNuovo: l.clienteNuovo, importo: l.importo, lavoro: l.lavoro, invio: l.invio, dubbio: l.dubbio,
+    voci: l.voci && l.voci.length ? l.voci : null, aliquota: l.aliquotaIva || null, totaleDetto: l.totaleDetto || null, confermato: false,
     simile: l.clienteSimile, candidati: l.candidati, primaVolta: true, nota: l.modo === "cerca" ? "Non trovo " + (cosa === "fattura" ? "fatture" : "preventivi") + " di " + l.cliente.name + ": ne preparo uno nuovo. " : "" };
   const titolo = "Nuovo " + cosa;
   const chiedi = (domanda, altro) => domandaDelCodice({ titolo: cosa === "fattura" ? "Nuova fattura" : titolo, domanda: (s.nota || "") + domanda, ...altro });
@@ -12621,10 +12636,14 @@ function gestisciDocumento(l, testo, invia){
         passo();
       } });
     }
-    if(!s.lavoro){
+    /* Preventivo dettato voce per voce: si mostrano le voci lette, un tocco e si crea */
+    if(s.voci && !s.confermato){
+      return mostraVociDocumento(s, cosa, () => { s.confermato = true; passo(); });
+    }
+    if(!s.lavoro && !s.voci){
       return chiedi("Per quale lavoro?", { segnaposto: "Es. rifacimento bagno", onRisposta: (t) => { s.nota = ""; s.lavoro = t.charAt(0).toUpperCase() + t.slice(1); passo(); } });
     }
-    if(s.importo === null || s.importo === undefined){
+    if(!s.voci && (s.importo === null || s.importo === undefined)){
       return chiedi("Quanto? (IVA esclusa)", { segnaposto: "Es. 2.000", onRisposta: (t) => {
         const v = typeof leggiImporto === "function" ? leggiImporto(t) : Number(String(t).replace(/[^\d,]/g, "").replace(",", "."));
         if(!(v > 0)) return chiedi("Non ho capito l'importo: quanto? (solo il numero)", { segnaposto: "Es. 2000", onRisposta: (t2) => { const v2 = leggiImporto(t2); if(v2 > 0){ s.importo = v2; passo(); } } });
@@ -12633,6 +12652,7 @@ function gestisciDocumento(l, testo, invia){
     }
     // Tutto pronto: lo fa il codice sul server
     const comando = { azione: "documento", tipo: s.tipo, importo: s.importo, lavoro: s.lavoro };
+    if(s.voci){ comando.voci = s.voci.map(v => ({ descrizione: v.descrizione, quantita: v.quantita, prezzo: v.prezzo })); if(s.aliquota) comando.aliquota_iva = s.aliquota; }
     if(s.cliente) comando.cliente_id = s.cliente.id; else comando.nuovo_cliente = s.clienteNuovo;
     const dopo = s.invio ? (risposta) => offriInvioDocumento(risposta) : null;
     if(prima) return { comando, dopo };
@@ -12642,6 +12662,60 @@ function gestisciDocumento(l, testo, invia){
   };
   const esito = passo();
   return esito && esito.comando ? esito : { fatto: "documento_domande" };
+}
+/* Le voci lette dal codice, prima di creare il documento (29/09/2026) */
+function euroIt(v){ return "€ " + Number(v).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function mostraVociDocumento(s, cosa, onCrea){
+  const corpo = document.createElement("div");
+  corpo.className = "scheda-chat conversazione-card domanda-codice";
+  const nomeCliente = s.cliente ? s.cliente.name : s.clienteNuovo;
+  const bolla = document.createElement("div");
+  bolla.className = "scheda-bolla eon";
+  bolla.textContent = "Ecco " + (cosa === "fattura" ? "la fattura" : "il preventivo") + " per " + nomeCliente + (s.clienteNuovo && !s.cliente ? " (cliente nuovo)" : "") + ": " + s.voci.length + (s.voci.length === 1 ? " voce." : " voci.");
+  corpo.appendChild(bolla);
+  const lista = document.createElement("div");
+  lista.className = "voci-lista"; lista.id = "vociDocumento";
+  let imponibile = 0;
+  s.voci.forEach(v => {
+    const tot = Math.round(v.quantita * v.prezzo * 100) / 100;
+    imponibile += tot;
+    const riga = document.createElement("div");
+    riga.className = "voci-riga";
+    const d = document.createElement("div"); d.className = "voci-desc";
+    d.textContent = v.descrizione;
+    if(v.quantita !== 1){ const q = document.createElement("small"); q.textContent = v.quantita.toLocaleString("it-IT") + (v.unita ? " " + v.unita : "") + " × " + euroIt(v.prezzo); d.appendChild(q); }
+    const t = document.createElement("div"); t.className = "voci-tot"; t.textContent = euroIt(tot);
+    riga.appendChild(d); riga.appendChild(t);
+    lista.appendChild(riga);
+  });
+  const aliquota = s.aliquota || 22;
+  const iva = Math.round(imponibile * aliquota) / 100;
+  const somme = document.createElement("div");
+  somme.className = "voci-somme";
+  somme.innerHTML = '<div><span>Imponibile</span><b></b></div><div><span></span><b></b></div><div class="voci-totale"><span>Totale</span><b></b></div>';
+  const b = somme.querySelectorAll("b"), sp = somme.querySelectorAll("span");
+  b[0].textContent = euroIt(imponibile); sp[1].textContent = "IVA " + aliquota + "%"; b[1].textContent = euroIt(iva); b[2].textContent = euroIt(imponibile + iva);
+  lista.appendChild(somme);
+  corpo.appendChild(lista);
+  if(s.totaleDetto && Math.abs(s.totaleDetto - imponibile) > 1 && Math.abs(s.totaleDetto - (imponibile + iva)) > 1){
+    const avviso = document.createElement("div");
+    avviso.className = "voci-avviso"; avviso.id = "vociAvviso";
+    avviso.textContent = "Hai detto un totale di " + euroIt(s.totaleDetto) + ", ma le voci fanno " + euroIt(imponibile) + ": controlla prima di mandarlo.";
+    corpo.appendChild(avviso);
+  }
+  const riga = document.createElement("div");
+  riga.className = "scheda-scelte";
+  const crea = document.createElement("button");
+  crea.type = "button"; crea.className = "scheda-scelta"; crea.id = "vociCrea";
+  crea.textContent = cosa === "fattura" ? "Crea la fattura" : "Crea il preventivo";
+  crea.addEventListener("click", () => { crea.disabled = true; onCrea(); });
+  const annulla = document.createElement("button");
+  annulla.type = "button"; annulla.className = "scheda-scelta"; annulla.textContent = "Annulla";
+  annulla.addEventListener("click", () => chiudiRisorsaCard());
+  riga.appendChild(crea); riga.appendChild(annulla);
+  corpo.appendChild(riga);
+  apriRisorsaCard(cosa === "fattura" ? "Nuova fattura" : "Nuovo preventivo", corpo);
+  return { fatto: "documento_voci" };
 }
 function nomeBelloCodice(t){ return String(t || "").trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" "); }
 /* "…e mandalo a Rita": appena fatto, i tasti per mandarlo */

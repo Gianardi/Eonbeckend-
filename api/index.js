@@ -4810,7 +4810,22 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     const tipo = TIPI_DOCUMENTO.has(comando.tipo) ? comando.tipo : null;
     const importo = Math.round(Number(comando.importo) * 100) / 100;
     const lavoro = eStringaNonVuota(comando.lavoro) ? comando.lavoro.trim().slice(0, 200) : "";
-    if (!tipo || !(importo > 0) || importo > 10000000 || !lavoro) return null;
+    /* Un preventivo dettato voce per voce (29/09/2026): le voci lette dal
+       lettore dell'app, ricontrollate qui una per una */
+    let voci = null;
+    if (Array.isArray(comando.voci)) {
+      if (!comando.voci.length || comando.voci.length > 60) return null;
+      voci = [];
+      for (const v of comando.voci) {
+        const descrizione = v && eStringaNonVuota(v.descrizione) ? v.descrizione.trim().slice(0, 200) : "";
+        const quantita = Number(v && v.quantita), prezzo = Math.round(Number(v && v.prezzo) * 100) / 100;
+        if (!descrizione || !(quantita > 0) || quantita > 1000000 || !Number.isFinite(prezzo) || Math.abs(prezzo) > 10000000) return null;
+        voci.push({ descrizione, quantita, prezzo });
+      }
+      const somma = voci.reduce((t, v) => t + v.quantita * v.prezzo, 0);
+      if (!(somma > 0) || somma > 10000000) return null;
+    }
+    if (!tipo || (!voci && (!(importo > 0) || importo > 10000000 || !lavoro))) return null;
     const azioni = [];
     let clienteId = null;
     if (eUuid(comando.cliente_id)) {
@@ -4825,7 +4840,8 @@ async function eseguiComandoDiretto(comando, ctx, user) {
       azioni.push({ tool: "trova_o_crea_cliente", esito: esitoC });
       clienteId = esitoC.id;
     } else return null;
-    const input = { cliente_id: clienteId, tipo, voci: [{ descrizione: lavoro, quantita: 1, prezzo: importo }] };
+    const input = { cliente_id: clienteId, tipo, voci: voci || [{ descrizione: lavoro, quantita: 1, prezzo: importo }] };
+    if ([0, 4, 5, 10, 22].includes(comando.aliquota_iva)) input.aliquota_iva = comando.aliquota_iva;
     let esito;
     try { esito = await TOOLS.crea_preventivo_o_fattura.run(input, ctx); } catch (err) {
       await registraOperazione(user, "crea_preventivo_o_fattura", input, { errore: err.message }, "errore");
