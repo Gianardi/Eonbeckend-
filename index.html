@@ -2379,6 +2379,11 @@
   .ap-testo{ flex:1; min-width:0; overflow-wrap:anywhere; cursor:pointer; }
   .ap-riga.nota .ap-testo{ color:var(--muted); }
   .ap-quando{ font-size:12px; color:var(--faint); flex:none; }
+  .ap-lista .scorri-wrap{ border-radius:0; border-top:1px solid var(--border); }
+  .ap-lista .scorri-wrap:first-child{ border-top:none; }
+  .ap-lista .scorri-wrap .ap-riga{ border-top:none; }
+  .ap-lista .scorri-contenuto{ background:var(--card); -webkit-user-select:none; user-select:none; }
+  .ap-lista .scorri-elimina{ border-radius:10px; }
   .ap-vuoto{ padding:18px 0; color:var(--muted); font-size:13.5px; text-align:center; }
   #homeCarteMestiere[hidden], .cartelle-griglia[hidden]{ display:none !important; }
   .scheda-invia.ap-invia{ background:var(--acc); color:var(--acc-ink); }
@@ -10759,7 +10764,8 @@ function disegnaListaAppunti(lista, cartellaId){
       quando.className = "ap-quando"; quando.textContent = quandoAppunto(a.created);
       riga.appendChild(quando);
     }
-    lista.appendChild(riga);
+    // Scorri a sinistra per cancellarlo (29/09/2026, Andrea): va nel Cestino, con "Annulla"
+    lista.appendChild(a.id ? rendiScorrevole(riga, () => cancellaAppuntiScelti([a])) : riga);
   });
 }
 /* Un appunto scritto o detto nella card: "ricordami di…" / "da fare: …"

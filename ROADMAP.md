@@ -73,6 +73,10 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
 
+**Fatto il 29/09 (mattina), nel prossimo pacchetto:** nella Mente si cancella un
+appunto scorrendo il dito verso sinistra ("Elimina" in rosso → Cestino, con
+"Annulla"), come già per chat e documenti. Prova: `eval/mente-scorri.test.js`.
+
 Tester: il 29/09 l'account di Simone (Massari) passato da "Altra attività"
 a "Amministratore di condominio" (a mano nel database, su richiesta di Andrea).
 
