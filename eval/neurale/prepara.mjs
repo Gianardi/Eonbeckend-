@@ -45,6 +45,12 @@ if (fs.existsSync(dirMaestra)) for (const f of fs.readdirSync(dirMaestra).filter
   const d = JSON.parse(fs.readFileSync(path.join(dirMaestra, f), "utf8"));
   (d.frasi || []).forEach(([fr, c]) => aggiungi("maestra", fr, c));
 }
+// le frasi "al confine" (coppie simili con etichette diverse, sulle confusioni del modello)
+const dirConfini = path.join(RADICE, "eval/neurale/confini");
+if (fs.existsSync(dirConfini)) for (const f of fs.readdirSync(dirConfini).filter((x) => x.endsWith(".json")).sort()) {
+  const d = JSON.parse(fs.readFileSync(path.join(dirConfini, f), "utf8"));
+  (d.frasi || []).forEach(([fr, c]) => aggiungi("confini", fr, c));
+}
 execFileSync("node", [path.join(RADICE, "eval/modello/genera-frasi.mjs"), path.join(TMP, "gen.json"), "700"], { stdio: "ignore" });
 leggiJson(path.relative(RADICE, path.join(TMP, "gen.json"))).esempi.forEach((e) => aggiungi("generatore", e.frase, e.intento));
 const { generaFrasario } = await import(path.join(RADICE, "eval/modello/frasario.mjs"));
