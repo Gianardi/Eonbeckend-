@@ -1,0 +1,82 @@
+{
+  "nota": "Giro 14 (30/09/2026): scritto dopo le correzioni del giro 13 e prima di misurare. Stessi stili (abbreviazioni, date lontane, inglese, ripensamenti lunghi, non dimenticare) con frasi nuove: serve a vedere se EON generalizza. Nomi inventati.",
+  "mestieri": {
+    "edile": {
+      "clienti": ["Giacomo Villa", "Elena Martini", "Condominio Le Querce", "Bar Centrale", "Fabio Neri"],
+      "impegni": [["Sopralluogo Giacomo Villa", "domani", "10:00"]],
+      "frasi": [
+        ["app.to x venerdì ore 8 con Fabio Neri x il muretto", "calendario", "08:00"],
+        ["tra una settimana alle 7 e mezza si getta il solaio dalla Martini", "calendario", "07:30"],
+        ["fra 5 giorni alle 16 consegna ponteggio al condominio le querce", "calendario", "16:00"],
+        ["meeting coi ragazzi della squadra lunedì alle 7", "calendario", "07:00"],
+        ["segnami martedì alle 10, no volevo dire mercoledì alle 10, riunione al bar centrale", "calendario", "10:00"],
+        ["il sopralluogo di Villa spostalo a tra una settimana alle 11", "calendario_modifica", "11:00"],
+        ["prev. x Elena Martini cappotto 110 mq a 62 € e ponteggio 2.500", "documento", "9320"],
+        ["fatt. bar centrale 1.900 € pavimento", "documento", "1900"],
+        ["nn dimenticare di prendere la livella laser", "mente"],
+        ["scrivi a Fabio Neri ke il muretto lo iniziamo lunedì", "messaggio"],
+        ["tel a Giacomo Villa", "chiamata"],
+        ["la Martini ha pagato 2,5k", "incasso"],
+        ["cosa ho tra una settimana?", "dati"],
+        ["urgente!!! crepa sul muro portante al condominio le querce", "urgenza"],
+        ["foto crepa x favore", "foto_scatta"]
+      ]
+    },
+    "idraulico": {
+      "clienti": ["Sara Longo", "Ristorante Il Faro", "Condominio Parco", "Nino Russo", "Palestra Olimpo"],
+      "impegni": [["Manutenzione Sara Longo", "domani", "15:00"]],
+      "frasi": [
+        ["a fine mese alle 10 manutenzione caldaie alla palestra olimpo", "calendario", "10:00"],
+        ["mercoledì della prossima settimana alle 9 sostituzione boiler dal Russo", "calendario", "09:00"],
+        ["call col grossista domani alle 11", "calendario", "11:00"],
+        ["la manutenzione della Longo spostala a fra 3 giorni alle 15", "calendario_modifica", "15:00"],
+        ["prev x ristorante il faro 4 lavelli a 280 € e scarichi nuovi 650", "documento", "1770"],
+        ["urgente!! nn c'è acqua calda in palestra", "urgenza"],
+        ["msg a Nino Russo x dire ke arrivo alle 9", "messaggio"],
+        ["tel ristorante il faro", "chiamata"],
+        ["Nino Russo ha dato 300 € cash", "incasso"],
+        ["cmq la palestra vuole i lavori di notte", "mente"],
+        ["chi nn mi ha pagato?", "dati"],
+        ["foto scarico x favore", "foto_scatta"]
+      ]
+    },
+    "elettricista": {
+      "clienti": ["Carla Bassi", "Officina Lampo", "Condominio Aurora", "Pietro Gallo"],
+      "impegni": [],
+      "frasi": [
+        ["deadline impianto officina lampo venerdì alle 18", "calendario", "18:00"],
+        ["tra due settimane alle 8 impianto fotovoltaico dal Gallo", "calendario", "08:00"],
+        ["prev. x officina lampo 30 prese a 40 € e quadro 1.800", "documento", "3000"],
+        ["dico x Pietro Gallo", "dico"],
+        ["scrivi alla Bassi ke passo in giornata", "messaggio"],
+        ["la Bassi ha pagato 1k", "incasso"],
+        ["nn scordarti di comprare i morsetti", "mente"],
+        ["urgente!!! corto circuito all'officina lampo", "urgenza"]
+      ]
+    },
+    "amministratore": {
+      "clienti": ["Condominio I Tigli", "Condominio Via Po 3", "Signora Grasso", "Clima Service"],
+      "impegni": [],
+      "frasi": [
+        ["assemblea i tigli il primo febbraio alle 21", "assemblea"],
+        ["meeting col consiglio di via Po 3 lunedì della prossima settimana alle 18", "calendario", "18:00"],
+        ["scrivi alla signora Grasso ke la rata scade a fine mese", "messaggio"],
+        ["la signora Grasso ha pagato 350 € x bonifico", "incasso"],
+        ["nn dimenticare di chiedere il preventivo a clima service", "mente"],
+        ["urgente!! i tigli ascensore fermo", "urgenza"]
+      ]
+    },
+    "artigiano": {
+      "clienti": ["Caffè Roma", "Giulia Esposito", "Boutique Chic", "Marco Lanza"],
+      "impegni": [],
+      "frasi": [
+        ["call con Marco Lanza tra 3 giorni alle 17", "calendario", "17:00"],
+        ["prev x boutique chic 50 cartellini a 2 € e logo 350", "documento", "450"],
+        ["Giulia Esposito ha pagato 0,5k", "incasso"],
+        ["scrivi a Marco Lanza ke il video è pronto", "messaggio"],
+        ["cmq il caffè roma vuole le tazze personalizzate", "mente"],
+        ["quanto ho incassato a fine mese?", "dati"]
+      ]
+    }
+  }
+}

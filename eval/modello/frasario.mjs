@@ -36,7 +36,7 @@ function cliente() {
 
 /* ---------- Tempo, soldi, lavori ---------- */
 const ORE_P = ["una", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove", "dieci", "undici", "dodici"];
-const GIORNI = ["domani", "oggi", "dopodomani", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "lunedì prossimo", "giovedì prossimo", "domattina", "stasera", "oggi pomeriggio", "domani mattina", "domani pomeriggio", "venerdì mattina", "il 12 ottobre", "il 3 novembre", "il 20/10", "martedì 14", "giovedì 22"];
+const GIORNI = ["domani", "oggi", "dopodomani","fra una settimana", "tra 3 giorni", "fra due settimane", "a fine mese", "lunedì della prossima settimana", "la prossima settimana giovedì", "il 1 dicembre", "in giornata", "a fine giornata",  "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "lunedì prossimo", "giovedì prossimo", "domattina", "stasera", "oggi pomeriggio", "domani mattina", "domani pomeriggio", "venerdì mattina", "il 12 ottobre", "il 3 novembre", "il 20/10", "martedì 14", "giovedì 22"];
 function ora() {
   const r = caso();
   if (r < 0.45) return "alle " + (6 + Math.floor(caso() * 14)) + uno(["", "", "", " e mezza", " e un quarto", ":30", ":15", " e 45", " in punto"]);
@@ -77,6 +77,10 @@ const G = {
     "{ho preso|ho fissato|abbiamo fissato} appuntamento <C.con> {per|} <QUANDO>",
     "<C.nudo> mi {aspetta|ha dato appuntamento|vuole vedere} <QUANDO> [per {il|la} <LAVORO>]",
     "{c'è da andare|bisogna andare|devo andare} <C.da> <QUANDO>",
+    // giro 13: parole inglesi, frasi lunghe con più pensieri
+    "{call|meeting|riunione|call veloce} {con|col} {il geometra|il fornitore|<C.nudo>|la squadra} <QUANDO>",
+    "deadline {logo|sito|preventivo|consegna} {per|di} <C.nudo> <QUANDO>",
+    "allora oggi {da|dal|dalla} <C.nudo> tutto ok, <QUANDO> torno per {il|la} <LAVORO> e ricordami di comprare <COSA>",
     // telegramma (giro 11)
     "<C.nudo> {domani|lunedì|martedì|mercoledì|giovedì|venerdì|sabato} {7|8|9|10|11|14|15|16|17} <LAVORO>",
     "<C.nudo> <LAVORO> {domani|lunedì|martedì|mercoledì|giovedì|venerdì|sabato} {7|8|9|10|11|14|15|16|17}",
@@ -116,6 +120,8 @@ const G = {
     "[<RIEMPI>]{oggi|ieri|stamattina|prima} {sono stato|sono passato|sono andato} <C.da> e {il bagno è quasi finito|manca solo il collaudo|tutto a posto|il cliente è contento|c'è da rifare il pezzo}",
     "[<RIEMPI>]{oggi|stamattina|ieri} ho {parlato con|visto|sentito} <C.nudo> e {mi ha detto che ci pensa|vuole anche <LAVORO>|paga a fine mese|è contento}",
     "{compra|prendi|ordina} <COSA>",
+    "{non dimenticare di|non scordarti di} {ordinare|comprare|prendere|chiamare} {<COSA>|<C.nudo>}",
+    "{non scordarti che|non dimenticare che|ricordati che} <C.nudo> {vuole|preferisce|ha chiesto} {il box doccia in cristallo|il colore bianco|la certificazione|le prese in più}",
   ],
   documento: [
     "[<RIEMPI>]{fammi|fai|prepara|preparami|crea|creami|emetti|fammi un|mi fai un|mi prepari un} {preventivo|fattura|preventivo|fattura} {per|a} <C.nudo> {per|di} {il|la} <LAVORO> <SOLDI>",

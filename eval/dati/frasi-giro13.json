@@ -1,0 +1,107 @@
+{
+  "nota": "Giro 13 (30/09/2026): scritto prima di misurare. Stili mai provati: abbreviazioni da chat (x, ke, nn, cmq, app.to, prev.), date lontane (fra una settimana, a fine mese, il primo novembre, tra 3 giorni), momenti della giornata (in mattinata, all'ora di pranzo), parole inglesi (call, meeting, deadline), ripensamenti 'no aspetta volevo dire', frasi lunghe con più cose. Nomi inventati. Dopo la misura: 'ricordami x domani di portare…' è un da fare di domani (etichetta corretta, era mente); così anche 'nn scordarti… entro fine mese' (da fare con scadenza, come deciso nel giro 7).",
+  "mestieri": {
+    "edile": {
+      "clienti": ["Luigi Ferrante", "Cristina Bellucci", "Condominio Il Viale", "Pub Old Oak", "Tommaso Rizzo"],
+      "impegni": [["Sopralluogo Luigi Ferrante", "domani", "09:00"]],
+      "frasi": [
+        ["app.to x domani ore 10 con Bellucci x il bagno", "calendario", "10:00"],
+        ["fra una settimana alle 9 inizio lavori dal Rizzo", "calendario", "09:00"],
+        ["il primo novembre alle 8 si parte col tetto del condominio il viale", "calendario", "08:00"],
+        ["tra 3 giorni alle 14 consegna piastrelle al pub old oak", "calendario", "14:00"],
+        ["domani all'ora di pranzo passo dalla Bellucci", "calendario"],
+        ["call con il geometra giovedì alle 11", "calendario", "11:00"],
+        ["meeting in cantiere lunedì alle 8 e mezza con tutta la squadra", "calendario", "08:30"],
+        ["segnami giovedì alle 9, no aspetta volevo dire venerdì alle 9, sopralluogo da Rizzo", "calendario", "09:00"],
+        ["prev. x Tommaso Rizzo rifacimento terrazzo 4.500 €", "documento", "4500"],
+        ["fatt. Cristina Bellucci 2.800 € bagno", "documento", "2800"],
+        ["preventivo pub old oak: bancone in muratura 3.200, pavimento 60 mq a 38, controsoffitto 1.900 e deadline fine novembre", "documento", "7380"],
+        ["cmq ricordati ke la Bellucci vuole il box doccia in cristallo", "mente"],
+        ["nn dimenticare di ordinare i sacchi di colla", "mente"],
+        ["scrivi a Luigi Ferrante ke domani nn riesco, passo venerdì", "messaggio"],
+        ["manda un msg al pub old oak x dire ke lunedì iniziamo", "messaggio"],
+        ["tel a Tommaso Rizzo", "chiamata"],
+        ["sposta il sopralluogo di Ferrante a fra una settimana alle 9", "calendario_modifica", "09:00"],
+        ["Rizzo ha pagato 1,5k", "incasso"],
+        ["la Bellucci mi ha dato mille e cinquecento euro", "incasso"],
+        ["quanto mi deve il pub old oak?", "dati"],
+        ["cosa ho a fine settimana?", "dati"],
+        ["urgentissimo perdita dal tetto al condominio il viale", "urgenza"],
+        ["foto al solaio x favore", "foto_scatta"],
+        ["allora oggi dal Rizzo tutto ok, domani alle 7 torno x il getto e ricordami di comprare i distanziali", "calendario", "07:00"],
+        ["qual è il costo medio di un bagno chiavi in mano?", "ai"]
+      ]
+    },
+    "idraulico": {
+      "clienti": ["Marisa Conte", "Hotel Aurora", "Condominio La Fontana", "Beppe Mariani", "Asilo Il Girotondo"],
+      "impegni": [["Manutenzione Beppe Mariani", "domani", "14:00"]],
+      "frasi": [
+        ["domani in mattinata verso le 10 caldaia dalla Conte", "calendario", "10:00"],
+        ["a fine mese alle 9 revisione impianto dell'hotel aurora", "calendario", "09:00"],
+        ["tra due settimane alle 15 controllo fumi all'asilo", "calendario", "15:00"],
+        ["la manutenzione di Mariani spostala a dopodomani stessa ora", "calendario_modifica"],
+        ["prev x hotel aurora sostituzione 20 miscelatori a 95 € e manodopera 1.400", "documento", "3300"],
+        ["fattura Beppe Mariani manutenzione caldaia 130 €", "documento", "130"],
+        ["urgente!!! allagamento all'asilo il girotondo", "urgenza"],
+        ["ricordami x domani di portare il flessibile lungo", "calendario"],
+        ["scrivi alla Conte ke il pezzo è arrivato", "messaggio"],
+        ["chiama l'hotel aurora x favore", "chiamata"],
+        ["Mariani ha saldato 130 € cash", "incasso"],
+        ["chi nn ha ancora pagato?", "dati"],
+        ["fammi vedere le fatture dell'hotel", "risorsa"],
+        ["la conte ha la caldaia sul balcone, serve la scala", "mente"],
+        ["foto boiler x favore", "foto_scatta"],
+        ["ogni quanti anni si cambia il vaso di espansione?", "ai"],
+        ["crea cartella Hotel", "cartella"]
+      ]
+    },
+    "elettricista": {
+      "clienti": ["Renato Guidi", "Bar Bianco", "Condominio Villa Rosa", "Paola Serra", "Magazzino Frigo Sud"],
+      "impegni": [],
+      "frasi": [
+        ["call con il fornitore dei quadri domani alle 16", "calendario", "16:00"],
+        ["lunedì della prossima settimana alle 8 impianto dal Guidi", "calendario", "08:00"],
+        ["a fine giornata passo dal bar bianco x il citofono", "calendario"],
+        ["prev. magazzino frigo sud 25 plafoniere a 70 € e quadro 2.400", "documento", "4150"],
+        ["dico x Paola Serra", "dico"],
+        ["urgente al bar bianco è saltato il salvavita e hanno la macchina del caffè spenta", "urgenza"],
+        ["scrivi a Renato Guidi ke il quadro nuovo è pronto", "messaggio"],
+        ["tel bar bianco", "chiamata"],
+        ["la Serra ha pagato 800 € x bonifico", "incasso"],
+        ["cosa ho lunedì della prossima settimana", "dati"],
+        ["nn scordarti ke il magazzino vuole la certificazione entro fine mese", "calendario"],
+        ["manda il prev al magazzino frigo sud", "invio"]
+      ]
+    },
+    "amministratore": {
+      "clienti": ["Condominio Le Palme", "Condominio Via Garibaldi 12", "Signor Rinaldi", "Verde Giardini Srl", "Condominio Borgo Alto"],
+      "impegni": [],
+      "frasi": [
+        ["assemblea le palme il primo dicembre alle 21", "assemblea"],
+        ["meeting col consiglio di via Garibaldi 12 giovedì alle 18", "calendario", "18:00"],
+        ["scrivi al signor Rinaldi ke manca la rata di ottobre", "messaggio"],
+        ["il signor Rinaldi ha pagato 420 € cash", "incasso"],
+        ["chi è moroso a borgo alto?", "dati"],
+        ["urgente!! borgo alto senza acqua", "urgenza"],
+        ["nn dimenticare il DURC di verde giardini", "mente"],
+        ["mail a verde giardini x il taglio siepi di novembre", "email"],
+        ["fattura le palme compenso ottobre 500 €", "documento", "500"],
+        ["ogni quanto va rinnovato il certificato antincendio del condominio?", "ai"]
+      ]
+    },
+    "artigiano": {
+      "clienti": ["Studio Grafico Pixel", "Laura Mancini", "Pizzeria Bella Napoli", "Davide Costa", "Negozio Vintage"],
+      "impegni": [],
+      "frasi": [
+        ["call con la pizzeria bella napoli domani alle 15 x il menu", "calendario", "15:00"],
+        ["deadline logo x Davide Costa venerdì alle 12", "calendario", "12:00"],
+        ["prev x negozio vintage sito 1.800 e foto prodotti 40 pezzi a 15 €", "documento", "2400"],
+        ["Laura Mancini ha pagato 300 € x bonifico", "incasso"],
+        ["scrivi a Davide Costa ke le bozze sono pronte", "messaggio"],
+        ["cmq la pizzeria vuole il menu anche in inglese", "mente"],
+        ["quanto ho fatturato a ottobre?", "dati"],
+        ["urgente il sito del negozio vintage nn va", "urgenza"]
+      ]
+    }
+  }
+}
