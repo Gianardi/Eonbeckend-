@@ -1,0 +1,589 @@
+{
+ "nota": "Frasi vere scritte o dettate da Andrea (fondatore) a EON dal 3 al 29/09/2026, dal registro richieste. Nomi dei clienti cambiati, numeri ed email tolti. atteso: cosa deve succedere; ai: true = va bene che risponda l'AI (consigli, domande tecniche, chiacchiere).",
+ "clienti": [
+  "Mario Rossi",
+  "Hunter",
+  "Fregona",
+  "Belle",
+  "Zanetti",
+  "Giulia Neri",
+  "Rigoni",
+  "Brigida",
+  "Linda Ferrari",
+  "Bianchi",
+  "Hanna Tricca",
+  "Dini Marco",
+  "Bellini",
+  "Grimaldi",
+  "Testoni",
+  "Walter Tosi",
+  "Dini Gianpaolo",
+  "Tommaso Greti",
+  "Rasponi",
+  "Valter",
+  "Montanari",
+  "Guasco",
+  "Lombardi",
+  "Steve Rob",
+  "Riccardo Zanella",
+  "Michele Posse",
+  "Schiavi",
+  "Simone Masi",
+  "Baudo",
+  "Mazzi",
+  "Machi Alessia",
+  "Biso Mattia",
+  "Chilosi Mariagrazie",
+  "Bini",
+  "Alessio Fini",
+  "Cucinelli",
+  "Andrea Gianardi",
+  "Franco Bake"
+ ],
+ "frasi": [
+  [
+   "Mi mandi foto cantiere Rossi",
+   "foto"
+  ],
+  [
+   "Sposta hunter alle 11",
+   "calendario_modifica"
+  ],
+  [
+   "Domani ore 09 sveglia. Poi ufficio lavoro un po ad EON. Definisco pratiche lavoro. Ore 17 a Falconara per aiuto a Lerici",
+   "calendario"
+  ],
+  [
+   "Cancella tutto il calendario",
+   "conferma"
+  ],
+  [
+   "Foto cantiere Rossi",
+   "foto"
+  ],
+  [
+   "ciao",
+   "risposta"
+  ],
+  [
+   "Ciao come stai domani mattina ore 11:00 appuntamento con Fregona",
+   "calendario"
+  ],
+  [
+   "Che palle non so cosa fare",
+   "ai"
+  ],
+  [
+   "Quando devo vedere Belle?",
+   "dati"
+  ],
+  [
+   "Mi cancelli appuntamento Belle",
+   "calendario_modifica"
+  ],
+  [
+   "Venerdì Belle",
+   "calendario"
+  ],
+  [
+   "Fammi la foto a questo e creami il cantiere Pinko",
+   "foto_scatta"
+  ],
+  [
+   "Come posso aumentare il mio guadagno?",
+   "ai"
+  ],
+  [
+   "Svuota il cestino",
+   "conferma"
+  ],
+  [
+   "Chi sei ?",
+   "ai"
+  ],
+  [
+   "Mi fai preventivo a Mario Rampoldi per cambio porte",
+   "documento"
+  ],
+  [
+   "Mi dai la foto dell'armadio di Zanetti",
+   "foto"
+  ],
+  [
+   "Incassi 20.000. All'anno di lavori e ho 3 dipendenti con paga 1200. Quanto guadagno ?",
+   "ai"
+  ],
+  [
+   "Devo rifare un pavimento di un abitazione. Da dove inizio?",
+   "ai"
+  ],
+  [
+   "Devo cambiare una stanza di una casa, devo chiedere la SCIA?",
+   "ai"
+  ],
+  [
+   "Fra un ora incontro con Giulia. Domattina ore 12 colazione con dottor Rigoni poi pomeriggio partita alle 15 e dovrò essere lì per le 13:40 . Portare distinta",
+   "calendario"
+  ],
+  [
+   "Mi sposti l'incontro con il dottore alle 17",
+   "calendario_modifica"
+  ],
+  [
+   "Scatta foto",
+   "foto_scatta"
+  ],
+  [
+   "Cos'è la carta intestata per un artigiano?",
+   "ai"
+  ],
+  [
+   "Quanto può arrivare a valere EON?",
+   "ai"
+  ],
+  [
+   "Domani mattina sentire prospect, sentite clienti per aggiuntivi, Brigida alle 18 per fondo pensione trasferimento e credit lombard casa, 18:30 Ferraresi e Albe.",
+   "calendario"
+  ],
+  [
+   "Mi dici programma di domani?",
+   "dati"
+  ],
+  [
+   "Cosa mi consigli di fare prima domattina?",
+   "ai"
+  ],
+  [
+   "Crea preventivo a Linda Ferrari per facciata 30.500",
+   "documento"
+  ],
+  [
+   "Crea preventivo per lavori facciata al Linda Ferrari 30.500",
+   "documento"
+  ],
+  [
+   "mi fai fattura da 500 + iva per bianchi per intervento pitturazioni muri",
+   "documento"
+  ],
+  [
+   "Crea fattura Hanna Tricca da 259 più iva per pitturazione cucina",
+   "documento"
+  ],
+  [
+   "Mi fai foto al cantiere",
+   "foto_scatta"
+  ],
+  [
+   "Mi fai fattura a Bianchi da 20.000 per facciata tetto",
+   "documento"
+  ],
+  [
+   "Fattura Dini Marco da 3000 euro per pulizia, sgombero e stuccate",
+   "documento"
+  ],
+  [
+   "Mi fai fattura Bellini da 59.999 per tetto e facciata",
+   "documento"
+  ],
+  [
+   "Fissa appuntamento domani con Alberto Zucca alle 15",
+   "calendario"
+  ],
+  [
+   "Mi crei fattura per Grimaldi da 300 + iva per cambio porte",
+   "documento"
+  ],
+  [
+   "fammi una fattura per Testoni da 100 euro per una prova",
+   "documento"
+  ],
+  [
+   "Preventivo facciata e tetto da 150.000 per Walter Tosi",
+   "documento"
+  ],
+  [
+   "Mi crei fattura da 300 per pitturazioni Dini Gianpaolo",
+   "documento"
+  ],
+  [
+   "Mi crei preventivo da 200 euro per pitturazione bagno per Spada Claudia?",
+   "documento"
+  ],
+  [
+   "Fattura da 300 + IVA per Michele Sodi studio progetto e pitturazione locali",
+   "documento"
+  ],
+  [
+   "Fattura da 1500 per Tommaso Greti per fognatura",
+   "documento"
+  ],
+  [
+   "Mi crei preventivo per Rasponi per pulizia scale e pitturazione da 3000 euro",
+   "documento"
+  ],
+  [
+   "Preventivo per Rasponi da 3000 per pulizia scale e pitturazione",
+   "documento"
+  ],
+  [
+   "Segna Dini domani alle 10",
+   "calendario"
+  ],
+  [
+   "Segna appuntamento Dini domani alle 10",
+   "calendario"
+  ],
+  [
+   "Chiamata Valter lunedì 10:00",
+   "calendario"
+  ],
+  [
+   "Lunedì Montanari in UniCredit ore 09:30 per assegno, fare credit lombard a Guasco, spedire raccomandata Brigida",
+   "calendario"
+  ],
+  [
+   "Luca Ferrero 333 1234567 bagno",
+   "cliente"
+  ],
+  [
+   "mi appunti comprare silicone e anche un altro appunto chiamare il vetraio",
+   "mente"
+  ],
+  [
+   "mi appunti comprare nastro e anche un altro appunto chiamare il fabbro",
+   "mente"
+  ],
+  [
+   "Chiamata Valter lunedì alle 9",
+   "calendario"
+  ],
+  [
+   "Mi serve fattura Testoni",
+   "risorsa"
+  ],
+  [
+   "Aggiungi Liverotti Barbi",
+   "cliente"
+  ],
+  [
+   "Domani ore 09:00 colazione con Chilosi Mariagrazie. Poi alle 12:00 riunione e sopralluogo per lavori alla pianta. Alle 15:00 a Lerici per ristrutturazione stadio.",
+   "calendario"
+  ],
+  [
+   "Cosa ho da fare domani?",
+   "dati"
+  ],
+  [
+   "Fammi la foto al cantiere e crea il cliente Pinco Pallino",
+   "foto_scatta"
+  ],
+  [
+   "Mi crei preventivo a LORENZO GUASCONI",
+   "documento"
+  ],
+  [
+   "Mi fai preventivo Lombardi per finestre 1200 €",
+   "documento"
+  ],
+  [
+   "Steve Rob",
+   "cliente"
+  ],
+  [
+   "Fai la foto a cantiere",
+   "foto_scatta"
+  ],
+  [
+   "Svuota cestino",
+   "conferma"
+  ],
+  [
+   "Mi serve preventivo Riccardo Zanella",
+   "risorsa"
+  ],
+  [
+   "Crea preventivo per bagno doccia Liberati Piero da 35.090",
+   "documento"
+  ],
+  [
+   "Domani ho un lavoro all'aperto. Ho problemi con il meteo?",
+   "risposta"
+  ],
+  [
+   "Crea preventivo per Michele Posse da 150 + IVA per camera da letto",
+   "documento"
+  ],
+  [
+   "Fai foto a pavimenti",
+   "foto_scatta"
+  ],
+  [
+   "Invia preventivo Michele Posse a mario.rossi@example.com",
+   "invio"
+  ],
+  [
+   "Chiamata Walter lunedì ore 9:00",
+   "calendario"
+  ],
+  [
+   "Aggiungi Andrea Gianardi 3331234567",
+   "cliente"
+  ],
+  [
+   "Annulla appuntamenti di domani",
+   "conferma"
+  ],
+  [
+   "Domani casa Schiavi per vedere rubinetto ore 09. Portare attrezzi",
+   "calendario"
+  ],
+  [
+   "Domani ore 11 Simone Masi per revisione caldaia",
+   "calendario"
+  ],
+  [
+   "Voglio cambiare password",
+   "pagina"
+  ],
+  [
+   "Rita Ambrosini aggiungi clienti",
+   "cliente"
+  ],
+  [
+   "Di a Mario Rossi che ci vediamo alle 11 lunedì",
+   "messaggio"
+  ],
+  [
+   "Caldaia Baudo venerdì ore 15",
+   "calendario"
+  ],
+  [
+   "Voglio cambiare e-mail",
+   "pagina"
+  ],
+  [
+   "Mario prova nuovo cliente",
+   "cliente"
+  ],
+  [
+   "Per la caldaia di Baudo portare la chiave",
+   "mente"
+  ],
+  [
+   "Di a Mario Prova che ci vediamo domani alle 10",
+   "messaggio"
+  ],
+  [
+   "Invia preventivo Lombardi",
+   "invio"
+  ],
+  [
+   "Domattina ore 09 con Montanari per assegni circolari in UniCredit.",
+   "calendario"
+  ],
+  [
+   "Poi giornata libera?",
+   "dati"
+  ],
+  [
+   "Messaggi",
+   "pagina"
+  ],
+  [
+   "Azienda",
+   "pagina"
+  ],
+  [
+   "Devo andare in via Roma 36?",
+   "risposta"
+  ],
+  [
+   "Chiamate",
+   "pagina"
+  ],
+  [
+   "Impostazione",
+   "pagina"
+  ],
+  [
+   "Domani alle 15 sono libero?",
+   "dati"
+  ],
+  [
+   "Segna domani appuntamento con Simone alle 11:30",
+   "calendario"
+  ],
+  [
+   "Franco bi",
+   "cliente"
+  ],
+  [
+   "Devo chiamare Fini Alessio",
+   "mente"
+  ],
+  [
+   "Controllare assicurazioni infortunio",
+   "mente"
+  ],
+  [
+   "Controllare PAC totali",
+   "mente"
+  ],
+  [
+   "Aggiungi cartella EON",
+   "cartella"
+  ],
+  [
+   "Metti in cartella Lerici sentire Overa per riportare materiale sportivo",
+   "mente"
+  ],
+  [
+   "Segna in cartella Lerici sentire Overa per riportare materiale sportivo",
+   "mente"
+  ],
+  [
+   "Domani ore 11 Mazzi. Mandare raccomandata Brigida",
+   "calendario"
+  ],
+  [
+   "Domani ore 11 Mazzi.",
+   "calendario"
+  ],
+  [
+   "Domani alle 11:30 con Simone",
+   "calendario"
+  ],
+  [
+   "Aggiungi Machi alessia",
+   "cliente"
+  ],
+  [
+   "Fai preventivo a machi Alessia per ristrutturazione bagno da 25.000",
+   "documento"
+  ],
+  [
+   "Fai preventivo Machi Alessia per cucine da 30.000",
+   "documento"
+  ],
+  [
+   "Mi serve preventivo cucina machi Alessia",
+   "risorsa"
+  ],
+  [
+   "preventivo cucina machi Alessia",
+   "documento"
+  ],
+  [
+   "Aggiungi cliente Biso Mattia",
+   "cliente"
+  ],
+  [
+   "Crea preventivo da 20.000 per ristrutturazione bagno e mandalo a Mario Rossi",
+   "documento"
+  ],
+  [
+   "Scrivi a Mario Rossi se va bene domani alle 18:00 in ufficio",
+   "messaggio"
+  ],
+  [
+   "Crea cartello fine lavori Machi alessia",
+   "cartello"
+  ],
+  [
+   "DURC machi Alessia",
+   "risorsa"
+  ],
+  [
+   "Chiamare per panini",
+   "mente"
+  ],
+  [
+   "Quanti soldi devo incassare ?",
+   "dati"
+  ],
+  [
+   "Fai fattura da 10.000 a Chilosi mariagrazie per progetto seconda casa in campagna",
+   "documento"
+  ],
+  [
+   "Fai fattura da 10.000 a Chilosi mariagrazie per progetto",
+   "documento"
+  ],
+  [
+   "Fattura Chilosi Mario 2000",
+   "documento"
+  ],
+  [
+   "Preventivo 1000 chilosi",
+   "documento"
+  ],
+  [
+   "Domani ore 13:00 chilosi",
+   "calendario"
+  ],
+  [
+   "Clienti che devono pagare?",
+   "dati"
+  ],
+  [
+   "Chi non ha ancora pagato?",
+   "dati"
+  ],
+  [
+   "Quanti cantieri attivi ho?",
+   "dati"
+  ],
+  [
+   "Quanti cantieri attivi?",
+   "dati"
+  ],
+  [
+   "Guarda se ho impegni sabato",
+   "dati"
+  ],
+  [
+   "Chiama Gianardi",
+   "chiamata"
+  ],
+  [
+   "Manda e-mail a Gianardi chiedendo chiarimenti su ultimo report",
+   "email"
+  ],
+  [
+   "Manda messaggio a Gianardi chiedendo chiarimenti su ultimo report",
+   "messaggio"
+  ],
+  [
+   "Quanto costa il cemento ?",
+   "ai"
+  ],
+  [
+   "Cos'è il DURC?",
+   "ai"
+  ],
+  [
+   "Mandi e-mail a Mario Rossi chiedendo prospetto cucina?",
+   "email"
+  ],
+  [
+   "Mandi messaggio a Mario Rossi",
+   "messaggio"
+  ],
+  [
+   "Che fai?",
+   "ai"
+  ],
+  [
+   "Domani Bini ore 13. Poi passare da Montanari e alle 17 con Brigida",
+   "calendario"
+  ],
+  [
+   "Mi fai preventivo ristrutturazione bagno 10000 per Simone Masi",
+   "documento"
+  ],
+  [
+   "Mi fai preventivo 10000 Simone Masi per ristrutturazione bagno",
+   "documento"
+  ]
+ ]
+}

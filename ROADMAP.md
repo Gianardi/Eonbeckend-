@@ -61,6 +61,8 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
    aperta dalla schermata Home).
 
 **Da fare per Claude, in ordine**
+0. In arrivo (29/09): il socio tester scrive cosa vuole trovare in ogni sezione;
+   Andrea lo manda in un blocco unico, professione per professione → un pacchetto.
 1. Controllare con Andrea il primo promemoria vero (non ancora provato su
    un telefono vero).
 2. 0b.12 Manuali dell'AI per ogni professione (elettricista, Altra
@@ -72,6 +74,20 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
    captcha, tetto di spesa dell'AI.
 6. Dopo la società: fattura elettronica (0b.4). In attesa: il nome del
    gestionale dell'amministratore (0b.5), morosità.
+
+**Fatto il 29/09 (notte), nel prossimo pacchetto:** pronta prima dei tester
+(0b.16): 5 giri di frasi nuove alla cieca (652 frasi, 5 mestieri + "La mia
+attività"): 95% al primo colpo, 651/652 dopo le correzioni. Prove più severe
+(ora giusta, tutti gli appuntamenti, totale del preventivo): trovati e
+corretti errori veri ("alle 7" finiva alle 19, "anzi", orari a parole, IVA 10
+con un importo solo, "Hotel Posta" letto come email).
+
+**Fatto il 29/09 (sera), nel prossimo pacchetto:** il modello di EON (0b.15),
+nostro, dentro l'app: prova cieca 74/77 (96%) al primo colpo.
+
+**Fatto il 29/09 (pomeriggio), nel prossimo pacchetto:** EON capisce col codice
+anche le frasi lunghe (0b.14): preventivo dettato voce per voce, correzioni a
+voce, 136/136 frasi vere di Andrea, 140/143 frasi nuove per i 5 mestieri.
 
 **Fatto il 29/09 (mattina), nel prossimo pacchetto:** nella Mente si cancella un
 appunto scorrendo il dito verso sinistra ("Elimina" in rosso → Cestino, con
@@ -313,6 +329,141 @@ DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
 alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.16 Pronta PRIMA dei tester: giri alla cieca — FATTO il 29/09 (notte)
+Andrea: "Io devo darla già pronta ai tester… non posso aspettare i tester".
+Quindi niente "migliora coi dati dei tester": giri di frasi nuove scritte da
+me, per ogni mestiere, **misurate una volta sola prima di toccare il codice**
+(il numero vero), poi corretti con regole generali, poi un giro nuovo.
+
+| Giro | Frasi | Al primo colpo (numero vero) | Dopo le correzioni |
+|---|---|---|---|
+| 5 (lunghe, dettate, "allora… praticamente…") | 186 | 171 (92%) | 186 |
+| 6 (nuove, dopo le correzioni del 5) | 175 | 171 (98%) | 175 |
+| 7 (la prova cattiva: "anzi", numeri a parole, niente accenti) | 123 | 117 (95%) | 123 |
+| 8 (preventivi lunghi dettati, col TOTALE controllato) | 120 | 114 (95%) | 120 |
+| 9 ("La mia attività": parrucchiera, meccanico, giardiniere, fotografo…) | 48 | 47 (98%) | 47 (*) |
+
+(*) L'unica che manca ("sposta l'appuntamento con Marta Galli alle 16") è un
+limite della prova: l'appuntamento creato un attimo prima, nella prova finta,
+non viene ricaricato; sul telefono vero sì (dopo ogni impegno EON ricarica le
+conversazioni dal database).
+
+**In tutto: 652 frasi nuove alla cieca, 620 giuste al primo colpo (95%);
+dopo le correzioni 651/652.**
+
+Più le prove di prima, rifatte con le regole nuove: frasi vere di Andrea
+136/136, prova cieca 77/77, frasi per mestiere 143/143, prova finale 99/100
+(l'unica all'AI è "mandale un messaggio…" senza dire a chi: giusto così).
+
+- **Prove più severe** (29/09): prima controllavano solo *che* un
+  appuntamento venisse creato; ora controllano anche **l'ora** (107 frasi) e,
+  con più appuntamenti in una frase, che ci siano **tutti**; per i preventivi
+  dettati, che il **totale** sia quello giusto (14 preventivi). Così sono
+  venuti fuori errori che prima passavano.
+- **Errori veri trovati e corretti** (i più importanti):
+  - "alle 7" veniva segnato alle **19** (anche l'esempio dentro EON dice
+    "domani alle 7 getto del solaio"): ora alle 7 è mattina (da 1 a 6 resta
+    pomeriggio: "alle 3" = 15).
+  - Orari a parole: "alle nove e un quarto", "alle sette e mezza", "alle dieci
+    meno un quarto", "a mezzogiorno", "alle 15 e 30".
+  - Il ripensamento: "domani alle 8 **anzi** alle 9", "giovedì anzi venerdì".
+  - Tre appuntamenti in una frase ("alle 8 Bruni poi alle 11 Tosi **e alle 16**
+    pizzeria"): ne segnava due.
+  - "posta" (Hotel Posta, cassetta della posta) veniva letta come **email**.
+  - "iva 10" con un solo importo: l'IVA restava al 22% e il "10" finiva nella
+    descrizione.
+  - L'impegno detto prima del verbo: "l'appuntamento con la Marchetti **lo
+    sposti** alle 17", "il sopralluogo di Lodi **fallo slittare**", "…
+    **cancellalo**"; il perché in coda ("…che è saltata", "…, piove").
+  - "Anna mi ha pagato **la fattura** 180 euro" = incasso (non una fattura nuova);
+    "è arrivato il bonifico della Moretti 2.000 euro"; "fammi parlare con…" = chiama.
+  - "il cliente **vuole** un preventivo…" = nota (non un preventivo da fare subito).
+  - "solo di sabato", "ogni lunedì" = abitudine, non un giorno da segnare.
+  - Domande senza punto interrogativo: "che pressione deve avere…", "ogni quanto…".
+  - Risposte col codice: "cosa ho **la prossima settimana**", "**quanti preventivi**
+    ho fatto questo mese", "che lavori ho domani"; "i documenti del condominio
+    Girasole" con più condomìni in rubrica (conta la parola che distingue).
+  - Annullare: "non trovo «getto» in calendario per domani" invece dell'AI.
+- **Cosa NON è provato**: tutto gira nell'app vera sul computer (browser vero,
+  server vero, database e AI finti), non su un telefono vero; le frasi le ho
+  scritte io, non artigiani veri. Il credito dell'AI resta da ricaricare (per
+  le domande tecniche e i casi che il codice non capisce).
+- File: `eval/dati/frasi-giro5.json` … `frasi-giro8.json`; si misurano con
+  `FRASI=frasi-giro8.json node eval/frasi-nuove-mestieri.test.js --elenco`.
+
+### 0b.15 Il modello di EON — FATTO il 29/09 (sera), versione 1
+Andrea: "ci serve per forza il modello funzionante… arrivare ai tester con il
+modello già avanzato". Deciso con lui: un modello **nostro**, non pagato a
+nessuno, piccolo, **dentro l'app** (funziona anche senza campo); sul server
+arriverà un modello "di significato" più grande quando ci saranno le frasi
+vere dei tester.
+
+- **Com'è fatto**: legge parole, coppie di parole e pezzi di parola (regge
+  gli errori di dettatura), con nomi/giorni/ore/importi/telefoni al posto
+  di segnaposto; decide il cassetto tra 20 (calendario, preventivo, cerca
+  documento, invio, sposta/annulla, messaggio, email, chiamata, cliente,
+  domanda sui dati, domanda all'AI, incasso, foto, cartella, urgenza, SAL,
+  DiCo, assemblea, saluto, Mente). 332 KB (`modello-eon.json`), sicurezza
+  tarata (quando dice "sono sicuro" ha ragione il 96%).
+- **Come lavora con le regole**: prima i **modi di dire → forma normale**
+  ("fai il numero di X" = chiama X, "salvami il numero di…" = aggiungi,
+  "arrivato il bonifico di X" = X ha pagato, "dove ho messo il…?" = mostrami);
+  poi le regole; se non capiscono e il modello è sicuro (≥85%), la frase si
+  riscrive nella forma del suo cassetto e si rilegge. Domande e saluti non
+  finiscono più nella Mente.
+- **Allenamento**: 12 mila frasi generate (`eval/modello/genera-frasi.mjs`:
+  5 mestieri, errori di dettatura, riempitivi) + simulatore;
+  `node eval/modello/allena.mjs --salva` rifà il modello e lo misura.
+- **Numeri onesti** (frasi mai viste): modello da solo 91%; prova finale
+  nell'app 79 → 88 col modello al primo colpo (99 dopo le correzioni);
+  **prova cieca finale (77 frasi, 5 mestieri, mai toccate prima): 74/77
+  (96%) al primo colpo**, 0 sbagliate gravi (1 nota presa per preventivo,
+  2 annullamenti all'AI; corretti dopo, con regole generali).
+- **Prossimi passi**: (1) coi tester, raccogliere col consenso le frasi che
+  non capisce e riallenarlo ogni settimana (0b.13 passo 2); (2) sul server
+  il modello "di significato" (serve accesso a Hugging Face, qui bloccato);
+  (3) nell'app per App Store, una copia dentro il telefono (Core ML).
+- **Per quando partiamo coi tester** (Andrea, 29/09): nel pannello admin la
+  pagina dei 4 numeri (attivazione, uso a 4 settimane, "quanto ti
+  dispiacerebbe", chi pagherebbe) — soglie in TODO.
+
+### 0b.14 EON capisce col codice, misurato sulle frasi vere — FATTO il 29/09 (primo passo di 0b.13)
+Andrea: "doveva funzionare con il codice e non con l'AI… va esteso a tutti
+anche a frasi lunghe". Il tester aveva dettato un preventivo di un minuto e
+l'AI (senza credito dal 28/09 14:48: 54 richieste fallite in 24 ore) non
+rispondeva. Fatto, come le grandi app, misurando su frasi vere:
+
+- **Preventivo lungo dettato, voce per voce, col codice**: anche senza
+  punteggiatura; quantità × prezzo (al metro, l'uno, all'ora), IVA, sconto,
+  totale detto (se non torna lo dice), numeri in lettere, centesimi, prezzo
+  prima della descrizione. Card con le voci e un tasto "Crea". Prova:
+  `eval/preventivi-lunghi.test.mjs` (52 preventivi, 25 scritti dopo il
+  codice: al primo colpo 20/25) e `eval/preventivo-voci-app.test.js`.
+- **Correggere a voce un preventivo già fatto, col codice**: "non 10000 ma
+  15000", "fammela da 57.000", "5000 di bagno e 5000 manodopera", "aggiungi
+  smaltimento 300", "togli l'IVA", "metti la data al 27 settembre".
+- **Le 136 frasi vere di Andrea** (registro 3-29/09, nomi cambiati) nell'app
+  vera: da **108 (79%) a 136 (100%)** col codice, 0 sbagliate
+  (`eval/frasi-vere-app.test.js`). Sono le frasi su cui si è corretto: il
+  100% non vale come prova da solo.
+- **143 frasi NUOVE per i 5 mestieri**, scritte senza guardare il codice
+  (`eval/frasi-nuove-mestieri.test.js`): al primo colpo **108 (76%)**, 13%
+  sbagliate; dopo le correzioni **140 (98%)**, 0 sbagliate. Le 3 che restano:
+  due limiti della prova, una cartella che non esiste.
+- Regole nuove, generali (non frase per frase): verbi detti col tu ("mi
+  cancelli", "mandi…?"), "fra un'ora", consigli e calcoli all'AI, seguiti
+  ("me la fai da 57.000"), clienti nuovi con telefono, solo il nome = scheda
+  del cliente, più impegni in una frase (anche con le virgole) segnati senza
+  AI, spostare/cancellare appuntamenti con conferma e "Annulla", nome
+  ambiguo → "con quale?", foto + cliente nuovo, meteo e percorso detti nel
+  discorso, assemblee (anche "il 20 ottobre", "giovedì 15"), DiCo, SAL
+  senza percentuale, "quanto mi deve X", "3/4" non è una data.
+
+**Onestà**: provato su Chromium con database e AI finti; non su un telefono
+vero. Le frasi nuove le ho scritte io: servono le frasi dei tester (0b.13
+passo 2) per sapere il numero vero. Resta all'AI (giusto così): consigli,
+domande tecniche, chiacchiere.
 
 ### 0b.13 Frasi di esempio, frasi vere e un "cervello" nostro — IN PROGRAMMA (deciso il 29/09)
 Andrea: "se ci mettessimo 1 milione di frasi esempi?". Risposta onesta: un

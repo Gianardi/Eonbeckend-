@@ -4935,3 +4935,93 @@ ROADMAP 0b.11.
 - **Da provare con Andrea dopo il merge**: la notifica vera su un telefono
   (Android e iPhone con EON nella schermata Home); il registro delle
   chiamate dell'orologio (`net._http_response`).
+
+### Il lettore misurato sulle frasi vere (29/09/2026, ROADMAP 0b.14)
+
+- `lettore.js`: `trovaVoci(pp, escludi)` (voci di un preventivo: ogni prezzo
+  chiude una voce; quantità = numero + unità prima di "a/da X" o "X al
+  metro/l'uno"; `UNITA`, `PER_UNITA`, `SPEC` per le misure tecniche;
+  stile "euro" vs cifre nude; prezzo prima della descrizione; IVA, sconto,
+  totale detto; `numeroParola` per i numeri in lettere);
+  `leggiModifica(testo, {voci, aliquota, oggi})` per le correzioni a voce
+  (data, IVA, togli IVA, "non X ma Y", più voci, una voce, aggiungi,
+  togli, nuovo totale in proporzione); `comandoDaTu` in `pulisci` (verbi
+  col tu → comando; senza "mi/ci" solo i verbi che non sono nomi);
+  tempo relativo in `trovaQuando`; "giovedì 15"; "da 3/4" non è una data;
+  azioni nuove: `cliente`, `apri_cliente`, `assemblea`, `cestino`; `dividi`
+  spezza per virgole con 2+ orari.
+- Server (`eseguiComandoDiretto`): `documento` con `voci` e `aliquota_iva`,
+  `modifica_documento`, `impegni` (più impegni letti dall'app),
+  `sposta_impegno`, `assemblea` (solo amministratori). Il tool
+  `modifica_preventivo_o_fattura` accetta anche `data`.
+- App: `mostraVociDocumento` (card delle voci + "Crea"), `leggiModifica`
+  prima dell'AI nella scheda del documento, `provaSpostaImmediato` /
+  `capisciSpostaImpegno`, annulla anche col verbo detto col tu,
+  `gestisciPiuComandi` manda il comando `impegni`, omonimi negli impegni
+  ("Con quale X?"), `apriLinkEsterno` per tel:, meteo e percorso detti nel
+  discorso, SAL senza percentuale, DiCo "dico per…", foto + cliente nuovo
+  (scheda con "Scatta foto" in evidenza), "quanto mi deve X", "non trovo
+  preventivi di X", cliente nuovo con telefono creato dall'app, aggiorna il
+  telefono di un cliente che c'è già (con conferma).
+- Prove: `eval/preventivi-lunghi.test.mjs`, `eval/preventivo-voci-app.test.js`,
+  `eval/frasi-vere-app.test.js` (dati: `eval/dati/frasi-vere-andrea.json`,
+  minimo 130/136), `eval/frasi-nuove-mestieri.test.js` (dati:
+  `eval/dati/frasi-nuove-mestieri.json`, minimo 135/143). Aggiornate
+  lettore-app, router, saluti-scelte, scheda-cliente, scheda, simulatore,
+  mestieri-altra dove ora il codice fa ciò che prima faceva l'AI.
+- Limiti noti: nella prova per mestiere gli impegni creati dal server non
+  tornano nella memoria dell'app finta (nel telefono sì, si ricarica la
+  chat): "annulla il getto di domani" risulta all'AI; una cartella che non
+  esiste ("Fornitori") va all'AI invece di proporre di crearla.
+
+### Giri alla cieca prima dei tester (29/09/2026 notte, ROADMAP 0b.16)
+Metodo: file `eval/dati/frasi-giroN.json` scritto PRIMA di guardare il
+codice, misurato una volta (`FRASI=frasi-giroN.json PORTA=9045 node
+eval/frasi-nuove-mestieri.test.js --elenco --minimo=0`), poi correzioni
+generali, poi giro nuovo. `SOLO=regex` rifà solo alcune frasi.
+- Terzo campo di una frase: per calendario/sposta l'ora attesa ("07:00", o
+  "08:00,11:00,15:00" = tutti), per i documenti l'imponibile atteso ("5440").
+  Il test tocca "Crea" sulla card delle voci come l'utente.
+- lettore.js: `togliRipensamenti` (ore/giorni con anzi/no/scusa), `ORE_PAROLE`/
+  `MINUTI_PAROLE` (+ "meno un quarto", "mezzogiorno"), "alle 7" = mattina
+  (1-6 = pomeriggio), giorni abituali (ogni/solo di/tutti i), `dividi` anche su
+  "e alle N", "posta" = email solo come canale, `di all'…` = messaggio,
+  `pagatoPrima`/`vuolePrima` nel ramo documento, aliquota con un solo importo
+  (`aliquotaDetta`, anche "iva inclusa al 10"), "iva 10" non è un importo,
+  PARAFRASI: "N per cento" → "N%", "segnami che devo" → "ricordami di",
+  bonifico arrivato con importo, "fammi parlare con" → chiama; temi dati
+  "documenti" e agenda ("che lavori ho", "cosa ho la prossima settimana");
+  PAROLE_DOMANDA: "che X deve/serve…", "ogni quanto".
+- index.html: `giraComandoImpegno` (impegno prima del verbo), `togliPerche`,
+  numeri nei nomi dei clienti ("via Verdi 14") per annullare e cercare,
+  annullare: fino a 5 parole col nome del cliente, ripiego sul solo cliente,
+  "non trovo X in calendario" con giorno/ora, senza giorno solo se c'è davvero,
+  mai per fatture/appunti/foto; `trovaClienteDaParole` conta le parole che
+  distinguono (non "condominio"); SAL con "per l'hotel"; agenda della
+  settimana; conteggio preventivi/fatture; `mi serve il preventivo di X` senza
+  preventivi = si prepara (come deciso), non "non ne ha".
+- Limite noto della prova: gli appuntamenti creati dal server non tornano
+  nella memoria dell'app finta (nel telefono vero sì: `aggiornaDatiToccati`).
+
+### Il modello di EON (29/09/2026, ROADMAP 0b.15)
+
+- `lettore.js`: `caratteristiche(testo, ctx)` (f:/f2: prime parole, w:, b:,
+  c: n-grammi 3-5 di caratteri, `<cl>` `<tempo>` `<soldi>` `<tel>` `<num>`,
+  `?`, `#ora`, `#giorno`), `caricaModello(json)`, `classifica(testo, ctx)` →
+  `{intento, p, secondo, p2}`; `parafrasi(testo)` (tabella `PARAFRASI`);
+  `riscrivi(intento, testo, ctx)`.
+- `modello-eon.json`: `{versione, intenti, feat: {nome: indice}, W: base64
+  int8 [F×K], scala[K], b[K], temperatura}` (scala e b già divisi per la
+  temperatura). Rifarlo: `node eval/modello/allena.mjs --salva`.
+- App: carica il modello al `load`; `parafrasi` all'inizio di `elabora`;
+  `provaModello(l, testo)` in `provaLettore` quando l'azione è mente /
+  comando / domanda / niente: `{rifai}` → `elabora(riscritta, …, {daModello:
+  true})` (mai due volte), `{alServer}` per domanda/saluto che sarebbero
+  finiti nella Mente. Messaggi/email da una nota solo con p ≥ 0.95.
+- Prove: `eval/frasi-nuove-mestieri.test.js` accetta `FRASI=file.json`
+  (`frasi-prova-finale-app.json`, `frasi-prova-cieca.json`) e `impegni` da
+  mettere in calendario prima delle frasi.
+- Soglie per i 50 tester (da Andrea, 29/09): attivazione 1a settimana ≥70%;
+  uso settimanale a 4 settimane ≥30% = si continua, 15-30% = si corregge,
+  <10% dopo due giri = si cambia strada; test di Sean Ellis ≥40% "molto
+  dispiaciuto"; 5-10 disposti a pagare. Dati dal registro, mai i messaggi.

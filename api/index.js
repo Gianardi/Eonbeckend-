@@ -2143,6 +2143,7 @@ const TOOLS = {
           aliquota_iva: { type: "number", description: "Percentuale IVA, se non detta mantieni quella già presente nel documento" },
           condizioni: { type: "string", description: "Se non detto, mantieni quelle già presenti nel documento" },
           note: { type: "string", description: "Se non detto, mantieni quelle già presenti nel documento" },
+          data: { type: "string", description: "Data del documento gg/mm/aaaa, solo se l'utente chiede di cambiarla" },
         },
         required: ["documento_id", "voci"],
       },
@@ -2178,6 +2179,7 @@ const TOOLS = {
         totale,
         condizioni: eStringaNonVuota(input.condizioni) ? input.condizioni.trim() : datiEsistenti.condizioni,
         note: eStringaNonVuota(input.note) ? input.note.trim() : datiEsistenti.note,
+        data: eStringaNonVuota(input.data) && /^\d{2}\/\d{2}\/\d{4}$/.test(input.data.trim()) ? input.data.trim() : datiEsistenti.data,
       };
 
       const riassunto = voci.map((v) => v.desc).join(" · ");
@@ -4128,7 +4130,8 @@ async function provaAppuntamentoDaCliente(testo, user, ctx) {
 async function provaPercorsoRapidoImpegno(body, ctx, user) {
   if (!body.messaggio.startsWith(PREFISSO_RACCONTO)) return null;
   const testo = ctx.testoUtente;
-  if (!candidatoPercorsoRapido(testo)) return null;
+  // La lettura del lettore dell'app (parole ricontrollate qui sotto) basta anche quando la frase ha parole "escluse" ("…per il preventivo") o l'ora detta "per le 17"
+  if (!candidatoPercorsoRapido(testo) && !(body.lettura_impegno && eStringaNonVuota(testo) && testo.length <= 200)) return null;
 
   let ultimo = ultimoImpegnoDalRicordo(body.ricordo);
   if (ultimo) {
@@ -4810,7 +4813,22 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     const tipo = TIPI_DOCUMENTO.has(comando.tipo) ? comando.tipo : null;
     const importo = Math.round(Number(comando.importo) * 100) / 100;
     const lavoro = eStringaNonVuota(comando.lavoro) ? comando.lavoro.trim().slice(0, 200) : "";
-    if (!tipo || !(importo > 0) || importo > 10000000 || !lavoro) return null;
+    /* Un preventivo dettato voce per voce (29/09/2026): le voci lette dal
+       lettore dell'app, ricontrollate qui una per una */
+    let voci = null;
+    if (Array.isArray(comando.voci)) {
+      if (!comando.voci.length || comando.voci.length > 60) return null;
+      voci = [];
+      for (const v of comando.voci) {
+        const descrizione = v && eStringaNonVuota(v.descrizione) ? v.descrizione.trim().slice(0, 200) : "";
+        const quantita = Number(v && v.quantita), prezzo = Math.round(Number(v && v.prezzo) * 100) / 100;
+        if (!descrizione || !(quantita > 0) || quantita > 1000000 || !Number.isFinite(prezzo) || Math.abs(prezzo) > 10000000) return null;
+        voci.push({ descrizione, quantita, prezzo });
+      }
+      const somma = voci.reduce((t, v) => t + v.quantita * v.prezzo, 0);
+      if (!(somma > 0) || somma > 10000000) return null;
+    }
+    if (!tipo || (!voci && (!(importo > 0) || importo > 10000000 || !lavoro))) return null;
     const azioni = [];
     let clienteId = null;
     if (eUuid(comando.cliente_id)) {
@@ -4825,7 +4843,8 @@ async function eseguiComandoDiretto(comando, ctx, user) {
       azioni.push({ tool: "trova_o_crea_cliente", esito: esitoC });
       clienteId = esitoC.id;
     } else return null;
-    const input = { cliente_id: clienteId, tipo, voci: [{ descrizione: lavoro, quantita: 1, prezzo: importo }] };
+    const input = { cliente_id: clienteId, tipo, voci: voci || [{ descrizione: lavoro, quantita: 1, prezzo: importo }] };
+    if ([0, 4, 5, 10, 22].includes(comando.aliquota_iva)) input.aliquota_iva = comando.aliquota_iva;
     let esito;
     try { esito = await TOOLS.crea_preventivo_o_fattura.run(input, ctx); } catch (err) {
       await registraOperazione(user, "crea_preventivo_o_fattura", input, { errore: err.message }, "errore");
@@ -4837,6 +4856,89 @@ async function eseguiComandoDiretto(comando, ctx, user) {
     const totaleTesto = Number(esito.totale).toLocaleString("it-IT", { maximumFractionDigits: 2 });
     const nuovo = azioni[0] && azioni[0].esito && azioni[0].esito.creato ? ` (cliente nuovo)` : "";
     return { azioni, payload: { stato: "concluso", testo: `${esito.titolo} per ${esito.cliente}${nuovo}: €${totaleTesto}`, azioni, focus: { tipo: "cliente", riferimento: esito.cliente } } };
+  }
+  /* Correzione a voce di un documento già fatto, letta dal codice nell'app
+     ("non 10000 ma 15000", "5000 di bagno e 5000 manodopera", "metti la
+     data al 27 settembre"): le voci nuove, ricontrollate qui (29/09/2026) */
+  if (comando.azione === "modifica_documento") {
+    if (!eUuid(comando.documento_id) || !Array.isArray(comando.voci) || !comando.voci.length || comando.voci.length > 60) return null;
+    const voci = [];
+    for (const v of comando.voci) {
+      const descrizione = v && eStringaNonVuota(v.descrizione) ? v.descrizione.trim().slice(0, 200) : "";
+      const quantita = Number(v && v.quantita), prezzo = Math.round(Number(v && v.prezzo) * 100) / 100;
+      if (!descrizione || !(quantita > 0) || quantita > 1000000 || !Number.isFinite(prezzo) || Math.abs(prezzo) > 10000000) return null;
+      voci.push({ descrizione, quantita, prezzo });
+    }
+    const somma = voci.reduce((t, v) => t + v.quantita * v.prezzo, 0);
+    if (!(somma > 0) || somma > 10000000) return null;
+    const input = { documento_id: comando.documento_id, voci };
+    if ([0, 4, 5, 10, 22].includes(comando.aliquota_iva)) input.aliquota_iva = comando.aliquota_iva;
+    if (eStringaNonVuota(comando.data) && /^\d{2}\/\d{2}\/\d{4}$/.test(comando.data)) input.data = comando.data;
+    let esito;
+    try { esito = await TOOLS.modifica_preventivo_o_fattura.run(input, ctx); } catch (err) {
+      await registraOperazione(user, "modifica_preventivo_o_fattura", input, { errore: err.message }, "errore");
+      return null;
+    }
+    await registraOperazione(user, "modifica_preventivo_o_fattura", input, esito, "auto");
+    ctx.lettoSenzaAI = true;
+    const azioni = [{ tool: "modifica_preventivo_o_fattura", esito }];
+    return { azioni, payload: { stato: "concluso", testo: "Fatto.", azioni } };
+  }
+  /* Più impegni detti in una frase, già letti dal lettore dell'app ("Domani
+     ore 9 sveglia. Poi… Ore 17 a Falconara"): uno per uno, senza AI (29/09/2026) */
+  if (comando.azione === "impegni") {
+    if (!Array.isArray(comando.impegni) || !comando.impegni.length || comando.impegni.length > 8) return null;
+    const lista = [];
+    for (const x of comando.impegni) {
+      const quando = x && /^\d{4}-\d{2}-\d{2}$/.test(String(x.giorno || "")) && /^\d{2}:\d{2}$/.test(String(x.ora || "")) ? quandoValido(`${x.giorno}T${x.ora}:00`) : null;
+      const titolo = x && eStringaNonVuota(x.titolo) ? x.titolo.trim().slice(0, 120) : "";
+      if (!quando || titolo.length < 3) return null;
+      lista.push({ quando, titolo, tipo: TIPI_IMPEGNO.has(x.tipo) ? x.tipo : "commissione", cliente_id: eUuid(x.cliente_id) ? x.cliente_id : null });
+    }
+    const azioni = [];
+    for (const x of lista) {
+      let cliente = null;
+      if (x.cliente_id) { const c = await trovaProprio("clients", x.cliente_id, ctx); if (c) cliente = { id: c.id, nome: c.name }; }
+      const r = await creaImpegnoRapido({ titolo: x.titolo, tipo: x.tipo, quando_iso: x.quando, nomeDetto: "" }, cliente, user, ctx);
+      azioni.push(...r.azioni);
+    }
+    ctx.lettoSenzaAI = true;
+    return { azioni, payload: { stato: "concluso", testo: azioni.length === 1 ? "Fatto." : `Segnati ${azioni.length} impegni.`, azioni } };
+  }
+  /* "Sposta Hunter alle 11": l'app ha trovato l'impegno e l'utente ha confermato col tasto (29/09/2026) */
+  if (comando.azione === "sposta_impegno") {
+    const quando = eUuid(comando.id) ? quandoValido(String(comando.nuovo_quando_iso || "")) : null;
+    if (!quando) return null;
+    const input = { id: comando.id, nuovo_quando_iso: quando };
+    let esito;
+    try { esito = await TOOLS.sposta_impegno.run(input, ctx); } catch (err) { return null; }
+    await registraOperazione(user, "sposta_impegno", input, esito, "auto");
+    ctx.lettoSenzaAI = true;
+    const azioni = [{ tool: "sposta_impegno", esito }];
+    return { azioni, payload: { stato: "concluso", testo: "Fatto.", azioni } };
+  }
+  /* L'assemblea letta dal lettore dell'app (29/09/2026): "convoca l'assemblea
+     del condominio Il Glicine per il 20 ottobre alle 18". Solo per gli amministratori. */
+  if (comando.azione === "assemblea") {
+    const quando = /^\d{4}-\d{2}-\d{2}$/.test(String(comando.giorno || "")) && /^\d{2}:\d{2}$/.test(String(comando.ora || "")) ? quandoValido(`${comando.giorno}T${comando.ora}:00`) : null;
+    const condominio = eStringaNonVuota(comando.condominio) ? comando.condominio.trim().slice(0, 80) : "";
+    if (!quando || !condominio) return null;
+    const profilo = await db(`profiles?select=profession&id=eq.${user.id}&limit=1`, { method: "GET" }, ctx.accessToken).catch(() => null);
+    const mestiere = Array.isArray(profilo) && profilo[0] ? profilo[0].profession : null;
+    const inProva = comando.prova === true && (await eAdmin(user).catch(() => null));
+    if (mestiere !== "amministratore" && !inProva) return null;
+    const riga = { condominio, quando, tipo: comando.tipo === "straordinaria" ? "straordinaria" : "ordinaria", stato: "da convocare" };
+    if (eUuid(comando.cliente_id)) { const c = await trovaProprio("clients", comando.cliente_id, ctx); if (c) riga.client_id = c.id; }
+    const creato = await db("assemblee", { method: "POST", body: JSON.stringify(riga), headers: { Prefer: "return=representation" } }, ctx.accessToken);
+    const a = Array.isArray(creato) ? creato[0] : creato;
+    if (!a || !a.id) return null;
+    const motivo = eStringaNonVuota(comando.motivo) ? comando.motivo.trim().slice(0, 300) : "";
+    if (motivo) await db("cantiere_appunti", { method: "POST", body: JSON.stringify({ testo: "Ordine del giorno: " + motivo, assemblea_id: a.id, ...(riga.client_id ? { client_id: riga.client_id } : {}) }), headers: { Prefer: "return=minimal" } }, ctx.accessToken).catch(() => null);
+    const esito = { ...a, quando_visualizzato: formattaQuando(riga.quando) };
+    await registraOperazione(user, "crea_assemblea", riga, esito, "auto");
+    ctx.lettoSenzaAI = true;
+    const azioni = [{ tool: "crea_assemblea", esito }];
+    return { azioni, payload: { stato: "concluso", testo: `Assemblea segnata: ${a.condominio}, ${esito.quando_visualizzato}`, azioni } };
   }
   if (comando.azione === "appunto") {
     // "Conti mi ha detto che paga a fine mese": nella scheda del cliente (e sul suo prossimo appuntamento)

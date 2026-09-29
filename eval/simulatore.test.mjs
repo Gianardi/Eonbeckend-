@@ -32,8 +32,10 @@ const id = (nome) => CLIENTI.find((c) => c.name === nome).id;
 
 let totale = 0, giuste = 0;
 const sbagliate = [];
+const esportate = []; // ESPORTA_FRASI=file.json: le frasi con la risposta giusta, per allenare il modello (eval/modello/)
 function prova(frase, atteso, gruppo) {
   totale++;
+  if (atteso && atteso.azione) esportate.push({ frase, azione: atteso.azione, gruppo });
   let l;
   try { l = L.leggi(frase, CTX); } catch (e) { sbagliate.push({ gruppo, frase, motivo: "errore: " + e.message }); return; }
   const problemi = [];
@@ -85,7 +87,7 @@ VERE.forEach(([f, a]) => prova(f, a, "frasi vere di Andrea"));
 
 /* ---------- 2. Frasi che NON devono finire nel cassetto sbagliato ---------- */
 const NON_SBAGLIARE = [
-  ["Svuota il cestino", { azione: "comando" }],
+  ["Svuota il cestino", { azione: "cestino" }],
   ["Sposta l'appuntamento di Rossi a giovedì", { azione: "modifica" }],
   ["Cancella l'appuntamento di domani", { azione: "modifica" }],
   ["Modifica la fattura di Rossi", { azione: /^(?:modifica|documento)$/ }],
@@ -95,7 +97,7 @@ const NON_SBAGLIARE = [
   ["Domani alle 9 sopralluogo da Rossi", { azione: "impegno", giorno: "2026-09-30", ora: "09:00" }],
   ["Venerdì comprare il cemento", { azione: "da_fare", giorno: "2026-10-02", cosa: "Comprare il cemento" }],
   ["Idea: fare un sito per i clienti", { azione: "mente" }],
-  ["Aggiungi Mario Bianchi 333 1234567", { azione: "comando" }],
+  ["Aggiungi Mario Bianchi 333 1234567", { azione: "cliente" }],
   ["Fatture di Rossi", { azione: "documento", modo: "crea" }], // senza verbo: si chiede cosa (lavoro, importo) o si guardano quelle fatte
   ["Mandami il DURC", { azione: "doc_impresa", documento: "durc" }],
   ["Dammi la visura camerale", { azione: "doc_impresa" }],
@@ -259,6 +261,11 @@ QUANDO.forEach(([q, g, o]) => ["sopralluogo da Rossi", "chiamare il fornitore", 
   prova(`${q} ${cosa}`, { azione: "impegno", giorno: g, ora: o }, "giorni e ore");
   prova(`${cosa} ${q}`, { azione: "impegno", giorno: g, ora: o }, "giorni e ore");
 }));
+
+if (process.env.ESPORTA_FRASI) {
+  const fs = require("fs");
+  fs.writeFileSync(process.env.ESPORTA_FRASI, JSON.stringify(esportate));
+}
 
 /* ---------- Risultato ---------- */
 const perGruppo = {};
