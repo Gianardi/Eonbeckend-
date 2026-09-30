@@ -4974,6 +4974,45 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Passo 3, cassetti del pomeriggio (30/09/2026, ROADMAP 0b.19)
+- **Appunti** (`index.html`):
+  - `gestisciMente(l, testo, viaVoce, invia, daModello)` è l'ex `case
+    "mente"` di `provaLettore`, ora in una funzione;
+  - il cassetto: `cassettoNeurale(testo, 0.95) === "mente"`, prima del
+    cassetto sposta/annulla;
+  - esclusi: `azione "comando"`, le frasi con un giorno (`trovaQuando`) e
+    "ricordami…";
+  - con `daModello` "segna/annota/salva…" sono ammessi.
+- **Cliente nuovo:** `aggiungiClienteLetto(nc)` è l'ex blocco del `case
+  "cliente"`. Il cassetto vuole un verbo di aggiunta con "client…" (o
+  "nuovo cliente") e `cassettoNeurale === "cliente"`, poi usa
+  `EonLettore.leggiNuovoCliente`.
+- **SAL:** `lettore.leggiSal(testo, ctx)` → `{percentuale, importo,
+  cliente}`, usato in `provaSal` quando `capisciSal` non legge e il modello
+  dice sal.
+- **Invio documento:** `lettore.leggiInvioDocumento(testo, ctx)` → frase
+  canonica "manda la fattura [numero N] [di mese] a Cliente", poi
+  `provaInvioDocumento`. Con un importo ("da 500", "€") torna null.
+- **Server** (`api/index.js`):
+  - `TEMPO_IN_APPUNTO` passa ai lookaround Unicode (`\b` non funzionava
+    dopo "ì") e riconosce anche "ore 11" e "20 ottobre";
+  - `provaAppuntoCliente` salta se c'è `body.lettura_impegno`.
+- **Lettore degli orari** (`trovaQuando`):
+  - "verso mezzogiorno";
+  - "giovedì 8 e mezza" dà l'ora;
+  - "oggi / stamattina / ieri" seguiti da ha/ho/sono e con un giorno dopo
+    sono un racconto: saltati, e non contano per "di mattina".
+- **Assemblea:** se il cliente non si trova, si cerca solo prima del motivo
+  (per / punto / ordine / odg).
+- **Minimi alzati:** giro 15 1046, giro 16 1021, giro 17 1016.
+- **Restano:**
+  - chiamate a chi non è in rubrica ("chiama il geometra Rovelli"): EON dice
+    che non ha il numero;
+  - dettagli: importi dei preventivi, "giovedì 8" senza "e mezza", due
+    appuntamenti nella stessa frase, dialetto ("alle deci");
+  - una decina di frasi in cui sbaglia il modello (appunti presi per
+    urgenze): da mettere nel prossimo allenamento.
+
 ### Passo 3, terzo cassetto: domande sui dati (30/09/2026, ROADMAP 0b.19)
 - `lettore.js`: `leggiDomandaDati(testo, ctx)` →
   `{azione: "dati", tema, cliente, quando, testo}`.

@@ -501,6 +501,27 @@ sporca, dialetti, chat, anziano, straniero.
      983 → **1000**. Nessun giro peggiora.
    - **Da stamattina, in tutto: giro 16 da 966 a 1002 (da 90% a 94%), giro
      17 da 966 a 1000 (da 91% a 94%).**
+   **Altri cassetti fatti il 30/09 (pomeriggio).**
+   - **Appunti:** se il modello è sicuro almeno al 95% va nella Mente (o
+     nella scheda del cliente), non in un "da fare sabato" o in una mail. Le
+     urgenze restano controllate prima. Le frasi con un giorno e i "ricordami
+     di…" restano alle regole di prima.
+   - **Cliente nuovo:** "crea il cliente…", "metti tra i clienti…": nome,
+     telefono e nota dal lettore, creato col codice, con "Annulla".
+   - **SAL:** "siamo a metà", "all'80", "al cinquanta" (`leggiSal`).
+   - **Mandare un documento:** "spedisci al condominio il preventivo…", "il
+     preventivo della palestra mandalo al titolare" (`leggiInvioDocumento`).
+     Con un importo è un documento nuovo e non si tocca.
+   - **Server:** un appuntamento con un cliente non diventa più un appunto.
+     La regola del tempo sbagliava "venerdì" con l'accento, "ore 11" e "20
+     ottobre"; se l'app ha già letto giorno e ora, è un appuntamento.
+   - **Orari:** "verso mezzogiorno"; "giovedì 8 e mezza" è giovedì alle 8:30;
+     "stamattina mi ha chiamato… giovedì alle 5" è giovedì alle 17.
+   - **Assemblea:** il condominio è quello nominato prima del motivo.
+   - **Risultati:** giro 15: 1046; giro 16: **1021 (96%)**; giro 17: **1016
+     (96%)**. Nessun giro peggiora; 71 prove su 71.
+   - **In tutto, da stamattina:** giro 16 da 966 a 1021 (da 90% a 96%), giro
+     17 da 966 a 1016 (da 91% a 96%).
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
 
