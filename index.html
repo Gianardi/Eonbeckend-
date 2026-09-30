@@ -15979,6 +15979,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        Col verbo detto dando del tu ("mi cancelli l'appuntamento con Belle")
        letto dal lettore come comando (29/09/2026). */
     const testoComando = !inContinuazione && typeof EonLettore !== "undefined" ? (() => { try{ return EonLettore.pulisci(testo).testo; }catch(e){ return testo; } })() : testo;
+    /* Il modello dice "sposta o annulla un impegno" (passo 3): i dettagli li legge il
+       lettore (leggiModificaImpegno). Le regole di prima restano sotto, come riserva. */
+    if(!inContinuazione && cassettoNeurale(testo) === "calendario_modifica" && provaModificaImpegno(testo, viaVoce)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "modifica_impegno");
+      return;
+    }
     if(!inContinuazione && (provaAnnullaImmediato(testo, viaVoce) || (testoComando !== testo && provaAnnullaImmediato(testoComando, viaVoce)))){
       campo.value = "";
       hint.textContent = hintBaseDi();
@@ -15990,13 +15998,6 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       campo.value = "";
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "sposta_impegno");
-      return;
-    }
-    /* Il modello dice "sposta o annulla un impegno" (passo 3): i dettagli li legge il lettore */
-    if(!inContinuazione && cassettoNeurale(testo) === "calendario_modifica" && provaModificaImpegno(testo, viaVoce)){
-      campo.value = "";
-      hint.textContent = hintBaseDi();
-      ricordaEsitoCodice(testo, "modifica_impegno");
       return;
     }
 
