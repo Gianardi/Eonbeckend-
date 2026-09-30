@@ -225,6 +225,8 @@ async function main() {
         const ai = chiamateAI > ai0;
         const vis = (st.card || "") + " " + st.toast + " " + st.landing;
         const scritto = (t) => st.scritture.includes(t);
+        // FOTO=cartella: uno screenshot dopo ogni frase (con SOLO, per vedere la grafica di una risposta)
+        if (process.env.FOTO) await page.screenshot({ path: require("path").join(process.env.FOTO, mestiere + "-" + frase.slice(0, 40).replace(/[^\p{L}\p{N}]+/gu, "_") + ".png") });
         const fatto = {
           calendario: dopo.tasks > prima.tasks || dopo.appt > prima.appt || scritto("tasks"),
           calendario_modifica: dopo.tasksJson !== prima.tasksJson || scritto("tasks"),

@@ -12429,7 +12429,8 @@ const SITUAZIONE_URGENTE = new RegExp([
 const URGENZA_PASSATA = /\b(?:sistemat|riparat|risolt|aggiustat|ripristinat|preventiv|fattur|ieri|scors[oa]|ricordami|ricordati|ho\s+(?:fatto|finito|chiuso|messo))\w*|\?/i;
 function capisciUrgenza(testo){
   const t = String(testo || "").trim().replace(/[.!]+$/, "");
-  const detta = PAROLE_URGENZA.test(t) && t.length <= 140;
+  // "le luci di emergenza da cambiare", "l'uscita di emergenza": è il nome di una cosa, non un'urgenza (30/09)
+  const detta = PAROLE_URGENZA.test(t.replace(/\b(?:luc[ei]|lampad[ae]|illuminazione|uscit[ae]|port[ae]|scal[ae]|impianto|kit|pulsante|pulsanti)\s+di\s+emergenza\b/gi, " ")) && t.length <= 140;
   const situazione = !detta && t.length <= 240 && SITUAZIONE_URGENTE.test(t) && !URGENZA_PASSATA.test(t);
   if(!(detta || situazione) || /\?/.test(t)) return null;
   if(/\bassemble[ae]\b/i.test(t)) return null; // "un'assemblea urgente": è un'assemblea da convocare (giro 15)
@@ -12949,21 +12950,25 @@ function risolviClienteLettura(l, titolo, poi){
    lui nell'altra app. */
 function scriviAChiNonECliente(l, email, viaVoce){
   const nome = l.nomeDetto;
-  const saluto = /^(?:squadra|ragazzi|operai|tutti)$/i.test(nome) ? "Ciao a tutti, " : "Ciao " + nome.split(/\s+/).filter(w => !/^(?:geometra|operaio|garzone|fornitore|commercialista|consigliere|avvocato|ingegnere|architetto|dottor|dottore|signor|signora|grossista)$/i.test(w))[0] + ", ";
+  const titoli = /^(?:geometra|operaio|garzone|fornitore|commercialista|consigliere|avvocato|ingegnere|architetto|dottor|dottore|signor|signora|grossista|ragionier|ragioniere|rag|amministratore)$/i;
+  const primo = nome.split(/\s+/).filter(w => !titoli.test(w))[0];
+  const saluto = /^(?:squadra|ragazzi|operai|tutti|gruppo)\b/i.test(nome) ? "Ciao a tutti, " : primo ? "Ciao " + primo + ", " : "Buongiorno, ";
   const corpoMsg = l.messaggio ? saluto + l.messaggio.charAt(0).toLowerCase() + l.messaggio.slice(1) : "";
+  const oggetto = l.oggetto ? l.oggetto.charAt(0).toUpperCase() + l.oggetto.slice(1) : "";
   const corpo = document.createElement("div");
   corpo.className = "percorso-card";
   const nota = document.createElement("p");
-  nota.textContent = nome + " non è tra i tuoi clienti: " + (email ? "apri la mail e scrivi tu l'indirizzo" : "apri WhatsApp e scegli tu il contatto") + ", il testo è pronto.";
+  const nomeB = nome.charAt(0).toUpperCase() + nome.slice(1);
+  nota.textContent = nomeB + " non è tra i tuoi clienti: " + (email ? "apri la mail e scrivi tu l'indirizzo" : "apri WhatsApp e scegli tu il contatto") + (corpoMsg ? ", il testo è pronto." : ".");
   corpo.appendChild(nota);
-  if(corpoMsg){ const a = document.createElement("p"); a.className = "domanda-codice-anteprima"; a.textContent = corpoMsg; corpo.appendChild(a); }
+  if(corpoMsg || oggetto){ const a = document.createElement("p"); a.className = "domanda-codice-anteprima"; a.textContent = oggetto && !corpoMsg ? "Oggetto: " + oggetto : corpoMsg; corpo.appendChild(a); }
   const link = document.createElement("a");
   link.className = "percorso-meta";
-  link.href = email ? "mailto:?body=" + encodeURIComponent(corpoMsg) : "https://wa.me/?text=" + encodeURIComponent(corpoMsg);
+  link.href = email ? "mailto:?" + (oggetto ? "subject=" + encodeURIComponent(oggetto) + "&" : "") + "body=" + encodeURIComponent(corpoMsg) : "https://wa.me/?text=" + encodeURIComponent(corpoMsg);
   if(!email){ link.target = "_blank"; link.rel = "noopener"; }
   link.innerHTML = `<span>${email ? "Apri la mail" : "Apri WhatsApp"}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>`;
   corpo.appendChild(link);
-  apriRisorsaCard((email ? "Email" : "Messaggio") + " · " + nome, corpo);
+  apriRisorsaCard((email ? "Email" : "Messaggio") + " · " + nomeB, corpo);
   if(viaVoce) parlaRisposta("Pronto, tocca per aprire");
   return { fatto: email ? "email_senza_cliente" : "messaggio_senza_cliente" };
 }
@@ -13033,7 +13038,18 @@ function gestisciChiamata(l, viaVoce){
   };
   if(!l.cliente && !l.candidati && !l.clienteSimile){
     if(!l.nomeDetto) return null;
-    mostraRispostaEON(l.originale, l.nomeDetto + " non è tra i tuoi clienti: non ho il numero.", { titolo: "Cliente non trovato" });
+    /* Il fornitore, il geometra, "mia moglie": non sono tra i clienti, il numero lo chiede
+       (30/09; prima diceva solo "non ho il numero") */
+    const chi = l.nomeDetto.charAt(0).toUpperCase() + l.nomeDetto.slice(1);
+    domandaDelCodice({ titolo: "Chiama " + chi, domanda: "Non ho il suo numero: scrivilo qui e parte la chiamata.", segnaposto: "Es. 333 1234567", onRisposta: (v) => {
+      const cifre = String(v || "").replace(/[^\d+]/g, "");
+      if(cifre.replace(/\D/g, "").length < 6){ showAIToast("Numero non valido", "Scrivi solo il numero, es. 333 1234567."); return; }
+      const numero = numeroPerLink(cifre);
+      const corpo = document.createElement("div");
+      corpo.className = "percorso-card";
+      corpo.innerHTML = `<a class="percorso-meta" href="tel:${escapeHtml(numero)}"><span>Chiama ${escapeHtml(chi)}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>`;
+      apriRisorsaCard("Chiama", corpo);
+    } });
     return { fatto: "chiama_senza_cliente" };
   }
   const r = risolviClienteLettura(l, "Chiama", chiama);
@@ -13510,6 +13526,24 @@ async function aggiungiClienteLetto(nc){
   });
   return { fatto: "cliente_nuovo" };
 }
+/* L'assemblea letta (dal lettore o dal cassetto del modello): solo per gli amministratori;
+   per gli altri è un impegno come un altro */
+function gestisciAssemblea(l, invia){
+  // Solo per gli amministratori; per gli altri è un impegno come un altro
+  if(currentProfession !== "amministratore"){ const li = letturaImpegnoPerServer(l); return li ? { letturaImpegno: li } : null; }
+  /* Giro 15: "prepara la convocazione dell'assemblea del Parco dei Tigli" senza giorno e ora:
+     EON chiede solo quello che manca, poi la segna */
+  if(!l.quando.giornoIso || !l.quando.ora){
+    domandaDelCodice({ titolo: "Assemblea · " + l.condominio, domanda: "Per quando la convoco? (giorno e ora)", segnaposto: "Es. giovedì 15 ottobre alle 21", onRisposta: (t) => {
+      const q = EonLettore.trovaQuando(EonLettore.parole(t), new Date());
+      if(!q.giornoIso || !q.ora){ showAIToast("Mi serve giorno e ora", "Es. «giovedì 15 ottobre alle 21»."); return; }
+      chiudiRisorsaCard();
+      invia(l.originale, { comando: { azione: "assemblea", condominio: l.condominio, giorno: q.giornoIso, ora: q.ora, tipo: l.tipo, motivo: l.motivo || "", ...(l.cliente ? { cliente_id: l.cliente.id } : {}), ...(mestiereInProva === "amministratore" ? { prova: true } : {}) } });
+    } });
+    return { fatto: "assemblea_quando" };
+  }
+  return { comando: { azione: "assemblea", condominio: l.condominio, giorno: l.quando.giornoIso, ora: l.quando.ora, tipo: l.tipo, motivo: l.motivo || "", ...(l.cliente ? { cliente_id: l.cliente.id } : {}), ...(mestiereInProva === "amministratore" ? { prova: true } : {}) } };
+}
 async function provaLettore(testo, viaVoce, invia, senzaModello){
   const l = leggiConLettore(testo);
   if(!senzaModello && (!l || !l.azione || /^(?:mente|comando|domanda|dati|impegno|da_fare|documento)$/.test(l.azione))){
@@ -13630,22 +13664,7 @@ async function provaLettore(testo, viaVoce, invia, senzaModello){
       }
       return li ? { letturaImpegno: li } : null;
     }
-    case "assemblea": {
-      // Solo per gli amministratori; per gli altri è un impegno come un altro
-      if(currentProfession !== "amministratore"){ const li = letturaImpegnoPerServer(l); return li ? { letturaImpegno: li } : null; }
-      /* Giro 15: "prepara la convocazione dell'assemblea del Parco dei Tigli" senza giorno e ora:
-         EON chiede solo quello che manca, poi la segna */
-      if(!l.quando.giornoIso || !l.quando.ora){
-        domandaDelCodice({ titolo: "Assemblea · " + l.condominio, domanda: "Per quando la convoco? (giorno e ora)", segnaposto: "Es. giovedì 15 ottobre alle 21", onRisposta: (t) => {
-          const q = EonLettore.trovaQuando(EonLettore.parole(t), new Date());
-          if(!q.giornoIso || !q.ora){ showAIToast("Mi serve giorno e ora", "Es. «giovedì 15 ottobre alle 21»."); return; }
-          chiudiRisorsaCard();
-          invia(l.originale, { comando: { azione: "assemblea", condominio: l.condominio, giorno: q.giornoIso, ora: q.ora, tipo: l.tipo, motivo: l.motivo || "", ...(l.cliente ? { cliente_id: l.cliente.id } : {}), ...(mestiereInProva === "amministratore" ? { prova: true } : {}) } });
-        } });
-        return { fatto: "assemblea_quando" };
-      }
-      return { comando: { azione: "assemblea", condominio: l.condominio, giorno: l.quando.giornoIso, ora: l.quando.ora, tipo: l.tipo, motivo: l.motivo || "", ...(l.cliente ? { cliente_id: l.cliente.id } : {}), ...(mestiereInProva === "amministratore" ? { prova: true } : {}) } };
-    }
+    case "assemblea": return gestisciAssemblea(l, invia);
     case "cestino": {
       navigateTo("cestino");
       showAIToast("Cestino", "Tocca «Svuota cestino» per eliminare tutto per sempre.");
@@ -15924,6 +15943,44 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
         return;
       }
     }
+    /* Il modello dice "messaggio", "email" o "chiamata" (passo 3) e le regole non l'avevano
+       letto per intero: a chi (anche chi non è tra i clienti: "i ragazzi della squadra", "il
+       fornitore del cemento") e cosa li legge il lettore (leggiDestinatario), poi lo stesso
+       invio di sempre. Prima delle urgenze e degli impegni ("…domani cantiere ore 7" è il testo) */
+    if(testo && !inCorso && !inContinuazione){
+      const tipoC = cassettoNeurale(testo);
+      const vecchia = /^(?:messaggio|email|chiamata)$/.test(tipoC || "") ? leggiConLettore(testo) : null;
+      // le regole l'hanno già letto tutto (a chi e, per scrivere, cosa): come prima
+      const giaLetta = vecchia && /^(?:messaggio|email|whatsapp|chiama)$/.test(vecchia.azione) && (vecchia.cliente || vecchia.candidati || vecchia.clienteSimile || vecchia.nomeDetto) && (vecchia.azione === "chiama" || vecchia.messaggio);
+      const ld = /^(?:messaggio|email|chiamata)$/.test(tipoC || "") && !giaLetta ? EonLettore.leggiDestinatario(testo, contestoLettore(), tipoC) : null;
+      const rc = !ld ? null : ld.azione === "chiama" ? gestisciChiamata(ld, viaVoce) : ld.azione === "messaggio" ? gestisciMessaggio(ld, testo, (frase, p) => elabora(frase, false, p)) : gestisciScrittura(ld, testo, viaVoce);
+      if(rc && rc.comando){ ricordaEsitoCodice(testo, "contatto_neurale"); return inviaAlServer(testo, viaVoce, false, rc); }
+      if(rc && rc.fatto){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "contatto_neurale"); return; }
+    }
+    /* Il modello dice "dichiarazione di conformità" (passo 3, elettricisti): il cliente lo
+       legge il lettore ("mi serve la di.co. per il condominio via gramsci", "la dico
+       dell'hotel belvedere per le luci di emergenza, preparala") */
+    if(testo && !inCorso && !inContinuazione && currentProfession === "elettricista" && /\b(?:di\.?\s*co\.?|dico|conformit)/i.test(testo) && cassettoNeurale(testo) === "dico"){
+      const ld = EonLettore.leggiDico(testo, contestoLettore());
+      // "dichiarazioni di conformità" da solo è il nome della pagina: serve un cliente o una richiesta
+      if(ld && (ld.cliente || /\b(?:serve|servirebbe|fai|fammi|fare|prepara\p{L}*|crea\p{L}*|compila\p{L}*|nuova|voglio|devo|bisogna)\b/iu.test(testo))){ chiudiRisorsaCard(); apriDico(ld.cliente, ld.cliente ? "" : ld.nomeDetto); campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "dico_neurale"); return; }
+    }
+    /* Il modello dice "assemblea" (passo 3, amministratori): condominio, giorno, ora e motivo
+       dal lettore anche quando la frase non comincia con "convoca" ("mettimi l'assemblea
+       del Parco Verde…", "c'è da convocare n'altra volta l'assemblea dell'Aurora…") */
+    if(testo && !inCorso && !inContinuazione && currentProfession === "amministratore" && /\bassemble[ae]\b/i.test(testo) && cassettoNeurale(testo) === "assemblea"){
+      const la = EonLettore.leggiAssemblea(testo, contestoLettore());
+      const ra = la ? gestisciAssemblea(la, (frase, p) => elabora(frase, false, p)) : null;
+      if(ra && ra.comando){ ricordaEsitoCodice(testo, "assemblea_neurale"); return inviaAlServer(testo, viaVoce, false, ra); }
+      if(ra && ra.fatto){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "assemblea_neurale"); return; }
+    }
+    /* Il modello dice "scatta una foto" (passo 3): "fammi una foto al tubo rotto che la mando
+       all'assicurazione" è una foto, non un'urgenza. Il soggetto è quello dopo "foto" */
+    if(testo && !inCorso && !inContinuazione && /\b(?:fai|fammi|fa|scatta|scattami|fare)\b[^.]{0,20}\bfot[oi]\b/i.test(testo) && cassettoNeurale(testo) === "foto"){
+      const mf = testo.match(/\bfot[oi]\s+(?:(?:al|alla|allo|ai|alle|agli|all['’]|a|del|della|dello|dei|delle|di)\s*)?(.+?)(?=\s+(?:che|per|perch[eé]|cos[iì]|e\s+poi|e\s+la|e\s+lo|e\s+mandala|e\s+mandalo)\b|[,;.]|$)/i);
+      const soggetto = mf ? mf[1].trim().split(/\s+/).slice(0, 4).join(" ") : "";
+      if(soggetto && provaFotoImmediata("fai foto al " + soggetto, viaVoce)){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "foto_neurale"); return; }
+    }
     if(testo && !inCorso && !inContinuazione && await provaUrgenza(testo)){
       campo.value = "";
       hint.textContent = hintBaseDi();
@@ -15941,6 +15998,12 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "dico");
       return;
+    }
+    /* Il modello dice "cartella" (passo 3): il nome lo legge il lettore ("nuova cartella:
+       Sicurezza cantieri", "…che si chiama…", "…chiamala Tetto Parco Verde") */
+    if(testo && !inCorso && !inContinuazione && cassettoNeurale(testo) === "cartella"){
+      const lc = EonLettore.leggiCartella(testo);
+      if(lc && await provaCreaCartella("crea cartella " + lc.nome)){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "cartella_neurale"); return; }
     }
     if(testo && !inCorso && !inContinuazione && await provaCreaCartella(testo)){
       campo.value = "";
@@ -16062,7 +16125,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       // "ricordami di…" (il loro "Da fare"), e le frasi con un giorno ("il muratore domani non viene"):
       // di quelle decide il calendario
       const conGiorno = !!EonLettore.trovaQuando(EonLettore.parole(EonLettore.pulisci(testo).testo), new Date()).giornoIso;
-      const rm = lm && lm.azione !== "comando" && !conGiorno && !/^\s*(?:ricordami|ricordarmi|ricorda)\b/i.test(testo) ? await gestisciMente({ ...lm, azione: "mente" }, testo, viaVoce, (frase, p) => elabora(frase, false, p), true) : null;
+      // "tieni presente che Fontana il sabato non lavora": detto che è da sapere, il giorno non è un appuntamento
+      const daSapere = /^\s*(?:(?:allora|senti|ah|eh)\s*,?\s*)?(?:tieni\s+(?:presente|a\s+mente)|sappi\s+che|prendi\s+nota\s+che|nota\s+che)\b/i.test(testo);
+      const rm = lm && lm.azione !== "comando" && (!conGiorno || daSapere) && !/^\s*(?:ricordami|ricordarmi|ricorda)\b/i.test(testo) ? await gestisciMente({ ...lm, azione: "mente" }, testo, viaVoce, (frase, p) => elabora(frase, false, p), true) : null;
       if(rm && rm.comando){ ricordaEsitoCodice(testo, "mente_neurale"); return inviaAlServer(testo, viaVoce, false, rm); }
       if(rm && rm.fatto){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "mente_neurale"); return; }
     }

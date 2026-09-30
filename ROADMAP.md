@@ -522,6 +522,34 @@ sporca, dialetti, chat, anziano, straniero.
      (96%)**. Nessun giro peggiora; 71 prove su 71.
    - **In tutto, da stamattina:** giro 16 da 966 a 1021 (da 90% a 96%), giro
      17 da 966 a 1016 (da 91% a 96%).
+   **Altri cassetti fatti il 30/09 (sera).**
+   - **Chiamare chi non è in rubrica** ("chiama il grossista", "fammi parlare
+     con l'amministratore Pozzoli", "chiama mia moglie"): prima EON diceva
+     solo "non ho il numero"; ora chiede il numero e prepara la chiamata.
+   - **Messaggi ed email a chi non è cliente o detti a metà** ("manda un
+     messaggio ai ragazzi della squadra domani cantiere ore 7", "avvisa con un
+     whatsapp il ragionier Pozzoli che…", "scrivi al condominio… cioè
+     all'amministratore…", "pec all'avvocato Donati per la messa in mora di
+     Esposito"): il lettore (`leggiDestinatario`) legge a chi e cosa. Il
+     destinatario è quello subito dopo il verbo, non un altro cliente nominato
+     nel testo. Prima finivano nel calendario, nei "da fare" o all'AI.
+   - **Cartelle** ("nuova cartella: Sicurezza cantieri", "…chiamala Tetto
+     Parco Verde"), **dichiarazione di conformità** ("mi serve la di.co. per
+     il condominio via Gramsci"), **assemblee** ("mettimi l'assemblea del
+     Parco Verde… il 10 dicembre alle 21"), **foto** ("fammi una foto al tubo
+     rotto che la mando all'assicurazione": una foto, non un'urgenza).
+   - "Le luci di emergenza da cambiare" non è più un'urgenza; "tieni presente
+     che Fontana il sabato non lavora" è un appunto, non un "da fare sabato".
+   - **Risultati:** giro 15: 1046 → **1050 (99%)**; giro 16: 1021 → **1032
+     (97%)**; giro 17: 1016 → **1032 (97%)**. Nessuna frase che prima era
+     giusta diventa sbagliata.
+   - **In tutto, da stamattina:** giro 16 da 966 a 1032 (da 90% a 97%), giro
+     17 da 966 a 1032 (da 91% a 97%).
+   - **Cosa resta** (circa 35 frasi per giro): dettagli (importi con sconti e
+     correzioni, "giovedì 8", due appuntamenti in una frase, dialetto) → passo
+     4; errori del modello (appunti presi per urgenze, "cerca un documento"
+     invece di "fai la DiCo") → nuovo addestramento; alcune domande sui dati
+     che EON non sa ancora rispondere.
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea

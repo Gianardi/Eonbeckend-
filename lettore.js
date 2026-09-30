@@ -1267,6 +1267,112 @@
     return { tipo, cliente: cl.cliente, mese: mese || null, testo };
   }
 
+  /* Passo 3 (30/09): il modello ha già detto "messaggio", "email" o "chiamata"; qui solo a
+     chi e cosa. Il destinatario è quello subito dopo il verbo o il canale ("avvisa con un
+     whatsapp il ragionier Pozzoli che…", "scrivi sul gruppo dei ragazzi…", "fammi parlare
+     con l'amministratore Pozzoli"), non un cliente nominato nel testo ("pec all'avvocato
+     Donati per la messa in mora di Esposito"). Una correzione prima del "che" ("scrivi al
+     condominio... cioè all'amministratore…", "no aspetta, scrivi una mail al
+     commercialista…") vale per quello che viene dopo. */
+  function leggiDestinatario(testoOriginale, ctx, tipo) {
+    ctx = ctx || {};
+    const intero = String(testoOriginale || "").replace(/\s+/g, " ").trim();
+    let t = intero;
+    const iChe0 = t.search(/\bche\b/i);
+    const testa0 = iChe0 >= 0 ? t.slice(0, iChe0) : t;
+    // "chiama Rossi e poi manda un messaggio a Bianchi": due comandi, restano alle regole di prima
+    if (/\b(?:e|poi|e\s+poi)\s+(?:segna|metti|chiama|manda|scrivi|fai|fammi|aggiungi|crea|ricorda)\p{L}*/iu.test(testa0)) return null;
+    const corr = [...testa0.matchAll(/(?:\.{2,}|…|,)?\s*\b(?:cioè|cioe|anzi|no\s+aspetta|no\s+scusa|no\s+no)(?!\p{L})[\s,.]*/giu)].pop();
+    if (corr) t = t.slice(corr.index + corr[0].length);
+    const canale = tipo === "chiamata" ? "chiama" : /\b(?:pec|e-?mail|mail)\b/i.test(t) || tipo === "email" ? "email" : /\bwhats\s?app\b/i.test(t) ? "whatsapp" : "messaggio";
+    const iChe = t.search(/\bche\b/i);
+    let dest = iChe >= 0 ? t.slice(0, iChe) : t;
+    let messaggio = iChe >= 0 ? t.slice(iChe).replace(/^che\s+/i, "").trim() : "";
+    const verbi = [...dest.matchAll(/\b(?:manda\p{L}*|scriv\p{L}*|avvis\p{L}*|chiam\p{L}*|telefon\p{L}*|parlare\s+con|messagg\p{L}*|whats\s?app|e-?mail|mail|pec|sms)\b/giu)].pop();
+    if (verbi) dest = dest.slice(verbi.index + verbi[0].length);
+    else if (!corr) return null;
+    const LEGA = /^(?:(?:sul\s+gruppo(?:\s+(?:dei|degli|delle|della|del|di))?|al|alla|allo|ai|agli|alle|a|ad|il|la|lo|i|gli|le|con|un|una|uno|di|mi|subito|direttamente|pure|anche)\s+|(?:all|l|dell|coll)['’]\s*)/i;
+    let prima;
+    do { prima = dest; dest = dest.trim().replace(LEGA, ""); } while (dest !== prima);
+    // senza "che": il messaggio comincia dove finisce il nome ("ai ragazzi della squadra domani cantiere Miramonti ore 7")
+    const stop = dest.search(/[,;:]|\.{2,}|…|\s(?:oggi|domani|dopodomani|stasera|stamattina|luned\p{L}*|marted\p{L}*|mercoled\p{L}*|gioved\p{L}*|venerd\p{L}*|sabato|domenica|alle|ore|per|perché|perche|se|quando|e\s+digli|e\s+dille|digli|dille|dicendo\p{L}*)\b/iu);
+    let oggetto = "";
+    if (stop >= 0) {
+      const resto = dest.slice(stop).replace(/^[\s,;:.…]+/, "").replace(/^(?:e\s+)?(?:digli|dille|dicendo(?:gli|le)?)\s+(?:che\s+)?/i, "").trim();
+      dest = dest.slice(0, stop);
+      if (!messaggio) {
+        // "pec all'avvocato Donati per la messa in mora di Esposito": "per …" è l'oggetto, il testo lo scrive lui
+        if (/^per\s/i.test(resto)) oggetto = resto.replace(/^per\s+/i, "");
+        else messaggio = resto;
+      }
+    }
+    dest = dest.replace(/[.…!?]+$/, "").trim().split(/\s+/).slice(0, 5).join(" ");
+    if (!dest || /^(?:lo|la|li|le|gli|mi|ti|ci|vi|ne)$/i.test(dest)) return null;
+    // "manda un feedback: …", "manda la fattura a Rossi": non è una persona, restano ai loro percorsi
+    if (/^(?:feedback|segnalazion|suggeriment|recension|promemoria|notific|report|backup|fattur|preventiv|document|foto|pdf|file|contratt|computo|cartell|posizione|dico|di\.co|sal\b|ricevut|bonifico|pagament)/i.test(dest)) return null;
+    const cl = trovaCliente(parole(dest), ctx.clienti || [], new Set());
+    return {
+      azione: canale, testo: intero, originale: intero, nomeDetto: dest, messaggio: messaggio.replace(/[.!]+$/, ""), oggetto,
+      cliente: cl.stato === "trovato" ? cl.cliente : null,
+      candidati: cl.stato === "ambiguo" ? cl.candidati : null,
+      clienteSimile: cl.stato === "simile" ? cl.cliente : null
+    };
+  }
+
+  /* Passo 3 (30/09): il nome della cartella da creare, quando il modello ha detto "cartella":
+     "nuova cartella: Sicurezza cantieri", "fai una cartella nuova che si chiama Hotel
+     Belvedere lavori 2026", "crea una cartella per i lavori del tetto… chiamala Tetto Parco Verde" */
+  function leggiCartella(testoOriginale) {
+    const t = String(testoOriginale || "").replace(/\s+/g, " ").trim().replace(/[.!]+$/, "");
+    if (!/\b(?:crea|creami|fai|fammi|aggiungi|aggiungimi|apri|aprimi|nuova|metti)\b/i.test(t) || !/\bcartell[ae]\b/i.test(t)) return null;
+    let m = t.match(/\b(?:chiamala|chiamata|che\s+si\s+chiama|di\s+nome|col\s+nome|con\s+(?:il\s+)?nome)\s*:?\s+(.+)$/i)
+      || t.match(/\bcartella(?:\s+nuova)?\s*:\s*(.+)$/i)
+      || t.match(/\bcartella(?:\s+nuova)?\s+(?:per\s+(?:il|la|i|le|gli|lo)?\s*|di\s+|del\s+|della\s+)?(.+)$/i);
+    if (!m) return null;
+    const nome = m[1].replace(/^[«"'“]+|[»"'”]+$/g, "").trim();
+    if (!nome || nome.split(/\s+/).length > 6) return null;
+    return { nome };
+  }
+
+  /* Passo 3 (30/09): per quale cliente la dichiarazione di conformità, quando il modello ha
+     detto "dico": "mi serve la di.co. per il condominio via gramsci, impianto citofonico",
+     "la dico dell'hotel belvedere per le luci di emergenza, preparala…" */
+  function leggiDico(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const t = String(testoOriginale || "").replace(/\s+/g, " ").trim();
+    const m = t.match(/\b(?:di\.?\s*co\.?|dico|dichiarazione\s+di\s+conformit[aà]|conformit[aà])(?=[\s,.]|$)\s*(.*)$/i);
+    if (!m) return null;
+    let resto = m[1].replace(/^(?:(?:per|del|della|dello|di|a|al|alla|da|dal|dell['’]|all['’])\s*)?(?:(?:l['’]\s*|il\s+|la\s+)?(?:impianto|lavoro|cliente)\s+)?(?:(?:del|della|dei|di|da|dal|per|dell['’])\s*)?/i, "");
+    resto = resto.split(/[,;:]|\s(?:per|che|perch[eé]|preparala|fammela|falla)\b/i)[0].trim().replace(/^(?:il|la|lo|i|gli|le)\s+|^l['’]\s*/i, "").split(/\s+/).slice(0, 5).join(" ");
+    const cl = resto ? trovaCliente(parole(resto), ctx.clienti || [], new Set()) : { stato: "nessuno" };
+    return { cliente: cl.stato === "trovato" ? cl.cliente : null, nomeDetto: resto };
+  }
+
+  /* Passo 3 (30/09): l'assemblea, quando il modello ha detto "assemblea" ma la frase non
+     comincia come il lettore se l'aspetta ("mettimi l'assemblea del Parco Verde…", "c'è da
+     convocare n'altra volta l'assemblea dell'Aurora che la prima è andata deserta…"): il
+     condominio è quello nominato dopo "assemblea" (prima del motivo), il motivo dopo "per" */
+  function leggiAssemblea(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const t = String(testoOriginale || "").replace(/\s+/g, " ").trim();
+    const m = t.match(/\bassemble[ae]\b\s*(.*)$/i);
+    if (!m) return null;
+    const dopo = m[1];
+    const quando = trovaQuando(parole(pulisci(t).testo), ctx.oggi || new Date());
+    const testaNome = dopo.split(/[,;:]|\s(?:per|che|perch[eé]|il\s+\d|alle|oggi|domani|dopodomani|luned\p{L}*|marted\p{L}*|mercoled\p{L}*|gioved\p{L}*|venerd\p{L}*|sabato|domenica)\b/iu)[0];
+    let cl = trovaCliente(parole(testaNome), ctx.clienti || [], new Set(), { nomeSolo: true });
+    if (cl.stato !== "trovato") cl = trovaCliente(parole(dopo), ctx.clienti || [], new Set(), { nomeSolo: true });
+    let condominio = cl.stato === "trovato" ? cl.cliente.name : "";
+    if (!condominio) {
+      const nome = testaNome.replace(/^(?:(?:del|della|dello|dei|di|al|alla|in|nel|nella|presso)\s+|(?:dell|all|nell)['’]\s*)/i, "").replace(/^condominio\s+/i, "").trim();
+      if (nome && nome.split(/\s+/).length <= 4) condominio = "Condominio " + maiuscola(nome);
+    }
+    if (!condominio) return null;
+    const mm = dopo.match(/\bper\s+(?!\d)(.+?)(?=\s+il\s+\d|\s+(?:oggi|domani|dopodomani|luned\p{L}*|marted\p{L}*|mercoled\p{L}*|gioved\p{L}*|venerd\p{L}*|sabato|domenica|alle)\b|[,;]|$)/iu);
+    const motivo = mm ? maiuscola(mm[1].replace(/^(?:il|la|lo|i|gli|le)\s+|^l['’]\s*/i, "")) : "";
+    return { azione: "assemblea", testo: t, originale: t, condominio, cliente: cl.stato === "trovato" ? cl.cliente : null, tipo: /straordinari/i.test(t) ? "straordinaria" : "ordinaria", motivo, quando };
+  }
+
   function leggiNuovoCliente(testo) {
     const tel = trovaTelefono(testo);
     let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
@@ -1924,7 +2030,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

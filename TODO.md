@@ -4974,6 +4974,56 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Passo 3, cassetti della sera (30/09/2026, ROADMAP 0b.19)
+- **`lettore.leggiDestinatario(testo, ctx, tipo)`** (tipo = messaggio | email |
+  chiamata) → `{azione: messaggio|email|whatsapp|chiama, nomeDetto, messaggio,
+  oggetto, cliente, candidati, clienteSimile}`:
+  - destinatario = testo dopo l'ULTIMO verbo/canale prima del "che"
+    (manda…, scriv…, avvis…, chiam…, parlare con, whatsapp, mail, pec, sms),
+    tolti "sul gruppo dei / al / all' / il / con…"; il cliente si cerca solo lì;
+  - una correzione prima del "che" ("… cioè", "no aspetta,", "no scusa",
+    "anzi"; lookahead `(?!\p{L})` perché `\b` non va dopo "è") = conta quello
+    che viene dopo;
+  - senza "che" il messaggio comincia a virgola / giorno / "alle" / "ore" /
+    "per"; per l'email "per …" diventa l'oggetto;
+  - "… e poi chiama/manda/fai…" prima del "che" = due comandi → null;
+  - destinatario che non è una persona (feedback, fattura, preventivo, foto,
+    cartella, bonifico…) → null: "manda un feedback: il calendario è lento"
+    resta al feedback (l'aveva preso la prima versione, trovato da
+    `azioni-dirette.test.js`).
+- **DiCo:** il cassetto vuole un cliente trovato o una richiesta (serve, fai,
+  prepara, compila…): "dichiarazioni di conformità" da solo resta il nome
+  della pagina (trovato da `apri-col-codice.test.js`).
+- **Cassetto contatti** (`index.html`, prima delle urgenze): se le regole di
+  prima avevano già letto tutto (stessa azione, destinatario e, per scrivere,
+  il testo) resta come prima; altrimenti `leggiDestinatario` e gli esecutori
+  di sempre (`gestisciChiamata`, `gestisciMessaggio`, `gestisciScrittura`).
+- **`gestisciChiamata` senza cliente:** `domandaDelCodice` chiede il numero,
+  poi la card "Chiama X" con `tel:`. Il numero NON si salva (un fornitore non
+  è un cliente): da decidere se serve una rubrica dei non clienti.
+- **`scriviAChiNonECliente`:** saluto "Ciao a tutti" per ragazzi/gruppo/
+  squadra, "Buongiorno" se c'è solo il titolo (commercialista); titoli in più
+  (ragionier, amministratore); oggetto nel `mailto:`.
+- **`lettore.leggiCartella`**, **`leggiDico`**, **`leggiAssemblea`**
+  (condominio dopo "assemblea" e prima del motivo, `trovaCliente` con
+  `nomeSolo` perché "Aurora" è anche un nome di persona; motivo dopo "per").
+  `gestisciAssemblea(l, invia)` è l'ex `case "assemblea"` di `provaLettore`.
+- **Foto:** cassetto "foto" con "fai/fammi/scatta … foto" prima delle
+  urgenze; soggetto dopo "foto (al/della…)" fino a che/per/virgola, poi
+  `provaFotoImmediata("fai foto al " + soggetto)`.
+- **Appunti:** il cassetto Mente accetta un giorno se la frase comincia con
+  "tieni presente / tieni a mente / sappi che / prendi nota che / nota che".
+- **Urgenze:** "luci / lampade / illuminazione / uscita / porta / scala /
+  impianto / kit / pulsante di emergenza" non contano come parola d'urgenza.
+- **Risultati:** giro 15 1050, giro 16 1032, giro 17 1032; nessuna frase
+  prima giusta diventa sbagliata.
+- **Restano, errori del modello (per il prossimo allenamento):** "mi serve
+  la DiCo del fotovoltaico di Le Querce" (dice cerca_documento), "dalla Zanon
+  il contatore dell'acqua è in cantina", "mancano ancora le fughe…", "al
+  Garibaldi il portone chiude male" (dice urgenza), "il consigliere Rinaldi
+  odia le mail" (dice invio_documento). Dettaglio: "il B&B" non trova "B&B La
+  Conchiglia" (parole di una lettera saltate in `trovaCliente`).
+
 ### Passo 3, cassetti del pomeriggio (30/09/2026, ROADMAP 0b.19)
 - **Appunti** (`index.html`):
   - `gestisciMente(l, testo, viaVoce, invia, daModello)` è l'ex `case
