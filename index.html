@@ -12320,6 +12320,13 @@ function normalizzaSal(testo){
 async function provaSal(testo){
   if(currentProfession !== "edile") return false;
   let s = capisciSal(testo) || (normalizzaSal(testo) ? capisciSal(normalizzaSal(testo)) : null);
+  /* Passo 3: il modello dice "SAL" e le regole non l'hanno letto ("siamo a metà", "all'80",
+     "secondo stato di avanzamento…"): cliente e percentuale dal lettore */
+  if(!s && cassettoNeurale(testo) === "sal"){
+    const x = EonLettore.leggiSal(testo, contestoLettore());
+    const cl = x.cliente && clients.find(c => c.id === x.cliente.id);
+    if(cl && x.percentuale) s = { cliente: cl, percentuale: x.percentuale, importo: x.importo };
+  }
   /* "Fammi il SAL numero 2 del cantiere Ferraro" senza la percentuale: la chiede (29/09/2026) */
   if(!s && isDbReady()){
     const m = String(testo || "").trim().replace(/[.!?]+$/, "").match(/^(?:(?:fai|fammi|segna|segnami|registra|crea|nuovo|metti|prepara|preparami)\s+(?:il\s+|un\s+|lo\s+)?)?s\.?a\.?l\.?\b\s*(?:(?:n\.?|numero)\s*\d+\s*)?(.*)$/i);

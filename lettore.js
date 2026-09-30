@@ -1224,6 +1224,28 @@
     return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim() } : null;
   }
 
+  /* ---------------- SAL: stato avanzamento lavori (passo 3, 30/09/2026) ----------------
+     Il modello ha deciso che la frase chiede un SAL; qui solo i dettagli: il cliente
+     e a che punto sono i lavori ("siamo a metà", "al 40%", "all'80", "al cinquanta",
+     "arrivati al 75%"), e un importo se detto in euro. */
+  function leggiSal(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const pp = parole(pulisci(testoOriginale).testo);
+    const n = pp.map((x) => x.n).join(" ");
+    let percentuale = null;
+    if (/\b(?:a\s+meta|alla\s+meta|meta\s+dei\s+lavori|fatto\s+meta|fatta\s+meta|meta\s+lavori)\b/.test(n)) percentuale = 50;
+    for (let i = 0; i < pp.length && percentuale === null; i++) {
+      const v = /^\d{1,3}%?$/.test(pp[i].n) ? Number(pp[i].n.replace("%", "")) : numeroParola(pp[i].n);
+      if (v === null || !(v > 0 && v <= 100)) continue;
+      const dopo = pp[i + 1] && pp[i + 1].n, prima = i > 0 ? pp[i - 1].n : "";
+      const perCento = /%$/.test(pp[i].o) || /%$/.test(pp[i].n) || /^(?:%|percento|per)$/.test(dopo || "");
+      if (perCento || /^(?:al|all|a|arrivati|arrivato|siamo)$/.test(prima)) percentuale = v;
+    }
+    const importi = pp.map((x, i) => ({ i, v: /^\d[\d.]*$/.test(x.n) ? Number(x.n.replace(/\./g, "")) : null })).filter((x) => x.v !== null && pp[x.i + 1] && /^(?:euro|€)$/.test(pp[x.i + 1].n));
+    const cl = trovaCliente(pp, ctx.clienti || [], new Set());
+    return { percentuale, importo: importi.length === 1 ? importi[0].v : null, cliente: cl.stato === "trovato" ? cl.cliente : null };
+  }
+
   function leggiNuovoCliente(testo) {
     const tel = trovaTelefono(testo);
     let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
@@ -1875,7 +1897,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);
