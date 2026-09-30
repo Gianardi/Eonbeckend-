@@ -20426,7 +20426,7 @@ suTocco("impVoceAiuto", () => {
    di avere una copia dei propri dati (art. 20 GDPR) con un tocco. */
 const TABELLE_MIEI_DATI = ["profiles", "clients", "conversations", "messages", "tasks", "incomes", "payments",
   "opportunities", "goals", "employees", "assigned_tasks", "cantieri", "cantiere_foto", "cantiere_documenti",
-  "cantiere_appunti", "cartelle", "assemblee", "sal", "dichiarazioni_conformita", "condomini", "documents", "azienda_intestazione", "feedback", "push_iscrizioni"];
+  "cantiere_appunti", "cartelle", "assemblee", "sal", "dichiarazioni_conformita", "condomini", "documents", "azienda_intestazione", "feedback", "push_iscrizioni", "frasi_addestramento"];
 async function scaricaIMieiDati(){
   if(!isDbReady()){ showAILanding("Non collegato", "Per scaricare i tuoi dati serve la connessione."); return; }
   const dati = { app: "EON", creato_il: new Date().toISOString(), account: (currentSession.user && currentSession.user.email) || "",
