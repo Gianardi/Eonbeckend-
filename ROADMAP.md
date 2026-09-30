@@ -551,6 +551,46 @@ sporca, dialetti, chat, anziano, straniero.
      invece di "fai la DiCo") → nuovo addestramento; alcune domande sui dati
      che EON non sa ancora rispondere.
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
+   **Primo pezzo fatto il 30/09 (sera): gli importi dei preventivi e delle fatture.**
+   - **Cosa fa:** per ogni numero della frase dice che ruolo ha: quantità,
+     prezzo a pezzo, totale di una voce, numero annullato ("a 12, eh no 15"),
+     acconto ("il 30 per cento su 10.000"), sconto, oppure niente (indirizzi,
+     misure come "6 kW" o "3 metri per 2", date, IVA). Il conto lo fa il
+     codice, il modello non fa aritmetica: si fa così anche nei sistemi grandi.
+   - **Come è stato allenato:**
+     - circa 40 mila frasi del generatore, ognuna verificata col conto;
+     - circa 2.500 frasi vere di preventivi (quelle del primo modello),
+       etichettate dalle regole senza dubbi;
+     - circa 230 frasi scritte a mano.
+     Le frasi dei giri restano solo per l'esame. Sono 3 modelli piccoli: vale
+     la media dei loro voti.
+   - **Nell'app:** le regole restano la base. Il modello cambia il conto solo
+     se è sicuro almeno al 98% su ogni numero.
+   - **Risultati sulle 317 frasi di prova con un importo:**
+     - regole da sole: 300;
+     - modello da solo: 303;
+     - regole + modello: **305**, e nessuna frase che era giusta diventa
+       sbagliata.
+     Sistemate, per esempio: "due armadi… 120 l'uno" (240), "mille e due" =
+     1.200, "du' telecamere a 180 l'una e er montaggio 120" (480), "300 euro
+     meno il 10 per cento" (270).
+   - **App intera:** giro 16 da 1032 a **1033**, giro 17 da 1032 a **1035**,
+     giro 15 uguale (1050).
+   - **Peso e velocità:** 1,4 MB, caricato dopo l'avvio. 24 ms a frase sul
+     computer; sul telefono non è misurato, stimo fino a circa 100 ms, e solo
+     per le frasi di preventivi e fatture.
+   - **Onestà:** una prova automatica nuova (`eval/modello-dettagli.test.mjs`)
+     blocca il merge se una frase giusta diventa sbagliata. La soglia del 98%
+     e le prove sono tarate sui giri che conosco: il voto vero lo darà il
+     giro 18 alla cieca (passo 5).
+   - **Resta:**
+     - le date e le ore ("giovedì 8" = giorno 8 o alle 8?, due appuntamenti
+       in una frase, "alle deci"): prossimo pezzo di questo passo;
+     - alcuni importi ancora sbagliati, per esempio "40 metri a 12, eh no 15,
+       e poi 6 plafoniere…";
+     - l'acconto "30 per cento su 10.000": il lettore lo legge giusto, ma
+       nell'app la frase non arriva al preventivo (è un problema di
+       smistamento).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono

@@ -748,7 +748,7 @@
       else if (r === "SCO") sco = v;
       else if (r === "SCOV") scov = v;
     }
-    if (perc != null && base != null) righe.push({ quantita: 1, prezzo: Math.round(base * perc) / 100, i: -1, acconto: true });
+    if (perc != null && base != null) righe.push({ quantita: 1, prezzo: Math.round(base * perc) / 100, i: -1, acconto: { perc, base } });
     let totale = righe.reduce((s, x) => s + x.quantita * x.prezzo, 0);
     if (sco != null) totale = totale * (1 - sco / 100);
     if (scov != null) totale -= scov;
@@ -788,22 +788,27 @@
     if (regole != null && Math.abs(regole - d.totale) < 0.005) return l;
     const parole = d.segni.parole;
     const senzaImporto = (l.manca || []).filter((x) => x !== "importo");
+    // "Du telecamere", "Er montaggio": senza il numero e l'articolo davanti
+    const pulita = (t) => { const x = String(t || "").replace(/^(?:(?:il|la|lo|l['’]|i|gli|le|er|'o|'a|un|una|uno|du['’]?)\s+|(?:l['’]))+/i, "").split(/\s+/).filter((w, k) => k > 0 || numeroParola(w) == null).join(" ").trim(); return x ? x.charAt(0).toUpperCase() + x.slice(1) : ""; };
     const descrizione = (riga, k) => {
       const uguale = (l.voci || []).find((v) => Math.abs(v.prezzo - riga.prezzo) < 0.005);
-      if (uguale) return uguale.descrizione;
+      if (uguale) return pulita(uguale.descrizione) || uguale.descrizione;
       if (riga.i < 0) return "Acconto";
       let a = riga.i - 1;
       const inizio = d.righe[k - 1] ? d.righe[k - 1].i + 1 : 0;
       const pp = [];
       for (; a >= inizio && pp.length < 6; a--) { if (d.segni.valori[a] != null) break; pp.unshift(parole[a]); }
       const t = pp.join(" ").replace(/^(?:(?:e|poi|più|piu|anche|ci|metti|mettici|aggiungi|di|per|il|la|lo|i|le|a|da|al|alla|un|una|allora|poi)\s+)+/i, "").replace(/\s+(?:a|da|di|per|euro|l'uno|l'una|metti)$/i, "").trim();
-      return t ? t.charAt(0).toUpperCase() + t.slice(1) : (l.lavoro || "Voce " + (k + 1));
+      return pulita(t) || l.lavoro || "Voce " + (k + 1);
     };
     // sconto o acconto: una voce sola col totale giusto (la descrizione dice perché)
     if (d.sconto != null || d.scontoEuro != null || d.righe.some((r) => r.acconto)) {
-      const perche = d.righe.some((r) => r.acconto) ? "acconto" : d.sconto != null ? "sconto " + d.sconto + "%" : "sconto " + d.scontoEuro + " euro";
-      const base = l.lavoro || (d.righe[0] ? descrizione(d.righe[0], 0) : "Lavoro");
-      return { ...l, voci: [{ descrizione: base + " (" + perche + ")", quantita: 1, prezzo: d.totale }], importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
+      const acc = (d.righe.find((r) => r.acconto) || {}).acconto;
+      const euro = (v) => v.toLocaleString("it-IT") + " €";
+      const lavoro = l.lavoro && l.lavoro.split(/\s+/).length >= 2 ? l.lavoro : (d.righe[0] && d.righe[0].i >= 0 ? descrizione(d.righe[0], 0) : "");
+      const descr = acc ? "Acconto " + acc.perc + "% su " + euro(acc.base) + (lavoro ? " (" + lavoro + ")" : "")
+        : (lavoro || "Lavoro") + " (sconto " + (d.sconto != null ? d.sconto + "%" : euro(d.scontoEuro)) + ")";
+      return { ...l, voci: [{ descrizione: descr, quantita: 1, prezzo: d.totale }], importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
     }
     const voci = d.righe.map((r, k) => ({ descrizione: descrizione(r, k), quantita: r.quantita, prezzo: r.prezzo }));
     if (voci.length === 1 && voci[0].quantita === 1) return { ...l, voci: undefined, importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
