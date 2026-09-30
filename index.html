@@ -1045,6 +1045,9 @@
   .cl-dettatura{ margin-top:2px; }
   .cl-filtri{ display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:12px; scrollbar-width:none; }
   .cl-filtri::-webkit-scrollbar{ display:none; }
+  /* le cartelle nella scheda del cliente: vanno a capo, "+ Cartella" sempre in vista */
+  .sc-cartelle{ flex-wrap:wrap; overflow-x:visible; }
+  .sc-cartelle #scCartellaNuova{ border-style:dashed; }
   .cl-filtro{ flex:none; padding:8px 14px; border-radius:999px; border:1px solid var(--border); background:var(--card); font:inherit; font-size:13.5px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; }
   .cl-filtro b{ font-weight:700; opacity:.6; margin-left:3px; }
   .cl-filtro.on{ background:var(--text); border-color:var(--text); color:#fff; }
@@ -5027,7 +5030,7 @@ async function loadUserDataFromDB(){
   cantiereAppunti.length = 0; dbCantiereAppunti.forEach(a => cantiereAppunti.push(mappaAppunto(a)));
   // Cartelle di "Altra attività" (28/09/2026): a parte, un errore qui non blocca il resto
   const dbCartelle = await dbSelect("cartelle").catch(() => []);
-  cartelle.length = 0; (dbCartelle || []).slice().sort((a, b) => (a.ordine || 0) - (b.ordine || 0)).forEach(c => cartelle.push({ id: c.id, nome: c.nome, icona: c.icona || null }));
+  cartelle.length = 0; (dbCartelle || []).slice().sort((a, b) => (a.ordine || 0) - (b.ordine || 0)).forEach(c => cartelle.push({ id: c.id, nome: c.nome, icona: c.icona || null, clientId: c.client_id || null }));
   // Assemblee vere (28/09/2026): prima c'erano solo quelle di esempio
   const [dbSal, dbDico] = await Promise.all([dbSelect("sal").catch(() => []), dbSelect("dichiarazioni_conformita").catch(() => [])]);
   salLista.length = 0; (dbSal || []).forEach(r => salLista.push(mappaSal(r)));
@@ -6226,7 +6229,7 @@ const assignedTasks = [];
 const cantiereFoto = [];
 const cantiereDocumenti = [];
 const cantiereAppunti = [];
-const cartelle = []; // "Altra attività": { id, nome, icona }
+const cartelle = []; // "Altra attività": { id, nome, icona, clientId } — con clientId sta nella scheda di quel cliente (30/09/2026)
 const salLista = []; // edile: { id, clientId, numero, percentuale, importo, note, fatturato, created }
 function mappaSal(r){ return { id:r.id, clientId:r.client_id || null, numero:r.numero || 1, percentuale:Number(r.percentuale) || 0, importo:r.importo === null || r.importo === undefined ? null : Number(r.importo), note:r.note || "", fatturato:!!r.fatturato, created:r.created_at }; }
 const dichiarazioni = []; // elettricista: { id, clientId, numero, dati, created }
@@ -10917,6 +10920,8 @@ async function aggiungiAppuntoDaCard(testo, cartellaId){
   const riga = { testo: daFare || testo.charAt(0).toUpperCase() + testo.slice(1) };
   if(daFare) riga.da_fare = true;
   if(cartellaId) riga.cartella_id = cartellaId;
+  const cartellaCliente = cartellaId ? (cartelle.find(c => c.id === cartellaId) || {}).clientId : null;
+  if(cartellaCliente) riga.client_id = cartellaCliente;
   const creato = await dbInsert("cantiere_appunti", riga);
   if(!creato) { showAIToast("Non salvato", "Non sono riuscita a salvare l'appunto: riprova."); return false; }
   cantiereAppunti.push(mappaAppunto(creato));
@@ -10944,18 +10949,20 @@ function apriCardAppunti(cartella){
     };
     const quanti = (id) => cantiereAppunti.filter(a => id ? a.cartellaId === id : (!a.cartellaId && !a.assembleaId)).filter(a => !(a.daFare && a.fattoIl)).length;
     chip("Mente", quanti(null), true, () => {});
-    cartelle.forEach(c => chip(c.nome, quanti(c.id), false, () => apriCardAppunti(c)));
+    cartelle.filter(c => !c.clientId).forEach(c => chip(c.nome, quanti(c.id), false, () => apriCardAppunti(c)));
     chip("+ Cartella", null, false, () => chiediNomeCartella(null, (nuova) => apriCardAppunti(nuova)));
     corpo.appendChild(striscia);
   }
   if(cartella){
     const azioni = document.createElement("div");
     azioni.className = "ap-azioni";
-    azioni.innerHTML = '<button type="button" data-az="mente">‹ Mente</button><button type="button" data-az="foto">Scatta foto</button><button type="button" data-az="galleria">Dalla galleria</button><button type="button" data-az="rinomina">Rinomina</button><button type="button" class="pericolo" data-az="elimina">Elimina cartella</button>';
+    const delCliente = cartella.clientId ? clients.find(x => x.id === cartella.clientId) : null;
+    azioni.innerHTML = '<button type="button" data-az="mente"></button><button type="button" data-az="foto">Scatta foto</button><button type="button" data-az="galleria">Dalla galleria</button><button type="button" data-az="rinomina">Rinomina</button><button type="button" class="pericolo" data-az="elimina">Elimina cartella</button>';
+    azioni.querySelector('[data-az="mente"]').textContent = "‹ " + (delCliente ? delCliente.name : "Mente");
     azioni.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-az]");
       if(!b) return;
-      if(b.dataset.az === "mente") apriCardAppunti(null);
+      if(b.dataset.az === "mente"){ if(delCliente) mostraSchedaCliente(delCliente); else apriCardAppunti(null); }
       else if(b.dataset.az === "foto") scattaFotoInCartella(cartella, false);
       else if(b.dataset.az === "galleria") apriGalleriaFoto({ cartellaId: cartella.id });
       else if(b.dataset.az === "rinomina") rinominaCartella(cartella);
@@ -11045,7 +11052,8 @@ function iconaCartella(nome){
 function cartelleVisibili(){
   let inProva = false;
   try{ inProva = !!mestiereInProva; }catch(e){}
-  return inProva && currentProfession !== "artigiano" ? [] : cartelle;
+  // le cartelle di un cliente stanno nella sua scheda, non nella Mente
+  return inProva && currentProfession !== "artigiano" ? [] : cartelle.filter(c => !c.clientId);
 }
 function renderCartelle(){
   const griglia = document.getElementById("cartelleGriglia");
@@ -11072,13 +11080,13 @@ function renderCartelle(){
   griglia.appendChild(nuova);
 }
 /* Una piccola card con il nome da scrivere: per crearne una o rinominarla */
-function chiediNomeCartella(cartella, poi){
+function chiediNomeCartella(cartella, poi, clienteId){
   const corpo = document.createElement("div");
   corpo.className = "imp-form";
   corpo.innerHTML = '<label class="imp-campo"><span>Nome della cartella</span><input type="text" id="cartellaNome" maxlength="40" autocomplete="off"></label><button type="button" class="imp-btn" id="cartellaNomeSalva"></button>';
   const campo = corpo.querySelector("#cartellaNome");
   campo.value = cartella ? cartella.nome : "";
-  campo.placeholder = "Es. Fornitori, Personale, Idee";
+  campo.placeholder = clienteId ? "Es. Foto sinistro, Preventivi, Lavori bagno" : "Es. Fornitori, Personale, Idee";
   const salva = corpo.querySelector("#cartellaNomeSalva");
   salva.textContent = cartella ? "Rinomina" : "Crea cartella";
   const conferma = async () => {
@@ -11090,9 +11098,9 @@ function chiediNomeCartella(cartella, poi){
       if(isDbReady()) dbUpdate("cartelle", cartella.id, { nome: nomeBello });
     } else {
       if(!isDbReady()){ showAILanding("Non collegato", "Per creare una cartella serve la connessione."); return; }
-      const creata = await dbInsert("cartelle", { nome: nomeBello, ordine: cartelle.length });
+      const creata = await dbInsert("cartelle", { nome: nomeBello, ordine: cartelle.length, ...(clienteId ? { client_id: clienteId } : {}) });
       if(!creata) return;
-      const nuova = { id: creata.id, nome: creata.nome, icona: null };
+      const nuova = { id: creata.id, nome: creata.nome, icona: null, clientId: clienteId || null };
       cartelle.push(nuova);
       if(poi){ renderCartelle(); poi(nuova); return; } // dalla Mente o da un appunto: si continua da lì
     }
@@ -11106,7 +11114,8 @@ function chiediNomeCartella(cartella, poi){
 }
 function rinominaCartella(c){ chiediNomeCartella(c); }
 function eliminaCartella(c){
-  showAIToastConDecisione("Eliminare la cartella?", 'La cartella "' + escapeHtml(c.nome) + '" sparisce; i suoi appunti tornano nella Mente, le foto restano in Foto.', async () => {
+  const delCliente = c.clientId ? clients.find(x => x.id === c.clientId) : null;
+  showAIToastConDecisione("Eliminare la cartella?", 'La cartella "' + escapeHtml(c.nome) + '" sparisce; ' + (delCliente ? "appunti e foto restano nella scheda di " + escapeHtml(delCliente.name) + "." : "i suoi appunti tornano nella Mente, le foto restano in Foto."), async () => {
     const quando = new Date().toISOString();
     if(isDbReady()){
       await dbUpdate("cartelle", c.id, { deleted_at: quando });
@@ -11119,6 +11128,7 @@ function eliminaCartella(c){
     if(i > -1) cartelle.splice(i, 1);
     chiudiRisorsaCard();
     renderCartelle(); renderDaFare();
+    if(delCliente) mostraSchedaCliente(delCliente);
   }, null, "Elimina", "Annulla");
 }
 /* Alla prima apertura di "Altra attività": le cartelle proposte dal
@@ -11782,10 +11792,12 @@ async function caricaCantiereFoto(file, clienteIdForzato, opzioni){
     const assembleaId = opzioni && opzioni.assembleaId ? opzioni.assembleaId : null;
     const rigaFoto = { url:pub.publicUrl };
     if(cartellaId) rigaFoto.cartella_id = cartellaId;
+    const clienteDellaCartella = cartellaId ? (cartelle.find(c => c.id === cartellaId) || {}).clientId || null : null;
+    if(clienteDellaCartella && !clienteIdForzato){ rigaFoto.client_id = clienteDellaCartella; }
     if(assembleaId) rigaFoto.assemblea_id = assembleaId;
     const creato = await dbInsert("cantiere_foto", rigaFoto);
     if(!creato) throw new Error("scrittura non riuscita");
-    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:null, nota:"", descrizione:"", cartellaId, assembleaId };
+    const nuovaFoto = { id:creato.id, url:creato.url, created:creato.created_at, clientId:rigaFoto.client_id || null, nota:"", descrizione:"", cartellaId, assembleaId };
     cantiereFoto.push(nuovaFoto);
     // Nota già detta nella frase ("fai foto a pavimenti" → "Pavimenti")
     const notaDetta = opzioni && opzioni.nota ? String(opzioni.nota).trim() : "";
@@ -17604,6 +17616,25 @@ function mostraSchedaCliente(c, opzioni){
 
   // Stato lavori: impegni, appunti, foto
   const sezione = (titolo) => { const s = document.createElement("div"); s.className = "risorsa-sezione"; s.textContent = titolo; corpo.appendChild(s); };
+  /* Le cartelle del cliente (30/09/2026, tester Simone: dentro "viale Italia 171" una
+     cartella "foto sinistro Del Santo" con solo quelle foto): foto e appunti insieme */
+  sezione("Cartelle");
+  const listaCartelle = document.createElement("div");
+  listaCartelle.className = "cl-filtri sc-cartelle"; listaCartelle.id = "scCartelle";
+  cartelle.filter(x => x.clientId === c.id).forEach(x => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "cl-filtro";
+    const n = cantiereFoto.filter(f => f.cartellaId === x.id).length + cantiereAppunti.filter(a => a.cartellaId === x.id).length;
+    b.textContent = x.nome;
+    if(n){ const q = document.createElement("b"); q.textContent = n; b.appendChild(q); }
+    b.addEventListener("click", () => apriCardAppunti(x));
+    listaCartelle.appendChild(b);
+  });
+  const nuovaC = document.createElement("button");
+  nuovaC.type = "button"; nuovaC.className = "cl-filtro"; nuovaC.id = "scCartellaNuova"; nuovaC.textContent = "+ Cartella";
+  nuovaC.addEventListener("click", () => chiediNomeCartella(null, (nuova) => apriCardAppunti(nuova), c.id));
+  listaCartelle.appendChild(nuovaC);
+  corpo.appendChild(listaCartelle);
   const impegni = impegniDelCliente(c);
   sezione("Impegni");
   const listaImpegni = document.createElement("div");
