@@ -486,6 +486,21 @@ sporca, dialetti, chat, anziano, straniero.
      prove su 71.
    - Restano gli importi letti male (sconti, correzioni "no, metti 15",
      "30% su 10.000"): sono dettagli, lavoro del passo 4.
+   **Terzo cassetto fatto il 30/09: domande sui tuoi dati.**
+   - Il modello decide che è una domanda sui tuoi dati.
+   - Il lettore (`leggiDomandaDati`) capisce il tema: agenda, soldi di un
+     cliente, chi ti deve, incassi, documenti, appunti di un cliente.
+   - Risponde il codice di sempre, senza AI: "che c'ho domani?", "com'è
+     messa la settimana prossima?", "Ingrassia quanto ha versato?", "chi non
+     mi paga?".
+   - Nuovo: "il preventivo della palestra l'hanno accettato?" mostra i
+     preventivi di quel cliente e dice onestamente che l'accettazione EON non
+     la registra ancora. "Cosa mi ero segnato su Fontana?" apre la sua scheda.
+   - Una o due parole ("pagamenti") restano i nomi delle pagine.
+   - Risultati: giro 15: 1037 → **1041**; giro 16: 985 → **1002**; giro 17:
+     983 → **1000**. Nessun giro peggiora.
+   - **Da stamattina, in tutto: giro 16 da 966 a 1002 (da 90% a 94%), giro
+     17 da 966 a 1000 (da 91% a 94%).**
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
 

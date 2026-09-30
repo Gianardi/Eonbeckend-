@@ -4974,6 +4974,31 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Passo 3, terzo cassetto: domande sui dati (30/09/2026, ROADMAP 0b.19)
+- `lettore.js`: `leggiDomandaDati(testo, ctx)` →
+  `{azione: "dati", tema, cliente, quando, testo}`.
+  - Temi con regole ampie: documenti (accettato / risposto / mandato /
+    fatto), crediti (non paga, da riscuotere), incassi (quanto m'ha dato /
+    versato, ha saldato, riepilogo incassi), agenda (lavori / giri /
+    appuntamenti + un tempo, "c'ho", "com'è messa", "punto dei lavori",
+    "quand'è che devo"), note_cliente.
+  - Se nessuna regola scatta si usa `temaDomanda`; se non trova nemmeno
+    quello, null.
+- `index.html`:
+  - in `elabora`, dopo il cassetto documento: `cassettoNeurale === "dati"`
+    (almeno 3 parole, non "apri / vai / mostra") → `rispondiSuiDati(ld)`;
+  - in `rispondiSuiDati`: `documenti` con un cliente o con "accettato /
+    risposto / mandato" elenca i documenti di quel cliente (importo, data,
+    numero), più una nota onesta sull'accettazione che non si registra;
+    `note_cliente` apre la scheda.
+- Restano (5): "quante caldaie ho installato", "l'ultima volta dalla
+  Pastorelli" (impegni passati), "la Colombini sabato o domenica?", "fammi il
+  punto dei lavori" (amministratore), "l'ho fatta la fattura alle Magnolie
+  per il secondo trimestre?".
+- Correzione della rete: `file-privati-app.test.js` aspetta il link firmato
+  (`waitForFunction`) invece di un tempo fisso (su GitHub falliva a volte).
+- Minimi alzati: giro 15 1041, giro 16 1002, giro 17 1000.
+
 ### Passo 3, secondo cassetto: preventivo/fattura (30/09/2026, ROADMAP 0b.19)
 - `lettore.js`: `leggiDocumento(testo, ctx)`.
   - Ripulisce la frase:
