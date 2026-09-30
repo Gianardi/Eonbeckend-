@@ -1158,6 +1158,41 @@
     return { tipo, impegni: migliori, nuovoPer, tempi, parole: piene };
   }
 
+  /* ---------------- Preventivo o fattura (passo 3, 30/09/2026) ----------------
+     Il modello neurale ha deciso che la frase chiede un preventivo o una fattura.
+     Qui si toglie solo quello che faceva sbagliare le regole, poi legge il
+     lettore di sempre (voci, importi, cliente):
+     - la parola storpiata dalla dettatura: "prevendivo", "prevetivo", "fatturami";
+     - "per un nuovo cliente," che faceva creare il cliente e basta.
+     Torna la lettura solo se è davvero un documento da fare o cercare. */
+  function distanza(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+  function parolaDocumento(w) {
+    const n = norm(w);
+    if (/^(?:preventiv[oi]|fattur[ae])$/.test(n)) return null;
+    if (/^fattur(?:ami|agli|ale|alo|ala|iamo|a)$/.test(n)) return "fattura a";
+    if (n.length >= 8 && n.length <= 12 && /^pre/.test(n) && distanza(n, "preventivo") <= 2) return "preventivo";
+    if (n.length >= 6 && n.length <= 9 && /^fat/.test(n) && distanza(n, "fattura") <= 2) return "fattura";
+    return null;
+  }
+  function leggiDocumento(testoOriginale, ctx) {
+    let t = String(testoOriginale || "").split(/(\s+)/).map((w) => { const x = parolaDocumento(w.replace(/[^\p{L}]/gu, "")); return x ? w.replace(/[\p{L}]+/u, x) : w; }).join("");
+    t = t.replace(/\b(?:per\s+)?(?:un|una|il|la)?\s*(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\s*[,:]?\s*/i, (m) => (/^per\b/i.test(m) ? "per " : ""))
+      .replace(/\bper\s+(?:il|la)\s+(signor|signora|sig\.?)\s+/i, "per $1 ");
+    const l = leggi(t, ctx);
+    if (!l || l.azione !== "documento") return null;
+    // "per un cliente nuovo, rifacimento impianto…" senza nome: il nome si chiede, non si inventa
+    const dopoNuovo = (String(testoOriginale).split(/client[ei]\s+nuov[oa]|nuov[oa]\s+client[ei]/i)[1] || "").replace(/^[\s,:]+/, "").split(/\s+/).slice(0, 3).join(" ");
+    const nuovoSenzaNome = /\b(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\b/i.test(testoOriginale) && l.clienteNuovo
+      && !/^(?:(?:il|la|lo)\s+)?(?:signor|signora|sig|ditta|condominio|studio|bar|hotel|ristorante|trattoria|pizzeria)\b|^(?:(?:il|la)\s+)?\p{Lu}/u.test(dopoNuovo);
+    if (nuovoSenzaNome) return { ...l, lavoro: (l.clienteNuovo + " " + (l.lavoro || "")).trim(), clienteNuovo: null, manca: [...new Set([...(l.manca || []), "cliente"])], testoLetto: t };
+    return { ...l, testoLetto: t };
+  }
+
   function leggiNuovoCliente(testo) {
     const tel = trovaTelefono(testo);
     let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
@@ -1215,7 +1250,7 @@
     for (let i = 0; i < pp.length - 1; i++) {
       if (giaUsate.has(i) || !MARCHE_NOME.test(pp[i].n)) continue;
       const usate = [];
-      for (let j = i + 1; j < pp.length && usate.length < 3 && libero(j); j++) usate.push(j);
+      for (let j = i + 1; j < pp.length && usate.length < 3 && libero(j); j++) { usate.push(j); if (pp[j].sep) break; } // la virgola chiude il nome
       if (usate.length) return usate;
     }
     return null;
@@ -1809,7 +1844,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, leggiModificaImpegno, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

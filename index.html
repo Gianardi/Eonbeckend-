@@ -15863,6 +15863,15 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Il nome di una pagina ("Cestino", "Chiamate") è sempre un comando,
        anche se EON aveva appena fatto una domanda (tranne quando la
        parola era proprio nella domanda: allora è la risposta) */
+    /* Il modello dice "preventivo o fattura" (passo 3): il lettore dei documenti legge la
+       frase ripulita ("prevendivo", "per un nuovo cliente,"), prima degli altri controllori
+       (niente "urgenza" per "24 lampade di emergenza", niente solo-cliente o solo-appunto) */
+    if(testo && !inCorso && !inContinuazione && cassettoNeurale(testo) === "documento"){
+      const ld = EonLettore.leggiDocumento(testo, contestoLettore());
+      const rd = ld && ld.modo === "crea" ? gestisciDocumento(ld, testo, (frase, p) => elabora(frase, false, p)) : null;
+      if(rd && rd.comando){ ricordaEsitoCodice(testo, "documento_neurale"); return inviaAlServer(testo, viaVoce, false, rd); }
+      if(rd && rd.fatto){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "documento_neurale"); return; }
+    }
     if(testo && !inCorso && !inContinuazione && await provaUrgenza(testo)){
       campo.value = "";
       hint.textContent = hintBaseDi();
