@@ -13337,7 +13337,8 @@ function rispondiSuiDati(l){
    Una domanda o un saluto che le regole mettevano nella Mente va invece a
    chi risponde. Mai due volte di fila (niente giri a vuoto). */
 const SOGLIA_NEURALE = 0.9;
-const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b/i.test(String(testo || ""));
+// "fammi un documento…" chiede di FARE; "fammi (ri)vedere / trovare / aprire…" chiede di cercare
+const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b(?!\s+(?:ri)?(?:vedere|trovare|aprire|cercare|leggere|sentire|avere|mandare))/i.test(String(testo || ""));
 function provaModello(l, testo, arbitro){
   if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
   // "aggiungi in EON queste foto", "segna in Fornitori…": una cartella che c'è, la gestisce la sua funzione

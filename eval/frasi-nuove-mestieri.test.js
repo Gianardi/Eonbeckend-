@@ -23,6 +23,16 @@ const path = require("path");
 const fs = require("fs");
 
 const PORT = Number(process.env.PORTA || 9025);
+/* Il giorno della prova è fisso (le frasi sono scritte per martedì 29/09/2026 mattina):
+   "giovedì" o "domani" vogliono dire la stessa cosa oggi e fra un anno. OGGI=... per cambiarlo.
+   L'orologio scorre normalmente da lì, sia qui (server) sia nella pagina. */
+const OGGI = process.env.OGGI || "2026-09-29T10:00:00";
+const fermaGiorno = (oggi) => {
+  const DataVera = Date, scarto = new DataVera(oggi).getTime() - DataVera.now();
+  class DataProva extends DataVera { constructor(...a) { if (a.length) super(...a); else super(DataVera.now() + scarto); } static now() { return DataVera.now() + scarto; } }
+  globalThis.Date = DataProva;
+};
+fermaGiorno(OGGI);
 const ROOT = path.resolve(__dirname, "..");
 const ELENCO = process.argv.includes("--elenco");
 const MINIMO = Number((process.argv.find((a) => a.startsWith("--minimo=")) || "").split("=")[1] || 135); // oggi 140/143 (al primo colpo erano 108)
@@ -112,6 +122,7 @@ async function main() {
       DATI = m; perMestiere[mestiere] = { giusta: 0, ai: 0, sbagliata: 0 };
       const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
       page.on("pageerror", (e) => errori.push(mestiere + ": " + e.message));
+      await page.addInitScript(`(${fermaGiorno})(${JSON.stringify(OGGI)})`);
       await page.addInitScript(() => {
         window.__scritture = []; window.__aperti = []; window.__fotoScatta = 0;
         window.open = (u) => { window.__aperti.push(String(u || "")); return { document: { write() {}, close() {} }, close() {} }; };
