@@ -4974,6 +4974,47 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Passo 4, il modello dei dettagli: gli importi (30/09/2026, ROADMAP 0b.19)
+- **Cosa fa:** per ogni numero di un preventivo o fattura dice il ruolo: O (niente:
+  indirizzi, misure, date, IVA, telefoni), QTA, PRZ (prezzo a pezzo), TOT (totale di una
+  voce), ANN (annullato: "12, eh no 15"), PERC + BASE (acconto: "il 30 per cento su
+  10.000"), SCO / SCOV (sconto in % / in euro). Il conto lo fa il codice
+  (`lettore.componiImporti`): il modello non fa aritmetica (come la "token classification"
+  dei modelli tipo BERT: ruoli dal modello, calcolo deterministico).
+- **Ingresso** (`lettore.segniDettagli`): una parola per volta, solo le abbreviazioni
+  sciolte (NON `togliRipensamenti`, le correzioni deve vederle); i numeri diventano la loro
+  forma (`<n3>` = 3 cifre, `<p2>` = in lettere, `<n2%>` = percentuale; "per cento" è il
+  segno %, "mille e due al…" = 1.200). Stessa funzione in allenamento e nel telefono.
+- **Dati** (`eval/neurale/dettagli/`, i file generati in `dati/`, non nel repository):
+  - `genera.mjs`: ~40 mila frasi di preventivi/fatture con i ruoli; ogni frase è
+    verificata (i numeri trovati dal lettore sono quelli scritti, il conto dà il totale
+    atteso), le altre si buttano;
+  - `argento.mjs`: ~2.500 frasi vere dei dati del primo modello etichettate dalle regole di
+    oggi, solo quelle senza dubbi (scartate: numeri non letti, un numero civico preso per
+    importo — errore delle regole che il modello imparava);
+  - `scritte/*.txt`: ~230 frasi scritte a mano col segno `12{QTA}`, `scritte.mjs` le
+    converte (i giri d'esame NON sono copiati);
+  - `esame.mjs`: le 317 frasi dei giri 8-17 con l'importo atteso (mai in allenamento).
+- **Modello** (`allena.py`): transformer D96, 2 strati, vocabolario WordPiece 1.500, voto
+  sul primo pezzo di ogni parola; pesi dei ruoli rari limitati (0.3-1.5: con 5 il modello
+  vedeva sconti e acconti dappertutto). Tre semi, media dei voti (`modello-dettagli.json`
+  = `{modelli: [...]}`).
+- **Nell'app:** `neurale.js` ora fa più modelli (`EonNeurale.crea()`), con
+  `etichetta(parole)`; `index.html` carica `modello-dettagli.json` dopo l'avvio;
+  `lettore.usaDettagli(lista)`. In `leggiDocumento` (`conDettagli`): le regole restano la
+  base; se il conto del modello è diverso e ogni numero è sicuro ≥ 98%, vale il modello
+  (descrizioni: la voce delle regole con lo stesso prezzo, o le parole prima del prezzo;
+  con un "totale detto" per controllo restano le regole, che avvisano se non torna — trovato
+  da `preventivo-voci-app.test.js`;
+  sconto/acconto = una voce sola col totale e il perché).
+- **Protezione dal giro 18** (trovata dalla CI): una percentuale che il modello lascia a O
+  e non è l'IVA ("sconto del cinque per cento", in lettere: il generatore mette le
+  percentuali solo in cifre) = non sicuro, decidono le regole. Al prossimo allenamento:
+  percentuali in lettere nel generatore.
+- **Prova** `eval/modello-dettagli.test.mjs`: legge tutti i giri con importo (giro 18
+  compreso: 420 frasi, regole 350, regole + modello 360); minimo 360, zero frasi rotte.
+- **Misure:** vedi ROADMAP 0b.19 passo 4.
+
 ### Passo 3, cassetti della sera (30/09/2026, ROADMAP 0b.19)
 - **`lettore.leggiDestinatario(testo, ctx, tipo)`** (tipo = messaggio | email |
   chiamata) → `{azione: messaggio|email|whatsapp|chiama, nomeDetto, messaggio,

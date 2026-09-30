@@ -1,0 +1,60 @@
+# Frasi scritte a mano (terza serie): indirizzi e misure vicino agli importi, decimali, pacchetti
+fattura al condominio via Cavour 27 compenso secondo trimestre 1.250{TOT} euro
+fattura viale Europa 40 compenso 980{TOT}
+fattura condominio di corso Italia 112 spese di gestione 340{TOT}
+fai la fattura al Condominio Via Dante 9 per il compenso annuale 3.900{TOT}
+fattura piazza Garibaldi 3 manutenzione cancello 260{TOT}
+preventivo per il condominio di via Matteotti 15, 8{QTA} appartamenti a 120{PRZ} ad appartamento
+fattura via Roma 101 compenso 700{TOT} e rimborso spese 42,30{TOT}
+fattura Magnolie compenso trimestre 1.300{TOT} e raccomandate 64,80{TOT}
+fattura per la signora Pini, rimborso bolli 16,00{TOT} e diritti di segreteria 25,50{TOT}
+preventivo per la villa due{QTA} boiler da 200 litri a 980{PRZ} l'uno e installazione 450{TOT}
+preventivo scaldabagno da 80 litri 390{TOT} con il montaggio
+fattura per il capannone colonnina da 22 kW 2.450{TOT} e linea dedicata 600{TOT}
+preventivo per la casa di montagna stufa a pellet da 12 kW 2.100{TOT}, canna fumaria 700{TOT}
+preventivo 3{QTA} climatizzatori da 12000 btu a 850{PRZ} l'uno
+fattura per il signor Leone, cavo da 6 millimetri 30{QTA} metri a 3,20{PRZ} al metro
+preventivo pannello solare termico da 300 litri 3.400{TOT} installato
+fattura massaggi per la signora Pace pacchetto 5{QTA} massaggi 250{TOT} euro meno il 10{SCO} per cento
+fattura estetica per la Galli pacchetto di 8{QTA} sedute 360{TOT}, sconto 20{SCOV} euro
+fattura parrucchiera pacchetto sposa 3{QTA} prove 280{TOT}
+fattura lezioni di nuoto pacchetto 10{QTA} lezioni 150{TOT}
+fai la fattura a Neri per il lavoro del magazzino, erano 3.000{ANN} di manodopera, no aspetta 2.800{TOT}, più materiale 1.200{TOT}
+preventivo per Dante, 1.500{ANN} di demolizione, anzi 1.300{TOT}, e smaltimento 400{TOT}
+fattura Rizzo, 600{ANN} di trasporto cioè no 550{TOT}
+preventivo per il salone: parquet 2.800{TOT}, battiscopa 400{ANN} no scusa 350{TOT}
+allora per la palestra fammi il preventivo, sono 4{QTA} spogliatoi a 3.500{PRZ} l'uno, poi le docce 2.200{TOT} e gli armadietti 1.800{TOT}
+preventivo per il bar, 2{QTA} frigoriferi a 1.300{PRZ} più una vetrina 2.100{TOT}
+fattura per Oliva, sostituzione di 2{QTA} pneumatici a 95{PRZ} più equilibratura 30{TOT}
+fattura officina Rossi tagliando 180{TOT}, olio 45{TOT}, filtri 38,50{TOT}
+preventivo per la ferramenta 500{QTA} volantini a 0,08{PRZ} e 200{QTA} biglietti da visita a 0,05{PRZ}
+fattura per la Coop, fornitura di 120{QTA} bottiglie a 2,50{PRZ}
+preventivo per il ristorante Da Lino, 30 posti a sedere, 30{QTA} sedie a 45{PRZ}
+fattura per il signor Riva, tre ore e mezza di lavoro 140{TOT} tutto compreso
+fattura per il civico 12 di via Po, pulizia scale 180{TOT}
+preventivo per il condominio al numero 5 di via Manzoni, cancello 1.900{TOT}
+fattura per la scala B del condominio Aurora, 2{QTA} lampade a 45{PRZ}
+preventivo per l'interno 7, bagno 5.900{TOT}
+fattura per il piano terra del negozio in via Tasso 22, insegna 750{TOT}
+preventivo per il condominio Venti Settembre, manutenzione ascensore 1.600{TOT}
+fattura per la trattoria I Due Leoni, riparazione cella frigo 420{TOT}
+preventivo per l'hotel Tre Stelle, 12{QTA} camere da tinteggiare a 220{PRZ}
+fattura per il residence Le Quattro Torri, giardinaggio mensile 380{TOT}
+preventivo per il bar Mille Luci, bancone 3.300{TOT}
+fattura per il signor Sette, riparazione tapparella 85{TOT}
+preventivo per la signora Cento, porta interna 390{TOT}
+fattura per la famiglia Otto, 2{QTA} ore a 35{PRZ}
+preventivo per il 2 ottobre, montaggio stand 1.400{TOT}
+fattura del 15 settembre per la Moretti, riparazione 210{TOT}
+preventivo valido 30 giorni per la Galli, recinzione 2.200{TOT}
+fattura con pagamento a 60 giorni per il condominio Aurora, compenso 1.700{TOT}
+preventivo per consegna entro il 20 novembre, cucina 7.400{TOT}
+fattura per la signora Bassi, iva al 10%, lavori 3.300{TOT}
+fattura per l'ingegner Pozzi aliquota 22, consulenza 1.500{TOT}
+preventivo per il supermercato Conad, 16{QTA} lampade stagne a 42,50{PRZ} l'una
+fattura mensile per il custode, 22{QTA} giorni a 65{PRZ} al giorno
+fattura noleggio piattaforma aerea 3{QTA} giorni a 280{PRZ}
+preventivo per il trasloco, 2{QTA} viaggi a 450{PRZ} a viaggio più imballaggio 180{TOT}
+fattura per il servizio di catering, 45{QTA} persone a 28{PRZ} a persona, torta 90{TOT}
+preventivo pulizia vetrate per l'hotel, 60{QTA} finestre a 8{PRZ} a finestra
+fattura per il condominio Le Palme, 4{QTA} interventi di disinfestazione da 120{PRZ}

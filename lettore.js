@@ -687,10 +687,139 @@
     const t = s.filter((w, i) => !(w.startsWith("<") && s[i - 1] === w));
     return (p.domanda ? "<dom> " : "") + t.join(" ");
   }
+  /* Passo 4 (30/09): il secondo modello neurale, quello dei DETTAGLI. Dice che ruolo ha
+     ogni numero della frase; il conto lo fa il codice (componiImporti).
+     Ingresso: una parola per volta, come la dice lui (solo le abbreviazioni sciolte, NON
+     le correzioni: "a 12, eh no 15" deve vederle per imparare che 12 è annullato); i numeri
+     diventano la loro "forma" (<n3> = tre cifre, <p2> = scritto in lettere, due cifre;
+     <n2%> = una percentuale), così il modello impara dal contesto e non dalla cifra. */
+  const RUOLI_DETTAGLI = ["O", "QTA", "PRZ", "TOT", "ANN", "PERC", "BASE", "SCO", "SCOV"];
+  const NUMERI_DIALETTO = { du: 2, tri: 3, quattru: 4, cincu: 5 };
+  function segniDettagli(testoOriginale) {
+    // "mille e due al condominio": 1.200 anche davanti a "al/alla/a" (espandiAbbreviazioni lo fa solo a fine cifra)
+    const t0 = String(testoOriginale || "").replace(/\b(mille|(?:due|tre|quattro|cinque|sei|sette|otto|nove|dieci)mila)\s+e\s+(due|tre|quattro|cinque|sei|sette|otto|nove)\b(?=\s+(?:al|alla|allo|ai|a|all['’]|agli|alle|per|di|da)\b)/gi,
+      (m, mila, cento) => String((mila.toLowerCase() === "mille" ? 1000 : 1000 * numeroParola(mila.toLowerCase().replace(/mila$/, ""))) + 100 * numeroParola(cento.toLowerCase())));
+    const pp = parole(espandiAbbreviazioni(t0));
+    const segni = [], valori = [];
+    const grandezza = (v) => (v < 10 ? 1 : v < 100 ? 2 : v < 1000 ? 3 : v < 10000 ? 4 : 5);
+    pp.forEach((x, i) => {
+      const o = x.o.replace(/^€/, "").replace(/€$/, "");
+      // "30 per cento": "cento" non è un numero, è il segno di percentuale
+      const perCento = (j) => pp[j] && pp[j].n === "per" && pp[j + 1] && pp[j + 1].n === "cento";
+      if (x.n === "cento" && i > 0 && pp[i - 1].n === "per" && i > 1 && valori[i - 2] != null) { segni.push("percento"); valori.push(null); return; }
+      const perc = /%$/.test(x.o) || perCento(i + 1) || (pp[i + 1] && /^(?:percento|%)$/.test(pp[i + 1].n));
+      let v = null, forma = null;
+      if (/^\+?\d[\d.\s]{7,}$/.test(x.o) || /^[03]\d{7,11}$/.test(x.n)) { segni.push("<tel>"); valori.push(null); return; }
+      if (/^\d{1,2}:\d{2}$/.test(o)) { segni.push("<ora>"); valori.push(null); return; }
+      v = numeroItaliano(o.replace(/%$/, ""));
+      if (v === null) { const k = x.n.match(/^(\d+(?:[.,]\d+)?)(k|mila)$/); if (k) v = Number(k[1].replace(",", ".")) * 1000; }
+      if (v !== null) forma = "n";
+      else if (x.n !== "mila") {
+        const w = NUMERI_DIALETTO[x.n] || (/^(?:un|uno|una)$/.test(x.n) ? null : numeroParola(x.n));
+        if (w) { v = w; forma = "p"; }
+      }
+      if (v !== null && pp[i + 1] && pp[i + 1].n === "mila") v *= 1000;
+      if (v === null) { segni.push(x.n); valori.push(null); return; }
+      segni.push("<" + forma + grandezza(v) + (perc ? "%" : "") + ">");
+      valori.push(v);
+    });
+    return { parole: pp.map((x) => x.o), segni, valori };
+  }
+  /* Il conto dai ruoli: quantità × prezzo (la quantità più vicina prima del prezzo, o
+     subito dopo: "150 l'una e ne mettiamo due"), i totali detti, l'acconto (percentuale
+     di una base), lo sconto (in percentuale o in euro); i numeri annullati non contano */
+  function componiImporti(valori, ruoli) {
+    const righe = [], qta = [];
+    let perc = null, base = null, sco = null, scov = null;
+    const prossimaQta = (i) => { for (let j = i + 1; j < ruoli.length; j++) { if (ruoli[j] === "QTA" && valori[j] != null) return j; if (/^(?:PRZ|TOT)$/.test(ruoli[j])) return -1; } return -1; };
+    const usate = new Set();
+    for (let i = 0; i < ruoli.length; i++) {
+      const r = ruoli[i], v = valori[i];
+      if (v == null || r === "O" || r === "ANN") continue;
+      if (r === "QTA") { if (!usate.has(i)) qta.push(i); }
+      else if (r === "PRZ") {
+        let q = qta.length ? qta.pop() : -1;
+        if (q < 0) { q = prossimaQta(i); if (q >= 0) usate.add(q); }
+        righe.push({ quantita: q >= 0 ? valori[q] : 1, prezzo: v, i });
+        qta.length = 0;
+      } else if (r === "TOT") { righe.push({ quantita: 1, prezzo: v, i }); qta.length = 0; }
+      else if (r === "PERC") perc = v;
+      else if (r === "BASE") base = v;
+      else if (r === "SCO") sco = v;
+      else if (r === "SCOV") scov = v;
+    }
+    if (perc != null && base != null) righe.push({ quantita: 1, prezzo: Math.round(base * perc) / 100, i: -1, acconto: { perc, base } });
+    let totale = righe.reduce((s, x) => s + x.quantita * x.prezzo, 0);
+    if (sco != null) totale = totale * (1 - sco / 100);
+    if (scov != null) totale -= scov;
+    return { righe, totale: Math.round(totale * 100) / 100, sconto: sco, scontoEuro: scov };
+  }
   /* Il modello neurale (30/09/2026): quando è caricato decide lui il cassetto;
      finché non c'è (primi istanti dopo l'apertura) decide il modello di parole */
   let NEURALE = null;
   function usaNeurale(n) { NEURALE = n && n.pronto && n.pronto() ? n : null; return !!NEURALE; }
+  /* Il modello dei DETTAGLI (passo 4): uno o più modelli (la media dei loro voti).
+     Finché non ci sono, gli importi li leggono solo le regole. */
+  let DETTAGLI = [];
+  function usaDettagli(lista) { DETTAGLI = (lista || []).filter((m) => m && m.pronto && m.pronto()); return DETTAGLI.length; }
+  const SICURO_DETTAGLI = 0.98;
+  function dettagliNeurali(testo) {
+    if (!DETTAGLI.length) return null;
+    const s = segniDettagli(testo);
+    if (!s.valori.some((v) => v != null)) return null;
+    const voti = DETTAGLI.map((m) => m.etichetta(s.segni));
+    if (voti.some((v) => !v)) return null;
+    const ruoli = [], sic = [];
+    s.segni.forEach((w, j) => {
+      if (s.valori[j] == null) { ruoli.push("O"); sic.push(1); return; }
+      const media = RUOLI_DETTAGLI.map((_, k) => voti.reduce((t, v) => t + (v[j].pp ? v[j].pp[k] : (k === 0 ? 1 : 0)), 0) / voti.length);
+      let k = 0; media.forEach((x, q) => { if (x > media[k]) k = q; });
+      ruoli.push(RUOLI_DETTAGLI[k]); sic.push(media[k]);
+    });
+    return { ...componiImporti(s.valori, ruoli), ruoli, sicurezza: Math.min(...sic), segni: s };
+  }
+  /* Il conto delle regole e quello del modello: se sono diversi e il modello è sicurissimo
+     (ogni numero ≥ 98%), vale il modello. Le descrizioni restano quelle delle regole
+     (la voce con lo stesso prezzo) o le parole prima del prezzo. */
+  function conDettagli(l, testo) {
+    const d = dettagliNeurali(testo);
+    if (!d || d.sicurezza < SICURO_DETTAGLI || !(d.totale > 0)) return l;
+    // "…totale 9.000": un totale detto per controllo; le regole lo confrontano con le voci e avvisano
+    if (l.totaleDetto != null) return l;
+    // una percentuale che il modello lascia senza ruolo e non è l'IVA ("sconto del cinque per
+    // cento", in lettere: non l'ha mai vista): non è sicuro, decidono le regole (giro 18)
+    const percSenzaRuolo = d.segni.segni.some((w, i) => /%>$/.test(w) && d.ruoli[i] === "O" && !d.segni.segni.slice(Math.max(0, i - 3), i).some((x) => /^(?:iva|aliquota)$/.test(x)));
+    if (percSenzaRuolo) return l;
+    const regole = l.voci && l.voci.length ? l.voci.reduce((t, v) => t + (v.quantita || 1) * v.prezzo, 0) : l.importo;
+    if (regole != null && Math.abs(regole - d.totale) < 0.005) return l;
+    const parole = d.segni.parole;
+    const senzaImporto = (l.manca || []).filter((x) => x !== "importo");
+    // "Du telecamere", "Er montaggio": senza il numero e l'articolo davanti
+    const pulita = (t) => { const x = String(t || "").replace(/^(?:(?:il|la|lo|l['’]|i|gli|le|er|'o|'a|un|una|uno|du['’]?)\s+|(?:l['’]))+/i, "").split(/\s+/).filter((w, k) => k > 0 || numeroParola(w) == null).join(" ").trim(); return x ? x.charAt(0).toUpperCase() + x.slice(1) : ""; };
+    const descrizione = (riga, k) => {
+      const uguale = (l.voci || []).find((v) => Math.abs(v.prezzo - riga.prezzo) < 0.005);
+      if (uguale) return pulita(uguale.descrizione) || uguale.descrizione;
+      if (riga.i < 0) return "Acconto";
+      let a = riga.i - 1;
+      const inizio = d.righe[k - 1] ? d.righe[k - 1].i + 1 : 0;
+      const pp = [];
+      for (; a >= inizio && pp.length < 6; a--) { if (d.segni.valori[a] != null) break; pp.unshift(parole[a]); }
+      const t = pp.join(" ").replace(/^(?:(?:e|poi|più|piu|anche|ci|metti|mettici|aggiungi|di|per|il|la|lo|i|le|a|da|al|alla|un|una|allora|poi)\s+)+/i, "").replace(/\s+(?:a|da|di|per|euro|l'uno|l'una|metti)$/i, "").trim();
+      return pulita(t) || l.lavoro || "Voce " + (k + 1);
+    };
+    // sconto o acconto: una voce sola col totale giusto (la descrizione dice perché)
+    if (d.sconto != null || d.scontoEuro != null || d.righe.some((r) => r.acconto)) {
+      const acc = (d.righe.find((r) => r.acconto) || {}).acconto;
+      const euro = (v) => v.toLocaleString("it-IT") + " €";
+      const lavoro = l.lavoro && l.lavoro.split(/\s+/).length >= 2 ? l.lavoro : (d.righe[0] && d.righe[0].i >= 0 ? descrizione(d.righe[0], 0) : "");
+      const descr = acc ? "Acconto " + acc.perc + "% su " + euro(acc.base) + (lavoro ? " (" + lavoro + ")" : "")
+        : (lavoro || "Lavoro") + " (sconto " + (d.sconto != null ? d.sconto + "%" : euro(d.scontoEuro)) + ")";
+      return { ...l, voci: [{ descrizione: descr, quantita: 1, prezzo: d.totale }], importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
+    }
+    const voci = d.righe.map((r, k) => ({ descrizione: descrizione(r, k), quantita: r.quantita, prezzo: r.prezzo }));
+    if (voci.length === 1 && voci[0].quantita === 1) return { ...l, voci: undefined, importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
+    return { ...l, voci, importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
+  }
   function classifica(testo, ctx) {
     if (NEURALE) { const r = NEURALE.classifica(segni(testo)); if (r) return r; }
     if (!MODELLO) return null;
@@ -1196,8 +1325,8 @@
     const dopoNuovo = (String(testoOriginale).split(/client[ei]\s+nuov[oa]|nuov[oa]\s+client[ei]/i)[1] || "").replace(/^[\s,:]+/, "").split(/\s+/).slice(0, 3).join(" ");
     const nuovoSenzaNome = /\b(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\b/i.test(testoOriginale) && l.clienteNuovo
       && !/^(?:(?:il|la|lo)\s+)?(?:signor|signora|sig|ditta|condominio|studio|bar|hotel|ristorante|trattoria|pizzeria)\b|^(?:(?:il|la)\s+)?\p{Lu}/u.test(dopoNuovo);
-    if (nuovoSenzaNome) return { ...l, lavoro: (l.clienteNuovo + " " + (l.lavoro || "")).trim(), clienteNuovo: null, manca: [...new Set([...(l.manca || []), "cliente"])], testoLetto: t };
-    return { ...l, testoLetto: t };
+    if (nuovoSenzaNome) return conDettagli({ ...l, lavoro: (l.clienteNuovo + " " + (l.lavoro || "")).trim(), clienteNuovo: null, manca: [...new Set([...(l.manca || []), "cliente"])], testoLetto: t }, testoOriginale);
+    return conDettagli({ ...l, testoLetto: t }, testoOriginale);
   }
 
   /* ---------------- Domande sui propri dati (passo 3, 30/09/2026) ----------------
@@ -2032,7 +2161,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

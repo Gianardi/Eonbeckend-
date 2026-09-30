@@ -1,0 +1,4810 @@
+{
+ "nota": "Giro 18 (30/09/2026, sera): ESAME ALLA CIECA dopo i passi 3 e 4. Frasi scritte da 5 scrittori NUOVI indipendenti (uno per mestiere: impresa edile a Verona, idraulico a Bari, elettricista a Torino, amministratrice di condominio a Palermo, tappezziere a Firenze) che NON hanno visto il codice di EON né i giri precedenti: solo le istruzioni con le etichette. Salvate nel repository PRIMA di misurare; misurate una volta prima di correggere. Nomi inventati.",
+ "mestieri": {
+  "edile": {
+   "clienti": [
+    "Famiglia Bertoldi",
+    "Condominio Le Querce",
+    "Zanetti Luigi",
+    "Pizzeria Da Bepi",
+    "Ferrari Marta",
+    "Immobiliare Adige srl",
+    "Tosi Renato",
+    "Bar Al Ponte"
+   ],
+   "impegni": [
+    [
+     "Sopralluogo Condominio Le Querce",
+     "domani",
+     "09:00"
+    ],
+    [
+     "Consegna materiale Zanetti",
+     "domani",
+     "14:30"
+    ],
+    [
+     "Rifacimento bagno Ferrari",
+     "sabato",
+     "08:00"
+    ],
+    [
+     "Preventivo Pizzeria Da Bepi",
+     "domani",
+     "17:00"
+    ],
+    [
+     "Riunione Immobiliare Adige",
+     "sabato",
+     "11:00"
+    ],
+    [
+     "Controllo tetto Tosi",
+     "sabato",
+     "07:30"
+    ]
+   ],
+   "frasi": [
+    [
+     "allora segnami domani alle otto dai Bertoldi per vedere il massetto",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "giovedì pomeriggio alle tre passo dal geometra Pasetto x le carte del condominio",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "metti venerdì alle 9 no alle 10 ritiro piastrelle da Ceramiche Scaligere",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "ricordami doman de ciamar el fornitor del cemento",
+     "calendario"
+    ],
+    [
+     "lunedì prossimo alle sette e mezza tutti in cantiere dai Zanetti",
+     "calendario",
+     "07:30"
+    ],
+    [
+     "segna che il 5 ottobre ho la visita medica alle undici",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "giovedì alle 8 dai Tosi e poi alle 2 dal bar al ponte",
+     "calendario",
+     "08:00,14:00"
+    ],
+    [
+     "fissami un appuntamento con la signora Ferrari per mercoledì 7 ore diciotto",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "venerdì mattina alle nove e un quarto consegna betoniera a noleggio in via Mazzini 22",
+     "calendario",
+     "09:15"
+    ],
+    [
+     "dopodomani alle 4 del pomeriggio vedo quelli dell'immobiliare adige x l'appartamento di borgo trento",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "promemoria per lunedì pagare l'F24 del Sergio",
+     "calendario"
+    ],
+    [
+     "el 12 de otobre alle sete in cantier Le Querce par le impalcature",
+     "calendario",
+     "07:00"
+    ],
+    [
+     "mia moglie dice che giovedì sera alle otto e mezza abbiamo cena dai suoceri segnalo",
+     "calendario",
+     "20:30"
+    ],
+    [
+     "venerdì alle 14 collaudo impianto elettrico con l'elettricista Bonomi dalla pizzeria",
+     "calendario",
+     "14:00"
+    ],
+    [
+     "metti in agenda lunedì 5 ore 10 banca per il fido",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "domani sera alle sei ricordami di chiamare il Renato per il tetto",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "giovedì 1 ottobre sopralluogo nuovo cliente in via Cantarane 14 alle nove",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "segna martedì prossimo dalle 8 a mezzogiorno demolizione tramezzo dai Bertoldi",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "venerdì 2 ottobre alle 17 riunione di condominio alle Querce che vogliono vedere i lavori",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "ricordami giovedì di ordinare il cartongesso",
+     "calendario"
+    ],
+    [
+     "mettimi mercoledì 7 alle tre e mezza dal commercialista Girelli",
+     "calendario",
+     "15:30"
+    ],
+    [
+     "lunedì alle sei e mezza de matina carico materiale in magazzino, no aspetta alle sette",
+     "calendario",
+     "07:00"
+    ],
+    [
+     "domani a mezzogiorno pranzo col geometra Pasetto al bar al ponte",
+     "calendario",
+     "12:00"
+    ],
+    [
+     "segna per il 15 ottobre scadenza durc da rinnovare",
+     "calendario"
+    ],
+    [
+     "venerdì alle otto dal Zanetti e alle undici dal Tosi",
+     "calendario",
+     "08:00,11:00"
+    ],
+    [
+     "fissa giovedì ore 16 sopralluogo tetto in via San Zeno 8 per la signora Pasquali",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "appuntamento sabato 10 alle nove col Mirko che viene a provare come operaio",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "ricordamelo lunedì mattina revisione del furgone alle otto e mezza a San Giovanni Lupatoto",
+     "calendario",
+     "08:30"
+    ],
+    [
+     "tra una settimana alle due del pomeriggio consegna finestre dai Ferrari",
+     "calendario",
+     "14:00"
+    ],
+    [
+     "venerdì ricordami di passare in comune x la scia della pizzeria",
+     "calendario"
+    ],
+    [
+     "giovedì dopo pranzo verso le due e mezza vado dai Bertoldi a vedere le tracce",
+     "calendario",
+     "14:30"
+    ],
+    [
+     "mettimi il 20 ottobre alle 9 corso sicurezza cantieri in fiera tutto il giorno",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "segna domani alle 7 e 45 partenza per Bussolengo con la gru",
+     "calendario",
+     "07:45"
+    ],
+    [
+     "il meccanico mi ha dato appuntamento giovedì alle 18 x il cambio gomme segnalo",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "lunedì prossimo ore quindici incontro all'immobiliare Adige per il capitolato",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "fissa un appuntamento col signor Tosi per giovedì alle dieci, no mettilo alle undici e mezza",
+     "calendario",
+     "11:30"
+    ],
+    [
+     "promemoria venerdì chiudere la contabilità di settembre",
+     "calendario"
+    ],
+    [
+     "mercoledì 14 alle otto pittore dai Zanetti",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "segna giovedì 8 ottobre ore 17 e 30 prova colore facciata condominio Le Querce",
+     "calendario",
+     "17:30"
+    ],
+    [
+     "domani pomeriggio alle cinque devo prendere la bimba a pallavolo metti in agenda",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "allora venerdì alle nove getto del solaio dai Bertoldi e ricordami la pompa del calcestruzzo",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "martedì 6 ottobre alle 10 e un quarto dal notaio con la Marta Ferrari",
+     "calendario",
+     "10:15"
+    ],
+    [
+     "segnami sabato 17 alle otto riunione coi ragazzi in magazzino",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "giovedì a pranzo verso l'una con el Bepi dea pizzeria x parlar del forno",
+     "calendario",
+     "13:00"
+    ],
+    [
+     "fra quindici giorni ricordami di controllare le crepe dai Tosi",
+     "calendario"
+    ],
+    [
+     "il sopralluogo al condominio Le Querce di domani spostalo alle dieci e mezza",
+     "calendario_modifica",
+     "10:30"
+    ],
+    [
+     "annulla la consegna materiale dai Zanetti de doman che no i xe pronti",
+     "calendario_modifica"
+    ],
+    [
+     "el bagno dei Ferrari sabato mettilo alle nove invece che alle otto",
+     "calendario_modifica",
+     "09:00"
+    ],
+    [
+     "sposta il preventivo della pizzeria da bepi a giovedì stessa ora",
+     "calendario_modifica"
+    ],
+    [
+     "la riunione con l'immobiliare Adige di sabato cancellala che mi hanno scritto che non vengono",
+     "calendario_modifica"
+    ],
+    [
+     "il tetto dei Tosi di sabato spostalo a lunedì alle 7, anzi alle 8",
+     "calendario_modifica",
+     "08:00"
+    ],
+    [
+     "domani il Zanetti anticipalo alle 13",
+     "calendario_modifica",
+     "13:00"
+    ],
+    [
+     "cancella sabato mattina dalla Ferrari, rinviamo a data da destinarsi",
+     "calendario_modifica"
+    ],
+    [
+     "la pizzeria di domani falla alle sei invece che alle cinque",
+     "calendario_modifica",
+     "18:00"
+    ],
+    [
+     "tieni presente che la signora Bertoldi vuole le piastrelle grigie non beige",
+     "mente"
+    ],
+    [
+     "segnati che dai Zanetti il contatore dell'acqua è in cantina dietro la caldaia",
+     "mente"
+    ],
+    [
+     "il Tosi paga sempre in ritardo ricordatelo quando gli faccio i prezzi",
+     "mente"
+    ],
+    [
+     "allora il codice del cancello del condominio Le Querce è 4512",
+     "mente"
+    ],
+    [
+     "la moglie del Bepi non vuole rumori prima delle nove occhio",
+     "mente"
+    ],
+    [
+     "cmq il fornitore Edilveneta fa lo sconto del 5 se paghi alla consegna",
+     "mente"
+    ],
+    [
+     "idea: fare dei volantini x i bagni chiavi in mano da lasciare al bar al ponte",
+     "mente"
+    ],
+    [
+     "tieni a mente che el Mirko no el sa guidar el camion",
+     "mente"
+    ],
+    [
+     "dai Ferrari il muro della cucina è portante non si tocca",
+     "mente"
+    ],
+    [
+     "l'amministratore delle Querce si chiama Dal Cero ed è pignolo con le fatture",
+     "mente"
+    ],
+    [
+     "segnati che la betoniera piccola ha il motore che scalda, prima o poi va cambiata",
+     "mente"
+    ],
+    [
+     "la Marta Ferrari ha un cane che morde, suonare prima di entrare in giardino",
+     "mente"
+    ],
+    [
+     "il geometra Pasetto preferisce essere chiamato dopo le due",
+     "mente"
+    ],
+    [
+     "allora ai Bertoldi ho lasciato 20 sacchi di colla in garage, tienlo presente",
+     "mente"
+    ],
+    [
+     "per il condominio servono i ponteggi a norma con la relazione, lo dice il Dal Cero",
+     "mente"
+    ],
+    [
+     "nota: la Adige srl vuole sempre tre preventivi diversi prima di decidere",
+     "mente"
+    ],
+    [
+     "tieni presente che il bar al ponte chiude il lunedì quindi i lavori si fanno quel giorno",
+     "mente"
+    ],
+    [
+     "dai Tosi le tegole sono coppi vecchi, recuperarne il più possibile",
+     "mente"
+    ],
+    [
+     "il Zanetti ha chiesto di non fatturare tutto, gli ho detto di no, segnatelo",
+     "mente"
+    ],
+    [
+     "per la pizzeria il forno pesa più di tre quintali, serve rinforzare il solaio",
+     "mente"
+    ],
+    [
+     "Ceramiche Scaligere ha il gres effetto legno in offerta, da ricordare per i prossimi bagni",
+     "mente"
+    ],
+    [
+     "il figlio della Ferrari fa l'elettricista, magari lo prendiamo per i lavoretti",
+     "mente"
+    ],
+    [
+     "ricordati che i Bertoldi hanno già dato l'ok per la finestra nuova in bagno",
+     "mente"
+    ],
+    [
+     "le ciavi del cantier de via Mazzini le ga el Sergio",
+     "mente"
+    ],
+    [
+     "misure del bagno Ferrari 2 e 40 per 1 e 80, altezza 2 e 70",
+     "mente"
+    ],
+    [
+     "cosa gh'ho domani in agenda",
+     "dati"
+    ],
+    [
+     "chi è che non mi ha ancora pagato",
+     "dati"
+    ],
+    [
+     "quanto ho incassato a settembre",
+     "dati"
+    ],
+    [
+     "ho fatto il preventivo alla pizzeria da bepi o no",
+     "dati"
+    ],
+    [
+     "cosa mi ero segnato sui Bertoldi",
+     "dati"
+    ],
+    [
+     "sabato che impegni ho",
+     "dati"
+    ],
+    [
+     "quanto mi deve il Tosi",
+     "dati"
+    ],
+    [
+     "il codice del cancello delle querce qual era",
+     "dati"
+    ],
+    [
+     "quante fatture ho fatto questo mese",
+     "dati"
+    ],
+    [
+     "ho mandato la fattura all'immobiliare adige?",
+     "dati"
+    ],
+    [
+     "a che ora ho il Zanetti domani",
+     "dati"
+    ],
+    [
+     "quanto ho preso di acconto dai Ferrari",
+     "dati"
+    ],
+    [
+     "dimmi gli appuntamenti di questa settimana",
+     "dati"
+    ],
+    [
+     "cosa avevo scritto sulle misure del bagno della Ferrari",
+     "dati"
+    ],
+    [
+     "quanti schei devo ancora ricevere in tutto",
+     "dati"
+    ],
+    [
+     "il bar al ponte ha pagato l'ultima fattura?",
+     "dati"
+    ],
+    [
+     "quali preventivi sono ancora in attesa di risposta",
+     "dati"
+    ],
+    [
+     "quando è l'ultima volta che sono stato dai Tosi",
+     "dati"
+    ],
+    [
+     "quanto ho fatturato quest'anno più o meno",
+     "dati"
+    ],
+    [
+     "giovedì sono libero la mattina?",
+     "dati"
+    ],
+    [
+     "fammi un preventivo per i Bertoldi rifacimento bagno demolizione 800 euro impianto idraulico 1500 e posa piastrelle 25 metri a 45 al metro",
+     "documento",
+     "3425"
+    ],
+    [
+     "fattura al bar al ponte per la tinteggiatura 1200 euro più iva",
+     "documento",
+     "1200"
+    ],
+    [
+     "preventivo condominio Le Querce facciata 450 metri quadri a 28 euro al metro, anzi 30, più ponteggio 3500",
+     "documento",
+     "17000"
+    ],
+    [
+     "fai una fattura al Zanetti per il massetto",
+     "documento"
+    ],
+    [
+     "preventivo per Tosi rifacimento tetto 120 metri a 65 euro più grondaie 1800 e fagli lo sconto del 10 per cento",
+     "documento",
+     "8640"
+    ],
+    [
+     "fattura di acconto del 30 per cento sul preventivo della pizzeria da 10000",
+     "documento",
+     "3000"
+    ],
+    [
+     "prev. x la signora Ferrari via Roma 45 cartongesso 3 pareti a 600 l'una",
+     "documento",
+     "1800"
+    ],
+    [
+     "fattura all'immobiliare adige per l'appartamento di borgo trento lavori finiti 14500 meno l'acconto che mi hanno già dato di 4000",
+     "documento",
+     "10500"
+    ],
+    [
+     "preventivo per il bar al ponte bagno disabili sanitari 2 pezzi a 350, piastrelle 1200 e manodopera 2000, però fagli un prezzo finale di 3800",
+     "documento",
+     "3800"
+    ],
+    [
+     "fattura Bertoldi 2500 euro per le opere murarie",
+     "documento",
+     "2500"
+    ],
+    [
+     "fammi un preventivo per la signora Pasquali muretto di recinzione di 15 metri alto 1 e 20 a 90 euro al metro",
+     "documento",
+     "1350"
+    ],
+    [
+     "preventivo cappotto termico casa Zanetti 180 metri quadri a 55 euro, spessore 12 centimetri",
+     "documento",
+     "9900"
+    ],
+    [
+     "fai la fattura alla Ferrari per il bagno 6800, no scusa 6300",
+     "documento",
+     "6300"
+    ],
+    [
+     "preventivo par el Bepi rinforzo solaio 4200 e demolizion forno vecio 600, sconto de 300 euro",
+     "documento",
+     "4500"
+    ],
+    [
+     "preventivo impermeabilizzazione terrazzo Tosi",
+     "documento"
+    ],
+    [
+     "fattura condominio Le Querce stato avanzamento 40 per cento sul contratto da 17000",
+     "documento",
+     "6800"
+    ],
+    [
+     "preventivo x immobiliare adige 2 bagni a 5500 l'uno, cucina 3000, pavimenti 90 metri a 40",
+     "documento",
+     "17600"
+    ],
+    [
+     "fattura al bar al ponte manutenzione grondaia 350 euro più 50 di uscita",
+     "documento",
+     "400"
+    ],
+    [
+     "preventivo per la Marta Ferrari muro di contenimento in via Verdi 18, 12 metri cubi di calcestruzzo a 150 al metro cubo, ferro 800 e manodopera 3 giorni x 3 operai a 250 al giorno a testa",
+     "documento",
+     "4850"
+    ],
+    [
+     "fattura al Tosi 1500 per la riparazione del camino",
+     "documento",
+     "1500"
+    ],
+    [
+     "prev. Zanetti per la scala esterna 2800 più il corrimano 650",
+     "documento",
+     "3450"
+    ],
+    [
+     "fai il preventivo per il condominio, cioè le Querce, rifacimento androne pavimento 60 metri a 70 e 4 punti luce a 80",
+     "documento",
+     "4520"
+    ],
+    [
+     "manda il preventivo ai Bertoldi",
+     "invio"
+    ],
+    [
+     "la fattura del bar al ponte mandala al titolare su whatsapp",
+     "invio"
+    ],
+    [
+     "spedisci il preventivo del tetto al Tosi per mail",
+     "invio"
+    ],
+    [
+     "inoltra la fattura all'amministratore delle Querce",
+     "invio"
+    ],
+    [
+     "mandighe el preventivo del solaio al Bepi",
+     "invio"
+    ],
+    [
+     "scrivi al Sergio che domani si parte alle sette dal magazzino",
+     "messaggio"
+    ],
+    [
+     "manda un whatsapp alla signora Bertoldi: domani arriviamo verso le otto, lasci aperto il garage",
+     "messaggio"
+    ],
+    [
+     "messaggio a mia moglie che stasera arrivo tardi",
+     "messaggio"
+    ],
+    [
+     "scrivi al geometra Pasetto se ha firmato la scia",
+     "messaggio"
+    ],
+    [
+     "manda un sms al Zanetti x dirgli che il materiale arriva giovedì",
+     "messaggio"
+    ],
+    [
+     "whatsapp al Mirko portati le scarpe antinfortunistiche",
+     "messaggio"
+    ],
+    [
+     "scrivi al Bepi che venerdì chiudiamo il cantiere alle quattro",
+     "messaggio"
+    ],
+    [
+     "manda un messaggio a Edilveneta mi servono 30 sacchi di premiscelato x domani",
+     "messaggio"
+    ],
+    [
+     "di' alla Ferrari che il bagno lo finiamo sabato, forse domenica",
+     "messaggio"
+    ],
+    [
+     "scrivi ai ragazzi che domani piove e si lavora solo al coperto",
+     "messaggio"
+    ],
+    [
+     "whatsapp al Tosi: le tegole nuove sono arrivate, passo io a fargliele vedere",
+     "messaggio"
+    ],
+    [
+     "messaggio al bar al ponte che lunedì veniamo a sistemare la porta",
+     "messaggio"
+    ],
+    [
+     "scrivighe al Dal Cero che la relazion dei ponteggi ghe la porto doman",
+     "messaggio"
+    ],
+    [
+     "manda un messaggio all'elettricista Bonomi, chiedigli se venerdì è libero",
+     "messaggio"
+    ],
+    [
+     "sms a mia figlia: ti vengo a prendere io alle cinque",
+     "messaggio"
+    ],
+    [
+     "manda una mail all'immobiliare adige con scritto che i lavori di borgo trento finiscono il 20",
+     "email"
+    ],
+    [
+     "scrivi una email al commercialista Girelli e chiedigli le scadenze di ottobre",
+     "email"
+    ],
+    [
+     "email all'amministratore Dal Cero: in allegato il cronoprogramma della facciata",
+     "email"
+    ],
+    [
+     "manda una mail a Ceramiche Scaligere x chiedere il listino del gres",
+     "email"
+    ],
+    [
+     "mail alla cassa edile per sapere se il durc è a posto",
+     "email"
+    ],
+    [
+     "chiama il Bertoldi",
+     "chiamata"
+    ],
+    [
+     "telefona al geometra Pasetto",
+     "chiamata"
+    ],
+    [
+     "chiamami mia moglie",
+     "chiamata"
+    ],
+    [
+     "fai il numero dell'Edilveneta",
+     "chiamata"
+    ],
+    [
+     "ciama el Sergio che no l'è gnancora rivà",
+     "chiamata"
+    ],
+    [
+     "telefona alla signora Ferrari, no aspetta, al marito",
+     "chiamata"
+    ],
+    [
+     "chiama il Bepi della pizzeria",
+     "chiamata"
+    ],
+    [
+     "chiama l'amministratore del condominio Le Querce",
+     "chiamata"
+    ],
+    [
+     "telefona al noleggio gru di Bussolengo",
+     "chiamata"
+    ],
+    [
+     "chiama il Tosi e mettilo in vivavoce",
+     "chiamata"
+    ],
+    [
+     "il Zanetti mi ha fatto il bonifico di 2000 euro",
+     "incasso"
+    ],
+    [
+     "segna che la Ferrari mi ha dato 1500 di acconto in contanti",
+     "incasso"
+    ],
+    [
+     "incassato dal bar al ponte 1200 euro",
+     "incasso"
+    ],
+    [
+     "l'immobiliare adige ha pagato la fattura, 10500",
+     "incasso"
+    ],
+    [
+     "el Tosi el m'ha dà mille euro in contanti",
+     "incasso"
+    ],
+    [
+     "arrivato bonifico condominio le querce 6800",
+     "incasso"
+    ],
+    [
+     "i Bertoldi mi hanno dato l'acconto del 30 per cento",
+     "incasso"
+    ],
+    [
+     "registra pagamento Bepi 3000 con assegno",
+     "incasso"
+    ],
+    [
+     "ricevuto 450 euro dalla signora Pasquali per il muretto, acconto",
+     "incasso"
+    ],
+    [
+     "il Zanetti ha saldato tutto",
+     "incasso"
+    ],
+    [
+     "segna incasso 2500 Bertoldi, bonifico arrivato ieri",
+     "incasso"
+    ],
+    [
+     "mi hanno pagato in contanti 300 euro per la grondaia del bar",
+     "incasso"
+    ],
+    [
+     "dai Bertoldi è saltato un tubo e c'è acqua dappertutto",
+     "urgenza"
+    ],
+    [
+     "è venuto giù un pezzo di cornicione alle querce bisogna transennare subito",
+     "urgenza"
+    ],
+    [
+     "el Mirko s'è fatto mal a na man col flessibile",
+     "urgenza"
+    ],
+    [
+     "in pizzeria c'è odore di gas dopo che abbiamo spostato il forno",
+     "urgenza"
+    ],
+    [
+     "dal Tosi piove dentro, il telo si è strappato col vento",
+     "urgenza"
+    ],
+    [
+     "si è rotto il ponteggio in via Mazzini, una tavola ha ceduto",
+     "urgenza"
+    ],
+    [
+     "ai Zanetti è saltata la corrente in tutta la casa da quando abbiamo forato",
+     "urgenza"
+    ],
+    [
+     "c'è una crepa nuova grossa sul muro portante dai Ferrari, non mi piace per niente",
+     "urgenza"
+    ],
+    [
+     "fai una foto al massetto",
+     "foto_scatta"
+    ],
+    [
+     "scatta una foto della crepa",
+     "foto_scatta"
+    ],
+    [
+     "fotografa il contatore",
+     "foto_scatta"
+    ],
+    [
+     "fammi una foto del bagno prima di demolire",
+     "foto_scatta"
+    ],
+    [
+     "foto adesso al ponteggio x la relazione",
+     "foto_scatta"
+    ],
+    [
+     "scatta na foto che ghe la fasso vedar al geometra",
+     "foto_scatta"
+    ],
+    [
+     "trovami le foto del tetto dei Tosi",
+     "risorsa"
+    ],
+    [
+     "apri il preventivo del condominio Le Querce",
+     "risorsa"
+    ],
+    [
+     "cerca la planimetria dei Bertoldi",
+     "risorsa"
+    ],
+    [
+     "fammi vedere la foto del contatore dei Zanetti",
+     "risorsa"
+    ],
+    [
+     "aggiungi un cliente nuovo, Pasquali Giovanna, 347 2210987",
+     "cliente"
+    ],
+    [
+     "nuovo cliente Autofficina Merlini di San Bonifacio",
+     "cliente"
+    ],
+    [
+     "salva il signor Castagna Walter telefono 045 8012345",
+     "cliente"
+    ],
+    [
+     "metti tra i clienti la Farmacia San Nazaro",
+     "cliente"
+    ],
+    [
+     "cliente novo el Bruno Righetti, el numero xe 340 5566778",
+     "cliente"
+    ],
+    [
+     "aggiungi Condominio Villa Rosa via Cantarane 14",
+     "cliente"
+    ],
+    [
+     "crea una cartella Cantiere Bertoldi",
+     "cartella"
+    ],
+    [
+     "fai una cartella nuova chiamata Sicurezza e DURC",
+     "cartella"
+    ],
+    [
+     "nuova cartella facciata Le Querce 2026",
+     "cartella"
+    ],
+    [
+     "fammi una cartella x le foto della pizzeria, chiamala Forno Bepi",
+     "cartella"
+    ],
+    [
+     "che differenza c'è tra la cila e la scia",
+     "ai"
+    ],
+    [
+     "come conviene fare il cappotto, 10 o 12 centi de spessore",
+     "ai"
+    ],
+    [
+     "col bonus ristrutturazioni quest'anno com'è la detrazione",
+     "ai"
+    ],
+    [
+     "madonna che giornata oggi, non ne posso più",
+     "ai"
+    ],
+    [
+     "è meglio il massetto autolivellante o quello tradizionale col riscaldamento a pavimento",
+     "ai"
+    ],
+    [
+     "quanto tempo deve asciugare un massetto prima di posare il parquet",
+     "ai"
+    ],
+    [
+     "secondo te conviene prendere un quarto operaio o no",
+     "ai"
+    ],
+    [
+     "come si calcola il costo orario di un operaio edile",
+     "ai"
+    ],
+    [
+     "sti clienti che vogliono tutto subito e pagano dopo sei mesi, mah",
+     "ai"
+    ],
+    [
+     "che malta si usa per rimettere i coppi vecchi",
+     "ai"
+    ],
+    [
+     "dimmi una barzelletta che sono in coda in tangenziale",
+     "ai"
+    ],
+    [
+     "ma il gres porcellanato va bene anche fuori col gelo?",
+     "ai"
+    ],
+    [
+     "siamo al 40% dai Bertoldi",
+     "sal"
+    ],
+    [
+     "segna che la facciata delle querce è a metà",
+     "sal"
+    ],
+    [
+     "dai Zanetti il cappotto è fatto al settanta per cento",
+     "sal"
+    ],
+    [
+     "il bagno Ferrari è quasi finito, diciamo 90",
+     "sal"
+    ],
+    [
+     "pizzeria da bepi avanzamento 25 per cento, no aspetta, 30",
+     "sal"
+    ],
+    [
+     "tetto Tosi finito, cento per cento",
+     "sal"
+    ],
+    [
+     "borgo trento dell'immobiliare semo a tre quarti dei lavori",
+     "sal"
+    ],
+    [
+     "bar al ponte lavori iniziati, mettici un 10 per cento",
+     "sal"
+    ]
+   ]
+  },
+  "idraulico": {
+   "clienti": [
+    "Lucrezia Tatò",
+    "Condominio Parco dei Gerani",
+    "Pizzeria Il Faro di Pane",
+    "Vito Lorusso",
+    "B&B Terrazza Muraglia",
+    "Donato Capriati",
+    "Palestra FitZone Poggiofranco",
+    "Rosa Laterza"
+   ],
+   "impegni": [
+    [
+     "Sostituzione caldaia Vito Lorusso",
+     "domani",
+     "08:30"
+    ],
+    [
+     "Sopralluogo Condominio Parco dei Gerani",
+     "domani",
+     "15:00"
+    ],
+    [
+     "Manutenzione caldaia Lucrezia Tatò",
+     "sabato",
+     "09:00"
+    ],
+    [
+     "Riparazione scarico Pizzeria Il Faro di Pane",
+     "domani",
+     "11:00"
+    ],
+    [
+     "Controllo boiler B&B Terrazza Muraglia",
+     "sabato",
+     "11:30"
+    ],
+    [
+     "Montaggio miscelatori Donato Capriati",
+     "domani",
+     "17:00"
+    ]
+   ],
+   "frasi": [
+    [
+     "allora dmn pomeriggio alle 4 passo da Rosa Laterza x il termosifone ke nn scalda",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "segnami giovedì alle 9 no alle 10 dalla palestra fitzone x le docce",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "venerdì mattina alle otto e mezza cambio rubinetto cucina da Donato Capriati",
+     "calendario",
+     "08:30"
+    ],
+    [
+     "ricordami lunedì di ordinare il vaso di espansione da 8 litri",
+     "calendario"
+    ],
+    [
+     "mett in agenda x giovedì 1 ottobre sopralluogo nuovo cliente via Dieta di Bari 14 alle 11",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "martedì prossimo alle 3 appuntamento col geometra Mastrorilli in cantiere a Carbonara",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "domani alle 7 e mezza passo dal grossista in zona industriale prima di andare da Lorusso",
+     "calendario",
+     "07:30"
+    ],
+    [
+     "fissa x venerdì alle 14 e 30 prova tenuta impianto gas al b&b terrazza muraglia",
+     "calendario",
+     "14:30"
+    ],
+    [
+     "u signor Pasquale Didonna m ha chiesto se passo mercoledì prossimo verso le 6 di sera x la lavatrice ke scarica male segnalo",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "promemoria il 15 ottobre scade la revisione del furgone",
+     "calendario"
+    ],
+    [
+     "mercoledì prossimo alle 5 del pomeriggio manutenzione caldaia a casa del sig Tommaso Loiacono in via Re David",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "sabato pomeriggio alle 4 e mezza vado a vedere la perdita al garage di Vito Lorusso",
+     "calendario",
+     "16:30"
+    ],
+    [
+     "domani sera alle 8 cena da mia suocera segnalo senò mia moglie m accid",
+     "calendario",
+     "20:00"
+    ],
+    [
+     "lunedì 5 alle nove sopralluogo pizzeria il faro di pane x la cappa e lo scaldacqua",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "metti venerdì alle 8 e alle 15 due interventi uno dal condominio parco dei gerani e poi da Capriati",
+     "calendario",
+     "08:00,15:00"
+    ],
+    [
+     "ricordami dopodomani di chiamare il fornitore x i raccordi pex",
+     "calendario"
+    ],
+    [
+     "giovedì mattina alle dieci meno un quarto dalla signora Laterza sostituzione valvole termostatiche",
+     "calendario",
+     "09:45"
+    ],
+    [
+     "xfav segna mercoledì 7 ottobre ore 16 corso aggiornamento f gas alla cassa edile",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "domani a mezzogiorno pranzo con Tonino il piastrellista x parlare del lavoro a Japigia",
+     "calendario",
+     "12:00"
+    ],
+    [
+     "tra due settimane ricordami il controllo fumi della caldaia della palestra",
+     "calendario"
+    ],
+    [
+     "segna sabato alle 13 no facciamo alle 13 e 30 pulizia scambiatore da Rosa Laterza",
+     "calendario",
+     "13:30"
+    ],
+    [
+     "fissa appuntamento con l amministratore del condominio parco dei gerani avvocato Scarangella venerdì prossimo alle 18",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "giovedì alle 2 e mezza prendo mia figlia a scuola ricordamelo",
+     "calendario",
+     "14:30"
+    ],
+    [
+     "mettm lunedì alle sette e mezza di mattina montaggio boiler elettrico 80 litri a casa di Lucrezia Tatò",
+     "calendario",
+     "07:30"
+    ],
+    [
+     "venerdì 2 ottobre verso le undici passo dalla banca x il fido segnalo",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "domenica mattina alle 9 reperibilità x lo studio dentistico del dottor Lamacchia ricordamelo",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "mercoledì pomeriggio alle cinque consegna dichiarazione di conformità a Vito Lorusso",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "ricordami il 20 ottobre di rinnovare l assicurazione rc",
+     "calendario"
+    ],
+    [
+     "allora cioè giovedì prossimo alle 15 no alle 16 sopralluogo bagno nuovo da Donato Capriati",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "segna x domani alle 13 intervento veloce al b&b terrazza muraglia sciacquone rotto camera 3",
+     "calendario",
+     "13:00"
+    ],
+    [
+     "fra una settimana alle 10 ricontrollo pressione impianto palestra fitzone",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "venerdì alle 19 calcetto coi compagni nn prendere impegni dopo",
+     "calendario",
+     "19:00"
+    ],
+    [
+     "sabato 3 alle dodici e un quarto ritiro ricambi Vaillant dal centro assistenza",
+     "calendario",
+     "12:15"
+    ],
+    [
+     "lunedì alle 14 e alle 17 e 30 due preventivi da fare sul posto prima via Amendola poi Poggiofranco",
+     "calendario",
+     "14:00,17:30"
+    ],
+    [
+     "domani alle 18 e mezza telefonata col commercialista Dell Olio mettila in agenda",
+     "calendario",
+     "18:30"
+    ],
+    [
+     "ricordami giovedì di passare dal ferramenta a prendere teflon e canapa",
+     "calendario"
+    ],
+    [
+     "appuntamento martedì 6 ottobre alle 8 e un quarto dalla sig.ra Laterza x la caldaia a condensazione nuova",
+     "calendario",
+     "08:15"
+    ],
+    [
+     "giovedì alle 11 ho il dentista io segnatelo",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "fissa dmn alle 18 e 45 ritiro furgone dal meccanico a Modugno",
+     "calendario",
+     "18:45"
+    ],
+    [
+     "venerdì prossimo alle 10 e mezza revisione caldaia centralizzata condominio parco dei gerani",
+     "calendario",
+     "10:30"
+    ],
+    [
+     "metti il 12 ottobre di mattina alle nove sopralluogo pizzeria nuova in via Sparano",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "tra tre giorni ricordami di fare il bonifico al grossista Idrotermica Pugliese",
+     "calendario"
+    ],
+    [
+     "sabato sera alle 9 compleanno di mio cognato nn me lo scordà",
+     "calendario",
+     "21:00"
+    ],
+    [
+     "giovedì 1 alle quattro meno dieci passo a riportare il flessibile a Lorusso ke me l ha prestato",
+     "calendario",
+     "15:50"
+    ],
+    [
+     "giovedì prima di pranzo alle undici e mezza giro dal cliente nuovo Giuseppe Ranieri x la cucina",
+     "calendario",
+     "11:30"
+    ],
+    [
+     "sposta la caldaia di Lorusso di domani alle 10 invece ke alle 8 e mezza",
+     "calendario_modifica",
+     "10:00"
+    ],
+    [
+     "annulla il sopralluogo di domani al condominio parco dei gerani ke l amministratore ha rinviato tutto",
+     "calendario_modifica"
+    ],
+    [
+     "la Tatò m ha scritto ke sabato nn c è, spostala a lunedì alle 9 e mezza",
+     "calendario_modifica",
+     "09:30"
+    ],
+    [
+     "pizzeria faro di pane domani alle 11 nn ce la faccio mettila alle 14",
+     "calendario_modifica",
+     "14:00"
+    ],
+    [
+     "cancella il controllo boiler del b&b di sabato l hanno fatto fare a un altro, pazienza",
+     "calendario_modifica"
+    ],
+    [
+     "Capriati i miscelatori nn sono arrivati sposta a venerdì sempre alle 17",
+     "calendario_modifica",
+     "17:00"
+    ],
+    [
+     "il sopralluogo dei gerani di domani anticipalo alle 2 e mezza",
+     "calendario_modifica",
+     "14:30"
+    ],
+    [
+     "sabato la manutenzione della Tatò mettila alle 10 invece ke alle 9",
+     "calendario_modifica",
+     "10:00"
+    ],
+    [
+     "togli dall agenda i miscelatori di Capriati di domani m ha detto ke ci risentiamo",
+     "calendario_modifica"
+    ],
+    [
+     "tieni presente ke la signora Laterza ha il cane ke morde, suonare e aspettare ke lo chiude",
+     "mente"
+    ],
+    [
+     "Vito Lorusso la caldaia vecchia è una Beretta del 2004 e il tubo fumi passa dal balcone del vicino",
+     "mente"
+    ],
+    [
+     "appunto: al condominio parco dei gerani le chiavi del locale caldaia le tiene il portiere Sabino",
+     "mente"
+    ],
+    [
+     "segnati ke Capriati paga sempre in ritardo la prossima volta acconto prima",
+     "mente"
+    ],
+    [
+     "idea fare un pacchetto manutenzione annuale caldaie x i b&b di Bari vecchia",
+     "mente"
+    ],
+    [
+     "alla pizzeria faro di pane il sifone sotto il lavello è in piombo vecchio prima o poi va rifatto tutto",
+     "mente"
+    ],
+    [
+     "ricordati ke la Tatò vuole le fatture intestate al marito Franco",
+     "mente"
+    ],
+    [
+     "la palestra fitzone ha 6 docce e i miscelatori sono tutti Grohe, solo ricambi originali",
+     "mente"
+    ],
+    [
+     "nota x me il grossista di Modugno fa il 10 x cento se pago in contanti",
+     "mente"
+    ],
+    [
+     "tieni a mente ke u furgon fa un rumore sui freni quando è carico",
+     "mente"
+    ],
+    [
+     "b&b terrazza muraglia la proprietaria si chiama Annalisa, il marito nn decide niente, parlare con lei",
+     "mente"
+    ],
+    [
+     "appunta il geometra Mastrorilli vuole sempre le foto prima e dopo di ogni lavoro",
+     "mente"
+    ],
+    [
+     "cmq a Carbonara la pressione dell acqua è bassa ci vuole l autoclave quasi in tutte le case",
+     "mente"
+    ],
+    [
+     "Rosa Laterza sta al terzo piano senza ascensore portare il carrello x la caldaia",
+     "mente"
+    ],
+    [
+     "segnati ke il codice del cancello del condominio gerani è 4471",
+     "mente"
+    ],
+    [
+     "tieni presente ke da ottobre il rame aumenta m ha avvisato il fornitore",
+     "mente"
+    ],
+    [
+     "Donato Capriati ha detto ke il bagno lo vuole rifare tutto l anno prossimo, tenerlo caldo",
+     "mente"
+    ],
+    [
+     "la caldaia della palestra ha dato errore F28 due volte, può essere la valvola gas",
+     "mente"
+    ],
+    [
+     "nota mia moglie dice di nn prendere lavori il sabato pomeriggio a novembre",
+     "mente"
+    ],
+    [
+     "al b&b la camera 2 ha la doccia ke scarica lenta, dirlo ad Annalisa quando passo",
+     "mente"
+    ],
+    [
+     "u signor Didonna è cugino di Lorusso m l ha mandato lui fargli un prezzo buono",
+     "mente"
+    ],
+    [
+     "appunto x il cantiere di Japigia i tubi del riscaldamento passano sotto il pavimento vecchio occhio a forare",
+     "mente"
+    ],
+    [
+     "idea mettere un adesivo col QR e il mio numero sulle caldaie ke manutengo",
+     "mente"
+    ],
+    [
+     "ricordati ke la Tatò l anno scorso la manutenzione l ha pagata in due volte",
+     "mente"
+    ],
+    [
+     "il condominio gerani ha il contatore dell acqua rotto nel pozzetto, deve venire l acquedotto nn io",
+     "mente"
+    ],
+    [
+     "cos ho dmn in agenda",
+     "dati"
+    ],
+    [
+     "chi è ke nn m ha ancora pagato",
+     "dati"
+    ],
+    [
+     "quanto ho incassato a settembre",
+     "dati"
+    ],
+    [
+     "ho fatto il preventivo alla palestra fitzone o no",
+     "dati"
+    ],
+    [
+     "cosa mi ero segnato sul condominio parco dei gerani",
+     "dati"
+    ],
+    [
+     "sabato a ke ora devo stare dalla Tatò",
+     "dati"
+    ],
+    [
+     "quanti soldi mi deve ancora Capriati",
+     "dati"
+    ],
+    [
+     "fammi vedere le fatture ke nn mi hanno pagato",
+     "dati"
+    ],
+    [
+     "ke impegni ho questa settimana",
+     "dati"
+    ],
+    [
+     "l ultima volta ke sono stato dalla signora Laterza quanto le ho fatto pagare",
+     "dati"
+    ],
+    [
+     "quanto ho preso in contanti questa settimana",
+     "dati"
+    ],
+    [
+     "la fattura alla pizzeria faro di pane l ho mandata?",
+     "dati"
+    ],
+    [
+     "a ke ora è il sopralluogo dei gerani domani",
+     "dati"
+    ],
+    [
+     "c è qualche preventivo ke aspetta ancora risposta",
+     "dati"
+    ],
+    [
+     "quanti interventi ho fatto al b&b quest anno",
+     "dati"
+    ],
+    [
+     "qual è il numero di Vito Lorusso",
+     "dati"
+    ],
+    [
+     "cosa m ero appuntato sulla caldaia della palestra",
+     "dati"
+    ],
+    [
+     "venerdì mattina sto libero?",
+     "dati"
+    ],
+    [
+     "quanto ho fatturato da gennaio a oggi",
+     "dati"
+    ],
+    [
+     "Lorusso l acconto me l ha dato o no",
+     "dati"
+    ],
+    [
+     "fai un preventivo x Vito Lorusso sostituzione caldaia a condensazione 24 kW 1650 euro più smontaggio e smaltimento vecchia 150 e kit fumi 180",
+     "documento",
+     "1980"
+    ],
+    [
+     "fattura alla signora Tatò manutenzione ordinaria caldaia 90 euro più analisi fumi 30",
+     "documento",
+     "120"
+    ],
+    [
+     "preventivo palestra fitzone 6 miscelatori doccia a 85 l uno più manodopera 240",
+     "documento",
+     "750"
+    ],
+    [
+     "fattura pizzeria il faro di pane disostruzione scarico cucina 120 euro più uscita urgente 50",
+     "documento",
+     "170"
+    ],
+    [
+     "prev x condominio parco dei gerani via Giulio Petroni 112 rifacimento colonna scarico 18 metri a 45 al metro più 2 giornate di manodopera a 280 al giorno",
+     "documento",
+     "1370"
+    ],
+    [
+     "fai la fattura a Capriati montaggio 3 miscelatori a 40 anzi 45 l uno",
+     "documento",
+     "135"
+    ],
+    [
+     "preventivo b&b terrazza muraglia boiler elettrico 80 litri 320 euro installazione 150 sconto del 10 per cento sul totale",
+     "documento",
+     "423"
+    ],
+    [
+     "fattura Rosa Laterza sostituzione 5 valvole termostatiche a 38 euro più 2 ore di lavoro a 35",
+     "documento",
+     "260"
+    ],
+    [
+     "prev x Donato Capriati rifacimento bagno impianto idrico 1800 scarichi 950 montaggio sanitari 400 e fagli uno sconto di 150",
+     "documento",
+     "3000"
+    ],
+    [
+     "fattura x Lorusso acconto del 30 per cento sul preventivo caldaia di 2000 euro",
+     "documento",
+     "600"
+    ],
+    [
+     "fammi un preventivo x la pizzeria scaldacqua a gas 11 litri 420 euro installazione 180 no 200",
+     "documento",
+     "620"
+    ],
+    [
+     "preventivo cliente nuovo Giuseppe Ranieri via Dieta di Bari 14 spostamento lavello 2 metri di multistrato a 12 euro più raccordi 35 più 3 ore di manodopera a 35",
+     "documento",
+     "164"
+    ],
+    [
+     "fattura condominio gerani pronto intervento notturno perdita colonna 180 euro più materiale 65",
+     "documento",
+     "245"
+    ],
+    [
+     "fai un preventivo x la sig.ra Laterza caldaia a condensazione nuova più installazione, i prezzi li metto dopo io",
+     "documento"
+    ],
+    [
+     "fattura palestra fitzone sostituzione scambiatore 280 euro più un ora e mezza di manodopera a 40 l ora",
+     "documento",
+     "340"
+    ],
+    [
+     "preventivo b&b 4 cassette wc Geberit a 110 l una 4 placche a 25 manodopera 200 e togli il 5 per cento",
+     "documento",
+     "703"
+    ],
+    [
+     "fattura dottor Lamacchia studio dentistico riparazione perdita sotto il lavabo 75 euro",
+     "documento",
+     "75"
+    ],
+    [
+     "prev x Vito Lorusso addolcitore 650 euro installazione 250 e defangatore magnetico 120",
+     "documento",
+     "1020"
+    ],
+    [
+     "fai la fattura a Pasquale Didonna riparazione scarico lavatrice 60 euro, no mettila a 50 ke gli faccio lo sconto",
+     "documento",
+     "50"
+    ],
+    [
+     "preventivo condominio gerani sostituzione pompa di circolazione centrale termica 890 euro manodopera 2 persone x 4 ore a 35 l ora",
+     "documento",
+     "1170"
+    ],
+    [
+     "fattura Tatò 2 rubinetti d arresto a 18 euro 1 flessibile 8 euro e mezz ora di lavoro 20 euro",
+     "documento",
+     "64"
+    ],
+    [
+     "fammi un preventivo x il faro di pane rifacimento acqua cucina 12 metri di tubo a 15 al metro 6 raccordi a 7 euro e 400 di manodopera, sconto 50 euro",
+     "documento",
+     "572"
+    ],
+    [
+     "manda il preventivo della caldaia a Vito Lorusso su whatsapp",
+     "invio"
+    ],
+    [
+     "invia la fattura alla signora Tatò x email",
+     "invio"
+    ],
+    [
+     "il prev delle docce mandalo alla palestra fitzone",
+     "invio"
+    ],
+    [
+     "manda al condominio gerani la fattura del pronto intervento",
+     "invio"
+    ],
+    [
+     "la fattura di Capriati mandagliela ke oggi me l ha chiesta",
+     "invio"
+    ],
+    [
+     "scrivi a Lorusso domani arrivo alle 8 e mezza lasciate libero il balcone",
+     "messaggio"
+    ],
+    [
+     "manda un wa a mia moglie ke stasera faccio tardi nn aspettatemi x cena",
+     "messaggio"
+    ],
+    [
+     "messaggio alla Tatò: signora sabato confermo le 9 mi lasci il libretto della caldaia sul tavolo",
+     "messaggio"
+    ],
+    [
+     "scrivi a Tonino il piastrellista giovedì a Japigia ci sei? devo chiudere le tracce prima",
+     "messaggio"
+    ],
+    [
+     "whatsapp ad Annalisa del b&b il boiler lo guardo sabato se fa ancora acqua fredda scrivimi",
+     "messaggio"
+    ],
+    [
+     "manda sms a Capriati ke i miscelatori sono arrivati",
+     "messaggio"
+    ],
+    [
+     "manda un messaggio all avvocato Scarangella ke il preventivo della colonna è pronto e glielo mando stasera",
+     "messaggio"
+    ],
+    [
+     "scrivi a Rosa Laterza signora sto in ritardo di mezz ora mi scusi",
+     "messaggio"
+    ],
+    [
+     "wa al grossista Idrotermica Pugliese mi servono 2 vasi espansione da 8 litri e 10 metri di multistrato da 20 passo domani alle 7 e mezza",
+     "messaggio"
+    ],
+    [
+     "scrivi a Sabino il portiere dei gerani di lasciarmi aperto il locale caldaia domani",
+     "messaggio"
+    ],
+    [
+     "manda un messaggio a Mimmo della pizzeria domani nn toccate lo scarico ke arrivo io",
+     "messaggio"
+    ],
+    [
+     "messaggio a mio fratello Gianni stasera mi presti la carotatrice?",
+     "messaggio"
+    ],
+    [
+     "scrivi alla palestra ke le docce lato donne sono a posto possono riaprirle",
+     "messaggio"
+    ],
+    [
+     "wa a Didonna la lavatrice va era il filtro pieno di monetine",
+     "messaggio"
+    ],
+    [
+     "manda al geometra Mastrorilli un messaggio ke giovedì ci sto alle 3 in cantiere",
+     "messaggio"
+    ],
+    [
+     "manda una mail al commercialista Dell Olio ke le fatture di settembre gliele porto venerdì",
+     "email"
+    ],
+    [
+     "scrivi una email all amministratore del condominio gerani ke x la colonna serve l ok dell assemblea",
+     "email"
+    ],
+    [
+     "email all assistenza Vaillant x chiedere se la caldaia di Lorusso è ancora in garanzia matricola 21457789",
+     "email"
+    ],
+    [
+     "manda un email alla palestra fitzone ke il preventivo è scaduto e se lo vogliono va rifatto",
+     "email"
+    ],
+    [
+     "scrivi una mail al b&b terrazza muraglia con l orario di sabato e ke il pagamento lo preferisco con bonifico",
+     "email"
+    ],
+    [
+     "chiama Vito Lorusso",
+     "chiamata"
+    ],
+    [
+     "chiamami la signora Tatò",
+     "chiamata"
+    ],
+    [
+     "telefona al grossista di Modugno",
+     "chiamata"
+    ],
+    [
+     "fai il numero di mia moglie",
+     "chiamata"
+    ],
+    [
+     "chiama l avvocato Scarangella l amministratore",
+     "chiamata"
+    ],
+    [
+     "chiama Capriati x sapere se sta a casa",
+     "chiamata"
+    ],
+    [
+     "chiamata al geometra Mastrorilli",
+     "chiamata"
+    ],
+    [
+     "telefona alla pizzeria faro di pane",
+     "chiamata"
+    ],
+    [
+     "chiama il centro assistenza Vaillant",
+     "chiamata"
+    ],
+    [
+     "mi chiami Annalisa del b&b",
+     "chiamata"
+    ],
+    [
+     "la Tatò m ha dato 120 euro contanti x la manutenzione",
+     "incasso"
+    ],
+    [
+     "è arrivato il bonifico della palestra fitzone di 750",
+     "incasso"
+    ],
+    [
+     "Lorusso m ha dato l acconto di 600 euro",
+     "incasso"
+    ],
+    [
+     "segna ke la pizzeria m ha pagato 170 cash",
+     "incasso"
+    ],
+    [
+     "incassati 260 da Rosa Laterza col bancomat",
+     "incasso"
+    ],
+    [
+     "Capriati m ha dato 100 euro il resto la settimana prossima",
+     "incasso"
+    ],
+    [
+     "bonifico condominio gerani 245 euro arrivato stamattina",
+     "incasso"
+    ],
+    [
+     "Didonna ha pagato 50 euro in contanti",
+     "incasso"
+    ],
+    [
+     "registra 423 dal b&b terrazza muraglia con bonifico",
+     "incasso"
+    ],
+    [
+     "il dentista Lamacchia m ha pagato i 75 euro con satispay",
+     "incasso"
+    ],
+    [
+     "ho preso duecento euro di acconto da Giuseppe Ranieri",
+     "incasso"
+    ],
+    [
+     "è arrivato il saldo di Vito Lorusso 1380 euro bonifico",
+     "incasso"
+    ],
+    [
+     "c è una perdita d acqua al condominio gerani sta allagando il garage devo andare subito",
+     "urgenza"
+    ],
+    [
+     "la signora Laterza sente puzza di gas in cucina",
+     "urgenza"
+    ],
+    [
+     "pizzeria faro di pane scarico intasato l acqua esce dal pozzetto in sala e tra un ora aprono",
+     "urgenza"
+    ],
+    [
+     "mi chiama Annalisa la caldaia del b&b è in blocco e i turisti stanno senza acqua calda",
+     "urgenza"
+    ],
+    [
+     "è scoppiato un flessibile a casa di Lorusso sotto il lavello acqua dappertutto",
+     "urgenza"
+    ],
+    [
+     "alla palestra fitzone la caldaia fa fumo nero dallo scarico",
+     "urgenza"
+    ],
+    [
+     "aiut u tubb s è rott sott u lavandin di Capriati m sta chiamand disperat",
+     "urgenza"
+    ],
+    [
+     "la Tatò ha il termosifone ke perde dalla valvola e cola sul soffitto di quello di sotto",
+     "urgenza"
+    ],
+    [
+     "scatta una foto",
+     "foto_scatta"
+    ],
+    [
+     "fai una foto alla targhetta della caldaia",
+     "foto_scatta"
+    ],
+    [
+     "foto al contatore",
+     "foto_scatta"
+    ],
+    [
+     "fotografa sto scarico ke poi la mando al geometra",
+     "foto_scatta"
+    ],
+    [
+     "fammi una foto prima di aprire il muro",
+     "foto_scatta"
+    ],
+    [
+     "apri la fotocamera e scatta al pozzetto",
+     "foto_scatta"
+    ],
+    [
+     "apri la foto della caldaia di Lorusso ke ho fatto la settimana scorsa",
+     "risorsa"
+    ],
+    [
+     "trova il preventivo della palestra ke ho fatto ad agosto",
+     "risorsa"
+    ],
+    [
+     "fammi vedere la scheda tecnica della Vaillant ecoTEC ke avevo salvato",
+     "risorsa"
+    ],
+    [
+     "dov è la foto del pozzetto dei gerani",
+     "risorsa"
+    ],
+    [
+     "aggiungi cliente Giuseppe Ranieri 348 552 9031",
+     "cliente"
+    ],
+    [
+     "nuovo cliente studio dentistico dottor Lamacchia",
+     "cliente"
+    ],
+    [
+     "salvami il cliente Pasquale Didonna numero 3291187465",
+     "cliente"
+    ],
+    [
+     "metti tra i clienti la ditta Edil Fratelli Abbrescia",
+     "cliente"
+    ],
+    [
+     "nuovo cliente signora Nunzia Cassano via Putignani 71 tel 080 5523418",
+     "cliente"
+    ],
+    [
+     "aggiungi ai clienti il ristorante U Vuzz di Polignano",
+     "cliente"
+    ],
+    [
+     "crea una cartella cantiere Japigia",
+     "cartella"
+    ],
+    [
+     "fai una cartella nuova chiamata certificati conformità 2026",
+     "cartella"
+    ],
+    [
+     "cartella nuova x il condominio parco dei gerani colonna scarico",
+     "cartella"
+    ],
+    [
+     "crea cartella fatture fornitori",
+     "cartella"
+    ],
+    [
+     "ke differenza c è tra una caldaia a condensazione e una camera stagna normale",
+     "ai"
+    ],
+    [
+     "come conviene far pagare un pronto intervento di notte a forfait o a ore",
+     "ai"
+    ],
+    [
+     "madonna ke giornata oggi nn ce la faccio più",
+     "ai"
+    ],
+    [
+     "x un impianto di riscaldamento nuovo è meglio il multistrato o il rame",
+     "ai"
+    ],
+    [
+     "quanto si fa pagare di solito una manutenzione caldaia qua a Bari",
+     "ai"
+    ],
+    [
+     "ma sto ecobonus sulle caldaie nel 2026 c è ancora o no",
+     "ai"
+    ],
+    [
+     "come faccio a convincere un cliente ke nn vuole dare l acconto",
+     "ai"
+    ],
+    [
+     "ke pressione deve avere un impianto di riscaldamento a freddo",
+     "ai"
+    ],
+    [
+     "oggi u Bari ha perso ancora ke tristezza",
+     "ai"
+    ],
+    [
+     "mi conviene prendere un aiutante o continuo da solo",
+     "ai"
+    ],
+    [
+     "come si toglie il calcare da uno scambiatore a piastre senza smontarlo",
+     "ai"
+    ],
+    [
+     "uè ma tu lo sai fare u cafè? scherz",
+     "ai"
+    ]
+   ]
+  },
+  "elettricista": {
+   "clienti": [
+    "Condominio Le Robinie",
+    "Bar Gianduia",
+    "Luisa Bertolotto",
+    "Studio Dentistico Ravera",
+    "Ferramenta Cavallero",
+    "Giorgio Actis",
+    "Agriturismo Cascina Morando",
+    "Autofficina Dematteis"
+   ],
+   "impegni": [
+    [
+     "Sopralluogo fotovoltaico Giorgio Actis",
+     "domani",
+     "09:00"
+    ],
+    [
+     "Installazione colonnina Autofficina Dematteis",
+     "domani",
+     "14:30"
+    ],
+    [
+     "Preventivo impianto Bar Gianduia",
+     "domani",
+     "17:00"
+    ],
+    [
+     "Verifica quadro Studio Dentistico Ravera",
+     "sabato",
+     "08:30"
+    ],
+    [
+     "Rifacimento impianto Luisa Bertolotto",
+     "sabato",
+     "10:00"
+    ],
+    [
+     "Manutenzione luci scale Condominio Le Robinie",
+     "sabato",
+     "11:30"
+    ]
+   ],
+   "frasi": [
+    [
+     "allora segnami giovedì alle otto e mezza dalla Bertolotto per le prese della cucina",
+     "calendario",
+     "08:30"
+    ],
+    [
+     "venerdì pomeriggio alle 3 passo dal bar gianduia a vedere la macchina del caffè che fa saltare il differenziale",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "metti lunedì 5 ottobre sopralluogo cascina morando per il fotovoltaico sul fienile alle 9 no alle 10",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "ricordami domattina di ordinare i pannelli da Elettroforniture Sabauda",
+     "calendario"
+    ],
+    [
+     "appuntamento col geometra Rolando giovedì alle 14 in cantiere in via Cibrario 37",
+     "calendario",
+     "14:00"
+    ],
+    [
+     "giovedì 8 ottobre alle 7 e 45 attacco al condominio le robinie con le lampade delle cantine",
+     "calendario",
+     "07:45"
+    ],
+    [
+     "dopodomani alle undici collaudo colonnina a Moncalieri dal signor Actis",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "segna mercoledì prossimo ore 16 riunione con l amministratore delle robinie",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "x venerdì ricordami di rinnovare l assicurazione del furgone neh",
+     "calendario"
+    ],
+    [
+     "lunedì alle 8 passo in ferramenta cavallero a sistemare l insegna e poi alle due vado dalla ravera",
+     "calendario",
+     "08:00,14:00"
+    ],
+    [
+     "fissa con lo studio Ravera il controllo del gruppo di continuità martedì 6 alle diciotto",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "lunedì 12 alle 9 e un quarto verifica periodica messa a terra all autofficina dematteis",
+     "calendario",
+     "09:15"
+    ],
+    [
+     "ricordami il 15 ottobre di fare la revisione degli estintori del magazzino",
+     "calendario"
+    ],
+    [
+     "venerdì 2 ottobre a mezzogiorno pranzo col rappresentante della Fronius",
+     "calendario",
+     "12:00"
+    ],
+    [
+     "mettimi giovedì alle cinque di pomeriggio dalla signora Bertolotto che deve firmare",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "domani alle 7 devo passare dal magazzino di Grugliasco a prendere le bobine di cavo",
+     "calendario",
+     "07:00"
+    ],
+    [
+     "segna martedì 13 alle 10 corso aggiornamento CEI 64-8 all unione artigiani, dura 4 ore",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "ricordami venerdì di sentire Gigi per il ponteggio",
+     "calendario"
+    ],
+    [
+     "allora mercoledì 7 ottobre alle 8 e mezza cioè no alle nove dal bar gianduia per il quadro nuovo",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "lunedì mattina alle sette e mezza carico il furgone con Beppe per il cantiere di Rivoli",
+     "calendario",
+     "07:30"
+    ],
+    [
+     "giovedì 1 ottobre ore 15 e 30 appuntamento dal commercialista Bosio",
+     "calendario",
+     "15:30"
+    ],
+    [
+     "metti un promemoria per il 16 scadenza F24",
+     "calendario"
+    ],
+    [
+     "venerdì alle 18 e 30 porto la bambina a pallavolo segnamelo se no mi dimentico",
+     "calendario",
+     "18:30"
+    ],
+    [
+     "ricordami domani alle 4 del pomeriggio di richiamare il fornitore dei cavi",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "segna x il 9 ottobre sopralluogo cliente nuova in corso Francia 212 alle 11",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "martedì prossimo alle 14 e 30 montaggio wallbox 7,4 kW a Chieri dal cognato dell Actis",
+     "calendario",
+     "14:30"
+    ],
+    [
+     "fissami con la cascina morando giovedì 8 alle 9 per la verifica dell impianto della stalla",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "sabato pomeriggio alle 15 vado a vedere il capannone del cugino di Beppe a Nichelino",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "segna lunedì 19 ottobre alle 9 fare la pratica GSE per il fotovoltaico Actis",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "ricordami giovedì di passare in banca a Santa Rita",
+     "calendario"
+    ],
+    [
+     "domani alle 12 e mezza dall ingegner Tosco per il progetto della cascina",
+     "calendario",
+     "12:30"
+    ],
+    [
+     "il 30 ottobre alle 10 c è l assemblea delle robinie devo esserci mettila",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "fissa venerdì 16 ottobre ore 8 posa corrugati alla ferramenta cavallero",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "prendi nota mercoledì 14 alle due e mezza dal notaio per la firma del magazzino",
+     "calendario",
+     "14:30"
+    ],
+    [
+     "lunedì alle 17 ho la telefonata con e-distribuzione per l allaccio della cascina mettila in agenda",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "venerdì alle nove e quarto sostituzione plafoniere led nell officina del Dematteis",
+     "calendario",
+     "09:15"
+    ],
+    [
+     "promemoria sabato mattina controllare le batterie di accumulo dall Actis",
+     "calendario"
+    ],
+    [
+     "giovedì 22 ottobre alle 10 e poi alle 16 due sopralluoghi a Pinerolo per le colonnine",
+     "calendario",
+     "10:00,16:00"
+    ],
+    [
+     "martedì 6 ottobre alle 20 cena del direttivo artigiani",
+     "calendario",
+     "20:00"
+    ],
+    [
+     "tra una settimana ricordami di rifare i conti della cascina che il rame è salito ancora",
+     "calendario"
+    ],
+    [
+     "mercoledì alle 13 e 45 passo a ritirare il misuratore di isolamento dalla taratura",
+     "calendario",
+     "13:45"
+    ],
+    [
+     "lunedì 26 ottobre alle 8 inizio cantiere appartamento Bertolotto via Madama Cristina 58",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "venerdì 9 alle quattro anzi facciamo alle cinque dal bar gianduia a montare le luci della vetrina",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "domani sera alle 21 riunione del condominio di mia sorella in via Po, mettimela che le ho promesso di andare",
+     "calendario",
+     "21:00"
+    ],
+    [
+     "segna giovedì prossimo alle 8 e mezza mezza giornata con l apprendista Samuele a Settimo",
+     "calendario",
+     "08:30"
+    ],
+    [
+     "sposta il sopralluogo di domani dall Actis alle 11",
+     "calendario_modifica",
+     "11:00"
+    ],
+    [
+     "la colonnina dal Dematteis di domani annullala che la wallbox non è ancora arrivata",
+     "calendario_modifica"
+    ],
+    [
+     "la verifica del quadro dalla Ravera sabato mettila alle 9 e mezza invece che alle 8 e mezza",
+     "calendario_modifica",
+     "09:30"
+    ],
+    [
+     "il bar gianduia domani alle 5 spostalo a giovedì sempre alle cinque",
+     "calendario_modifica",
+     "17:00"
+    ],
+    [
+     "sabato dalla Bertolotto non ce la faccio cancella che poi la richiamo",
+     "calendario_modifica"
+    ],
+    [
+     "le luci scale delle robinie di sabato portale alle 14",
+     "calendario_modifica",
+     "14:00"
+    ],
+    [
+     "l Actis domani rimandalo a lunedì che danno pioggia e sul tetto bagnato non si sale",
+     "calendario_modifica"
+    ],
+    [
+     "annulla quello di sabato col condominio robinie l amministratore ha detto che rimandano tutto",
+     "calendario_modifica"
+    ],
+    [
+     "la colonnina Dematteis domani invece che alle due e mezza falla alle quattro",
+     "calendario_modifica",
+     "16:00"
+    ],
+    [
+     "tieni presente che dalla Bertolotto il contatore è in cantina e la chiave ce l ha la vicina del primo piano",
+     "mente"
+    ],
+    [
+     "segnati che alle robinie ci sono ancora le linee in alluminio nelle scale B e C",
+     "mente"
+    ],
+    [
+     "il Dematteis vuole la colonnina da 22 kW ma ha il contatore da 15 bisogna fare l aumento di potenza",
+     "mente"
+    ],
+    [
+     "appunto x la cascina morando nella stalla umidità altissima tutto IP65 minimo",
+     "mente"
+    ],
+    [
+     "ricordati che l Actis ha il cane che morde, suonare e aspettare fuori",
+     "mente"
+    ],
+    [
+     "nota sul bar gianduia macchina del caffè trifase e anche la friggitrice, siamo sui 12 kW di carico",
+     "mente"
+    ],
+    [
+     "il fornitore Elettroforniture Sabauda mi fa il 38 di sconto sui cavi FG16 se ne prendo più di 500 metri",
+     "mente"
+    ],
+    [
+     "tieni a mente che la Ravera paga sempre a 60 giorni però cmq paga",
+     "mente"
+    ],
+    [
+     "idea: fare un pacchetto fotovoltaico più colonnina per chi ha la villetta, da proporre in primavera",
+     "mente"
+    ],
+    [
+     "segna che il quadro della ferramenta cavallero è roba anni 90 va rifatto tutto altro che ritocchi",
+     "mente"
+    ],
+    [
+     "allora il geometra Rolando dice che in via Cibrario le tracce le fa il muratore non noi",
+     "mente"
+    ],
+    [
+     "annotati che Samuele è bravo coi quadri ma sulle scale ha paura, sui tetti non mandarlo",
+     "mente"
+    ],
+    [
+     "l Actis ha il tetto a sud est inclinazione 30 gradi ci stanno 14 pannelli da 430",
+     "mente"
+    ],
+    [
+     "ricordati che la signora Bertolotto vuole le placche bianche lucide non opache, l ha detto tre volte",
+     "mente"
+    ],
+    [
+     "memo il Dematteis il lunedì mattina ha l officina chiusa",
+     "mente"
+    ],
+    [
+     "tieni presente che all autofficina il differenziale generale è di tipo AC, per la wallbox ci vuole almeno un tipo A",
+     "mente"
+    ],
+    [
+     "la cascina morando ha il pozzo con pompa sommersa da 3 cavalli vuole il quadro con avviatore",
+     "mente"
+    ],
+    [
+     "alle robinie l amministratore è il ragionier Ferrero e risponde solo per mail, al telefono fa nen",
+     "mente"
+    ],
+    [
+     "mia sorella dice che il suo vicino cerca qualcuno per l antifurto, più avanti ci penso",
+     "mente"
+    ],
+    [
+     "segnati il codice del cancello del cortile del bar gianduia 4 7 1 9",
+     "mente"
+    ],
+    [
+     "ho visto che l inverter Huawei da 6 kW adesso costa meno del Fronius, da valutare per i prossimi",
+     "mente"
+    ],
+    [
+     "dalla Ravera lo sterilizzatore assorbe un casino non metterlo sulla stessa linea del compressore",
+     "mente"
+    ],
+    [
+     "appunto sul furgone la gomma dietro a destra perde aria",
+     "mente"
+    ],
+    [
+     "tieni a mente che l agriturismo vuole anche le luci del vialetto, una cinquantina di metri, coi paletti",
+     "mente"
+    ],
+    [
+     "ferramenta cavallero adesso il titolare è il figlio Marco, il padre non c entra più",
+     "mente"
+    ],
+    [
+     "cosa ho domani",
+     "dati"
+    ],
+    [
+     "chi è che non mi ha ancora pagato",
+     "dati"
+    ],
+    [
+     "quanto ho incassato a settembre",
+     "dati"
+    ],
+    [
+     "ho già fatto il preventivo per il bar gianduia?",
+     "dati"
+    ],
+    [
+     "cosa mi ero segnata sulla cascina morando",
+     "dati"
+    ],
+    [
+     "sabato che impegni ho",
+     "dati"
+    ],
+    [
+     "la ravera mi deve ancora qualcosa",
+     "dati"
+    ],
+    [
+     "quanti preventivi ho mandato questo mese e quanti me li hanno accettati",
+     "dati"
+    ],
+    [
+     "a che ora ho l Actis domani",
+     "dati"
+    ],
+    [
+     "ma la fattura alle robinie l ho fatta o no",
+     "dati"
+    ],
+    [
+     "fammi vedere cosa avevo scritto sul contatore della Bertolotto",
+     "dati"
+    ],
+    [
+     "quanto ho fatturato da inizio anno",
+     "dati"
+    ],
+    [
+     "giovedì pomeriggio sono libera?",
+     "dati"
+    ],
+    [
+     "quanto mi deve ancora il Dematteis per la colonnina",
+     "dati"
+    ],
+    [
+     "il codice del cancello del bar come era",
+     "dati"
+    ],
+    [
+     "che lavori ho fatto quest anno per la ferramenta cavallero",
+     "dati"
+    ],
+    [
+     "quanti soldi devo ancora prendere in tutto",
+     "dati"
+    ],
+    [
+     "c era qualcosa questa settimana che dovevo ricordarmi?",
+     "dati"
+    ],
+    [
+     "l ultimo pagamento dell Actis quando è arrivato",
+     "dati"
+    ],
+    [
+     "lo sconto del fornitore sui cavi l avevo segnato da qualche parte?",
+     "dati"
+    ],
+    [
+     "fammi un preventivo per Giorgio Actis impianto fotovoltaico 6 kW 14 pannelli da 430 watt fornitura e posa 7800 euro più accumulo 5 kWh 3200",
+     "documento",
+     "11000"
+    ],
+    [
+     "preventivo bar gianduia quadro elettrico nuovo 1200, 6 prese industriali a 45 l una, manodopera 16 ore a 38",
+     "documento",
+     "2078"
+    ],
+    [
+     "fattura alla ferramenta cavallero per la sostituzione dell insegna luminosa 450 euro",
+     "documento",
+     "450"
+    ],
+    [
+     "prev. x cascina morando linea stalla 80 metri di cavo a 3 euro e 20 al metro, 12 plafoniere stagne a 38 anzi 42, manodopera 900",
+     "documento",
+     "1660"
+    ],
+    [
+     "fai fattura Dematteis colonnina wallbox 22 kW 1650 più installazione 480 meno sconto del 10 per cento",
+     "documento",
+     "1917"
+    ],
+    [
+     "preventivo per la signora Bertolotto rifacimento impianto appartamento via Madama Cristina 58 terzo piano 70 metri quadri a corpo 5400 euro",
+     "documento",
+     "5400"
+    ],
+    [
+     "fattura condominio le robinie manutenzione luci scale 18 lampade led a 22 euro più 3 ore a 40",
+     "documento",
+     "516"
+    ],
+    [
+     "preventivo studio ravera gruppo di continuità 2 kVA 890 e installazione 150",
+     "documento",
+     "1040"
+    ],
+    [
+     "preventivo per l agriturismo cascina morando luci del vialetto, i prezzi li metto dopo",
+     "documento"
+    ],
+    [
+     "fattura all Actis acconto del 30 per cento sul preventivo del fotovoltaico da 11000",
+     "documento",
+     "3300"
+    ],
+    [
+     "preventivo colonnina autofficina dematteis wallbox 7,4 kW 890 euro adeguamento quadro 350 cavo 25 metri a 6 euro",
+     "documento",
+     "1390"
+    ],
+    [
+     "fattura bar gianduia intervento di sabato 180 di uscita più 2 ore a 45",
+     "documento",
+     "270"
+    ],
+    [
+     "preventivo ferramenta cavallero rifacimento quadro generale 2300 cioè no 2500 più collaudo e certificazione 200",
+     "documento",
+     "2700"
+    ],
+    [
+     "fattura studio dentistico ravera verifica periodica impianto duecentocinquanta euro",
+     "documento",
+     "250"
+    ],
+    [
+     "preventivo robinie sostituzione linee in alluminio scale B e C, 2 scale a 1850 l una, sconto 5 per cento",
+     "documento",
+     "3515"
+    ],
+    [
+     "fattura cascina morando quadro pompa sommersa 3 cavalli con avviatore materiale 620 manodopera 280",
+     "documento",
+     "900"
+    ],
+    [
+     "preventivo Luisa Bertolotto 12 punti luce a 55, 20 prese a 48 e il quadretto 380, togli 100 di sconto",
+     "documento",
+     "1900"
+    ],
+    [
+     "fammi la fattura a Giorgio Actis per il saldo del fotovoltaico settemilasettecento",
+     "documento",
+     "7700"
+    ],
+    [
+     "preventivo per Mario Chiabrando via Nizza 142 impianto citofonico 2 posti 350 euro",
+     "documento",
+     "350"
+    ],
+    [
+     "fattura dematteis plafoniere led officina 10 a 65 euro e 4 ore a 40, anzi mettine 5",
+     "documento",
+     "850"
+    ],
+    [
+     "prev. bar gianduia luci vetrina striscia led 8 metri a 25 al metro, alimentatore 60 e posa 150",
+     "documento",
+     "410"
+    ],
+    [
+     "fammi un preventivo per la ravera per 4 prese sotto il bancone, i prezzi li decidiamo poi",
+     "documento"
+    ],
+    [
+     "manda il preventivo del fotovoltaico a Giorgio Actis",
+     "invio"
+    ],
+    [
+     "la fattura della ferramenta cavallero mandala a Marco su whatsapp",
+     "invio"
+    ],
+    [
+     "invia alle robinie il preventivo delle linee scale, all amministratore",
+     "invio"
+    ],
+    [
+     "mandagli al Dematteis la fattura della colonnina",
+     "invio"
+    ],
+    [
+     "il preventivo della Bertolotto giralo alla signora che lo aspetta da ieri",
+     "invio"
+    ],
+    [
+     "scrivi alla Bertolotto che domani non riesco arrivo giovedì mattina",
+     "messaggio"
+    ],
+    [
+     "manda un whatsapp a Beppe domani alle 7 al magazzino e porta il trapano grosso",
+     "messaggio"
+    ],
+    [
+     "messaggio al Dematteis la wallbox è arrivata la montiamo domani",
+     "messaggio"
+    ],
+    [
+     "scrivi a mio marito che stasera faccio tardi prendi tu la bambina",
+     "messaggio"
+    ],
+    [
+     "sms al bar gianduia sabato stacco la corrente dalle 8 alle 10 organizzatevi",
+     "messaggio"
+    ],
+    [
+     "scrivi a Samuele domattina ci vediamo direttamente a Moncalieri non in magazzino",
+     "messaggio"
+    ],
+    [
+     "whatsapp al geometra Rolando le tracce in via Cibrario quando sono pronte?",
+     "messaggio"
+    ],
+    [
+     "manda un messaggio all Actis che il GSE ha approvato la pratica",
+     "messaggio"
+    ],
+    [
+     "scrivi a Elettroforniture Sabauda se hanno 500 metri di FG16 3x2,5 per venerdì",
+     "messaggio"
+    ],
+    [
+     "di alla Ravera che per la verifica devono spegnere i riuniti per mezz ora",
+     "messaggio"
+    ],
+    [
+     "messaggio a Marco della ferramenta ciao Marco il quadro nuovo è ordinato arriva la settimana prossima",
+     "messaggio"
+    ],
+    [
+     "manda a Mirella della cascina mi mandate una foto del contatore per favore",
+     "messaggio"
+    ],
+    [
+     "scrivi al Dematteis ricordati di liberare il posto auto dove va la colonnina",
+     "messaggio"
+    ],
+    [
+     "whatsapp a mia sorella dille che il numero del suo vicino me lo passi che lo chiamo io",
+     "messaggio"
+    ],
+    [
+     "scrivi alla signora Gai delle robinie che lunedì mattina manca la luce nelle scale per un ora",
+     "messaggio"
+    ],
+    [
+     "manda una mail al ragionier Ferrero delle robinie con la relazione sulle linee in alluminio",
+     "email"
+    ],
+    [
+     "email al commercialista Bosio ti giro le fatture di settembre fammi sapere se manca qualcosa",
+     "email"
+    ],
+    [
+     "scrivi una mail alla Fronius che l inverter dell Actis dà errore di isolamento e chiedi l intervento in garanzia",
+     "email"
+    ],
+    [
+     "mail allo studio ravera con le date possibili per la verifica",
+     "email"
+    ],
+    [
+     "manda un email alla cascina morando col riepilogo del sopralluogo e le foto",
+     "email"
+    ],
+    [
+     "chiama Giorgio Actis",
+     "chiamata"
+    ],
+    [
+     "chiamami il bar gianduia",
+     "chiamata"
+    ],
+    [
+     "telefona a Beppe",
+     "chiamata"
+    ],
+    [
+     "chiama Elettroforniture Sabauda il banco",
+     "chiamata"
+    ],
+    [
+     "fammi chiamare lo studio Ravera",
+     "chiamata"
+    ],
+    [
+     "chiama il geometra Rolando",
+     "chiamata"
+    ],
+    [
+     "chiama mio marito",
+     "chiamata"
+    ],
+    [
+     "telefona al Dematteis che sono davanti all officina e non c è nessuno",
+     "chiamata"
+    ],
+    [
+     "chiama l assistenza Fronius",
+     "chiamata"
+    ],
+    [
+     "chiamami Marco della ferramenta",
+     "chiamata"
+    ],
+    [
+     "l Actis mi ha fatto il bonifico di 3300 di acconto",
+     "incasso"
+    ],
+    [
+     "incassati 270 in contanti dal bar gianduia",
+     "incasso"
+    ],
+    [
+     "segna che il Dematteis ha pagato tutta la fattura della colonnina",
+     "incasso"
+    ],
+    [
+     "la ravera ha pagato 250 con bonifico",
+     "incasso"
+    ],
+    [
+     "ricevuto dalla signora Bertolotto un acconto di mille euro in contanti",
+     "incasso"
+    ],
+    [
+     "le robinie hanno saldato 516",
+     "incasso"
+    ],
+    [
+     "è arrivato il bonifico della ferramenta cavallero per l insegna",
+     "incasso"
+    ],
+    [
+     "la cascina morando mi ha dato 500 in contanti il resto a fine mese",
+     "incasso"
+    ],
+    [
+     "segna incasso 850 dall autofficina dematteis per le plafoniere",
+     "incasso"
+    ],
+    [
+     "mi han pagato il saldo del fotovoltaico l Actis settemilasettecento",
+     "incasso"
+    ],
+    [
+     "preso 80 euro contanti dal signor Chiabrando per il citofono",
+     "incasso"
+    ],
+    [
+     "bonifico del bar gianduia arrivato duemila per il quadro è la metà",
+     "incasso"
+    ],
+    [
+     "il bar gianduia è senza corrente e il generale salta ogni volta che lo rialzano devo andare subito",
+     "urgenza"
+    ],
+    [
+     "dalla bertolotto c è odore di bruciato dalla presa della cucina bisogna andare adesso",
+     "urgenza"
+    ],
+    [
+     "bôja fauss è saltato tutto allo studio Ravera e hanno un paziente sulla poltrona",
+     "urgenza"
+    ],
+    [
+     "alla cascina morando la pompa del pozzo non parte e le bestie sono senza acqua",
+     "urgenza"
+    ],
+    [
+     "al condominio robinie c è un filo scoperto in cantina che fa scintille",
+     "urgenza"
+    ],
+    [
+     "la moglie dell Actis dice che dall inverter esce fumo bisogna andare subito",
+     "urgenza"
+    ],
+    [
+     "colonnina del Dematteis la macchina è bloccata in carica il cavo non si sgancia e il cliente deve partire",
+     "urgenza"
+    ],
+    [
+     "alla ferramenta è venuta giù l insegna e i fili pendono sul marciapiede",
+     "urgenza"
+    ],
+    [
+     "fai una foto al quadro",
+     "foto_scatta"
+    ],
+    [
+     "scatta una foto al contatore",
+     "foto_scatta"
+    ],
+    [
+     "fotografa la targhetta dell inverter",
+     "foto_scatta"
+    ],
+    [
+     "fammi una foto a questa scatola di derivazione",
+     "foto_scatta"
+    ],
+    [
+     "foto al tetto della stalla adesso che c è luce",
+     "foto_scatta"
+    ],
+    [
+     "scatta che qui le tracce le han fatte storte, documentiamo",
+     "foto_scatta"
+    ],
+    [
+     "apri la foto del quadro del bar gianduia",
+     "risorsa"
+    ],
+    [
+     "trovami lo schema unifilare della cascina morando",
+     "risorsa"
+    ],
+    [
+     "fammi vedere la planimetria della Bertolotto",
+     "risorsa"
+    ],
+    [
+     "cerca le foto del tetto dell Actis che ho fatto a luglio",
+     "risorsa"
+    ],
+    [
+     "aggiungi cliente nuovo Mario Chiabrando telefono 333 481 2276",
+     "cliente"
+    ],
+    [
+     "nuovo cliente Pizzeria Da Tonino di Collegno",
+     "cliente"
+    ],
+    [
+     "salva come cliente la signora Elda Gai 347 902 1188",
+     "cliente"
+    ],
+    [
+     "aggiungi il Garage Rosso Auto di Venaria",
+     "cliente"
+    ],
+    [
+     "nuova cliente Carla Musso numero 340 5566 712",
+     "cliente"
+    ],
+    [
+     "mettimi tra i clienti la Palestra Fit Crocetta",
+     "cliente"
+    ],
+    [
+     "crea una cartella Fotovoltaico Actis",
+     "cartella"
+    ],
+    [
+     "fai una cartella nuova che si chiama Colonnine 2026",
+     "cartella"
+    ],
+    [
+     "nuova cartella Robinie linee scale",
+     "cartella"
+    ],
+    [
+     "crea la cartella Dichiarazioni di conformità",
+     "cartella"
+    ],
+    [
+     "che differenza c è tra un differenziale tipo A e tipo B per le wallbox",
+     "ai"
+    ],
+    [
+     "come conviene dimensionare l accumulo per una famiglia di quattro che consuma 4500 kWh l anno",
+     "ai"
+    ],
+    [
+     "che giornata oggi sono cotta",
+     "ai"
+    ],
+    [
+     "secondo te mi conviene restare in ordinario o passare al forfettario",
+     "ai"
+    ],
+    [
+     "per una colonnina da 22 kW a 30 metri dal quadro che sezione di cavo ci vuole",
+     "ai"
+    ],
+    [
+     "ma è vero che la dico va fatta anche per le piccole riparazioni?",
+     "ai"
+    ],
+    [
+     "bôja fauss che traffico in corso Regina stamattina",
+     "ai"
+    ],
+    [
+     "come si spiega a un cliente che il fotovoltaico senza accumulo rende meno",
+     "ai"
+    ],
+    [
+     "quanto dura in media un inverter",
+     "ai"
+    ],
+    [
+     "non se ne può più dei clienti che pagano a 90 giorni",
+     "ai"
+    ],
+    [
+     "che detrazione c è quest anno per le colonnine in casa",
+     "ai"
+    ],
+    [
+     "hai qualche consiglio per trovare un apprendista bravo",
+     "ai"
+    ],
+    [
+     "prepara la dico per l impianto fotovoltaico dell Actis",
+     "dico"
+    ],
+    [
+     "fammi la di.co. del bar gianduia per il quadro nuovo",
+     "dico"
+    ],
+    [
+     "dichiarazione di conformità per la colonnina del Dematteis con schema e relazione dei materiali",
+     "dico"
+    ],
+    [
+     "mi serve la dico della Bertolotto appartamento via Madama Cristina rifacimento completo",
+     "dico"
+    ],
+    [
+     "prepara la dichiarazione di conformità per la ferramenta cavallero quadro generale",
+     "dico"
+    ],
+    [
+     "allora la dico per la cascina morando linea stalla impianto nuovo secondo la 64-8",
+     "dico"
+    ],
+    [
+     "fai la di co per lo studio ravera ampliamento 4 prese sotto il bancone",
+     "dico"
+    ],
+    [
+     "preparami la dichiarazione di conformità del citofono del signor Chiabrando che gliela chiede l amministratore",
+     "dico"
+    ]
+   ]
+  },
+  "amministratore": {
+   "clienti": [
+    "Condominio Le Zagare",
+    "Condominio Palazzo Ferraro",
+    "Condominio Villa Carmela",
+    "Condominio Residence Belvedere",
+    "Condominio Parco dei Gelsomini",
+    "Supermercato Fratelli Scimeca",
+    "Avv. Benedetto Caronia",
+    "Giuseppina Tumminello"
+   ],
+   "impegni": [
+    [
+     "Sopralluogo ascensore Condominio Le Zagare",
+     "domani",
+     "09:30"
+    ],
+    [
+     "Assemblea Condominio Palazzo Ferraro",
+     "domani",
+     "18:00"
+    ],
+    [
+     "Incontro con Avv. Benedetto Caronia",
+     "domani",
+     "11:00"
+    ],
+    [
+     "Consegna rendiconto Condominio Villa Carmela",
+     "sabato",
+     "10:00"
+    ],
+    [
+     "Perito sinistro Condominio Residence Belvedere",
+     "domani",
+     "15:30"
+    ],
+    [
+     "Riunione consiglieri Condominio Parco dei Gelsomini",
+     "sabato",
+     "12:00"
+    ]
+   ],
+   "frasi": [
+    [
+     "allora domani alle nove e mezza no aspetta alle dieci devo vedere l'idraulico Ferrante al Villa Carmela per la colonna di scarico",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "segnami giovedì alle tre il geometra Randazzo al Palazzo Ferraro per le crepe sul prospetto",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "venerdì mattina alle 8 e un quarto passa la ditta pulizie Splendor al Belvedere x il sopralluogo",
+     "calendario",
+     "08:15"
+    ],
+    [
+     "ricordami lunedì di mandare i solleciti ai morosi delle Zagare",
+     "calendario"
+    ],
+    [
+     "mettimi il 5 ottobre alle 17 riunione col consiglio del Parco dei Gelsomini",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "giovedì alle 9 banca per aprire il conto nuovo del Villa Carmela e poi alle 4 dal commercialista Giambrone",
+     "calendario",
+     "09:00,16:00"
+    ],
+    [
+     "minchia mi stavo scordando venerdì alle undici viene il tecnico della Elevatori Trinacria alle Zagare segnalo",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "promemoria x domani pomeriggio chiamare l'assicurazione per il sinistro del Belvedere",
+     "calendario"
+    ],
+    [
+     "il 12 ottobre alle 18 e 30 incontro con la signora Tumminello per il contratto d'affitto",
+     "calendario",
+     "18:30"
+    ],
+    [
+     "segna x mercoledì 7 alle dieci e mezza il perito delle Assicurazioni Conca d'Oro",
+     "calendario",
+     "10:30"
+    ],
+    [
+     "lunedì prossimo alle 3 e mezza devo andare in tribunale per il decreto ingiuntivo contro Lo Cascio",
+     "calendario",
+     "15:30"
+    ],
+    [
+     "domani sera alle otto cena da mia sorella Nunzia mettilo che poi me lo scordo",
+     "calendario",
+     "20:00"
+    ],
+    [
+     "fissami venerdì 2 ottobre alle 14 sopralluogo del terrazzo alle Zagare con l'impresa Edil Oreto",
+     "calendario",
+     "14:00"
+    ],
+    [
+     "ricordami sabato mattina di passare a prendere le chiavi del locale caldaia dal portiere del Ferraro",
+     "calendario"
+    ],
+    [
+     "giovedì 1 ottobre ore 12 appuntamento dall'avvocato Caronia per le carte del pignoramento",
+     "calendario",
+     "12:00"
+    ],
+    [
+     "allora mettimi che il giorno 6 alle nove viene la disinfestazione al Parco dei Gelsomini ci sono i surci in cantina",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "tra una settimana alle cinque richiamare il fornitore del gasolio per il riscaldamento",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "martedì prossimo alle 10 cioè alle 10 e mezza pardon visita al cantiere della facciata del Palazzo Ferraro",
+     "calendario",
+     "10:30"
+    ],
+    [
+     "il 15 ottobre scadenza F24 ritenute dei condomini mettilo in agenda",
+     "calendario"
+    ],
+    [
+     "domani alle 13 pranzo col geometra Randazzo al bar sotto l'ufficio",
+     "calendario",
+     "13:00"
+    ],
+    [
+     "segna appuntamento col signor Pippo Mangano giovedì alle 17 e 45 che vuole vedere il bilancio del Belvedere",
+     "calendario",
+     "17:45"
+    ],
+    [
+     "fissa x lunedì 5 alle 16 il fabbro Buttitta per il portone del Belvedere che non chiude",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "ricordami il 20 ottobre di rinnovare la polizza globale fabbricati del Villa Carmela",
+     "calendario"
+    ],
+    [
+     "mi segni giovedì alle nove meno un quarto che passo al Comune per la pratica del passo carrabile",
+     "calendario",
+     "08:45"
+    ],
+    [
+     "sabato alle 11 e mezza devo incontrare la nuova ditta di pulizie Brillant Service per farmi fare un prezzo",
+     "calendario",
+     "11:30"
+    ],
+    [
+     "mercoledì 7 ottobre alle due e mezza vedere con l'elettricista Cusimano le luci delle scale del Ferraro",
+     "calendario",
+     "14:30"
+    ],
+    [
+     "domani appena arrivo in ufficio ricordami di stampare le convocazioni",
+     "calendario"
+    ],
+    [
+     "il 9 ottobre alle 18 incontro coi condòmini della scala B del Belvedere per le infiltrazioni",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "venerdì alle 10 dentista e alle 16 e 30 sopralluogo con l'idraulico alle Zagare",
+     "calendario",
+     "10:00,16:30"
+    ],
+    [
+     "mettimi giovedì alle sei di pomeriggio la palestra che se no non ci vado mai",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "lunedì 12 alle nove e venti arriva il camion dello spurgo fognatura al Parco dei Gelsomini",
+     "calendario",
+     "09:20"
+    ],
+    [
+     "ricordami tra 3 giorni di controllare se l'impresa ha montato i ponteggi al Ferraro",
+     "calendario"
+    ],
+    [
+     "segna il 14 alle 11 appuntamento al CAF per il 770 dei condomini",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "domenica alle 19 compleanno di mio nipote Totò non mi fare prendere impegni",
+     "calendario",
+     "19:00"
+    ],
+    [
+     "giovedì alle 15 no alle 15 e 30 viene il signor Bonanno a portarmi l'assegno delle quote arretrate",
+     "calendario",
+     "15:30"
+    ],
+    [
+     "fissami con la signora Tumminello venerdì 9 alle 10 all'appartamento di via dei Cantieri 44 per consegnare le chiavi all'inquilino",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "il 21 ottobre alle 17 corso di aggiornamento per amministratori alla Camera di commercio",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "mettimi x dopodomani alle 8 la lettura dei contatori dell'acqua al Villa Carmela",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "promemoria martedì 13 verificare scadenza estintori del supermercato Scimeca",
+     "calendario"
+    ],
+    [
+     "allora segnati mercoledì prossimo alle dodici e mezza incontro in banca col direttore per il finanziamento lavori delle Zagare",
+     "calendario",
+     "12:30"
+    ],
+    [
+     "venerdì 16 alle 4 riunione con la Elevatori Trinacria per il contratto di manutenzione",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "domani alle 12 devo portare la macchina dal meccanico",
+     "calendario",
+     "12:00"
+    ],
+    [
+     "il 3 novembre alle 9 udienza dal giudice di pace per la signora Messina che è scivolata nell'androne",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "ricordami il 30 ottobre di fare i conguagli del riscaldamento del Belvedere",
+     "calendario"
+    ],
+    [
+     "fissa il sopralluogo col perito per l'infiltrazione del signor Lo Verde lunedì alle 9 e mezza al Parco dei Gelsomini",
+     "calendario",
+     "09:30"
+    ],
+    [
+     "sposta il sopralluogo dell'ascensore alle Zagare di domani alle 11",
+     "calendario_modifica",
+     "11:00"
+    ],
+    [
+     "l'assemblea del Palazzo Ferraro di domani spostala alle 18 e 30 che il salone della parrocchia è occupato",
+     "calendario_modifica",
+     "18:30"
+    ],
+    [
+     "annulla l'incontro con l'avvocato Caronia di domani mi ha scritto che è malato",
+     "calendario_modifica"
+    ],
+    [
+     "la consegna del rendiconto al Villa Carmela di sabato portala a lunedì alle 10",
+     "calendario_modifica",
+     "10:00"
+    ],
+    [
+     "il perito del Belvedere domani non viene più alle tre e mezza mettilo alle cinque",
+     "calendario_modifica",
+     "17:00"
+    ],
+    [
+     "cancella la riunione dei consiglieri del Parco dei Gelsomini di sabato rimandiamo a data da destinarsi",
+     "calendario_modifica"
+    ],
+    [
+     "Caronia domani anticipiamo alle 10 e un quarto",
+     "calendario_modifica",
+     "10:15"
+    ],
+    [
+     "la riunione coi consiglieri dei Gelsomini sabato falla a mezzogiorno e mezza invece che a mezzogiorno",
+     "calendario_modifica",
+     "12:30"
+    ],
+    [
+     "togli il sopralluogo dell'ascensore delle Zagare l'hanno già aggiustato stanotte",
+     "calendario_modifica"
+    ],
+    [
+     "tieni presente che il signor Lo Cascio del Palazzo Ferraro deve ancora 3 rate e dice sempre che paga la settimana prossima",
+     "mente"
+    ],
+    [
+     "appunto alle Zagare l'ascensore fa un rumore strano al terzo piano dirlo al tecnico quando viene",
+     "mente"
+    ],
+    [
+     "segnati che la signora Messina del Belvedere è cugina del consigliere Parrino quindi attenzione a come ci parlo",
+     "mente"
+    ],
+    [
+     "cioè la Splendor non ha pulito la scala C per due settimane di fila da ricordare quando rinnoviamo il contratto",
+     "mente"
+    ],
+    [
+     "nota sul Villa Carmela il contatore generale dell'acqua è nel pozzetto dietro il cancello verde",
+     "mente"
+    ],
+    [
+     "tieni a mente che al Parco dei Gelsomini il portiere Vincenzo va in pensione a marzo bisogna pensare al sostituto",
+     "mente"
+    ],
+    [
+     "idea fare un gruppo whatsapp per ogni condominio così la finiscono di chiamarmi alle 11 di sera",
+     "mente"
+    ],
+    [
+     "l'idraulico Ferrante è bravo ma caro per le cose piccole meglio Giacalone",
+     "mente"
+    ],
+    [
+     "ricordati che la Tumminello vuole solo inquilini con contratto a tempo indeterminato niente studenti",
+     "mente"
+    ],
+    [
+     "il supermercato Scimeca ha la canna fumaria del forno che passa dal cavedio condominiale c'è un accordo firmato nel 2019",
+     "mente"
+    ],
+    [
+     "appunto x il Ferraro i consiglieri vogliono cambiare ditta ascensori perché la Trinacria risponde sempre in ritardo",
+     "mente"
+    ],
+    [
+     "al Belvedere il signor Lo Verde del quinto piano ha l'infiltrazione dal lastrico solare secondo il geometra è la guaina vecchia di vent'anni",
+     "mente"
+    ],
+    [
+     "mi dicono che il nuovo proprietario dell'interno 8 alle Zagare è un certo avvocato Giorgio Alaimo pare uno pignolo assai",
+     "mente"
+    ],
+    [
+     "tenere presente che l'avvocato Caronia preferisce essere chiamato la mattina presto mai dopo pranzo",
+     "mente"
+    ],
+    [
+     "al Villa Carmela la pompa dell'autoclave è del 2008 prima o poi ci lascia",
+     "mente"
+    ],
+    [
+     "sai che ti dico segnati che la Edil Oreto chiede sempre il 30% di anticipo non accettare più del 20",
+     "mente"
+    ],
+    [
+     "nota la signora Bonanno del Parco dei Gelsomini si lamenta del cane del vicino che abbaia terza volta che me lo dice mischina",
+     "mente"
+    ],
+    [
+     "il codice fiscale del condominio Le Zagare sta nella cartellina blu nel secondo cassetto",
+     "mente"
+    ],
+    [
+     "appunto sul Ferraro la chiave del lastrico ce l'ha la portineria quella del locale contatori il consigliere Scaduto",
+     "mente"
+    ],
+    [
+     "cioè ricordati che al Belvedere ci sono 42 unità e 3 negozi al piano terra e i millesimi dei negozi sono da rivedere",
+     "mente"
+    ],
+    [
+     "tieni presente che il nuovo fornitore del gasolio Petroli Madonie fa lo sconto se paghiamo entro 10 giorni",
+     "mente"
+    ],
+    [
+     "mi hanno detto che i Lo Cascio stanno vendendo casa quindi gli arretrati li chiediamo al notaio al rogito",
+     "mente"
+    ],
+    [
+     "segnati che il fabbro Buttitta non fa la fattura se non glielo dici due volte",
+     "mente"
+    ],
+    [
+     "idea per il Parco dei Gelsomini mettere le telecamere nel parcheggio ci hanno rubato due motorini",
+     "mente"
+    ],
+    [
+     "tieni a mente che mio marito Enzo non vuole che lavoro la domenica quindi niente appuntamenti di domenica",
+     "mente"
+    ],
+    [
+     "cosa ho domani in agenda",
+     "dati"
+    ],
+    [
+     "chi è che non ha ancora pagato la rata di settembre al Palazzo Ferraro",
+     "dati"
+    ],
+    [
+     "quanto ho incassato questo mese",
+     "dati"
+    ],
+    [
+     "il preventivo per il Parco dei Gelsomini l'ho fatto o no",
+     "dati"
+    ],
+    [
+     "cosa mi ero segnata sul signor Lo Cascio",
+     "dati"
+    ],
+    [
+     "sabato che impegni ho",
+     "dati"
+    ],
+    [
+     "quanto mi deve ancora il Villa Carmela di compensi",
+     "dati"
+    ],
+    [
+     "la fattura all'avvocato Caronia di agosto l'ho già fatta?",
+     "dati"
+    ],
+    [
+     "che mi ero appuntata sull'ascensore delle Zagare",
+     "dati"
+    ],
+    [
+     "quante fatture ho fatto a settembre",
+     "dati"
+    ],
+    [
+     "c'è qualcuno che non mi paga da più di tre mesi",
+     "dati"
+    ],
+    [
+     "a che ora è l'assemblea del Ferraro domani",
+     "dati"
+    ],
+    [
+     "il fabbro come si chiamava me l'ero segnato da qualche parte",
+     "dati"
+    ],
+    [
+     "quanto ho preso quest'anno dalla signora Tumminello in tutto",
+     "dati"
+    ],
+    [
+     "dimmi gli appuntamenti di questa settimana",
+     "dati"
+    ],
+    [
+     "l'ultimo pagamento del supermercato Scimeca quand'è stato",
+     "dati"
+    ],
+    [
+     "quanti preventivi ho ancora in sospeso",
+     "dati"
+    ],
+    [
+     "cosa avevo scritto sul portiere del Parco dei Gelsomini",
+     "dati"
+    ],
+    [
+     "quant'è il fatturato da gennaio a oggi",
+     "dati"
+    ],
+    [
+     "giovedì mattina sono libera?",
+     "dati"
+    ],
+    [
+     "fammi la fattura al condominio Le Zagare per il compenso di amministrazione del terzo trimestre 1200 euro",
+     "documento",
+     "1200"
+    ],
+    [
+     "preventivo per il Palazzo Ferraro gestione straordinaria rifacimento facciata compenso del 2% su 85000 euro di lavori",
+     "documento",
+     "1700"
+    ],
+    [
+     "fattura alla signora Tumminello gestione affitti luglio agosto e settembre 150 euro al mese",
+     "documento",
+     "450"
+    ],
+    [
+     "fai un preventivo per amministrare il condominio di via dei Mille 58 sono 24 unità a 13 euro no facciamo 14 euro l'una al mese per 12 mesi",
+     "documento",
+     "4032"
+    ],
+    [
+     "fattura al Villa Carmela compenso ordinario 900 più pratica sinistro 250 più 3 raccomandate a 8 euro l'una",
+     "documento",
+     "1174"
+    ],
+    [
+     "preventivo all'avvocato Caronia per la gestione del suo palazzo 2400 euro l'anno con lo sconto del 10 per cento",
+     "documento",
+     "2160"
+    ],
+    [
+     "fattura al Belvedere per la pratica del sinistro infiltrazione interno 15 scala B 350 euro",
+     "documento",
+     "350"
+    ],
+    [
+     "fammi la fattura di acconto del 30% sul preventivo del Ferraro che era di 3000 euro",
+     "documento",
+     "900"
+    ],
+    [
+     "preventivo per il supermercato Scimeca gestione contratti di manutenzione 80 euro al mese per 12 mesi più 200 una tantum di apertura pratica",
+     "documento",
+     "1160"
+    ],
+    [
+     "fattura al Parco dei Gelsomini 2 assemblee straordinarie a 180 euro l'una e il verbale 60 anzi mettilo 50",
+     "documento",
+     "410"
+    ],
+    [
+     "prepara un preventivo per le Zagare per seguire il cantiere del tetto poi gli importi te li dico dopo",
+     "documento"
+    ],
+    [
+     "fattura al condominio Villa Carmela compenso di settembre 400 euro meno 50 di sconto che ho sbagliato il riparto",
+     "documento",
+     "350"
+    ],
+    [
+     "fai un preventivo alla signora Giuseppina Tumminello registrazione di 2 contratti d'affitto a 120 euro l'uno e la pratica APE 180",
+     "documento",
+     "420"
+    ],
+    [
+     "fattura all'avvocato Caronia 600 euro compenso di agosto",
+     "documento",
+     "600"
+    ],
+    [
+     "preventivo per il Belvedere amministrazione anno 2027 42 unità a 12 euro al mese ciascuna per 12 mesi fai tu il conto",
+     "documento",
+     "6048"
+    ],
+    [
+     "fattura al Palazzo Ferraro per la gestione del decreto ingiuntivo contro Lo Cascio 300 euro più diritti di segreteria 45",
+     "documento",
+     "345"
+    ],
+    [
+     "preventivo al Parco dei Gelsomini per seguire la pratica dei lavori della facciata l'uno e mezzo per cento su 120 mila euro",
+     "documento",
+     "1800"
+    ],
+    [
+     "fattura supermercato Scimeca 3 mesi di gestione a 80 euro",
+     "documento",
+     "240"
+    ],
+    [
+     "fammi una fattura per il Belvedere 5 solleciti a 15 euro una lettera all'avvocato 40 e 2 ore di sopralluogo a 50 euro l'ora",
+     "documento",
+     "215"
+    ],
+    [
+     "prev. per la signora Tumminello gestione di 4 appartamenti a 90 euro al mese per un anno col 5% di sconto",
+     "documento",
+     "4104"
+    ],
+    [
+     "fattura al condominio Le Zagare per il saldo del compenso straordinario erano 1500 e mi hanno già dato 500 di acconto",
+     "documento",
+     "1000"
+    ],
+    [
+     "fattura al Villa Carmela per convocazione e verbale dell'assemblea straordinaria del 18 settembre 220 euro",
+     "documento",
+     "220"
+    ],
+    [
+     "manda la fattura del terzo trimestre al condominio Le Zagare",
+     "invio"
+    ],
+    [
+     "il preventivo che ho fatto all'avvocato Caronia mandaglielo su whatsapp",
+     "invio"
+    ],
+    [
+     "inviale alla Tumminello la fattura di settembre per mail",
+     "invio"
+    ],
+    [
+     "manda al Palazzo Ferraro il preventivo della facciata",
+     "invio"
+    ],
+    [
+     "la fattura del supermercato Scimeca gliela giri tu che io non ho tempo",
+     "invio"
+    ],
+    [
+     "scrivi a Ferrante l'idraulico domani alle 10 ti aspetto al Villa Carmela porta la telecamera per gli scarichi",
+     "messaggio"
+    ],
+    [
+     "manda un whatsapp alla signora Messina signora il perito passa giovedì mattina si faccia trovare a casa",
+     "messaggio"
+    ],
+    [
+     "messaggio al signor Lo Cascio le ricordo che deve ancora 3 rate entro fine mese o passo all'avvocato",
+     "messaggio"
+    ],
+    [
+     "scrivi a mia figlia Chiara stasera non cucino ordiniamo le pizze",
+     "messaggio"
+    ],
+    [
+     "manda un sms al portiere Vincenzo domani alle 8 apri il locale caldaia al tecnico",
+     "messaggio"
+    ],
+    [
+     "whatsapp alla Splendor la scala C è di nuovo lorda mandate qualcuno oggi stesso",
+     "messaggio"
+    ],
+    [
+     "scrivi all'avvocato Caronia che i documenti sono pronti può passare a ritirarli quando vuole",
+     "messaggio"
+    ],
+    [
+     "manda msg al geometra Randazzo x sapere se giovedì alle 3 gli va bene",
+     "messaggio"
+    ],
+    [
+     "scrivi alla signora Tumminello l'inquilino ha pagato l'affitto domani le giro il bonifico",
+     "messaggio"
+    ],
+    [
+     "manda un messaggio al consigliere Parrino ci vediamo sabato per firmare il verbale",
+     "messaggio"
+    ],
+    [
+     "scrivi a Giacalone mi serve un prezzo per cambiare la saracinesca dell'acqua al Parco dei Gelsomini",
+     "messaggio"
+    ],
+    [
+     "manda un whatsapp a mio marito Enzo passa tu a prendere la picciridda a scuola che io faccio tardi",
+     "messaggio"
+    ],
+    [
+     "sms al signor Bonanno ho ricevuto l'assegno grazie le mando la ricevuta",
+     "messaggio"
+    ],
+    [
+     "messaggio alla Elevatori Trinacria l'ascensore delle Zagare si è fermato un'altra volta al secondo piano quando venite",
+     "messaggio"
+    ],
+    [
+     "scrivi al fabbro Buttitta ricordati di mandarmi la fattura del portone",
+     "messaggio"
+    ],
+    [
+     "manda una mail all'assicurazione Conca d'Oro con la denuncia del sinistro del Belvedere oggetto infiltrazione interno 15",
+     "email"
+    ],
+    [
+     "scrivi una email all'avvocato Caronia con l'elenco dei morosi del Palazzo Ferraro",
+     "email"
+    ],
+    [
+     "email al commercialista Giambrone ti mando i dati per il 770 entro venerdì",
+     "email"
+    ],
+    [
+     "manda una mail alla Edil Oreto chiedendo il cronoprogramma dei lavori della facciata",
+     "email"
+    ],
+    [
+     "fai una mail all'ufficio tecnico del Comune per sapere a che punto è la pratica del passo carrabile del Villa Carmela",
+     "email"
+    ],
+    [
+     "chiama l'idraulico Ferrante",
+     "chiamata"
+    ],
+    [
+     "chiamami l'avvocato Caronia",
+     "chiamata"
+    ],
+    [
+     "telefona alla ditta degli ascensori",
+     "chiamata"
+    ],
+    [
+     "fai una chiamata alla signora Tumminello",
+     "chiamata"
+    ],
+    [
+     "chiama mio marito",
+     "chiamata"
+    ],
+    [
+     "chiama il portiere del Parco dei Gelsomini",
+     "chiamata"
+    ],
+    [
+     "mi chiami il geometra Randazzo per favore",
+     "chiamata"
+    ],
+    [
+     "telefona all'assicurazione per il sinistro del Belvedere",
+     "chiamata"
+    ],
+    [
+     "chiama il signor Lo Cascio che gliene devo dire quattro",
+     "chiamata"
+    ],
+    [
+     "amunì chiama il supermercato Scimeca",
+     "chiamata"
+    ],
+    [
+     "il condominio Le Zagare mi ha fatto il bonifico di 1200 euro per il compenso",
+     "incasso"
+    ],
+    [
+     "ho ricevuto 450 in contanti dalla signora Tumminello",
+     "incasso"
+    ],
+    [
+     "segna che Lo Cascio finalmente ha pagato 2 rate 380 euro",
+     "incasso"
+    ],
+    [
+     "arrivato bonifico dal Villa Carmela 1174 euro saldo fattura",
+     "incasso"
+    ],
+    [
+     "l'avvocato Caronia mi ha dato un acconto di 300 euro con assegno",
+     "incasso"
+    ],
+    [
+     "incassati 240 dal supermercato Scimeca",
+     "incasso"
+    ],
+    [
+     "il Belvedere ha pagato la pratica del sinistro trecentocinquanta euro",
+     "incasso"
+    ],
+    [
+     "registra il pagamento del signor Bonanno 520 euro di quote arretrate in assegno",
+     "incasso"
+    ],
+    [
+     "mi è arrivato il bonifico del Parco dei Gelsomini 410",
+     "incasso"
+    ],
+    [
+     "il Palazzo Ferraro ha versato l'acconto del 30 per cento cioè 900 euro",
+     "incasso"
+    ],
+    [
+     "ho preso 150 euro in contanti dalla Tumminello per la gestione di ottobre",
+     "incasso"
+    ],
+    [
+     "segnati che Caronia ha saldato 600 euro con bonifico",
+     "incasso"
+    ],
+    [
+     "c'è acqua che scende dal soffitto dell'androne alle Zagare chiama subito l'idraulico",
+     "urgenza"
+    ],
+    [
+     "mi dicono che al Belvedere c'è una persona chiusa nell'ascensore",
+     "urgenza"
+    ],
+    [
+     "c'è puzza di gas nelle scale del Palazzo Ferraro che faccio chiamo i pompieri",
+     "urgenza"
+    ],
+    [
+     "si è staccato un pezzo di cornicione al Villa Carmela ed è caduto sul marciapiede bisogna transennare subito",
+     "urgenza"
+    ],
+    [
+     "il portone del Parco dei Gelsomini non si chiude più e stanotte resta aperto a tutti",
+     "urgenza"
+    ],
+    [
+     "è saltata la corrente in tutte le Zagare e l'autoclave è ferma niente acqua in nessun appartamento",
+     "urgenza"
+    ],
+    [
+     "si è allagata la cantina del Belvedere c'è mezzo metro d'acqua",
+     "urgenza"
+    ],
+    [
+     "il signor Lo Verde mi chiama che gli sta cadendo il controsoffitto del bagno per l'infiltrazione",
+     "urgenza"
+    ],
+    [
+     "fai una foto alla crepa",
+     "foto_scatta"
+    ],
+    [
+     "scatta una foto al contatore",
+     "foto_scatta"
+    ],
+    [
+     "fotografa la macchia di umidità sul soffitto",
+     "foto_scatta"
+    ],
+    [
+     "apri la fotocamera che devo fotografare il cornicione",
+     "foto_scatta"
+    ],
+    [
+     "talìa fammi una foto dei ponteggi",
+     "foto_scatta"
+    ],
+    [
+     "scatta una foto al verbale firmato",
+     "foto_scatta"
+    ],
+    [
+     "aprimi il regolamento di condominio del Palazzo Ferraro",
+     "risorsa"
+    ],
+    [
+     "trovami la foto dell'infiltrazione del signor Lo Verde",
+     "risorsa"
+    ],
+    [
+     "cerca la polizza assicurativa del Belvedere",
+     "risorsa"
+    ],
+    [
+     "fammi vedere il verbale dell'ultima assemblea delle Zagare",
+     "risorsa"
+    ],
+    [
+     "aggiungi un nuovo cliente condominio Residence Sferracavallo referente signor Gaspare Noto 347 812 5566",
+     "cliente"
+    ],
+    [
+     "nuovo cliente dottoressa Marilena Cirrincione",
+     "cliente"
+    ],
+    [
+     "metti tra i clienti il condominio Giardino degli Aranci",
+     "cliente"
+    ],
+    [
+     "aggiungi cliente Bar Pasticceria Lo Monaco numero 091 6123478",
+     "cliente"
+    ],
+    [
+     "salva un cliente nuovo il signor Rosario Lipari telefono tre tre otto quattro cinque sei sette otto nove zero",
+     "cliente"
+    ],
+    [
+     "crea il cliente Condominio Torre Normanna di via delle Magnolie 12",
+     "cliente"
+    ],
+    [
+     "crea una cartella sinistri 2026",
+     "cartella"
+    ],
+    [
+     "fai una cartella nuova chiamata Condominio Torre Normanna",
+     "cartella"
+    ],
+    [
+     "nuova cartella lavori facciata Ferraro",
+     "cartella"
+    ],
+    [
+     "crea la cartella morosi",
+     "cartella"
+    ],
+    [
+     "che differenza c'è tra spese straordinarie e ordinarie per l'inquilino",
+     "ai"
+    ],
+    [
+     "come conviene recuperare i soldi da un condomino moroso decreto ingiuntivo o mediazione",
+     "ai"
+    ],
+    [
+     "sono stanca morta sti condòmini mi fanno uscire pazza è una camurrìa",
+     "ai"
+    ],
+    [
+     "quanti giorni prima va mandata la convocazione dell'assemblea per legge",
+     "ai"
+    ],
+    [
+     "le ritenute d'acconto sui fornitori del condominio entro quando si versano",
+     "ai"
+    ],
+    [
+     "ma secondo te conviene cambiare ditta di pulizie o provare a rinegoziare il prezzo",
+     "ai"
+    ],
+    [
+     "il lastrico solare a uso esclusivo le riparazioni chi le paga",
+     "ai"
+    ],
+    [
+     "oggi fa un caldo che si muore a Palermo a fine settembre ma è normale",
+     "ai"
+    ],
+    [
+     "come si calcolano i millesimi per l'ascensore",
+     "ai"
+    ],
+    [
+     "che maggioranza serve per approvare il rifacimento della facciata",
+     "ai"
+    ],
+    [
+     "mi consigli un modo per far pagare prima i condòmini senza litigare",
+     "ai"
+    ],
+    [
+     "grazie EON sei più affidabile del mio vecchio segretario",
+     "ai"
+    ],
+    [
+     "convoca l'assemblea ordinaria del condominio Le Zagare per il 20 ottobre alle 18 per l'approvazione del consuntivo",
+     "assemblea"
+    ],
+    [
+     "allora fissami un'assemblea straordinaria al Palazzo Ferraro giovedì 8 ottobre alle sei e mezza di sera per i lavori della facciata",
+     "assemblea"
+    ],
+    [
+     "assemblea del Belvedere il 22 alle 17 e 30 straordinaria motivo infiltrazioni dal lastrico solare",
+     "assemblea"
+    ],
+    [
+     "convochiamo l'assemblea ordinaria del Villa Carmela lunedì 26 ottobre alle 18 per il preventivo 2027",
+     "assemblea"
+    ],
+    [
+     "fai la convocazione per il Parco dei Gelsomini assemblea straordinaria venerdì 16 alle 19 per le telecamere nel parcheggio",
+     "assemblea"
+    ],
+    [
+     "mi serve un'assemblea straordinaria alle Zagare per l'ascensore mettila mercoledì 14 alle 18 no alle 18 e 30",
+     "assemblea"
+    ],
+    [
+     "convoca assemblea al Ferraro il 5 novembre alle cinque di pomeriggio per il rinnovo del contratto ascensori",
+     "assemblea"
+    ],
+    [
+     "allora assemblea ordinaria Residence Belvedere martedì 3 novembre ore diciotto poi ti dico l'ordine del giorno",
+     "assemblea"
+    ]
+   ]
+  },
+  "artigiano": {
+   "clienti": [
+    "Hotel Villa Giuggiolo",
+    "Trattoria Da Beppino",
+    "Ornella Paciscopi",
+    "Leonardo Marchi",
+    "Ristorante Il Tegame",
+    "Albergo La Loggetta",
+    "Gianfranco Tordelli",
+    "Arredi Rondinelli snc"
+   ],
+   "impegni": [
+    [
+     "Rilievo tende Hotel Villa Giuggiolo",
+     "domani",
+     "09:30"
+    ],
+    [
+     "Consegna sedie Trattoria Da Beppino",
+     "domani",
+     "15:00"
+    ],
+    [
+     "Ritiro poltrona Ornella Paciscopi",
+     "sabato",
+     "10:00"
+    ],
+    [
+     "Preventivo divano Leonardo Marchi",
+     "sabato",
+     "11:30"
+    ],
+    [
+     "Montaggio tende Albergo La Loggetta",
+     "domani",
+     "17:00"
+    ],
+    [
+     "Sopralluogo panche Ristorante Il Tegame",
+     "sabato",
+     "08:30"
+    ]
+   ],
+   "frasi": [
+    [
+     "allora segnami giovedì alle nove e mezzo dal Tordelli per le sedie impagliate",
+     "calendario",
+     "09:30"
+    ],
+    [
+     "domani alle tre di pomeriggio passo dal tessutaio in via dei Cimatori a prende i campioni di velluto",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "venerdi mattina alle 8 devo anda dal falegname a Scandicci x le assi di faggio",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "mettimi un promemoria lunedì di chiamà la Loggetta per il saldo",
+     "calendario"
+    ],
+    [
+     "il 6 ottobre alle dieci no alle undici sopralluogo al Tegame per le sedute del privè",
+     "calendario",
+     "11:00"
+    ],
+    [
+     "giovedì primo ottobre ore 14 e 30 appuntamento con la signora Paciscopi pe sceglie la stoffa",
+     "calendario",
+     "14:30"
+    ],
+    [
+     "fissa per sabato prossimo alle 9 il montaggio del bastone tende a casa Marchi e poi alle 4 del pomeriggio la consegna del puff all'Arredi Rondinelli",
+     "calendario",
+     "09:00,16:00"
+    ],
+    [
+     "ricordami domattina di portà la graffatrice ad aria a ripara",
+     "calendario"
+    ],
+    [
+     "mercoledì prossimo alle diciotto riunione col commercialista pe l'iva",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "venerdì alle 7 e un quarto carico il furgone con Beppe i figliolo di mi cugino",
+     "calendario",
+     "07:15"
+    ],
+    [
+     "o senti mettimi fra due settimane martedì il controllo delle tende ignifughe all'Hotel Villa Giuggiolo alle dieci",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "giovedì a mezzogiorno pranzo col rappresentante del Lanificio Borgognoni",
+     "calendario",
+     "12:00"
+    ],
+    [
+     "segna il 15 ottobre alle 5 di pomeriggio ritiro del chesterfield da restaurà dal signor Tordelli",
+     "calendario",
+     "17:00"
+    ],
+    [
+     "lunedì 5 alle otto e quaranta vo a Prato dal grossista di gommapiuma",
+     "calendario",
+     "08:40"
+    ],
+    [
+     "promemoria x venerdì scade la rata del furgone",
+     "calendario"
+    ],
+    [
+     "domani sera alle 20 cena di lavoro col direttore della Loggetta",
+     "calendario",
+     "20:00"
+    ],
+    [
+     "allora giovedì alle 3 no aspetta alle 4 e mezzo passa la signora Ornella a vedé i galloni",
+     "calendario",
+     "16:30"
+    ],
+    [
+     "fissami un appuntamento con Leonardo Marchi per venerdì 2 alle undici e un quarto per provà la seduta",
+     "calendario",
+     "11:15"
+    ],
+    [
+     "sabato 10 ottobre alle nove mercatino dell'antiquariato in piazza dei Ciompi voglio andà a cercà sedie da recuperà",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "mettimi in agenda il 20 alle 14 visita medica",
+     "calendario",
+     "14:00"
+    ],
+    [
+     "ricordamelo lunedì alle 7 di mattina di comprà le puntine ottonate",
+     "calendario",
+     "07:00"
+    ],
+    [
+     "la settimana prossima mercoledì 7 ore 16 appuntamento alla Trattoria Da Beppino x misurà le panche nuove",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "venerdì alle nove e mezzo dal notaio co la mi moglie e alle quindici in banca",
+     "calendario",
+     "09:30,15:00"
+    ],
+    [
+     "giovedì pomeriggio alle due consegna tende alla signora Gualtieri in via Maggio",
+     "calendario",
+     "14:00"
+    ],
+    [
+     "segna x il 12 ottobre alle 10 corso sulla sicurezza a Sesto",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "domani alle sei e mezzo di sera passo da i Rondinelli a fagli vedé i campioni di pelle",
+     "calendario",
+     "18:30"
+    ],
+    [
+     "il 3 novembre alle 8 e 30 si comincia il lavoro grosso all'Hotel Villa Giuggiolo rifoderà tutte le sedie della sala colazioni",
+     "calendario",
+     "08:30"
+    ],
+    [
+     "promemoria per giovedì ordinà la ciniglia color salvia per la Paciscopi",
+     "calendario"
+    ],
+    [
+     "lunedì alle 13 mangio col geometra Fanfani per il lavoro dello studio legale",
+     "calendario",
+     "13:00"
+    ],
+    [
+     "venerdi alle 17 e 45 portà la bimba a pallavolo",
+     "calendario",
+     "17:45"
+    ],
+    [
+     "fissa giovedì otto ottobre alle nove un sopralluogo in via de Serragli dal Pacini nuovo cliente per un divano letto",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "allora sabato alle dodici e mezzo ritiro le cinghie elastiche dal fornitore a Campi",
+     "calendario",
+     "12:30"
+    ],
+    [
+     "martedì prossimo alle 10 e 20 appuntamento dal dentista",
+     "calendario",
+     "10:20"
+    ],
+    [
+     "ricordami mercoledì 14 di rinnovà l'assicurazione del furgone",
+     "calendario"
+    ],
+    [
+     "il 9 ottobre alle 11 no facciamo alle 11 e mezzo consegna tende oscuranti al Ristorante Il Tegame",
+     "calendario",
+     "11:30"
+    ],
+    [
+     "domenica alle 16 festa di compleanno di mi nipote un me la fa scordà",
+     "calendario",
+     "16:00"
+    ],
+    [
+     "giovedì alle nove sopralluogo dalla signora Frescobaldini per le tende di camera",
+     "calendario",
+     "09:00"
+    ],
+    [
+     "segna lunedì dodici ottobre h 15 riunione coi ragazzi dell'Arredi Rondinelli per la collezione di poltroncine",
+     "calendario",
+     "15:00"
+    ],
+    [
+     "fra una settimana alle otto passo al Giuggiolo a controllà i binari delle tende",
+     "calendario",
+     "08:00"
+    ],
+    [
+     "mettimi venerdì alle 14 e poi alle 16 due consegne una dalla Paciscopi e una dal Tordelli",
+     "calendario",
+     "14:00,16:00"
+    ],
+    [
+     "promemoria domani alle 12 chiamà il corriere per la spedizione a Lucca",
+     "calendario",
+     "12:00"
+    ],
+    [
+     "giovedì 22 ottobre alle 10 di mattina fiera dell'arredamento alla Fortezza",
+     "calendario",
+     "10:00"
+    ],
+    [
+     "segnami x sabato 17 alle nove e tre quarti il restauro del cassettone della sora Gina",
+     "calendario",
+     "09:45"
+    ],
+    [
+     "a fine mese il 30 ottobre alle 18 appuntamento col commercialista per il bilancino",
+     "calendario",
+     "18:00"
+    ],
+    [
+     "mettimi un promemoria tra tre giorni per riguardà il preventivo del Tegame",
+     "calendario"
+    ],
+    [
+     "sposta la consegna delle sedie alla Trattoria Da Beppino da domani a giovedì alle cinque di pomeriggio",
+     "calendario_modifica",
+     "17:00"
+    ],
+    [
+     "annulla il ritiro della poltrona della Paciscopi di sabato ha detto che la porta lei",
+     "calendario_modifica"
+    ],
+    [
+     "il rilievo tende al Villa Giuggiolo di domani spostalo alle undici",
+     "calendario_modifica",
+     "11:00"
+    ],
+    [
+     "o il Marchi m'ha scritto che sabato un pole sposta l'appuntamento del divano a lunedì alle nove e mezzo",
+     "calendario_modifica",
+     "09:30"
+    ],
+    [
+     "cancella il montaggio tende alla Loggetta di domani sera che le tende un son mica pronte",
+     "calendario_modifica"
+    ],
+    [
+     "il sopralluogo al Tegame di sabato mettilo alle 10 no alle 9",
+     "calendario_modifica",
+     "09:00"
+    ],
+    [
+     "anticipa il ritiro della poltrona Paciscopi a domani alle otto",
+     "calendario_modifica",
+     "08:00"
+    ],
+    [
+     "togli dall'agenda il sopralluogo delle panche al Tegame l'hanno rimandato a data da destinarsi",
+     "calendario_modifica"
+    ],
+    [
+     "la consegna al Beppino di domani spostala alle 18 e un quarto",
+     "calendario_modifica",
+     "18:15"
+    ],
+    [
+     "tieni presente che la signora Paciscopi vole sempre la fodera sfoderabile con la cerniera nascosta",
+     "mente"
+    ],
+    [
+     "segnati che all'Hotel Villa Giuggiolo le tende della sala devono esse ignifughe classe uno sennò i vigili del foco un le passano",
+     "mente"
+    ],
+    [
+     "appunto il Tordelli c'ha un gatto che graffia tutto consigliagli la microfibra",
+     "mente"
+    ],
+    [
+     "ricordati che il Beppino paga sempre con un mese di ritardo ma paga",
+     "mente"
+    ],
+    [
+     "allora il divano del Marchi misura due metri e venti per novanta di profondità seduta alta 55",
+     "mente"
+    ],
+    [
+     "idea fa un pacchetto rifodera sedie per i ristoranti a prezzo fisso a sedia",
+     "mente"
+    ],
+    [
+     "il fornitore di gommapiuma di Prato ha aumentato dell'8 per cento da ottobre tienine conto",
+     "mente"
+    ],
+    [
+     "la moglie del Rondinelli si chiama Marisa ed è lei che decide i colori",
+     "mente"
+    ],
+    [
+     "alla Loggetta il portiere di notte si chiama Samuele se c'è da entrà la sera chiedi a lui",
+     "mente"
+    ],
+    [
+     "tieni a mente che al Tegame il furgone va parcheggiato dietro nel vicolo",
+     "mente"
+    ],
+    [
+     "cioè le sedie Thonet del Beppino son quindici e tre c'hanno la paglia di Vienna rotta",
+     "mente"
+    ],
+    [
+     "nota la poltrona della Paciscopi è una bergère fine ottocento le molle son da rifà tutte a mano",
+     "mente"
+    ],
+    [
+     "per il Giuggiolo il colore scelto è il blu Prussia codice tessuto 4471",
+     "mente"
+    ],
+    [
+     "icché mi disse il geometra Fanfani lo studio legale vole le tende a pannello no a pacchetto",
+     "mente"
+    ],
+    [
+     "segnati che la colla vinilica nuova quella col tappo verde secca male un la ricomprà",
+     "mente"
+    ],
+    [
+     "il Tordelli ha lasciato le chiavi del magazzino sotto i vaso a destra",
+     "mente"
+    ],
+    [
+     "tieni presente che la Marisa Rondinelli è allergica alla lana niente imbottiture in crine",
+     "mente"
+    ],
+    [
+     "la signora Gualtieri di via Maggio vole la fattura intestata alla società no a lei",
+     "mente"
+    ],
+    [
+     "appunto veloce la macchina da cucire grande fa i punto lento c'è da cambià la cinghia",
+     "mente"
+    ],
+    [
+     "all'hotel le finestre del secondo piano son tutte fuori squadro di un centimetro",
+     "mente"
+    ],
+    [
+     "ricordati che il Marchi ha detto che se il lavoro vien bene ci manda anche la sorella con sei sedie",
+     "mente"
+    ],
+    [
+     "il Beppino vole il marrone testa di moro uguale a quello dell'anno scorso",
+     "mente"
+    ],
+    [
+     "segna che i pagamenti della Loggetta passano dall'amministrazione a Milano e ci vole tempo",
+     "mente"
+    ],
+    [
+     "memo la ciniglia salvia ce l'ha solo il Lanificio Borgognoni gli altri no",
+     "mente"
+    ],
+    [
+     "tieni conto che a novembre la mi moglie vole andà in ferie una settimana quindi un piglià lavori grossi",
+     "mente"
+    ],
+    [
+     "icché ho in agenda domani",
+     "dati"
+    ],
+    [
+     "chi è che mi deve ancora dei soldi",
+     "dati"
+    ],
+    [
+     "quanto ho incassato a settembre",
+     "dati"
+    ],
+    [
+     "ma l'ho fatto il preventivo al Marchi per il divano o no",
+     "dati"
+    ],
+    [
+     "cosa mi ero segnato sulla signora Paciscopi",
+     "dati"
+    ],
+    [
+     "che impegni ho sabato",
+     "dati"
+    ],
+    [
+     "quanto mi deve in tutto la Trattoria Da Beppino",
+     "dati"
+    ],
+    [
+     "fammi vedé le fatture non pagate",
+     "dati"
+    ],
+    [
+     "gliel'ho già mandata la fattura alla Loggetta",
+     "dati"
+    ],
+    [
+     "quante sedie avevo detto che son rotte dal Beppino",
+     "dati"
+    ],
+    [
+     "quanto ho fatturato quest'anno all'Hotel Villa Giuggiolo",
+     "dati"
+    ],
+    [
+     "a che ora è il montaggio alla Loggetta",
+     "dati"
+    ],
+    [
+     "ma questa settimana c'ho qualche buco libero x un sopralluogo",
+     "dati"
+    ],
+    [
+     "che codice era il tessuto blu del Giuggiolo",
+     "dati"
+    ],
+    [
+     "quanti preventivi ho fatto a settembre e quanti me l'hanno accettati",
+     "dati"
+    ],
+    [
+     "il Tordelli m'ha pagato l'acconto sì o no",
+     "dati"
+    ],
+    [
+     "quanto ho incassato questa settimana in contanti",
+     "dati"
+    ],
+    [
+     "quand'è che c'ho l'appuntamento dal commercialista",
+     "dati"
+    ],
+    [
+     "ci sono preventivi vecchi che nessuno m'ha risposto",
+     "dati"
+    ],
+    [
+     "mi dici il numero di telefono del Rondinelli",
+     "dati"
+    ],
+    [
+     "fai un preventivo alla Trattoria Da Beppino per rifoderare 15 sedie a 45 euro l'una",
+     "documento",
+     "675"
+    ],
+    [
+     "fattura all'Hotel Villa Giuggiolo confezione tende 12 teli a 130 anzi 140 euro più binari 6 metri x 25 euro al metro",
+     "documento",
+     "1830"
+    ],
+    [
+     "preventivo per la signora Paciscopi rifacimento bergère molle e imbottitura 380 tessuto 3 metri a 55 al metro manodopera 220",
+     "documento",
+     "765"
+    ],
+    [
+     "preventivo divano Marchi via Pisana 214 rifacimento completo 1200 euro con lo sconto del 10 per cento",
+     "documento",
+     "1080"
+    ],
+    [
+     "fammi una fattura al Tordelli per restauro cassettone 650 euro e scrivi in nota che il 30 per cento l'ha già dato di acconto",
+     "documento",
+     "650"
+    ],
+    [
+     "prev. Arredi Rondinelli 20 poltroncine da imbottire a 85 cad più trasporto 120",
+     "documento",
+     "1820"
+    ],
+    [
+     "fattura Ristorante Il Tegame tende oscuranti quattro finestre da 2 metri e 40 180 euro a finestra",
+     "documento",
+     "720"
+    ],
+    [
+     "preventivo per la Loggetta 30 testiere letto a 95 poi montaggio forfait 400 e togli 200 di sconto",
+     "documento",
+     "3050"
+    ],
+    [
+     "fai fattura al Beppino 8 cuscini panca a 35 euro no aspetta a 38",
+     "documento",
+     "304"
+    ],
+    [
+     "preventivo tende camera per la signora Frescobaldini finestra 1 e 60 per 2 e 70 tessuto lino 90 euro confezione 70 bastone in ferro battuto 65",
+     "documento",
+     "225"
+    ],
+    [
+     "fattura Marchi riparazione gamba sedia 40 euro più laccatura 60",
+     "documento",
+     "100"
+    ],
+    [
+     "preventivo Hotel Villa Giuggiolo sala colazioni quaranta sedie da rifoderare a cinquanta euro l'una sconto del cinque per cento per la quantità",
+     "documento",
+     "1900"
+    ],
+    [
+     "fammi un preventivo x il Tegame panca angolare 3 metri e mezzo imbottitura e skai 650 euro più smontaggio della vecchia 80",
+     "documento",
+     "730"
+    ],
+    [
+     "fattura Paciscopi rifacimento seduta sedia impagliata 2 pezzi a 60 tutto qui",
+     "documento",
+     "120"
+    ],
+    [
+     "preventivo Rondinelli restauro 6 sedie Luigi Filippo lucidatura a gommalacca 90 l'una e tessuto 6 per 25",
+     "documento",
+     "690"
+    ],
+    [
+     "fattura Loggetta montaggio tende 22 camere a 30 euro a camera ci aggiungi 2 ore di straordinario a 35 l'ora",
+     "documento",
+     "730"
+    ],
+    [
+     "preventivo per il signor Pacini via de Serragli 45 divano letto materasso nuovo 280 rifodera 450 ritiro e consegna 60 ma fagli 90 di sconto",
+     "documento",
+     "700"
+    ],
+    [
+     "fattura d'acconto al Beppino il 40 per cento sul lavoro delle panche da 800 euro",
+     "documento",
+     "320"
+    ],
+    [
+     "preventivo tappezzeria pareti in stoffa per il Tordelli 35 metri quadri a 28 euro al metro quadro",
+     "documento",
+     "980"
+    ],
+    [
+     "preparami un preventivo per rifà le sedie del Tegame i prezzi ce li metto dopo",
+     "documento"
+    ],
+    [
+     "fattura Hotel Villa Giuggiolo mantovane 10 pezzi a 75 e 10 fasce fermatenda a 12 anzi mettile a 15",
+     "documento",
+     "900"
+    ],
+    [
+     "preventivo per la signora Ornella due poltrone anni sessanta da rifoderà in pelle 520 cadauna pelle compresa sconto 40 euro",
+     "documento",
+     "1000"
+    ],
+    [
+     "manda il preventivo del divano al Marchi",
+     "invio"
+    ],
+    [
+     "mandagli per email la fattura all'Hotel Villa Giuggiolo",
+     "invio"
+    ],
+    [
+     "la fattura delle sedie mandala al Beppino su whatsapp",
+     "invio"
+    ],
+    [
+     "rimanda alla Paciscopi il preventivo della bergère che dice un l'ha ricevuto",
+     "invio"
+    ],
+    [
+     "manda il preventivo delle poltroncine all'Arredi Rondinelli",
+     "invio"
+    ],
+    [
+     "scrivi alla signora Paciscopi che la poltrona è pronta e pole passà quando vole",
+     "messaggio"
+    ],
+    [
+     "manda un whatsapp alla mi moglie stasera fo tardi un m'aspettà pe cena",
+     "messaggio"
+    ],
+    [
+     "messaggio al Beppino domani arrivo con le sedie verso le tre fatemi trovà libero l'ingresso",
+     "messaggio"
+    ],
+    [
+     "scrivi al fornitore di Prato che mi servono 10 lastre di gommapiuma densità 30 per giovedì",
+     "messaggio"
+    ],
+    [
+     "manda un sms al Tordelli il cassettone è in lavorazione ci vogliono due settimane",
+     "messaggio"
+    ],
+    [
+     "whatsapp al Marchi digli che il tessuto è arrivato se vole venì a vedello",
+     "messaggio"
+    ],
+    [
+     "scrivi al geometra Fanfani mandami le misure delle finestre dello studio che un le ritrovo",
+     "messaggio"
+    ],
+    [
+     "manda messaggio alla Loggetta le tende saranno pronte per venerdì confermate il montaggio",
+     "messaggio"
+    ],
+    [
+     "scrivi a mi cugino Beppe domattina alle 7 davanti al laboratorio e porta i guanti",
+     "messaggio"
+    ],
+    [
+     "messaggio al Tegame x dire che il preventivo è fatto e glielo porto io sabato",
+     "messaggio"
+    ],
+    [
+     "manda un whatsapp alla Marisa del Rondinelli ho i campioni di pelle color cuoio quando passate",
+     "messaggio"
+    ],
+    [
+     "sms al commercialista gli ho lasciato le fatture di settembre nella cassetta della posta",
+     "messaggio"
+    ],
+    [
+     "scrivi all'Hotel Villa Giuggiolo che domani arrivo un po' prima verso le nove e un quarto",
+     "messaggio"
+    ],
+    [
+     "manda un messaggio alla signora Frescobaldini il lino che voleva un c'è più le propongo il cotone lavato",
+     "messaggio"
+    ],
+    [
+     "dì al Pacini su whatsapp grazie del contatto la settimana prossima gli fo sapere",
+     "messaggio"
+    ],
+    [
+     "manda una mail all'Hotel Villa Giuggiolo con scritto che i lavori della sala colazioni partono il 3 novembre",
+     "email"
+    ],
+    [
+     "scrivi una email al Lanificio Borgognoni per chiede il listino nuovo dei velluti",
+     "email"
+    ],
+    [
+     "email all'amministrazione della Loggetta sollecito pagamento della fattura d'agosto",
+     "email"
+    ],
+    [
+     "mandami una mail al commercialista dottor Pampaloni oggetto documenti settembre digli che manca solo l'estratto conto",
+     "email"
+    ],
+    [
+     "fai una mail al Ristorante Il Tegame per ringrazialli e allega le foto delle panche finite",
+     "email"
+    ],
+    [
+     "chiama il Beppino",
+     "chiamata"
+    ],
+    [
+     "telefona alla signora Paciscopi",
+     "chiamata"
+    ],
+    [
+     "chiamami il fornitore di gommapiuma",
+     "chiamata"
+    ],
+    [
+     "fammi parlà con la mi moglie",
+     "chiamata"
+    ],
+    [
+     "chiama il geometra Fanfani",
+     "chiamata"
+    ],
+    [
+     "o chiama i Tordelli sul cellulare",
+     "chiamata"
+    ],
+    [
+     "telefona all'Hotel Villa Giuggiolo alla reception",
+     "chiamata"
+    ],
+    [
+     "chiama il commercialista",
+     "chiamata"
+    ],
+    [
+     "chiama il Marchi e mettilo in vivavoce che sto guidando",
+     "chiamata"
+    ],
+    [
+     "chiama Arredi Rondinelli",
+     "chiamata"
+    ],
+    [
+     "il Beppino m'ha dato 300 euro in contanti di acconto",
+     "incasso"
+    ],
+    [
+     "è arrivato il bonifico dell'Hotel Villa Giuggiolo di 1830",
+     "incasso"
+    ],
+    [
+     "la Paciscopi ha pagato 765 euro con bonifico",
+     "incasso"
+    ],
+    [
+     "segna incasso 150 euro contanti dal Marchi per la riparazione",
+     "incasso"
+    ],
+    [
+     "il Tordelli ha saldato il cassettone 455 euro in contanti",
+     "incasso"
+    ],
+    [
+     "arrivato bonifico Loggetta tremila e cinquanta",
+     "incasso"
+    ],
+    [
+     "registra pagamento del Tegame 720 euro con assegno",
+     "incasso"
+    ],
+    [
+     "la signora Frescobaldini m'ha dato cento euro di acconto x le tende",
+     "incasso"
+    ],
+    [
+     "Rondinelli ha fatto un bonifico di 900 euro acconto poltroncine",
+     "incasso"
+    ],
+    [
+     "incassati 40 euro da un signore x una sedia riparata al volo contanti",
+     "incasso"
+    ],
+    [
+     "o m'è arrivato il saldo del Beppino 375 euro",
+     "incasso"
+    ],
+    [
+     "il Pacini ha pagato il 30 per cento di acconto sul divano letto 210 euro con satispay",
+     "incasso"
+    ],
+    [
+     "c'è una perdita d'acqua dal soffitto del laboratorio e mi sta bagnando tutti i tessuti",
+     "urgenza"
+    ],
+    [
+     "all'hotel è venuto giù il bastone delle tende in sala e c'è mancato poco che pigliasse un ospite bisogna andà subito",
+     "urgenza"
+    ],
+    [
+     "la sega circolare fa fumo e puzza di bruciato",
+     "urgenza"
+    ],
+    [
+     "m'ha chiamato il Beppino una panca s'è rotta con la gente seduta sopra",
+     "urgenza"
+    ],
+    [
+     "il ragazzo s'è tagliato col taglierino c'è parecchio sangue",
+     "urgenza"
+    ],
+    [
+     "sento puzzo di gas in laboratorio",
+     "urgenza"
+    ],
+    [
+     "il compressore perde aria e fa un fischio fortissimo ho paura che scoppi",
+     "urgenza"
+    ],
+    [
+     "la Loggetta dice che una tenda in camera 12 ha preso foco da una candela",
+     "urgenza"
+    ],
+    [
+     "fai una foto alla poltrona com'è ora prima di smontalla",
+     "foto_scatta"
+    ],
+    [
+     "scatta una foto",
+     "foto_scatta"
+    ],
+    [
+     "fotografa il tessuto e mettilo nella cartella della Paciscopi",
+     "foto_scatta"
+    ],
+    [
+     "fammi una foto al cartellino del velluto",
+     "foto_scatta"
+    ],
+    [
+     "apri la fotocamera che fotografo il danno sulla panca",
+     "foto_scatta"
+    ],
+    [
+     "foto alle finestre dell'hotel per le misure",
+     "foto_scatta"
+    ],
+    [
+     "fammi vedé le foto della bergère della Paciscopi",
+     "risorsa"
+    ],
+    [
+     "apri il pdf del preventivo del Giuggiolo di giugno",
+     "risorsa"
+    ],
+    [
+     "dov'è la foto del campionario del Borgognoni",
+     "risorsa"
+    ],
+    [
+     "apri la piantina del Tegame che m'ha mandato il geometra",
+     "risorsa"
+    ],
+    [
+     "aggiungi un cliente nuovo Mauro Pacini telefono 347 882 1904",
+     "cliente"
+    ],
+    [
+     "nuovo cliente la signora Teresa Frescobaldini",
+     "cliente"
+    ],
+    [
+     "salva il Bar Sant'Ambrogino come cliente numero 055 234 7781",
+     "cliente"
+    ],
+    [
+     "crea cliente Pensione Il Poggiolo",
+     "cliente"
+    ],
+    [
+     "metti nei clienti Lorenzo Batignani tre tre otto uno due tre quattro cinque sei sette",
+     "cliente"
+    ],
+    [
+     "aggiungi tra i clienti lo Studio Legale Nerucci e Mei",
+     "cliente"
+    ],
+    [
+     "crea una cartella Hotel Villa Giuggiolo sala colazioni",
+     "cartella"
+    ],
+    [
+     "fammi una cartella nuova chiamata Campionari tessuti 2026",
+     "cartella"
+    ],
+    [
+     "nuova cartella Lavori Tordelli",
+     "cartella"
+    ],
+    [
+     "crea cartella fatture fornitori",
+     "cartella"
+    ],
+    [
+     "che differenza c'è tra il velluto di cotone e quello sintetico per le sedie di un ristorante",
+     "ai"
+    ],
+    [
+     "come conviene pulì una seduta in pelle macchiata di vino rosso",
+     "ai"
+    ],
+    [
+     "maremma che giornataccia oggi",
+     "ai"
+    ],
+    [
+     "icché è meglio per un divano d'albergo la gommapiuma o il memory",
+     "ai"
+    ],
+    [
+     "secondo te quanto dovrei chiede all'ora per un restauro",
+     "ai"
+    ],
+    [
+     "mi spieghi la differenza tra tenda a pacchetto e tenda a rullo",
+     "ai"
+    ],
+    [
+     "ma per uno come me conviene il forfettario o l'ordinario",
+     "ai"
+    ],
+    [
+     "la gommalacca si pole dà anche sul noce o vien troppo scuro",
+     "ai"
+    ],
+    [
+     "oh ma lo sai che la Fiorentina ha perso ancora",
+     "ai"
+    ],
+    [
+     "come fo a convince un albergo a rifà tutte le tende invece di rappezzà quelle vecchie",
+     "ai"
+    ],
+    [
+     "che vuol dire classe 1 per un tessuto ignifugo",
+     "ai"
+    ],
+    [
+     "son stanco morto stasera un ho voglia di nulla",
+     "ai"
+    ]
+   ]
+  }
+ }
+}

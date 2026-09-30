@@ -2564,6 +2564,12 @@
   const carica = () => {
     fetch("/modello-eon.json").then(r => r.ok ? r.json() : null).then(m => { if(m) EonLettore.caricaModello(m); }).catch(() => {});
     if(typeof EonNeurale !== "undefined") fetch("/modello-neurale.json").then(r => r.ok ? r.json() : null).then(m => { if(m && EonNeurale.carica(m)) EonLettore.usaNeurale(EonNeurale); }).catch(() => {});
+    /* Passo 4: il modello dei dettagli (che ruolo ha ogni numero di un preventivo): più
+       modelli piccoli, la media dei loro voti. Finché non c'è, gli importi li leggono le regole. */
+    if(typeof EonNeurale !== "undefined" && EonNeurale.crea && EonLettore.usaDettagli) fetch("/modello-dettagli.json").then(r => r.ok ? r.json() : null).then(j => {
+      if(!j || !Array.isArray(j.modelli)) return;
+      EonLettore.usaDettagli(j.modelli.map(m => { const x = EonNeurale.crea(); return x.carica(m) ? x : null; }).filter(Boolean));
+    }).catch(() => {});
   };
   if(document.readyState === "complete") carica(); else window.addEventListener("load", carica);
 })();

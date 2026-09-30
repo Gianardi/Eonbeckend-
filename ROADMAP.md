@@ -551,7 +551,76 @@ sporca, dialetti, chat, anziano, straniero.
      invece di "fai la DiCo") → nuovo addestramento; alcune domande sui dati
      che EON non sa ancora rispondere.
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
+   **Primo pezzo fatto il 30/09 (sera): gli importi dei preventivi e delle fatture.**
+   - **Cosa fa:** per ogni numero della frase dice che ruolo ha: quantità,
+     prezzo a pezzo, totale di una voce, numero annullato ("a 12, eh no 15"),
+     acconto ("il 30 per cento su 10.000"), sconto, oppure niente (indirizzi,
+     misure come "6 kW" o "3 metri per 2", date, IVA). Il conto lo fa il
+     codice, il modello non fa aritmetica: si fa così anche nei sistemi grandi.
+   - **Come è stato allenato:**
+     - circa 40 mila frasi del generatore, ognuna verificata col conto;
+     - circa 2.500 frasi vere di preventivi (quelle del primo modello),
+       etichettate dalle regole senza dubbi;
+     - circa 230 frasi scritte a mano.
+     Le frasi dei giri restano solo per l'esame. Sono 3 modelli piccoli: vale
+     la media dei loro voti.
+   - **Nell'app:** le regole restano la base. Il modello cambia il conto solo
+     se è sicuro almeno al 98% su ogni numero.
+   - **Risultati sulle 317 frasi di prova con un importo:**
+     - regole da sole: 300;
+     - modello da solo: 303;
+     - regole + modello: **305**, e nessuna frase che era giusta diventa
+       sbagliata.
+     Sistemate, per esempio: "due armadi… 120 l'uno" (240), "mille e due" =
+     1.200, "du' telecamere a 180 l'una e er montaggio 120" (480), "300 euro
+     meno il 10 per cento" (270).
+   - **App intera:** giro 16 da 1032 a **1033**, giro 17 da 1032 a **1035**,
+     giro 15 uguale (1050).
+   - **Peso e velocità:** 1,4 MB, caricato dopo l'avvio. 24 ms a frase sul
+     computer; sul telefono non è misurato, stimo fino a circa 100 ms, e solo
+     per le frasi di preventivi e fatture.
+   - **Onestà:** una prova automatica nuova (`eval/modello-dettagli.test.mjs`)
+     blocca il merge se una frase giusta diventa sbagliata. La soglia del 98%
+     e le prove sono tarate sui giri che conosco: il voto vero lo darà il
+     giro 18 alla cieca (passo 5): sugli importi del giro 18 le regole ne fanno 50 su 103, regole + modello 54 (vedi sotto).
+   - **Resta:**
+     - le date e le ore ("giovedì 8" = giorno 8 o alle 8?, due appuntamenti
+       in una frase, "alle deci"): prossimo pezzo di questo passo;
+     - alcuni importi ancora sbagliati, per esempio "40 metri a 12, eh no 15,
+       e poi 6 plafoniere…";
+     - l'acconto "30 per cento su 10.000": il lettore lo legge giusto, ma
+       nell'app la frase non arriva al preventivo (è un problema di
+       smistamento).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
+   **Giro 18 fatto il 30/09 (sera), dopo i passi 3 e 4.**
+   - **Chi l'ha scritto:** 5 scrittori nuovi, che non hanno visto il codice né
+     i giri vecchi: impresa edile a Verona, idraulico a Bari, elettricista a
+     Torino, amministratrice di condominio a Palermo, tappezziere a Firenze.
+     1.064 frasi, salvate nel progetto prima di misurare
+     (`eval/dati/frasi-giro18.json`) e misurate una volta, senza correggere
+     niente prima.
+   - **Modello dei cassetti da solo:** **95%** giusto (il modello di parole di
+     prima: 81%). È lo stesso livello degli esami alla cieca 16 e 17: il
+     modello tiene su frasi mai viste.
+   - **App intera:** **920 su 1.064 (86%)**, 39 all'AI, 105 sbagliate. Sui
+     giri che conosco è al 97%: la differenza è il voto onesto.
+   - **Dove sbaglia (144 frasi):**
+     - **48 importi di preventivi e fatture** su 103: è il punto debole. Gli
+       scrittori avevano l'indicazione di mettere sconti, correzioni e acconti,
+       e ne hanno messi molti. Il modello dei dettagli ne sistema 4 in più
+       (regole 50, regole + modello 54). Resta scoperto:
+       - lo sconto detto in tanti modi ("fagli uno sconto di 150", "togli il 5
+         per cento");
+       - "meno l'acconto che mi hanno già dato di 4000";
+       - "24 unità a 14 euro al mese per 12 mesi";
+       - "il 2% su 85.000 euro di lavori";
+       - "fagli un prezzo finale di 3.800";
+     - **16 orari** (due impegni in una frase, "giovedì 8");
+     - **80 frasi nel cassetto sbagliato:** 14 chiacchiere o domande di mestiere
+       prese per comandi, 12 appunti, 12 domande sui dati, 10 "apri/cerca un
+       documento", 9 incassi.
+   - Il giro 18 ora fa da soglia minima (920) contro i peggioramenti. Da qui
+     in avanti non è più cieco: per il prossimo voto onesto servirà un giro 19.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
