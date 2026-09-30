@@ -1,0 +1,241 @@
+{ "stile": "dettatura vocale sporca: parole simili sbagliate, nomi storpiati, parole attaccate o spezzate, niente punteggiatura, esitazioni ehm cioè, ripetizioni, correzioni a metà", "frasi": [
+["ehm crea una cartella nuova che si chiama fornitori grazie", "cartella"],
+["fammi una carte la fornitori cioè una cartella per i fornitori", "cartella"],
+["nuova cartella ehm fornitori no aspetta chiamala fornitori e grossisti", "cartella"],
+
+["stato di avanzamento lavori villa o netto le aiuole sono finite manca solo la paccia matura", "sal"],
+["sal villa Oneto ehm cioè aiuole fatte al cento per cento pacciamatura ancora da fare", "sal"],
+["segna lo stato avanzamento lavori al giardino di villa Rondelli prato seminato siepe piantata manca l'impianto a goccia", "sal"],
+
+["l'amministratore scarpe lini ha messo l'assemblea il 22 ottobre alle nove di sera segnala", "assemblea"],
+["segna assemblea di condominio ehm fissata dall'amministratore Scarpellini per il 22 del mese alle 21", "assemblea"],
+["cioè l'amministratrice Bertoldi ha convocato l'assemblea condominiale per il 5 novembre alle 20 e 30 mettila", "assemblea"],
+
+["metti sta foto nella cartella del moretti", "cartella"],
+["ehm questa foto qua mettila nella cartella di Moretto no Moretti", "cartella"],
+["salva questa immagine dentro la cartella Ferrarini cioè quella del cliente Ferrarini", "cartella"],
+
+["sposta il preventivo delle scale dentro la cartella ciampi", "cartella"],
+["il preventivo della scala a chiocciola mettilo nella cartella di Ciampi ehm quella del cantiere", "cartella"],
+["sposta il preventivo del parapetto nella cartella del Giampi cioè Ciampi", "cartella"],
+
+["manda a spano un messaggio di auguri oggi compie gli anni mi sa", "messaggio"],
+["scrivi un whatsapp al Spanu ehm tanti auguri di buon compleanno", "messaggio"],
+["mandagli un messaggio a Pina cioè no Pinna Salvatore auguri per il compleanno che è oggi credo", "messaggio"],
+
+["ciao ci sentiamo dopo", "saluto"],
+["ok ciao ciao a dopo", "saluto"],
+["ehm va be ciao eon ci si sente più tardi", "saluto"],
+
+["che tempo fa domani a tol mezzo che devo salire sul tetto", "domanda"],
+["ma domani a Tolmezzo piove o no ehm che devo andare sul tetto", "domanda"],
+["com'è il meteo giovedì a Gemona cioè c'è vento che devo salire sul tetto", "domanda"],
+
+["prepara il sale di ottobre per il cantiere delle villette a maranello", "sal"],
+["ehm fammi lo stato avanzamento lavori di ottobre del cantiere villette Maranello", "sal"],
+["prepara il esse a elle cioè il sal di settembre per le villette di Formigine", "sal"],
+
+["l'appuntamento con titta relli del 10 spostalo di un ora più avanti", "calendario_modifica"],
+["ehm sposta di un'ora cioè più tardi l'appuntamento del 10 con Tittarelli", "calendario_modifica"],
+["l'appuntamento col Martarelli del 12 no aspetta del 14 mettilo mezz'ora dopo", "calendario_modifica"],
+
+["la foto della canna fu maria di cavallaro aprimela", "cerca_documento"],
+["ehm aprimi la foto della cannafumaria del Cavallaro", "cerca_documento"],
+["fammi vedere le foto della canna fumaria che ho fatto da Cavalieri no Cavallaro", "cerca_documento"],
+
+["c'è da andare dalla signora barbieri domattina presto a staccare il contatore", "calendario"],
+["ehm domani mattina alle sette dalla Barbiere cioè Barbieri a staccare il contatore", "calendario"],
+["segna dopodomani mattina presto dalla signora Bertolini a staccare il contatore della luce", "calendario"],
+
+["nel bagno cosa dice la norma per le zone delle prese", "domanda"],
+["ehm la norma dei bagni le zone zero uno due le prese dove si possono mettere", "domanda"],
+["cioè a che distanza dalla doccia posso mettere una presa secondo la norma", "domanda"],
+
+["telefona al comi nelli", "chiamata"],
+["chiamo il Cominelli ehm cioè chiama il Cominelli", "chiamata"],
+["fammi parlare col Cominetti no Cominelli chiamalo", "chiamata"],
+
+["scrivi una mail a tutti i condomini di parco dei pini con gli orari della ditta nuova delle pulizie", "email"],
+["ehm mail ai condomini del parco dei pini cioè a tutti con gli orari della nuova impresa di pulizia", "email"],
+["manda una email a tutti i condòmini di residenza Le Querce con i giorni e gli orari della ditta pulizie nuova", "email"],
+
+["convoca l'assemblea del condominio che mi devono approvare il preventivo", "assemblea"],
+["ehm convoca una assemblea di condominio cioè straordinaria per votare il preventivo mio del tetto", "assemblea"],
+["fai la convocazione dell'assemblea condominiale per approvare il mio preventivo quello della facciata", "assemblea"],
+
+["fai la dico a giusi leonardi mascalucia", "dico"],
+["ehm dichiarazione di conformità per Agata no aspetta per Giusy Leonardi a Mascalucia", "dico"],
+["fai la di co a Leonardi Giusi di Masca Lucia", "dico"],
+
+["si è rotto il tubo dell irrigazione all hotel esce l'acqua a fontana in mezzo al prato", "urgenza"],
+["ehm all'hotel Miramare è scoppiato il tubo dell'irrigazione c'è acqua dappertutto nel prato", "urgenza"],
+["cioè si è spaccato il tubo dell'irrigazione al residence e l'acqua esce a getto non si ferma", "urgenza"],
+
+["fai una foto al contatore adesso", "foto"],
+["ehm fotografa il contatore", "foto"],
+["fammi una foto ora al quadro elettrico no al contatore", "foto"],
+
+["serra ha saldato tutto", "incasso"],
+["il Serra ehm ha pagato il saldo", "incasso"],
+["la signora Sera cioè Serra ha fatto il bonifico del saldo", "incasso"],
+
+["fai partire la chiamata a marco", "chiamata"],
+["chiama marco ehm il Marco elettricista", "chiamata"],
+["fai partire una telefonata a Mirco no Marco", "chiamata"],
+
+["dico gas per il piano cottura dei coia nitz", "dico"],
+["ehm dichiarazione conformità gas del piano cottura per i Coianiz", "dico"],
+["fai la di co del gas per il piano cottura dei Tomasin", "dico"],
+
+["lusuardi ha pagato la metà della pompa di calore", "incasso"],
+["ehm il Lusardi mi ha dato la metà della pompa di calore", "incasso"],
+["ho incassato metà della pompa di calore dal Lusuardi cioè 2000 euro", "incasso"],
+
+["dico per esposito cucina impianto a gas", "dico"],
+["ehm fammi la dichiarazione di conformità per Esposito cioè per l'impianto gas della cucina", "dico"],
+["dico Esposto no Esposito impianto gas della cucina", "dico"],
+
+["preventivo per i cuscini del gabbiano due materassino di prua e quattro cuscini del pozzetto", "documento"],
+["ehm fai un preventivo per la barca Gabbiano 2 cioè materassino di prua più 4 cuscini pozzetto", "documento"],
+["preventivo cuscini per la barca Delfino tre il materasso di poppa no di prua e sei cuscini del pozzetto", "documento"],
+
+["l'amministratore ferrante mi ha chiesto di partecipare all'assemblea di condominio di via tasso il 14 alle sei di sera per spiegare il lavoro della caldaia centralizzata segnala", "assemblea"],
+["ehm segna l'assemblea del condominio di via Tasso il 14 alle 18 mi ha chiamato Ferrante devo spiegare la caldaia centralizzata", "assemblea"],
+["l'amministratore Ferranti cioè Ferrante vuole che vado all'assemblea di via Tasso il 14 sera alle sei per la caldaia segnala", "assemblea"],
+
+["a posto così grazie", "saluto"],
+["ok ok va bene così", "saluto"],
+["ehm no niente altro a posto", "saluto"],
+
+["ricordami giovedì di rifare il durc", "calendario"],
+["ehm giovedì mattina ricordami il dur cioè il DURC da rifare", "calendario"],
+["ricordami lunedì prossimo di rinnovare il durch", "calendario"],
+
+["scrivi una mail formale all amministratore del condominio di via bolognese per il portone", "email"],
+["ehm mail formale cioè seria all'amministratore di via Bolognese per la questione del portone", "email"],
+["manda una email formale all'amministratore del condominio di via Faentina per il cancello", "email"],
+
+["metà fatture pagata dal bonacina 55 euro", "incasso"],
+["ehm il Bonacina ha pagato metà della fattura cinquantacinque euro", "incasso"],
+["mi ha dato metà fattura il Bonaccina cioè 120 euro", "incasso"],
+
+["inoltra il preventivo del super condominio a tutti e due i presidenti oliviero e marino", "invio_documento"],
+["ehm manda il preventivo del supercondominio a Oliviero e a Marino tutti e due i presidenti", "invio_documento"],
+["inoltra il preventivo del super condominio ai presidenti cioè a Olivieri e Marini", "invio_documento"],
+
+["zio tonino mi deve ancora ridare la scala a pioli", "mente"],
+["ehm ricordati che la scala a pioli ce l'ha ancora zio Tonino", "mente"],
+["segnati che lo zio Totò cioè Tonino non mi ha ancora ridato la scala", "mente"],
+
+["scrivi una mail no non un messaggio una mail al mancinelli che senza acconto del 30 per cento non parto però gentile", "email"],
+["ehm mail al Mancinelli cioè email eh non whatsapp gli scrivi che senza il 30 di acconto non comincio però con educazione", "email"],
+["scrivi una e mail al Mancini no Mancinelli educata che senza anticipo del trenta non inizio i lavori", "email"],
+
+["come rispondo a un cliente che mi chiede lo sconto", "domanda"],
+["ehm cosa gli dico a uno che mi chiede lo sconto cioè come faccio a dire di no", "domanda"],
+["un cliente vuole il dieci per cento di sconto come gli rispondo senza perderlo", "domanda"],
+
+["mi mostri tutti i preventivi di settembre che li voglio riguardare uno per uno", "cerca_documento"],
+["ehm fammi vedere i preventivi di settembre tutti", "cerca_documento"],
+["aprimi tutti i preventivi fatti ad agosto cioè settembre che li riguardo", "cerca_documento"],
+
+["cancella tutti gli appuntamenti di giovedì uno sono a un funerale", "calendario_modifica"],
+["ehm togli tutti gli appuntamenti di giovedì che vado a un funerale", "calendario_modifica"],
+["annulla gli appuntamenti di venerdì 2 tutti quanti c'ho un funerale", "calendario_modifica"],
+
+["quanti cioè quanti soldi devo ancora prendere in totale da tutti tranne i condomini", "dati"],
+["ehm quanto mi devono in tutto i clienti senza contare i condomini", "dati"],
+["a quanto sta il totale che devo incassare cioè togliendo i condomini", "dati"],
+
+["apri per piacere le foto del bagno della ceva sco", "cerca_documento"],
+["ehm aprimi le foto del bagno della Cevasco", "cerca_documento"],
+["fammi vedere le foto della cucina no del bagno della signora Cevasco", "cerca_documento"],
+
+["scrivi a luca il ragazzo che domani si parte alle sette dal magazzino", "messaggio"],
+["ehm manda un messaggio a Luca cioè al ragazzo domattina partenza alle 7 dal magazzino", "messaggio"],
+["scrivi un whatsapp a Luka no Luca che domani ci vediamo alle sei e mezza in magazzino", "messaggio"],
+
+["a san rocco è saltata la luce durante il funerale e il quadro in sacrestia non riparte", "urgenza"],
+["ehm in chiesa a San Rocco blackout durante la messa il quadro della sacrestia non si riarma", "urgenza"],
+["è saltata la corrente a San Rocco cioè nella chiesa e il quadro in sagrestia non riparte c'è il funerale", "urgenza"],
+
+["puoi registrare un nuovo cliente signori garrone palazzina in via bossoli 20", "cliente"],
+["ehm nuovo cliente i Garrone cioè i signori Garrone via Bossoli venti la palazzina", "cliente"],
+["registra un cliente nuovo famiglia Garone palazzina di via Bossoli 22", "cliente"],
+
+["il 30 ottobre ricordami di rinnovare l'assicurazione del furgone credo che scade quel giorno", "calendario"],
+["ehm ricordami il trenta di ottobre l'assicurazione del furgone da rinnovare", "calendario"],
+["il 28 ottobre cioè due giorni prima della scadenza ricordami di rinnovare la sicurazione del furgone", "calendario"],
+
+["chi è che mi deve ancora pagare", "dati"],
+["ehm chi mi deve dei soldi ancora", "dati"],
+["chi è che non mi ha ancora pagato cioè quali clienti", "dati"],
+
+["foto al bigliettodavisita di sto cliente", "foto"],
+["ehm fai una foto al biglietto da visita del cliente", "foto"],
+["fotografa il bigliettino da visita di questo qua", "foto"],
+
+["preventivo a zedda per tinteggiatura esterna e sistemazione grondaie tremila due cioè tremiladuecento tutto compreso", "documento"],
+["ehm fai un preventivo a Zeda per pittura esterna e grondaie 3200 euro tutto compreso", "documento"],
+["preventivo al Sedda no Zedda tinteggiatura della facciata e grondaie quattromila e cinque tutto incluso", "documento"],
+
+["manda un whatsapp alla sciura tagliabue sono giù apra il portone", "messaggio"],
+["ehm scrivi alla signora Taglia bue su whatsapp che sono sotto che mi apre il portone", "messaggio"],
+["whatsapp alla Tagliabue cioè alla signora sono qui davanti mi apra il cancello", "messaggio"],
+
+["stato avanzamento lavori hotel stella alpina strutture finite moduli al 40 per cento", "sal"],
+["ehm sal hotel Stella Alpina le strutture sono fatte i moduli al quaranta per cento", "sal"],
+["stato di avanzamento lavori albergo Edelweiss strutture completate pannelli montati al sessanta per cento", "sal"],
+
+["aggiungi ai clienti mario gencarelli idraulico no cioè è un cliente di bisignano", "cliente"],
+["ehm nuovo cliente Mario Gen carelli di Bisignano", "cliente"],
+["aggiungi il cliente Mario Gencarelli cioè Gencarelli Mario di Bisignano provincia di Cosenza", "cliente"],
+
+["condividi con la brambilla la fatture della cila", "invio_documento"],
+["ehm manda alla Brambilla la fattura della cila che le ho fatto", "invio_documento"],
+["condividi con la signora Brambati no Brambilla la fattura per la CILA", "invio_documento"],
+
+["furlan vuole il battiscopa bianco laccato alto sette centimetri", "mente"],
+["ehm segnati che il Furlan vuole il battiscopa bianco laccato da 7", "mente"],
+["la Furlani cioè la signora Furlan il battiscopa lo vuole laccato bianco alto 8 no 7 centimetri", "mente"],
+
+["leonardi ha il sotto tetto non accessibile i cavi vanno fatti passare dal cavedio", "mente"],
+["ehm dal Leonardi nel sottotetto non ci si entra quindi i cavi vanno nel cavedio", "mente"],
+["ricordati che da Leonardo cioè Leonardi nel sottotetto non si passa i cavi passano dal cavedio", "mente"],
+
+["fai una foto allo scontrino del gasolio", "foto"],
+["ehm fotografa lo scontrino del diesel", "foto"],
+["foto allo scontrino del distributore cioè del gasolio adesso", "foto"],
+
+["allagamento della rampa dei box in viale monza", "urgenza"],
+["ehm si è allagata la rampa dei box di viale Monza c'è mezzo metro d'acqua", "urgenza"],
+["rampa dei garage allagata in via Padova cioè viale Padova", "urgenza"],
+
+["registra il nuovo cliente condominio le magnolie amministratrice rinaldi", "cliente"],
+["ehm nuovo cliente condominio Le Magnolie cioè l'amministratrice è la Rinaldi", "cliente"],
+["aggiungi il condominio Le Camelie come cliente nuovo l'amministratrice è la Rinaldo no Rinaldi", "cliente"],
+
+["manda il preventivo della canna fumaria a nunzio cavallaro", "invio_documento"],
+["ehm il preventivo della canna fu maria mandalo a Nunzio Cavallaro", "invio_documento"],
+["manda il preventivo del camino cioè della canna fumaria al Cavallaro Nunzio", "invio_documento"],
+
+["il getto del solaio ehm spostalo da giovedì a mercoledì cioè anticipalo", "calendario_modifica"],
+["anticipa il getto del solaio a martedì invece di giovedì", "calendario_modifica"],
+["sposta il getto del solaio di venerdì a giovedì no aspetta a mercoledì", "calendario_modifica"],
+
+["buongiorno fammi un quadro quante fatture devo ancora incassare da quali condomini e qual è la più vecchia", "dati"],
+["ehm quante fatture ho ancora da incassare dai condomini e quale è quella più vecchia", "dati"],
+["le fatture dei condomini non ancora pagate quante sono cioè da chi e qual è la più vecchia", "dati"],
+
+["buon giorno e on", "saluto"],
+["ehm ciao eon buongiorno", "saluto"],
+["buondì eon", "saluto"],
+
+["chiama stenico", "chiamata"],
+["ehm chiama lo Stenico cioè Stenico Paolo", "chiamata"],
+["fai una chiamata allo Stennico", "chiamata"],
+
+["fattura saldo per i tonutti erano 1800 meno l acconto di 500 quindi 1300", "documento"],
+["ehm fai la fatture di saldo ai Tonutti mille e otto meno 500 di acconto fa milletrecento", "documento"],
+["fattura a saldo per Tonut cioè Tonutti 2400 meno 600 di anticipo quindi 1800", "documento"]
+] }
