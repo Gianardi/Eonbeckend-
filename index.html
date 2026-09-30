@@ -14413,7 +14413,41 @@ function provaSpostaImmediato(testo, viaVoce){
     const ora = letto.nuovaOra || estraiOra(v.quando) || "09:00";
     return giorno ? giorno + "T" + ora + ":00" : null;
   };
-  const vecchioIso = (v) => nuovoIso({ quando: v.quando }) && (() => { const d = interpretaQuando(v.quando); const o = estraiOra(v.quando) || "09:00"; return d ? d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + "T" + o + ":00" : null; })();
+  return confermaSpostamento(voci, nuovoIso, testo, viaVoce);
+}
+/* Passo 3 (30/09/2026), primo cassetto: il modello neurale ha deciso che la
+   frase chiede di SPOSTARE o ANNULLARE un impegno. Il lettore legge solo i
+   dettagli (quale impegno, il nuovo quando: EonLettore.leggiModificaImpegno)
+   e qui si chiede conferma. Se l'impegno non si trova, EON chiede quale:
+   mai un appuntamento nuovo al posto di uno spostato. */
+function cassettoNeurale(testo, soglia = 0.9){
+  if(typeof EonLettore === "undefined" || !EonLettore.neuraleAttivo || !EonLettore.neuraleAttivo()) return null;
+  const r = EonLettore.classifica(testo, contestoLettore());
+  return r && r.p >= soglia ? r.intento : null;
+}
+function provaModificaImpegno(testo, viaVoce){
+  if(!isDbReady()) return false;
+  const voci = impegniDaAnnullare({ nome: [], oggetto: null, data: null, fascia: null, ora: null });
+  const lista = voci.map((v, i) => ({ id: i, titolo: v.titolo, chi: v.chat ? v.chat.name : "", iso: isoImpegno(v) })).filter(x => x.iso);
+  const x = EonLettore.leggiModificaImpegno(testo, lista, new Date());
+  if(!x || !x.tipo) return false;
+  const scelte = x.impegni.map(i => voci[i.id]);
+  // non lo trovo (o sono troppi): come prima, decide chi viene dopo (al massimo l'AI)
+  if(!scelte.length || scelte.length > 6) return false;
+  if(x.tipo === "annulla") return confermaAnnullamento(scelte, viaVoce);
+  const nuovoIso = (v) => { const l = lista.find(i => voci[i.id] === v); return l ? x.nuovoPer(l) : null; };
+  const spostabili = scelte.filter(v => nuovoIso(v));
+  return spostabili.length ? confermaSpostamento(spostabili, nuovoIso, testo, viaVoce) : false;
+}
+/* Quando è (ISO) un impegno del calendario, come "2026-10-03T16:00:00" */
+function isoImpegno(v){
+  const d = interpretaQuando(v.quando); if(!d) return null;
+  const o = estraiOra(v.quando) || "09:00";
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + "T" + o + ":00";
+}
+/* Chiede conferma e sposta (uno: "Sposto … a …?"; più: "Quale sposto?"), con "Annulla" */
+function confermaSpostamento(voci, nuovoIso, testo, viaVoce){
+  const vecchioIso = (v) => isoImpegno(v);
   const etichetta = (iso) => { const d = new Date(iso); const oggi = new Date(); oggi.setHours(0,0,0,0); const g = new Date(d); g.setHours(0,0,0,0); const diff = Math.round((g - oggi) / 86400000);
     return (diff === 0 ? "oggi" : diff === 1 ? "domani" : d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric" })) + " alle " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
   const sposta = async (v) => {
@@ -14442,7 +14476,8 @@ function provaSpostaImmediato(testo, viaVoce){
       scelte: [{ etichetta: "Sì, sposta", valore: "si" }, { etichetta: "No", valore: "no" }], onRisposta: (x) => { if(x === "si") sposta(v); else chiudiRisorsaCard(); } });
     return true;
   }
-  domandaDelCodice({ titolo: "Sposta", domanda: "Quale sposto a " + (letto.nuovaOra ? "le " + letto.nuovaOra : "") + (letto.nuovoGiorno ? " " + etichetta(nuovoIso(voci[0])).split(" alle ")[0] : "") + "?", senzaCampo: true,
+  const primo = nuovoIso(voci[0]);
+  domandaDelCodice({ titolo: "Sposta", domanda: "Quale sposto" + (primo ? " a " + etichetta(primo) : "") + "?", senzaCampo: true,
     scelte: voci.map((v, i) => ({ etichetta: v.titolo + " · " + quandoBreve(v.quando), valore: String(i) })).concat([{ etichetta: "Nessuno", valore: "no" }]),
     onRisposta: (x) => { if(x === "no") return chiudiRisorsaCard(); sposta(voci[+x]); } });
   return true;
@@ -14475,7 +14510,10 @@ function provaAnnullaImmediato(testo, viaVoce){
     return true;
   }
   if(voci.length > 15) return false;
-
+  return confermaAnnullamento(voci, viaVoce);
+}
+/* La card "Annullo questo impegno?" con le caselle, poi annulla davvero */
+function confermaAnnullamento(voci, viaVoce){
   const corpo = document.createElement("div");
   corpo.className = "annulla-card";
   const lista = document.createElement("div");
@@ -15952,6 +15990,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       campo.value = "";
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "sposta_impegno");
+      return;
+    }
+    /* Il modello dice "sposta o annulla un impegno" (passo 3): i dettagli li legge il lettore */
+    if(!inContinuazione && cassettoNeurale(testo) === "calendario_modifica" && provaModificaImpegno(testo, viaVoce)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "modifica_impegno");
       return;
     }
 

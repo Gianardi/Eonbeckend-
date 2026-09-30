@@ -1040,6 +1040,110 @@
     "dott ing ingegner avv avvocato geom geometra telefono tel numero cell cellulare cel via piazza corso viale rubrica anagrafica ditta come amministratore referente si chiama " +
     "ciao ecco guarda scusa per favore grazie tra fra ai nei in è venuta venuto oggi ieri stamattina mi hanno affidato palazzo").split(" "));
   const LEGA_NOME = new Set("di da del della dello dei degli delle la le il lo i gli d de".split(" "));
+  /* ---------------- Spostare o annullare un impegno (passo 3, 30/09/2026) ----------------
+     Che la frase chieda di spostare/annullare lo decide il modello neurale;
+     qui si leggono solo i dettagli, senza indovinare le formulazioni:
+     - i tempi detti, uno per pezzo di frase ("domani invece che alle 16 … alle
+       cinque e mezza" = domani 16:00 [vecchio], 17:30 [nuovo]);
+     - quale impegno: il più simile per parole (cliente, lavoro, posto) e per
+       giorno/ora detti;
+     - il nuovo quando: il giorno e l'ora detti DIVERSI da quelli che ha già
+       (quello che resta uguale non si tocca: "sabato 10 ottobre sempre alle 10").
+     impegni: [{ id, titolo, chi, iso: "2026-10-03T16:00:00" }]. */
+  const INIZIO_TEMPO = /^(?:oggi|domani|dopodomani|stasera|stamattina|domattina|stanotte|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|alle|all|dalle|dall|ore|verso|mezzogiorno|mezzanotte|fra|tra|\d{1,2}(?::\d{2})?|\d{1,2}\/\d{1,2}|la|le|l)$/;
+  const FERMA_TEMPO = /^(?:invece|anziche|non|ma|piuttosto|oppure|perche|che|cosi|dopo|prima|spostal\w*|sposta|mettil\w*|portal\w*|facciamol\w*|fall\w*|rimandal\w*|anticipal\w*|posticipal\w*|slitta|cambia|correggi)$/;
+  const NEGA_TEMPO = /^(?:invece|anziche|non|posto)$/;
+  const TIPI_IMPEGNO = /^(?:sopralluog\w*|appuntament\w*|verific\w*|consegn\w*|manutenzion\w*|riunion\w*|collaud\w*|preventiv\w*|intervent\w*|lavor\w*|incontr\w*|visit\w*|montaggi\w*|install\w*|chiamat\w*|telefonat\w*|cantier\w*)$/;
+  function tempiDetti(pp, oggi) {
+    const out = [];
+    for (let i = 0; i < pp.length; i++) {
+      if (!INIZIO_TEMPO.test(pp[i].n)) continue;
+      let j = i;
+      // "domani dalle 4 alle 6": ogni tempo il suo pezzo
+      const ferma = (w) => FERMA_TEMPO.test(w) || /^(?:dalle|dall)$/.test(w) || (/^(?:dalle|dall)$/.test(pp[i].n) && /^(?:alle|all|a)$/.test(w));
+      while (j < pp.length && j - i < 7 && (j === i || !ferma(pp[j].n)) && !(j > i && pp[j - 1].sep)) j++;
+      const q = trovaQuando(pp.slice(i, j), oggi);
+      if (!q.giornoIso && !q.ora) continue;
+      const usate = [...q.usate];
+      if (!usate.length || Math.min(...usate) > 1) continue; // il tempo deve cominciare qui
+      const fine = i + Math.max(...usate);
+      // negato: "invece che alle 16", "non alle 7", "anziché sabato", "dalle 4 (alle 6)"
+      let k = i - 1;
+      while (k >= 0 && /^(?:alle|all|le|a|ore|che|piu|e|di)$/.test(pp[k].n) && i - k <= 3) k--;
+      const negato = /^(?:dalle|dall)$/.test(pp[i].n) || (k >= 0 && i - k <= 3 && NEGA_TEMPO.test(pp[k].n));
+      out.push({ i, giornoIso: q.giornoIso, ora: q.ora, negato });
+      i = fine;
+    }
+    return out;
+  }
+  const ANNULLA_PAROLE = /\b(?:cancella\w*|annulla\w*|togli\w*|leva\w*|elimina\w*|disdett\w*|disdic\w*|salta|saltato|salta\w*)\b|\bnon\s+si\s+fa\s+piu\b|\bnon\s+(?:ci\s+)?(?:vado|andiamo|viene|vengono)\s+piu\b/;
+  const NON_ANNULLA = /\bnon\s+(?:la|lo|le|li)?\s*(?:voglio\s+)?(?:cancell|annull|togli)\w*/;
+  const PAROLE_NON_NOME = /^(?:sposta\w*|spostal\w*|mett\w*|port\w*|fac\w*|fall\w*|rimand\w*|anticip\w*|posticip\w*|slitt\w*|cambi\w*|corregg\w*|cancell\w*|annull\w*|togl\w*|lev\w*|elimin\w*|appuntamento|impegno|orario|ora|giorno|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mattina|pomeriggio|sera|alle|invece|anziche|dopo|prima|sempre|scritto|detto|chiamato|chiesto|puo|riesce|arriva|viene|ottobre|novembre|dicembre|settembre|mezza|mezzo|mezzogiorno|diventare|intendo|quello|quella|quelli|signora|signor|signore|dottor|dottore|non|piu|che|eh|ah|allora|cioe|ciao|poi|anche|solo|niente|tutto|fatto|fare)$/;
+  function leggiModificaImpegno(testoOriginale, impegni, oggiRif) {
+    const oggi = new Date(oggiRif || Date.now());
+    const testo = pulisci(testoOriginale).testo;
+    const pp = parole(testo);
+    const n = pp.map((x) => x.n).join(" ");
+    const tempi = tempiDetti(pp, oggi);
+    const usateTempo = new Set();
+    tempi.forEach((t) => { for (let k = t.i; k < t.i + 6 && k < pp.length; k++) if (INIZIO_TEMPO.test(pp[k].n) || /^\d/.test(pp[k].n) || numeroParola(pp[k].n) !== null) usateTempo.add(k); });
+    // Le parole che dicono QUALE impegno (cliente, lavoro, posto)
+    const piene = pp.filter((x, k) => !usateTempo.has(k) && x.n.length >= 3 && !VUOTE.has(x.n) && !PAROLE_NON_NOME.test(x.n) && numeroParola(x.n) === null).map((x) => x.n);
+    const giornoDi = (iso) => String(iso || "").slice(0, 10), oraDi = (iso) => String(iso || "").slice(11, 16);
+    const punteggi = (impegni || []).map((imp) => {
+      const suo = norm((imp.titolo || "") + " " + (imp.chi || "")).split(" ");
+      const radice = (w) => w.slice(0, Math.max(4, w.length - 2));
+      let p = 0;
+      const peso = (w) => (TIPI_IMPEGNO.test(w) ? 1 : 3);
+      piene.forEach((w) => { if (suo.includes(w)) p += peso(w); else if (w.length >= 5 && suo.some((x) => x.length >= 5 && x.slice(0, 6) === w.slice(0, 6))) p += peso(w) - 1; });
+      // a parità: quello che ha meno parole in più ("Verifica Villa Flora" prima di "Verifica impianto Villa Flora")
+      p += 0.01 * (piene.filter((w) => suo.includes(w)).length / Math.max(1, suo.length));
+      const parole = p;
+      tempi.forEach((t) => {
+        if (t.giornoIso && t.giornoIso === giornoDi(imp.iso)) p += 2;
+        if (t.ora && t.ora === oraDi(imp.iso)) p += 2;
+      });
+      return { imp, p, parole };
+    }).filter((x) => x.parole > 0 || x.p >= 4).sort((a, b) => b.p - a.p);
+    const migliori = [];
+    punteggi.filter((x) => x.p === (punteggi[0] && punteggi[0].p)).forEach((x) => { if (!migliori.some((m) => m.titolo === x.imp.titolo && m.iso === x.imp.iso)) migliori.push(x.imp); });
+    // Il nuovo quando: giorno e ora detti, non negati, diversi da quelli che ha
+    const nuovoPer = (imp) => {
+      const g0 = giornoDi(imp.iso), o0 = oraDi(imp.iso);
+      let g = null, o = null;
+      tempi.filter((t) => !t.negato).forEach((t) => {
+        if (t.giornoIso && t.giornoIso !== g0) g = t.giornoIso;
+        if (t.ora && t.ora !== o0) o = t.ora;
+      });
+      // "rimandalo alla settimana prossima", "di una settimana": stesso giorno, sette giorni dopo
+      if (!g && /\b(?:(?:alla|la)\s+settimana\s+(?:prossima|dopo)|di\s+una\s+settimana)\b/.test(n)) {
+        const d = new Date(g0 + "T12:00:00"); d.setDate(d.getDate() + 7); g = isoGiorno(d);
+      }
+      // "un'ora dopo", "mezz'ora prima", "anticipa di un'ora"
+      const rel = n.match(/\b(?:(un|una|due|tre|mezz)\s*(?:ora|ore)|(\d+)\s*minuti)\s+(dopo|prima|piu\s+tardi|in\s+anticipo)\b|\b(anticip|posticip)\w*\s+di\s+(un|una|due|mezz)\s*(?:ora|ore)\b/);
+      if (!o && rel) {
+        const quanti = rel[2] ? Number(rel[2]) : ({ un: 60, una: 60, due: 120, tre: 180, mezz: 30 })[rel[1] || rel[5]];
+        const verso = /prima|anticip/.test(rel[3] || rel[4]) ? -1 : 1;
+        const [h, m] = o0.split(":").map(Number);
+        const tot = h * 60 + m + verso * quanti;
+        if (tot > 0 && tot < 24 * 60) o = String(Math.floor(tot / 60)).padStart(2, "0") + ":" + String(tot % 60).padStart(2, "0");
+      }
+      // un'ora piccola per un impegno del pomeriggio: "alle 5" = 17
+      if (o && Number(o.slice(0, 2)) < 8 && Number(o0.slice(0, 2)) >= 12) o = String(Number(o.slice(0, 2)) + 12).padStart(2, "0") + o.slice(2);
+      if (!g && !o) return null;
+      return (g || g0) + "T" + (o || o0) + ":00";
+    };
+    const spostaDetto = migliori.length ? migliori.some((imp) => nuovoPer(imp)) : tempi.some((t) => !t.negato) && tempi.length >= 2;
+    const annullaDetto = ANNULLA_PAROLE.test(n) && !NON_ANNULLA.test(n);
+    const ordineAnnulla = /\b(?:cancella|cancellalo|cancellala|cancellami|annulla|annullalo|annullala|togli|toglilo|toglila|leva|levalo|levala|elimina|eliminalo|eliminala)\b/.test(n) && !NON_ANNULLA.test(n);
+    const tipo = spostaDetto && !(ordineAnnulla && !/\b(?:spost|mett|port|rimand|anticip|posticip|slitt|fall|facciam)\w*/.test(n)) ? "sposta" : annullaDetto ? "annulla" : null;
+    // Non è un impegno ("annulla la fattura di Rossi") o sono due comandi ("cancella X e segna Y"): non tocca a questo cassetto
+    const altraCosa = /\b(?:fattur\w*|preventiv\w*|document\w*|ddt|foto|nota|note|appunt\w*|cartell\w*|messaggi\w*|mail|email|pagament\w*|incass\w*|acconto|bonifico|cliente)\b/.test(n) && !/\b(?:appuntament\w*|impegn\w*|sopralluog\w*|riunion\w*|incontr\w*)\b/.test(n) && !migliori.some((m) => piene.some((w) => TIPI_IMPEGNO.test(w) && norm(m.titolo).includes(w.slice(0, 5))));
+    const dueComandi = /\b(?:e|poi|e\s+poi)\s+(?:segna\w*|metti\w*|chiama\w*|manda\w*|scrivi\w*|fai|fammi|aggiungi\w*|crea\w*|ricorda\w*)\b/.test(n);
+    if (altraCosa || dueComandi) return { tipo: null, impegni: [], nuovoPer, tempi, parole: piene, motivo: altraCosa ? "non è un impegno" : "due comandi" };
+    return { tipo, impegni: migliori, nuovoPer, tempi, parole: piene };
+  }
+
   function leggiNuovoCliente(testo) {
     const tel = trovaTelefono(testo);
     let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
@@ -1691,7 +1795,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, leggiModificaImpegno, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);
