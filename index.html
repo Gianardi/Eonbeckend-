@@ -13452,6 +13452,40 @@ function chiediCosaFare(testo, viaVoce, rifai){
   if(viaVoce) parlaRisposta("Non sono sicura: scegli cosa faccio");
   return true;
 }
+/* La Mente: un appunto (con un cliente nella sua scheda, sul server; senza, qui).
+   daModello: l'ha deciso il modello neurale (passo 3). */
+async function gestisciMente(l, testo, viaVoce, invia, daModello){
+  // "Ricordami di mandare i solleciti ai morosi del Parco Sole": da fare, nella scheda del cliente
+  if(l.cliente && isDbReady() && /^(?:ricordami|ricordarmi|ricorda|promemoria)\b/i.test(l.testo)){
+    const cosa = String(l.cosa || l.testo).replace(/^(?:ricordami|ricordarmi|ricorda|promemoria)\s*(?:di|che|:)?\s*/i, "");
+    if(cosa.length >= 3) return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: cosa.charAt(0).toUpperCase() + cosa.slice(1), da_fare: true } };
+  }
+  // Con un cliente ("Conti mi ha detto che…"): nella sua scheda, col codice sul server
+  if(l.cliente && isDbReady() && !/^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|ricordami|ricordarmi)\b/i.test(l.testo)){
+    const testoNota = l.cosa || l.testo;
+    return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: testoNota.charAt(0).toUpperCase() + testoNota.slice(1), ...(l.daFare ? { da_fare: true } : {}) } };
+  }
+  // "Ricordami di comprare raccordi da 3/4 e teflon" (senza giorno né ora): da fare nella Mente
+  // (quelli senza numeri li fa già provaDaFareImmediato, con il suo avviso)
+  const ricorda = !l.cliente && /^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i.test(l.testo) && !(l.quando && (l.quando.giornoIso || l.quando.ora)) && !(typeof capisciDaFare === "function" && capisciDaFare(l.testo));
+  // Solo le frasi senza comando: le altre le sa fare già chi viene dopo
+  // (quando è il modello a dire "è un appunto", "segna/annota/salva…" vanno bene: sono il modo di dirlo)
+  const verbiAzione = daModello ? /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|fai|fammi|ciao|grazie)\b/i : /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|segna|segnami|metti|mettimi|annota|salva|appunta|appuntami|fai|fammi|ciao|grazie|ricordami|ricordarmi)\b/i;
+  if(!ricorda && ((l.cliente && !daModello) || verbiAzione.test(l.testo))) return null;
+  if(!isDbReady() || l.testo.split(/\s+/).length < 2) return null;
+  const riga = { testo: ricorda ? (() => { const c = l.testo.replace(/^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i, ""); return c.charAt(0).toUpperCase() + c.slice(1); })() : (l.cosa || l.testo) };
+  if(l.daFare || ricorda) riga.da_fare = true;
+  const creato = await dbInsert("cantiere_appunti", riga);
+  if(!creato) return null;
+  const nuovo = mappaAppunto(creato);
+  cantiereAppunti.push(nuovo);
+  aggiornaCantiereSottotitoli(); renderCantiereAppunti();
+  ricordaAppuntoCreato(nuovo.id);
+  showAIToastConAnnulla("In Mente", "«" + escapeHtml(nuovo.testo) + "»" + (l.daFare ? ", da fare." : "."), async () => { await cancellaAppuntiSenzaAvviso([nuovo]); }, 8,
+    { etichetta: "Era una richiesta a EON", azione: async () => { await cancellaAppuntiSenzaAvviso([nuovo]); invia(testo, { soloServer: true }); } });
+  if(viaVoce) parlaRisposta("Segnato");
+  return { fatto: "mente" };
+}
 async function provaLettore(testo, viaVoce, invia, senzaModello){
   const l = leggiConLettore(testo);
   if(!senzaModello && (!l || !l.azione || /^(?:mente|comando|domanda|dati|impegno|da_fare|documento)$/.test(l.azione))){
@@ -13567,36 +13601,7 @@ async function provaLettore(testo, viaVoce, invia, senzaModello){
       if(viaVoce) parlaRisposta("Segnato per " + (l.quando.etichetta || ""));
       return r;
     }
-    case "mente": {
-      // "Ricordami di mandare i solleciti ai morosi del Parco Sole": da fare, nella scheda del cliente
-      if(l.cliente && isDbReady() && /^(?:ricordami|ricordarmi|ricorda|promemoria)\b/i.test(l.testo)){
-        const cosa = String(l.cosa || l.testo).replace(/^(?:ricordami|ricordarmi|ricorda|promemoria)\s*(?:di|che|:)?\s*/i, "");
-        if(cosa.length >= 3) return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: cosa.charAt(0).toUpperCase() + cosa.slice(1), da_fare: true } };
-      }
-      // Con un cliente ("Conti mi ha detto che…"): nella sua scheda, col codice sul server
-      if(l.cliente && isDbReady() && !/^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|ricordami|ricordarmi)\b/i.test(l.testo)){
-        const testoNota = l.cosa || l.testo;
-        return { comando: { azione: "appunto", cliente_id: l.cliente.id, testo: testoNota.charAt(0).toUpperCase() + testoNota.slice(1), ...(l.daFare ? { da_fare: true } : {}) } };
-      }
-      // "Ricordami di comprare raccordi da 3/4 e teflon" (senza giorno né ora): da fare nella Mente
-      // (quelli senza numeri li fa già provaDaFareImmediato, con il suo avviso)
-      const ricorda = !l.cliente && /^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i.test(l.testo) && !(l.quando && (l.quando.giornoIso || l.quando.ora)) && !(typeof capisciDaFare === "function" && capisciDaFare(l.testo));
-      // Solo le frasi senza comando: le altre le sa fare già chi viene dopo
-      if(!ricorda && (l.cliente || /^(?:aggiungi|aggiungere|crea|creare|inserisci|nuovo|nuova|registra|segna|segnami|metti|mettimi|annota|salva|appunta|appuntami|fai|fammi|ciao|grazie|ricordami|ricordarmi)\b/i.test(l.testo))) return null;
-      if(!isDbReady() || l.testo.split(/\s+/).length < 2) return null;
-      const riga = { testo: ricorda ? (() => { const c = l.testo.replace(/^(?:ricordami|ricordarmi)\s+(?:di\s+|che\s+)?/i, ""); return c.charAt(0).toUpperCase() + c.slice(1); })() : (l.cosa || l.testo) };
-      if(l.daFare || ricorda) riga.da_fare = true;
-      const creato = await dbInsert("cantiere_appunti", riga);
-      if(!creato) return null;
-      const nuovo = mappaAppunto(creato);
-      cantiereAppunti.push(nuovo);
-      aggiornaCantiereSottotitoli(); renderCantiereAppunti();
-      ricordaAppuntoCreato(nuovo.id);
-      showAIToastConAnnulla("In Mente", "«" + escapeHtml(nuovo.testo) + "»" + (l.daFare ? ", da fare." : "."), async () => { await cancellaAppuntiSenzaAvviso([nuovo]); }, 8,
-        { etichetta: "Era una richiesta a EON", azione: async () => { await cancellaAppuntiSenzaAvviso([nuovo]); invia(testo, { soloServer: true }); } });
-      if(viaVoce) parlaRisposta("Segnato");
-      return { fatto: "mente" };
-    }
+    case "mente": return gestisciMente(l, testo, viaVoce, invia, false);
     case "impegno": {
       /* Il percorso degli impegni sul server resta quello di sempre; in più
          riceve la lettura del lettore, da usare invece della piccola AI */
@@ -16020,6 +16025,17 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        Col verbo detto dando del tu ("mi cancelli l'appuntamento con Belle")
        letto dal lettore come comando (29/09/2026). */
     const testoComando = !inContinuazione && typeof EonLettore !== "undefined" ? (() => { try{ return EonLettore.pulisci(testo).testo; }catch(e){ return testo; } })() : testo;
+    /* Il modello dice "è un appunto" ed è sicurissimo (passo 3): nella Mente (o nella scheda
+       del cliente), prima dei controllori che ne facevano un "da fare sabato", un'email o uno
+       spostamento. Le urgenze restano prima (mai perderne una); "Era una richiesta a EON"
+       nell'avviso rimedia a un appunto sbagliato. */
+    if(!inContinuazione && cassettoNeurale(testo, 0.95) === "mente"){
+      const lm = EonLettore.leggi(testo, contestoLettore());
+      // "segnami negli appunti…": un comando che le regole sanno già fare, lo fanno loro
+      const rm = lm && lm.azione !== "comando" ? await gestisciMente({ ...lm, azione: "mente" }, testo, viaVoce, (frase, p) => elabora(frase, false, p), true) : null;
+      if(rm && rm.comando){ ricordaEsitoCodice(testo, "mente_neurale"); return inviaAlServer(testo, viaVoce, false, rm); }
+      if(rm && rm.fatto){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "mente_neurale"); return; }
+    }
     /* Il modello dice "sposta o annulla un impegno" (passo 3): i dettagli li legge il
        lettore (leggiModificaImpegno). Le regole di prima restano sotto, come riserva. */
     if(!inContinuazione && cassettoNeurale(testo) === "calendario_modifica" && provaModificaImpegno(testo, viaVoce)){
