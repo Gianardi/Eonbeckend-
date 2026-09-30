@@ -721,13 +721,20 @@
      le correzioni: "a 12, eh no 15" deve vederle per imparare che 12 è annullato); i numeri
      diventano la loro "forma" (<n3> = tre cifre, <p2> = scritto in lettere, due cifre;
      <n2%> = una percentuale), così il modello impara dal contesto e non dalla cifra. */
-  const RUOLI_DETTAGLI = ["O", "QTA", "PRZ", "TOT", "ANN", "PERC", "BASE", "SCO", "SCOV"];
+  // MOLT: moltiplica la voce prima ("80 al mese per 12 mesi"); FIN: il prezzo finale detto
+  // ("fagli un prezzo finale di 3.800", "facciamo tutto 950"): vale lui (passo 4, giro 18)
+  const RUOLI_DETTAGLI = ["O", "QTA", "PRZ", "TOT", "ANN", "PERC", "BASE", "SCO", "SCOV", "MOLT", "FIN"];
   const NUMERI_DIALETTO = { du: 2, tri: 3, quattru: 4, cincu: 5 };
   function segniDettagli(testoOriginale) {
     // "mille e due al condominio": 1.200 anche davanti a "al/alla/a" (espandiAbbreviazioni lo fa solo a fine cifra)
     const t0 = String(testoOriginale || "").replace(/\b(mille|(?:due|tre|quattro|cinque|sei|sette|otto|nove|dieci)mila)\s+e\s+(due|tre|quattro|cinque|sei|sette|otto|nove)\b(?=\s+(?:al|alla|allo|ai|a|all['’]|agli|alle|per|di|da)\b)/gi,
       (m, mila, cento) => String((mila.toLowerCase() === "mille" ? 1000 : 1000 * numeroParola(mila.toLowerCase().replace(/mila$/, ""))) + 100 * numeroParola(cento.toLowerCase())));
-    const pp = parole(espandiAbbreviazioni(t0));
+    // "un'ora e mezza", "due ore e mezza": 1,5 e 2,5 ore (una quantità)
+    const t1 = t0.replace(/\b(un['’]?\s*|una\s+|un\s+)?(\d+|due|tre|quattro|cinque|sei|sette|otto)?\s*(or[ae]|giornat[ae]|giorn[oi])\s+e\s+mezz[oa]\b/gi, (m, un, n, cosa) => {
+      const v = n ? (Number(n) || numeroParola(n.toLowerCase())) : 1;
+      return v ? String(v).replace(".", ",") + ",5 " + cosa : m;
+    });
+    const pp = parole(espandiAbbreviazioni(t1));
     const segni = [], valori = [];
     const grandezza = (v) => (v < 10 ? 1 : v < 100 ? 2 : v < 1000 ? 3 : v < 10000 ? 4 : 5);
     pp.forEach((x, i) => {
@@ -758,7 +765,7 @@
      di una base), lo sconto (in percentuale o in euro); i numeri annullati non contano */
   function componiImporti(valori, ruoli) {
     const righe = [], qta = [];
-    let perc = null, base = null, sco = null, scov = null;
+    let perc = null, base = null, sco = null, scov = 0, conScov = false, fin = null;
     const prossimaQta = (i) => { for (let j = i + 1; j < ruoli.length; j++) { if (ruoli[j] === "QTA" && valori[j] != null) return j; if (/^(?:PRZ|TOT)$/.test(ruoli[j])) return -1; } return -1; };
     const usate = new Set();
     for (let i = 0; i < ruoli.length; i++) {
@@ -766,21 +773,25 @@
       if (v == null || r === "O" || r === "ANN") continue;
       if (r === "QTA") { if (!usate.has(i)) qta.push(i); }
       else if (r === "PRZ") {
-        let q = qta.length ? qta.pop() : -1;
-        if (q < 0) { q = prossimaQta(i); if (q >= 0) usate.add(q); }
-        righe.push({ quantita: q >= 0 ? valori[q] : 1, prezzo: v, i });
+        // "3 giorni x 3 operai a 250": le quantità dette prima si moltiplicano
+        let q = qta.length ? qta.reduce((t, k) => t * valori[k], 1) : null;
+        if (q == null) { const k = prossimaQta(i); if (k >= 0) { usate.add(k); q = valori[k]; } }
+        righe.push({ quantita: q == null ? 1 : q, prezzo: v, i });
         qta.length = 0;
       } else if (r === "TOT") { righe.push({ quantita: 1, prezzo: v, i }); qta.length = 0; }
+      else if (r === "MOLT") { if (righe.length) righe[righe.length - 1].quantita *= v; }
       else if (r === "PERC") perc = v;
       else if (r === "BASE") base = v;
       else if (r === "SCO") sco = v;
-      else if (r === "SCOV") scov = v;
+      else if (r === "SCOV") { scov += v; conScov = true; }
+      else if (r === "FIN") fin = v;
     }
     if (perc != null && base != null) righe.push({ quantita: 1, prezzo: Math.round(base * perc) / 100, i: -1, acconto: { perc, base } });
     let totale = righe.reduce((s, x) => s + x.quantita * x.prezzo, 0);
     if (sco != null) totale = totale * (1 - sco / 100);
-    if (scov != null) totale -= scov;
-    return { righe, totale: Math.round(totale * 100) / 100, sconto: sco, scontoEuro: scov };
+    if (conScov) totale -= scov;
+    if (fin != null) totale = fin;
+    return { righe, totale: Math.round(totale * 100) / 100, sconto: sco, scontoEuro: conScov ? scov : null, finale: fin };
   }
   /* Il modello neurale (30/09/2026): quando è caricato decide lui il cassetto;
      finché non c'è (primi istanti dopo l'apertura) decide il modello di parole */
@@ -800,7 +811,11 @@
     const ruoli = [], sic = [];
     s.segni.forEach((w, j) => {
       if (s.valori[j] == null) { ruoli.push("O"); sic.push(1); return; }
-      const media = RUOLI_DETTAGLI.map((_, k) => voti.reduce((t, v) => t + (v[j].pp ? v[j].pp[k] : (k === 0 ? 1 : 0)), 0) / voti.length);
+      // la media per NOME del ruolo: un modello vecchio può averne meno (senza MOLT e FIN)
+      const media = RUOLI_DETTAGLI.map((nome, k) => voti.reduce((t, v, m) => {
+        const suoi = (DETTAGLI[m].ruoli && DETTAGLI[m].ruoli()) || RUOLI_DETTAGLI, q = suoi.indexOf(nome);
+        return t + (v[j].pp ? (q >= 0 ? v[j].pp[q] : 0) : (k === 0 ? 1 : 0));
+      }, 0) / voti.length);
       let k = 0; media.forEach((x, q) => { if (x > media[k]) k = q; });
       ruoli.push(RUOLI_DETTAGLI[k]); sic.push(media[k]);
     });

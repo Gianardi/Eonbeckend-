@@ -210,7 +210,8 @@ async function main() {
       const dati = JSON.parse(await blob.text());
       return { voci, file: window.__scaricato, clienti: dati.clients, messaggi: dati.messages, account: dati.account };
     });
-    verifica("Impostazioni → Privacy e dati: informativa, termini, scarica i miei dati", JSON.stringify(privacy.voci) === '["Informativa privacy","Termini d\'uso","Scarica i miei dati"]', JSON.stringify(privacy.voci));
+    // 30/09: in mezzo anche "Aiuta a migliorare EON" (l'interruttore per le frasi di allenamento)
+    verifica("Impostazioni → Privacy e dati: informativa, termini, aiuta a migliorare, scarica i miei dati", JSON.stringify(privacy.voci) === '["Informativa privacy","Termini d\'uso","Aiuta a migliorare EON","Scarica i miei dati"]', JSON.stringify(privacy.voci));
     verifica("\"Scarica i miei dati\": un file con clienti, messaggi e il resto", /^eon-i-miei-dati-\d{4}-\d\d-\d\d\.json$/.test(privacy.file) && privacy.clienti[0].name === "Rita Ambrosini" && privacy.messaggi[0].body === "Ciao" && privacy.account === "a@b.it", JSON.stringify(privacy));
     await page.evaluate(() => chiudiRisorsaCard());
 

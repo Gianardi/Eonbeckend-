@@ -159,7 +159,7 @@
       const ordine = p.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]);
       return { intento: M.intenti[ordine[0][1]], p: ordine[0][0], secondo: M.intenti[ordine[1][1]], p2: ordine[1][0] };
     }
-    return { carica, classifica, probabilita, etichetta, pezzi, pronto: () => !!M, versione: () => (M ? M.versione : null) };
+    return { carica, classifica, probabilita, etichetta, pezzi, pronto: () => !!M, versione: () => (M ? M.versione : null), ruoli: () => (M && M.ruoli) || null };
   }
   const EonNeurale = crea();
   EonNeurale.crea = crea;

@@ -114,6 +114,19 @@ function frase() {
   const stile = forse(0.15) ? "lettere" : "cifre";
   let totale = 0;
   const cl = cliente();
+  // "3 giorni x 3 operai a 250 al giorno a testa", "2 persone per 4 ore a 35 l'ora": le quantità si moltiplicano
+  const doppia = () => {
+    const [a, b, aPezzo, pmin, pmax] = uno([["giorni", "operai", "al giorno a testa", 150, 300], ["persone", "ore", "l'ora", 25, 45], ["operai", "giornate", "a giornata", 150, 280], ["ore", "persone", "l'ora", 25, 45], ["uscite", "tecnici", "a uscita", 50, 120]]);
+    const q1 = tra(2, 6), q2 = tra(2, 8), p = prezzoTra(pmin, pmax);
+    txt(uno(["manodopera", "lavoro", "", "poi"])); num(q1, "QTA", quanti(q1)); txt(a + " " + uno(["x", "per", "con"])); num(q2, "QTA", quanti(q2)); txt(b + " a"); num(p, "PRZ", soldi(p, stile)); txt(aPezzo);
+    return q1 * q2 * p;
+  };
+  // misure che non sono soldi dentro la frase: "alto 1 e 20", "da 2 metri e 40", "7,4 kW", "spessore 12 centimetri"
+  const numeroMisura = () => { const f = tra(0, 3);
+    if (f === 0) { const a = tra(1, 2), b = uno([20, 40, 50, 60, 80]); txt("alto"); num(a, "O", String(a)); txt("e"); num(b, "O", String(b)); }
+    else if (f === 1) { const a = tra(1, 3), b = uno([20, 40, 60, 70]); txt("da"); num(a, "O", String(a)); txt("metri e"); num(b, "O", String(b)); }
+    else if (f === 2) { const v = uno([3.7, 7.4, 11, 22, 4.5]); txt("da"); num(v, "O", String(v).replace(".", ",")); txt("kW"); }
+    else { const v = uno([8, 10, 12, 14]); txt("spessore"); num(v, "O", String(v)); txt("centimetri"); } };
   // "12 docce a 40 euro l'una", "tre mesi a 500 al mese", "due boiler da 300 litri a 1.150 l'uno"
   const contabile = (m) => {
     const [nome, aPezzo, pmin, pmax, misura] = uno(CONTABILI[m]);
@@ -159,6 +172,8 @@ function frase() {
       const sep = k === 0 ? "" : uno(["", ",", "poi", "e", "più", "e poi", "e anche", "ci metti anche", "aggiungi"]);
       if (sep) txt(sep);
       if (forse(0.35)) { totale += contabile(mest); return; }
+      if (forse(0.07)) { totale += doppia(); return; }
+      if (forse(0.06)) numeroMisura();
       const conDescrMisura = (d) => misura == null ? txt(d) : pezzi.push(...spezzaNumeri(d, Array.isArray(misura) ? misura : [misura]));
       if (unita && forse(0.55)) {
         let q = unita === "mq" || unita === "metri" ? tra(5, 120) : unita === "ore" ? tra(2, 40) : tra(2, 24);
@@ -210,11 +225,21 @@ function frase() {
     });
     // una voce tolta a metà ("ci metti anche i 180 di bolli, no i bolli toglili")
     if (forse(0.06)) { const v = prezzoTra(30, 400), d = uno(["bolli", "trasporto", "smaltimento", "sopralluogo", "materiale"]); txt(uno(["ci metti anche i", "e poi"])); num(v, "ANN", soldi(v, stile)); txt("di " + d + uno([", no " + d + " toglilo", ", no i " + d + " toglili", ", anzi no, niente " + d])); }
-    // lo sconto
-    if (forse(0.15)) {
-      if (forse(0.6)) { const s = uno([5, 10, 15, 20]); txt(uno(["meno il", "con lo sconto del", "sconto", "fagli il", "togli il"])); num(s, "SCO", s + uno(["%", " per cento", " percento"])); if (forse(0.5)) txt("di sconto"); totale = totale * (1 - s / 100); }
-      else { const s = uno([20, 30, 50, 100, 150, 200]); if (s < totale) { txt(uno(["fagli", "togli", "sconto di", "meno"])); num(s, "SCOV", soldi(s, stile)); if (forse(0.5)) txt("di sconto"); totale -= s; } }
+    // un moltiplicatore dopo l'ultima voce: "al mese per 12 mesi", "per 3 settimane" (giro 18)
+    if (forse(0.08)) { const [per, unita] = uno([["al mese per", "mesi"], ["per", "mesi"], ["a settimana per", "settimane"], ["all'anno per", "anni"], ["al giorno per", "giorni"]]); const m = unita === "anni" ? tra(2, 5) : tra(2, 12); txt(per); num(m, "MOLT", quanti(m)); txt(unita); totale *= m; }
+    // lo sconto (in tanti modi, anche in lettere)
+    if (forse(0.2)) {
+      if (forse(0.55)) { const s = uno([5, 10, 15, 20, 3, 8]); txt(uno(["meno il", "con lo sconto del", "sconto", "fagli il", "togli il", "col", "levaci il", "sconto del", "applica il"])); num(s, "SCO", forse(0.3) ? inLettere(s) + " per cento" : s + uno(["%", " per cento", " percento"])); if (forse(0.5)) txt(uno(["di sconto", "sul totale", "per la quantità", "perché paga subito"])); totale = totale * (1 - s / 100); }
+      else { const s = uno([20, 30, 40, 50, 90, 100, 150, 200]); if (s < totale) { txt(uno(["fagli", "togli", "sconto di", "meno", "fagli uno sconto di", "levaci", "togli pure", "meno"])); num(s, "SCOV", soldi(s, stile)); if (forse(0.5)) txt(uno(["di sconto", "euro di sconto", "che ho sbagliato il conto", "perché è un amico"])); totale -= s; } }
     }
+    // l'acconto già dato da togliere: "meno l'acconto che mi hanno già dato di 4000" (giro 18)
+    if (forse(0.07)) { const a = Math.round(totale * uno([0.2, 0.3, 0.4, 0.5]) / 50) * 50; if (a > 0 && a < totale) { const f = tra(0, 2);
+      if (f === 0) { txt(uno(["meno l'acconto che mi hanno già dato di", "meno l'acconto di", "togli l'acconto già versato di", "meno i"])); num(a, "SCOV", soldi(a, stile)); if (forse(0.4)) txt("già versati"); }
+      else if (f === 1) { txt(uno(["e mi hanno già dato", "però mi hanno già dato", "ma hanno già pagato"])); num(a, "SCOV", soldi(a, stile)); txt(uno(["di acconto", "in contanti", "di anticipo"])); }
+      else { txt(uno(["tolto l'acconto di", "detratto l'anticipo di"])); num(a, "SCOV", soldi(a, stile)); }
+      totale -= a; } }
+    // il prezzo finale detto: vale lui (giro 18)
+    if (forse(0.06)) { const fin = Math.max(50, Math.round(totale * uno([0.9, 0.93, 0.95, 0.97]) / 50) * 50); txt(uno(["però fagli un prezzo finale di", "facciamo tutto", "chiudiamo a", "arrotonda a", "in tutto fagli", "alla fine gli faccio", "fai prezzo finale"])); num(fin, "FIN", soldi(fin, stile)); totale = fin; }
   }
   if (!clientePrima) mettiCliente();
   if (forse(0.03)) txt(uno(["più... no basta così", "e basta", "tutto qui", "niente altro"]));
