@@ -524,6 +524,22 @@ sporca, dialetti, chat, anziano, straniero.
      17 da 966 a 1016 (da 91% a 96%).
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
+6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
+   il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
+   miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
+   quando serve. I comandi semplici restano ai nostri modelli piccoli (veloci,
+   gratis, dati sul telefono). Chi usa l'app vede solo EON.
+   - **Conversare:** una domanda o un ragionamento (non un comando) riceve una
+     risposta che conosce clienti, appuntamenti e documenti dell'utente.
+   - **Scrivere testi:** email ai clienti, solleciti di pagamento, descrizioni
+     per i preventivi, sempre da confermare prima dell'invio.
+   - **Elaborare documenti:** foto o file di fattura, contratto, computo →
+     dati estratti, riassunto, collegato al cliente giusto.
+   - **Da fare prima:** stimare il costo per utente al mese (costi e prezzi
+     sopra) e mettere un tetto.
+   - **Più avanti, con molti utenti:** valutare un modello aperto (Meta,
+     Mistral) specializzato sui dati di EON, per spendere meno. Oggi scrive
+     peggio di Claude e costa un server potente: non adesso.
 
 ### 0b.18 Addestramento potenziato: 5 scrittori che non conoscono EON — FATTO il 30/09 (notte)
 Andrea: "Facciamo altro addestramento potenziato?". Scelta (sua): **più
