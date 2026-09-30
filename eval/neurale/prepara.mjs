@@ -39,17 +39,22 @@ const nell_esame = new Set(esame.map((x) => L.norm(x.frase)));
 
 /* ---------- L'allenamento ---------- */
 const allena = [];
-const aggiungi = (fonte, frase, intento) => { if (INTENTI.includes(intento) && frase && !nell_esame.has(L.norm(frase))) allena.push({ fonte, frase, intento }); };
+const aggiungi = (fonte, frase, intento, file) => { if (INTENTI.includes(intento) && frase && !nell_esame.has(L.norm(frase))) allena.push(file ? { fonte, frase, intento, file } : { fonte, frase, intento }); };
 const dirMaestra = path.join(RADICE, "eval/neurale/maestra");
 if (fs.existsSync(dirMaestra)) for (const f of fs.readdirSync(dirMaestra).filter((x) => x.endsWith(".json")).sort()) {
   const d = JSON.parse(fs.readFileSync(path.join(dirMaestra, f), "utf8"));
-  (d.frasi || []).forEach(([fr, c]) => aggiungi("maestra", fr, c));
+  (d.frasi || []).forEach(([fr, c]) => aggiungi("maestra", fr, c, "maestra/" + f));
 }
 // le frasi "al confine" (coppie simili con etichette diverse, sulle confusioni del modello)
 const dirConfini = path.join(RADICE, "eval/neurale/confini");
 if (fs.existsSync(dirConfini)) for (const f of fs.readdirSync(dirConfini).filter((x) => x.endsWith(".json")).sort()) {
   const d = JSON.parse(fs.readFileSync(path.join(dirConfini, f), "utf8"));
-  (d.frasi || []).forEach(([fr, c]) => aggiungi("confini", fr, c));
+  (d.frasi || []).forEach(([fr, c]) => aggiungi("confini", fr, c, "confini/" + f));
+}
+// le riscritture: le stesse richieste in 14 stili (telegrafico, dialetti, dettatura sporca...)
+const dirParafrasi = path.join(RADICE, "eval/neurale/parafrasi");
+if (fs.existsSync(dirParafrasi)) for (const f of fs.readdirSync(dirParafrasi).filter((x) => x.endsWith(".json")).sort()) {
+  try { (JSON.parse(fs.readFileSync(path.join(dirParafrasi, f), "utf8")).frasi || []).forEach(([fr, c]) => aggiungi("parafrasi", fr, c, "parafrasi/" + f)); } catch { console.error("file rotto:", f); }
 }
 execFileSync("node", [path.join(RADICE, "eval/modello/genera-frasi.mjs"), path.join(TMP, "gen.json"), "700"], { stdio: "ignore" });
 leggiJson(path.relative(RADICE, path.join(TMP, "gen.json"))).esempi.forEach((e) => aggiungi("generatore", e.frase, e.intento));
