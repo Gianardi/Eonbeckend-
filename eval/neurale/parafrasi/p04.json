@@ -1,0 +1,241 @@
+{ "stile": "artigiano napoletano che mescola italiano e napoletano, caloroso e un po' teatrale", "frasi": [
+["uè, levame 'o Moretti 'e stamattina d'a agenda, ha rimandato isso", "calendario_modifica"],
+["jamme, cancella l'appuntamento cu' Esposito d'oggi, m'ha ditto ca nun po' venì", "calendario_modifica"],
+["chillo appuntamento d'oggi cu' 'o Russo toglielo, ha spostato isso a n'ata vota", "calendario_modifica"],
+
+["m'arraccumanno, ricordame giovedì 'e fà 'a fattura ê Bianchi p''o bagno", "calendario"],
+["uè EON, martedì matina ricordame ca aggia fatturà 'a cucina d''e Capuano", "calendario"],
+["mettime nu promemoria pe' venerdì alle 9: fattura a Donna Carmela p''e piastrelle", "calendario"],
+
+["uè, 'a dichiarazione 'e conformità p''o Tanini, jamme", "dico"],
+["fa' 'a DICO p''o signor Cuomo, l'impianto elettrico è fernuto", "dico"],
+["m'arraccumanno, dichiarazione di conformità pe' chillo impianto 'e Gennarino Ascione", "dico"],
+
+["uè, me serve nu preventivo da fà vedé ê condòmini, l'amministratore 'e via Toledo 112 'o vo'", "documento"],
+["jamme, preparame nu preventivo p''a riunione d''e condòmini, amministrazione 'e via Foria 45", "documento"],
+["l'amministrazione 'e corso Vittorio Emanuele 80 vo' nu preventivo pe' tutt''e condòmini, fammelo nu poco preciso", "documento"],
+
+["fa' 'nu squillo ô gommista, jamme", "chiamata"],
+["uè, chiamma 'o gommista 'e via Marina", "chiamata"],
+["telefona a chillo d''e gomme, Pasquale 'o gommista", "chiamata"],
+
+["uè, fammi nu preventivo p''o Bonomi: pittura d''a sala e d''a cucina, 1.200 euro", "documento"],
+["preventivo p''a signora Iervolino, tinteggiatura 'e tre stanze, mettece 1.850 euro", "documento"],
+["jamme, preventivo pe' Tonino Sarnataro: pittà scale e ingresso, 950 euro tutto compreso", "documento"],
+
+["uè, che maggioranza serve p'aggiustà 'o tetto d''o palazzo? spiegame nu poco", "domanda"],
+["pe' rifà 'a copertura d''o condominio, quanti millesimi ce vonno?", "domanda"],
+["dimme na cosa: pe' rifà 'o lastrico solare che maggioranza s'addà avè?", "domanda"],
+
+["uè, 'o corso p''o patentino d''o 5 novembre l'hanno spostato ô 12, aggiorna", "calendario_modifica"],
+["chillo corso d''a sicurezza d''o 3 ottobre mo' 'o fanno 'o 10, cagna 'a data", "calendario_modifica"],
+["jamme, 'a visita d''o 20 'e novembre 'a rimandano ô 27, spostala", "calendario_modifica"],
+
+["uè, arape 'a scheda d''o supermercato 'e Maio", "cliente"],
+["a pri la sche da de lu for no Di Lau ro", "cliente"],
+["famme vedé 'a scheda cliente d''a pizzeria 'e Totonno Cimmino", "cliente"],
+
+["uè, fa' na foto ê cassette d''a posta", "foto"],
+["jamme, scatta mo' na foto a chillu citofono rotto", "foto"],
+["fotografa 'o quadro elettrico adesso, m'arraccumanno", "foto"],
+
+["stato avanzamento lavori p''o bagno d''o Pirovano, stammo ô 40 pe' ciento", "sal"],
+["uè, fa' 'o SAL d''a cucina 'e Donna Assunta, simmo a metà, 50 pe' cento", "sal"],
+["jamme cu' 'o stato d'avanzamento d''o cantiere 'e Posillipo, 'e lavori stanno ô 65%", "sal"],
+
+["uè, m'hanno dato l'acconto 'e 2.500 euro 'e Guasti p''a cucina", "incasso"],
+["ricevuto n'acconto 'e 800 euro d''a signora Parisi p''o bagno, segna", "incasso"],
+["jamme, 'o Capasso m'ha versato 1.300 euro 'e acconto p''o terrazzo", "incasso"],
+
+["l'assemblea... eh, chella d''o condominio, l'ordinaria, l'hanno misa p''o 28 alle nove 'e sera, segnala", "assemblea"],
+["uè, assemblea ordinaria d''o palazzo 'e via Caracciolo, 'o 15 alle 18, mettila", "assemblea"],
+["jamme, assemblea straordinaria d''o condominio Miramare, lunedì 3 alle 20:30", "assemblea"],
+
+["manda nu WhatsApp a mammà: stasera nun vengo a cena, tengo nu lavoro", "messaggio"],
+["uè, scrive a mia sorella Titina su WhatsApp ca stasera faccio tardi p''o cantiere", "messaggio"],
+["jamme, messaggio a mia moglie: nun me aspettà p''a cena, sto ancora addò Nunzia", "messaggio"],
+
+["a casa 'e Tagliavini 'a canna fumaria è in comune c''o vicino, ce vo' na verifica pe' l'intubamento", "mente"],
+["segna: d''o signor Coppola 'a canna d''a caldaia è condivisa c''o piano 'e sopra, s'addà verificà primma 'e intubà", "mente"],
+["tieni a mente ca addò l'Improta 'o camino è in comune c''o vicino, aggia verificà l'intubamento", "mente"],
+
+["uè, fa' 'a DICO p''e prese nove int''a bottega", "dico"],
+["jamme, dichiarazione 'e conformità p''e punti luce nuovi d''a salumeria 'e Ciro", "dico"],
+["fa' la DICO p''o quadro elettrico nuovo d''o laboratorio mio", "dico"],
+
+["'o Pedrotti ha pagato 'o saldo, 4.500 euro, finalmente", "incasso"],
+["uè, Donna Rosaria m'ha saldato tutto, 3.200 euro", "incasso"],
+["jamme, segna ca 'o Mazzarella ha pagato 'o saldo d''a caldaia, 1.750 euro", "incasso"],
+
+["man da nu mes sag gio a De Lu cia ca fac cio tar di die ci mi nu ti", "messaggio"],
+["uè, scrive a De Lucia ca arrivo cu' nu quarto d'ora 'e ritardo", "messaggio"],
+["manna nu messaggio a Peppe Iaccarino: tardo cinque minuti, scusa", "messaggio"],
+
+["scrive na mail a l'assicurazione p''o furgone, tene n'ammaccatura", "email"],
+["uè, manda n'email all'assicurazione: 'o furgoncino ha pigliato na botta ô parafango", "email"],
+["jamme, email a l'agenzia 'e l'assicurazione p''o danno ô camioncino", "email"],
+
+["fa' 'o SAL d''o cantiere 'e Pozzuoli", "sal"],
+["uè, jamme cu' 'o stato avanzamento lavori d''o cantiere a Portici", "sal"],
+["prepara 'o SAL p''a ristrutturazione 'e Casoria, m'arraccumanno", "sal"],
+
+["uè, ma 'o regime forfettario conviene a nu artigiano comm'a me?", "domanda"],
+["dimme na cosa, pe' uno ca guadagna 40 mila l'anno, conviene 'o forfettario?", "domanda"],
+["jamme, spiegame nu poco si me cunviene passà ô forfettario", "domanda"],
+
+["Mercoledì trenta... ah no, dimane è 'o trenta, allora dimane alle dieci addò 'o Mazzoni", "calendario"],
+["venerdì... no aspetta, è giovedì, allora giovedì alle tre d''o pomeriggio d''a signora Scognamiglio", "calendario"],
+["uè, dopodimane... no, dimane, dimane alle otto e mezza a Pianura d''o Ferrante", "calendario"],
+
+["uè EON, ce vedimmo dimane", "saluto"],
+["statte buono EON, a dimane", "saluto"],
+["jamme, buonanotte EON, ce sentimmo dimane", "saluto"],
+
+["uè, so' libero giovedì pomeriggio?", "dati"],
+["tengo quaccosa segnato lunedì matina?", "dati"],
+["dimme, sabato tengo appuntamenti o so' libero?", "dati"],
+
+["arape 'a scheda d''o signor Gatti", "cliente"],
+["uè, famme vedé 'a scheda cliente 'e Don Salvatore Cozzolino", "cliente"],
+["jamme, arapi 'a scheda d''a signora Formisano", "cliente"],
+
+["scrive a Gigi ca passasse a piglià 'e scatoloni", "messaggio"],
+["uè, manda nu messaggio a Ciruzzo: vieni a piglià 'e sacchi 'e cemento", "messaggio"],
+["jamme, scrive a Tore ca passa stasera pe' 'e tubi avanzati", "messaggio"],
+
+["segna ca l'impresa Rota tene 'a betoniera da prestà", "mente"],
+["tieni a mente: 'o cugino 'e Gaetano tene nu trabattello ca ce presta quanno serve", "mente"],
+["uè, appunta ca l'impresa Ruggiero tene 'a smerigliatrice grossa e ce 'a presta", "mente"],
+
+["'o Ferretti m'ha pagato tutto 'o cunto?", "dati"],
+["uè, 'a signora Amitrano ha saldato o me deve ancora quaccosa?", "dati"],
+["dimme nu poco, 'o Buonocore m'ha dato tutt''e sorde d''o bagno?", "dati"],
+
+["fissa l'assemblea d''o condominio Belvedere p''o fotovoltaico", "assemblea"],
+["uè, convoca l'assemblea d''o parco Margherita p''e pannelli solari", "assemblea"],
+["jamme, organizza l'assemblea d''e condòmini 'e via Manzoni p''o cappotto termico", "assemblea"],
+
+["s'è rotta l'autoclave a via Novara, 'o palazzo sta senz'acqua", "urgenza"],
+["uè, currite! l'autoclave d''o palazzo 'e via Duomo è schiattata, nisciuno tene acqua", "urgenza"],
+["jamme, a Fuorigrotta s'è fermata 'a pompa, tutto 'o condominio è rimasto a secco", "urgenza"],
+
+["voglio vedé 'e foto d''e piastrelle rotte d''a signora Esposito", "cerca_documento"],
+["uè, famme vedé chelle foto d''o soffitto cu' 'a muffa d''o signor Longobardi", "cerca_documento"],
+["addò stanno 'e foto d''o balcone scrostato 'e Donna Nunziata? arapile", "cerca_documento"],
+
+["fa' 'a DICO d''o gas p''o ristorante Marino", "dico"],
+["uè, dichiarazione 'e conformità d''o gas p''a trattoria 'e Zi' Teresa", "dico"],
+["jamme, fa' 'a DICO gas p''a pizzeria d''o Capone", "dico"],
+
+["Cartella. Nova. Manuali d''e caldaie.", "cartella"],
+["uè, crea na cartella nova, chiamala Schede tecniche", "cartella"],
+["jamme, famme na cartella 'Garanzie attrezzi'", "cartella"],
+
+["gira 'o preventivo d''o stucco a la Belleri", "invio_documento"],
+["uè, manda 'o preventivo d''a rasatura a Donna Filomena", "invio_documento"],
+["jamme, inoltra ô signor Amato 'o preventivo d''a pittura ca avimmo fatto", "invio_documento"],
+
+["spedisci 'o preventivo d''a autoclave ô Bozzo", "invio_documento"],
+["uè, manna 'o preventivo d''a pompa a Totonno Cascone", "invio_documento"],
+["mandalo ô Palumbo 'o preventivo d''o scaldabagno, chillo già fatto", "invio_documento"],
+
+["ha pagato 'o Da Nerino, tutto quanto", "incasso"],
+["uè, 'a pizzeria d''o Brandi ha saldato, tutto a posto", "incasso"],
+["jamme, 'o Cirillo m'ha pagato fino all'ultimo centesimo", "incasso"],
+
+["'a Ferri ha dato l'ata metà?", "dati"],
+["uè, 'o Scarpato m'ha dato 'o resto o ancora no?", "dati"],
+["dimme, 'a signora Picone ha pagato 'a seconda rata?", "dati"],
+
+["famme fotografà 'e misure scritte ncopp''o muro", "foto"],
+["uè, scatta mo' na foto ê numeri ca aggio scritto ncopp''a parete", "foto"],
+["jamme, fa' na foto adesso a chillo schizzo cu' 'e misure ncopp''o cartone", "foto"],
+
+["assemblea condominiale Sole giovedì 1 alle 20, segna", "assemblea"],
+["uè, assemblea d''o condominio Aurora, martedì 6 alle sette 'e sera", "assemblea"],
+["jamme, assemblea d''o palazzo Vesuvio venerdì 9 alle 18 e mezza", "assemblea"],
+
+["fa' na foto... aspe' ca me sposto... ecco, mo', a chella pianta ca s'è seccata", "foto"],
+["uè, scatta... no aspetta, 'o sole... jamme, mo', ô tubo arruggiuto", "foto"],
+["fotografa... chiano chiano ca me metto buono... ecco, mo' ô muro crepato", "foto"],
+
+["scrive na mail a lo studio Valentini ca l'intervento è confermato", "email"],
+["uè, manda n'email a lo studio 'e l'architetto Sannino: 'o lavoro è confermato", "email"],
+["jamme, email ô geometra Russo, dicenno ca 'o sopralluogo è confermato", "email"],
+
+["arape 'a fattura d''o compenso 'e settembre d''o Parco dei Pini", "cerca_documento"],
+["uè, famme vedé 'a fattura d''o compenso 'e luglio p''o condominio Villa Flora", "cerca_documento"],
+["jamme, trova 'a fattura d''e competenze 'e agosto d''o Parco Azzurro", "cerca_documento"],
+
+["perdita grossa 'e gas all'hotel Costa Bianca, fischia d''a linea", "urgenza"],
+["uè, mamma mia, ô ristorante 'e Pasquale se sente 'o gas, fischia 'o tubo", "urgenza"],
+["jamme, currite! all'albergo Miramare esce 'o gas d''o contatore", "urgenza"],
+
+["ciao ciao, uè", "saluto"],
+["jamme, statte buono", "saluto"],
+["uè, ciao bello, ce vedimmo", "saluto"],
+
+["voglio rivedé nu mumento 'a fattura 'e Nicoletti, arapila", "cerca_documento"],
+["uè, famme vedé 'a fattura d''o signor Sepe, 'a voglio ricontrollà", "cerca_documento"],
+["jamme, arape chella fattura d''a signora Caccavale ca 'a guardo n'ata vota", "cerca_documento"],
+
+["prev d''a scola media, mandalo ô geometra Fabbri", "invio_documento"],
+["uè, 'o preventivo d''a palestra d''a scola, mannalo all'ingegnere Russo", "invio_documento"],
+["jamme, manda ô geometra Pagano 'o preventivo d''o asilo", "invio_documento"],
+
+["fa' na cartella p''a palestra e miettece dinto 'o contratto", "cartella"],
+["uè, crea na cartella 'Pizzeria Ciro' e mietti 'o contratto llà dinto", "cartella"],
+["jamme, cartella nova p''o lido Sirena, e ce metti dinto 'o capitolato", "cartella"],
+
+["sabato alle 11 me faccio spiegà d''Anna comme se fa 'o gruppo WhatsApp", "calendario"],
+["uè, domenica alle 10 Carmela me 'mpara a usà 'o computer, segna", "calendario"],
+["jamme, lunedì alle 5 d''o pomeriggio vado addò Gennaro ca me spiega comme se usa 'o drone", "calendario"],
+
+["Preventivo. Tre porte d''a cantina. Menichetti.", "documento"],
+["uè, preventivo pe' Scognamiglio: doje finestre 'e alluminio", "documento"],
+["jamme, preventivo, cancello d''o garage, signor Palmieri", "documento"],
+
+["'o preventivo d''o parquet d''o Moretti mettilo int''a cartella Accettati", "cartella"],
+["uè, sposta 'o preventivo d''e finestre 'e Donna Lucia int''a cartella Da fà", "cartella"],
+["jamme, 'a fattura d''o signor Ruocco miettila int''a cartella Pagate", "cartella"],
+
+["telefona a Conti l'elettricista, addò s'è cacciato", "chiamata"],
+["uè, fa' 'nu squillo a Peppino 'o muratore, nun se vede ancora", "chiamata"],
+["jamme, chiamma a Salvatore 'o piastrellista, ma addò è fernuto?", "chiamata"],
+
+["uè, che ora è?", "domanda"],
+["dimme nu poco che ore so'", "domanda"],
+["jamme, che ora se so' fatte?", "domanda"],
+
+["scrive na mail a l'assicurazione p''o sinistro d''o furgone", "email"],
+["uè, manda n'email all'agenzia p''o incidente d''o camioncino", "email"],
+["jamme, mail all'assicurazione: denuncia d''o sinistro d''o furgone 'e ieri", "email"],
+
+["chiamma 'o Ferraro p''o saldo d''a taverna", "chiamata"],
+["uè, fa' 'nu squillo ô signor Iovine p''e sorde d''a mansarda", "chiamata"],
+["jamme, telefona a Donna Carmela p''o saldo d''o bagno", "chiamata"],
+
+["addò 'a Gloria l'armadio d''a caldaia ncopp''o balcone è chino 'e fummo e se sente n'addore strano", "urgenza"],
+["uè, currite: a casa d''o signor Varriale esce fummo d''a caldaia e puzza 'e bruciato", "urgenza"],
+["jamme, d''a signora Aiello 'o vano caldaia fa fummo niro, c'è na puzza ca nun me piace", "urgenza"],
+
+["l'ingegner Riva è pignolo p''e certificati, preparà tutto buono", "mente"],
+["tieni a mente: l'architetto Esposito è precisino cu' 'e carte, tutto in ordine", "mente"],
+["uè, appunta ca 'o geometra Nappi vo' sempe 'e certificazioni perfette", "mente"],
+
+["'o SAL 'e Nembro... no scusa, d'Alzano, chillo d''o Rossoni, fallo cu' 'e murature ô 90", "sal"],
+["uè, 'o stato avanzamento 'e Ercolano, no aspetta, 'e Torre, chillo d''o Pisani, mettece 'e massetti ô 70", "sal"],
+["jamme, SAL d''o cantiere 'e Afragola... anzi Casoria, d''o Mennella, intonaci ô 80 pe' cento", "sal"],
+
+["mietti int''e clienti 'a Palestra Cadeddu, Iglesias, via Roma 44", "cliente"],
+["uè, cliente nuovo: Bar 'e Nannina, Ercolano, corso Resina 88", "cliente"],
+["jamme, aggiungi tra i clienti 'o signor Gaetano Esposito, Pomigliano, via Nazionale 7", "cliente"],
+
+["ciao ciao EON, jamme", "saluto"],
+["uè, a presto!", "saluto"],
+["va buò, ciao", "saluto"],
+
+["'a riunione d''e artigiani 'e dimane sera l'hanno spostata a giovedì, aggiorna", "calendario_modifica"],
+["uè, 'a cena d''a confartigianato 'e venerdì 'a fanno sabato, cagna", "calendario_modifica"],
+["jamme, l'incontro d''o consorzio 'e lunedì mo' è mercoledì, sposta", "calendario_modifica"]
+] }

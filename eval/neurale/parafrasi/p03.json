@@ -1,0 +1,241 @@
+{ "stile": "artigiano romano, romanesco colloquiale, diretto e scherzoso", "frasi": [
+["aò, la scadenza der video de Rinaldi slitta ar 25 ottobre, aggiornamela in agenda", "calendario_modifica"],
+["mo' la deadline der video Ferretti se sposta ar 30 ottobre, cambiala in agenda", "calendario_modifica"],
+["sposta 'a scadenza der filmato de Rinaldi, da mo' è er 3 novembre, sistema tutto", "calendario_modifica"],
+
+["famme vede' la dico... no aspè, er preventivo, quello der Maugeri", "cerca_documento"],
+["aò trovame er preventivo de Castellani, no la fattura, er preventivo", "cerca_documento"],
+["tirame fori er preventivo che avevo fatto a Maugeri, quello der bagno", "cerca_documento"],
+
+["aò, secondo te se 'n cliente me disdice all'ultimo e io avevo già noleggiato er cestello, l'acconto me lo posso tene' o no?", "domanda"],
+["'na domanda: se uno me dà buca er giorno prima e io ho già prenotato la gru, l'anticipo è mio o glielo devo ridà?", "domanda"],
+["dimme 'na cosa, se er cliente annulla all'ultimo momento e io ho già pagato er ponteggio, c'ho diritto a tenemme la caparra?", "domanda"],
+
+["aò, chi è che nun m'ha ancora pagato?", "dati"],
+["famme sape' chi me deve ancora li sordi", "dati"],
+["quanti clienti c'ho che devono ancora sganciare?", "dati"],
+
+["manda... no, mandaje ar Sestini er preventivo der bancone", "invio_documento"],
+["daje, spediscije ar Cortellessa er preventivo della cucina che avemo fatto", "invio_documento"],
+["er preventivo der bancone bar mandalo ar Sestini, va'", "invio_documento"],
+
+["aprime la scheda der comune de San Vito", "cliente"],
+["famme vede' er cliente Comune de Monterotondo", "cliente"],
+["apri er comune de Fiano, quello che ce sta nei clienti", "cliente"],
+
+["scrivi 'na mail seria ar Pesenti, che me deve paga' e nun se move", "email"],
+["manda 'na mail formale ar Terenzi pe' sollecita' er saldo, co' tutti i crismi", "email"],
+["aò, mail ar Pesenti, tono serio, je ricordi che la fattura è scaduta e deve paga'", "email"],
+
+["manda 'n WhatsApp a Moreno dei pannelli: me servono 280 moduli, quanto ce metti?", "messaggio"],
+["scrivije su WhatsApp ar fornitore Moreno: aò, c'ho bisogno de 400 pannelli, che tempi c'hai?", "messaggio"],
+["messaggio a Moreno, quello dei fotovoltaici: 340 moduli, quando me li porti?", "messaggio"],
+
+["famme 'na foto pe' Bonomi, così vede com'è venuto er lavoro", "foto"],
+["scatta mo' 'na foto ar bagno finito, così er Proietti vede com'è venuto", "foto"],
+["aò, fotografa qua, così er Bonomi vede er risultato", "foto"],
+
+["er sor Improta vole esse' chiamato ar fisso de casa, er cellulare nun lo guarda mai", "mente"],
+["segnate che la Pierantoni risponde solo ar fisso, er cell manco lo guarda", "mente"],
+["aò, ricordate: ar Cappelletti je devi telefona' a casa, er telefonino lo tiene sempre spento", "mente"],
+
+["aò, a quali preventivi ancora nun m'ha risposto nessuno?", "dati"],
+["quanti preventivi ce stanno ancora appesi che nessuno m'ha risposto?", "dati"],
+["chi è che nun m'ha fatto sape' gnente sui preventivi mandati?", "dati"],
+
+["aò, chiamame er geometra Fabbri, è pe' er ponteggio", "chiamata"],
+["famme parla' cor geometra Fabbri, è pe' er trabattello", "chiamata"],
+["telefona ar geometra Santoni x l'impalcatura", "chiamata"],
+
+["sì sì, esatto", "saluto"],
+["aò, giusto", "saluto"],
+["eh sì, proprio così", "saluto"],
+
+["aò, è saltato er generale da De Angelis e nun riparte più", "urgenza"],
+["da la Ciccarelli è scattato er salvavita generale e nun se riarma, so' ar buio", "urgenza"],
+["emergenza da De Angelis: er quadro generale è andato e nun se riaccende", "urgenza"],
+
+["giovedì primo ottobre alle 8 attacco a rasa' le pareti dar sor Gatti", "calendario"],
+["segna: venerdì 2 ottobre alle 7 e mezza comincio a rasa' i muri da la signora Pucci", "calendario"],
+["giovedì alle 8 so' dar Gatti pe' la rasatura, mettilo in agenda", "calendario"],
+
+["che c'ho da fa' la settimana che viene?", "dati"],
+["aò, famme sape' l'impegni de la settimana prossima", "dati"],
+["com'è messa l'agenda mia la prossima settimana?", "dati"],
+
+["scrivije ar Moretti, Paolo, che er quadro nun lo deve tocca' pe' gnente", "messaggio"],
+["manda 'n messaggio ar Moretti: er quadro nun lo devi tocca', capito?", "messaggio"],
+["messaggino a Gianni Pace: lassa perde er quadro elettrico, nun lo toccà", "messaggio"],
+
+["manda a tutti i condomini la convocazione pe' l'assemblea, daje", "assemblea"],
+["daje, spedisci ai condomini l'avviso de convocazione de l'assemblea", "assemblea"],
+["fa' partì la convocazione pe' l'assemblea condominiale a tutti l'inquilini", "assemblea"],
+
+["stato d'avanzamento pe' la trattoria Da Beppe, la cucina è rifatta a metà", "sal"],
+["SAL der ristorante Er Carrettino: cucina ar 50%", "sal"],
+["famme lo stato avanzamento lavori da Beppe, la cucina è fatta pe' metà", "sal"],
+
+["famme 'n preventivo co' la detrazione der 50 pe' le finestre in PVC, cliente Baldoni", "documento"],
+["prepara er preventivo ar Baldoni: infissi in PVC, co' lo sconto fiscale der 50%", "documento"],
+["preventivo pe' la Carletti, sei finestre in PVC co' detrazione ar 50", "documento"],
+
+["aò, la fattura 47 segnala pagata, è a posto", "incasso"],
+["la fattura 112 mettila come pagata, li sordi so' arrivati", "incasso"],
+["aò, la numero 53 è saldata, segnala", "incasso"],
+
+["compila er SAL pe' l'impresa Bazzanella", "sal"],
+["famme lo stato avanzamento lavori pe' la ditta Bazzanella", "sal"],
+["prepara lo stato d'avanzamento pe' l'impresa Colasanti, er cantiere de via Tuscolana", "sal"],
+
+["a via Verdi, in cantiere, 'n operaio s'è preso 'na scossa dar quadro e sta pe' terra, presto", "urgenza"],
+["aò, emergenza! er ragazzo mio ha preso 'na scossa ar quadro in via Nomentana e nun se rialza", "urgenza"],
+["presto, a via Verdi uno dei miei s'è folgorato cor quadro, è steso pe' terra", "urgenza"],
+
+["scrivije a mi' moglie che stasera faccio tardi, nun m'aspetta", "messaggio"],
+["manda 'n messaggio a mi' moglie, dije che stasera arrivo tardi", "messaggio"],
+["messaggio a Rosanna: amò, nun m'aspettà pe' cena, faccio tardi", "messaggio"],
+
+["la fattura der Bianchini falla arriva' ar commercialista suo, l'indirizzo lo trovi ne la scheda", "invio_documento"],
+["spedisci la fattura de Ceccarelli ar suo commercialista, la mail ce l'hai ne la scheda", "invio_documento"],
+["aò, gira ar commercialista der Bianchini la fattura sua, trovi tutto ne la scheda", "invio_documento"],
+
+["aprime le foto che ho fatto ar sopralluogo der terrazzo, via Cilea", "cerca_documento"],
+["famme rivede' le foto che ho fatto ar terrazzo de via Cilea", "cerca_documento"],
+["'ndo stanno le foto der sopralluogo sur terrazzo de piazza Bologna?", "cerca_documento"],
+
+["dico pe' Sposini, quello d'Assisi", "dico"],
+["fa' la dico pe' Sposini, a Assisi", "dico"],
+["dichiarazione de conformità Pacifici, Frascati", "dico"],
+
+["aò, giusto giusto, lassa così", "saluto"],
+["sì, così è perfetto", "saluto"],
+["a posto, va benone così", "saluto"],
+
+["aò, ce sta 'na crepa sur muro portante der condominio Le Querce che s'allarga a vista d'occhio", "urgenza"],
+["ar condominio I Pini er muro maestro se sta a spacca', la crepa cresce de minuto in minuto", "urgenza"],
+["Le Querce: la crepa sur portante s'allarga sempre de più, sembra che viè giù", "urgenza"],
+
+["sabato alle 9 c'è l'inaugurazione der negozio de la Mariani, ce devo anna' pe' forza", "calendario"],
+["domenica alle 11 c'è l'apertura der bar der Lucchetti, segnamela che ce vado", "calendario"],
+["sabato mattina alle 9 so' all'inaugurazione da la Mariani, mettimelo in agenda", "calendario"],
+
+["mail ar fornitore der cartongesso: nella consegna de ieri manca 'n bancale", "email"],
+["scrivi 'na mail a quelli der cartongesso, je manca 'n pallet a la consegna de stamattina", "email"],
+["email a Edilcartongessi: ieri m'avete portato 'n bancale in meno", "email"],
+
+["fai er prev ar Salvador pe' er condominio, 5 appartamenti da 80 mq, prefinito a 50 €/mq", "documento"],
+["preventivo ar Salvador: condominio, 3 appartamenti da 90 metri, parquet prefinito a 52 euro ar metro", "documento"],
+["aò, famme 'n preventivo pe' Loreti, 6 appartamenti da 70 mq, prefinito a 45 €/mq", "documento"],
+
+["lunedì 5 ottobre attacco co' er massetto a via Garibaldi 14, segnalo", "calendario"],
+["mercoledì 7 ottobre inizio a fa' er massetto a via Appia 120, mettilo in agenda", "calendario"],
+["segna: lunedì 5 ottobre alle 7 massetto a via Garibaldi 14", "calendario"],
+
+["aò, scrivi 'na bella mail de ringraziamento a la Zambanini", "email"],
+["manda 'na mail a la Zambanini pe' ringraziarla", "email"],
+["mail a la signora Pellegrini: grazie de tutto, è stato 'n piacere", "email"],
+
+["sposta er sopralluogo der Bruzzone, da martedì 6 a giovedì 8 ottobre, l'ora resta quella", "calendario_modifica"],
+["aò, er sopralluogo da Bruzzone mettilo ar 9 ottobre invece der 6, l'orario è quello", "calendario_modifica"],
+["sposta sposta, er sopralluogo de la Carboni dal 12 al 14 ottobre, stessa ora", "calendario_modifica"],
+
+["aò, apri 'n po' Marino", "cliente"],
+["aprime la scheda der Marino", "cliente"],
+["famme vede' er cliente Tittarelli", "cliente"],
+
+["crea la cartella Fornitori e mettece dentro er biglietto da visita che ho appena fotografato", "cartella"],
+["fa' 'na cartella Fornitori e schiafface er biglietto da visita de prima", "cartella"],
+["nova cartella 'Fornitori', mettece er biglietto che ho fotografato mo'", "cartella"],
+
+["er Galli ha pagato, bonifico fatto ieri sera", "incasso"],
+["er Galli m'ha fatto er bonifico ieri sera, segna che ha pagato", "incasso"],
+["er Tozzi m'ha pagato, bonifico partito stamattina", "incasso"],
+
+["la polizza e er DURC mettimeli tutti e due ne 'na cartella Documenti pe' i cantieri", "cartella"],
+["fa' 'na cartella Documenti cantiere e mettece er DURC e la polizza", "cartella"],
+["aò, er DURC e l'assicurazione schiaffali ne la cartella Carte cantieri", "cartella"],
+
+["se po' scarica' er furgone novo?", "domanda"],
+["aò, er furgone che me so' comprato lo posso mette in detrazione?", "domanda"],
+["conviene detrae er Ducato novo o no?", "domanda"],
+
+["aò, la ricevuta der bonifico mettila ne la cartella banca", "cartella"],
+["la contabile der bonifico infilala ne la cartella Banca", "cartella"],
+["schiaffa la ricevuta de 'sto bonifico ne la cartella de la banca", "cartella"],
+
+["bongiorno EON", "saluto"],
+["aò EON, bella!", "saluto"],
+["aò, bongiorno a te EON", "saluto"],
+
+["famme 'n preventivo pe' er Pampaloni, du' rubinetti e 'n miscelatore termostatico, duecentonovanta euro", "documento"],
+["preventivo a Pampaloni: tre rubinetti e 'n termostatico, trecentoventi euro tutto", "documento"],
+["scrivi er preventivo de la Righetti, 'n miscelatore termostatico e du' rubinetti, 310 euro", "documento"],
+
+["mandaje ar dottor Mancini er preventivo suo, daje", "invio_documento"],
+["spedisci ar dottor Mancini er preventivo che j'ho fatto", "invio_documento"],
+["aò, er preventivo der dottor Paolucci mandajelo", "invio_documento"],
+
+["so' arrivati li sordi der Sorbini", "incasso"],
+["er Sorbini ha pagato, finalmente so' entrati", "incasso"],
+["aò, m'è arrivato er saldo de la Ciampi", "incasso"],
+
+["aò, telefona all'architetto Fumagalli", "chiamata"],
+["chiamame l'architetto Fumagalli", "chiamata"],
+["famme 'na telefonata all'architetta Corsetti", "chiamata"],
+
+["segnate 'sta cosa: la chiave der capanno de la Dellepiane la trovi sotto er vaso co' la salvia", "mente"],
+["da la Dellepiane la chiave der capanno sta sotto er vaso der basilico, tienilo a mente", "mente"],
+["aò, la chiave de la cantina der Ruggeri la lascia sempre dentro la cassetta de la posta", "mente"],
+
+["aò, fotografame er pianoforte da la parte de dietro", "foto"],
+["famme 'na foto ar pianoforte, la parte de dietro", "foto"],
+["scatta mo' 'na foto der retro der pianoforte", "foto"],
+
+["la dico der Giordano l'hai fatta? no? allora falla mo', impianto idrico e riscaldamento, co' er progetto dell'ingegnere allegato", "dico"],
+["aò, famme la dichiarazione de conformità pe' Giordano, idraulico e riscaldamento, allegace er progetto dell'ingegnere", "dico"],
+["dico pe' la Spadoni: impianto idrico e termico, mettece pure er progetto der tecnico", "dico"],
+
+["se po' fa' 'na foto mo'? che tra poco chiudo er muro", "foto"],
+["aspè, famme 'na foto adesso, che poi chiudo la traccia", "foto"],
+["daje, scatta subito 'na foto ai tubi prima che ce metto er cartongesso", "foto"],
+
+["come funziona er distacco dar riscaldamento centralizzato? chi se stacca deve continua' a paga' quarcosa, e quanto?", "domanda"],
+["aò, se uno der condominio se stacca dar termo centralizzato, deve paga' ancora quarcosa?", "domanda"],
+["spiegame 'sta cosa: er condòmino che se stacca dar riscaldamento comune, quanto paga de spese fisse?", "domanda"],
+
+["mo' preparame la dichiarazione de conformità pe' l'hotel Miramare", "dico"],
+["famme la dico pe' l'albergo Miramare", "dico"],
+["dichiarazione de conformità pe' er B&B Colosseo, preparala", "dico"],
+
+["assemblea der condominio a Borgo San Jacopo, 5 novembre alle 21, all'ordine der giorno lo stemma in facciata", "assemblea"],
+["segna l'assemblea der condominio de via Merulana, 12 novembre alle 20 e mezza, pe' la facciata", "assemblea"],
+["convoca l'assemblea a Borgo San Jacopo pe' giovedì 5 novembre alle 21, argomento lo stemma", "assemblea"],
+
+["aprime la scheda de l'hotel Belvedere, va'", "cliente"],
+["famme vede' la scheda der cliente hotel Belvedere", "cliente"],
+["aprime l'albergo Bellavista ne li clienti", "cliente"],
+
+["assemblea a corso Lodi martedì 27 ottobre alle 21, se vota pe' cambia' l'ascensore", "assemblea"],
+["segname l'assemblea de viale Marconi, mercoledì 28 ottobre alle 20, pe' l'ascensore novo", "assemblea"],
+["convoca l'assemblea de condominio a corso Lodi, martedì 27 alle 21, se decide pe' l'ascensore", "assemblea"],
+
+["'ndo è finito er preventivo der dottor Mancini?", "cerca_documento"],
+["aò, nun trovo er preventivo der dottor Mancini, cercamelo", "cerca_documento"],
+["famme ritrova' er preventivo che avevo fatto ar dottor Giuliani", "cerca_documento"],
+
+["condominio Le Querce: l'amministratore è er ragionier Ognibene, è lui er referente pe' la centrale termica", "mente"],
+["segnate che ar condominio Le Querce pe' la caldaia centrale devi senti' er rag. Ognibene", "mente"],
+["aò, ar palazzo de via Taranto l'amministratore è er geometra Salvi, pe' la centrale termica se parla co' lui", "mente"],
+
+["aò, chiamame Rocco ar volo", "chiamata"],
+["daje, famme parla' co' Rocco", "chiamata"],
+["telefona a Settimio, va'", "chiamata"],
+
+["l'appuntamento de le 17 co' la signora Usai, se po' mette alle 18 e mezza?", "calendario_modifica"],
+["sposta la signora Usai dalle 17 alle 18 e trenta", "calendario_modifica"],
+["aò, l'appuntamento de le 16 cor Ciampini famme la cortesia, portalo alle 17 e mezza", "calendario_modifica"],
+
+["SAL pe' Palazzo Vettori, cliente Bardelli: ner salone stuccature finite, dorature ar 20%", "sal"],
+["stato d'avanzamento Palazzo Vettori Bardelli: salone co' stucchi ar 100 e dorature ar 25 pe' cento", "sal"],
+["SAL pe' Villa Torlonia, sala grande: stucchi fatti tutti, dorature ar 30 pe' cento", "sal"]
+] }

@@ -1,0 +1,241 @@
+{ "stile": "artigiano di 68 anni poco pratico di telefoni che parla all'app come a una segretaria in carne e ossa", "frasi": [
+["senti signorina, la signora Brivio mi ha dato 500 euro di anticipo, segna che li ho presi", "incasso"],
+["mi fai la cortesia di scrivere che ho incassato quattrocentocinquanta euro di acconto dalla signora Brivio", "incasso"],
+["la Brivio, come si chiama, la signora del terzo piano, m'ha dato 600 euro in contanti come acconto", "incasso"],
+
+["senti, mi fai una di quelle cartelle lì, chiamala Ferrante terrazzo con le piante, e ci metti tutte le fotografie che ho fatto da loro", "cartella"],
+["signorina, apra una cartella nuova col nome Ferrante giardino sul tetto e dentro ci infili le foto di stamattina fatte là", "cartella"],
+["quella cosa lì dove si mettono le carte insieme, la cartella, fammene una per Ferrante giardino pensile con dentro le foto del cantiere", "cartella"],
+
+["senti, per lo sgombero della casa di riposo mi fai quel foglio dello stato dei lavori? ala nord finita, ala sud a metà, il magazzino non l'abbiamo toccato, direi un sessanta per cento", "sal"],
+["signorina, stato avanzamento lavori casa di riposo Villa Serena: l'ala nord è sgomberata, la sud siamo a metà, magazzino ancora da cominciare, mettiamo 55 per cento", "sal"],
+["mi fai la cortesia di preparare il SAL, come si chiama, dell'avanzamento per la casa di riposo: nord fatto, sud mezzo, magazzino niente, siamo sul 60", "sal"],
+
+["senti, ce l'hai ancora quel preventivo delle sei tele che avevo mandato al museo? me lo fai vedere", "cerca_documento"],
+["signorina, mi ritrova il preventivo per il museo, quello delle tele da restaurare, sei mi pare, che lo voglio rileggere", "cerca_documento"],
+["dov'è finito quel foglio col prezzo per le otto tele del museo civico, il preventivo che gli ho mandato, me lo apri per piacere", "cerca_documento"],
+
+["senti, mi scrivi una lettera per posta elettronica al grossista Termoidraulica Adriatica, che voglio aprire un conto da loro", "email"],
+["signorina, mi fa la cortesia di scrivere una mail alla Termoidraulica Adriatica, il grossista, per aprire il conto", "email"],
+["quella cosa lì, la mail, scrivila alla Termoidraulica Adriatica che vorrei aprire il conto fornitore", "email"],
+
+["senti, mi fai il foglio dei soldi, la fattura, per Postal: batteria 1.800, manodopera 350 e poi, no aspetta, lasciaci anche i 50 della trasferta", "documento"],
+["signorina, fattura per la ditta Postal: 1.750 la batteria, 400 di mano d'opera, e la trasferta di 60 la teniamo, sì, la lasci", "documento"],
+["mi fa la cortesia di preparare la fattura a Postal, batteria milleottocento, lavoro trecentocinquanta, la trasferta volevo toglierla ma no, lasci i cinquanta", "documento"],
+
+["senti, quel preventivo di Pace che ho fatto la settimana passata, me lo riapri che lo guardo", "cerca_documento"],
+["signorina, mi tira fuori il preventivo del signor Pace, l'avrò fatto sette otto giorni fa", "cerca_documento"],
+["il preventivo, come si chiama, quello di Pace della settimana scorsa, me lo fa rivedere per cortesia", "cerca_documento"],
+
+["senti, Nicola, l'idraulico, ha rifatto tutti gli scarichi, mi serve quella carta lì, la dichiarazione di conformità", "dico"],
+["signorina, mi prepara la dico, quella della conformità, che Nicola ha finito di rifare gli scarichi", "dico"],
+["gli scarichi li ha rifatti il Nicola idraulico, adesso mi ci vuole la dichiarazione, come si chiama, la dico", "dico"],
+
+["senti, fammi una fotografia al telaio che s'è rotto", "foto"],
+["signorina, mi scatti una foto adesso a questo telaio spaccato", "foto"],
+["mi fa la cortesia di fare la foto al telaio della finestra, quello rotto qui davanti a me", "foto"],
+
+["senti, segnami un cliente nuovo, è un gruppo musicale, I Randagi, quello da cercare è Simone", "cliente"],
+["signorina, mi mette tra i clienti la band I Randagi, il contatto è un certo Simone", "cliente"],
+["c'è un cliente nuovo, quei ragazzi che suonano, I Randagi, mi fa la cortesia di registrarli, il riferimento è Simone", "cliente"],
+
+["senti, mandami un messaggino alla Polo Nord, di' che il banco frigo glielo ricarichiamo di gas", "messaggio"],
+["signorina, scriva sul telefono alla Polo Nord che il bancone frigorifero lo ricarichiamo noi col gas", "messaggio"],
+["mi fa la cortesia di mandare un whatsapp, come si chiama, alla Polo Nord: il banco frigo lo ricarichiamo di gas", "messaggio"],
+
+["senti, il bar centrale m'ha pagato centocinquanta per lo scalino che gli ho aggiustato", "incasso"],
+["signorina, segni che ho preso 180 euro dal bar Centrale, quelli dello scalino sistemato", "incasso"],
+["mi fa la cortesia di scrivere che il bar in piazza, il Centrale, mi ha dato i centocinquanta euro dello scalino", "incasso"],
+
+["senti, mandala alla Calzature Nives la fattura, quella dei vetri", "invio_documento"],
+["signorina, mi spedisce a Calzature Nives il foglio dei soldi dei vetri, la fattura che abbiamo già fatto", "invio_documento"],
+["mi fa la cortesia di far avere alla Calzature Nives la fattura per i vetri", "invio_documento"],
+
+["senti, il dentista di mercoledì toglilo, non ci vado più", "calendario_modifica"],
+["signorina, mi cancella l'appuntamento dal dentista che avevo mercoledì", "calendario_modifica"],
+["quella cosa lì del dentista, mercoledì, la levi dall'agenda per cortesia", "calendario_modifica"],
+
+["senti, segnati solo per ricordo che il preventivo del parquet a Martini era di 3.100 euro", "mente"],
+["signorina, si tenga a mente che per il parquet del Martini avevo chiesto tremilacento", "mente"],
+["mi fa la cortesia di annotare che il parquet di Martini, il prezzo che gli avevo fatto, era 3.200", "mente"],
+
+["senti, io non ci capisco niente con questo telefono, ma il lavoro da Deiana va spostato da martedì a mercoledì", "calendario_modifica"],
+["signorina, mi fa la cortesia di cambiare il giorno di Deiana, non più martedì ma mercoledì", "calendario_modifica"],
+["quel lavoro lì da Deiana che avevo messo martedì, me lo porta a mercoledì, come si fa non lo so", "calendario_modifica"],
+
+["senti, prepara la lettera per convocare l'assemblea del Belvedere, c'è un punto solo: la causa in corso", "assemblea"],
+["signorina, mi fa l'avviso per l'assemblea del condominio Belvedere, all'ordine del giorno solo il contenzioso", "assemblea"],
+["quella carta lì per chiamare i condomini del Belvedere in assemblea, un punto unico, il contenzioso con l'impresa", "assemblea"],
+
+["senti, apri il preventivo di Rebora, quello grande", "cerca_documento"],
+["signorina, mi tira fuori il preventivo del Rebora, quello con la cifra grossa", "cerca_documento"],
+["quel foglio dei prezzi, il preventivo del Rebora, il più grosso, me lo fa vedere", "cerca_documento"],
+
+["senti, ma si può salire sul tetto a lavorare se non c'è la linea vita?", "domanda"],
+["signorina, mi dica lei, è permesso lavorare sopra un tetto senza quella cosa lì, come si chiama, la linea vita?", "domanda"],
+["sul tetto senza la linea vita ci posso andare o rischio la multa?", "domanda"],
+
+["senti, avanzamento lavori per Trasporti Menegatti: la colonnina è montata, manca da allacciarla", "sal"],
+["signorina, mi fa lo stato dei lavori di Menegatti Trasporti, colonnina messa su, resta l'allacciamento", "sal"],
+["quel foglio dell'avanzamento, il SAL, per i Trasporti Menegatti: la colonnina di ricarica c'è, l'allaccio no", "sal"],
+
+["senti, al condominio Le Ginestre il bruciatore s'è rotto e ci sono cinquanta famiglie senza riscaldamento", "urgenza"],
+["signorina, è una cosa grave: Le Ginestre, bruciatore guasto, una quarantina di famiglie al freddo", "urgenza"],
+["mi chiamano dal condominio Le Ginestre, il bruciatore è andato, tutti al gelo, sessanta appartamenti", "urgenza"],
+
+["senti, fai una foto a questa ricevuta", "foto"],
+["signorina, mi fa la cortesia di fotografare lo scontrino, la ricevuta qui", "foto"],
+["mi scatti una fotografia adesso alla ricevuta che ho in mano", "foto"],
+
+["senti, domenica ricordami di caricare nel furgone il flessibile e la tagliapiastrelle", "calendario"],
+["signorina, mi metta un promemoria per domenica mattina: flessibile e taglierina delle piastrelle da mettere sul furgone", "calendario"],
+["mi fa la cortesia di ricordarmi sabato che devo caricare quella cosa lì, il flessibile, e la tagliapiastrelle sul furgone", "calendario"],
+
+["senti, mandami un messaggino alla Cappugi: la prova del trompe-l'oeil è venuta benissimo", "messaggio"],
+["signorina, scriva un messaggio al signor Cappugi che quella pittura lì, il trompe-l'oeil, la prova è riuscita una meraviglia", "messaggio"],
+["mi fa la cortesia di mandare un whatsapp a Cappugi, gli dica che la prova del dipinto finto, il trompe-l'oeil, è venuta splendida", "messaggio"],
+
+["senti, mi fai un SAL per il capannone, per piacere", "sal"],
+["signorina, mi prepara lo stato di avanzamento dei lavori del capannone", "sal"],
+["quella cosa lì dell'avanzamento, come si chiama, il sal, me lo fa per il capannone di via dell'Industria", "sal"],
+
+["senti, fra due settimane ricordami di richiamare Tardioli per la pensilina", "calendario"],
+["signorina, mi segni un promemoria tra quindici giorni: risentire il Tardioli per la tettoia, la pensilina", "calendario"],
+["mi fa la cortesia di ricordarmi di qui a tre settimane che devo rifarmi vivo con Tardioli per la pensilina", "calendario"],
+
+["senti, scrivi una mail al Tealdi che il quadro arriva la settimana che viene", "email"],
+["signorina, mandi una posta elettronica al signor Tealdi: il quadro elettrico arriva la prossima settimana", "email"],
+["mi fa la cortesia di fare una mail, come si chiama, al Tealdi, per dirgli che il quadro lo portano settimana prossima", "email"],
+
+["senti, la caldaia della scuola di Montalto è in blocco e i bambini sono al freddo, è urgente", "urgenza"],
+["signorina, corra, alla scuola di Montalto s'è fermata la caldaia, i bimbi stanno gelando", "urgenza"],
+["mi hanno chiamato da Montalto, la scuola elementare, caldaia bloccata e classi fredde, bisogna andare subito", "urgenza"],
+
+["senti, quand'è che ce l'ho il prossimo appuntamento col Loda?", "dati"],
+["signorina, mi guarda in agenda quando devo rivedere il signor Loda?", "dati"],
+["col Loda, quando ci vediamo la prossima volta, me lo dice lei che io non me lo ricordo", "dati"],
+
+["senti, prepara la dichiarazione di conformità per il bagno dei Mariani, rifatto tutto da capo", "dico"],
+["signorina, mi fa la dico per il bagno della signora Mariani, impianto tutto nuovo", "dico"],
+["quella carta lì della conformità, la dico, per il bagno Mariani che l'abbiamo rifatto da zero", "dico"],
+
+["senti, le foto mettile nella cartella di Bortolato", "cartella"],
+["signorina, mi sposta le fotografie dentro la cartella Bortolato", "cartella"],
+["quelle foto lì le infili nella cartella del Bortolato per piacere", "cartella"],
+
+["senti, fammi un preventivo per l'hotel Stella Alpina a Folgaria, trenta kWp sul tetto piano con le zavorre", "documento"],
+["signorina, preventivo per l'albergo Stella Alpina di Folgaria: impianto di 25 kWp, tetto piano, quei pesi lì, le zavorre", "documento"],
+["mi fa la cortesia di preparare il foglio del prezzo, il preventivo, per lo Stella Alpina di Folgaria, 30 chilowatt picco sul tetto piatto zavorrato", "documento"],
+
+["senti, fammi vedere la scheda del Carraro", "cliente"],
+["signorina, mi apre la scheda del cliente Carraro", "cliente"],
+["quella pagina lì dove c'è tutto del Carraro, il cliente, me la tira fuori", "cliente"],
+
+["senti, ma il furgone lo posso scaricare dalle tasse?", "domanda"],
+["signorina, lei che sa, il furgone si può mettere in detrazione?", "domanda"],
+["mi toglie un dubbio, il furgone da lavoro lo scarico dalle tasse o no?", "domanda"],
+
+["senti, mandala al Casati la fattura", "invio_documento"],
+["signorina, spedisca al signor Casati la fattura che gli abbiamo fatto", "invio_documento"],
+["mi fa la cortesia di far arrivare al Casati quel foglio dei soldi, la fattura", "invio_documento"],
+
+["brava signorina, ottimo lavoro", "saluto"],
+["bene bene, un bel lavoro, brava", "saluto"],
+["signorina, perfetta, proprio un buon lavoro", "saluto"],
+
+["senti, fammi una cartella nuova: Condominio Le Magnolie", "cartella"],
+["signorina, mi apre una cartella che si chiama Condominio Le Magnolie", "cartella"],
+["mi fa la cortesia di creare quella cosa lì, la cartella, per il condominio Le Magnolie", "cartella"],
+
+["senti, chi è che non m'ha ancora pagato da agosto in qua?", "dati"],
+["signorina, mi dice chi mi deve ancora dei soldi da agosto?", "dati"],
+["quelli che non hanno pagato da luglio, chi sono, me lo guarda lei", "dati"],
+
+["senti, scrivi una mail al comune, anzi no, alla polizia locale per il permesso del furgone nella zona a traffico limitato", "email"],
+["signorina, mi fa una mail ai vigili, la polizia municipale, per chiedere il permesso di entrare in ztl col furgone", "email"],
+["mi fa la cortesia di mandare la posta elettronica, come si chiama, al comune, no alla polizia locale, sì alla polizia, per il permesso ztl del furgone", "email"],
+
+["senti, mi scrivi la dichiarazione di conformità per l'autoclave di via Faenza, con tutti gli allegati", "dico"],
+["signorina, mi prepara la dico dell'autoclave in via Faenza, allegati compresi", "dico"],
+["quella carta della conformità per l'autoclave, quella di via Faenza, me la fa con gli allegati dentro", "dico"],
+
+["senti, come si fa a sapere quanto calcestruzzo ci va per un solaio di 80 metri quadri alto 20 centimetri?", "domanda"],
+["signorina, mi fa il conto di quanto cemento serve per un solaio di 90 metri quadri spesso 20?", "domanda"],
+["per un solaio da cento metri, venti di spessore, quanti metri cubi di calcestruzzo ci vogliono, come si calcola?", "domanda"],
+
+["va bene, ho capito tutto", "saluto"],
+["ah ecco, tutto chiaro signorina", "saluto"],
+["sì sì, chiarissimo", "saluto"],
+
+["senti, segna, il 15, giovedì 15 ottobre alle otto, dal Zampetti ai Parioli, e ricordami di portare la scala grande che ha i soffitti alti", "calendario"],
+["signorina, mi scriva giovedì 15 ottobre, ore 8, lavoro da Zampetti ai Parioli, e mi ricordi la scala lunga perché i soffitti sono alti", "calendario"],
+["mi fa la cortesia di segnare il quindici di ottobre, alle otto di mattina, Zampetti ai Parioli, e poi la scala grande da portare, che là c'hanno i soffitti alti", "calendario"],
+
+["va bene, grazie", "saluto"],
+["ok, grazie signorina", "saluto"],
+["grazie tante, va bene così", "saluto"],
+
+["senti, chiamami l'ufficio tecnico di Gorle", "chiamata"],
+["signorina, mi fa la cortesia di telefonare all'ufficio tecnico del comune di Gorle", "chiamata"],
+["mi metti in linea con quelli lì dell'ufficio tecnico, a Gorle", "chiamata"],
+
+["senti, c'è la riunione dei condomini di via Cavour, quelli che ci hanno chiamato per la centrale termica, il 4 novembre alle nove di sera", "assemblea"],
+["signorina, mi segni l'assemblea del condominio di via Cavour, 5 novembre, ore 21, per i lavori alla centrale", "assemblea"],
+["quella cosa lì dei condòmini, l'assemblea, via Cavour, il quattro di novembre alle nove di sera, per la centrale termica", "assemblea"],
+
+["senti, chiama il signor Visone, quello del quinto piano di via Bernini", "chiamata"],
+["signorina, mi fa telefonare al sig. Visone di via Bernini, quinto piano", "chiamata"],
+["mi passi al telefono il Visone, via Bernini, quello al quinto", "chiamata"],
+
+["senti, Vitale m'ha mandato 450 euro con quella cosa lì, il PayPal", "incasso"],
+["signorina, segni che il signor Vitale mi ha girato 500 euro con PayPal", "incasso"],
+["mi sono arrivati quattrocentocinquanta da Vitale, col PayPal, come si chiama, il pagamento sul telefono", "incasso"],
+
+["senti, segnati che il Nesti non vuole essere chiamato prima delle nove", "mente"],
+["signorina, si ricordi che al signor Nesti non gli piace che lo chiamino prima delle nove di mattina", "mente"],
+["tenga a mente quella cosa lì del Nesti: prima delle nove non gli si telefona", "mente"],
+
+["senti, chiamami Giorgio Ferrari", "chiamata"],
+["signorina, mi fa la cortesia di telefonare a Giorgio Ferrari", "chiamata"],
+["Giorgio Ferrari, me lo chiami al telefono per piacere", "chiamata"],
+
+["senti, assemblea straordinaria del condominio di via Napoli per il tubo del gas", "assemblea"],
+["signorina, mi convoca l'assemblea straordinaria in via Napoli, per quella cosa del tubo del gas", "assemblea"],
+["i condomini di via Napoli, quelli del tubo del gas, bisogna fargli l'assemblea straordinaria", "assemblea"],
+
+["senti, a che ora ce l'ho il Bozzo domani?", "dati"],
+["signorina, mi guarda a che ora devo andare dal Bozzo domani?", "dati"],
+["domani dal Bozzo, a che ora era, che non me lo ricordo", "dati"],
+
+["senti, manda un messaggio ai Leonardi: la manutenzione è fatta, tutto a posto", "messaggio"],
+["signorina, scriva sul telefonino ai signori Leonardi che la manutenzione l'abbiamo finita e va tutto bene", "messaggio"],
+["mi fa la cortesia di mandare un messaggino, un whatsapp, ai Leonardi, che il controllo è fatto e non c'è niente che non va", "messaggio"],
+
+["senti, il promemoria del cancello automatico che avevo messo per il 3, spostalo a fine novembre", "calendario_modifica"],
+["signorina, mi rimanda a fine novembre quella cosa lì del cancello automatico che era segnata al 3", "calendario_modifica"],
+["il cancello automatico, il promemoria del 3, me lo fa slittare verso la fine di novembre", "calendario_modifica"],
+
+["senti, fammi la fattura per la signora Tosolini, sgombero del garage, 280 euro", "documento"],
+["signorina, il foglio dei soldi, la fattura, per la Tosolini, quella del garage sgomberato: 300 euro", "documento"],
+["mi fa la cortesia di preparare la fattura alla signora Tosolini per lo sgombero della rimessa, duecentottanta", "documento"],
+
+["senti, c'è un cliente nuovo: Franco Pisetta, via dei Mughi 4, a Baselga di Pinè", "cliente"],
+["signorina, mi aggiunga come cliente il signor Franco Pisetta, abita in via dei Mughi numero 4, Baselga di Pinè", "cliente"],
+["mi segni tra i clienti un certo Pisetta Franco, via dei Mughi 6, su a Baselga di Pinè", "cliente"],
+
+["senti, la Tognetti dice che dalla finestra nuova le entra l'acqua, ha la pozza in salotto", "urgenza"],
+["signorina, la signora Tognetti ha chiamato, la finestra che le ho messo fa entrare l'acqua e il salotto è allagato", "urgenza"],
+["c'è un guaio dalla Tognetti: piove dentro dalla finestra nuova, c'è l'acqua per terra in sala", "urgenza"],
+
+["senti, fai una foto alla porta prima che la smonto", "foto"],
+["signorina, mi scatti una fotografia a questa porta, che poi la tolgo dai cardini", "foto"],
+["prima di smontare la porta mi fa la cortesia di fotografarla adesso", "foto"],
+
+["senti, segnati che al cantiere di Borgo San Giacomo il quadro vecchio ha ancora i fusibili a tappo", "mente"],
+["signorina, si annoti questa cosa: a Borgo San Giacomo, nel cantiere, c'è un quadro elettrico vecchio coi fusibili a tappo", "mente"],
+["tenga presente che là a Borgo San Giacomo quel quadro lì, quello vecchio, ha ancora i fusibili di una volta, a tappo", "mente"],
+
+["senti, mandala agli sposi Cravero la fattura dell'acconto", "invio_documento"],
+["signorina, spedisca ai signori Cravero, i due sposini, la fattura dell'anticipo", "invio_documento"],
+["mi fa la cortesia di far avere ai Cravero, gli sposi, quel foglio dei soldi dell'acconto, la fattura", "invio_documento"]
+] }
