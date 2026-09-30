@@ -458,6 +458,22 @@ sporca, dialetti, chat, anziano, straniero.
    regole che indovinano il cassetto, doppioni app/server; il file unico
    dell'app diviso in file ordinati. Ogni cassetto passa solo se le 3.600 frasi
    etichettate e i test danno risultati uguali o migliori.
+   **Primo cassetto fatto il 30/09: sposta/annulla un impegno.**
+   - Il modello decide che la frase chiede di spostare o annullare.
+   - Il lettore (`leggiModificaImpegno`) legge solo i dettagli: quale impegno
+     (parole e giorno detti prima del verbo) e il nuovo quando (il giorno e
+     l'ora detti diversi da quelli che ha già; "un'ora dopo"; "la settimana
+     prossima").
+   - Le regole di prima restano sotto, come riserva.
+   - Protezioni:
+     - serve una parola di cambio ("Rita domani alle 9 sopralluogo" resta un
+       impegno nuovo);
+     - "annulla la fattura" non tocca il calendario;
+     - due comandi insieme restano alle regole di prima.
+   - Risultati: delle 34 frasi "sposta/annulla" che l'app sbagliava (le
+     segnava come impegni NUOVI) ne sistema 32. Giro 16: 966 → **982**; giro
+     17: 966 → **979**; giro 15: 1036 → 1037; giro 9: 48/48. Nessun giro
+     peggiora; 71 prove su 71.
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
 

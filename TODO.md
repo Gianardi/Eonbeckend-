@@ -4974,6 +4974,46 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Passo 3, primo cassetto: sposta/annulla (30/09/2026, ROADMAP 0b.19)
+- `lettore.js`:
+  - `tempiDetti(pp, oggi)`: ogni tempo detto nel suo pezzo di frase, con
+    `negato` ("invece che alle 16", "non alle 7", "dalle 4");
+  - `leggiModificaImpegno(testo, impegni, oggi)` →
+    `{tipo: "sposta"|"annulla"|null, impegni, nuovoPer(imp), tempi, parole, motivo}`.
+- Punteggio dell'impegno:
+  - una parola del titolo vale 3 (1 se è un tipo generico: sopralluogo,
+    verifica…); il prefisso di 6 lettere vale 2;
+  - il giorno detto vale 4, l'ora detta 2;
+  - contano solo parole e tempi detti prima del verbo di cambio (col verbo
+    in testa: fino al motivo "che/perché").
+- Il nuovo quando: giorno e ora non negati, diversi da quelli dell'impegno.
+  - Casi aggiunti: "un'ora dopo / mezz'ora prima"; "la settimana prossima" /
+    "di una settimana" (+7 giorni); "alle 5" per un impegno del pomeriggio =
+    17.
+- `tipo` è null (decidono le regole di prima) in quattro casi:
+  - manca una parola di cambio;
+  - l'oggetto non è un impegno (fattura, foto, cliente…);
+  - ci sono due comandi insieme ("e segna…");
+  - ci sono solo giorno e fascia, senza nome né lavoro ("annulla gli
+    appuntamenti di domani pomeriggio").
+- `index.html`:
+  - `cassettoNeurale(testo, 0.9)`;
+  - `provaModificaImpegno` prima di `provaAnnullaImmediato` e di
+    `provaSpostaImmediato`, che restano come riserva;
+  - `confermaSpostamento` e `confermaAnnullamento` sono stati separati dai
+    vecchi gestori e riusati;
+  - `isoImpegno(v)`.
+- Prova rapida in node: lo script `prova-modifica.js` (nello scratchpad)
+  legge 211 frasi giuste su 216 di tutti i giri. Le 5 che restano hanno due
+  impegni dello stesso cliente: EON chiede quale, ed è voluto.
+- Ancora sbagliate nell'app:
+  - "Guidetti domani alle due non ce la fa…, portamelo alle 18": il modello
+    è sicuro solo al 66%, quindi decidono le regole di prima e sbagliano l'ora;
+  - "l'assemblea … spostala a sabato 10 ottobre": il modello dice
+    "assemblea".
+- `eval/dati/soglie-app.json` alzato: giro 9 48, giro 15 1037, giro 16 982,
+  giro 17 979.
+
 ### Rete di sicurezza automatica (30/09/2026 mattina, ROADMAP 0b.19 passo 2)
 - `.github/workflows/prove.yml`, su ogni `pull_request`, sui push su `main`
   e a mano (`workflow_dispatch`):
