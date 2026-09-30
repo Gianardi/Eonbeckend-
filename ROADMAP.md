@@ -632,6 +632,11 @@ sporca, dialetti, chat, anziano, straniero.
      per i preventivi, sempre da confermare prima dell'invio.
    - **Elaborare documenti:** foto o file di fattura, contratto, computo →
      dati estratti, riassunto, collegato al cliente giusto.
+   - **Rispondere ai clienti (idea del 30/09, dalle frasi di ChatGPT mandate da
+     Andrea):** quando un cliente scrive all'artigiano "mi serve un preventivo
+     per rifare il bagno", "avete disponibilità la settimana prossima?", EON
+     prepara la risposta (e la bozza del preventivo, o gli orari liberi dal
+     calendario), da confermare. Pilastri *soldi* e *tempo*.
    - **Da fare prima:** stimare il costo per utente al mese (costi e prezzi
      sopra) e mettere un tetto.
    - **Più avanti, con molti utenti:** valutare un modello aperto (Meta,
