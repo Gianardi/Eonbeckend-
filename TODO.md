@@ -5007,6 +5007,12 @@ ROADMAP 0b.11.
   con un "totale detto" per controllo restano le regole, che avvisano se non torna — trovato
   da `preventivo-voci-app.test.js`;
   sconto/acconto = una voce sola col totale e il perché).
+- **Protezione dal giro 18** (trovata dalla CI): una percentuale che il modello lascia a O
+  e non è l'IVA ("sconto del cinque per cento", in lettere: il generatore mette le
+  percentuali solo in cifre) = non sicuro, decidono le regole. Al prossimo allenamento:
+  percentuali in lettere nel generatore.
+- **Prova** `eval/modello-dettagli.test.mjs`: legge tutti i giri con importo (giro 18
+  compreso: 420 frasi, regole 350, regole + modello 360); minimo 360, zero frasi rotte.
 - **Misure:** vedi ROADMAP 0b.19 passo 4.
 
 ### Passo 3, cassetti della sera (30/09/2026, ROADMAP 0b.19)

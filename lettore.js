@@ -786,6 +786,10 @@
     if (!d || d.sicurezza < SICURO_DETTAGLI || !(d.totale > 0)) return l;
     // "…totale 9.000": un totale detto per controllo; le regole lo confrontano con le voci e avvisano
     if (l.totaleDetto != null) return l;
+    // una percentuale che il modello lascia senza ruolo e non è l'IVA ("sconto del cinque per
+    // cento", in lettere: non l'ha mai vista): non è sicuro, decidono le regole (giro 18)
+    const percSenzaRuolo = d.segni.segni.some((w, i) => /%>$/.test(w) && d.ruoli[i] === "O" && !d.segni.segni.slice(Math.max(0, i - 3), i).some((x) => /^(?:iva|aliquota)$/.test(x)));
+    if (percSenzaRuolo) return l;
     const regole = l.voci && l.voci.length ? l.voci.reduce((t, v) => t + (v.quantita || 1) * v.prezzo, 0) : l.importo;
     if (regole != null && Math.abs(regole - d.totale) < 0.005) return l;
     const parole = d.segni.parole;
