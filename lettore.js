@@ -687,6 +687,34 @@
     const t = s.filter((w, i) => !(w.startsWith("<") && s[i - 1] === w));
     return (p.domanda ? "<dom> " : "") + t.join(" ");
   }
+  /* Frasi vere per allenare i modelli, col consenso (30/09): prima di mandarle si tolgono i
+     dati personali, la forma della frase resta (serve per imparare). Nomi dei clienti →
+     "Cliente", nomi di persona → "Nome", dopo signor/dottor… → "Rossi", telefoni, email,
+     IBAN, codici fiscali e partite IVA, indirizzi → segnaposto. */
+  function anonimizza(testo, ctx) {
+    let t = String(testo || "").replace(/\s+/g, " ").trim();
+    t = t.replace(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, "email@esempio.it")
+      .replace(/\bIT\s?\d{2}\s?[A-Z](?:\s?[0-9A-Z]){22}\b/g, "IBAN")
+      .replace(/\b[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]\b/gi, "CODICEFISCALE")
+      .replace(/\b(?:p\.?\s?iva|partita\s+iva)\s*:?\s*\d{11}\b/gi, "partita iva 00000000000")
+      .replace(/(?:\+?39[\s.]?)?(?:3\d{2}|0\d{1,3})[\s.]?\d{3}[\s.]?\d{3,4}\b|\b3\d{8,9}\b/g, "333 0000000")
+      .replace(/\b(via|viale|piazza|piazzale|corso|vicolo|largo|strada|contrada|borgo|località)\s+((?:(?:de|dei|del|della|delle|degli|di|da|san|santa|dello|d'|\p{Lu}[\p{L}'’-]*)\s*){1,4})(\d+[a-z]?)?/giu, (m, via, nome, num) => via + " Roma" + (num ? " 1" : "") + " ");
+    // i clienti dell'utente, parola per parola ("Condominio Via Gramsci 14" → "Cliente")
+    const parole = new Set();
+    (ctx && ctx.clienti || []).forEach((c) => tokenNome(c.name || "").forEach((w) => { if (w.length >= 3 && !VUOTE.has(w) && !/^(?:condominio|studio|bar|hotel|ristorante|trattoria|pizzeria|palestra|officina|ditta|srl|snc|spa|via|viale|piazza|corso|supercondominio|dentistico|impianti)$/.test(w)) parole.add(w); }));
+    t = t.split(/(\s+)/).map((w) => {
+      const n = norm(w.replace(/[^\p{L}'’]/gu, ""));
+      if (!n) return w;
+      const segno = w.match(/[^\p{L}'’]+$/u);
+      if (parole.has(n)) return "Cliente" + (segno ? segno[0] : "");
+      if (NOMI.has(n) && /^\p{Lu}/u.test(w)) return "Nome" + (segno ? segno[0] : "");
+      return w;
+    }).join("");
+    // "il signor Brambilla", "l'avvocato Donati", "dalla Colombini": il cognome dopo il titolo
+    t = t.replace(/\b(signor|signora|sig\.?|sig\.ra|dottor|dottore|dottoressa|dott\.?|ingegner|ingegnere|ing\.?|avvocato|avv\.?|geometra|geom\.?|architetto|arch\.?|ragionier|ragioniere|rag\.?|professor|professoressa|prof\.?)\s+(?!Nome\b|Cliente\b)\p{Lu}[\p{L}'’-]+/giu, "$1 Rossi");
+    return t.replace(/\s+/g, " ").trim().slice(0, 600);
+  }
+
   /* Passo 4 (30/09): il secondo modello neurale, quello dei DETTAGLI. Dice che ruolo ha
      ogni numero della frase; il conto lo fa il codice (componiImporti).
      Ingresso: una parola per volta, come la dice lui (solo le abbreviazioni sciolte, NON
@@ -2161,7 +2189,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, anonimizza, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

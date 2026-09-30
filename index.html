@@ -1391,6 +1391,11 @@
   .imp-btn{ align-self:flex-start; padding:10px 20px; border-radius:12px; border:none; background:var(--text); color:#fff; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
   .imp-btn:disabled{ opacity:.5; }
   .imp-btn-pericolo{ background:var(--coral); }
+  .imp-btn-secondario{ background:var(--card); color:var(--text); border:1px solid var(--border-strong); }
+  /* "Aiuta a migliorare EON" (30/09/2026) */
+  .imp-migliora{ display:flex; flex-direction:column; gap:8px; padding:14px; border-radius:16px; border:1px solid var(--border-strong); background:var(--card); }
+  .imp-migliora-testo{ margin:0; font-size:13.5px; line-height:1.5; color:var(--muted); }
+  .imp-migliora-tasti{ display:flex; flex-wrap:wrap; gap:8px; }
   .imp-esito{ font-size:13px; color:var(--muted); }
   .imp-esito:empty{ display:none; }
   .imp-esito.ok{ color:#12894F; }
@@ -5811,6 +5816,7 @@ function showAIToastConAnnulla(titolo, testo, onAnnulla, secondi, altro){
     if(deciso) return;
     deciso = true;
     toast.querySelectorAll("button").forEach(b => b.disabled = true);
+    registraAnnullatoAddestramento(); // EON aveva capito male: vale per l'allenamento (col consenso)
     await onAnnulla();
     toast.remove();
   });
@@ -6034,8 +6040,35 @@ function ricordaTurnoLocale(domanda, risposta){
 }
 /* Cosa ha fatto il codice, letto da quello che si vede: la card aperta
    (titolo e contenuto) o la pagina aperta */
+/* Frasi vere per allenare i modelli (30/09/2026, Andrea: "ogni richiesta del tester viene
+   registrata"). SOLO se l'utente ha acceso "Aiuta a migliorare EON" (Impostazioni → Privacy e
+   dati). Si manda la frase senza dati personali (EonLettore.anonimizza), cosa ha capito il
+   modello e cosa ha fatto EON; mai la conversazione. "Annulla" subito dopo = una riga "annullato". */
+let ultimaFraseAddestramento = null;
+function registraFraseAddestramento(testo, esito){
+  try{
+    const p = profiloSicuro();
+    if(!p || !p.aiuta_migliorare || !isDbReady() || typeof EonLettore === "undefined" || !EonLettore.anonimizza) return;
+    const frase = EonLettore.anonimizza(testo, contestoLettore());
+    if(!frase || frase.length < 2) return;
+    // la stessa frase due volte di fila (lo stesso invio passa da più strade): una sola riga
+    if(ultimaFraseAddestramento && ultimaFraseAddestramento.frase === frase && Date.now() - ultimaFraseAddestramento.t < 5000) return;
+    const c = EonLettore.classifica ? EonLettore.classifica(testo, contestoLettore()) : null;
+    ultimaFraseAddestramento = { frase, esito, t: Date.now(), cassetto: c ? c.intento : null, sicurezza: c ? Math.round(c.p * 1000) / 1000 : null };
+    dbInsert("frasi_addestramento", { frase, cassetto: ultimaFraseAddestramento.cassetto, sicurezza: ultimaFraseAddestramento.sicurezza, esito: String(esito || "").slice(0, 60), mestiere: currentProfession || null }).catch(() => {});
+  }catch(e){ /* mai bloccare l'app per questo */ }
+}
+function registraAnnullatoAddestramento(){
+  const u = ultimaFraseAddestramento;
+  if(!u || Date.now() - u.t > 120000 || !isDbReady()) return;
+  const p = profiloSicuro();
+  if(!p || !p.aiuta_migliorare) return;
+  ultimaFraseAddestramento = null;
+  dbInsert("frasi_addestramento", { frase: u.frase, cassetto: u.cassetto, sicurezza: u.sicurezza, esito: "annullato", mestiere: currentProfession || null }).catch(() => {});
+}
 function ricordaEsitoCodice(domanda, tipo){
   contaUsoCodice(tipo);
+  registraFraseAddestramento(domanda, tipo);
   setTimeout(() => {
     const overlay = document.getElementById("risorsaOverlay");
     let esito;
@@ -16283,6 +16316,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        richiesta sembra ferma per tutta l'attesa — una breve conferma
        parlata, subito, colma il buco senza dire nulla di non confermato
        (mai un orario, solo la ricezione). */
+    // la frase va al server (comando già letto) o all'AI: anche questa, per l'allenamento (col consenso)
+    if(!inContinuazione) registraFraseAddestramento(testo, pronto && pronto.comando ? "server_" + (pronto.comando.azione || "comando") : "ai");
     const eImpegnoInArrivo = !inContinuazione && !(pronto && pronto.comando) && sembraRichiestaAppuntamento(testo);
     if(eImpegnoInArrivo){
       aggiungiImpegnoInConferma(testo);
@@ -20422,13 +20457,49 @@ suTocco("impVocePrivacy", () => {
         <div class="module-icon" style="background:var(--indigo);">${icona('<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h4"/>')}</div>
         <div class="azienda-link-card-body"><div class="module-title">Termini d'uso</div><div class="module-sub">Le regole, e l'accordo sui dati dei tuoi clienti</div></div>
       </a>
+      <div class="imp-migliora" id="impMigliora"></div>
       <button type="button" class="azienda-link-card imp-aiuto-voce" data-azione="scarica">
         <div class="module-icon" style="background:var(--violet);">${icona('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>')}</div>
         <div class="azienda-link-card-body"><div class="module-title">Scarica i miei dati</div><div class="module-sub">Una copia di tutto: clienti, messaggi, documenti, impegni</div></div>
       </button>
     </div>`);
   corpo.querySelector('[data-azione="scarica"]').addEventListener("click", scaricaIMieiDati);
+  disegnaAiutaMigliorare(corpo.querySelector("#impMigliora"));
 });
+/* "Aiuta a migliorare EON" (30/09/2026): spento finché l'utente non lo accende. Acceso, EON
+   manda le frasi che gli dici (senza nomi, telefoni, indirizzi) per allenare i suoi modelli;
+   spento, smette; "Cancella" toglie quelle già date. */
+function disegnaAiutaMigliorare(box){
+  if(!box) return;
+  const p = profiloSicuro() || {};
+  const acceso = !!p.aiuta_migliorare;
+  box.innerHTML = `
+    <div class="module-title">Aiuta a migliorare EON</div>
+    <p class="imp-migliora-testo">${acceso
+      ? "Acceso. Le frasi che dici a EON (senza nomi, telefoni e indirizzi, che vengono tolti prima) servono ad allenare i suoi modelli, così capisce meglio te e gli altri. Non si salvano le risposte né le conversazioni."
+      : "Spento. Se lo accendi, le frasi che dici a EON (senza nomi, telefoni e indirizzi, che vengono tolti prima) servono ad allenare i suoi modelli, così capisce meglio te e gli altri. Puoi spegnerlo quando vuoi."}</p>
+    <div class="imp-migliora-tasti">
+      <button type="button" class="imp-btn" id="impMiglioraCambia">${acceso ? "Spegni" : "Accendi"}</button>
+      ${acceso ? '<button type="button" class="imp-btn imp-btn-secondario" id="impMiglioraCancella">Cancella le frasi date</button>' : ""}
+    </div>
+    <div class="imp-esito" id="impEsitoMigliora"></div>`;
+  box.querySelector("#impMiglioraCambia").addEventListener("click", async () => {
+    if(!isDbReady()) return esitoImp("impEsitoMigliora", "Serve la connessione.", false);
+    const nuovo = !acceso;
+    const dati = { aiuta_migliorare: nuovo, aiuta_migliorare_dal: nuovo ? new Date().toISOString() : null };
+    const { error } = await supabaseClient.from("profiles").update(dati).eq("id", currentSession.user.id);
+    if(error) return esitoImp("impEsitoMigliora", "Non sono riuscita a salvare: riprova.", false);
+    if(profiloUtente) Object.assign(profiloUtente, dati);
+    disegnaAiutaMigliorare(box);
+    esitoImp("impEsitoMigliora", nuovo ? "Grazie! Da ora EON impara anche dalle tue frasi." : "Spento: da ora non si manda più niente.", true);
+  });
+  const canc = box.querySelector("#impMiglioraCancella");
+  if(canc) canc.addEventListener("click", async () => {
+    if(!isDbReady()) return esitoImp("impEsitoMigliora", "Serve la connessione.", false);
+    const { error } = await supabaseClient.from("frasi_addestramento").delete().eq("owner_id", currentSession.user.id);
+    esitoImp("impEsitoMigliora", error ? "Non sono riuscita a cancellarle: riprova." : "Cancellate tutte le frasi che avevi dato.", !error);
+  });
+}
 
 suTocco("impVoceProfilo", () => {
   const p = profiloUtente || { full_name:"", business_name:"" };

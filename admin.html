@@ -161,6 +161,7 @@ function quando(iso){
 let token = null;
 let dati = null;
 let codice = null;
+let frasi = null;
 const NOMI_TIPO_CODICE = { pagina: "Aprire una pagina", azione_diretta: "Impostazioni e account", comando: "Chiama, scrivi, fatto, link, archivia", invio_documento: "Invio documenti", lettura_giorno: "Cosa ho da fare", lettura_soldi: "Incassi e crediti", lettura_disponibilita: "Sono libero?", lettura_cliente: "Info sui clienti", lettura_clienti: "Quanti clienti", lettura_messaggi: "Messaggi non letti", lettura_altro: "Altre letture", saluto: "Saluti", cancella_appunto: "Cancella appunto", annulla_impegni: "Annulla impegni", foto: "Foto", scheda_cliente: "Scheda cliente", meteo_percorso: "Meteo e strade", documento_impresa: "Documenti impresa", risorsa: "Foto e documenti dei clienti", appunto: "Appunti" };
 
 function statoPagina(titolo, testo, link){
@@ -214,6 +215,12 @@ async function carica(){
     const rc = await fetch(API + "admin_codice", { headers: { Authorization: "Bearer " + token } });
     if(rc.ok) codice = await rc.json();
   }catch(e){ /* sezione non disponibile */ }
+  // Frasi per l'allenamento dei modelli: solo i numeri, mai il testo
+  frasi = null;
+  try{
+    const rf = await fetch(API + "admin_frasi", { headers: { Authorization: "Bearer " + token } });
+    if(rf.ok) frasi = await rf.json();
+  }catch(e){ /* sezione non disponibile */ }
   disegna();
 }
 
@@ -229,6 +236,7 @@ function disegna(){
     { num: t.senza_ai_pct == null ? "—" : numero(t.senza_ai_pct) + "%", lab: "Richieste senza AI", extra: "ultimi 30 giorni" },
     { num: t.durata_media_ms == null ? "—" : numero(t.durata_media_ms / 1000, 1) + " s", lab: "Attesa media con l'AI", extra: "ultimi 30 giorni" },
   ];
+  if(frasi && frasi.disponibile) tiles.push({ num: numero(frasi.frasi), lab: "Frasi per allenare EON", extra: numero(frasi.frasi_7g) + " negli ultimi 7 giorni · " + (frasi.utenti_consenso == null ? "—" : numero(frasi.utenti_consenso)) + " utenti col consenso" });
   const giorni = dati.giorni || [];
   const massimo = Math.max(1, ...giorni.map((g) => g.richieste || 0));
   const errori = dati.errori || [];

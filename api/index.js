@@ -2990,7 +2990,25 @@ async function handleAdmin(action, req, res, user) {
     return send(res, 200, { ok: true });
   }
   if (action === "admin_codice") return send(res, 200, await riepilogoCodice());
+  if (action === "admin_frasi") return send(res, 200, await riepilogoFrasiAddestramento());
   throw fail("Richiesta non riconosciuta");
+}
+
+/* Frasi per allenare i modelli (30/09/2026): nel pannello SOLO quante sono e quanti utenti
+   hanno acceso "Aiuta a migliorare EON". Mai il testo delle frasi. */
+async function riepilogoFrasiAddestramento() {
+  const da = new Date(Date.now() - 7 * 24 * 3600 * 1000).getTime();
+  const righe = await servizio("frasi_addestramento?select=created_at,esito&order=created_at.desc&limit=20000", { method: "GET" }).catch(() => null);
+  const consensi = await servizio("profiles?select=id&aiuta_migliorare=eq.true", { method: "GET" }).catch(() => null);
+  if (!Array.isArray(righe)) return { disponibile: false };
+  return {
+    disponibile: true,
+    frasi: righe.length,
+    frasi_7g: righe.filter((r) => new Date(r.created_at).getTime() > da).length,
+    annullate: righe.filter((r) => r.esito === "annullato").length,
+    all_ai: righe.filter((r) => r.esito === "ai").length,
+    utenti_consenso: Array.isArray(consensi) ? consensi.length : null,
+  };
 }
 
 /* Credito dell'AI finito (29/09/2026: il 28/09 sera 36 richieste fallite
@@ -6910,7 +6928,7 @@ export default async function handler(req, res) {
 
     const { user, accessToken } = await requireUser(req);
 
-    if (action === "admin_stato" || action === "admin_riepilogo" || action === "admin_errori_visti" || action === "admin_codice") return await handleAdmin(action, req, res, user);
+    if (action === "admin_stato" || action === "admin_riepilogo" || action === "admin_errori_visti" || action === "admin_codice" || action === "admin_frasi") return await handleAdmin(action, req, res, user);
     if (action === "uso_codice") return await handleUsoCodice(req, res, user);
     if (/^passkey_(opzioni_registrazione|registra|stato|disattiva)$/.test(action)) return await handlePasskey(action, req, res, user);
     if (action === "ai") return await handleAI(req, res);

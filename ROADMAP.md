@@ -897,7 +897,33 @@ di frasi vere, etichettate, per addestrare un piccolo modello loro. Piano in 3 p
    dettatura, frasi lunghe e confuse, più cose insieme) e farle girare nel
    simulatore (`eval/simulatore.test.mjs`) per trovare i buchi veri del
    lettore. Costo: pochi euro (stima).
-2. **Con i tester**: salvare le frasi che il codice non capisce e che vanno
+2. **Con i tester** — **FATTO il 30/09 (sera), manca solo la tabella in produzione.**
+   Andrea: "ogni richiesta del tester viene registrata e poi le metti tutte
+   insieme per addestrare il modello".
+   - **Interruttore:** Impostazioni → Privacy e dati → **"Aiuta a migliorare
+     EON"**, spento per tutti finché l'utente non lo accende. Serve anche per
+     un socio come Simone: resta traccia del sì, e i dati dei SUOI clienti
+     vanno tolti comunque.
+   - **Acceso:** ogni richiesta manda la frase **senza dati personali** (nomi
+     dei clienti, nomi di persona, telefoni, email, indirizzi, IBAN, codici
+     fiscali: tolti nel telefono prima di partire), cosa ha capito il modello,
+     cosa ha fatto EON e il mestiere. "Annulla" subito dopo = una riga
+     "annullato" (EON aveva capito male). Mai le risposte, mai le
+     conversazioni.
+   - **Controllo dell'utente:** spegne quando vuole; "Cancella le frasi date"
+     toglie le sue.
+   - **Privacy:** informativa aggiornata (consenso, art. 6.1.a; tenute al
+     massimo 24 mesi). Da far rileggere a un legale prima di aprire a tutti.
+   - **Pannello admin:** solo i numeri (quante frasi, ultimi 7 giorni, quanti
+     utenti col consenso), mai il testo.
+   - **Tabella** `frasi_addestramento` (`supabase/frasi_addestramento.sql`):
+     su staging fatta; in produzione dopo l'ok di Andrea.
+   - **Prova automatica:** `eval/frasi-addestramento-app.test.js`.
+   - **Anonimizzazione, onestà:** un cognome detto da solo che non è tra i
+     clienti e senza "signor/dottor…" davanti ("preventivo per Rossi") resta.
+     Nomi di clienti, persone con titolo, telefoni e indirizzi no.
+
+   Testo del piano originale: salvare le frasi che il codice non capisce e che vanno
    all'AI, **solo col consenso** (da aggiungere all'informativa privacy; mai
    visibili nel pannello admin come messaggi). L'AI le classifica; ogni
    settimana diventano vocabolario del lettore e nuove prove del simulatore.

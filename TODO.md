@@ -4974,6 +4974,31 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Frasi vere per allenare i modelli, col consenso (30/09/2026, ROADMAP 0b.13 passo 2)
+- **Database** (`supabase/frasi_addestramento.sql`, solo aggiunte):
+  - `profiles.aiuta_migliorare` (default false) e `aiuta_migliorare_dal`;
+  - tabella `frasi_addestramento` (frase ≤ 600 caratteri, cassetto, sicurezza, esito,
+    mestiere);
+  - RLS: insert solo per sé E col consenso acceso (controllato nel database, non solo
+    nell'app); select e delete solo le proprie;
+  - staging fatta il 30/09; produzione in attesa dell'ok di Andrea.
+- **App** (`index.html`):
+  - `registraFraseAddestramento(testo, esito)` in `ricordaEsitoCodice` (tutto quello che fa
+    il codice) e in `inviaAlServer` (esito "ai" o "server_<azione>"; non le risposte a una
+    domanda di EON);
+  - la stessa frase entro 5 s una volta sola (il primo esito vince, il più preciso);
+  - `registraAnnullatoAddestramento()` nel tasto "Annulla" di `showAIToastConAnnulla`
+    (entro 2 minuti);
+  - interruttore `disegnaAiutaMigliorare` in Privacy e dati.
+- **Anonimizzazione** (`lettore.anonimizza(testo, ctx)`): email, IBAN, codice fiscale,
+  partita IVA, telefoni, indirizzi (via/viale/piazza… + nome + civico → "via Roma 1"), parole
+  dei nomi dei clienti → "Cliente", nomi propri (lista NOMI, con la maiuscola) → "Nome",
+  cognome dopo signor/dottor/avvocato… → "Rossi". Limite: un cognome sconosciuto da solo resta.
+- **Admin:** `admin_frasi` (api) → solo conteggi; riquadro "Frasi per allenare EON".
+- **Per allenare:** le leggo col servizio (SQL su produzione, solo questa tabella), le
+  etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
+  aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
+
 ### Passo 4, il modello dei dettagli: gli importi (30/09/2026, ROADMAP 0b.19)
 - **Cosa fa:** per ogni numero di un preventivo o fattura dice il ruolo: O (niente:
   indirizzi, misure, date, IVA, telefoni), QTA, PRZ (prezzo a pezzo), TOT (totale di una
