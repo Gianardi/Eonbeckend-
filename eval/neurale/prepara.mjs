@@ -35,6 +35,7 @@ for (const g of ["frasi-prova-cieca.json", "frasi-giro5.json", "frasi-giro6.json
   Object.values(leggiJson("eval/dati/" + g).mestieri).forEach((m) => m.frasi.forEach(([f, c]) => aggiungiEsame("giri alla cieca 5-14", f, DA_CATEGORIA[c])));
 Object.values(leggiJson("eval/dati/frasi-giro15.json").mestieri).forEach((m) => m.frasi.forEach(([f, c]) => aggiungiEsame("giro 15 (5 scrittori)", f, DA_CATEGORIA[c])));
 if (fs.existsSync(path.join(RADICE, "eval/dati/frasi-giro16.json"))) Object.values(leggiJson("eval/dati/frasi-giro16.json").mestieri).forEach((m) => m.frasi.forEach(([f, c]) => aggiungiEsame("giro 16 (ESAME, 5 scrittori nuovi)", f, DA_CATEGORIA[c])));
+if (fs.existsSync(path.join(RADICE, "eval/dati/frasi-giro17.json"))) Object.values(leggiJson("eval/dati/frasi-giro17.json").mestieri).forEach((m) => m.frasi.forEach(([f, c]) => aggiungiEsame("giro 17 (ESAME FINALE, scrittori nuovi)", f, DA_CATEGORIA[c])));
 const nell_esame = new Set(esame.map((x) => L.norm(x.frase)));
 
 /* ---------- L'allenamento ---------- */
