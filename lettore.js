@@ -157,7 +157,7 @@
   /* Trova giorno e ora, e segna le parole usate */
   function trovaQuando(pp, oggiRif) {
     const oggi = new Date(oggiRif || Date.now()); oggi.setHours(0, 0, 0, 0);
-    const usate = new Set();
+    const usate = new Set(), racconto = new Set();
     let giorno = null, ora = null, fascia = null;
     const piu = (n) => { const d = new Date(oggi); d.setDate(d.getDate() + n); return d; };
     for (let i = 0; i < pp.length; i++) {
@@ -182,6 +182,10 @@
         continue;
       }
       if (n === "giornata" && i > 0 && pp[i - 1].n === "in") { giorno = oggi; usate.add(i - 1); usate.add(i); continue; }
+      /* "stamattina mi ha chiamato Sala e ci vediamo giovedì alle 5": "stamattina" è quando
+         l'ha saputo, il giorno dell'impegno è quello dopo (30/09) */
+      if (/^(?:oggi|stamattina|stamani|stasera|ieri)$/.test(n) && pp.slice(i + 1, i + 5).some((x) => /^(?:ha|ho|hanno|sono|abbiamo)$/.test(x.n))
+        && pp.slice(i + 1).some((x) => GIORNI.includes(x.n) || /^(?:domani|dopodomani|domattina)$/.test(x.n))) { racconto.add(i); continue; }
       if (n === "oggi" || n === "stamattina" || n === "stamani" || n === "stasera" || n === "stanotte") { giorno = oggi; usate.add(i); if (n !== "oggi") fascia = n; }
       else if (n === "domani" || n === "domattina") { giorno = piu(1); usate.add(i); if (n === "domattina") fascia = "mattina"; }
       else if (n === "dopodomani") { giorno = piu(2); usate.add(i); }
@@ -208,7 +212,9 @@
         }
         /* "giovedì 15": il 15 (questo mese o il prossimo), non il primo giovedì */
         const num = pp[i + 1] && /^\d{1,2}$/.test(pp[i + 1].n) ? Number(pp[i + 1].n) : 0;
-        if (num >= 1 && num <= 31 && !(pp[i + 2] && /^(?:euro|€|%|mila|ore|minuti|:)$/.test(pp[i + 2].n))) {
+        // "giovedì 8 e mezza": è l'ora, non il giorno 8 (30/09)
+        const eMezza = pp[i + 2] && pp[i + 2].n === "e" && pp[i + 3] && /^(?:mezza|mezzo|un|quarto|trenta|quindici|dieci|venti|quaranta|quarantacinque)$/.test(pp[i + 3].n);
+        if (num >= 1 && num <= 31 && !eMezza && !(pp[i + 2] && /^(?:euro|€|%|mila|ore|minuti|:)$/.test(pp[i + 2].n))) {
           let d = new Date(oggi.getFullYear(), oggi.getMonth(), num);
           if (d < oggi) d = new Date(oggi.getFullYear(), oggi.getMonth() + 1, num);
           const conMese = pp[i + 2] && MESI.includes(pp[i + 2].n);
@@ -251,12 +257,13 @@
       ora = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
     }
     // "domattina alle sei e mezza", "domani mattina alle 6", "presto alle 5": di mattina (giro 15)
-    const diMattina = pp.some((x) => /^(?:domattina|stamattina|stamani|mattina|mattino|mattinata|alba|presto)$/.test(x.n)) && !pp.some((x) => /^(?:pomeriggio|sera|stasera|serata|notte)$/.test(x.n));
+    const diMattina = pp.some((x, k) => !racconto.has(k) && /^(?:domattina|stamattina|stamani|mattina|mattino|mattinata|alba|presto)$/.test(x.n)) && !pp.some((x) => /^(?:pomeriggio|sera|stasera|serata|notte)$/.test(x.n));
     const diSera = pp.some((x) => /^(?:sera|stasera|serata|pomeriggio)$/.test(x.n)) && !pp.some((x) => /^(?:domattina|stamattina|mattina|mattino|mattinata)$/.test(x.n));
     // L'ora: "alle 11", "ore 11:30", "11:30", "alle 3 e mezza", "alle 15 in punto"
     for (let i = 0; i < pp.length && !ora; i++) {
       // "a mezzogiorno" (giro 7)
-      if (pp[i].n === "mezzogiorno" && !(i > 0 && /^(?:dopo|prima|verso)$/.test(pp[i - 1].n))) { usate.add(i); if (i > 0 && /^(?:a|alle|verso)$/.test(pp[i - 1].n)) usate.add(i - 1); ora = "12:00"; break; }
+      // ("verso mezzogiorno" = 12, 30/09)
+      if (pp[i].n === "mezzogiorno" && !(i > 0 && /^(?:dopo|prima)$/.test(pp[i - 1].n))) { usate.add(i); if (i > 0 && /^(?:a|alle|verso)$/.test(pp[i - 1].n)) usate.add(i - 1); ora = "12:00"; break; }
       // "per le 17", "verso le 9", "entro le 18": come "alle"
       // "verso l'una", "per l'una" (giro 15)
       const lUna = pp[i].n === "una" && i > 1 && pp[i - 1].n === "l" && /^(?:verso|per|entro|dopo|prima|alle)$/.test(pp[i - 2].n);
