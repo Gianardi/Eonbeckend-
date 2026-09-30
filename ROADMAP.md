@@ -439,6 +439,17 @@ sporca, dialetti, chat, anziano, straniero.
 1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
 2. Rete di sicurezza automatica: le prove partono da sole a ogni pacchetto e
    bloccano il merge se qualcosa si rompe (prima di toccare il codice a fondo).
+   **Fatto il 30/09 (mattina):** a ogni PR GitHub fa partire da solo
+   (`.github/workflows/prove.yml`):
+   - tutte le prove (`eval/tutti.sh`, in 4 parti in parallelo);
+   - il modello neurale da solo, che non deve scendere sotto i numeri di oggi
+     (`eval/modello-neurale.test.mjs`);
+   - l'app intera sulle ~4.500 frasi dei giri 5-17 (`eval/prove-frasi.sh`),
+     con un minimo di frasi giuste per ogni giro (`eval/dati/soglie-app.json`).
+
+   La prova delle frasi usa un giorno fisso (29/09), così "giovedì" vuol dire
+   sempre la stessa cosa. Perché blocchi davvero il merge serve una regola su
+   GitHub ("Require status checks" su main), da attivare una volta.
 3. Codice rifatto a catena unica, un cassetto alla volta (prima gli
    appuntamenti): pulizia della frase → **il neurale decide il cassetto** →
    lettura dei dettagli (date, importi, cliente, telefono: un modulo ciascuno) →

@@ -4974,6 +4974,31 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Rete di sicurezza automatica (30/09/2026 mattina, ROADMAP 0b.19 passo 2)
+- `.github/workflows/prove.yml`, su ogni `pull_request`, sui push su `main`
+  e a mano (`workflow_dispatch`):
+  - job `prove`: 4 pezzi in parallelo, `PEZZO=i/4 bash eval/tutti.sh`;
+  - job `frasi`: `bash eval/prove-frasi.sh`;
+  - Playwright 1.56.1 installato con `npm install --no-save` (`node_modules/`
+    è in `.gitignore`), niente segreti.
+- `eval/tutti.sh`: esce con errore se una prova fallisce (o scrive "FAIL").
+- `eval/modello-neurale.test.mjs` + `eval/neurale/soglie.json`: il neurale
+  da solo, per ogni serie, al massimo -1%; il totale non scende mai. Controlla
+  anche peso ≤ 3 MB e velocità ≤ 30 ms a frase. `MODELLO=file` prova un
+  modello nuovo prima di sostituirlo; quello di ieri sera viene bocciato,
+  come deve.
+- `eval/prove-frasi.sh` + `eval/dati/soglie-app.json`: l'app intera, con un
+  minimo esatto di frasi giuste per serie (oggi: giro 15 1036, giro 16 966,
+  giro 17 966…).
+- `frasi-nuove-mestieri.test.js`: giorno fisso `OGGI=2026-09-29T10:00:00`,
+  sia nel server finto (`Date` sostituita) sia nella pagina
+  (`addInitScript`); l'orologio scorre da lì.
+- Trovato così: la protezione `chiedeDiFare` di stanotte bloccava anche
+  "fammi rivedere le foto"; ora esclude vedere/trovare/aprire/cercare/
+  leggere/sentire/avere/mandare (giro 10: 127/127).
+- Da fare una volta su GitHub (Andrea): Settings → Branches → regola per
+  `main` → "Require status checks to pass" → scegliere i controlli "Prove".
+
 ### Il modello neurale: allenamento della notte (30/09/2026, ROADMAP 0b.19)
 - Dati (`eval/neurale/prepara.mjs` → `eval/neurale/dati/`, non nel repo):
   ~55 mila frasi = maestra m01-m40 (~19,7 mila, 40 personaggi) + confini
