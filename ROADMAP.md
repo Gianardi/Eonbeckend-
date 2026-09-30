@@ -65,8 +65,28 @@ cartelle (0b.11). L'orologio dei promemoria in produzione risponde bene
    aperta dalla schermata Home).
 
 **Da fare per Claude, in ordine**
-0. In arrivo (29/09): il socio tester scrive cosa vuole trovare in ogni sezione;
-   Andrea lo manda in un blocco unico, professione per professione → un pacchetto.
+0. Considerazioni del tester Simone (30/09 sera, mandate da Andrea).
+   **Fatto:**
+   - foto dalla galleria, anche più insieme: nella scheda del cliente
+     ("Galleria"), nelle cartelle ("Dalla galleria"), nella pagina Foto (una
+     domanda sola "a quale cliente?" per tutte);
+   - cartelle dentro la scheda del cliente ("+ Cartella": foto e appunti anche
+     nella scheda; non compaiono nella Mente; colonna `cartelle.client_id`,
+     staging e produzione, OK di Andrea);
+   - un appunto va in una cartella solo se la frase la nomina (l'AI metteva
+     appunti in "MD via Roma 37" senza che lui l'avesse detto).
+
+   **In attesa delle sue risposte (Andrea gliele chiede):**
+   - foto di un documento in "Lettera"/"Carta intestata" → EON ne copia lo
+     stile e mostra una fattura d'esempio: voleva archiviarlo? Proposta:
+     tasto chiaro "Copia lo stile da un tuo documento" e l'archivio nel
+     cliente;
+   - eliminare i clienti di prova "non fatto bene": cosa lo blocca (tasto,
+     passaggi, tanti insieme)?
+   - Mente: il pallino (da fare, tocco = fatto) e la penna (appunto,
+     scorri per il cestino) lo confondono; "Chiamare condomina…" finito tra
+     gli appunti invece che tra i da fare. Proposta: stesso gesto per
+     cancellare, spunta "Fatto" visibile, verbi da fare → sempre da fare.
 1. Controllare con Andrea il primo promemoria vero (non ancora provato su
    un telefono vero).
 2. 0b.12 Manuali dell'AI per ogni professione (elettricista, Altra
@@ -621,6 +641,40 @@ sporca, dialetti, chat, anziano, straniero.
        documento", 9 incassi.
    - Il giro 18 ora fa da soglia minima (920) contro i peggioramenti. Da qui
      in avanti non è più cieco: per il prossimo voto onesto servirà un giro 19.
+
+   **Correzioni del giro 18 e giro 19 alla cieca (30/09 sera – 1/10 notte).**
+   - **Codice:**
+     - chiamate, incassi e messaggi a persone fuori rubrica ("ciama el Sergio",
+       "preso 80 euro dal signor Chiabrando", "wa a Didonna…");
+     - "wa a…" / "whatsapp a…" detto chiaro resta un messaggio anche con un'ora dentro;
+     - sfoghi e chiacchiere con "oggi" o "stasera" ("che giornata oggi") vanno a EON
+       che risponde, non diventano un "da fare";
+     - orari: la correzione ("alle 8 e mezza cioè no alle nove"), "invece che alle…",
+       "nove e tre quarti", "h 15", "mezzogiorno e mezza", dialetto ("alle sete de
+       matina", "12 de otobre"), "lunedì dodici ottobre", due impegni in una frase
+       ("alle 8 dal Zanetti e alle 11 dal Tosi", "alle 10 e poi alle 16 due sopralluoghi").
+   - **Modelli dei dettagli (importi) v4:** 11 ruoli, frasi scritte a mano m05 (correzione
+     a metà e poi altre voci) e m06 (sconti in dialetto, percentuali solo in nota). Da
+     soli 378 su 420 (v1: 362 con le regole); nell'app regole + modello a 0,98, nessuna
+     frase rotta.
+   - **Modello dei cassetti:** riallenato con 180 frasi mirate (c18): sistema 8 errori in
+     più del giro 18 ma nell'app peggiora il giro 17 (−7). **Resta quello di ieri notte.**
+     Le frasi mirate e le ~510 frasi di ChatGPT mandate da Andrea (c19-c22, ricontrollate)
+     restano per il prossimo allenamento.
+   - **App con le correzioni:** giro 15 1.051 (+1), 16 1.035 (+2), 17 1.035 (=),
+     **18 941 (+21)**; giri 5-14 uguali.
+   - **Giro 19 alla cieca** (5 scrittori nuovi: impresa edile a Cagliari, idraulica a
+     Genova, elettricista a Pescara, amministratore a Bologna, falegname in Val di Non;
+     1.052 frasi salvate prima di misurare, `eval/dati/frasi-giro19.json`): **935 su
+     1.052 (89%)**, 32 all'AI, 85 sbagliate. Il giro 18 al primo colpo era all'86%.
+     - Nota onesta: la prova automatica degli importi legge tutti i giri, quindi 4-5
+       frasi del giro 19 le ho viste prima della misura (non usate per correggere).
+     - **Dove sbaglia (117):** 48 importi (40 conti sbagliati, 8 preventivi non fatti:
+       restano il punto debole), 12 orari, 57 cassetti (12 domande sui dati, 12
+       chiacchiere o consigli, 9 incassi, 7 "apri/cerca", 6 appunti, 5 spostamenti).
+   - **Prossimo:** importi (la parte più debole: correzioni "950, no scusa 980",
+     acconti e sconti detti in tanti modi), poi un allenamento grande del modello dei
+     cassetti con tutte le frasi nuove.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo

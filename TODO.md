@@ -4999,6 +4999,44 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### Correzioni del giro 18, giro 19, considerazioni del tester (30/09 sera – 1/10, ROADMAP 0b.19 passo 5)
+- `lettore.riscrivi`: `nomeLibero(annuncio)` — per chiamata/messaggio/incasso senza cliente in rubrica,
+  il nome con la maiuscola dopo "chiama/ciama/wa/sms/scrivi" o "da/dal/dalla" (saltando articoli,
+  titoli e mestieri: "al grossista Idrotermica Pugliese"). Decide poi l'app (chiede chi è).
+- `index.html provaModello`: `MESSAGGIO_ESPLICITO` (^wa|whatsapp|sms|manda un wa…) toglie il divieto
+  "da un impegno non si passa a un messaggio" (deciso il 28/09) solo per i messaggi detti chiari;
+  `da_fare` senza ora + modello "domanda/saluto" ≥ 0,97 → al server (risponde EON, niente "da fare").
+- `trovaQuando`: pre-passo `vecchie` (ora seguita da no/anzi/cioè/aspetta/facciamo… e un'altra ora
+  entro 15 parole, senza "poi/dopo"; ora dopo "invece che/di", "anziché") → saltata e tolta dal
+  titolo; "e tre quarti" = :45; marca "h"; "mezzogiorno e mezza"; `sete/oto/diese/undese`; "matina";
+  mesi in dialetto (`MESI_ALTRI`); "12 de/di ottobre"; "lunedì dodici ottobre" (numero a parole solo
+  col mese dopo).
+- `dividi`: separa anche "e alle undici" (ore a parole); "alle 10 e poi alle 16 due sopralluoghi" →
+  due impegni con la stessa cosa da fare (il pezzo fatto solo di "quando" prende il resto del pezzo
+  dopo, se anche quello ha la sua ora).
+- Dettagli v4: `scritte/m05.txt` (correzione a metà + altre voci), `m06.txt` (sconto de/da, percentuali
+  solo in nota = O). 3 semi, 6 epoche, `modello-dettagli.json`. Soglia resta 0,98 (scelta prima di
+  guardare il giro 19: a 0,95 una frase del giro 19 si rompe). `modello-dettagli.test.mjs` MINIMO 420
+  (524 frasi coi giri 8-19). Nota: il test e `verifica.mjs` leggono TUTTI i `frasi-giro*.json`, quindi
+  vedono anche un giro cieco appena aggiunto: per il prossimo giro, misurarlo prima di lanciarli.
+- Modello dei cassetti: `confini/c18.json` (183, errori del giro 18), `c19-c22` (frasi di ChatGPT
+  mandate da Andrea, ricontrollate: "mail con il preventivo" → invio_documento; tolte le ambigue).
+  Riallenato (5 maestri + studente, `prepara.mjs` con giro 18 e 19 nell'esame): da solo uguale (±5),
+  sugli 80 errori di cassetto del giro 18 ne capisce 60 invece di 52, ma nell'app giro 17 −7 →
+  **tenuto il modello di ieri notte**. Le frasi nuove restano per il prossimo allenamento.
+- Giro 19 (`eval/dati/frasi-giro19.json`, istruzioni come il giro 18): 935/1052 al primo colpo.
+  Soglie app: 15→1051, 16→1035, 17→1035, 18→941, 19→935.
+- Tester (Simone): `galleriaFotoInput` (multiple, senza capture) + `caricaPiuFoto(files, clienteId,
+  {cartellaId})` (caricamento silenzioso, un avviso solo; senza cliente `apriTagFotoCantiere(prima,
+  altre)` e `collegaAncheLeAltre` per collegarle tutte con una risposta); `cantiereFotoInput` multiple.
+  Cartelle del cliente: `cartelle.client_id` (migrazione `supabase/cartelle_cliente.sql`, policy con
+  controllo del proprietario del cliente), `cartelleVisibili()` senza quelle dei clienti, sezione
+  "Cartelle" nella scheda (`#scCartelle`), appunti e foto nella cartella prendono anche `client_id`.
+  Server `crea_appunto`: la cartella scelta dall'AI vale solo se le sue parole sono nella frase
+  (`ctx.testoUtente`). Prove: `foto-galleria-app`, `cartelle-cliente-app`, `appunto-cartella`.
+- `clienti-frasi.test.mjs`: "assemblea … giovedì" falliva di giovedì (anche su main): ora il giorno
+  detto non è mai oggi.
+
 ### Passo 4, il modello dei dettagli: gli importi (30/09/2026, ROADMAP 0b.19)
 - **Cosa fa:** per ogni numero di un preventivo o fattura dice il ruolo: O (niente:
   indirizzi, misure, date, IVA, telefoni), QTA, PRZ (prezzo a pezzo), TOT (totale di una
