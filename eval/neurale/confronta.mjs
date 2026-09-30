@@ -9,7 +9,7 @@ const RADICE = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..
 const L = require(path.join(RADICE, "lettore.js"));
 const N = require(path.join(RADICE, "neurale.js"));
 L.caricaModello(JSON.parse(fs.readFileSync(path.join(RADICE, "modello-eon.json"), "utf8")));
-N.carica(JSON.parse(fs.readFileSync(path.join(RADICE, "modello-neurale.json"), "utf8")));
+N.carica(JSON.parse(fs.readFileSync(process.env.NEURALE || path.join(RADICE, "modello-neurale.json"), "utf8")));
 const DA_CATEGORIA = { calendario: "calendario", calendario_modifica: "calendario_modifica", documento: "documento", risorsa: "cerca_documento", foto: "cerca_documento", foto_scatta: "foto",
   mente: "mente", cliente: "cliente", messaggio: "messaggio", email: "email", chiamata: "chiamata", dati: "dati", cartella: "cartella", invio: "invio_documento", ai: "domanda",
   incasso: "incasso", urgenza: "urgenza", sal: "sal", dico: "dico", assemblea: "assemblea", risposta: "saluto" };
