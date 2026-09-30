@@ -28,7 +28,7 @@ SEME = int(os.environ.get("SEME", "7"))
 random.seed(SEME); np.random.seed(SEME); torch.manual_seed(SEME)
 torch.set_num_threads(int(os.environ.get("THREADS", "4")))
 
-RUOLI = ["O", "QTA", "PRZ", "TOT", "ANN", "PERC", "BASE", "SCO", "SCOV"]
+RUOLI = ["O", "QTA", "PRZ", "TOT", "ANN", "PERC", "BASE", "SCO", "SCOV", "MOLT", "FIN"]
 R = {r: i for i, r in enumerate(RUOLI)}
 leggi = lambda f: [json.loads(r) for r in open(f) if r.strip()]
 allena = [x for f in FILE for x in leggi(f)]

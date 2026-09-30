@@ -1,0 +1,41 @@
+# Frasi scritte a mano (quarta serie, 30/09 sera): sconti in tutti i modi, acconti già dati,
+# "per N mesi", prezzo finale, quantità doppie, misure dentro la frase, ore e mezza.
+# MOLT moltiplica la voce prima · FIN prezzo finale detto · SCOV anche l'acconto già dato da togliere
+preventivo per la signora Rinaldi imbiancatura 1.800{TOT} e stucco 400{TOT}, fagli uno sconto di 100{SCOV}
+fattura Galli riparazione tetto 2.600{TOT} meno l'acconto che mi ha già dato di 1.000{SCOV}
+fattura al condominio Glicine per il saldo, erano 5.000{TOT} e mi hanno già dato 2.000{SCOV} di acconto
+fai la fattura a Ferri per il bagno 6.800{TOT} tolto l'acconto di 3.000{SCOV} già versato
+preventivo pulizie ufficio Moro 300{PRZ} euro al mese per 12{MOLT} mesi
+preventivo manutenzione giardino villa Bassi 180{PRZ} al mese per 6{MOLT} mesi più potatura 250{TOT}
+preventivo assistenza caldaie per l'hotel 90{PRZ} a caldaia, sono 8{QTA} caldaie, all'anno per 3{MOLT} anni
+preventivo gestione condominio Pini 20{QTA} unità a 15{PRZ} euro al mese per 12{MOLT} mesi
+fattura noleggio ponteggio 450{PRZ} a settimana per 3{MOLT} settimane
+preventivo per il bar Sole, cucina 8.200{TOT}, banco 3.100{TOT}, però fagli un prezzo finale di 10.500{FIN}
+preventivo Donati bagno completo 4.300{TOT} più sanitari 900{TOT}, facciamo tutto 5.000{FIN}
+fattura Longo 1.280{TOT}, arrotonda a 1.250{FIN}
+preventivo per la villa Riva 3{QTA} giorni x 2{QTA} operai a 220{PRZ} al giorno a testa più materiale 600{TOT}
+fattura Colombo 2{QTA} persone per 5{QTA} ore a 32{PRZ} l'ora
+preventivo scavo 4{QTA} giornate con 2{QTA} operai a 200{PRZ} a giornata
+preventivo per la Neri muretto 12{QTA} metri alto 1 e 20 a 85{PRZ} al metro
+preventivo tende per l'hotel 6{QTA} finestre da 2 metri e 40 a 160{PRZ} a finestra
+preventivo colonnina da 7,4 kW 950{TOT} e cavo 20{QTA} metri a 5{PRZ}
+preventivo cappotto 150{QTA} metri quadri spessore 10 centimetri a 58{PRZ}
+fattura Villa un ora e mezza{QTA} di lavoro a 40{PRZ} più materiale 25{TOT}
+fattura Marini due ore e mezza{QTA} a 36{PRZ} l'ora
+fattura per Gatti 4{ANN} ore a 38{PRZ}, anzi mettine 5{QTA}
+fattura per il condominio Aurora compenso 1.200{TOT} meno 60{SCOV} che avevo sbagliato il riparto
+preventivo per il comune, il 3{PERC}% su 60.000{BASE} di lavori per la direzione
+fattura SAL al 40{PERC} per cento sul contratto da 25.000{BASE}
+fattura al condominio Magnolie il 2{PERC}% sui 90.000{BASE} euro dei lavori straordinari
+preventivo tapparelle per la signora Rota, tre{QTA} a 350{PRZ} l'una, col cinque{SCO} per cento di sconto
+preventivo mobili per l'ufficio Gatti 3.400{TOT} con il dieci{SCO} per cento di sconto
+preventivo divano 1.100{TOT} sconto del quindici{SCO} per cento
+fattura Sala 780{TOT}, levaci 30{SCOV} euro
+preventivo per la pizzeria 2{QTA} forni a 3.200{PRZ} e togli il 5{SCO}% sul totale
+preventivo Rizzi 14{QTA} punti luce a 50{PRZ} e 8{QTA} prese a 40{PRZ}, sconto 70{SCOV} euro
+fattura veloce Pagano 950{TOT} ma gli ho già preso 300{SCOV} in contanti
+preventivo per il ristorante: 40{QTA} sedie a 55{PRZ}, 10{QTA} tavoli a 190{PRZ}, alla fine gli faccio 3.900{FIN}
+preventivo manutenzione estintori 25{QTA} estintori a 18{PRZ} all'anno per 2{MOLT} anni
+fattura condominio Rose, pulizia scale 220{PRZ} al mese per 3{MOLT} mesi luglio agosto settembre
+preventivo per la famiglia Rota trasloco 2{QTA} viaggi a 380{PRZ} a viaggio, facciamo 700{FIN} tondi
+fattura Bruno 3{QTA} uscite a 60{PRZ} e 2{ANN} ore e mezza no metti 3{QTA} ore a 35{PRZ}
