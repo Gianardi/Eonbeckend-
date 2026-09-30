@@ -1324,7 +1324,9 @@
      Belvedere lavori 2026", "crea una cartella per i lavori del tetto… chiamala Tetto Parco Verde" */
   function leggiCartella(testoOriginale) {
     const t = String(testoOriginale || "").replace(/\s+/g, " ").trim().replace(/[.!]+$/, "");
-    if (!/\b(?:crea|creami|fai|fammi|aggiungi|aggiungimi|apri|aprimi|nuova|metti)\b/i.test(t) || !/\bcartell[ae]\b/i.test(t)) return null;
+    if (!/\b(?:crea|creami|fai|fammi|aggiungi|aggiungimi|apri|aprimi|nuova)\b/i.test(t) || !/\bcartell[ae]\b/i.test(t)) return null;
+    // "metti in cartella Scadenze pagare F24": una nota IN una cartella, non una cartella nuova
+    if (/\b(?:in|nella|dentro\s+la|sulla)\s+cartella\b/i.test(t)) return null;
     let m = t.match(/\b(?:chiamala|chiamata|che\s+si\s+chiama|di\s+nome|col\s+nome|con\s+(?:il\s+)?nome)\s*:?\s+(.+)$/i)
       || t.match(/\bcartella(?:\s+nuova)?\s*:\s*(.+)$/i)
       || t.match(/\bcartella(?:\s+nuova)?\s+(?:per\s+(?:il|la|i|le|gli|lo)?\s*|di\s+|del\s+|della\s+)?(.+)$/i);

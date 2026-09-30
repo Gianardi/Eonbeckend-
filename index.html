@@ -16003,7 +16003,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        Sicurezza cantieri", "…che si chiama…", "…chiamala Tetto Parco Verde") */
     if(testo && !inCorso && !inContinuazione && cassettoNeurale(testo) === "cartella"){
       const lc = EonLettore.leggiCartella(testo);
-      if(lc && await provaCreaCartella("crea cartella " + lc.nome)){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "cartella_neurale"); return; }
+      // il nome comincia con una cartella che c'è già ("Scadenze pagare F24"): è una nota, non una cartella
+      const giaC = lc && cartelle.some(c => { const a = normalizzaComando(c.nome), b = normalizzaComando(lc.nome); return b !== a && b.startsWith(a + " "); });
+      if(lc && !giaC && await provaCreaCartella("crea cartella " + lc.nome)){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "cartella_neurale"); return; }
     }
     if(testo && !inCorso && !inContinuazione && await provaCreaCartella(testo)){
       campo.value = "";

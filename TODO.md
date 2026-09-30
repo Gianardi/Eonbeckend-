@@ -4991,6 +4991,11 @@ ROADMAP 0b.11.
     cartella, bonifico…) → null: "manda un feedback: il calendario è lento"
     resta al feedback (l'aveva preso la prima versione, trovato da
     `azioni-dirette.test.js`).
+- **Cartelle:** "metti in cartella Scadenze pagare F24 il 16" è una nota nella
+  cartella Scadenze, non una cartella nuova (trovato dalla CI,
+  `utente-virtuale-mestieri.test.js`): `leggiCartella` vuole crea/fai/nuova/
+  aggiungi/apri (non "metti") e salta "in/nella cartella"; l'app salta un nome
+  che comincia con una cartella che c'è già.
 - **DiCo:** il cassetto vuole un cliente trovato o una richiesta (serve, fai,
   prepara, compila…): "dichiarazioni di conformità" da solo resta il nome
   della pagina (trovato da `apri-col-codice.test.js`).
