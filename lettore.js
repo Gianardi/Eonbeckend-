@@ -1088,13 +1088,17 @@
     const tempi = tempiDetti(pp, oggi);
     const usateTempo = new Set();
     tempi.forEach((t) => { for (let k = t.i; k < t.i + 6 && k < pp.length; k++) if (INIZIO_TEMPO.test(pp[k].n) || /^\d/.test(pp[k].n) || numeroParola(pp[k].n) !== null) usateTempo.add(k); });
-    // Le parole che dicono QUALE impegno (cliente, lavoro, posto)
-    const piene = pp.filter((x, k) => !usateTempo.has(k) && x.n.length >= 3 && !VUOTE.has(x.n) && !PAROLE_NON_NOME.test(x.n) && numeroParola(x.n) === null).map((x) => x.n);
     const giornoDi = (iso) => String(iso || "").slice(0, 10), oraDi = (iso) => String(iso || "").slice(11, 16);
-    // Per riconoscere l'impegno contano i tempi detti PRIMA del verbo che cambia
-    // ("il dentista di sabato | anticipalo alle 9": sabato sì, le 9 no, sono l'orario nuovo)
+    // Per riconoscere l'impegno contano le parole e i tempi detti PRIMA del verbo che cambia
+    // ("l'hotel di sabato | anticipalo alle 7 e mezza che devono liberare le camere": le 7 e
+    // mezza sono l'orario nuovo, "le camere" il motivo). Col verbo in testa ("rimanda la
+    // verifica di Brambilla a venerdì") le parole fino al motivo ("che…", "perché…").
     const iVerbo = pp.findIndex((x) => VERBO_CAMBIO.test(x.n));
-    const tempiRiconosci = iVerbo > 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i < iVerbo) : tempi;
+    const iMotivo = pp.findIndex((x, k) => k > Math.max(0, iVerbo) && /^(?:che|perche|siccome|cosi|visto)$/.test(x.n));
+    const [da, a] = iVerbo > 0 ? [0, iVerbo] : [0, iMotivo > 0 ? iMotivo : pp.length];
+    const tempiRiconosci = iVerbo >= 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i < iVerbo) : tempi;
+    // Le parole che dicono QUALE impegno (cliente, lavoro, posto)
+    const piene = pp.filter((x, k) => k >= da && k < a && !usateTempo.has(k) && x.n.length >= 3 && !VUOTE.has(x.n) && !PAROLE_NON_NOME.test(x.n) && numeroParola(x.n) === null).map((x) => x.n);
     const punteggi = (impegni || []).map((imp) => {
       const suo = norm((imp.titolo || "") + " " + (imp.chi || "")).split(" ");
       const radice = (w) => w.slice(0, Math.max(4, w.length - 2));
@@ -1105,7 +1109,7 @@
       p += 0.01 * (piene.filter((w) => suo.includes(w)).length / Math.max(1, suo.length));
       const parole = p;
       tempiRiconosci.forEach((t) => {
-        if (t.giornoIso && t.giornoIso === giornoDi(imp.iso)) p += 2;
+        if (t.giornoIso && t.giornoIso === giornoDi(imp.iso)) p += 4; // il giorno detto pesa più di una parola
         if (t.ora && t.ora === oraDi(imp.iso)) p += 2;
       });
       return { imp, p, parole };
