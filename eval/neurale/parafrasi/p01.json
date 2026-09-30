@@ -1,0 +1,244 @@
+{
+"stile": "telegrafico",
+"frasi": [
+["impianto Ricci vecchio, prima o poi rifarlo", "mente"],
+["Bortolin impianto vecchissimo, da rifare prima o poi", "mente"],
+["nota: caldaia Ferri decrepita, prima o poi cambiarla", "mente"],
+
+["ok grazie", "saluto"],
+["perfetto, grazie", "saluto"],
+["ricevuto, grazie EON", "saluto"],
+
+["SAL settembre Zuliani Costruzioni", "sal"],
+["SAL ottobre impresa Moretti", "sal"],
+["stato avanzamento lavori Edilcasa agosto", "sal"],
+
+["messaggio marito Sorrentino, acconto", "messaggio"],
+["WhatsApp al Capuano per l'acconto", "messaggio"],
+["scrivi Lorenzi, sollecito acconto", "messaggio"],
+
+["Kone al telefono", "chiamata"],
+["telefona Schindler", "chiamata"],
+["chiamata Otis subito", "chiamata"],
+
+["ricordami venerdì ferramenta Pieraccini guarnizioni", "calendario"],
+["promemoria martedì: ferramenta, guarnizioni", "calendario"],
+["ricordami lunedì 9 fornitore Bonetti, raccordi", "calendario"],
+
+["foto crepa via Manin, trovamele", "cerca_documento"],
+["dove sono foto muro crepato Bassi", "cerca_documento"],
+["cerca foto facciata via Roma", "cerca_documento"],
+
+["Vaccaro spostalo al 12 ottobre", "calendario_modifica"],
+["sposta Dini a martedì 15", "calendario_modifica"],
+["Ferretti rimandato a lunedì 20", "calendario_modifica"],
+
+["fattura Mancinelli cancelletto 1600 più iva", "documento"],
+["fattura Gori cancello 2.300", "documento"],
+["Rossi preventivo bagno 3000", "documento"],
+
+["dico colonna montante condominio Aurora", "dico"],
+["conformità impianto elettrico Bianchi", "dico"],
+["dichiarazione conformità caldaia Neri", "dico"],
+
+["convoca assemblea, ringhiera scale", "assemblea"],
+["assemblea condominio Gelsi, lavori scale", "assemblea"],
+["convocazione assemblea via Po, ascensore", "assemblea"],
+
+["allagamento caldaia parrocchia San Martino", "urgenza"],
+["cantina Ferri allagata", "urgenza"],
+["tubo scoppiato bar Centrale", "urgenza"],
+
+["Canepa da domani a giovedì, stessa ora", "calendario_modifica"],
+["sposta Rota da domani a venerdì 9", "calendario_modifica"],
+["appuntamento Galli giovedì invece di domani", "calendario_modifica"],
+
+["cancello automatico impazzito, apre chiude da solo", "urgenza"],
+["cancello Moretti bloccato aperto, guasto", "urgenza"],
+["serranda negozio Bassi bloccata, guasto", "urgenza"],
+
+["revisione caldaia ogni quanto?", "domanda"],
+["controllo fumi caldaia, ogni quanto?", "domanda"],
+["libretto caldaia, come funziona?", "domanda"],
+
+["divani rifatti quest'anno, quanti?", "dati"],
+["quanti bagni fatti nel 2026?", "dati"],
+["lavori chiusi a settembre, quanti?", "dati"],
+
+["preventivo Maugeri clima più caldaia 3200", "documento"],
+["preventivo Conti split 12000 btu 1800", "documento"],
+["preventivo Lodi caldaia, totale 2.900", "documento"],
+
+["dico bagno Venturini, idrico, allegati", "dico"],
+["conformità idraulica dottor Sala, con allegati", "dico"],
+["DiCo impianto idrico villa Moro", "dico"],
+
+["conformità aspirazione centralizzata Studio Bertozzi", "dico"],
+["dico aspirazione studio Bertozzi", "dico"],
+["dichiarazione conformità impianto gas Pozzi", "dico"],
+
+["mail amministratori, auguri Natale anticipati", "email"],
+["email a tutti gli amministratori, auguri", "email"],
+["mail auguri Natale ai clienti", "email"],
+
+["SAL: controsoffitto sala trucco finito", "sal"],
+["nel SAL muratore finito tramezzi", "sal"],
+["avanzamento lavori: intonaci finiti cantiere Bassi", "sal"],
+
+["ceduta ringhiera balcone via Washington", "urgenza"],
+["crollato cornicione via Verdi", "urgenza"],
+["balcone Rossi, parapetto ceduto", "urgenza"],
+
+["mail condòmini Morgagni, nuovo codice portone", "email"],
+["email inquilini via Dante, codice cancello cambiato", "email"],
+["mail ai condòmini: portone nuovo codice", "email"],
+
+["avanzamento lavori cantiere Madeo", "sal"],
+["SAL Madeo Rossano", "sal"],
+["fammi SAL cantiere Carbone", "sal"],
+
+["assegno Ferraro quanto era?", "dati"],
+["bonifico Lanza, che cifra era?", "dati"],
+["quanto mi ha dato Ferraro?", "dati"],
+
+["preventivo bar Onnis, dov'è?", "cerca_documento"],
+["trova preventivo pizzeria Melis", "cerca_documento"],
+["fattura Onnis, non la trovo", "cerca_documento"],
+
+["Cominelli disdetto, togli giovedì", "calendario_modifica"],
+["cancella Rota di venerdì", "calendario_modifica"],
+["Bianchi annullato domani, levalo", "calendario_modifica"],
+
+["trova preventivo deposito Menis", "cerca_documento"],
+["apri fattura Menis", "cerca_documento"],
+["preventivo Zanon di marzo, dov'è?", "cerca_documento"],
+
+["giovedì 7 caricare trapano a colonna", "calendario"],
+["ricordami domani 6 batterie avvitatore", "calendario"],
+["sabato 8 caricare furgone", "calendario"],
+
+["furgone nuovo, scaricabile tutto?", "domanda"],
+["IVA furgone detraibile tutta?", "domanda"],
+["auto aziendale, deducibile al 100?", "domanda"],
+
+["preventivo tetto Toffolo, cifre dopo", "documento"],
+["preventivo Zanin grondaie, prezzi poi", "documento"],
+["fai preventivo tetto Marchi", "documento"],
+
+["700 da Olivieri, incassati", "incasso"],
+["Olivieri pagato 700", "incasso"],
+["Bassi saldato, 1200 contanti", "incasso"],
+
+["convocazione assemblea, scelta impresa facciata", "assemblea"],
+["assemblea condominio Giglio, preventivi facciata", "assemblea"],
+["convoca assemblea: facciata, Colombo o Bianchi", "assemblea"],
+
+["rimanda preventivo aggiornato Mariani, IVA corretta", "invio_documento"],
+["manda nuovo preventivo alla Mariani", "invio_documento"],
+["invia a Serra fattura corretta", "invio_documento"],
+
+["assemblea condomini Alzano, lavori tetto", "assemblea"],
+["segna assemblea condominio Pini, tetto", "assemblea"],
+["assemblea straordinaria via Monti, voto tetto", "assemblea"],
+
+["foto lavoro fatto", "foto"],
+["scatta foto quadro finito", "foto"],
+["foto cucina montata", "foto"],
+
+["passami Queirolo", "chiamata"],
+["chiama Queirolo", "chiamata"],
+["Queirolo al telefono", "chiamata"],
+
+["foto contatore in cartella Deiana", "cartella"],
+["metti foto quadro nella cartella Sanna", "cartella"],
+["contatore Deiana, nella sua cartella", "cartella"],
+
+["WhatsApp Dallapiccola: sabato ok, solo mattina", "messaggio"],
+["rispondi Dallapiccola, sabato mattina sì", "messaggio"],
+["messaggio Tonini: domenica no, lunedì sì", "messaggio"],
+
+["foto ponteggio fronte strada", "foto"],
+["fotografa facciata nord", "foto"],
+["scatta ponteggio cortile", "foto"],
+
+["Ecofriuli, chiamali", "chiamata"],
+["chiama Hera", "chiamata"],
+["telefono Acegas", "chiamata"],
+
+["nuovo cliente Sergio Mancini, via Garibaldi 40", "cliente"],
+["cliente nuovo: Mancini e moglie, Garibaldi 40", "cliente"],
+["aggiungi cliente Luca Ferri, via Roma 12", "cliente"],
+
+["foto muffa in cartella Cominelli", "cartella"],
+["sposta foto muffa, cartella Cominelli", "cartella"],
+["metti foto crepe nella cartella Ruggeri", "cartella"],
+
+["scrivi Gino pizzeria: cappa appena arriva motore", "messaggio"],
+["messaggio Gino: motore cappa in arrivo", "messaggio"],
+["SMS Gino, cappa sistemo presto", "messaggio"],
+
+["manda Tosolini seconda fattura acconto", "invio_documento"],
+["invia a Tosolini fattura acconto", "invio_documento"],
+["Tosolini, mandagli anche seconda fattura", "invio_documento"],
+
+["la Rinaldi", "cliente"],
+["scheda signora Rinaldi", "cliente"],
+["apri cliente Martini", "cliente"],
+
+["mail banca: bonifico Galbiati non arrivato", "email"],
+["email banca, bonifico Galbiati mancante", "email"],
+["scrivi mail alla banca, bonifico Riva", "email"],
+
+["domani 7 trasloco Tonutti Codroipo", "calendario"],
+["Tonutti trasloco domani 7, con Ivan e Nevio", "calendario"],
+["sabato 8 trasloco Bressan, terzo piano", "calendario"],
+
+["Pulvirenti acconto 300", "incasso"],
+["acconto 300 da Pulvirenti", "incasso"],
+["Bellini dato acconto 500", "incasso"],
+
+["Fabbri Mario", "cliente"],
+["scheda Fabbri", "cliente"],
+["cliente Lucchesi", "cliente"],
+
+["incassato acconto 30% Santo Spirito", "incasso"],
+["parrocchia Santo Spirito, acconto pagato", "incasso"],
+["segna incasso parrocchia, acconto 30 per cento", "incasso"],
+
+["gelateria Polo Nord chiusa il lunedì", "mente"],
+["nota: bar Sport chiuso il martedì", "mente"],
+["appunto: ferramenta Rossi chiusa il sabato", "mente"],
+
+["stasera impegni dopo le otto?", "dati"],
+["domani mattina sono libero?", "dati"],
+["venerdì cosa ho?", "dati"],
+
+["preventivo Pace, mandaglielo", "invio_documento"],
+["rimanda a Pace preventivo settimana scorsa", "invio_documento"],
+["invia Pace preventivo vecchio", "invio_documento"],
+
+["ferro per solaio da 20, quanto?", "domanda"],
+["quanto cemento per massetto 5 cm?", "domanda"],
+["armatura solaio 24, quanti chili?", "domanda"],
+
+["grazie infinite", "saluto"],
+["grazie mille", "saluto"],
+["grazie, gentilissimo", "saluto"],
+
+["a posto così", "saluto"],
+["tutto ok, grazie", "saluto"],
+["va bene, ciao", "saluto"],
+
+["comprare borsa gimbal", "mente"],
+["da comprare: punte trapano", "mente"],
+["prendere guanti nuovi", "mente"],
+
+["foto sezionatore", "foto"],
+["foto al contatore", "foto"],
+["scatta quadro elettrico", "foto"],
+
+["cartella cantiere Nervi", "cartella"],
+["nuova cartella Nervi", "cartella"],
+["crea cartella lavori Bassi", "cartella"]
+]
+}
