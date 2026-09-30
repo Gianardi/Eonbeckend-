@@ -5009,6 +5009,16 @@ ROADMAP 0b.11.
   104 frasi del giro 16 che l'app sbaglia o passa all'AI, il neurale da solo
   ne capisce il cassetto giusto 90 (giro 17: 88 su 94). È il lavoro del passo
   3 (il neurale decide il cassetto, poi i dettagli).
+- App (`provaModello` in `index.html`): `chiedeDiFare(testo)` blocca
+  `cerca_documento` per "fammi/fai/prepara/crea/scrivi/compila…" (anche in
+  `chiediCosaFare`); da una nota a `urgenza` solo con p ≥ 0,9 (bloccarlo del
+  tutto costava ~8 emergenze vere per giro). Finale: suite 70/70; giro 16
+  app 964, giro 17 app 965; giro 5 184/186 (2 note → urgenza: "messa a terra
+  non c'è", "muro portante").
+- La prova delle app (`frasi-nuove-mestieri.test.js`) usa la data vera: dal
+  30/09 "sposta … a giovedì alle 9" (giro 10, prova cieca) risulta sbagliata
+  anche col modello di prima (le frasi sono scritte per il 29/09). Da fissare
+  con una data finta nella prova.
 - Limite noto: "apri la scheda di X" nell'esame è `cerca_documento`
   (risorsa), nella maestra è `cliente`: 5 errori della palestra vengono da qui,
   da decidere nel passo 3 insieme all'esecutore.

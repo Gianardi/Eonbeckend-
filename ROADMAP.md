@@ -423,6 +423,18 @@ sporca, dialetti, chat, anziano, straniero.
   che l'app sbaglia per giro, il modello da solo ne capirebbe il cassetto
   giusto circa 90. Questo si prende col passo 3 qui sotto.
 
+**Protezioni aggiunte nell'app:**
+- "Fammi un documento per il DURC" non apre il DURC che c'è già.
+- Un appunto diventa urgenza solo se il modello è sicuro almeno al 90%. Bloccare
+  del tutto faceva perdere emergenze vere dette senza "urgente" ("odore
+  fortissimo di gas nel vano scala").
+
+**Resta:** nel giro 5, 2 appunti tranquilli su 186 sono segnati come urgenti
+("la messa a terra non c'è").
+
+**Prove:** 70 prove su 70 passano; giri vecchi uguali o +1 (tranne il giro 5,
+-2).
+
 **La strada, in ordine:**
 1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
 2. Rete di sicurezza automatica: le prove partono da sole a ogni pacchetto e
