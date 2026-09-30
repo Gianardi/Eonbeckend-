@@ -13337,6 +13337,7 @@ function rispondiSuiDati(l){
    Una domanda o un saluto che le regole mettevano nella Mente va invece a
    chi risponde. Mai due volte di fila (niente giri a vuoto). */
 const SOGLIA_NEURALE = 0.9;
+const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b/i.test(String(testo || ""));
 function provaModello(l, testo, arbitro){
   if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
   // "aggiungi in EON queste foto", "segna in Fornitori…": una cartella che c'è, la gestisce la sua funzione
@@ -13345,6 +13346,8 @@ function provaModello(l, testo, arbitro){
   const ctx = contestoLettore();
   const r = EonLettore.classifica(testo, ctx);
   if(!r) return null;
+  // chi chiede di FARE qualcosa ("fammi un documento per il DURC") non si vede aprire quello che c'è
+  if(r.intento === "cerca_documento" && chiedeDiFare(testo)) return null;
   /* Il modello neurale decide il cassetto (30/09/2026, come le grandi app): se è
      sicurissimo e le regole dicono un'altra cosa, vince lui e la frase si riscrive
      nella forma di quel cassetto. Tranne i casi delicati: mai da un'azione a
@@ -13383,6 +13386,8 @@ function provaModello(l, testo, arbitro){
   }
   if(r.p < 0.85) return null;
   if(/^(?:mente|cartella|calendario|documento|dati)$/.test(r.intento)) return null; // quelli li leggono già le regole
+  // Come sopra: un appunto non diventa un allarme rosso (le urgenze le riconosce il codice)
+  if(r.intento === "urgenza" && l && l.azione === "mente") return null;
   if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" ? { alServer: true, intento: r.intento } : null;
   // Scrivere a un cliente partendo da una nota: solo se il modello è sicurissimo (e il messaggio chiede sempre conferma)
   if((r.intento === "messaggio" || r.intento === "email") && l && l.azione === "mente" && r.p < 0.95) return null;
@@ -13409,6 +13414,7 @@ function chiediCosaFare(testo, viaVoce, rifai){
   const scelte = [];
   [[r.intento, r.p], [r.secondo, r.p2]].forEach(([intento, p]) => {
     if(!intento || p < 0.15 || !COSA_FARE[intento] || scelte.some(x => x.intento === intento)) return;
+    if(intento === "cerca_documento" && chiedeDiFare(testo)) return;
     if(intento === "mente"){ scelte.push({ intento, etichetta: COSA_FARE.mente, valore: "mente" }); return; }
     const x = EonLettore.riscrivi(intento, testo, ctx);
     if(!x || EonLettore.norm(x) === EonLettore.norm(testo)) return;
