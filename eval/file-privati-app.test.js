@@ -67,7 +67,8 @@ async function main() {
 
     // Apri un documento
     await page.evaluate((PUB) => apriFile(PUB + "u1/altro-documento.pdf"), PUB);
-    await page.waitForTimeout(200);
+    // aspetta il link firmato (non un tempo fisso: sui computer lenti arriva dopo)
+    await page.waitForFunction(() => window.__finestre.length && window.__finestre[0].location.href, null, { timeout: 3000 }).catch(() => {});
     let fin = await page.evaluate(() => window.__finestre.map((w) => ({ url: w.url, href: w.location.href })));
     verifica("\"Apri\" un documento: finestra aperta subito, poi il link firmato", fin.length === 1 && fin[0].url === "" && fin[0].href === firma(PUB + "u1/altro-documento.pdf"), JSON.stringify(fin));
 
@@ -78,7 +79,7 @@ async function main() {
       document.body.appendChild(riga);
       riga.querySelector('[data-canale="WhatsApp"]').click();
     }, PUB);
-    await page.waitForTimeout(250);
+    await page.waitForFunction(() => window.__finestre.length && window.__finestre[0].location.href, null, { timeout: 3000 }).catch(() => {});
     fin = await page.evaluate(() => window.__finestre.map((w) => w.location.href));
     verifica("foto mandata su WhatsApp: nel messaggio un link che vale 7 giorni", fin.length === 1 && decodeURIComponent(fin[0]).includes(firma(PUB + "u1/cantiere/foto/bagno.jpg", "condivisione")) && decodeURIComponent(fin[0]).includes("Il lavabo"), JSON.stringify(fin));
 

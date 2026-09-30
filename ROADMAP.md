@@ -439,6 +439,17 @@ sporca, dialetti, chat, anziano, straniero.
 1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
 2. Rete di sicurezza automatica: le prove partono da sole a ogni pacchetto e
    bloccano il merge se qualcosa si rompe (prima di toccare il codice a fondo).
+   **Fatto il 30/09 (mattina):** a ogni PR GitHub fa partire da solo
+   (`.github/workflows/prove.yml`):
+   - tutte le prove (`eval/tutti.sh`, in 4 parti in parallelo);
+   - il modello neurale da solo, che non deve scendere sotto i numeri di oggi
+     (`eval/modello-neurale.test.mjs`);
+   - l'app intera sulle ~4.500 frasi dei giri 5-17 (`eval/prove-frasi.sh`),
+     con un minimo di frasi giuste per ogni giro (`eval/dati/soglie-app.json`).
+
+   La prova delle frasi usa un giorno fisso (29/09), così "giovedì" vuol dire
+   sempre la stessa cosa. Perché blocchi davvero il merge serve una regola su
+   GitHub ("Require status checks" su main), da attivare una volta.
 3. Codice rifatto a catena unica, un cassetto alla volta (prima gli
    appuntamenti): pulizia della frase → **il neurale decide il cassetto** →
    lettura dei dettagli (date, importi, cliente, telefono: un modulo ciascuno) →
@@ -447,8 +458,116 @@ sporca, dialetti, chat, anziano, straniero.
    regole che indovinano il cassetto, doppioni app/server; il file unico
    dell'app diviso in file ordinati. Ogni cassetto passa solo se le 3.600 frasi
    etichettate e i test danno risultati uguali o migliori.
+   **Primo cassetto fatto il 30/09: sposta/annulla un impegno.**
+   - Il modello decide che la frase chiede di spostare o annullare.
+   - Il lettore (`leggiModificaImpegno`) legge solo i dettagli: quale impegno
+     (parole e giorno detti prima del verbo) e il nuovo quando (il giorno e
+     l'ora detti diversi da quelli che ha già; "un'ora dopo"; "la settimana
+     prossima").
+   - Le regole di prima restano sotto, come riserva.
+   - Protezioni:
+     - serve una parola di cambio ("Rita domani alle 9 sopralluogo" resta un
+       impegno nuovo);
+     - "annulla la fattura" non tocca il calendario;
+     - due comandi insieme restano alle regole di prima.
+   - Risultati: delle 34 frasi "sposta/annulla" che l'app sbagliava (le
+     segnava come impegni NUOVI) ne sistema 32. Giro 16: 966 → **982**; giro
+     17: 966 → **979**; giro 15: 1036 → 1037; giro 9: 48/48. Nessun giro
+     peggiora; 71 prove su 71.
+   **Secondo cassetto fatto il 30/09: preventivo o fattura.**
+   - Il modello decide.
+   - Il lettore dei documenti di sempre legge la frase ripulita da tre
+     problemi, prima degli altri controllori:
+     - parole storpiate dalla dettatura ("prevendivo", "prevetivo",
+       "fatturami");
+     - "per un nuovo cliente,", che faceva creare solo il cliente;
+     - "24 lampade di emergenza", che finiva tra le urgenze.
+   - Giro 16: 982 → **985**; giro 17: 979 → **983**. Nessun giro peggiora; 71
+     prove su 71.
+   - Restano gli importi letti male (sconti, correzioni "no, metti 15",
+     "30% su 10.000"): sono dettagli, lavoro del passo 4.
+   **Terzo cassetto fatto il 30/09: domande sui tuoi dati.**
+   - Il modello decide che è una domanda sui tuoi dati.
+   - Il lettore (`leggiDomandaDati`) capisce il tema: agenda, soldi di un
+     cliente, chi ti deve, incassi, documenti, appunti di un cliente.
+   - Risponde il codice di sempre, senza AI: "che c'ho domani?", "com'è
+     messa la settimana prossima?", "Ingrassia quanto ha versato?", "chi non
+     mi paga?".
+   - Nuovo: "il preventivo della palestra l'hanno accettato?" mostra i
+     preventivi di quel cliente e dice onestamente che l'accettazione EON non
+     la registra ancora. "Cosa mi ero segnato su Fontana?" apre la sua scheda.
+   - Una o due parole ("pagamenti") restano i nomi delle pagine.
+   - Risultati: giro 15: 1037 → **1041**; giro 16: 985 → **1002**; giro 17:
+     983 → **1000**. Nessun giro peggiora.
+   - **Da stamattina, in tutto: giro 16 da 966 a 1002 (da 90% a 94%), giro
+     17 da 966 a 1000 (da 91% a 94%).**
+   **Altri cassetti fatti il 30/09 (pomeriggio).**
+   - **Appunti:** se il modello è sicuro almeno al 95% va nella Mente (o
+     nella scheda del cliente), non in un "da fare sabato" o in una mail. Le
+     urgenze restano controllate prima. Le frasi con un giorno e i "ricordami
+     di…" restano alle regole di prima.
+   - **Cliente nuovo:** "crea il cliente…", "metti tra i clienti…": nome,
+     telefono e nota dal lettore, creato col codice, con "Annulla".
+   - **SAL:** "siamo a metà", "all'80", "al cinquanta" (`leggiSal`).
+   - **Mandare un documento:** "spedisci al condominio il preventivo…", "il
+     preventivo della palestra mandalo al titolare" (`leggiInvioDocumento`).
+     Con un importo è un documento nuovo e non si tocca.
+   - **Server:** un appuntamento con un cliente non diventa più un appunto.
+     La regola del tempo sbagliava "venerdì" con l'accento, "ore 11" e "20
+     ottobre"; se l'app ha già letto giorno e ora, è un appuntamento.
+   - **Orari:** "verso mezzogiorno"; "giovedì 8 e mezza" è giovedì alle 8:30;
+     "stamattina mi ha chiamato… giovedì alle 5" è giovedì alle 17.
+   - **Assemblea:** il condominio è quello nominato prima del motivo.
+   - **Risultati:** giro 15: 1046; giro 16: **1021 (96%)**; giro 17: **1016
+     (96%)**. Nessun giro peggiora; 71 prove su 71.
+   - **In tutto, da stamattina:** giro 16 da 966 a 1021 (da 90% a 96%), giro
+     17 da 966 a 1016 (da 91% a 96%).
+   **Altri cassetti fatti il 30/09 (sera).**
+   - **Chiamare chi non è in rubrica** ("chiama il grossista", "fammi parlare
+     con l'amministratore Pozzoli", "chiama mia moglie"): prima EON diceva
+     solo "non ho il numero"; ora chiede il numero e prepara la chiamata.
+   - **Messaggi ed email a chi non è cliente o detti a metà** ("manda un
+     messaggio ai ragazzi della squadra domani cantiere ore 7", "avvisa con un
+     whatsapp il ragionier Pozzoli che…", "scrivi al condominio… cioè
+     all'amministratore…", "pec all'avvocato Donati per la messa in mora di
+     Esposito"): il lettore (`leggiDestinatario`) legge a chi e cosa. Il
+     destinatario è quello subito dopo il verbo, non un altro cliente nominato
+     nel testo. Prima finivano nel calendario, nei "da fare" o all'AI.
+   - **Cartelle** ("nuova cartella: Sicurezza cantieri", "…chiamala Tetto
+     Parco Verde"), **dichiarazione di conformità** ("mi serve la di.co. per
+     il condominio via Gramsci"), **assemblee** ("mettimi l'assemblea del
+     Parco Verde… il 10 dicembre alle 21"), **foto** ("fammi una foto al tubo
+     rotto che la mando all'assicurazione": una foto, non un'urgenza).
+   - "Le luci di emergenza da cambiare" non è più un'urgenza; "tieni presente
+     che Fontana il sabato non lavora" è un appunto, non un "da fare sabato".
+   - **Risultati:** giro 15: 1046 → **1050 (99%)**; giro 16: 1021 → **1032
+     (97%)**; giro 17: 1016 → **1032 (97%)**. Nessuna frase che prima era
+     giusta diventa sbagliata.
+   - **In tutto, da stamattina:** giro 16 da 966 a 1032 (da 90% a 97%), giro
+     17 da 966 a 1032 (da 91% a 97%).
+   - **Cosa resta** (circa 35 frasi per giro): dettagli (importi con sconti e
+     correzioni, "giovedì 8", due appuntamenti in una frase, dialetto) → passo
+     4; errori del modello (appunti presi per urgenze, "cerca un documento"
+     invece di "fai la DiCo") → nuovo addestramento; alcune domande sui dati
+     che EON non sa ancora rispondere.
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
+6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
+   il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
+   miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
+   quando serve. I comandi semplici restano ai nostri modelli piccoli (veloci,
+   gratis, dati sul telefono). Chi usa l'app vede solo EON.
+   - **Conversare:** una domanda o un ragionamento (non un comando) riceve una
+     risposta che conosce clienti, appuntamenti e documenti dell'utente.
+   - **Scrivere testi:** email ai clienti, solleciti di pagamento, descrizioni
+     per i preventivi, sempre da confermare prima dell'invio.
+   - **Elaborare documenti:** foto o file di fattura, contratto, computo →
+     dati estratti, riassunto, collegato al cliente giusto.
+   - **Da fare prima:** stimare il costo per utente al mese (costi e prezzi
+     sopra) e mettere un tetto.
+   - **Più avanti, con molti utenti:** valutare un modello aperto (Meta,
+     Mistral) specializzato sui dati di EON, per spendere meno. Oggi scrive
+     peggio di Claude e costa un server potente: non adesso.
 
 ### 0b.18 Addestramento potenziato: 5 scrittori che non conoscono EON — FATTO il 30/09 (notte)
 Andrea: "Facciamo altro addestramento potenziato?". Scelta (sua): **più

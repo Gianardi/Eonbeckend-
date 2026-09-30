@@ -4974,6 +4974,211 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Passo 3, cassetti della sera (30/09/2026, ROADMAP 0b.19)
+- **`lettore.leggiDestinatario(testo, ctx, tipo)`** (tipo = messaggio | email |
+  chiamata) → `{azione: messaggio|email|whatsapp|chiama, nomeDetto, messaggio,
+  oggetto, cliente, candidati, clienteSimile}`:
+  - destinatario = testo dopo l'ULTIMO verbo/canale prima del "che"
+    (manda…, scriv…, avvis…, chiam…, parlare con, whatsapp, mail, pec, sms),
+    tolti "sul gruppo dei / al / all' / il / con…"; il cliente si cerca solo lì;
+  - una correzione prima del "che" ("… cioè", "no aspetta,", "no scusa",
+    "anzi"; lookahead `(?!\p{L})` perché `\b` non va dopo "è") = conta quello
+    che viene dopo;
+  - senza "che" il messaggio comincia a virgola / giorno / "alle" / "ore" /
+    "per"; per l'email "per …" diventa l'oggetto;
+  - "… e poi chiama/manda/fai…" prima del "che" = due comandi → null;
+  - destinatario che non è una persona (feedback, fattura, preventivo, foto,
+    cartella, bonifico…) → null: "manda un feedback: il calendario è lento"
+    resta al feedback (l'aveva preso la prima versione, trovato da
+    `azioni-dirette.test.js`).
+- **Cartelle:** "metti in cartella Scadenze pagare F24 il 16" è una nota nella
+  cartella Scadenze, non una cartella nuova (trovato dalla CI,
+  `utente-virtuale-mestieri.test.js`): `leggiCartella` vuole crea/fai/nuova/
+  aggiungi/apri (non "metti") e salta "in/nella cartella"; l'app salta un nome
+  che comincia con una cartella che c'è già.
+- **DiCo:** il cassetto vuole un cliente trovato o una richiesta (serve, fai,
+  prepara, compila…): "dichiarazioni di conformità" da solo resta il nome
+  della pagina (trovato da `apri-col-codice.test.js`).
+- **Cassetto contatti** (`index.html`, prima delle urgenze): se le regole di
+  prima avevano già letto tutto (stessa azione, destinatario e, per scrivere,
+  il testo) resta come prima; altrimenti `leggiDestinatario` e gli esecutori
+  di sempre (`gestisciChiamata`, `gestisciMessaggio`, `gestisciScrittura`).
+- **`gestisciChiamata` senza cliente:** `domandaDelCodice` chiede il numero,
+  poi la card "Chiama X" con `tel:`. Il numero NON si salva (un fornitore non
+  è un cliente): da decidere se serve una rubrica dei non clienti.
+- **`scriviAChiNonECliente`:** saluto "Ciao a tutti" per ragazzi/gruppo/
+  squadra, "Buongiorno" se c'è solo il titolo (commercialista); titoli in più
+  (ragionier, amministratore); oggetto nel `mailto:`.
+- **`lettore.leggiCartella`**, **`leggiDico`**, **`leggiAssemblea`**
+  (condominio dopo "assemblea" e prima del motivo, `trovaCliente` con
+  `nomeSolo` perché "Aurora" è anche un nome di persona; motivo dopo "per").
+  `gestisciAssemblea(l, invia)` è l'ex `case "assemblea"` di `provaLettore`.
+- **Foto:** cassetto "foto" con "fai/fammi/scatta … foto" prima delle
+  urgenze; soggetto dopo "foto (al/della…)" fino a che/per/virgola, poi
+  `provaFotoImmediata("fai foto al " + soggetto)`.
+- **Appunti:** il cassetto Mente accetta un giorno se la frase comincia con
+  "tieni presente / tieni a mente / sappi che / prendi nota che / nota che".
+- **Urgenze:** "luci / lampade / illuminazione / uscita / porta / scala /
+  impianto / kit / pulsante di emergenza" non contano come parola d'urgenza.
+- **Risultati:** giro 15 1050, giro 16 1032, giro 17 1032; nessuna frase
+  prima giusta diventa sbagliata.
+- **Restano, errori del modello (per il prossimo allenamento):** "mi serve
+  la DiCo del fotovoltaico di Le Querce" (dice cerca_documento), "dalla Zanon
+  il contatore dell'acqua è in cantina", "mancano ancora le fughe…", "al
+  Garibaldi il portone chiude male" (dice urgenza), "il consigliere Rinaldi
+  odia le mail" (dice invio_documento). Dettaglio: "il B&B" non trova "B&B La
+  Conchiglia" (parole di una lettera saltate in `trovaCliente`).
+
+### Passo 3, cassetti del pomeriggio (30/09/2026, ROADMAP 0b.19)
+- **Appunti** (`index.html`):
+  - `gestisciMente(l, testo, viaVoce, invia, daModello)` è l'ex `case
+    "mente"` di `provaLettore`, ora in una funzione;
+  - il cassetto: `cassettoNeurale(testo, 0.95) === "mente"`, prima del
+    cassetto sposta/annulla;
+  - esclusi: `azione "comando"`, le frasi con un giorno (`trovaQuando`) e
+    "ricordami…";
+  - con `daModello` "segna/annota/salva…" sono ammessi.
+- **Cliente nuovo:** `aggiungiClienteLetto(nc)` è l'ex blocco del `case
+  "cliente"`. Il cassetto vuole un verbo di aggiunta con "client…" (o
+  "nuovo cliente") e `cassettoNeurale === "cliente"`, poi usa
+  `EonLettore.leggiNuovoCliente`.
+- **SAL:** `lettore.leggiSal(testo, ctx)` → `{percentuale, importo,
+  cliente}`, usato in `provaSal` quando `capisciSal` non legge e il modello
+  dice sal.
+- **Invio documento:** `lettore.leggiInvioDocumento(testo, ctx)` → frase
+  canonica "manda la fattura [numero N] [di mese] a Cliente", poi
+  `provaInvioDocumento`. Con un importo ("da 500", "€") torna null.
+- **Server** (`api/index.js`):
+  - `TEMPO_IN_APPUNTO` passa ai lookaround Unicode (`\b` non funzionava
+    dopo "ì") e riconosce anche "ore 11" e "20 ottobre";
+  - `provaAppuntoCliente` salta se c'è `body.lettura_impegno`.
+- **Lettore degli orari** (`trovaQuando`):
+  - "verso mezzogiorno";
+  - "giovedì 8 e mezza" dà l'ora;
+  - "oggi / stamattina / ieri" seguiti da ha/ho/sono e con un giorno dopo
+    sono un racconto: saltati, e non contano per "di mattina".
+- **Assemblea:** se il cliente non si trova, si cerca solo prima del motivo
+  (per / punto / ordine / odg).
+- **Minimi alzati:** giro 15 1046, giro 16 1021, giro 17 1016 (poi, la sera: 1050, 1032, 1032).
+- **Restano:**
+  - chiamate a chi non è in rubrica ("chiama il geometra Rovelli"): EON dice
+    che non ha il numero;
+  - dettagli: importi dei preventivi, "giovedì 8" senza "e mezza", due
+    appuntamenti nella stessa frase, dialetto ("alle deci");
+  - una decina di frasi in cui sbaglia il modello (appunti presi per
+    urgenze): da mettere nel prossimo allenamento.
+
+### Passo 3, terzo cassetto: domande sui dati (30/09/2026, ROADMAP 0b.19)
+- `lettore.js`: `leggiDomandaDati(testo, ctx)` →
+  `{azione: "dati", tema, cliente, quando, testo}`.
+  - Temi con regole ampie: documenti (accettato / risposto / mandato /
+    fatto), crediti (non paga, da riscuotere), incassi (quanto m'ha dato /
+    versato, ha saldato, riepilogo incassi), agenda (lavori / giri /
+    appuntamenti + un tempo, "c'ho", "com'è messa", "punto dei lavori",
+    "quand'è che devo"), note_cliente.
+  - Se nessuna regola scatta si usa `temaDomanda`; se non trova nemmeno
+    quello, null.
+- `index.html`:
+  - in `elabora`, dopo il cassetto documento: `cassettoNeurale === "dati"`
+    (almeno 3 parole, non "apri / vai / mostra") → `rispondiSuiDati(ld)`;
+  - in `rispondiSuiDati`: `documenti` con un cliente o con "accettato /
+    risposto / mandato" elenca i documenti di quel cliente (importo, data,
+    numero), più una nota onesta sull'accettazione che non si registra;
+    `note_cliente` apre la scheda.
+- Restano (5): "quante caldaie ho installato", "l'ultima volta dalla
+  Pastorelli" (impegni passati), "la Colombini sabato o domenica?", "fammi il
+  punto dei lavori" (amministratore), "l'ho fatta la fattura alle Magnolie
+  per il secondo trimestre?".
+- Correzione della rete: `file-privati-app.test.js` aspetta il link firmato
+  (`waitForFunction`) invece di un tempo fisso (su GitHub falliva a volte).
+- Minimi alzati: giro 15 1041, giro 16 1002, giro 17 1000.
+
+### Passo 3, secondo cassetto: preventivo/fattura (30/09/2026, ROADMAP 0b.19)
+- `lettore.js`: `leggiDocumento(testo, ctx)`.
+  - Ripulisce la frase:
+    - `parolaDocumento` (distanza di modifica ≤ 2 da "preventivo" o "fattura";
+      "fatturami" → "fattura a");
+    - toglie "per un nuovo cliente,";
+    - "per il signor X" → "per signor X".
+  - Poi chiama `leggi`.
+  - Torna la lettura solo se `azione === "documento"`.
+  - "Cliente nuovo" senza nome dopo: il nome si chiede (`manca: cliente`),
+    non si inventa.
+- `trovaNomeNuovo`: dopo "signor/…" la virgola chiude il nome.
+- `index.html`, in `elabora`: prima di `provaUrgenza`, se
+  `cassettoNeurale(testo) === "documento"`, allora `leggiDocumento` →
+  `gestisciDocumento`.
+  - Se torna un `comando`, si passa a `inviaAlServer`.
+  - Se torna `fatto`, si chiude.
+  - Solo `modo === "crea"`: cercare un documento resta alle regole di prima.
+- Sistemate 7 frasi (giro 16: +3, giro 17: +4). Minimi alzati: giro 16 985,
+  giro 17 983.
+
+### Passo 3, primo cassetto: sposta/annulla (30/09/2026, ROADMAP 0b.19)
+- `lettore.js`:
+  - `tempiDetti(pp, oggi)`: ogni tempo detto nel suo pezzo di frase, con
+    `negato` ("invece che alle 16", "non alle 7", "dalle 4");
+  - `leggiModificaImpegno(testo, impegni, oggi)` →
+    `{tipo: "sposta"|"annulla"|null, impegni, nuovoPer(imp), tempi, parole, motivo}`.
+- Punteggio dell'impegno:
+  - una parola del titolo vale 3 (1 se è un tipo generico: sopralluogo,
+    verifica…); il prefisso di 6 lettere vale 2;
+  - il giorno detto vale 4, l'ora detta 2;
+  - contano solo parole e tempi detti prima del verbo di cambio (col verbo
+    in testa: fino al motivo "che/perché").
+- Il nuovo quando: giorno e ora non negati, diversi da quelli dell'impegno.
+  - Casi aggiunti: "un'ora dopo / mezz'ora prima"; "la settimana prossima" /
+    "di una settimana" (+7 giorni); "alle 5" per un impegno del pomeriggio =
+    17.
+- `tipo` è null (decidono le regole di prima) in quattro casi:
+  - manca una parola di cambio;
+  - l'oggetto non è un impegno (fattura, foto, cliente…);
+  - ci sono due comandi insieme ("e segna…");
+  - ci sono solo giorno e fascia, senza nome né lavoro ("annulla gli
+    appuntamenti di domani pomeriggio").
+- `index.html`:
+  - `cassettoNeurale(testo, 0.9)`;
+  - `provaModificaImpegno` prima di `provaAnnullaImmediato` e di
+    `provaSpostaImmediato`, che restano come riserva;
+  - `confermaSpostamento` e `confermaAnnullamento` sono stati separati dai
+    vecchi gestori e riusati;
+  - `isoImpegno(v)`.
+- Prova rapida in node: lo script `prova-modifica.js` (nello scratchpad)
+  legge 211 frasi giuste su 216 di tutti i giri. Le 5 che restano hanno due
+  impegni dello stesso cliente: EON chiede quale, ed è voluto.
+- Ancora sbagliate nell'app:
+  - "Guidetti domani alle due non ce la fa…, portamelo alle 18": il modello
+    è sicuro solo al 66%, quindi decidono le regole di prima e sbagliano l'ora;
+  - "l'assemblea … spostala a sabato 10 ottobre": il modello dice
+    "assemblea".
+- `eval/dati/soglie-app.json` alzato: giro 9 48, giro 15 1037, giro 16 982,
+  giro 17 979.
+
+### Rete di sicurezza automatica (30/09/2026 mattina, ROADMAP 0b.19 passo 2)
+- `.github/workflows/prove.yml`, su ogni `pull_request`, sui push su `main`
+  e a mano (`workflow_dispatch`):
+  - job `prove`: 4 pezzi in parallelo, `PEZZO=i/4 bash eval/tutti.sh`;
+  - job `frasi`: `bash eval/prove-frasi.sh`;
+  - Playwright 1.56.1 installato con `npm install --no-save` (`node_modules/`
+    è in `.gitignore`), niente segreti.
+- `eval/tutti.sh`: esce con errore se una prova fallisce (o scrive "FAIL").
+- `eval/modello-neurale.test.mjs` + `eval/neurale/soglie.json`: il neurale
+  da solo, per ogni serie, al massimo -1%; il totale non scende mai. Controlla
+  anche peso ≤ 3 MB e velocità ≤ 30 ms a frase. `MODELLO=file` prova un
+  modello nuovo prima di sostituirlo; quello di ieri sera viene bocciato,
+  come deve.
+- `eval/prove-frasi.sh` + `eval/dati/soglie-app.json`: l'app intera, con un
+  minimo esatto di frasi giuste per serie (oggi: giro 15 1036, giro 16 966,
+  giro 17 966…).
+- `frasi-nuove-mestieri.test.js`: giorno fisso `OGGI=2026-09-29T10:00:00`,
+  sia nel server finto (`Date` sostituita) sia nella pagina
+  (`addInitScript`); l'orologio scorre da lì.
+- Trovato così: la protezione `chiedeDiFare` di stanotte bloccava anche
+  "fammi rivedere le foto"; ora esclude vedere/trovare/aprire/cercare/
+  leggere/sentire/avere/mandare (giro 10: 127/127).
+- Da fare una volta su GitHub (Andrea): Settings → Branches → regola per
+  `main` → "Require status checks to pass" → scegliere i controlli "Prove".
+
 ### Il modello neurale: allenamento della notte (30/09/2026, ROADMAP 0b.19)
 - Dati (`eval/neurale/prepara.mjs` → `eval/neurale/dati/`, non nel repo):
   ~55 mila frasi = maestra m01-m40 (~19,7 mila, 40 personaggi) + confini

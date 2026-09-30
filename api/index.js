@@ -4674,7 +4674,8 @@ async function provaPiuComandi(body, ctx, user) {
    nominato nella frase (nome completo, o una parola del nome con la
    maiuscola che è di un solo cliente). Altrimenti → come prima. */
 const PAROLA_APPUNTO = /\b(ricordarsi|ricordati|ricordami|ricorda|ricordarmi|portare|portarsi|porta|prendere|serve|servono|attenzione|nota|annota|appunta|appuntami|segna|segnami|segnare)\b/i;
-const TEMPO_IN_APPUNTO = /\b(oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|stasera|stamattina|settimana|mese|alle|ore\s+\d|\d{1,2}[:.]\d{2})\b/i;
+// (con "ì" in fondo \b non funziona: si guarda che dopo non ci sia una lettera; "ore 11", "20 ottobre" contano, 30/09/2026)
+const TEMPO_IN_APPUNTO = /(?:^|[^\p{L}\p{N}])(?:oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|stasera|stamattina|settimana|mese|alle|ore\s+\d+|\d{1,2}[:.]\d{2}|\d{1,2}\s+(?:gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre))(?![\p{L}\p{N}])/iu;
 const CHIEDE_ALTRO = /\b(chiama\w*|telefona\w*|manda\w*|invia\w*|scrivi\w*|di'|dì|dici|dire|fattur\w*|preventiv\w*|elimin\w*|cancell\w*|annull\w*|spost\w*|foto|aggiungi\s+(?:il\s+)?cliente|pagat\w*|pagament\w*|incass\w*|accont\w*|sald[oi]|euro)\b|€/i;
 
 function clienteNominatoNellaFrase(testo, clienti) {
@@ -4738,6 +4739,7 @@ async function provaDaFareCliente(body, ctx, user) {
 async function provaAppuntoCliente(body, ctx, user) {
   const testo = ctx.testoUtente;
   if (!body.messaggio.startsWith(PREFISSO_RACCONTO) || !eStringaNonVuota(testo) || testo.length > 200) return null;
+  if (body.lettura_impegno) return null; // l'app ha già letto giorno e ora: è un impegno, non un appunto
   if (!PAROLA_APPUNTO.test(testo) || TEMPO_IN_APPUNTO.test(testo) || CHIEDE_ALTRO.test(testo) || /\?/.test(testo)) return null;
   const tutti = await db(`clients?select=id,name,is_archived,created_at&deleted_at=is.null&limit=500`, { method: "GET" }, ctx.accessToken);
   const cliente = clienteNominatoNellaFrase(testo, Array.isArray(tutti) ? tutti : []);

@@ -1,0 +1,65 @@
+name: Prove
+
+# Rete di sicurezza (30/09/2026): a ogni PR e a ogni merge su main partono da
+# sole tutte le prove di EON. Se anche una sola fallisce la PR diventa rossa
+# e (con la regola "Require status checks" su main) non si può fare il merge.
+# Nessun segreto, nessun database vero: le prove usano dati finti.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: prove-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove:
+    name: Prove dell'app (${{ matrix.pezzo }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        pezzo: ["1/4", "2/4", "3/4", "4/4"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Playwright e Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      # Le prove sostituiscono Supabase con un database finto: la libreria vera
+      # dal CDN non deve arrivare a sovrascriverlo (come nell'ambiente di sviluppo)
+      - name: Niente librerie esterne durante le prove
+        run: echo "127.0.0.1 cdn.jsdelivr.net" | sudo tee -a /etc/hosts
+      - name: Prove
+        env:
+          PEZZO: ${{ matrix.pezzo }}
+          TZ: UTC
+        run: bash eval/tutti.sh
+
+  frasi:
+    name: Frasi etichettate (modello e app)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Playwright e Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      # Le prove sostituiscono Supabase con un database finto: la libreria vera
+      # dal CDN non deve arrivare a sovrascriverlo (come nell'ambiente di sviluppo)
+      - name: Niente librerie esterne durante le prove
+        run: echo "127.0.0.1 cdn.jsdelivr.net" | sudo tee -a /etc/hosts
+      - name: Frasi dei giri 5-17 nell'app intera
+        env:
+          TZ: UTC
+        run: bash eval/prove-frasi.sh

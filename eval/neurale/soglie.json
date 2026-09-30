@@ -1,0 +1,11 @@
+{
+  "nota": "Frasi giuste del modello neurale DA SOLO per ogni serie (30/09/2026). Un modello nuovo passa solo se il totale non scende e nessuna serie perde più dell'1%. Si alzano quando un modello nuovo fa meglio.",
+  "serie": {
+    "frasi-giro5.json": 184, "frasi-giro6.json": 174, "frasi-giro7.json": 122, "frasi-giro8.json": 120,
+    "frasi-giro9.json": 47, "frasi-giro10.json": 125, "frasi-giro11.json": 72, "frasi-giro12.json": 59,
+    "frasi-giro13.json": 71, "frasi-giro14.json": 46, "frasi-prova-cieca.json": 77, "frasi-giro15.json": 1042,
+    "frasi-giro16.json": 1031, "frasi-giro17.json": 1034, "frasi-nuove-mestieri.json": 140
+  },
+  "pesoMassimoKB": 3072,
+  "msMassimiAFrase": 30
+}

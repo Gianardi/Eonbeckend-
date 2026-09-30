@@ -157,7 +157,7 @@
   /* Trova giorno e ora, e segna le parole usate */
   function trovaQuando(pp, oggiRif) {
     const oggi = new Date(oggiRif || Date.now()); oggi.setHours(0, 0, 0, 0);
-    const usate = new Set();
+    const usate = new Set(), racconto = new Set();
     let giorno = null, ora = null, fascia = null;
     const piu = (n) => { const d = new Date(oggi); d.setDate(d.getDate() + n); return d; };
     for (let i = 0; i < pp.length; i++) {
@@ -182,6 +182,10 @@
         continue;
       }
       if (n === "giornata" && i > 0 && pp[i - 1].n === "in") { giorno = oggi; usate.add(i - 1); usate.add(i); continue; }
+      /* "stamattina mi ha chiamato Sala e ci vediamo giovedì alle 5": "stamattina" è quando
+         l'ha saputo, il giorno dell'impegno è quello dopo (30/09) */
+      if (/^(?:oggi|stamattina|stamani|stasera|ieri)$/.test(n) && pp.slice(i + 1, i + 5).some((x) => /^(?:ha|ho|hanno|sono|abbiamo)$/.test(x.n))
+        && pp.slice(i + 1).some((x) => GIORNI.includes(x.n) || /^(?:domani|dopodomani|domattina)$/.test(x.n))) { racconto.add(i); continue; }
       if (n === "oggi" || n === "stamattina" || n === "stamani" || n === "stasera" || n === "stanotte") { giorno = oggi; usate.add(i); if (n !== "oggi") fascia = n; }
       else if (n === "domani" || n === "domattina") { giorno = piu(1); usate.add(i); if (n === "domattina") fascia = "mattina"; }
       else if (n === "dopodomani") { giorno = piu(2); usate.add(i); }
@@ -208,7 +212,9 @@
         }
         /* "giovedì 15": il 15 (questo mese o il prossimo), non il primo giovedì */
         const num = pp[i + 1] && /^\d{1,2}$/.test(pp[i + 1].n) ? Number(pp[i + 1].n) : 0;
-        if (num >= 1 && num <= 31 && !(pp[i + 2] && /^(?:euro|€|%|mila|ore|minuti|:)$/.test(pp[i + 2].n))) {
+        // "giovedì 8 e mezza": è l'ora, non il giorno 8 (30/09)
+        const eMezza = pp[i + 2] && pp[i + 2].n === "e" && pp[i + 3] && /^(?:mezza|mezzo|un|quarto|trenta|quindici|dieci|venti|quaranta|quarantacinque)$/.test(pp[i + 3].n);
+        if (num >= 1 && num <= 31 && !eMezza && !(pp[i + 2] && /^(?:euro|€|%|mila|ore|minuti|:)$/.test(pp[i + 2].n))) {
           let d = new Date(oggi.getFullYear(), oggi.getMonth(), num);
           if (d < oggi) d = new Date(oggi.getFullYear(), oggi.getMonth() + 1, num);
           const conMese = pp[i + 2] && MESI.includes(pp[i + 2].n);
@@ -251,12 +257,13 @@
       ora = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
     }
     // "domattina alle sei e mezza", "domani mattina alle 6", "presto alle 5": di mattina (giro 15)
-    const diMattina = pp.some((x) => /^(?:domattina|stamattina|stamani|mattina|mattino|mattinata|alba|presto)$/.test(x.n)) && !pp.some((x) => /^(?:pomeriggio|sera|stasera|serata|notte)$/.test(x.n));
+    const diMattina = pp.some((x, k) => !racconto.has(k) && /^(?:domattina|stamattina|stamani|mattina|mattino|mattinata|alba|presto)$/.test(x.n)) && !pp.some((x) => /^(?:pomeriggio|sera|stasera|serata|notte)$/.test(x.n));
     const diSera = pp.some((x) => /^(?:sera|stasera|serata|pomeriggio)$/.test(x.n)) && !pp.some((x) => /^(?:domattina|stamattina|mattina|mattino|mattinata)$/.test(x.n));
     // L'ora: "alle 11", "ore 11:30", "11:30", "alle 3 e mezza", "alle 15 in punto"
     for (let i = 0; i < pp.length && !ora; i++) {
       // "a mezzogiorno" (giro 7)
-      if (pp[i].n === "mezzogiorno" && !(i > 0 && /^(?:dopo|prima|verso)$/.test(pp[i - 1].n))) { usate.add(i); if (i > 0 && /^(?:a|alle|verso)$/.test(pp[i - 1].n)) usate.add(i - 1); ora = "12:00"; break; }
+      // ("verso mezzogiorno" = 12, 30/09)
+      if (pp[i].n === "mezzogiorno" && !(i > 0 && /^(?:dopo|prima)$/.test(pp[i - 1].n))) { usate.add(i); if (i > 0 && /^(?:a|alle|verso)$/.test(pp[i - 1].n)) usate.add(i - 1); ora = "12:00"; break; }
       // "per le 17", "verso le 9", "entro le 18": come "alle"
       // "verso l'una", "per l'una" (giro 15)
       const lUna = pp[i].n === "una" && i > 1 && pp[i - 1].n === "l" && /^(?:verso|per|entro|dopo|prima|alle)$/.test(pp[i - 2].n);
@@ -1040,6 +1047,334 @@
     "dott ing ingegner avv avvocato geom geometra telefono tel numero cell cellulare cel via piazza corso viale rubrica anagrafica ditta come amministratore referente si chiama " +
     "ciao ecco guarda scusa per favore grazie tra fra ai nei in è venuta venuto oggi ieri stamattina mi hanno affidato palazzo").split(" "));
   const LEGA_NOME = new Set("di da del della dello dei degli delle la le il lo i gli d de".split(" "));
+  /* ---------------- Spostare o annullare un impegno (passo 3, 30/09/2026) ----------------
+     Che la frase chieda di spostare/annullare lo decide il modello neurale;
+     qui si leggono solo i dettagli, senza indovinare le formulazioni:
+     - i tempi detti, uno per pezzo di frase ("domani invece che alle 16 … alle
+       cinque e mezza" = domani 16:00 [vecchio], 17:30 [nuovo]);
+     - quale impegno: il più simile per parole (cliente, lavoro, posto) e per
+       giorno/ora detti;
+     - il nuovo quando: il giorno e l'ora detti DIVERSI da quelli che ha già
+       (quello che resta uguale non si tocca: "sabato 10 ottobre sempre alle 10").
+     impegni: [{ id, titolo, chi, iso: "2026-10-03T16:00:00" }]. */
+  const INIZIO_TEMPO = /^(?:oggi|domani|dopodomani|stasera|stamattina|domattina|stanotte|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|alle|all|dalle|dall|ore|verso|mezzogiorno|mezzanotte|fra|tra|\d{1,2}(?::\d{2})?|\d{1,2}\/\d{1,2}|la|le|l)$/;
+  const FERMA_TEMPO = /^(?:invece|anziche|non|ma|piuttosto|oppure|perche|che|cosi|dopo|prima|spostal\w*|sposta|mettil\w*|portal\w*|facciamol\w*|fall\w*|rimandal\w*|anticipal\w*|posticipal\w*|slitta|cambia|correggi)$/;
+  const NEGA_TEMPO = /^(?:invece|anziche|non|posto)$/;
+  const VERBO_CAMBIO = /^(?:spost\w*|sposti|anticip\w*|posticip\w*|rimand\w*|slitt\w*|mettil\w*|mettimel\w*|mettiam\w*|portal\w*|portamel\w*|portiam\w*|falla|fallo|falle|falli|facciam\w*|famo|famola|famolo|invece|anziche|cambi\w*|corregg\w*|diventare)$/;
+  const TIPI_IMPEGNO = /^(?:sopralluog\w*|appuntament\w*|verific\w*|consegn\w*|manutenzion\w*|riunion\w*|collaud\w*|preventiv\w*|intervent\w*|lavor\w*|incontr\w*|visit\w*|montaggi\w*|install\w*|chiamat\w*|telefonat\w*|cantier\w*)$/;
+  function tempiDetti(pp, oggi) {
+    const out = [];
+    for (let i = 0; i < pp.length; i++) {
+      if (!INIZIO_TEMPO.test(pp[i].n)) continue;
+      let j = i;
+      // "domani dalle 4 alle 6": ogni tempo il suo pezzo
+      const ferma = (w) => FERMA_TEMPO.test(w) || /^(?:dalle|dall)$/.test(w) || (/^(?:dalle|dall)$/.test(pp[i].n) && /^(?:alle|all|a)$/.test(w));
+      while (j < pp.length && j - i < 7 && (j === i || !ferma(pp[j].n)) && !(j > i && pp[j - 1].sep)) j++;
+      const q = trovaQuando(pp.slice(i, j), oggi);
+      if (!q.giornoIso && !q.ora) continue;
+      const usate = [...q.usate];
+      if (!usate.length || Math.min(...usate) > 1) continue; // il tempo deve cominciare qui
+      const fine = i + Math.max(...usate);
+      // negato: "invece che alle 16", "non alle 7", "anziché sabato", "dalle 4 (alle 6)"
+      let k = i - 1;
+      while (k >= 0 && /^(?:alle|all|le|a|ore|che|piu|e|di)$/.test(pp[k].n) && i - k <= 3) k--;
+      const negato = /^(?:dalle|dall)$/.test(pp[i].n) || (k >= 0 && i - k <= 3 && NEGA_TEMPO.test(pp[k].n));
+      out.push({ i, giornoIso: q.giornoIso, ora: q.ora, negato });
+      i = fine;
+    }
+    return out;
+  }
+  const ANNULLA_PAROLE = /\b(?:cancella\w*|annulla\w*|togli\w*|leva\w*|elimina\w*|disdett\w*|disdic\w*|salta|saltato|salta\w*)\b|\bnon\s+si\s+fa\s+piu\b|\bnon\s+(?:ci\s+)?(?:vado|andiamo|viene|vengono)\s+piu\b/;
+  const NON_ANNULLA = /\bnon\s+(?:la|lo|le|li)?\s*(?:voglio\s+)?(?:cancell|annull|togli)\w*/;
+  const PAROLE_NON_NOME = /^(?:sposta\w*|spostal\w*|mett\w*|port\w*|fac\w*|fall\w*|rimand\w*|anticip\w*|posticip\w*|slitt\w*|cambi\w*|corregg\w*|cancell\w*|annull\w*|togl\w*|lev\w*|elimin\w*|appuntamento|impegno|orario|ora|giorno|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mattina|pomeriggio|sera|alle|invece|anziche|dopo|prima|sempre|scritto|detto|chiamato|chiesto|puo|riesce|arriva|viene|ottobre|novembre|dicembre|settembre|mezza|mezzo|mezzogiorno|diventare|intendo|quello|quella|quelli|signora|signor|signore|dottor|dottore|non|piu|che|eh|ah|allora|cioe|ciao|poi|anche|solo|niente|tutto|fatto|fare)$/;
+  function leggiModificaImpegno(testoOriginale, impegni, oggiRif) {
+    const oggi = new Date(oggiRif || Date.now());
+    const testo = pulisci(testoOriginale).testo;
+    const pp = parole(testo);
+    const n = pp.map((x) => x.n).join(" ");
+    const tempi = tempiDetti(pp, oggi);
+    const usateTempo = new Set();
+    tempi.forEach((t) => { for (let k = t.i; k < t.i + 6 && k < pp.length; k++) if (INIZIO_TEMPO.test(pp[k].n) || /^\d/.test(pp[k].n) || numeroParola(pp[k].n) !== null) usateTempo.add(k); });
+    const giornoDi = (iso) => String(iso || "").slice(0, 10), oraDi = (iso) => String(iso || "").slice(11, 16);
+    // Per riconoscere l'impegno contano le parole e i tempi detti PRIMA del verbo che cambia
+    // ("l'hotel di sabato | anticipalo alle 7 e mezza che devono liberare le camere": le 7 e
+    // mezza sono l'orario nuovo, "le camere" il motivo). Col verbo in testa ("rimanda la
+    // verifica di Brambilla a venerdì") le parole fino al motivo ("che…", "perché…").
+    const iVerbo = pp.findIndex((x) => VERBO_CAMBIO.test(x.n));
+    const iMotivo = pp.findIndex((x, k) => k > Math.max(0, iVerbo) && /^(?:che|perche|siccome|cosi|visto)$/.test(x.n));
+    const [da, a] = iVerbo > 0 ? [0, iVerbo] : [0, iMotivo > 0 ? iMotivo : pp.length];
+    const tempiRiconosci = iVerbo >= 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i < iVerbo) : tempi;
+    // Le parole che dicono QUALE impegno (cliente, lavoro, posto)
+    const piene = pp.filter((x, k) => k >= da && k < a && !usateTempo.has(k) && x.n.length >= 3 && !VUOTE.has(x.n) && !PAROLE_NON_NOME.test(x.n) && numeroParola(x.n) === null).map((x) => x.n);
+    const punteggi = (impegni || []).map((imp) => {
+      const suo = norm((imp.titolo || "") + " " + (imp.chi || "")).split(" ");
+      const radice = (w) => w.slice(0, Math.max(4, w.length - 2));
+      let p = 0;
+      const peso = (w) => (TIPI_IMPEGNO.test(w) ? 1 : 3);
+      piene.forEach((w) => { if (suo.includes(w)) p += peso(w); else if (w.length >= 5 && suo.some((x) => x.length >= 5 && x.slice(0, 6) === w.slice(0, 6))) p += peso(w) - 1; });
+      // a parità: quello che ha meno parole in più ("Verifica Villa Flora" prima di "Verifica impianto Villa Flora")
+      p += 0.01 * (piene.filter((w) => suo.includes(w)).length / Math.max(1, suo.length));
+      const parole = p;
+      tempiRiconosci.forEach((t) => {
+        if (t.giornoIso && t.giornoIso === giornoDi(imp.iso)) p += 4; // il giorno detto pesa più di una parola
+        if (t.ora && t.ora === oraDi(imp.iso)) p += 2;
+      });
+      return { imp, p, parole };
+    }).filter((x) => x.parole > 0 || x.p >= 4).sort((a, b) => b.p - a.p);
+    const migliori = [];
+    punteggi.filter((x) => x.p === (punteggi[0] && punteggi[0].p)).forEach((x) => { if (!migliori.some((m) => m.titolo === x.imp.titolo && m.iso === x.imp.iso)) migliori.push(x.imp); });
+    // Il nuovo quando: giorno e ora detti, non negati, diversi da quelli che ha
+    const nuovoPer = (imp) => {
+      const g0 = giornoDi(imp.iso), o0 = oraDi(imp.iso);
+      let g = null, o = null;
+      tempi.filter((t) => !t.negato).forEach((t) => {
+        if (t.giornoIso && t.giornoIso !== g0) g = t.giornoIso;
+        if (t.ora && t.ora !== o0) o = t.ora;
+      });
+      // "rimandalo alla settimana prossima", "di una settimana": stesso giorno, sette giorni dopo
+      if (!g && /\b(?:(?:alla|la)\s+settimana\s+(?:prossima|dopo)|di\s+una\s+settimana)\b/.test(n)) {
+        const d = new Date(g0 + "T12:00:00"); d.setDate(d.getDate() + 7); g = isoGiorno(d);
+      }
+      // "un'ora dopo", "mezz'ora prima", "anticipa di un'ora"
+      const rel = n.match(/\b(?:(un|una|due|tre|mezz)\s*(?:ora|ore)|(\d+)\s*minuti)\s+(dopo|prima|piu\s+tardi|in\s+anticipo)\b|\b(anticip|posticip)\w*\s+di\s+(un|una|due|mezz)\s*(?:ora|ore)\b/);
+      if (!o && rel) {
+        const quanti = rel[2] ? Number(rel[2]) : ({ un: 60, una: 60, due: 120, tre: 180, mezz: 30 })[rel[1] || rel[5]];
+        const verso = /prima|anticip/.test(rel[3] || rel[4]) ? -1 : 1;
+        const [h, m] = o0.split(":").map(Number);
+        const tot = h * 60 + m + verso * quanti;
+        if (tot > 0 && tot < 24 * 60) o = String(Math.floor(tot / 60)).padStart(2, "0") + ":" + String(tot % 60).padStart(2, "0");
+      }
+      // un'ora piccola per un impegno del pomeriggio: "alle 5" = 17
+      if (o && Number(o.slice(0, 2)) < 8 && Number(o0.slice(0, 2)) >= 12) o = String(Number(o.slice(0, 2)) + 12).padStart(2, "0") + o.slice(2);
+      if (!g && !o) return null;
+      return (g || g0) + "T" + (o || o0) + ":00";
+    };
+    const spostaDetto = migliori.length ? migliori.some((imp) => nuovoPer(imp)) : tempi.some((t) => !t.negato) && tempi.length >= 2;
+    const annullaDetto = ANNULLA_PAROLE.test(n) && !NON_ANNULLA.test(n);
+    const ordineAnnulla = /\b(?:cancella|cancellalo|cancellala|cancellami|annulla|annullalo|annullala|togli|toglilo|toglila|leva|levalo|levala|elimina|eliminalo|eliminala)\b/.test(n) && !NON_ANNULLA.test(n);
+    const tipo = spostaDetto && !(ordineAnnulla && !/\b(?:spost|mett|port|rimand|anticip|posticip|slitt|fall|facciam)\w*/.test(n)) ? "sposta" : annullaDetto ? "annulla" : null;
+    // Non è un impegno ("annulla la fattura di Rossi") o sono due comandi ("cancella X e segna Y"): non tocca a questo cassetto
+    const altraCosa = /\b(?:fattur\w*|preventiv\w*|document\w*|ddt|foto|nota|note|appunt\w*|cartell\w*|messaggi\w*|mail|email|pagament\w*|incass\w*|acconto|bonifico|cliente)\b/.test(n) && !/\b(?:appuntament\w*|impegn\w*|sopralluog\w*|riunion\w*|incontr\w*)\b/.test(n) && !migliori.some((m) => piene.some((w) => TIPI_IMPEGNO.test(w) && norm(m.titolo).includes(w.slice(0, 5))));
+    const dueComandi = /\b(?:e|poi|e\s+poi)\s+(?:segna\w*|metti\w*|chiama\w*|manda\w*|scrivi\w*|fai|fammi|aggiungi\w*|crea\w*|ricorda\w*)\b/.test(n);
+    // Senza una parola che dica di cambiare ("Rita domani alle 9 sopralluogo") è un impegno nuovo, non uno spostamento
+    const cambio = /\b(?:spost\w*|rimand\w*|anticip\w*|posticip\w*|slitt\w*|cambi\w*|corregg\w*|mettil\w*|mettimel\w*|portal\w*|portamel\w*|falla|fallo|falle|falli|facciam\w*|mettiam\w*|portiam\w*|famo|famola|famolo|invece|anziche|diventare|cancell\w*|annull\w*|togli\w*|levalo|levala|levali|elimin\w*|disdett\w*|disdic\w*|salta\w*|sposti|dopo|prima)\b|\bnon\s+(?:puo|riesce|viene|vengono|ce\s+la|si\s+fa|c\s+e|piu)\b/.test(n);
+    // Senza un nome né un lavoro ("annulla gli appuntamenti di domani pomeriggio") decidono
+    // le regole per giorno e fascia, che li prendono tutti insieme
+    const soloTempo = !piene.some((w) => !TIPI_IMPEGNO.test(w));
+    if (altraCosa || dueComandi || !cambio || soloTempo) return { tipo: null, impegni: [], nuovoPer, tempi, parole: piene, motivo: altraCosa ? "non è un impegno" : dueComandi ? "due comandi" : !cambio ? "nessun cambio detto" : "solo giorno e ora" };
+    return { tipo, impegni: migliori, nuovoPer, tempi, parole: piene };
+  }
+
+  /* ---------------- Preventivo o fattura (passo 3, 30/09/2026) ----------------
+     Il modello neurale ha deciso che la frase chiede un preventivo o una fattura.
+     Qui si toglie solo quello che faceva sbagliare le regole, poi legge il
+     lettore di sempre (voci, importi, cliente):
+     - la parola storpiata dalla dettatura: "prevendivo", "prevetivo", "fatturami";
+     - "per un nuovo cliente," che faceva creare il cliente e basta.
+     Torna la lettura solo se è davvero un documento da fare o cercare. */
+  function distanza(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+  function parolaDocumento(w) {
+    const n = norm(w);
+    if (/^(?:preventiv[oi]|fattur[ae])$/.test(n)) return null;
+    if (/^fattur(?:ami|agli|ale|alo|ala|iamo|a)$/.test(n)) return "fattura a";
+    if (n.length >= 8 && n.length <= 12 && /^pre/.test(n) && distanza(n, "preventivo") <= 2) return "preventivo";
+    if (n.length >= 6 && n.length <= 9 && /^fat/.test(n) && distanza(n, "fattura") <= 2) return "fattura";
+    return null;
+  }
+  function leggiDocumento(testoOriginale, ctx) {
+    let t = String(testoOriginale || "").split(/(\s+)/).map((w) => { const x = parolaDocumento(w.replace(/[^\p{L}]/gu, "")); return x ? w.replace(/[\p{L}]+/u, x) : w; }).join("");
+    t = t.replace(/\b(?:per\s+)?(?:un|una|il|la)?\s*(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\s*[,:]?\s*/i, (m) => (/^per\b/i.test(m) ? "per " : ""))
+      .replace(/\bper\s+(?:il|la)\s+(signor|signora|sig\.?)\s+/i, "per $1 ");
+    const l = leggi(t, ctx);
+    if (!l || l.azione !== "documento") return null;
+    // "per un cliente nuovo, rifacimento impianto…" senza nome: il nome si chiede, non si inventa
+    const dopoNuovo = (String(testoOriginale).split(/client[ei]\s+nuov[oa]|nuov[oa]\s+client[ei]/i)[1] || "").replace(/^[\s,:]+/, "").split(/\s+/).slice(0, 3).join(" ");
+    const nuovoSenzaNome = /\b(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\b/i.test(testoOriginale) && l.clienteNuovo
+      && !/^(?:(?:il|la|lo)\s+)?(?:signor|signora|sig|ditta|condominio|studio|bar|hotel|ristorante|trattoria|pizzeria)\b|^(?:(?:il|la)\s+)?\p{Lu}/u.test(dopoNuovo);
+    if (nuovoSenzaNome) return { ...l, lavoro: (l.clienteNuovo + " " + (l.lavoro || "")).trim(), clienteNuovo: null, manca: [...new Set([...(l.manca || []), "cliente"])], testoLetto: t };
+    return { ...l, testoLetto: t };
+  }
+
+  /* ---------------- Domande sui propri dati (passo 3, 30/09/2026) ----------------
+     Il modello neurale ha deciso che è una domanda sui TUOI dati (agenda, soldi,
+     documenti). Qui si capisce solo il tema e di chi/quando si parla; risponde
+     il codice di sempre (rispondiSuiDati). Nessun tema sicuro = null (decide chi
+     viene dopo, al massimo l'AI). */
+  function leggiDomandaDati(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const p = pulisci(testoOriginale);
+    const pp = parole(p.testo);
+    const n = pp.map((x) => x.n).join(" ");
+    const q = trovaQuando(pp, ctx.oggi);
+    const cl = trovaCliente(pp, ctx.clienti || [], new Set(q.usate));
+    const cliente = cl.stato === "trovato" ? cl.cliente : null;
+    const quando = { giornoIso: q.giornoIso, etichetta: q.etichetta, ora: q.ora, fascia: q.fascia };
+    let tema = null;
+    if (/\b(?:preventiv[oi]|fattur[ae])\b/.test(n) && /\b(?:accettat\w*|rispost\w*|risposto|mandat[oi]|inviat[oi]|fatt[oa]|fatte|apert[oi]|firmat[oi])\b/.test(n)) tema = "documenti";
+    else if (/\bnon\s+(?:mi\s+|m\s+)?(?:paga|pagano|ha\s+(?:ancora\s+)?pagato|hanno\s+(?:ancora\s+)?pagato|(?:ha|hanno)\s+(?:ancora\s+)?dato)\b|\bda\s+riscuotere\b|\briscuot\w*\b|\bmi\s+deve\w*\b/.test(n)) tema = "crediti";
+    else if (/\b(?:quanto|cosa)\b.*\b(?:dato|versato|pagato|preso|saldato)\b|\b(?:ha|hanno)\s+(?:gia\s+)?(?:saldato|pagato)\b|\bacconto\b.*\b(?:dato|dat[oi]|versat[oi])\b|\b(?:riepilogo|riassunto|resoconto)\s+degli\s+incassi\b|\bquanto\s+ho\s+(?:preso|incassato)\b/.test(n)) tema = "incassi";
+    else if (/\b(?:lavori|giri|appuntament\w*|impegn\w*|consegn\w*)\b.*\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mese)\b|\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b.*\b(?:lavori|giri|appuntament\w*|impegn\w*)\b|\bc\s*ho\b|\bcom\s*e\s+messa\b|\b(?:riepilogo|punto|riassunto)\s+dei\s+lavori\b|\bquand\s*e\s+che\s+devo\b|\bin\s+agenda\b/.test(n)) tema = "agenda";
+    else if (/\b(?:cosa|che)\s+(?:mi\s+)?(?:ero|avevo)\s+segnat\w*\b/.test(n) && cliente) tema = "note_cliente";
+    if (!tema) tema = temaDomanda(n);
+    return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim() } : null;
+  }
+
+  /* ---------------- SAL: stato avanzamento lavori (passo 3, 30/09/2026) ----------------
+     Il modello ha deciso che la frase chiede un SAL; qui solo i dettagli: il cliente
+     e a che punto sono i lavori ("siamo a metà", "al 40%", "all'80", "al cinquanta",
+     "arrivati al 75%"), e un importo se detto in euro. */
+  function leggiSal(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const pp = parole(pulisci(testoOriginale).testo);
+    const n = pp.map((x) => x.n).join(" ");
+    let percentuale = null;
+    if (/\b(?:a\s+meta|alla\s+meta|meta\s+dei\s+lavori|fatto\s+meta|fatta\s+meta|meta\s+lavori)\b/.test(n)) percentuale = 50;
+    for (let i = 0; i < pp.length && percentuale === null; i++) {
+      const v = /^\d{1,3}%?$/.test(pp[i].n) ? Number(pp[i].n.replace("%", "")) : numeroParola(pp[i].n);
+      if (v === null || !(v > 0 && v <= 100)) continue;
+      const dopo = pp[i + 1] && pp[i + 1].n, prima = i > 0 ? pp[i - 1].n : "";
+      const perCento = /%$/.test(pp[i].o) || /%$/.test(pp[i].n) || /^(?:%|percento|per)$/.test(dopo || "");
+      if (perCento || /^(?:al|all|a|arrivati|arrivato|siamo)$/.test(prima)) percentuale = v;
+    }
+    const importi = pp.map((x, i) => ({ i, v: /^\d[\d.]*$/.test(x.n) ? Number(x.n.replace(/\./g, "")) : null })).filter((x) => x.v !== null && pp[x.i + 1] && /^(?:euro|€)$/.test(pp[x.i + 1].n));
+    const cl = trovaCliente(pp, ctx.clienti || [], new Set());
+    return { percentuale, importo: importi.length === 1 ? importi[0].v : null, cliente: cl.stato === "trovato" ? cl.cliente : null };
+  }
+
+  /* ---------------- Mandare un documento già fatto (passo 3, 30/09/2026) ----------------
+     Il modello ha deciso che la frase chiede di MANDARE un preventivo o una fattura; qui
+     il tipo, il cliente (dovunque sia nella frase: "il preventivo della palestra mandalo
+     al titolare", "spedisci al condominio…") e il mese se detto. Torna la frase nella
+     forma che il codice d'invio conosce: "manda la fattura di settembre a Paola Castelli". */
+  function leggiInvioDocumento(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const pp = parole(pulisci(testoOriginale).testo);
+    const n = pp.map((x) => x.n).join(" ");
+    const tipo = /\bfattur/.test(n) ? "fattura" : /\bpreventiv/.test(n) ? "preventivo" : null;
+    if (!tipo) return null;
+    // "manda la fattura da 500 a Rossi": con un importo è un documento NUOVO, non un invio
+    if (/\bda\s+\d|\d\s*(?:euro|€)|€/.test(n) || pp.some((x) => /^\d{3,}$/.test(x.n.replace(/\./g, "")) && !/^(?:n|numero)$/.test((pp[pp.indexOf(x) - 1] || {}).n || ""))) return null;
+    const cl = trovaCliente(pp, ctx.clienti || [], new Set());
+    if (cl.stato !== "trovato") return null;
+    const mese = MESI.find((m) => new RegExp("\\b" + m + "\\b").test(n));
+    const numero = (n.match(/\b(?:n|numero)\s+(\d+)\b/) || [])[1];
+    const testo = "manda " + (tipo === "fattura" ? "la fattura" : "il preventivo") + (numero ? " numero " + numero : "") + (mese ? " di " + mese : "") + " a " + cl.cliente.name;
+    return { tipo, cliente: cl.cliente, mese: mese || null, testo };
+  }
+
+  /* Passo 3 (30/09): il modello ha già detto "messaggio", "email" o "chiamata"; qui solo a
+     chi e cosa. Il destinatario è quello subito dopo il verbo o il canale ("avvisa con un
+     whatsapp il ragionier Pozzoli che…", "scrivi sul gruppo dei ragazzi…", "fammi parlare
+     con l'amministratore Pozzoli"), non un cliente nominato nel testo ("pec all'avvocato
+     Donati per la messa in mora di Esposito"). Una correzione prima del "che" ("scrivi al
+     condominio... cioè all'amministratore…", "no aspetta, scrivi una mail al
+     commercialista…") vale per quello che viene dopo. */
+  function leggiDestinatario(testoOriginale, ctx, tipo) {
+    ctx = ctx || {};
+    const intero = String(testoOriginale || "").replace(/\s+/g, " ").trim();
+    let t = intero;
+    const iChe0 = t.search(/\bche\b/i);
+    const testa0 = iChe0 >= 0 ? t.slice(0, iChe0) : t;
+    // "chiama Rossi e poi manda un messaggio a Bianchi": due comandi, restano alle regole di prima
+    if (/\b(?:e|poi|e\s+poi)\s+(?:segna|metti|chiama|manda|scrivi|fai|fammi|aggiungi|crea|ricorda)\p{L}*/iu.test(testa0)) return null;
+    const corr = [...testa0.matchAll(/(?:\.{2,}|…|,)?\s*\b(?:cioè|cioe|anzi|no\s+aspetta|no\s+scusa|no\s+no)(?!\p{L})[\s,.]*/giu)].pop();
+    if (corr) t = t.slice(corr.index + corr[0].length);
+    const canale = tipo === "chiamata" ? "chiama" : /\b(?:pec|e-?mail|mail)\b/i.test(t) || tipo === "email" ? "email" : /\bwhats\s?app\b/i.test(t) ? "whatsapp" : "messaggio";
+    const iChe = t.search(/\bche\b/i);
+    let dest = iChe >= 0 ? t.slice(0, iChe) : t;
+    let messaggio = iChe >= 0 ? t.slice(iChe).replace(/^che\s+/i, "").trim() : "";
+    const verbi = [...dest.matchAll(/\b(?:manda\p{L}*|scriv\p{L}*|avvis\p{L}*|chiam\p{L}*|telefon\p{L}*|parlare\s+con|messagg\p{L}*|whats\s?app|e-?mail|mail|pec|sms)\b/giu)].pop();
+    if (verbi) dest = dest.slice(verbi.index + verbi[0].length);
+    else if (!corr) return null;
+    const LEGA = /^(?:(?:sul\s+gruppo(?:\s+(?:dei|degli|delle|della|del|di))?|al|alla|allo|ai|agli|alle|a|ad|il|la|lo|i|gli|le|con|un|una|uno|di|mi|subito|direttamente|pure|anche)\s+|(?:all|l|dell|coll)['’]\s*)/i;
+    let prima;
+    do { prima = dest; dest = dest.trim().replace(LEGA, ""); } while (dest !== prima);
+    // senza "che": il messaggio comincia dove finisce il nome ("ai ragazzi della squadra domani cantiere Miramonti ore 7")
+    const stop = dest.search(/[,;:]|\.{2,}|…|\s(?:oggi|domani|dopodomani|stasera|stamattina|luned\p{L}*|marted\p{L}*|mercoled\p{L}*|gioved\p{L}*|venerd\p{L}*|sabato|domenica|alle|ore|per|perché|perche|se|quando|e\s+digli|e\s+dille|digli|dille|dicendo\p{L}*)\b/iu);
+    let oggetto = "";
+    if (stop >= 0) {
+      const resto = dest.slice(stop).replace(/^[\s,;:.…]+/, "").replace(/^(?:e\s+)?(?:digli|dille|dicendo(?:gli|le)?)\s+(?:che\s+)?/i, "").trim();
+      dest = dest.slice(0, stop);
+      if (!messaggio) {
+        // "pec all'avvocato Donati per la messa in mora di Esposito": "per …" è l'oggetto, il testo lo scrive lui
+        if (/^per\s/i.test(resto)) oggetto = resto.replace(/^per\s+/i, "");
+        else messaggio = resto;
+      }
+    }
+    dest = dest.replace(/[.…!?]+$/, "").trim().split(/\s+/).slice(0, 5).join(" ");
+    if (!dest || /^(?:lo|la|li|le|gli|mi|ti|ci|vi|ne)$/i.test(dest)) return null;
+    // "manda un feedback: …", "manda la fattura a Rossi": non è una persona, restano ai loro percorsi
+    if (/^(?:feedback|segnalazion|suggeriment|recension|promemoria|notific|report|backup|fattur|preventiv|document|foto|pdf|file|contratt|computo|cartell|posizione|dico|di\.co|sal\b|ricevut|bonifico|pagament)/i.test(dest)) return null;
+    const cl = trovaCliente(parole(dest), ctx.clienti || [], new Set());
+    return {
+      azione: canale, testo: intero, originale: intero, nomeDetto: dest, messaggio: messaggio.replace(/[.!]+$/, ""), oggetto,
+      cliente: cl.stato === "trovato" ? cl.cliente : null,
+      candidati: cl.stato === "ambiguo" ? cl.candidati : null,
+      clienteSimile: cl.stato === "simile" ? cl.cliente : null
+    };
+  }
+
+  /* Passo 3 (30/09): il nome della cartella da creare, quando il modello ha detto "cartella":
+     "nuova cartella: Sicurezza cantieri", "fai una cartella nuova che si chiama Hotel
+     Belvedere lavori 2026", "crea una cartella per i lavori del tetto… chiamala Tetto Parco Verde" */
+  function leggiCartella(testoOriginale) {
+    const t = String(testoOriginale || "").replace(/\s+/g, " ").trim().replace(/[.!]+$/, "");
+    if (!/\b(?:crea|creami|fai|fammi|aggiungi|aggiungimi|apri|aprimi|nuova)\b/i.test(t) || !/\bcartell[ae]\b/i.test(t)) return null;
+    // "metti in cartella Scadenze pagare F24": una nota IN una cartella, non una cartella nuova
+    if (/\b(?:in|nella|dentro\s+la|sulla)\s+cartella\b/i.test(t)) return null;
+    let m = t.match(/\b(?:chiamala|chiamata|che\s+si\s+chiama|di\s+nome|col\s+nome|con\s+(?:il\s+)?nome)\s*:?\s+(.+)$/i)
+      || t.match(/\bcartella(?:\s+nuova)?\s*:\s*(.+)$/i)
+      || t.match(/\bcartella(?:\s+nuova)?\s+(?:per\s+(?:il|la|i|le|gli|lo)?\s*|di\s+|del\s+|della\s+)?(.+)$/i);
+    if (!m) return null;
+    const nome = m[1].replace(/^[«"'“]+|[»"'”]+$/g, "").trim();
+    if (!nome || nome.split(/\s+/).length > 6) return null;
+    return { nome };
+  }
+
+  /* Passo 3 (30/09): per quale cliente la dichiarazione di conformità, quando il modello ha
+     detto "dico": "mi serve la di.co. per il condominio via gramsci, impianto citofonico",
+     "la dico dell'hotel belvedere per le luci di emergenza, preparala…" */
+  function leggiDico(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const t = String(testoOriginale || "").replace(/\s+/g, " ").trim();
+    const m = t.match(/\b(?:di\.?\s*co\.?|dico|dichiarazione\s+di\s+conformit[aà]|conformit[aà])(?=[\s,.]|$)\s*(.*)$/i);
+    if (!m) return null;
+    let resto = m[1].replace(/^(?:(?:per|del|della|dello|di|a|al|alla|da|dal|dell['’]|all['’])\s*)?(?:(?:l['’]\s*|il\s+|la\s+)?(?:impianto|lavoro|cliente)\s+)?(?:(?:del|della|dei|di|da|dal|per|dell['’])\s*)?/i, "");
+    resto = resto.split(/[,;:]|\s(?:per|che|perch[eé]|preparala|fammela|falla)\b/i)[0].trim().replace(/^(?:il|la|lo|i|gli|le)\s+|^l['’]\s*/i, "").split(/\s+/).slice(0, 5).join(" ");
+    const cl = resto ? trovaCliente(parole(resto), ctx.clienti || [], new Set()) : { stato: "nessuno" };
+    return { cliente: cl.stato === "trovato" ? cl.cliente : null, nomeDetto: resto };
+  }
+
+  /* Passo 3 (30/09): l'assemblea, quando il modello ha detto "assemblea" ma la frase non
+     comincia come il lettore se l'aspetta ("mettimi l'assemblea del Parco Verde…", "c'è da
+     convocare n'altra volta l'assemblea dell'Aurora che la prima è andata deserta…"): il
+     condominio è quello nominato dopo "assemblea" (prima del motivo), il motivo dopo "per" */
+  function leggiAssemblea(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const t = String(testoOriginale || "").replace(/\s+/g, " ").trim();
+    const m = t.match(/\bassemble[ae]\b\s*(.*)$/i);
+    if (!m) return null;
+    const dopo = m[1];
+    const quando = trovaQuando(parole(pulisci(t).testo), ctx.oggi || new Date());
+    const testaNome = dopo.split(/[,;:]|\s(?:per|che|perch[eé]|il\s+\d|alle|oggi|domani|dopodomani|luned\p{L}*|marted\p{L}*|mercoled\p{L}*|gioved\p{L}*|venerd\p{L}*|sabato|domenica)\b/iu)[0];
+    let cl = trovaCliente(parole(testaNome), ctx.clienti || [], new Set(), { nomeSolo: true });
+    if (cl.stato !== "trovato") cl = trovaCliente(parole(dopo), ctx.clienti || [], new Set(), { nomeSolo: true });
+    let condominio = cl.stato === "trovato" ? cl.cliente.name : "";
+    if (!condominio) {
+      const nome = testaNome.replace(/^(?:(?:del|della|dello|dei|di|al|alla|in|nel|nella|presso)\s+|(?:dell|all|nell)['’]\s*)/i, "").replace(/^condominio\s+/i, "").trim();
+      if (nome && nome.split(/\s+/).length <= 4) condominio = "Condominio " + maiuscola(nome);
+    }
+    if (!condominio) return null;
+    const mm = dopo.match(/\bper\s+(?!\d)(.+?)(?=\s+il\s+\d|\s+(?:oggi|domani|dopodomani|luned\p{L}*|marted\p{L}*|mercoled\p{L}*|gioved\p{L}*|venerd\p{L}*|sabato|domenica|alle)\b|[,;]|$)/iu);
+    const motivo = mm ? maiuscola(mm[1].replace(/^(?:il|la|lo|i|gli|le)\s+|^l['’]\s*/i, "")) : "";
+    return { azione: "assemblea", testo: t, originale: t, condominio, cliente: cl.stato === "trovato" ? cl.cliente : null, tipo: /straordinari/i.test(t) ? "straordinaria" : "ordinaria", motivo, quando };
+  }
+
   function leggiNuovoCliente(testo) {
     const tel = trovaTelefono(testo);
     let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
@@ -1097,7 +1432,7 @@
     for (let i = 0; i < pp.length - 1; i++) {
       if (giaUsate.has(i) || !MARCHE_NOME.test(pp[i].n)) continue;
       const usate = [];
-      for (let j = i + 1; j < pp.length && usate.length < 3 && libero(j); j++) usate.push(j);
+      for (let j = i + 1; j < pp.length && usate.length < 3 && libero(j); j++) { usate.push(j); if (pp[j].sep) break; } // la virgola chiude il nome
       if (usate.length) return usate;
     }
     return null;
@@ -1280,7 +1615,13 @@
     const prefissoA = iAss >= 0 && iAss <= 3 && pp.slice(0, iAss).every((x) => /^(?:convoca|convocare|segna|segnami|fissa|fissare|metti|crea|nuova|l|un|una|la|devo|dobbiamo|bisogna|fare|organizza|organizzare|segnare)$/.test(x.n));
     if (iAss >= 0 && ((prefissoA && q.giornoIso && q.ora) || convocaA)) {
       const tipoA = ha(/^straordinari[ae]$/) ? "straordinaria" : "ordinaria";
-      const cl = trovaCliente(pp, ctx.clienti, usate);
+      let cl = trovaCliente(pp, ctx.clienti, usate);
+      /* "…assemblea, Magnolie, punto unico cambio della ditta delle pulizie": il motivo può
+         nominare un altro cliente (la ditta); il condominio è quello prima del motivo (30/09) */
+      if (cl.stato !== "trovato") {
+        const fine = pp.findIndex((x, i) => i > iAss && /^(?:per|punto|ordine|odg|motivo|argomento)$/.test(x.n));
+        if (fine > iAss) { const cl2 = trovaCliente(pp.slice(0, fine), ctx.clienti, usate); if (cl2.stato === "trovato") cl = cl2; }
+      }
       let condominio = cl.stato === "trovato" ? cl.cliente.name : "";
       const liberi = pp.map((x, i) => i).filter((i) => i > iAss && !usate.has(i) && !(cl.stato === "trovato" && cl.usate.includes(i)) && !/^(?:straordinari[ae]|ordinari[ae])$/.test(pp[i].n));
       // il motivo: "per il rifacimento del tetto", "per approvare il bilancio"
@@ -1691,7 +2032,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

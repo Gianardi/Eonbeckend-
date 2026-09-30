@@ -1,0 +1,21 @@
+{
+  "nota": "Frasi giuste dell'app intera per ogni serie (giorno fisso 29/09). eval/prove-frasi.sh fallisce se una serie scende sotto il minimo. Si alzano quando l'app migliora, mai si abbassano senza dirlo ad Andrea. Ultimo aggiornamento: 30/09 sera, passo 3 (8 cassetti).",
+  "serie": {
+    "frasi-nuove-mestieri.json": 143,
+    "frasi-giro5.json": 184,
+    "frasi-giro6.json": 175,
+    "frasi-giro7.json": 123,
+    "frasi-giro8.json": 120,
+    "frasi-giro9.json": 48,
+    "frasi-giro10.json": 127,
+    "frasi-giro11.json": 75,
+    "frasi-giro12.json": 59,
+    "frasi-giro13.json": 72,
+    "frasi-giro14.json": 47,
+    "frasi-prova-cieca.json": 77,
+    "frasi-prova-finale-app.json": 99,
+    "frasi-giro15.json": 1050,
+    "frasi-giro16.json": 1032,
+    "frasi-giro17.json": 1032
+  }
+}
