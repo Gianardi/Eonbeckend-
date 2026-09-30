@@ -1053,6 +1053,7 @@
   const INIZIO_TEMPO = /^(?:oggi|domani|dopodomani|stasera|stamattina|domattina|stanotte|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|alle|all|dalle|dall|ore|verso|mezzogiorno|mezzanotte|fra|tra|\d{1,2}(?::\d{2})?|\d{1,2}\/\d{1,2}|la|le|l)$/;
   const FERMA_TEMPO = /^(?:invece|anziche|non|ma|piuttosto|oppure|perche|che|cosi|dopo|prima|spostal\w*|sposta|mettil\w*|portal\w*|facciamol\w*|fall\w*|rimandal\w*|anticipal\w*|posticipal\w*|slitta|cambia|correggi)$/;
   const NEGA_TEMPO = /^(?:invece|anziche|non|posto)$/;
+  const VERBO_CAMBIO = /^(?:spost\w*|sposti|anticip\w*|posticip\w*|rimand\w*|slitt\w*|mettil\w*|mettimel\w*|mettiam\w*|portal\w*|portamel\w*|portiam\w*|falla|fallo|falle|falli|facciam\w*|famo|famola|famolo|invece|anziche|cambi\w*|corregg\w*|diventare)$/;
   const TIPI_IMPEGNO = /^(?:sopralluog\w*|appuntament\w*|verific\w*|consegn\w*|manutenzion\w*|riunion\w*|collaud\w*|preventiv\w*|intervent\w*|lavor\w*|incontr\w*|visit\w*|montaggi\w*|install\w*|chiamat\w*|telefonat\w*|cantier\w*)$/;
   function tempiDetti(pp, oggi) {
     const out = [];
@@ -1090,6 +1091,10 @@
     // Le parole che dicono QUALE impegno (cliente, lavoro, posto)
     const piene = pp.filter((x, k) => !usateTempo.has(k) && x.n.length >= 3 && !VUOTE.has(x.n) && !PAROLE_NON_NOME.test(x.n) && numeroParola(x.n) === null).map((x) => x.n);
     const giornoDi = (iso) => String(iso || "").slice(0, 10), oraDi = (iso) => String(iso || "").slice(11, 16);
+    // Per riconoscere l'impegno contano i tempi detti PRIMA del verbo che cambia
+    // ("il dentista di sabato | anticipalo alle 9": sabato sì, le 9 no, sono l'orario nuovo)
+    const iVerbo = pp.findIndex((x) => VERBO_CAMBIO.test(x.n));
+    const tempiRiconosci = iVerbo > 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i < iVerbo) : tempi;
     const punteggi = (impegni || []).map((imp) => {
       const suo = norm((imp.titolo || "") + " " + (imp.chi || "")).split(" ");
       const radice = (w) => w.slice(0, Math.max(4, w.length - 2));
@@ -1099,7 +1104,7 @@
       // a parità: quello che ha meno parole in più ("Verifica Villa Flora" prima di "Verifica impianto Villa Flora")
       p += 0.01 * (piene.filter((w) => suo.includes(w)).length / Math.max(1, suo.length));
       const parole = p;
-      tempi.forEach((t) => {
+      tempiRiconosci.forEach((t) => {
         if (t.giornoIso && t.giornoIso === giornoDi(imp.iso)) p += 2;
         if (t.ora && t.ora === oraDi(imp.iso)) p += 2;
       });
