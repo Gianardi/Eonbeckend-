@@ -15890,7 +15890,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
     /* Il modello dice "domanda sui tuoi dati" (passo 3): il lettore capisce il tema
        (agenda, soldi di un cliente, chi ti deve, incassi, documenti) e risponde il codice */
-    if(testo && !inCorso && !inContinuazione && cassettoNeurale(testo) === "dati"){
+    // (una o due parole, "apri…", "vai…": è il nome di una pagina, non una domanda)
+    if(testo && !inCorso && !inContinuazione && testo.trim().split(/\s+/).length >= 3 && !/^\s*(?:apri|aprimi|vai|mostra|mostrami|fammi\s+vedere)\b/i.test(testo) && cassettoNeurale(testo) === "dati"){
       const ld = EonLettore.leggiDomandaDati(testo, contestoLettore());
       const r = ld ? rispondiSuiDati(ld) : null;
       if(r){
