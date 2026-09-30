@@ -4981,7 +4981,7 @@ ROADMAP 0b.11.
     mestiere);
   - RLS: insert solo per sé E col consenso acceso (controllato nel database, non solo
     nell'app); select e delete solo le proprie;
-  - staging fatta il 30/09; produzione in attesa dell'ok di Andrea.
+  - staging e produzione fatte il 30/09 (produzione con l'ok di Andrea).
 - **App** (`index.html`):
   - `registraFraseAddestramento(testo, esito)` in `ricordaEsitoCodice` (tutto quello che fa
     il codice) e in `inviaAlServer` (esito "ai" o "server_<azione>"; non le risposte a una

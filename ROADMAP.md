@@ -897,7 +897,7 @@ di frasi vere, etichettate, per addestrare un piccolo modello loro. Piano in 3 p
    dettatura, frasi lunghe e confuse, più cose insieme) e farle girare nel
    simulatore (`eval/simulatore.test.mjs`) per trovare i buchi veri del
    lettore. Costo: pochi euro (stima).
-2. **Con i tester** — **FATTO il 30/09 (sera), manca solo la tabella in produzione.**
+2. **Con i tester** — **FATTO il 30/09 (sera)** (tabella in staging e in produzione, con l'ok di Andrea).
    Andrea: "ogni richiesta del tester viene registrata e poi le metti tutte
    insieme per addestrare il modello".
    - **Interruttore:** Impostazioni → Privacy e dati → **"Aiuta a migliorare
@@ -917,7 +917,7 @@ di frasi vere, etichettate, per addestrare un piccolo modello loro. Piano in 3 p
    - **Pannello admin:** solo i numeri (quante frasi, ultimi 7 giorni, quanti
      utenti col consenso), mai il testo.
    - **Tabella** `frasi_addestramento` (`supabase/frasi_addestramento.sql`):
-     su staging fatta; in produzione dopo l'ok di Andrea.
+     staging e produzione fatte il 30/09.
    - **Prova automatica:** `eval/frasi-addestramento-app.test.js`.
    - **Anonimizzazione, onestà:** un cognome detto da solo che non è tra i
      clienti e senza "signor/dottor…" davanti ("preventivo per Rossi") resta.
