@@ -37,7 +37,7 @@ NASCONDI = os.environ.get("NASCONDI_ESAME") == "1"
 palestra = [x for x in esame if not x["insieme"].startswith(("giro 16", "giro 17"))]
 
 # la maestra pesa di più: frasi scritte a mano, più varie del frasario
-PESO_FONTE = {"maestra": float(os.environ.get("PESO_MAESTRA", "3")), "confini": float(os.environ.get("PESO_CONFINI", "3")), "frasario": 1.0, "generatore": 0.7, "simulatore": 1.0}
+PESO_FONTE = {"maestra": float(os.environ.get("PESO_MAESTRA", "3")), "confini": float(os.environ.get("PESO_CONFINI", "3")), "frasario": float(os.environ.get("PESO_FRASARIO", "1")), "generatore": float(os.environ.get("PESO_GENERATORE", "0.7")), "simulatore": 1.0}
 
 # ---------- Il vocabolario (WordPiece) ----------
 SPECIALI = ["[PAD]", "[UNK]", "[CLS]", "<tempo>", "<soldi>", "<tel>", "<num>", "<dom>"]
