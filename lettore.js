@@ -1193,6 +1193,30 @@
     return { ...l, testoLetto: t };
   }
 
+  /* ---------------- Domande sui propri dati (passo 3, 30/09/2026) ----------------
+     Il modello neurale ha deciso che è una domanda sui TUOI dati (agenda, soldi,
+     documenti). Qui si capisce solo il tema e di chi/quando si parla; risponde
+     il codice di sempre (rispondiSuiDati). Nessun tema sicuro = null (decide chi
+     viene dopo, al massimo l'AI). */
+  function leggiDomandaDati(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const p = pulisci(testoOriginale);
+    const pp = parole(p.testo);
+    const n = pp.map((x) => x.n).join(" ");
+    const q = trovaQuando(pp, ctx.oggi);
+    const cl = trovaCliente(pp, ctx.clienti || [], new Set(q.usate));
+    const cliente = cl.stato === "trovato" ? cl.cliente : null;
+    const quando = { giornoIso: q.giornoIso, etichetta: q.etichetta, ora: q.ora, fascia: q.fascia };
+    let tema = null;
+    if (/\b(?:preventiv[oi]|fattur[ae])\b/.test(n) && /\b(?:accettat\w*|rispost\w*|risposto|mandat[oi]|inviat[oi]|fatt[oa]|fatte|apert[oi]|firmat[oi])\b/.test(n)) tema = "documenti";
+    else if (/\bnon\s+(?:mi\s+|m\s+)?(?:paga|pagano|ha\s+(?:ancora\s+)?pagato|hanno\s+(?:ancora\s+)?pagato|(?:ha|hanno)\s+(?:ancora\s+)?dato)\b|\bda\s+riscuotere\b|\briscuot\w*\b|\bmi\s+deve\w*\b/.test(n)) tema = "crediti";
+    else if (/\b(?:quanto|cosa)\b.*\b(?:dato|versato|pagato|preso|saldato)\b|\b(?:ha|hanno)\s+(?:gia\s+)?(?:saldato|pagato)\b|\bacconto\b.*\b(?:dato|dat[oi]|versat[oi])\b|\b(?:riepilogo|riassunto|resoconto)\s+degli\s+incassi\b|\bquanto\s+ho\s+(?:preso|incassato)\b/.test(n)) tema = "incassi";
+    else if (/\b(?:lavori|giri|appuntament\w*|impegn\w*|consegn\w*)\b.*\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mese)\b|\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b.*\b(?:lavori|giri|appuntament\w*|impegn\w*)\b|\bc\s*ho\b|\bcom\s*e\s+messa\b|\b(?:riepilogo|punto|riassunto)\s+dei\s+lavori\b|\bquand\s*e\s+che\s+devo\b|\bin\s+agenda\b/.test(n)) tema = "agenda";
+    else if (/\b(?:cosa|che)\s+(?:mi\s+)?(?:ero|avevo)\s+segnat\w*\b/.test(n) && cliente) tema = "note_cliente";
+    if (!tema) tema = temaDomanda(n);
+    return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim() } : null;
+  }
+
   function leggiNuovoCliente(testo) {
     const tel = trovaTelefono(testo);
     let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
@@ -1844,7 +1868,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

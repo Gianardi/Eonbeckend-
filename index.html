@@ -13309,6 +13309,22 @@ function rispondiSuiDati(l){
     if(!voci.length) return { titolo: quando.charAt(0).toUpperCase() + quando.slice(1), testo: "Niente in programma per " + quando + "." };
     return { titolo: (voci.length === 1 ? "1 impegno " : voci.length + " impegni ") + quando, testo: voci.map(v => v.ora ? "**" + v.ora + "** – " + v.titolo : v.titolo).join("\n") };
   }
+  /* "Il preventivo della palestra l'hanno accettato?", "l'ho fatta la fattura alle
+     Magnolie?" (passo 3): i documenti di quel cliente. Se l'hanno accettato EON non
+     lo sa (non si registra ancora): lo dice, non inventa. */
+  if(l.tema === "documenti" && (l.cliente || /\b(?:accettat|rispost|risposto|mandat|inviat|firmat)/.test(n))){
+    const tipo = /\bfattur/.test(n) ? "fattura" : "preventivo";
+    const chiedeEsito = /\b(?:accettat|rispost|risposto|firmat)/.test(n);
+    const docs = documentiVeri().filter(d => d.dati && d.dati.tipo === tipo && (!l.cliente || nomeChiave(d.clienteChat || "") === nomeChiave(l.cliente.name)));
+    const nome = tipo === "fattura" ? "fattura" : "preventivo", nomi = tipo === "fattura" ? "fatture" : "preventivi";
+    const nota = chiedeEsito ? "\nSe l'hanno accettato EON non lo sa ancora: quando ti rispondono, dimmelo e lo segno nella Mente." : "";
+    if(!docs.length) return { titolo: l.cliente ? l.cliente.name : nomi.charAt(0).toUpperCase() + nomi.slice(1), testo: "Non trovo " + nomi + " fatti con EON" + (l.cliente ? " per " + l.cliente.name : "") + "." };
+    const quandoDoc = (d) => { const x = d.createdAt ? new Date(d.createdAt) : null; return x && !isNaN(x) ? x.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : ""; };
+    return { titolo: l.cliente ? l.cliente.name + ": " + (docs.length === 1 ? "1 " + nome : docs.length + " " + nomi) : "Ultimi " + nomi,
+      testo: docs.slice(0, 6).map(d => (l.cliente ? "" : "**" + (d.clienteChat || "") + "** – ") + euroConti(Number(d.dati.totale) || 0) + (quandoDoc(d) ? " · fatto il " + quandoDoc(d) : "") + (d.dati.numero ? " · n. " + d.dati.numero : "")).join("\n") + nota };
+  }
+  // "Cosa mi ero segnato su Fontana?": la sua scheda, con gli appunti
+  if(l.tema === "note_cliente" && l.cliente){ chiudiRisorsaCard(); mostraSchedaCliente(clients.find(c => c.id === l.cliente.id) || l.cliente); return { gestito: true }; }
   /* "Quanti preventivi ho fatto questo mese?" (giro 5): contati dai documenti fatti con EON */
   if(l.tema === "documenti"){
     const tipo = /\bfattur/.test(n) ? "fattura" : "preventivo";
@@ -15871,6 +15887,21 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       const rd = ld && ld.modo === "crea" ? gestisciDocumento(ld, testo, (frase, p) => elabora(frase, false, p)) : null;
       if(rd && rd.comando){ ricordaEsitoCodice(testo, "documento_neurale"); return inviaAlServer(testo, viaVoce, false, rd); }
       if(rd && rd.fatto){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "documento_neurale"); return; }
+    }
+    /* Il modello dice "domanda sui tuoi dati" (passo 3): il lettore capisce il tema
+       (agenda, soldi di un cliente, chi ti deve, incassi, documenti) e risponde il codice */
+    if(testo && !inCorso && !inContinuazione && cassettoNeurale(testo) === "dati"){
+      const ld = EonLettore.leggiDomandaDati(testo, contestoLettore());
+      const r = ld ? rispondiSuiDati(ld) : null;
+      if(r){
+        if(!r.gestito){
+          const righe = String(r.testo || "").split("\n").filter(Boolean);
+          mostraRispostaEON(testo, righe.length > 1 ? righe.map(x => "- " + x).join("\n") : r.testo, { titolo: r.titolo });
+          if(viaVoce) parlaRisposta(r.titolo + (r.testo ? ": " + r.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
+        }
+        campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "dati_neurale_" + ld.tema);
+        return;
+      }
     }
     if(testo && !inCorso && !inContinuazione && await provaUrgenza(testo)){
       campo.value = "";
