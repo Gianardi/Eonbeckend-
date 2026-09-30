@@ -13386,8 +13386,9 @@ function provaModello(l, testo, arbitro){
   }
   if(r.p < 0.85) return null;
   if(/^(?:mente|cartella|calendario|documento|dati)$/.test(r.intento)) return null; // quelli li leggono già le regole
-  // Come sopra: un appunto non diventa un allarme rosso (le urgenze le riconosce il codice)
-  if(r.intento === "urgenza" && l && l.azione === "mente") return null;
+  // Un appunto diventa urgenza solo se il modello è sicurissimo: le emergenze dette senza
+  // "urgente" le prende lui, ma niente allarmi per un fatto tranquillo ("il portiere è in ferie")
+  if(r.intento === "urgenza" && l && l.azione === "mente" && r.p < 0.9) return null;
   if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" ? { alServer: true, intento: r.intento } : null;
   // Scrivere a un cliente partendo da una nota: solo se il modello è sicurissimo (e il messaggio chiede sempre conferma)
   if((r.intento === "messaggio" || r.intento === "email") && l && l.azione === "mente" && r.p < 0.95) return null;
