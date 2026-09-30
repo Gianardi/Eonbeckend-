@@ -5059,7 +5059,7 @@ ROADMAP 0b.11.
     sono un racconto: saltati, e non contano per "di mattina".
 - **Assemblea:** se il cliente non si trova, si cerca solo prima del motivo
   (per / punto / ordine / odg).
-- **Minimi alzati:** giro 15 1046, giro 16 1021, giro 17 1016.
+- **Minimi alzati:** giro 15 1046, giro 16 1021, giro 17 1016 (poi, la sera: 1050, 1032, 1032).
 - **Restano:**
   - chiamate a chi non è in rubrica ("chiama il geometra Rovelli"): EON dice
     che non ha il numero;
