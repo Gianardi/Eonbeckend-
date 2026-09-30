@@ -1151,7 +1151,10 @@
     const dueComandi = /\b(?:e|poi|e\s+poi)\s+(?:segna\w*|metti\w*|chiama\w*|manda\w*|scrivi\w*|fai|fammi|aggiungi\w*|crea\w*|ricorda\w*)\b/.test(n);
     // Senza una parola che dica di cambiare ("Rita domani alle 9 sopralluogo") è un impegno nuovo, non uno spostamento
     const cambio = /\b(?:spost\w*|rimand\w*|anticip\w*|posticip\w*|slitt\w*|cambi\w*|corregg\w*|mettil\w*|mettimel\w*|portal\w*|portamel\w*|falla|fallo|falle|falli|facciam\w*|mettiam\w*|portiam\w*|famo|famola|famolo|invece|anziche|diventare|cancell\w*|annull\w*|togli\w*|levalo|levala|levali|elimin\w*|disdett\w*|disdic\w*|salta\w*|sposti|dopo|prima)\b|\bnon\s+(?:puo|riesce|viene|vengono|ce\s+la|si\s+fa|c\s+e|piu)\b/.test(n);
-    if (altraCosa || dueComandi || !cambio) return { tipo: null, impegni: [], nuovoPer, tempi, parole: piene, motivo: altraCosa ? "non è un impegno" : dueComandi ? "due comandi" : "nessun cambio detto" };
+    // Senza un nome né un lavoro ("annulla gli appuntamenti di domani pomeriggio") decidono
+    // le regole per giorno e fascia, che li prendono tutti insieme
+    const soloTempo = !piene.some((w) => !TIPI_IMPEGNO.test(w));
+    if (altraCosa || dueComandi || !cambio || soloTempo) return { tipo: null, impegni: [], nuovoPer, tempi, parole: piene, motivo: altraCosa ? "non è un impegno" : dueComandi ? "due comandi" : !cambio ? "nessun cambio detto" : "solo giorno e ora" };
     return { tipo, impegni: migliori, nuovoPer, tempi, parole: piene };
   }
 
