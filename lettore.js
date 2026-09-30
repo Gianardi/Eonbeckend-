@@ -1507,7 +1507,13 @@
     const prefissoA = iAss >= 0 && iAss <= 3 && pp.slice(0, iAss).every((x) => /^(?:convoca|convocare|segna|segnami|fissa|fissare|metti|crea|nuova|l|un|una|la|devo|dobbiamo|bisogna|fare|organizza|organizzare|segnare)$/.test(x.n));
     if (iAss >= 0 && ((prefissoA && q.giornoIso && q.ora) || convocaA)) {
       const tipoA = ha(/^straordinari[ae]$/) ? "straordinaria" : "ordinaria";
-      const cl = trovaCliente(pp, ctx.clienti, usate);
+      let cl = trovaCliente(pp, ctx.clienti, usate);
+      /* "…assemblea, Magnolie, punto unico cambio della ditta delle pulizie": il motivo può
+         nominare un altro cliente (la ditta); il condominio è quello prima del motivo (30/09) */
+      if (cl.stato !== "trovato") {
+        const fine = pp.findIndex((x, i) => i > iAss && /^(?:per|punto|ordine|odg|motivo|argomento)$/.test(x.n));
+        if (fine > iAss) { const cl2 = trovaCliente(pp.slice(0, fine), ctx.clienti, usate); if (cl2.stato === "trovato") cl = cl2; }
+      }
       let condominio = cl.stato === "trovato" ? cl.cliente.name : "";
       const liberi = pp.map((x, i) => i).filter((i) => i > iAss && !usate.has(i) && !(cl.stato === "trovato" && cl.usate.includes(i)) && !/^(?:straordinari[ae]|ordinari[ae])$/.test(pp[i].n));
       // il motivo: "per il rifacimento del tetto", "per approvare il bilancio"
