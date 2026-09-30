@@ -1,0 +1,737 @@
+{
+"confini": "giro 18: sfoghi e chiacchiere (domanda) vs da fare; domande di mestiere vs appunti; 'cosa avevo scritto su X' (dati) vs aprire un file vs appunto; stato avanzamento (sal) vs appunti di cantiere; fatti tranquilli (mente) vs emergenze; fatti che nominano fattura/mail/whatsapp/giorni (mente) vs azioni; dialetti (ricordami/chiama); sposta vs fissa con correzione; wa/sms abbreviati; incassi detti in tanti modi",
+"frasi": [
+[
+"che giornata oggi, sono distrutto",
+"domanda"
+],
+[
+"oggi devo passare dal commercialista a portare le ricevute",
+"calendario"
+],
+[
+"madonna che mattinata, tre clienti arrabbiati di fila",
+"domanda"
+],
+[
+"stamattina alle 10 passo dai Colombo a misurare la cucina",
+"calendario"
+],
+[
+"non ne posso più di sti fornitori che non consegnano mai",
+"domanda"
+],
+[
+"domani chiamare il fornitore che non ha ancora consegnato",
+"calendario"
+],
+[
+"uffa oggi piove e il cantiere è fermo",
+"domanda"
+],
+[
+"oggi pomeriggio sistemare il furgone dal meccanico",
+"calendario"
+],
+[
+"mamma mia che caldo oggi in cantiere, si schiatta",
+"domanda"
+],
+[
+"porca miseria ho bucato una gomma col furgone",
+"domanda"
+],
+[
+"oggi alle 5 gommista per il furgone",
+"calendario"
+],
+[
+"che stanchezza stasera, non vedo l'ora di andare a letto",
+"domanda"
+],
+[
+"stasera alle 8 cena col geometra Sartori",
+"calendario"
+],
+[
+"ma ti rendi conto, il Brambilla vuole lo sconto anche stavolta",
+"domanda"
+],
+[
+"sti clienti che non pagano mai mi fanno impazzire",
+"domanda"
+],
+[
+"ricordami di sollecitare il Brambilla che non ha pagato",
+"calendario"
+],
+[
+"l'Inter ha perso di nuovo, che disastro",
+"domanda"
+],
+[
+"il Napoli ha vinto ieri sera, grande partita",
+"domanda"
+],
+[
+"che traffico sulla tangenziale stamattina, un'ora per fare dieci km",
+"domanda"
+],
+[
+"ueh che giurnata oggi, nun ce la faccio cchiù",
+"domanda"
+],
+[
+"ostia che fadiga oggi in cantier",
+"domanda"
+],
+[
+"mizzica che caldo stamatina",
+"domanda"
+],
+[
+"boia che freddo stamattina sul tetto",
+"domanda"
+],
+[
+"maremma maiala che giornata",
+"domanda"
+],
+[
+"oggi proprio non è giornata, mi è caduto pure il telefono",
+"domanda"
+],
+[
+"son cotto, oggi ho fatto tre traslochi",
+"domanda"
+],
+[
+"basta, per oggi chiudo baracca",
+"domanda"
+],
+[
+"che noia le pratiche del comune, non finiscono mai",
+"domanda"
+],
+[
+"oggi devo fare la pratica al comune per la Rossi",
+"calendario"
+],
+[
+"sono stufa di rincorrere i condomini morosi",
+"domanda"
+],
+[
+"lunedì mattina sollecito ai morosi del condominio Aurora",
+"calendario"
+],
+[
+"bella giornata oggi, finalmente il sole",
+"domanda"
+],
+[
+"buongiorno EON come va",
+"saluto"
+],
+[
+"ciao EON grazie di tutto",
+"saluto"
+],
+[
+"che fatica oggi con la signora Pini, voleva cambiare tutto",
+"domanda"
+],
+[
+"oggi la signora Pini ha cambiato idea sulle piastrelle, vuole quelle grigie",
+"mente"
+],
+[
+"che rabbia, il grossista ha sbagliato di nuovo l'ordine",
+"domanda"
+],
+[
+"il grossista ha sbagliato l'ordine, ci devono mandare i raccordi da 20",
+"mente"
+],
+[
+"ma perché tutti chiamano all'ora di pranzo",
+"domanda"
+],
+[
+"che bello, il cliente mi ha fatto i complimenti",
+"domanda"
+],
+[
+"che sezione di cavo ci vuole per un forno da 6 kW a 25 metri",
+"domanda"
+],
+[
+"per il forno dei Galli servono 25 metri di cavo da 6",
+"mente"
+],
+[
+"meglio il multistrato o il rame per un impianto nuovo",
+"domanda"
+],
+[
+"dai Rossi l'impianto è tutto in multistrato",
+"mente"
+],
+[
+"la colla per piastrelle grandi va bene anche in esterno o no",
+"domanda"
+],
+[
+"sul terrazzo dei Neri abbiamo usato la colla per esterni",
+"mente"
+],
+[
+"quanto tempo deve asciugare il massetto prima del parquet",
+"domanda"
+],
+[
+"il massetto dei Conti è stato fatto lunedì, parquet tra un mese",
+"mente"
+],
+[
+"la gommalacca si può dare sopra la cera vecchia",
+"domanda"
+],
+[
+"sul comò della signora Riva c'è la cera vecchia da togliere",
+"mente"
+],
+[
+"entro quando si paga l'F24 delle ritenute",
+"domanda"
+],
+[
+"per il condominio Aurora le ritenute le paga lo studio Bassi",
+"mente"
+],
+[
+"come si calcola la quota di un condomino che ha venduto a metà anno",
+"domanda"
+],
+[
+"il signor Rota del condominio Tigli ha venduto a giugno",
+"mente"
+],
+[
+"per un cappotto da 10 cm serve il tassello lungo quanto",
+"domanda"
+],
+[
+"sul cappotto dei Serra abbiamo messo i tasselli da 180",
+"mente"
+],
+[
+"conviene di più la pompa di calore o la caldaia a condensazione per una villetta",
+"domanda"
+],
+[
+"la villetta dei Longo ha la caldaia a condensazione del 2015",
+"mente"
+],
+[
+"che differenza c'è tra gommapiuma e memory per un materasso",
+"domanda"
+],
+[
+"per il divano dei Ferri il cliente vuole la gommapiuma densità 35",
+"mente"
+],
+[
+"a quanto si fa pagare un'uscita notturna di solito",
+"domanda"
+],
+[
+"per le uscite notturne col condominio Aurora abbiamo detto 90 euro",
+"mente"
+],
+[
+"cosa avevo scritto sul cancello dei Moretti",
+"dati"
+],
+[
+"fammi vedere la foto del cancello dei Moretti",
+"cerca_documento"
+],
+[
+"segna sul cancello dei Moretti che va riverniciato",
+"mente"
+],
+[
+"cosa mi ero segnato sul condominio Aurora",
+"dati"
+],
+[
+"apri il regolamento del condominio Aurora",
+"cerca_documento"
+],
+[
+"cosa mi ero appuntata sulla signora Bassi",
+"dati"
+],
+[
+"cosa avevo annotato sulle misure della cucina dei Colombo",
+"dati"
+],
+[
+"trovami la piantina della cucina dei Colombo",
+"cerca_documento"
+],
+[
+"le misure della cucina dei Colombo sono 3 metri e 20 per 2 e 80",
+"mente"
+],
+[
+"fammi rileggere cosa avevo scritto sul contatore del Parco Verde",
+"dati"
+],
+[
+"fammi vedere lo schema del quadro del Parco Verde",
+"cerca_documento"
+],
+[
+"che cosa avevo detto sul portiere del condominio Tigli",
+"dati"
+],
+[
+"il portiere del condominio Tigli va in ferie ad agosto",
+"mente"
+],
+[
+"mi ero segnato qualcosa sulla caldaia dei Ferri?",
+"dati"
+],
+[
+"avevo scritto qualcosa sul fornitore delle piastrelle?",
+"dati"
+],
+[
+"dove avevo scritto il codice del cancello dei Neri",
+"dati"
+],
+[
+"il codice del cancello dei Neri è 4521",
+"mente"
+],
+[
+"cosa sapevo del ragionier Galli",
+"dati"
+],
+[
+"leggimi gli appunti sul cantiere di via Roma",
+"dati"
+],
+[
+"aprimi la relazione del geometra sul cantiere di via Roma",
+"cerca_documento"
+],
+[
+"cosa c'era scritto sulla perdita dei Martini",
+"dati"
+],
+[
+"fammi vedere le foto della perdita dei Martini",
+"cerca_documento"
+],
+[
+"cossa gavevo scrito sul tetto del Bepi",
+"dati"
+],
+[
+"che m'ero segnato pe' la signora Ada",
+"dati"
+],
+[
+"cosa avevamo deciso col Longo per le finestre",
+"dati"
+],
+[
+"dai Rossi il bagno è a metà",
+"sal"
+],
+[
+"dai Rossi nel bagno manca ancora il piatto doccia",
+"mente"
+],
+[
+"la facciata del condominio Tigli è al sessanta per cento",
+"sal"
+],
+[
+"sulla facciata del condominio Tigli c'è una crepa sopra il portone",
+"mente"
+],
+[
+"il tetto dei Galli è finito, tutto fatto",
+"sal"
+],
+[
+"il tetto dei Galli perde ancora vicino al camino",
+"mente"
+],
+[
+"cappotto dei Serra fatto all'ottanta per cento",
+"sal"
+],
+[
+"per il cappotto dei Serra mancano 20 pannelli",
+"mente"
+],
+[
+"semo a metà col bagno del Bepi",
+"sal"
+],
+[
+"el bagno del Bepi el ga le piastrelle storte",
+"mente"
+],
+[
+"la cucina dei Colombo è quasi finita, diciamo al novanta",
+"sal"
+],
+[
+"la cucina dei Colombo aspetta il top in quarzo",
+"mente"
+],
+[
+"siamo a tre quarti dei lavori alla villa Riva",
+"sal"
+],
+[
+"alla villa Riva i lavori si fermano ad agosto",
+"mente"
+],
+[
+"avanzamento lavori scuola: 40 per cento",
+"sal"
+],
+[
+"i lavori della scuola li segue l'ingegner Pace",
+"mente"
+],
+[
+"il capannone Moretti è al 25 per cento, solo fondazioni",
+"sal"
+],
+[
+"nel capannone Moretti le fondazioni sono più profonde del previsto",
+"mente"
+],
+[
+"metà lavori fatti dai Neri, fatturiamo il SAL",
+"sal"
+],
+[
+"segna che il rifacimento del tetto dei Martini è completato al cento per cento",
+"sal"
+],
+[
+"segna che al tetto dei Martini servono altre 30 tegole",
+"mente"
+],
+[
+"col condominio Aurora siamo a un terzo della facciata",
+"sal"
+],
+[
+"dai Bianchi il muro del soggiorno è portante, non si tocca",
+"mente"
+],
+[
+"dai Bianchi è venuto giù un pezzo di muro, c'è polvere dappertutto e gente in casa",
+"urgenza"
+],
+[
+"il condominio Tigli ha il contatore del gas vecchio, deve cambiarlo il distributore non noi",
+"mente"
+],
+[
+"al condominio Tigli si sente puzza di gas forte nel vano scala",
+"urgenza"
+],
+[
+"la palestra ha la caldaia che dà errore ogni tanto, forse è la sonda",
+"mente"
+],
+[
+"la palestra è senza riscaldamento e senza acqua calda, hanno le docce piene di gente",
+"urgenza"
+],
+[
+"le sedie del ristorante Sole sono dodici e due hanno la seduta rotta",
+"mente"
+],
+[
+"al ristorante Sole è saltata la corrente in cucina in pieno servizio",
+"urgenza"
+],
+[
+"il pozzetto del condominio Aurora ha il chiusino rotto, lo deve sistemare il comune",
+"mente"
+],
+[
+"il pozzetto del condominio Aurora è intasato e l'acqua sta entrando nei garage",
+"urgenza"
+],
+[
+"all'hotel Lido una tenda della camera 5 si è bruciacchiata tempo fa, da cambiare",
+"mente"
+],
+[
+"all'hotel Lido ha preso fuoco una tenda in camera 5, c'è fumo nel corridoio",
+"urgenza"
+],
+[
+"mi dicono che al condominio Pini c'è un signore bloccato in ascensore",
+"urgenza"
+],
+[
+"il condominio Pini ha l'ascensore vecchio, prima o poi va rifatto",
+"mente"
+],
+[
+"la signora Rota ha il salvavita che scatta quando accende il forno",
+"mente"
+],
+[
+"la signora Rota è senza luce in tutta la casa e ha la bambina piccola",
+"urgenza"
+],
+[
+"il ragionier Ferri è pignolo con le fatture, vuole sempre il dettaglio",
+"mente"
+],
+[
+"il cliente Costa paga sempre a 90 giorni, tenerne conto",
+"mente"
+],
+[
+"la signora Gualtieri vuole le fatture intestate alla società, non a lei",
+"mente"
+],
+[
+"fai la fattura alla signora Gualtieri intestata alla società, 350 euro",
+"documento"
+],
+[
+"il condominio Aurora vuole le fatture sempre con la ritenuta",
+"mente"
+],
+[
+"l'amministratore dei Tigli risponde solo per mail, al telefono mai",
+"mente"
+],
+[
+"manda una mail all'amministratore dei Tigli per il sopralluogo",
+"email"
+],
+[
+"idea: fare un gruppo whatsapp per ogni cantiere così i clienti non mi chiamano la sera",
+"mente"
+],
+[
+"scrivi su whatsapp al gruppo del cantiere Riva che domani non si lavora",
+"messaggio"
+],
+[
+"il fornitore Edilnord manda i preventivi solo su whatsapp",
+"mente"
+],
+[
+"mia moglie dice di non prendere lavori il sabato pomeriggio",
+"mente"
+],
+[
+"sabato pomeriggio niente lavori, lo dice mia moglie, ricordatelo",
+"mente"
+],
+[
+"sabato alle 3 dai Neri per la caldaia",
+"calendario"
+],
+[
+"memo: il Longo il lunedì ha il negozio chiuso",
+"mente"
+],
+[
+"lunedì mattina alle 9 dal Longo in negozio",
+"calendario"
+],
+[
+"il Ferrari il martedì non c'è mai, meglio andare il mercoledì",
+"mente"
+],
+[
+"mercoledì alle 10 dal Ferrari",
+"calendario"
+],
+[
+"la Bassi vuole essere chiamata solo dopo le 6 di sera",
+"mente"
+],
+[
+"il geometra Sala preferisce whatsapp alle telefonate",
+"mente"
+],
+[
+"scrivi al geometra Sala che il rilievo è pronto",
+"messaggio"
+],
+[
+"ricordami doman de ciamar el geometra",
+"calendario"
+],
+[
+"ciama el geometra",
+"chiamata"
+],
+[
+"ricordame dopodomani de portar la scala dal Toni",
+"calendario"
+],
+[
+"ciama el Toni che l'è in ritardo",
+"chiamata"
+],
+[
+"arricordami dumani di chiamà u fornituri",
+"calendario"
+],
+[
+"chiamami u fornituri ca nun è arrivatu",
+"chiamata"
+],
+[
+"m'arricordi giovedì de passà dar Mario",
+"calendario"
+],
+[
+"fammi parlà cor Mario",
+"chiamata"
+],
+[
+"ricordati domani de sentì er fabbro",
+"calendario"
+],
+[
+"dammi el numero del fabbro e ciamalo",
+"chiamata"
+],
+[
+"la riunione dei Tigli di venerdì portala alle 16",
+"calendario_modifica"
+],
+[
+"fissa venerdì alle 10 la riunione dei Tigli, no mettila alle 11",
+"calendario"
+],
+[
+"il sopralluogo dai Neri di domani spostalo alle 3",
+"calendario_modifica"
+],
+[
+"fissami domani un sopralluogo dai Neri alle 9, anzi alle 10",
+"calendario"
+],
+[
+"Bassi domani anticipiamo alle 8 e mezza",
+"calendario_modifica"
+],
+[
+"Bassi domani alle 8 e mezza sopralluogo",
+"calendario"
+],
+[
+"col Conti giovedì posticipiamo di un'ora",
+"calendario_modifica"
+],
+[
+"col Conti giovedì alle 4 appuntamento in cantiere",
+"calendario"
+],
+[
+"l'appuntamento del Riva di lunedì fallo slittare a martedì",
+"calendario_modifica"
+],
+[
+"il Moretti di sabato annullalo che non può",
+"calendario_modifica"
+],
+[
+"wa a Rossi la caldaia è a posto, era la sonda",
+"messaggio"
+],
+[
+"la caldaia dei Rossi è a posto, era la sonda",
+"mente"
+],
+[
+"wa al fornitore mi servono 10 sacchi di colla per domani",
+"messaggio"
+],
+[
+"al fornitore servono 10 sacchi di colla da ordinare",
+"mente"
+],
+[
+"sms alla signora Pini arrivo tra mezz'ora",
+"messaggio"
+],
+[
+"whats al Bepi che domani no se lavora",
+"messaggio"
+],
+[
+"manda un wa a Colombo: pezzo arrivato",
+"messaggio"
+],
+[
+"wapp alla Neri che passo lunedì",
+"messaggio"
+],
+[
+"preso 120 euro contanti dal signor Galli per la riparazione",
+"incasso"
+],
+[
+"devo ancora prendere 120 euro dal signor Galli",
+"mente"
+],
+[
+"incassati 60 euro da una signora per un lavoretto al volo",
+"incasso"
+],
+[
+"presi 300 euro di acconto dalla Bassi col bonifico",
+"incasso"
+],
+[
+"il Longo m'ha dato 200 euro in mano per il cancello",
+"incasso"
+],
+[
+"il Longo deve darmi 200 euro per il cancello",
+"mente"
+],
+[
+"riscossi 500 euro dal condominio Aurora",
+"incasso"
+],
+[
+"m'hanno pagato i Neri, 800 euro con assegno",
+"incasso"
+],
+[
+"i Neri pagano a fine mese",
+"mente"
+],
+[
+"entrati 1.200 euro dal bonifico dei Colombo",
+"incasso"
+]
+]
+}

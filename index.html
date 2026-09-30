@@ -13415,6 +13415,8 @@ function rispondiSuiDati(l){
    Una domanda o un saluto che le regole mettevano nella Mente va invece a
    chi risponde. Mai due volte di fila (niente giri a vuoto). */
 const SOGLIA_NEURALE = 0.9;
+// "wa a Didonna…", "whatsapp al grossista…", "sms alla Pini…": un messaggio detto chiaro, anche con un'ora dentro (giro 18)
+const MESSAGGIO_ESPLICITO = /^\s*(?:wa|whatsapp|whats|wapp|sms|manda\s+un\s+(?:wa|whatsapp|messaggio|sms))\b/i;
 // "fammi un documento…" chiede di FARE; "fammi (ri)vedere / trovare / aprire…" chiede di cercare
 const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b(?!\s+(?:ri)?(?:vedere|trovare|aprire|cercare|leggere|sentire|avere|mandare))/i.test(String(testo || ""));
 function provaModello(l, testo, arbitro){
@@ -13440,7 +13442,7 @@ function provaModello(l, testo, arbitro){
     const conQuando = !!(l.quando && (l.quando.ora || l.quando.giornoIso));
     const vietato = /^(?:saluto|domanda|mente|urgenza)$/.test(r.intento)
       || (conQuando && /^(?:dati|cliente|cerca_documento|cartella|assemblea)$/.test(r.intento))
-      || (/^(?:impegno|da_fare)$/.test(l.azione) && /^(?:messaggio|email|chiamata)$/.test(r.intento))
+      || (/^(?:impegno|da_fare)$/.test(l.azione) && /^(?:messaggio|email|chiamata)$/.test(r.intento) && !(r.intento === "messaggio" && MESSAGGIO_ESPLICITO.test(testo)))
       || (l.azione === "documento" && !/^(?:cerca_documento|invio_documento)$/.test(r.intento));
     if(daRegole && r.intento !== daRegole && !vietato){
       const x = EonLettore.riscrivi(r.intento, testo, ctx);
@@ -13451,12 +13453,16 @@ function provaModello(l, testo, arbitro){
      impegno", il modello è sicurissimo che è un'altra azione ("me lo metti
      in agenda…?", "ho preso appuntamento con…", "fai sapere a X che…"): vince
      il modello, riscrivendo la frase nella forma di quel cassetto. */
+  /* "Madonna che giornata oggi, non ne posso più", "son stanco morto stasera" (giro 18): le regole
+     vedono "oggi" e fanno un "da fare"; se il modello è sicurissimo che è una chiacchiera o una
+     domanda, e non c'è un'ora, risponde EON e non si segna niente. */
+  if(l && !arbitro && l.azione === "da_fare" && !(l.quando && l.quando.ora) && /^(?:domanda|saluto)$/.test(r.intento) && r.p >= 0.97) return { alServer: true, intento: r.intento };
   const AZIONI = /^(?:calendario|messaggio|email|chiamata|incasso|invio_documento|cerca_documento|urgenza|cliente)$/;
   if(arbitro || (l && /^(?:dati|domanda|impegno|da_fare)$/.test(l.azione))){
     const soglia = arbitro ? 0.7 : l && /^(?:impegno|da_fare)$/.test(l.azione) ? 0.95 : 0.9;
     const stesso = l && ((l.azione === "impegno" || l.azione === "da_fare") ? r.intento === "calendario" : l.azione === "dati" ? r.intento === "dati" : r.intento === "domanda");
     // "scrivi a Machi domani alle 10" resta un promemoria per te (deciso il 28/09): da un impegno non si passa a un messaggio
-    const vietato = l && /^(?:impegno|da_fare)$/.test(l.azione) && /^(?:messaggio|email|chiamata|calendario)$/.test(r.intento);
+    const vietato = l && /^(?:impegno|da_fare)$/.test(l.azione) && /^(?:messaggio|email|chiamata|calendario)$/.test(r.intento) && !(r.intento === "messaggio" && MESSAGGIO_ESPLICITO.test(testo));
     if(r.p >= soglia && AZIONI.test(r.intento) && !stesso && !vietato){
       const x = EonLettore.riscrivi(r.intento, testo, ctx);
       if(x && EonLettore.norm(x) !== EonLettore.norm(testo)) return { rifai: x, intento: r.intento };
