@@ -160,9 +160,12 @@ verifica("risposta \"Verdi\": segnato con Alessio Verdi", (r.corpo.azioni || [])
 console.log("\n=== Assemblee ===");
 preparaDb();
 tabelle.profiles[0].profession = "amministratore";
-r = await chiedi("assemblea in via Roma 12 giovedì alle 21");
+// il giorno detto non è mai oggi (con "giovedì" detto di giovedì decide l'AI): la prova non dipende dal giorno in cui gira
+const oggiRoma = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Rome", weekday: "short" }).format(new Date());
+const giornoAssemblea = oggiRoma === "Thu" ? "venerdì" : "giovedì";
+r = await chiedi(`assemblea in via Roma 12 ${giornoAssemblea} alle 21`);
 const a = tabelle.assemblee[0];
-verifica("amministratore: \"assemblea in via Roma 12 giovedì alle 21\" → assemblea vera, senza AI", chiamateAI.length === 0 && a && a.condominio === "Via Roma 12" && /T21:00:00$/.test(a.quando) && a.tipo === "ordinaria" && (r.corpo.azioni || [])[0].tool === "crea_assemblea", JSON.stringify({ a, testo: r.corpo.testo }));
+verifica(`amministratore: "assemblea in via Roma 12 ${giornoAssemblea} alle 21" → assemblea vera, senza AI`, chiamateAI.length === 0 && a && a.condominio === "Via Roma 12" && /T21:00:00$/.test(a.quando) && a.tipo === "ordinaria" && (r.corpo.azioni || [])[0].tool === "crea_assemblea", JSON.stringify({ a, testo: r.corpo.testo }));
 preparaDb();
 tabelle.profiles[0].profession = "amministratore";
 r = await chiedi("assemblea straordinaria condominio Parco Verde domani ore 18");
