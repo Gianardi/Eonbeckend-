@@ -1,0 +1,511 @@
+{ "confini": "mente / messaggio / email / chiamata", "frasi": [
+["bisogna dire alla ditta delle pulizie che le scale del condominio sono sporche", "mente"],
+["scrivi alla ditta delle pulizie che le scale del condominio sono sporche", "messaggio"],
+["manda una mail alla ditta delle pulizie che le scale del condominio sono sporche", "email"],
+["chiama la ditta delle pulizie per le scale sporche del condominio", "chiamata"],
+
+["Rossi preferisce essere chiamato la sera, di giorno non risponde mai", "mente"],
+["chiama Rossi, anche se di giorno non risponde mai provaci lo stesso", "chiamata"],
+["manda un whatsapp a Rossi visto che al telefono non risponde mai", "messaggio"],
+["scrivi una mail a Rossi, tanto al telefono non risponde mai", "email"],
+
+["devo sentire il fornitore per il listino nuovo", "mente"],
+["chiama il fornitore per il listino nuovo", "chiamata"],
+["scrivi al fornitore se mi manda il listino nuovo", "messaggio"],
+["manda una mail al fornitore per chiedere il listino nuovo", "email"],
+
+["la Bianchi vuole che le scriva solo su whatsapp", "mente"],
+["scrivi alla Bianchi su whatsapp che il pezzo è arrivato", "messaggio"],
+["manda una mail alla Bianchi che il pezzo è arrivato", "email"],
+["telefona alla Bianchi che il pezzo è arrivato", "chiamata"],
+
+["il geometra Ferri dice che per il soppalco serve la SCIA", "mente"],
+["scrivi al geometra Ferri se per il soppalco serve la SCIA", "messaggio"],
+["manda una email al geometra Ferri e chiedigli se per il soppalco serve la SCIA", "email"],
+["chiama il geometra Ferri per la SCIA del soppalco", "chiamata"],
+
+["Colombo vuole il cancello verniciato verde scuro, non nero", "mente"],
+["manda un messaggio a Colombo, chiedigli se il cancello lo vuole verde scuro o nero", "messaggio"],
+["mail a Colombo per confermare il cancello verde scuro al posto del nero", "email"],
+["fammi parlare con Colombo per il colore del cancello", "chiamata"],
+
+["bisogna avvisare la ditta dei ponteggi che il cortile è stretto e il camion non entra", "mente"],
+["manda un sms alla ditta dei ponteggi che il cortile è stretto e il camion non entra", "messaggio"],
+["scrivi per email alla ditta dei ponteggi che il cortile è stretto e il camion non entra", "email"],
+["telefona alla ditta dei ponteggi, digli che il cortile è stretto e il camion non entra", "chiamata"],
+
+["a casa Esposito c'è un cane grosso, bisogna farselo chiudere dalla signora", "mente"],
+["scrivi alla signora Esposito di tenere chiuso il cane quando arriviamo", "messaggio"],
+["manda due righe per mail alla signora Esposito di tenere chiuso il cane quando arriviamo", "email"],
+["chiama la signora Esposito così chiude il cane prima che arriviamo", "chiamata"],
+
+["l'amministratore Russo va informato che l'infiltrazione viene dal terrazzo del quinto piano", "mente"],
+["whatsapp all'amministratore Russo: l'infiltrazione viene dal terrazzo del quinto piano", "messaggio"],
+["scrivi una mail all'amministratore Russo che l'infiltrazione viene dal terrazzo del quinto piano", "email"],
+["chiamami l'amministratore Russo per l'infiltrazione dal terrazzo del quinto", "chiamata"],
+
+["le chiavi del cantiere di via Manzoni le ha Galli, bisogna farsele ridare", "mente"],
+["scrivi a Galli di lasciare le chiavi di via Manzoni sotto lo zerbino", "messaggio"],
+["manda una mail a Galli per riavere le chiavi del cantiere di via Manzoni", "email"],
+["chiama Galli, mi servono le chiavi di via Manzoni", "chiamata"],
+
+["Conti l'elettricista arriva sempre in ritardo, tenerne conto quando si organizza il lavoro", "mente"],
+["manda un messaggio a Conti l'elettricista che siamo già in cantiere e lo aspettiamo", "messaggio"],
+["manda una mail a Conti l'elettricista che se ritarda ancora deve avvisare prima", "email"],
+["telefona a Conti l'elettricista, dove si è cacciato", "chiamata"],
+
+["la signora Marino ha scelto le piastrelle grigie 60x60 rettificate", "mente"],
+["scrivi alla signora Marino se conferma le piastrelle grigie 60x60", "messaggio"],
+["manda una mail alla signora Marino per confermare le piastrelle grigie 60x60", "email"],
+["chiama la signora Marino per le piastrelle grigie 60x60", "chiamata"],
+
+["il vicino di De Luca si lamenta del rumore, bisogna dire ai ragazzi di fare piano", "mente"],
+["scrivi ai ragazzi sul gruppo che il vicino di De Luca si lamenta del rumore", "messaggio"],
+["manda una mail a De Luca che per il rumore col vicino ci parlo io", "email"],
+["chiama De Luca per la storia del vicino che si lamenta del rumore", "chiamata"],
+
+["Ricci del magazzino edile fa lo sconto se prendi più di venti sacchi di cemento", "mente"],
+["scrivi a Ricci del magazzino edile se mi tiene da parte venti sacchi di cemento", "messaggio"],
+["manda una email a Ricci del magazzino edile per ordinare venti sacchi di cemento", "email"],
+["chiama Ricci del magazzino edile per venti sacchi di cemento", "chiamata"],
+
+["Moretti non trova più il libretto della caldaia, bisogna chiederlo all'installatore", "mente"],
+["scrivi a Moretti di cercare il libretto della caldaia", "messaggio"],
+["manda una mail a Moretti di cercare il libretto della caldaia prima del controllo fumi", "email"],
+["chiama Moretti per il libretto della caldaia", "chiamata"],
+
+["da Barbieri non si parcheggia davanti, il furgone va messo nel cortile dietro", "mente"],
+["scrivi a Barbieri se ci lascia aperto il cortile dietro per il furgone", "messaggio"],
+["manda una mail a Barbieri per chiedere il cortile dietro per il furgone", "email"],
+["chiama Barbieri che deve aprirci il cortile dietro per il furgone", "chiamata"],
+
+["Fontana l'idraulico mi deve ancora ridare la pressa che gli ho prestato", "mente"],
+["scrivi a Fontana l'idraulico di ridarmi la pressa che gli ho prestato", "messaggio"],
+["chiama Fontana l'idraulico per la pressa che gli ho prestato", "chiamata"],
+
+["Santoro ha detto che il muro della cantina lo vuole lasciare a vista", "mente"],
+["manda un messaggio a Santoro: il muro della cantina lo lasciamo a vista?", "messaggio"],
+["scrivi una email a Santoro per chiedergli se il muro della cantina lo lascia a vista", "email"],
+["telefona a Santoro per il muro della cantina a vista", "chiamata"],
+
+["la Termoservice bisogna avvertirla che il condizionatore del bar gocciola ancora", "mente"],
+["scrivi alla Termoservice che il condizionatore del bar gocciola ancora", "messaggio"],
+["manda una mail alla Termoservice che il condizionatore del bar gocciola ancora", "email"],
+["chiama la Termoservice, il condizionatore del bar gocciola ancora", "chiamata"],
+
+["Mariani è quello che vuole sempre lo sconto, occhio con i prezzi", "mente"],
+["scrivi a Mariani che più di così non posso scendere col prezzo", "messaggio"],
+["manda una mail a Mariani che col prezzo più di così non posso scendere", "email"],
+["chiama Mariani per parlare del prezzo", "chiamata"],
+
+["devo chiedere a Rinaldi dove sta il contatore del gas", "mente"],
+["scrivi a Rinaldi per sapere dove sta il contatore del gas", "messaggio"],
+["manda una mail a Rinaldi per sapere dove sta il contatore del gas", "email"],
+["chiama Rinaldi e chiedigli dove sta il contatore del gas", "chiamata"],
+
+["Caruso vuole essere avvisato prima che arriviamo perché lavora di notte", "mente"],
+["manda un messaggio a Caruso che stiamo arrivando", "messaggio"],
+["chiama Caruso che stiamo arrivando", "chiamata"],
+
+["la moglie di Ferrara è quella che decide, meglio parlare con lei", "mente"],
+["scrivi alla moglie di Ferrara per i colori della cucina", "messaggio"],
+["manda una mail alla moglie di Ferrara per i colori della cucina", "email"],
+["chiama la moglie di Ferrara per i colori della cucina", "chiamata"],
+
+["Lombardi del comune dice che per l'occupazione del suolo pubblico serve la domanda", "mente"],
+["scrivi a Lombardi del comune per l'occupazione del suolo pubblico", "messaggio"],
+["manda una mail all'ufficio tecnico, alla signora Lombardi, per l'occupazione del suolo pubblico", "email"],
+["telefona in comune a Lombardi per l'occupazione del suolo pubblico", "chiamata"],
+
+["Gentile ha un bambino piccolo, niente polvere in casa: bisogna mettere i teli ovunque", "mente"],
+["scrivi a Gentile che mettiamo i teli ovunque così la polvere non arriva al bambino", "messaggio"],
+["manda una mail a Gentile che metteremo i teli dappertutto per la polvere", "email"],
+["chiama Gentile per spiegargli dei teli contro la polvere", "chiamata"],
+
+["Longo parla solo dialetto, meglio che ci parli io e non il ragazzo", "mente"],
+["scrivi a Longo che ci vediamo in cantiere", "messaggio"],
+["chiama Longo, ci parlo io", "chiamata"],
+
+["il fabbro Leone va sentito per la ringhiera del balcone di Vitale", "mente"],
+["scrivi al fabbro Leone per la ringhiera del balcone di Vitale", "messaggio"],
+["manda una mail al fabbro Leone con le misure della ringhiera di Vitale, tre metri e venti per un metro e dieci", "email"],
+["chiama il fabbro Leone per la ringhiera di Vitale", "chiamata"],
+
+["Martinelli ha detto che le finestre le prende lui dal cognato", "mente"],
+["scrivi a Martinelli se le finestre le prende davvero dal cognato", "messaggio"],
+["manda una mail a Martinelli per sapere se le finestre le prende dal cognato", "email"],
+["telefona a Martinelli per le finestre del cognato", "chiamata"],
+
+["la signora Serra non vuole rumore dopo pranzo perché riposa", "mente"],
+["scrivi alla signora Serra che il rumore dopo pranzo cerchiamo di evitarlo", "messaggio"],
+["manda una mail alla signora Serra che dopo pranzo non faremo rumore", "email"],
+["chiama la signora Serra per la storia del rumore dopo pranzo", "chiamata"],
+
+["la Coppola vuole il bagno finito prima che arrivi la suocera", "mente"],
+["scrivi alla Coppola che il bagno è quasi finito", "messaggio"],
+["manda un'email alla Coppola che il bagno è quasi finito", "email"],
+["chiama la Coppola, dille che il bagno è quasi finito", "chiamata"],
+
+["De Santis mi ha detto che il muratore di prima gli ha lasciato i calcinacci in garage", "mente"],
+["scrivi a De Santis che i calcinacci in garage li portiamo via noi", "messaggio"],
+["manda una mail a De Santis che i calcinacci in garage li portiamo via noi", "email"],
+["telefona a De Santis per i calcinacci in garage", "chiamata"],
+
+["D'Angelo è allergico alla vernice, bisogna usare quella all'acqua", "mente"],
+["scrivi a D'Angelo che usiamo la vernice all'acqua", "messaggio"],
+["chiama D'Angelo per dirgli che usiamo la vernice all'acqua", "chiamata"],
+
+["ricordati che Marchetti vuole la fattura intestata alla ditta e non a lui", "mente"],
+["scrivi a Marchetti se la fattura la vuole intestata alla ditta o a lui", "messaggio"],
+["manda una mail a Marchetti per chiedere a chi intestare la fattura", "email"],
+["chiama Marchetti per l'intestazione della fattura", "chiamata"],
+
+["Parisi ha chiesto se possiamo fare anche il giardino", "mente"],
+["scrivi a Parisi che il giardino lo possiamo fare anche noi", "messaggio"],
+["manda una mail a Parisi che possiamo occuparci anche del giardino", "email"],
+["chiama Parisi per il discorso del giardino", "chiamata"],
+
+["il signor Villa è sordo, meglio scrivergli che chiamarlo", "mente"],
+["scrivi al signor Villa che i lavori finiscono prima del previsto", "messaggio"],
+["manda una mail al figlio del signor Villa che i lavori finiscono prima del previsto", "email"],
+["chiama il figlio del signor Villa, il padre non sente il telefono", "chiamata"],
+
+["la Edil Po consegna solo col camion gru, bisogna dirlo al cliente", "mente"],
+["scrivi alla Edil Po se possono consegnare senza camion gru", "messaggio"],
+["manda una mail alla Edil Po per chiedere la consegna senza camion gru", "email"],
+["chiama la Edil Po per la consegna col camion gru", "chiamata"],
+
+["Conte ha lasciato detto che il cancelletto va chiuso sempre per il gatto", "mente"],
+["scrivi a Conte che il cancelletto lo teniamo chiuso per il gatto", "messaggio"],
+["chiama Conte per il cancelletto del gatto", "chiamata"],
+
+["Ferraro paga sempre ma bisogna ricordarglielo due volte", "mente"],
+["scrivi a Ferraro per ricordargli il saldo del lavoro in taverna", "messaggio"],
+["manda una mail a Ferraro per ricordargli il saldo della taverna", "email"],
+["chiama Ferraro per il saldo della taverna", "chiamata"],
+
+["Fabbri il piastrellista lavora anche a chiamata, basta avvisarlo prima", "mente"],
+["scrivi a Fabbri il piastrellista se è libero per il bagno dei Colombo", "messaggio"],
+["manda una mail a Fabbri il piastrellista per il bagno dei Colombo", "email"],
+["chiama Fabbri il piastrellista per il bagno dei Colombo", "chiamata"],
+
+["bisogna dire a Bianco che il parquet va lasciato acclimatare prima di posarlo", "mente"],
+["scrivi a Bianco che il parquet va lasciato acclimatare prima di posarlo", "messaggio"],
+["manda una mail a Bianco che il parquet deve acclimatarsi prima della posa", "email"],
+["chiama Bianco per spiegargli che il parquet deve acclimatarsi", "chiamata"],
+
+["Marini vuole sapere se il muro portante si può aprire, devo chiedere all'ingegnere", "mente"],
+["scrivi all'ingegnere se il muro portante di Marini si può aprire", "messaggio"],
+["manda una mail all'ingegnere per il muro portante di Marini", "email"],
+["chiama l'ingegnere per il muro portante di Marini", "chiamata"],
+
+["Grasso ha il portone che si apre solo col telecomando, bisogna farsene dare uno", "mente"],
+["scrivi a Grasso se ci presta un telecomando del portone", "messaggio"],
+["chiama Grasso per il telecomando del portone", "chiamata"],
+
+["Valentini ha detto che la sua banca è lenta coi bonifici", "mente"],
+["scrivi a Valentini se ha già fatto partire il bonifico", "messaggio"],
+["manda una mail a Valentini per sapere se ha fatto partire il bonifico", "email"],
+["chiama Valentini per il bonifico", "chiamata"],
+
+["la Messina Infissi va avvisata che il vano della porta finestra è fuori squadra", "mente"],
+["scrivi alla Messina Infissi che il vano della porta finestra è fuori squadra", "messaggio"],
+["manda una mail alla Messina Infissi che il vano della porta finestra è fuori squadra di due centimetri", "email"],
+["chiama la Messina Infissi per il vano fuori squadra", "chiamata"],
+
+["Sala del colorificio dice che il bianco antimuffa è finito, bisogna aspettarlo", "mente"],
+["scrivi a Sala del colorificio quando gli arriva il bianco antimuffa", "messaggio"],
+["manda una mail al colorificio Sala per il bianco antimuffa", "email"],
+["chiama il colorificio Sala per il bianco antimuffa", "chiamata"],
+
+["la De Rosa ha paura delle scale, per il sottotetto bisogna accompagnarla", "mente"],
+["scrivi alla De Rosa che il sottotetto glielo facciamo vedere noi, non deve salire da sola", "messaggio"],
+["manda una mail alla De Rosa per spiegarle i lavori nel sottotetto", "email"],
+["chiama la De Rosa per i lavori nel sottotetto", "chiamata"],
+
+["Gatti della ferramenta tiene i tasselli chimici buoni, non comprarli altrove", "mente"],
+["scrivi a Gatti della ferramenta se ha i tasselli chimici", "messaggio"],
+["chiama la ferramenta Gatti per i tasselli chimici", "chiamata"],
+
+["Pellegrini ha detto che il vicino gli dà il permesso di passare dal suo giardino", "mente"],
+["scrivi a Pellegrini di farsi dare per scritto il permesso del vicino", "messaggio"],
+["manda una mail a Pellegrini per il permesso del vicino a passare dal giardino", "email"],
+["chiama Pellegrini per il permesso del vicino", "chiamata"],
+
+["Palumbo non vuole che i ragazzi fumino in casa sua", "mente"],
+["scrivi sul gruppo dei ragazzi che da Palumbo non si fuma in casa", "messaggio"],
+["chiama Marco, digli che da Palumbo non si fuma in casa", "chiamata"],
+
+["Sanna è in ferie in Sardegna, bisogna aspettare che torni per scegliere i sanitari", "mente"],
+["scrivi a Sanna per i sanitari, anche se è in ferie", "messaggio"],
+["manda una mail a Sanna per chiedergli che sanitari preferisce", "email"],
+["chiama Sanna in Sardegna per i sanitari", "chiamata"],
+
+["Farina vuole dividere le spese dei lavori a metà col fratello", "mente"],
+["scrivi a Farina se il conto lo dividiamo tra lui e il fratello", "messaggio"],
+["manda una mail a Farina e al fratello per come dividere le spese", "email"],
+["chiama Farina per come dividere le spese col fratello", "chiamata"],
+
+["Rizzi ha la corrente a 3 kilowatt, con le macchine salta tutto", "mente"],
+["scrivi a Rizzi di chiedere l'aumento di potenza all'Enel", "messaggio"],
+["manda una mail a Rizzi che con 3 kilowatt le macchine fanno saltare tutto", "email"],
+["chiama Rizzi per l'aumento di potenza del contatore", "chiamata"],
+
+["Monti il commercialista ha detto che per il bonus serve l'asseverazione", "mente"],
+["scrivi a Monti il commercialista se per il bonus serve l'asseverazione", "messaggio"],
+["manda una mail al commercialista Monti per l'asseverazione del bonus", "email"],
+["chiama Monti il commercialista per l'asseverazione", "chiamata"],
+
+["la Cattaneo vuole che si entri dal garage e non dal portone principale", "mente"],
+["scrivi alla Cattaneo che entriamo dal garage", "messaggio"],
+["chiama la Cattaneo che siamo davanti al garage", "chiamata"],
+
+["Morelli preferisce le mail, al telefono si dimentica tutto", "mente"],
+["manda una mail a Morelli col riepilogo di cosa abbiamo deciso: pavimento in resina e battiscopa bianco", "email"],
+["scrivi a Morelli su whatsapp: pavimento in resina e battiscopa bianco, confermi?", "messaggio"],
+["chiama Morelli per il pavimento in resina", "chiamata"],
+
+["Amato ha il tetto in eternit, bisogna sentire una ditta per la bonifica", "mente"],
+["scrivi ad Amato che per l'eternit serve una ditta specializzata", "messaggio"],
+["manda una mail alla Ecobonifiche per l'eternit sul tetto di Amato", "email"],
+["chiama la Ecobonifiche per il tetto in eternit di Amato", "chiamata"],
+
+["Silvestri vuole spostare il termosifone del salotto sotto la finestra", "mente"],
+["scrivi a Silvestri se il termosifone lo mettiamo sotto la finestra", "messaggio"],
+["manda una mail a Silvestri che spostare il termosifone costa di più", "email"],
+["chiama Silvestri per la storia del termosifone da spostare", "chiamata"],
+
+["il ragazzo nuovo, Mazza, non ha ancora il patentino per il muletto", "mente"],
+["scrivi a Mazza che deve fare il corso per il muletto", "messaggio"],
+["chiama Mazza per il corso del muletto", "chiamata"],
+
+["Testa ha detto che sotto il pavimento vecchio c'è ancora la graniglia", "mente"],
+["scrivi a Testa che sotto il pavimento c'è la graniglia, se la vuole recuperare", "messaggio"],
+["manda una mail a Testa che sotto c'è la graniglia originale", "email"],
+["chiama Testa, sotto il pavimento c'è la graniglia", "chiamata"],
+
+["il signor Grassi vuole lo scarico della lavatrice sul balcone", "mente"],
+["scrivi al signor Grassi che lo scarico sul balcone non si può fare", "messaggio"],
+["manda una mail al signor Grassi che lo scarico della lavatrice sul balcone non è a norma", "email"],
+["chiama il signor Grassi per lo scarico della lavatrice", "chiamata"],
+
+["Pellegrino il vetraio va sentito per lo specchio grande del bagno", "mente"],
+["scrivi a Pellegrino il vetraio per lo specchio del bagno", "messaggio"],
+["manda una mail al vetraio Pellegrino con le misure dello specchio, ottanta per centoventi", "email"],
+["chiama il vetraio Pellegrino per lo specchio ottanta per centoventi", "chiamata"],
+
+["Carbone ha il cane che abbaia e il citofono non si sente, bisogna chiamarlo sul cellulare", "mente"],
+["chiama Carbone sul cellulare, al citofono non sente", "chiamata"],
+["scrivi a Carbone che siamo giù al citofono", "messaggio"],
+
+["Giuliani ha chiesto se facciamo anche le zanzariere", "mente"],
+["scrivi a Giuliani che le zanzariere le facciamo", "messaggio"],
+["manda una mail a Giuliani che facciamo anche le zanzariere", "email"],
+["chiama Giuliani per le zanzariere", "chiamata"],
+
+["Benedetti è il cognato di Ferri, ci ha mandati lui", "mente"],
+["scrivi a Ferri per ringraziarlo che ci ha mandato Benedetti", "messaggio"],
+["chiama Ferri per ringraziarlo di Benedetti", "chiamata"],
+
+["la Barone vuole la cucina con l'isola al centro", "mente"],
+["scrivi alla Barone se l'isola della cucina la vuole proprio al centro", "messaggio"],
+["manda una mail alla Barone che l'isola al centro ci sta solo se spostiamo il gas", "email"],
+["chiama la Barone per l'isola della cucina", "chiamata"],
+
+["Rossetti del noleggio dice che il miniescavatore va riportato pulito", "mente"],
+["scrivi a Rossetti del noleggio che il miniescavatore glielo riportiamo pulito", "messaggio"],
+["manda una mail al noleggio Rossetti per il miniescavatore", "email"],
+["chiama Rossetti del noleggio per il miniescavatore", "chiamata"],
+
+["Caputo non vuole che si tocchi l'albero in giardino, era del nonno", "mente"],
+["scrivi a Caputo che l'albero non lo tocchiamo", "messaggio"],
+["chiama Caputo, l'albero intralcia lo scavo", "chiamata"],
+
+["la Montanari ha detto che la cantina si allaga quando piove forte", "mente"],
+["scrivi alla Montanari se la cantina si allaga sempre quando piove", "messaggio"],
+["manda una mail alla Montanari per il problema della cantina che si allaga", "email"],
+["chiama la Montanari per capire quando si allaga la cantina", "chiamata"],
+
+["Guerra ha detto che il suo idraulico di fiducia è bravo ma caro", "mente"],
+["scrivi a Guerra se vuole usare il suo idraulico o il nostro", "messaggio"],
+["chiama Guerra per decidere quale idraulico usare", "chiamata"],
+
+["Palmieri ha il riscaldamento a pavimento, attenzione a non forare", "mente"],
+["scrivi ai ragazzi che da Palmieri c'è il riscaldamento a pavimento e non si fora", "messaggio"],
+["manda una mail a Palmieri per sapere dove passano i tubi del riscaldamento a pavimento", "email"],
+["chiama Palmieri per sapere dove passano i tubi a pavimento", "chiamata"],
+
+["Bernardi vuole che gli scriva solo per email perché il telefono lo usa la moglie", "mente"],
+["manda una email a Bernardi che il sopralluogo è andato bene", "email"],
+["scrivi a Bernardi che il sopralluogo è andato bene", "messaggio"],
+["chiama Bernardi, il sopralluogo è andato bene", "chiamata"],
+
+["Martino ha detto che i pagamenti li fa la sua società e non lui", "mente"],
+["scrivi a Martino di farmi sapere quando la società fa il bonifico", "messaggio"],
+["manda una mail all'amministrazione della società di Martino per il bonifico", "email"],
+["chiama l'amministrazione della società di Martino per il bonifico", "chiamata"],
+
+["Fiore mi ha consigliato un cartongessista bravo, si chiama Riva", "mente"],
+["scrivi a Riva il cartongessista, digli che me l'ha consigliato Fiore", "messaggio"],
+["manda una mail a Riva il cartongessista, digli che ci manda Fiore", "email"],
+["chiama Riva il cartongessista, quello consigliato da Fiore", "chiamata"],
+
+["Bruno è allergico agli acari, bisogna aspirare bene a fine lavori", "mente"],
+["scrivi a Bruno che a fine lavori aspiriamo tutto", "messaggio"],
+["chiama Bruno per dirgli che aspiriamo tutto a fine lavori", "chiamata"],
+
+["Orlando lavora in ospedale a turni, meglio scrivergli che chiamarlo", "mente"],
+["scrivi a Orlando che la doccia è pronta, può usarla", "messaggio"],
+["manda una mail a Orlando che la doccia è pronta", "email"],
+["chiama Orlando, la doccia è pronta", "chiamata"],
+
+["Donati tiene le chiavi della centrale termica del condominio", "mente"],
+["scrivi a Donati se ci apre la centrale termica", "messaggio"],
+["manda una mail a Donati per farci aprire la centrale termica", "email"],
+["chiama Donati per le chiavi della centrale termica", "chiamata"],
+
+["devo scrivere a Vitale che il colore del salone non va bene", "mente"],
+["scrivi a Vitale che il colore del salone non va bene", "messaggio"],
+["manda una mail a Vitale che il colore del salone non va bene", "email"],
+["chiama Vitale, il colore del salone non va bene", "chiamata"],
+
+["bisogna chiamare l'Enel per lo spostamento del contatore dei Riva", "mente"],
+["chiama l'Enel per lo spostamento del contatore dei Riva", "chiamata"],
+["scrivi ai Riva che per il contatore bisogna aspettare l'Enel", "messaggio"],
+["manda una mail all'Enel per lo spostamento del contatore dei Riva", "email"],
+
+["mi ha scritto la Longo che il soffitto del bagno ha una macchia", "mente"],
+["rispondi alla Longo su whatsapp che la macchia del soffitto la guardiamo noi", "messaggio"],
+["rispondi alla mail della Longo che la macchia del soffitto la guardiamo noi", "email"],
+["richiama la Longo per la macchia sul soffitto del bagno", "chiamata"],
+
+["Zanetti del pellet consegna solo sopra i cinquanta sacchi", "mente"],
+["scrivi a Zanetti del pellet se consegna anche trenta sacchi", "messaggio"],
+["manda una mail a Zanetti del pellet per trenta sacchi", "email"],
+["chiama Zanetti per il pellet, mi servono trenta sacchi", "chiamata"],
+
+["la Idraulica Nord va avvisata che il boiler della signora Ricci fa rumore quando si accende", "mente"],
+["scrivi alla Idraulica Nord che il boiler della signora Ricci fa rumore quando si accende", "messaggio"],
+["manda una mail alla Idraulica Nord che il boiler della Ricci fa rumore quando si accende", "email"],
+["chiama la Idraulica Nord per il boiler della Ricci che fa rumore", "chiamata"],
+
+["il signor Pagano vuole essere chiamato solo sul fisso di casa", "mente"],
+["chiama il signor Pagano sul fisso di casa", "chiamata"],
+["scrivi al figlio del signor Pagano che abbiamo finito la cucina", "messaggio"],
+["manda una mail al figlio del signor Pagano che la cucina è finita", "email"],
+
+["tenere a mente che l'architetto Neri vuole approvare ogni cambio di materiale", "mente"],
+["scrivi all'architetto Neri se va bene il gres al posto del marmo", "messaggio"],
+["manda una mail all'architetto Neri per approvare il gres al posto del marmo", "email"],
+["chiama l'architetto Neri per il gres al posto del marmo", "chiamata"],
+
+["la Sorrentino vuole che per i soldi si parli sempre col marito", "mente"],
+["scrivi al marito della Sorrentino per l'acconto", "messaggio"],
+["manda una mail al marito della Sorrentino per l'acconto", "email"],
+["chiama il marito della Sorrentino per l'acconto", "chiamata"],
+
+["il gruista Pace vuole sapere il peso dei bancali prima di venire", "mente"],
+["scrivi al gruista Pace che i bancali pesano otto quintali l'uno", "messaggio"],
+["manda una mail a Pace il gruista col peso dei bancali, otto quintali l'uno", "email"],
+["chiama Pace il gruista per il peso dei bancali", "chiamata"],
+
+["devo dire a Marco che il flessibile l'ha lasciato da Conti", "mente"],
+["scrivi a Marco che il flessibile l'ha lasciato da Conti", "messaggio"],
+["chiama Marco che ha lasciato il flessibile da Conti", "chiamata"],
+
+["la Ferri non sopporta i vocali, vuole solo messaggi scritti", "mente"],
+["scrivi alla Ferri, niente vocale, che la porta nuova è ordinata", "messaggio"],
+["telefona alla Ferri che la porta nuova è ordinata", "chiamata"],
+
+["il custode della scuola, Nicola, ha le chiavi della palestra", "mente"],
+["manda un messaggio a Nicola il custode per le chiavi della palestra", "messaggio"],
+["chiama Nicola il custode per le chiavi della palestra", "chiamata"],
+
+["Luca il mio socio va avvisato che il furgone ha la gomma bassa", "mente"],
+["scrivi a Luca che il furgone ha la gomma bassa", "messaggio"],
+["chiama Luca, il furgone ha la gomma bassa", "chiamata"],
+
+["la signora Gallo non sa usare whatsapp, solo sms", "mente"],
+["manda un sms alla signora Gallo che domattina arriviamo presto", "messaggio"],
+["chiama la signora Gallo che domattina arriviamo presto", "chiamata"],
+
+["i Ricci vanno avvisati che durante i lavori il bagno resta senz'acqua", "mente"],
+["segnati che ai Ricci bisogna dire di riempire qualche bottiglia d'acqua prima dei lavori", "mente"],
+["scrivi ai Ricci di riempire qualche bottiglia d'acqua prima dei lavori", "messaggio"],
+
+["il nipote della signora Rota è quello che segue i lavori per lei", "mente"],
+["con la signora Rota bisogna sempre passare dal nipote", "mente"],
+["scrivi al nipote della signora Rota che il tetto è finito", "messaggio"],
+
+["Bellini mi ha chiesto di tenergli da parte le tegole vecchie", "mente"],
+["da ricordare: le tegole vecchie di Bellini non vanno buttate", "mente"],
+["scrivi a Bellini che le tegole vecchie gliele teniamo da parte", "messaggio"],
+
+["Cirillo ha cambiato numero, quello vecchio non è più attivo", "mente"],
+["il numero nuovo di Cirillo finisce con 482", "mente"],
+["manda un messaggio a Cirillo sul numero nuovo, che il lavoro è confermato", "messaggio"],
+
+["alla ditta del cartongesso bisogna dire che i profili sono arrivati storti", "mente"],
+["la ditta del cartongesso ci ha mandato i profili storti, vanno fatti cambiare", "mente"],
+["scrivi alla ditta del cartongesso che i profili sono arrivati storti", "messaggio"],
+
+["Negri il falegname vuole le misure esatte prima di tagliare", "mente"],
+["a Negri il falegname le misure vanno date in millimetri, non in centimetri", "mente"],
+["scrivi a Negri il falegname le misure: duecentoquattordici per ottantadue", "messaggio"],
+
+["la signora Mancini si offende se non la salutiamo quando entriamo", "mente"],
+["la Mancini ci tiene che si tolgano le scarpe in casa", "mente"],
+["scrivi alla signora Mancini che porteremo i copriscarpe", "messaggio"],
+
+["il condominio di via Verdi vuole che si usi solo l'ascensore di servizio", "mente"],
+["bisogna dire ai ragazzi che in via Verdi si usa solo l'ascensore di servizio", "mente"],
+["scrivi ai ragazzi che in via Verdi si usa solo l'ascensore di servizio", "messaggio"],
+
+["Ruggiero mi deve ancora dire dove vuole le prese in camera", "mente"],
+["devo chiedere a Ruggiero dove vuole le prese in camera", "mente"],
+["scrivi a Ruggiero dove vuole le prese in camera", "messaggio"],
+
+["Ideal Bagno ha sbagliato il colore del lavabo", "mente"],
+["bisogna far presente a Ideal Bagno che il lavabo è arrivato nero invece che bianco", "mente"],
+["scrivi a Ideal Bagno che il lavabo è arrivato nero invece che bianco", "messaggio"],
+
+["Fumagalli dice che la sua vicina vorrebbe rifare il bagno anche lei", "mente"],
+["la vicina di Fumagalli è una possibile cliente, da sentire", "mente"],
+["scrivi a Fumagalli di darmi il numero della vicina", "messaggio"],
+
+["Tosi vuole le prese USB in cucina", "mente"],
+["da non dimenticare che Tosi ha chiesto le prese USB anche nella camera dei bambini", "mente"],
+["scrivi a Tosi che le prese USB nella camera dei bambini le mettiamo", "messaggio"],
+
+["Piras è di poche parole, basta scrivergli sì o no", "mente"],
+["con Piras meglio messaggi corti", "mente"],
+["scrivi a Piras: lavoro finito, tutto ok", "messaggio"],
+
+["la Scavi Lorenzi va avvertita che nel giardino di Monti passa il tubo del gas", "mente"],
+["attenzione, nel giardino di Monti passa il tubo del gas, lo devono sapere quelli dello scavo", "mente"],
+["scrivi alla Scavi Lorenzi che nel giardino di Monti passa il tubo del gas", "messaggio"],
+
+["Cristian il ragazzo nuovo non ha ancora le scarpe antinfortunistiche", "mente"],
+["bisogna dire a Cristian di comprarsi le scarpe antinfortunistiche", "mente"],
+["scrivi a Cristian di comprarsi le scarpe antinfortunistiche", "messaggio"],
+
+["Salvatore il portiere vuole essere avvisato quando scarichiamo il materiale", "mente"],
+["Salvatore il portiere si arrabbia se occupiamo l'androne", "mente"],
+["scrivi a Salvatore il portiere che stiamo scaricando il materiale", "messaggio"],
+
+["la Colombo mi ha raccontato che il marito vuole vendere la casa al mare", "mente"],
+["la casa al mare dei Colombo forse va sistemata prima della vendita", "mente"],
+["scrivi alla Colombo se vogliono un sopralluogo alla casa al mare", "messaggio"],
+
+["Deiana ha perso le chiavi della cassetta della posta, bisogna cambiare la serratura", "mente"],
+["la cassetta della posta di Deiana ha la serratura rotta", "mente"],
+["scrivi a Deiana che la serratura della cassetta la cambiamo noi", "messaggio"],
+
+["il fratello di Gentile fa l'elettricista, potrebbe lavorare con noi", "mente"],
+["da sentire il fratello di Gentile per qualche lavoro elettrico", "mente"],
+["scrivi al fratello di Gentile se ha voglia di lavorare con noi", "messaggio"],
+
+["Poli ha chiesto di non lasciare il secchio della malta sul marmo", "mente"],
+["ai ragazzi va detto che da Poli il secchio della malta non va appoggiato sul marmo", "mente"],
+["scrivi ai ragazzi che da Poli il secchio della malta non va sul marmo", "messaggio"]
+] }
