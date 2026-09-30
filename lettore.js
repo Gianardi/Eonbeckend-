@@ -1140,7 +1140,9 @@
     // Non è un impegno ("annulla la fattura di Rossi") o sono due comandi ("cancella X e segna Y"): non tocca a questo cassetto
     const altraCosa = /\b(?:fattur\w*|preventiv\w*|document\w*|ddt|foto|nota|note|appunt\w*|cartell\w*|messaggi\w*|mail|email|pagament\w*|incass\w*|acconto|bonifico|cliente)\b/.test(n) && !/\b(?:appuntament\w*|impegn\w*|sopralluog\w*|riunion\w*|incontr\w*)\b/.test(n) && !migliori.some((m) => piene.some((w) => TIPI_IMPEGNO.test(w) && norm(m.titolo).includes(w.slice(0, 5))));
     const dueComandi = /\b(?:e|poi|e\s+poi)\s+(?:segna\w*|metti\w*|chiama\w*|manda\w*|scrivi\w*|fai|fammi|aggiungi\w*|crea\w*|ricorda\w*)\b/.test(n);
-    if (altraCosa || dueComandi) return { tipo: null, impegni: [], nuovoPer, tempi, parole: piene, motivo: altraCosa ? "non è un impegno" : "due comandi" };
+    // Senza una parola che dica di cambiare ("Rita domani alle 9 sopralluogo") è un impegno nuovo, non uno spostamento
+    const cambio = /\b(?:spost\w*|rimand\w*|anticip\w*|posticip\w*|slitt\w*|cambi\w*|corregg\w*|mettil\w*|mettimel\w*|portal\w*|portamel\w*|falla|fallo|falle|falli|facciam\w*|mettiam\w*|portiam\w*|famo|famola|famolo|invece|anziche|diventare|cancell\w*|annull\w*|togli\w*|levalo|levala|levali|elimin\w*|disdett\w*|disdic\w*|salta\w*|sposti|dopo|prima)\b|\bnon\s+(?:puo|riesce|viene|vengono|ce\s+la|si\s+fa|c\s+e|piu)\b/.test(n);
+    if (altraCosa || dueComandi || !cambio) return { tipo: null, impegni: [], nuovoPer, tempi, parole: piene, motivo: altraCosa ? "non è un impegno" : dueComandi ? "due comandi" : "nessun cambio detto" };
     return { tipo, impegni: migliori, nuovoPer, tempi, parole: piene };
   }
 
