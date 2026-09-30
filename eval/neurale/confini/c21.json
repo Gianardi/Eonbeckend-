@@ -1,0 +1,501 @@
+{
+"confini": "Frasi di ChatGPT chieste da Andrea (30/09/2026, idraulico a Napoli, seconda serie), ricontrollate: due \"email\" che mandano un documento spostate in invio_documento, tre troppo vaghe tolte",
+"frasi": [
+[
+"domani alle 8 e un quarto devo stare da Carmine in via Arenaccia 215",
+"calendario"
+],
+[
+"segna per giovedì alle 9 il sopralluogo da Paola Neri a Fuorigrotta",
+"calendario"
+],
+[
+"venerdì alle 15 ho il lavoro al condominio Partenope in via Mergellina 44",
+"calendario"
+],
+[
+"metti lunedì alle 7 e mezza il ritiro del materiale da Termosud",
+"calendario"
+],
+[
+"oggi alle 18 devo passare da Salvatore Romano a Secondigliano",
+"calendario"
+],
+[
+"martedì prossimo alle 10 ho il bagno di De Luca a Chiaiano",
+"calendario"
+],
+[
+"ricordami sabato alle 9 di andare da Bruno Esposito per il preventivo",
+"calendario"
+],
+[
+"domani alle 13 devo vedere il signor Amato in via Foria",
+"calendario"
+],
+[
+"giovedì alle 16 devo tornare dal condominio Vesuvio per il controllo",
+"calendario"
+],
+[
+"metti per mercoledì alle 11 il lavoro da Anna Ferrara a Posillipo",
+"calendario"
+],
+[
+"no Carmine non alle 8 e un quarto facciamo alle 9",
+"calendario_modifica"
+],
+[
+"sposta il lavoro di via Mergellina a venerdì alle 17",
+"calendario_modifica"
+],
+[
+"l'appuntamento con Neri cancellalo che mi ha detto di rimandare",
+"calendario_modifica"
+],
+[
+"quello da Romano spostalo a domani mattina alle 10",
+"calendario_modifica"
+],
+[
+"il sopralluogo da Amato non è mercoledì è giovedì alle 14",
+"calendario_modifica"
+],
+[
+"annulla il ritiro da Termosud di lunedì",
+"calendario_modifica"
+],
+[
+"sposta De Luca da martedì a mercoledì alle 10",
+"calendario_modifica"
+],
+[
+"Ferrara non può alle 11 mettila alle 12 e mezza",
+"calendario_modifica"
+],
+[
+"ricordati che da Carmine il tubo principale passa dietro la cucina",
+"mente"
+],
+[
+"Paola Neri vuole essere avvisata almeno mezz'ora prima",
+"mente"
+],
+[
+"il condominio Partenope ha il locale tecnico al piano terra",
+"mente"
+],
+[
+"da De Luca devo portare due flessibili da mezzo pollice",
+"mente"
+],
+[
+"il signor Amato ha già comprato i sanitari",
+"mente"
+],
+[
+"Bruno Esposito vuole il preventivo anche stampato",
+"mente"
+],
+[
+"il custode del Vesuvio si chiama Michele e lavora solo la mattina",
+"mente"
+],
+[
+"Termosud mi fa lo sconto se pago subito",
+"mente"
+],
+[
+"Anna Ferrara ha il contatore nel ripostiglio dietro la cucina",
+"mente"
+],
+[
+"Romano non vuole interventi dopo le 18",
+"mente"
+],
+[
+"chi mi deve ancora pagare dei lavori finiti",
+"dati"
+],
+[
+"quanto devo incassare questa settimana",
+"dati"
+],
+[
+"che appuntamenti ho domani mattina",
+"dati"
+],
+[
+"cosa avevo scritto sul lavoro di Carmine",
+"dati"
+],
+[
+"quanto avevo fatto di preventivo a Neri",
+"dati"
+],
+[
+"chi devo vedere giovedì pomeriggio",
+"dati"
+],
+[
+"qual era il fornitore dove dovevo ritirare la pompa",
+"dati"
+],
+[
+"il condominio Partenope mi ha già pagato",
+"dati"
+],
+[
+"quanto deve ancora De Luca",
+"dati"
+],
+[
+"che lavoro avevo segnato per sabato",
+"dati"
+],
+[
+"fammi un preventivo per Neri 900 euro di manodopera e 240 di materiale",
+"documento"
+],
+[
+"prepara la fattura per Carmine 680 euro per la riparazione della perdita",
+"documento"
+],
+[
+"fai un prev a De Luca per rifare le tubazioni 2800 più 450 di demolizione",
+"documento"
+],
+[
+"preparami la fattura del condominio Partenope da 1750 euro",
+"documento"
+],
+[
+"fammi un preventivo per Esposito 350 di uscita e 1200 per il rifacimento del bagno",
+"documento"
+],
+[
+"prepara una fattura per Amato da 920 euro più 180 di materiale",
+"documento"
+],
+[
+"fammi un prev per Ferrara 1600 di lavoro e 300 di pezzi",
+"documento"
+],
+[
+"prepara la fattura per Romano da 470 euro tutto compreso",
+"documento"
+],
+[
+"fai una fattura per il Vesuvio di 2100 euro per manutenzione",
+"documento"
+],
+[
+"fammi il preventivo per sostituire la pompa 780 euro più 150 di montaggio",
+"documento"
+],
+[
+"manda a Neri il preventivo che ho appena fatto",
+"invio_documento"
+],
+[
+"invia a Carmine la fattura del lavoro di oggi",
+"invio_documento"
+],
+[
+"manda al condominio Partenope il preventivo definitivo",
+"invio_documento"
+],
+[
+"gira a De Luca la fattura già preparata",
+"invio_documento"
+],
+[
+"invia a Esposito il prev aggiornato con il materiale",
+"invio_documento"
+],
+[
+"manda ad Amato la fattura via mail",
+"invio_documento"
+],
+[
+"invia a Ferrara il preventivo senza cambiare niente",
+"invio_documento"
+],
+[
+"manda a Romano la fattura che abbiamo fatto ieri",
+"invio_documento"
+],
+[
+"gira al custode del Vesuvio il documento dei lavori",
+"invio_documento"
+],
+[
+"manda al cliente il preventivo firmato",
+"invio_documento"
+],
+[
+"manda al commercialista la fattura di Neri",
+"invio_documento"
+],
+[
+"prepara una mail a Esposito con il preventivo aggiornato",
+"invio_documento"
+],
+[
+"scrivi a Carmine che arrivo tra venti minuti",
+"messaggio"
+],
+[
+"manda un WhatsApp a Neri e dille che porto io il materiale",
+"messaggio"
+],
+[
+"scrivi a De Luca che il lavoro slitta a giovedì",
+"messaggio"
+],
+[
+"manda al custode di Partenope che sono sotto al portone",
+"messaggio"
+],
+[
+"scrivi a Esposito di mandarmi una foto del bagno",
+"messaggio"
+],
+[
+"manda ad Amato che ho trovato il ricambio",
+"messaggio"
+],
+[
+"scrivi a Ferrara che oggi finisco più tardi",
+"messaggio"
+],
+[
+"manda a Romano che domani passo alle 10",
+"messaggio"
+],
+[
+"scrivi a Bruno che il preventivo è pronto",
+"messaggio"
+],
+[
+"manda a Michele del Vesuvio che ho bisogno delle chiavi",
+"messaggio"
+],
+[
+"manda una mail a Termosud per ordinare 30 metri di tubo",
+"email"
+],
+[
+"scrivi al condominio Partenope una mail con il riepilogo dell'intervento",
+"email"
+],
+[
+"scrivi a De Luca una mail con le lavorazioni previste",
+"email"
+],
+[
+"manda a Termosud una mail per sapere quando arriva la caldaia",
+"email"
+],
+[
+"chiama Carmine e chiedigli se è già a casa",
+"chiamata"
+],
+[
+"fai chiamare Neri per confermare il sopralluogo",
+"chiamata"
+],
+[
+"chiama il custode di Partenope e chiedigli di aprire il locale tecnico",
+"chiamata"
+],
+[
+"chiama De Luca e digli che ho bisogno di una foto del bagno",
+"chiamata"
+],
+[
+"chiama Termosud e senti se è pronto il materiale",
+"chiamata"
+],
+[
+"prova a chiamare Esposito che non risponde da stamattina",
+"chiamata"
+],
+[
+"chiama Romano per confermare l'orario di domani",
+"chiamata"
+],
+[
+"fai una chiamata a Ferrara per il pagamento",
+"chiamata"
+],
+[
+"chiama Michele del Vesuvio prima di andare al condominio",
+"chiamata"
+],
+[
+"chiama Amato e chiedigli il modello della caldaia",
+"chiamata"
+],
+[
+"Neri mi ha appena pagato 1140 euro con bonifico",
+"incasso"
+],
+[
+"Carmine mi ha dato 680 euro in contanti",
+"incasso"
+],
+[
+"il condominio Partenope ha saldato 1750 euro",
+"incasso"
+],
+[
+"ho ricevuto 3250 euro da De Luca",
+"incasso"
+],
+[
+"Esposito mi ha pagato 500 euro di acconto",
+"incasso"
+],
+[
+"Amato mi ha fatto un bonifico di 1100 euro",
+"incasso"
+],
+[
+"Ferrara ha pagato 1900 euro",
+"incasso"
+],
+[
+"Romano mi ha appena saldato 470 euro",
+"incasso"
+],
+[
+"ho ricevuto 700 euro dal condominio Vesuvio",
+"incasso"
+],
+[
+"Bruno mi ha dato 300 euro come acconto",
+"incasso"
+],
+[
+"si è rotto il tubo principale in un palazzo a via Foria stanno allagando i garage",
+"urgenza"
+],
+[
+"dal quinto piano di Partenope sta scendendo acqua nel vano scale",
+"urgenza"
+],
+[
+"il bagno di Carmine perde acqua da sotto il pavimento serve andare subito",
+"urgenza"
+],
+[
+"è esploso un flessibile da De Luca e stanno chiudendo l'acqua generale",
+"urgenza"
+],
+[
+"il locale del ristorante a Chiaia si sta allagando",
+"urgenza"
+],
+[
+"hanno una perdita grossa nel muro e l'acqua sta arrivando ai vicini",
+"urgenza"
+],
+[
+"al Vesuvio non arriva acqua a tre appartamenti",
+"urgenza"
+],
+[
+"la tubazione del condominio si è spaccata e c'è acqua per strada",
+"urgenza"
+],
+[
+"il cliente dice che perde tantissima acqua dalla caldaia",
+"urgenza"
+],
+[
+"si è allagato il piano terra del palazzo in via Mergellina",
+"urgenza"
+],
+[
+"il bagno di Neri è al 80 per cento manca solo il lavabo",
+"sal"
+],
+[
+"da Carmine abbiamo finito le tubazioni e domani chiudiamo le tracce",
+"sal"
+],
+[
+"il condominio Partenope è al 60 per cento abbiamo fatto due scale su tre",
+"sal"
+],
+[
+"il lavoro di De Luca è al 40 per cento perché sto aspettando i sanitari",
+"sal"
+],
+[
+"da Esposito l'impianto è finito resta solo il collaudo",
+"sal"
+],
+[
+"il bagno di Amato è praticamente completato",
+"sal"
+],
+[
+"a Ferrara ho finito il riscaldamento manca la prova di pressione",
+"sal"
+],
+[
+"il cantiere del Vesuvio è fermo al 50 per cento per un pezzo che non è arrivato",
+"sal"
+],
+[
+"da Romano ho completato la riparazione e sto facendo le prove",
+"sal"
+],
+[
+"il lavoro di Bruno è appena iniziato siamo al 20 per cento",
+"sal"
+],
+[
+"ma secondo te per questo impianto vecchio conviene rifare tutto",
+"domanda"
+],
+[
+"oggi ho girato Napoli tre volte per trovare un raccordo",
+"domanda"
+],
+[
+"secondo te quanto posso chiedere per un intervento di domenica sera",
+"domanda"
+],
+[
+"ma una perdita così piccola può davvero fare tutto quel danno",
+"domanda"
+],
+[
+"sto pensando di organizzare meglio gli appuntamenti perché perdo troppo tempo",
+"domanda"
+],
+[
+"secondo te per un bagno piccolo quanto ci metto a rifare tutte le tubazioni",
+"domanda"
+],
+[
+"che giornata infernale oggi non mi sono fermato un minuto",
+"domanda"
+],
+[
+"ma secondo te conviene tenere più materiale nel furgone",
+"domanda"
+],
+[
+"il cliente vuole cambiare tutto a metà lavoro che faccio col preventivo",
+"domanda"
+],
+[
+"secondo te 3000 euro sono troppi per questo rifacimento",
+"domanda"
+]
+]
+}
