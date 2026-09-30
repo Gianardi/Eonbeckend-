@@ -784,6 +784,8 @@
   function conDettagli(l, testo) {
     const d = dettagliNeurali(testo);
     if (!d || d.sicurezza < SICURO_DETTAGLI || !(d.totale > 0)) return l;
+    // "…totale 9.000": un totale detto per controllo; le regole lo confrontano con le voci e avvisano
+    if (l.totaleDetto != null) return l;
     const regole = l.voci && l.voci.length ? l.voci.reduce((t, v) => t + (v.quantita || 1) * v.prezzo, 0) : l.importo;
     if (regole != null && Math.abs(regole - d.totale) < 0.005) return l;
     const parole = d.segni.parole;

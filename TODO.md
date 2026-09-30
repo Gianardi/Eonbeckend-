@@ -5004,6 +5004,8 @@ ROADMAP 0b.11.
   `lettore.usaDettagli(lista)`. In `leggiDocumento` (`conDettagli`): le regole restano la
   base; se il conto del modello è diverso e ogni numero è sicuro ≥ 98%, vale il modello
   (descrizioni: la voce delle regole con lo stesso prezzo, o le parole prima del prezzo;
+  con un "totale detto" per controllo restano le regole, che avvisano se non torna — trovato
+  da `preventivo-voci-app.test.js`;
   sconto/acconto = una voce sola col totale e il perché).
 - **Misure:** vedi ROADMAP 0b.19 passo 4.
 
