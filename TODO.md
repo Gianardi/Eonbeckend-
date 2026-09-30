@@ -4974,6 +4974,27 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Passo 3, secondo cassetto: preventivo/fattura (30/09/2026, ROADMAP 0b.19)
+- `lettore.js`: `leggiDocumento(testo, ctx)`.
+  - Ripulisce la frase:
+    - `parolaDocumento` (distanza di modifica ≤ 2 da "preventivo" o "fattura";
+      "fatturami" → "fattura a");
+    - toglie "per un nuovo cliente,";
+    - "per il signor X" → "per signor X".
+  - Poi chiama `leggi`.
+  - Torna la lettura solo se `azione === "documento"`.
+  - "Cliente nuovo" senza nome dopo: il nome si chiede (`manca: cliente`),
+    non si inventa.
+- `trovaNomeNuovo`: dopo "signor/…" la virgola chiude il nome.
+- `index.html`, in `elabora`: prima di `provaUrgenza`, se
+  `cassettoNeurale(testo) === "documento"`, allora `leggiDocumento` →
+  `gestisciDocumento`.
+  - Se torna un `comando`, si passa a `inviaAlServer`.
+  - Se torna `fatto`, si chiude.
+  - Solo `modo === "crea"`: cercare un documento resta alle regole di prima.
+- Sistemate 7 frasi (giro 16: +3, giro 17: +4). Minimi alzati: giro 16 985,
+  giro 17 983.
+
 ### Passo 3, primo cassetto: sposta/annulla (30/09/2026, ROADMAP 0b.19)
 - `lettore.js`:
   - `tempiDetti(pp, oggi)`: ogni tempo detto nel suo pezzo di frase, con

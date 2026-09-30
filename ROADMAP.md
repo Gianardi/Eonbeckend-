@@ -474,6 +474,18 @@ sporca, dialetti, chat, anziano, straniero.
      segnava come impegni NUOVI) ne sistema 32. Giro 16: 966 → **982**; giro
      17: 966 → **979**; giro 15: 1036 → 1037; giro 9: 48/48. Nessun giro
      peggiora; 71 prove su 71.
+   **Secondo cassetto fatto il 30/09: preventivo o fattura.**
+   - Il modello decide.
+   - Il lettore dei documenti di sempre legge la frase ripulita da tre
+     problemi, prima degli altri controllori:
+     - parole storpiate dalla dettatura ("prevendivo", "prevetivo",
+       "fatturami");
+     - "per un nuovo cliente,", che faceva creare solo il cliente;
+     - "24 lampade di emergenza", che finiva tra le urgenze.
+   - Giro 16: 982 → **985**; giro 17: 979 → **983**. Nessun giro peggiora; 71
+     prove su 71.
+   - Restano gli importi letti male (sconti, correzioni "no, metti 15",
+     "30% su 10.000"): sono dettagli, lavoro del passo 4.
 4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
 

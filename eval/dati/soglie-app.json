@@ -1,5 +1,5 @@
 {
-  "nota": "Frasi giuste dell'app intera per ogni serie (giorno fisso 29/09). eval/prove-frasi.sh fallisce se una serie scende sotto il minimo. Si alzano quando l'app migliora, mai si abbassano senza dirlo ad Andrea. Ultimo aggiornamento: 30/09, passo 3 sposta/annulla.",
+  "nota": "Frasi giuste dell'app intera per ogni serie (giorno fisso 29/09). eval/prove-frasi.sh fallisce se una serie scende sotto il minimo. Si alzano quando l'app migliora, mai si abbassano senza dirlo ad Andrea. Ultimo aggiornamento: 30/09, passo 3 sposta/annulla e preventivi/fatture.",
   "serie": {
     "frasi-nuove-mestieri.json": 143,
     "frasi-giro5.json": 184,
@@ -15,7 +15,7 @@
     "frasi-prova-cieca.json": 77,
     "frasi-prova-finale-app.json": 99,
     "frasi-giro15.json": 1037,
-    "frasi-giro16.json": 982,
-    "frasi-giro17.json": 979
+    "frasi-giro16.json": 985,
+    "frasi-giro17.json": 983
   }
 }
