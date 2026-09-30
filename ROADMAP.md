@@ -582,7 +582,7 @@ sporca, dialetti, chat, anziano, straniero.
    - **Onestà:** una prova automatica nuova (`eval/modello-dettagli.test.mjs`)
      blocca il merge se una frase giusta diventa sbagliata. La soglia del 98%
      e le prove sono tarate sui giri che conosco: il voto vero lo darà il
-     giro 18 alla cieca (passo 5).
+     giro 18 alla cieca (passo 5): sugli importi del giro 18 le regole ne fanno 50 su 103, regole + modello 54 (vedi sotto).
    - **Resta:**
      - le date e le ore ("giovedì 8" = giorno 8 o alle 8?, due appuntamenti
        in una frase, "alle deci"): prossimo pezzo di questo passo;
@@ -592,6 +592,35 @@ sporca, dialetti, chat, anziano, straniero.
        nell'app la frase non arriva al preventivo (è un problema di
        smistamento).
 5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
+   **Giro 18 fatto il 30/09 (sera), dopo i passi 3 e 4.**
+   - **Chi l'ha scritto:** 5 scrittori nuovi, che non hanno visto il codice né
+     i giri vecchi: impresa edile a Verona, idraulico a Bari, elettricista a
+     Torino, amministratrice di condominio a Palermo, tappezziere a Firenze.
+     1.064 frasi, salvate nel progetto prima di misurare
+     (`eval/dati/frasi-giro18.json`) e misurate una volta, senza correggere
+     niente prima.
+   - **Modello dei cassetti da solo:** **95%** giusto (il modello di parole di
+     prima: 81%). È lo stesso livello degli esami alla cieca 16 e 17: il
+     modello tiene su frasi mai viste.
+   - **App intera:** **920 su 1.064 (86%)**, 39 all'AI, 105 sbagliate. Sui
+     giri che conosco è al 97%: la differenza è il voto onesto.
+   - **Dove sbaglia (144 frasi):**
+     - **48 importi di preventivi e fatture** su 103: è il punto debole. Gli
+       scrittori avevano l'indicazione di mettere sconti, correzioni e acconti,
+       e ne hanno messi molti. Il modello dei dettagli ne sistema 4 in più
+       (regole 50, regole + modello 54). Resta scoperto:
+       - lo sconto detto in tanti modi ("fagli uno sconto di 150", "togli il 5
+         per cento");
+       - "meno l'acconto che mi hanno già dato di 4000";
+       - "24 unità a 14 euro al mese per 12 mesi";
+       - "il 2% su 85.000 euro di lavori";
+       - "fagli un prezzo finale di 3.800";
+     - **16 orari** (due impegni in una frase, "giovedì 8");
+     - **80 frasi nel cassetto sbagliato:** 14 chiacchiere o domande di mestiere
+       prese per comandi, 12 appunti, 12 domande sui dati, 10 "apri/cerca un
+       documento", 9 incassi.
+   - Il giro 18 ora fa da soglia minima (920) contro i peggioramenti. Da qui
+     in avanti non è più cieco: per il prossimo voto onesto servirà un giro 19.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
