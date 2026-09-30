@@ -16031,8 +16031,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        nell'avviso rimedia a un appunto sbagliato. */
     if(!inContinuazione && cassettoNeurale(testo, 0.95) === "mente"){
       const lm = EonLettore.leggi(testo, contestoLettore());
-      // "segnami negli appunti…": un comando che le regole sanno già fare, lo fanno loro
-      const rm = lm && lm.azione !== "comando" ? await gestisciMente({ ...lm, azione: "mente" }, testo, viaVoce, (frase, p) => elabora(frase, false, p), true) : null;
+      // Restano alle regole di prima: "segnami negli appunti…" (comando che sanno già fare),
+      // "ricordami di…" (il loro "Da fare"), e le frasi con un giorno ("il muratore domani non viene"):
+      // di quelle decide il calendario
+      const conGiorno = !!EonLettore.trovaQuando(EonLettore.parole(EonLettore.pulisci(testo).testo), new Date()).giornoIso;
+      const rm = lm && lm.azione !== "comando" && !conGiorno && !/^\s*(?:ricordami|ricordarmi|ricorda)\b/i.test(testo) ? await gestisciMente({ ...lm, azione: "mente" }, testo, viaVoce, (frase, p) => elabora(frase, false, p), true) : null;
       if(rm && rm.comando){ ricordaEsitoCodice(testo, "mente_neurale"); return inviaAlServer(testo, viaVoce, false, rm); }
       if(rm && rm.fatto){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "mente_neurale"); return; }
     }
