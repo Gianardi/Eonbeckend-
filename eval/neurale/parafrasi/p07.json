@@ -1,0 +1,243 @@
+{ "stile": "titolare formale ed educato (geometra, amministratrice di condominio): per cortesia, potresti, gentilmente, avrei bisogno di, frasi complete, a volte il lei rivolto all'app",
+"frasi": [
+["Va benissimo così, la ringrazio.", "saluto"],
+["Perfetto, per me è tutto in ordine, grazie.", "saluto"],
+["D'accordo, così può andare.", "saluto"],
+
+["Per cortesia, registri che il signor Gaudio ha saldato il conto.", "incasso"],
+["Avrei bisogno di segnare che la signora Mazzocchi ha pagato tutto il dovuto.", "incasso"],
+["Gentilmente, annoti che il condominio Le Querce ha versato il saldo.", "incasso"],
+
+["Per cortesia, scatti adesso una foto alla ringhiera del signor Tonoli, prima che cominciamo.", "foto"],
+["Potresti fare una fotografia al cancello dei Ferrandi prima di iniziare i lavori?", "foto"],
+["Gentilmente, apra la fotocamera: devo fotografare il parapetto del balcone Rinaldi prima di smontarlo.", "foto"],
+
+["Potrebbe dirmi per cortesia quando ho l'appuntamento con il signor Casagranda?", "dati"],
+["Avrei bisogno di sapere in che giorno è fissato l'incontro con la famiglia Bortolin.", "dati"],
+["Mi sa dire gentilmente a che ora è previsto il sopralluogo con l'ingegner Pozzan?", "dati"],
+
+["Per cortesia, mi apra la fotografia della scala a chiocciola dei signori Pertoldi.", "cerca_documento"],
+["Potresti mostrarmi la foto già scattata del soppalco in casa Venturini?", "cerca_documento"],
+["Avrei bisogno di rivedere le immagini archiviate del terrazzo dei Morassutti.", "cerca_documento"],
+
+["Per cortesia, telefoni al signor Buti.", "chiamata"],
+["Potresti gentilmente chiamare la geometra Castellani?", "chiamata"],
+["Avrei bisogno di parlare con l'idraulico Fornasier, me lo chiami per favore.", "chiamata"],
+
+["Potrebbe dirmi quale aliquota IVA si applica all'installazione di un condizionatore in un'abitazione privata?", "domanda"],
+["Avrei un dubbio: per un climatizzatore montato in un appartamento l'IVA è al 10 o al 22 per cento?", "domanda"],
+["Gentilmente, mi spiega come va trattata l'IVA quando si installa una pompa di calore in una casa di residenza?", "domanda"],
+
+["Per cortesia, mi mostri le fotografie scattate ieri.", "cerca_documento"],
+["Potresti aprirmi le immagini fatte lunedì in cantiere?", "cerca_documento"],
+["Avrei bisogno di rivedere gentilmente le foto della settimana scorsa.", "cerca_documento"],
+
+["Per cortesia, cancelli dall'agenda la riunione di giovedì con i signori della ditta Oneto.", "calendario_modifica"],
+["Potresti eliminare l'incontro di martedì con i rappresentanti della Serramenti Bellandi? Non si fa più.", "calendario_modifica"],
+["Gentilmente, annulli l'appuntamento di venerdì con i tecnici della ditta Carrer.", "calendario_modifica"],
+
+["Potrebbe verificare se il signor Gatti ha già pagato il lavoro dello scarico?", "dati"],
+["Avrei bisogno di sapere se la signora Pellegrino ha saldato la fattura della grondaia.", "dati"],
+["Gentilmente, mi dice se il condominio Aurora mi ha pagato la riparazione della fognatura?", "dati"],
+
+["Per cortesia, prepari una fattura di 650 euro al signor Favaro per la riparazione dei listoni gonfi.", "documento"],
+["Avrei bisogno di emettere una fattura alla signora Righetto: sostituzione di sei doghe del parquet, 420 euro.", "documento"],
+["Potresti fare una fattura intestata a Marcuzzi per la levigatura del pavimento in rovere, importo 980 euro?", "documento"],
+
+["Per cortesia, scriva una mail al signor Ledda con le misure del giardino.", "email"],
+["Potresti preparare un'email per la signora Pinna in cui le riporto le dimensioni del cortile?", "email"],
+["Avrei bisogno di inviare per posta elettronica all'architetto Sanna le misure del terrazzo.", "email"],
+
+["Buonasera, ci sentiamo domani.", "saluto"],
+["La saluto, a domani.", "saluto"],
+["Arrivederci e grazie, a domattina.", "saluto"],
+
+["Per cortesia, crei una cartella dedicata al cantiere dell'albergo.", "cartella"],
+["Avrei bisogno di una cartella nuova per i lavori della residenza Le Betulle.", "cartella"],
+["Potresti aprire una cartella apposita per la ristrutturazione della scuola di via Roma?", "cartella"],
+
+["Per cortesia, scriva all'impresa Gribaudo una mail in cui domandiamo il cronoprogramma aggiornato del cantiere.", "email"],
+["Avrei bisogno di mandare un'email alla ditta Rosso Costruzioni per sollecitare il programma delle lavorazioni.", "email"],
+["Potresti gentilmente redigere una mail all'impresa Olivero chiedendo le date previste di inizio e fine cantiere?", "email"],
+
+["Per cortesia, prepari la dichiarazione di conformità per il signor Bernabei, appartamento 3.", "dico"],
+["Avrei bisogno di redigere la DiCo per l'impianto elettrico dell'interno 7 di casa Fabbri.", "dico"],
+["Potresti compilare la dichiarazione di conformità dell'impianto idraulico della signora Ciampi?", "dico"],
+
+["Per cortesia, emetta la fattura alla ditta Candotti per la manutenzione annuale della cabina, 1.850 euro.", "documento"],
+["Avrei bisogno di fatturare al supermercato Zorzi il controllo annuale del quadro elettrico: 1.200 euro.", "documento"],
+["Potresti preparare la fattura per la Tessitura Beltrame, manutenzione ordinaria della cabina di trasformazione, importo di 2.100 euro?", "documento"],
+
+["Per cortesia, mi apra la scheda del signor Lattarulo: vorrei vedere tutti i lavori svolti per lui.", "cliente"],
+["Potresti mostrarmi la scheda cliente della signora Colucci con lo storico degli interventi?", "cliente"],
+["Avrei bisogno di consultare la scheda del condominio Belvedere per rivedere quanto fatto finora.", "cliente"],
+
+["Le segnalo una perdita dalla colonna montante dell'acqua nel condominio di via Washington 40.", "urgenza"],
+["Avrei bisogno di registrare un guasto: la colonna dell'acqua sta perdendo nel palazzo di viale Monza 12.", "urgenza"],
+["Per cortesia, segni che in via Carducci 8 esce acqua dal tubo montante, è una cosa seria.", "urgenza"],
+
+["Potrebbe dirmi se per le pelli sensibili è preferibile la ceretta brasiliana o quella tradizionale?", "domanda"],
+["Avrei una domanda: per una cliente con la pelle delicata conviene la cera a caldo o quella a freddo?", "domanda"],
+["Gentilmente, mi consiglia quale tipo di depilazione sia più indicato per chi ha la pelle che si irrita facilmente?", "domanda"],
+
+["Per cortesia, metta in agenda venerdì alle 16: ritiro delle chiavi del locale caldaie dal custode del Condominio Ginestra.", "calendario"],
+["Avrei bisogno di fissare per mercoledì alle 10 il ritiro delle chiavi della centrale termica presso il portiere del Condominio Glicine.", "calendario"],
+["Potresti annotare in agenda lunedì alle nove e mezza il ritiro delle chiavi del vano contatori dalla portineria di via Nizza 22?", "calendario"],
+
+["Per cortesia, prepari la convocazione dell'assemblea del condominio Oleandri sul fotovoltaico condominiale, il 19 ottobre alle 18.", "assemblea"],
+["Avrei bisogno di convocare l'assemblea del Condominio Magnolie per il 7 novembre alle 18:30, all'ordine del giorno l'impianto fotovoltaico.", "assemblea"],
+["Potresti redigere l'avviso di convocazione per i condòmini di Residenza Tigli, 25 ottobre ore 17, tema pannelli solari sul tetto?", "assemblea"],
+
+["Per cortesia, si ricordi che la pompa per il massetto la noleggia Fiorini a un buon prezzo.", "mente"],
+["Avrei bisogno che annotasse questo: il noleggio della betoniera da Scarpa è il più conveniente della zona.", "mente"],
+["Gentilmente, prenda nota che la ditta Menegatti affitta il ponteggio a prezzi onesti.", "mente"],
+
+["Stavo valutando di assumere un apprendista di diciotto anni appena uscito dal professionale: potrebbe dirmi quanto mi costerebbe all'incirca in un anno?", "domanda"],
+["Avrei una domanda: quanto incide annualmente un ragazzo in apprendistato, tra stipendio e contributi?", "domanda"],
+["Gentilmente, mi saprebbe indicare il costo annuo indicativo di un giovane apprendista assunto a tempo pieno?", "domanda"],
+
+["Potrebbe dirmi quando inizia il lavoro del cappotto in via Manzoni?", "dati"],
+["Avrei bisogno di sapere quando è prevista la partenza del cantiere del cappotto termico in via Verdi.", "dati"],
+["Gentilmente, mi controlla in agenda in che data comincia l'isolamento della palazzina di via Garibaldi?", "dati"],
+
+["Per cortesia, mi mostri tutte le fatture emesse a settembre.", "cerca_documento"],
+["Potresti aprirmi l'elenco delle fatture di agosto?", "cerca_documento"],
+["Avrei bisogno di vedere tutti i preventivi fatti nel mese di luglio.", "cerca_documento"],
+
+["Sì, così va bene, grazie.", "saluto"],
+["Benissimo, non serve altro.", "saluto"],
+["La ringrazio, è tutto a posto così.", "saluto"],
+
+["Per cortesia, metta le fotografie della cantina del signor Parenti in una cartella separata.", "cartella"],
+["Avrei bisogno di raccogliere le foto del sottotetto dei Galli in una cartella a sé.", "cartella"],
+["Potresti gentilmente spostare le immagini del garage della signora Orlandi in una cartella apposita?", "cartella"],
+
+["Per cortesia, scriva una mail alla Kone per chiedere un intervento programmato sull'ascensore di via Tasso.", "email"],
+["Avrei bisogno di mandare un'email alla Schindler per richiedere la manutenzione programmata dell'elevatore di via Petrarca.", "email"],
+["Potresti preparare una mail all'Otis in cui chiedo di fissare un intervento sull'ascensore del condominio di corso Dante?", "email"],
+
+["Per cortesia, chiami il signor Locatelli, al numero dell'ufficio e non a quello di casa.", "chiamata"],
+["Potresti telefonare alla dottoressa Brambilla sul cellulare di lavoro, non sul fisso di casa?", "chiamata"],
+["Avrei bisogno di chiamare l'ingegner Colombo: usi gentilmente il numero dello studio.", "chiamata"],
+
+["Per cortesia, invii al signor Iorio il preventivo che abbiamo preparato ieri.", "invio_documento"],
+["Avrei bisogno di mandare alla signora Esposito il preventivo fatto lunedì.", "invio_documento"],
+["Potresti trasmettere all'avvocato De Luca il preventivo già pronto per la cucina?", "invio_documento"],
+
+["Per cortesia, avrei bisogno del primo stato di avanzamento lavori del cantiere Nocentini a Sesto Fiorentino.", "sal"],
+["Avrei bisogno di preparare il secondo SAL per il cantiere Bartolini a Scandicci.", "sal"],
+["Potresti redigere il SAL n. 3 della ristrutturazione Mariotti a Campi Bisenzio?", "sal"],
+
+["Per cortesia, aggiunga un nuovo cliente: condominio di via Pietrapiana 32, amministratore Pieraccini.", "cliente"],
+["Avrei bisogno di registrare un cliente nuovo, il Condominio Le Rose di via Aretina 15, amministratrice signora Bencini.", "cliente"],
+["Potresti inserire in anagrafica il condominio di piazza Beccaria 4, amministrato dal ragionier Tozzi?", "cliente"],
+
+["Le comunico che è arrivato il bonifico della Edil Marcon, 4.800 euro.", "incasso"],
+["Per cortesia, registri l'incasso di 3.200 euro ricevuto con bonifico dalla Costruzioni Dal Bo.", "incasso"],
+["Avrei bisogno di segnare che la Immobiliare Pavan mi ha accreditato 5.600 euro.", "incasso"],
+
+["Per cortesia, prepari un preventivo per la signora Guidi a Monteverde: quattro lampadari a 60 euro l'uno e un punto luce nuovo a 80.", "documento"],
+["Avrei bisogno di un preventivo per il signor Paolucci, in zona Prati: sei faretti a 35 euro ciascuno e due prese nuove a 50.", "documento"],
+["Potresti fare un preventivo alla famiglia Ceccarelli per il montaggio di tre plafoniere a 45 euro e la sostituzione del quadro a 320?", "documento"],
+
+["Le segnalo che ci sono tarli attivi nel coro ligneo: stanno rovinando tutto, occorre intervenire subito.", "urgenza"],
+["Avrei bisogno di registrare un'emergenza: i tarli stanno divorando le travi del soffitto a cassettoni di palazzo Mancini.", "urgenza"],
+["Per cortesia, segni che nell'armadio antico della sacrestia c'è un'infestazione di tarli in corso e va trattata immediatamente.", "urgenza"],
+
+["Per cortesia, mi ricordi giovedì mattina di comprare i guanti nuovi per i ragazzi.", "calendario"],
+["Avrei bisogno di un promemoria per lunedì alle 8: prendere le scarpe antinfortunistiche per gli operai.", "calendario"],
+["Potresti ricordarmi domani pomeriggio di passare in ferramenta per gli occhiali protettivi della squadra?", "calendario"],
+
+["Le comunico che ho ricevuto dai signori Chiabrando un acconto di 500 euro.", "incasso"],
+["Per cortesia, registri un acconto di 800 euro versato dalla famiglia Bertola.", "incasso"],
+["Avrei bisogno di segnare l'acconto di 300 euro che mi ha consegnato la signora Gribodo.", "incasso"],
+
+["Per cortesia, sposterebbe il taglio della siepe delle Mimose dalle 14 alle 16?", "calendario_modifica"],
+["Avrei bisogno di posticipare la potatura al condominio Gardenie dalle 9 alle 11.", "calendario_modifica"],
+["Potresti anticipare lo sfalcio del prato dei signori Ravera da venerdì a giovedì, stessa ora?", "calendario_modifica"],
+
+["Per cortesia, prepari la convocazione dei condòmini di via Madama Cristina: dobbiamo discutere dell'ascensore in assemblea.", "assemblea"],
+["Avrei bisogno di convocare un'assemblea straordinaria a corso Vittorio 18 per il rifacimento dell'ascensore.", "assemblea"],
+["Potresti indire un'assemblea dei proprietari del condominio di via Nizza per decidere sull'installazione dell'ascensore?", "assemblea"],
+
+["Per cortesia, prepari la DiCo per l'impianto del signor Galbiati.", "dico"],
+["Avrei bisogno della dichiarazione di conformità dell'impianto gas di casa Villa.", "dico"],
+["Potresti gentilmente redigere la dico per il nuovo impianto elettrico del negozio Brivio?", "dico"],
+
+["Le segnalo che è saltata la corrente in tutto il laboratorio.", "urgenza"],
+["Avrei bisogno di registrare un blackout: il capannone è completamente al buio.", "urgenza"],
+["Per cortesia, segni che nell'officina è andata via l'elettricità e non riparte nulla.", "urgenza"],
+
+["Per cortesia, segni l'assemblea del condominio Villa Serena per il 3 novembre alle 21.", "assemblea"],
+["Avrei bisogno di fissare l'assemblea del Condominio Il Parco il 12 dicembre alle 20:30.", "assemblea"],
+["Potresti registrare l'assemblea condominiale di Residenza Aurora per il 28 novembre alle 18?", "assemblea"],
+
+["Per cortesia, sposti il preventivo del signor Bonanno nella cartella caldaie nuove.", "cartella"],
+["Avrei bisogno di mettere la fattura della signora Lo Presti nella cartella climatizzatori.", "cartella"],
+["Potresti archiviare il preventivo della famiglia Caruso nella cartella bagni 2026?", "cartella"],
+
+["Per cortesia, mandi un messaggio alla signora Zanotti per dirle che il tessuto antigraffio è arrivato.", "messaggio"],
+["Avrei bisogno di scrivere un WhatsApp al signor Benassi: le tende che aveva ordinato sono pronte.", "messaggio"],
+["Potresti inviare un SMS alla signora Grandi avvisandola che il velluto per il divano è in negozio?", "messaggio"],
+
+["Per cortesia, registri lo stato di avanzamento del cantiere di Grottaferrata al 40 per cento.", "sal"],
+["Avrei bisogno di aggiornare il SAL del cantiere di Frascati: siamo al 65 per cento.", "sal"],
+["Potresti preparare lo stato avanzamento lavori di Marino, con le opere giunte a metà?", "sal"],
+
+["Per cortesia, scatti una foto al numero di serie dell'NVR.", "foto"],
+["Avrei bisogno di fotografare adesso la targhetta della caldaia.", "foto"],
+["Potresti aprire la fotocamera per inquadrare la matricola del contatore?", "foto"],
+
+["Per cortesia, prenda nota che devo chiedere la liberatoria per le foto dei lavori.", "mente"],
+["Avrei bisogno di ricordare che ai clienti va fatta firmare l'autorizzazione a pubblicare le immagini dei cantieri.", "mente"],
+["Gentilmente, annoti che prima di pubblicare le foto del bagno Rinaldi serve il consenso scritto.", "mente"],
+
+["Avrei bisogno, per cortesia, dello stato di avanzamento numero uno dell'impresa Martinelli, cantiere di piazzale Susa.", "sal"],
+["Per cortesia, rediga il SAL numero due della ditta Ferrero per i lavori di corso Francia.", "sal"],
+["Potresti compilare lo stato di avanzamento dell'impresa Gallo sul cantiere di via Cibrario?", "sal"],
+
+["Per cortesia, prenda nota: Idrocasa applica il 10 per cento di sconto con pagamento immediato.", "mente"],
+["Avrei bisogno che si ricordasse che da Termoidraulica Pagano pagando in contanti fanno il 5 per cento in meno.", "mente"],
+["Gentilmente, annoti che il magazzino Edilfer concede uno sconto dell'8 per cento sopra i mille euro di spesa.", "mente"],
+
+["Per cortesia, scriva un WhatsApp al signor Pisanu: il garage lo vediamo più avanti, gli farò sapere io.", "messaggio"],
+["Avrei bisogno di mandare un messaggio alla signora Deiana per dirle che la cantina la guardiamo il mese prossimo e che la ricontatto io.", "messaggio"],
+["Potresti inviare un SMS al signor Melis? Gli scriva che il sopralluogo al magazzino è rimandato e che lo richiamo io.", "messaggio"],
+
+["Per cortesia, invii il preventivo del signor Lucarelli anche all'amministratore, il dottor Evangelisti.", "invio_documento"],
+["Avrei bisogno di inoltrare il preventivo della signora Sarti al suo amministratore di condominio, il ragionier Marini.", "invio_documento"],
+["Potresti mandare la fattura già emessa per i Bellucci anche al loro commercialista, la dottoressa Ricci?", "invio_documento"],
+
+["Per cortesia, scatti una fotografia.", "foto"],
+["Avrei bisogno di fare una foto adesso.", "foto"],
+["Potresti aprire la fotocamera, gentilmente?", "foto"],
+
+["Per cortesia, cancelli il servizio fotografico di sabato con i Bertolino: hanno rinviato il matrimonio.", "calendario_modifica"],
+["Avrei bisogno di annullare la sessione di domenica con gli sposi Ferraris, la cerimonia è stata spostata.", "calendario_modifica"],
+["Potresti togliere dall'agenda il servizio di venerdì con la famiglia Costa? Hanno disdetto.", "calendario_modifica"],
+
+["Per cortesia, segni domani alle 15 l'arrivo del camion del calcestruzzo a Lissone.", "calendario"],
+["Avrei bisogno di mettere in agenda giovedì alle 7:30 la consegna del cemento al cantiere di Seregno.", "calendario"],
+["Potresti annotare che martedì alle 11 arriva l'autobetoniera a Desio?", "calendario"],
+
+["Per cortesia, prepari la dichiarazione di conformità.", "dico"],
+["Avrei bisogno di fare la DiCo.", "dico"],
+["Potresti compilare la dico, gentilmente?", "dico"],
+
+["Per cortesia, aggiunga un nuovo cliente: Riccardo Bossi, via Padova.", "cliente"],
+["Avrei bisogno di inserire tra i clienti la signora Elena Brambati, residente in viale Monza.", "cliente"],
+["Potresti registrare come nuovo cliente il signor Gianluca Tagliabue di via Porpora?", "cliente"],
+
+["Per cortesia, invii il preventivo dei sanitari alla signora Serra, a lei e non al marito.", "invio_documento"],
+["Avrei bisogno di mandare il preventivo della doccia alla signora Pirastu personalmente, non al figlio.", "invio_documento"],
+["Potresti trasmettere il preventivo della cucina direttamente al signor Mura, non alla moglie?", "invio_documento"],
+
+["Per cortesia, chiami il mio socio Marco in vivavoce, perché sto guidando.", "chiamata"],
+["Avrei bisogno di telefonare al mio collega Stefano, metta il vivavoce che sono al volante.", "chiamata"],
+["Potresti avviare una chiamata con il geometra Ruggeri? Sono in macchina, gentilmente in vivavoce.", "chiamata"],
+
+["Per cortesia, mandi un SMS al signor Boero per informarlo che il posto auto numero 12 è suo.", "messaggio"],
+["Avrei bisogno di scrivere un messaggio alla signora Ghione per comunicarle che la cantina numero 4 è sua.", "messaggio"],
+["Potresti inviare un WhatsApp al signor Aimar per informarlo che il box è stato assegnato a lui?", "messaggio"]
+]
+}

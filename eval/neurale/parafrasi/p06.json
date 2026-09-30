@@ -1,0 +1,241 @@
+{ "stile": "artigiano siciliano o calabrese, italiano regionale con verbo in fondo, talè, amunì, picciotto, compà, passato remoto", "frasi": [
+["talè, ma tra persiana e scuretto la differenza qual è?", "domanda"],
+["compà, persiana e scuretto la stessa cosa sono o no?", "domanda"],
+["spiegami una cosa, lo scuretto dalla persiana in che cosa diverso è?", "domanda"],
+
+["l'avviso d'assemblea per i condomini di via Garibaldi preparalo, amunì", "assemblea"],
+["picciotto, la convocazione dell'assemblea per il condominio di corso Umberto fammela", "assemblea"],
+["ai condomini di via Etnea l'avviso dell'assemblea preparare devi", "assemblea"],
+
+["una mail alla Ferramenta Siciliana scrivila, che 40 cerniere ordinare voglio", "email"],
+["amunì, mail a Ferramenta Calabra, un ordine di 60 cerniere ci metti", "email"],
+["all'ingrosso Bruno per email scrivi, che 50 maniglie ci ordino", "email"],
+
+["il ritiro delle chiavi di via Roma, quello di venerdì, a giovedì spostamelo", "calendario_modifica"],
+["talè, le chiavi di corso Vittorio le dovevo ritirare venerdì, a mercoledì mettilo", "calendario_modifica"],
+["compà, l'appuntamento per le chiavi di via Maqueda da sabato a venerdì passalo", "calendario_modifica"],
+
+["una foto al quadro vecchio fammela, amunì", "foto"],
+["talè, il quadro elettrico vecchio fotografalo ora", "foto"],
+["scatta, scatta una foto a sto quadro elettrico antico", "foto"],
+
+["il bonifico dell'Edilsud arrivò, 11.800 euro incassai", "incasso"],
+["talè, Edilcalabria pagò: 9.600 di bonifico entrarono", "incasso"],
+["segna che il bonifico della Costruzioni Russo ieri arrivò, 14.200 euro", "incasso"],
+
+["segnati che il condominio di via Libertà la caldaia a gasolio ce l'ha", "mente"],
+["tienilo a mente, compà: a corso Garibaldi la centrale termica a gasolio va ancora", "mente"],
+["appuntati che nel palazzo di via Sciuti a gasolio è la caldaia centrale", "mente"],
+
+["talè, il cancello di legno dei Cusumano col vento a terra cadde", "urgenza"],
+["il cancello del Mancuso stanotte il vento se lo portò giù, crollato è", "urgenza"],
+["compà, dai Lo Presti il cancello in legno venne giù per la tramontana", "urgenza"],
+
+["le foto del contatore del condominio di via Notarbartolo fammele vedere", "cerca_documento"],
+["talè, dove sono le foto che feci al contatore del palazzo di via Dante?", "cerca_documento"],
+["le foto del contatore di via Cavour, quelle che scattai, trovamele", "cerca_documento"],
+
+["quanto ancora incassare devo dai clienti, dimmi", "dati"],
+["talè, i crediti che ancora non incassai a quanto arrivano?", "dati"],
+["compà, chi pagare mi deve ancora e quanto in totale?", "dati"],
+
+["salutamu, a domani", "saluto"],
+["amunì, ci vediamo domani, ciao EON", "saluto"],
+["bona sirata, a domani", "saluto"],
+
+["oggi dopo pranzo dove andare devo?", "dati"],
+["nel pomeriggio d'oggi dove mi tocca andare, talè?", "dati"],
+["oggi pomeriggio unni haiu a ghiri, compà?", "dati"],
+
+["i preventivi del fotovoltaico che ancora nessuno firmò quali sono?", "dati"],
+["talè, di fotovoltaico quanti preventivi aperti ancora ho?", "dati"],
+["dimmi quali preventivi di pannelli solari ancora accettati non sono", "dati"],
+
+["grazie comunque, picciotto", "saluto"],
+["va bè, grazie lo stesso compà", "saluto"],
+["non fa niente, grazie assai", "saluto"],
+
+["l'avviso di convocazione dell'assemblea per il palazzo sopra la pasticceria Savia fammelo", "assemblea"],
+["amunì, la convocazione d'assemblea per lo stabile del bar Ideal prepara", "assemblea"],
+["per il condominio dove c'è il bar Sicilia l'assemblea convocare dobbiamo, l'avviso fallo", "assemblea"],
+
+["un whatsapp a tutti i condòmini di via Ruggero Settimo scrivi: venerdì mattina dalle 8 alle 12 l'acqua non c'è per lavori alla colonna", "messaggio"],
+["talè, ai condòmini di corso Calatafimi un messaggio manda, che martedì dalle nove all'una manca l'acqua, la colonna montante rifacciamo", "messaggio"],
+["compà, mandaci un WhatsApp ai condòmini di via Crispi: giovedì mattina acqua chiusa dalle 7 a mezzogiorno per lavori", "messaggio"],
+
+["la chiave del cancello degli Scalia la vicina del secondo piano ce l'ha, segnatelo", "mente"],
+["talè, le chiavi del portone dei Greco la signora di fronte le tiene", "mente"],
+["tienilo a mente: la chiave del cancello di casa Ferraro la tiene la vicina del piano terra", "mente"],
+
+["con 10 operai conviene una srl aprire o ditta individuale restare?", "domanda"],
+["compà, con sei dipendenti la srl mi conviene o la ditta com'è lascio?", "domanda"],
+["talè, ditta individuale o società, con 7 operai che è meglio?", "domanda"],
+
+["una cartella nuova fammi, palme col punteruolo", "cartella"],
+["amunì, cartella nuova: ulivi malati", "cartella"],
+["crea la cartella agrumi malati, picciotto", "cartella"],
+
+["sabato 17 alle nove e mezza la manutenzione dell'impianto alla palestra Fitness Sud ho", "calendario"],
+["segna: venerdì alle 8 e un quarto manutenzione impianto palestra Messina", "calendario"],
+["talè, lunedì 12 alle 7 e mezza l'impianto della palestra Barbera in manutenzione è, segnalo", "calendario"],
+
+["la fattura di saldo per il cantiere di via Maqueda fare devi", "documento"],
+["amunì, fattura a saldo del lavoro di corso Umberto emetti", "documento"],
+["talè, per il cantiere di via Libertà la fattura del saldo prepara", "documento"],
+
+["le misure che scrissi sul muro fotografale", "foto"],
+["talè, una foto alle misure segnate sulla parete fammi", "foto"],
+["scatta una foto a sti numeri sul muro, che le misure sono", "foto"],
+
+["la dico per il Cannizzaro fotovoltaico fammi, 12 kW... no aspetta, 10 kWp", "dico"],
+["dichiarazione di conformità per l'impianto fotovoltaico dei Bellomo, potenza 6... no, 8 kWp", "dico"],
+["talè, dico per Vitale, fotovoltaico da 150 kWp, anzi no, 145", "dico"],
+
+["una mail al Pappalardo preparala, che il materiale di prezzo aumentò ci spieghi", "email"],
+["compà, un'email al Giuffrida scrivi, spiegaci che i materiali cari diventarono", "email"],
+["per email al Lo Bianco spiega che i prezzi del materiale salirono", "email"],
+
+["il preventivo della tenda al Russo su WhatsApp mandaglielo", "invio_documento"],
+["talè, al Mangano il preventivo della pergola mandalo per whatsapp", "invio_documento"],
+["compà, il preventivo della cappottina che feci al Catalano su WhatsApp mandaci", "invio_documento"],
+
+["l'amministratore Lo Cascio vuole che l'assemblea fissiamo per il colore della facciata scegliere", "assemblea"],
+["talè, l'assemblea per decidere il colore dei prospetti l'amministratore Puglisi fissare chiede", "assemblea"],
+["l'amministratrice Messina disse di convocare l'assemblea per scegliere il colore del palazzo", "assemblea"],
+
+["il preventivo del box doccia al Caruso mandalo, e digli che 30 giorni vale", "invio_documento"],
+["talè, al Parisi il preventivo del bagno manda, valido 60 giorni scrivici", "invio_documento"],
+["compà, il preventivo della doccia al Siracusa mandaci e che 15 giorni vale ci dici", "invio_documento"],
+
+["il sal del Pagano aggiorna: grondaie finii, la pittura a metà è", "sal"],
+["talè, sal di Vaccaro aggiornalo, i pluviali finiti e l'intonaco a metà", "sal"],
+["stato avanzamento del cantiere Lombardo: grondaie fatte, tinteggiatura al 50, aggiornalo", "sal"],
+
+["chiama la Edil Sicula, all'ufficio però", "chiamata"],
+["talè, l'ufficio della Costruzioni Arena chiamami", "chiamata"],
+["fammi parlare con l'Edilponte, il numero dell'ufficio chiama", "chiamata"],
+
+["il preventivo per la tettoia dei Randazzo unni finìu?", "cerca_documento"],
+["talè, dove andò a finire il preventivo della pensilina dei Cardella?", "cerca_documento"],
+["compà, il preventivo del gazebo dei Pennisi trovamelo, che non lo trovo", "cerca_documento"],
+
+["l'etichetta della telecamera fotografala", "foto"],
+["talè, una foto alla targhetta della videocamera scatta", "foto"],
+["fammi una foto adesso al codice sotto la telecamera", "foto"],
+
+["bongiorno, EON", "saluto"],
+["salutamu, compà", "saluto"],
+["buongiorno a tia", "saluto"],
+
+["a Scuderi su whatsapp scrivici che la planimetria mi serve", "messaggio"],
+["talè, un messaggio al Tomasello manda: la pianta della casa mandarmela deve", "messaggio"],
+["compà, scrivi al Bonanno su whatsapp, che la planimetria ci chiedo", "messaggio"],
+
+["il cancello automatico dei Musumeci dopo il temporale bloccato è, corrente non ce n'è", "urgenza"],
+["talè, dai Sciacca col temporale la corrente saltò e il cancello non si apre più", "urgenza"],
+["compà, il cancello elettrico del Cutrona fermo è, dopo il fulmine niente luce", "urgenza"],
+
+["una cartella nuova fammi: Materiale da rendere", "cartella"],
+["amunì, crea la cartella Resi al fornitore", "cartella"],
+["cartella nuova, chiamala Roba da riportare indietro", "cartella"],
+
+["chiama il Messina, quello di Bagheria, non quello di Palermo", "chiamata"],
+["talè, chiamami Cuffaro, quello di Rende e no quello di Cosenza", "chiamata"],
+["compà, al Barone telefona, quello di Acireale, l'altro di Catania no", "chiamata"],
+
+["martedì che viene tutta la giornata al cantiere di Mondello sono, segnamelo", "calendario"],
+["talè, giovedì prossimo tutto il giorno a Tropea al cantiere mi trovo, mettilo", "calendario"],
+["segna che lunedì 14 dalla mattina alla sera al cantiere di Cefalù sto", "calendario"],
+
+["in salone che musica mettere devo che alle clienti piaccia?", "domanda"],
+["talè, che canzoni metto in negozio che a tutte le signore piacciono?", "domanda"],
+["compà, una musica per il salone mi consigli che non dia fastidio a nessuna?", "domanda"],
+
+["il promemoria dei cavi FG16 cancellalo, che il grossista già lo chiamai", "calendario_modifica"],
+["talè, levami il promemoria del corrugato, il fornitore già lo sentii", "calendario_modifica"],
+["compà, quel promemoria per le guaine toglilo, con il magazzino ieri parlai", "calendario_modifica"],
+
+["la fattura 52 nella cartella Edilsud mettila", "cartella"],
+["talè, la fattura numero 31 spostala nella cartella Costruzioni Arena", "cartella"],
+["compà, metti la fattura 18 dentro la cartella Condominio Etna", "cartella"],
+
+["la dico per Scalia fammi, con lo schema e l'elenco materiali allegati", "dico"],
+["talè, dichiarazione di conformità per il Lombardo, schema e materiali ci alleghi", "dico"],
+["compà, dico x Musumeci con allegato schema elettrico e lista materiali", "dico"],
+
+["un preventivo nuovo fammi: album 30x40 per gli sposi Catanzaro, 520 euro", "documento"],
+["talè, preventivo per gli sposi Rizzo, album fotografico quadrato, 480 euro", "documento"],
+["compà, preventivo album di nozze per i Cannata, 30x30, 390 euro", "documento"],
+
+["giovedì alle dieci con l'architetto Pirrone per il terrazzo verde appuntamento ho", "calendario"],
+["talè, mercoledì alle 9 e mezza l'architetto Genovese vedere devo per il giardino sul tetto", "calendario"],
+["segnami venerdì alle 11 l'appuntamento con l'architetta Ferlito per il giardino pensile", "calendario"],
+
+["il bonifico dei Serramenti Arena arrivò, 870 euro", "incasso"],
+["talè, Infissi Parisi pagò con bonifico, 1.150 euro", "incasso"],
+["compà, da Alluminio Sud ricevetti un bonifico di 760 euro", "incasso"],
+
+["una mail al catasto scrivi per la correzione della planimetria dei Nicosia", "email"],
+["talè, email all'agenzia del territorio per rettificare la planimetria Ferraro", "email"],
+["compà, al catasto per email la rettifica della piantina dei Lo Giudice chiedi", "email"],
+
+["da comprare: scotch marrone, pellicola e 40 scatoloni grandi", "mente"],
+["talè, segnati che servono nastro da pacchi, pellicola e 60 cartoni medi", "mente"],
+["compà, comprare devo nastro adesivo, pluriball e trenta scatole, appuntalo", "mente"],
+
+["il preventivo del Lo Presti fammelo vedere", "cerca_documento"],
+["talè, apri il preventivo che feci al Calabrò", "cerca_documento"],
+["compà, il preventivo dei Tripodi trovamelo", "cerca_documento"],
+
+["segna che la parrocchia di Santa Rosalia 1.600 per l'impianto pagò", "incasso"],
+["talè, la chiesa di San Francesco pagò, 1.250 euro per l'impianto", "incasso"],
+["compà, dalla parrocchia Madre ieri 2.100 incassai per l'impianto audio", "incasso"],
+
+["Scalia Giuseppe, aprimi la scheda", "cliente"],
+["talè, la scheda del cliente Mancuso Rosario apri", "cliente"],
+["compà, Ferrara Salvatore, apri", "cliente"],
+
+["fattura al Longo... no, al Barbaro, Longo è l'altro: 620 euro per il condizionatore", "documento"],
+["talè, fai fattura a Grasso, anzi no, a Pellegrino, 480 euro per lo split", "documento"],
+["compà, fattura a Mazzola... no, a Cutrì, 710 euro per il climatizzatore", "documento"],
+
+["fammi chiamare il Lo Monaco", "chiamata"],
+["talè, il Pirrello chiamamelo", "chiamata"],
+["compà, telefona al Barbagallo", "chiamata"],
+
+["dai Riggio dal soffitto acqua entra, in camera da letto gocciola", "urgenza"],
+["talè, infiltrazione dal tetto dal Caruso, cola in camera", "urgenza"],
+["compà, a casa Nicotra dal soffitto della stanza da letto l'acqua scende", "urgenza"],
+
+["mandaci 'a fattura, allo Scordo", "invio_documento"],
+["talè, la fattura al Cuzzocrea mandagliela", "invio_documento"],
+["compà, a Spanò la fattura manda", "invio_documento"],
+
+["al bar Roma un messaggio manda, che domattina ci passo io", "messaggio"],
+["talè, scrivi al Panificio Cusimano che domani mattina passare devo io", "messaggio"],
+["compà, messaggio alla Macelleria Russo: domattina vengo io", "messaggio"],
+
+["quello di domani, no, quello di dopodomani dai Sottile, a lunedì mattina spostalo che giovedì piove e con la porta aperta lavorare non si può", "calendario_modifica"],
+["talè, l'appuntamento di venerdì dal Morabito, no, quello di sabato, a martedì mattina mettilo che pioggia danno", "calendario_modifica"],
+["compà, da Vitale giovedì non ci vado, piove: spostamelo a lunedì mattina", "calendario_modifica"],
+
+["il cliente Fichera aprimi", "cliente"],
+["talè, la scheda del Bonaccorso apri", "cliente"],
+["compà, fammi vedere la scheda cliente del Ruggeri", "cliente"],
+
+["uno stato avanzamento per il Caruso fammi, pompa di calore e canali al 50", "sal"],
+["talè, sal per i Buscemi: pdc e canalizzazioni a metà", "sal"],
+["compà, stato avanzamento lavori Leonardi, la pompa di calore e i canali al 60 per cento", "sal"],
+
+["secondo sal dell'impresa Edil Etna, via Pirandello, 19.800", "sal"],
+["talè, il terzo sal per l'impresa Costruzioni Aspromonte in via Verga, 27.300", "sal"],
+["compà, sal numero due per la Edilstretto di via Garibaldi, 21.400 euro", "sal"],
+
+["la dico per Cirillo fammi, il quadro rifeci", "dico"],
+["talè, dichiarazione di conformità per il Fazio, quadro elettrico rifatto", "dico"],
+["compà, dico x Mirabella, il quadro nuovo misi", "dico"],
+
+["cliente nuovo: la signora Concetta Arena", "cliente"],
+["talè, aggiungimi la signora Rosaria Pulvirenti come cliente", "cliente"],
+["compà, nuova cliente, signora Carmela Di Stefano", "cliente"]
+] }

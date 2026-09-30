@@ -4974,6 +4974,55 @@ ROADMAP 0b.11.
   chat): "annulla il getto di domani" risulta all'AI; una cartella che non
   esiste ("Fornitori") va all'AI invece di proporre di crearla.
 
+### Il modello neurale: allenamento della notte (30/09/2026, ROADMAP 0b.19)
+- Dati (`eval/neurale/prepara.mjs` → `eval/neurale/dati/`, non nel repo):
+  ~55 mila frasi = maestra m01-m40 (~19,7 mila, 40 personaggi) + confini
+  c1-c17 (~5,9 mila, coppie simili con etichette diverse, c9-c17 mirati sugli
+  errori della palestra) + parafrasi p01-p14 (2.518 riscritture in 14 stili:
+  telegrafico, dettatura sporca, dialetti, chat, anziano, straniero, domande
+  indirette…) + generatore, frasario, simulatore. Il campo `file` dice da dove
+  viene ogni frase scritta a mano.
+- Esame: palestra = frasi vere di Andrea, giri 5-15; esame alla cieca = giro
+  16 e giro 17 (`NASCONDI_ESAME=1` li nasconde mentre si prova). Le frasi
+  d'esame sono tolte dall'allenamento.
+- `eval/neurale/allena.py`, nuove manopole: `PIEGA=i/n` (pulizia dati:
+  allena senza 1/n e giudica quelle frasi → `dati/piega-i.jsonl`; analisi con
+  `eval/neurale/sospette.py`: frasi che il modello, senza averle viste, mette con
+  sicurezza altrove); `LOGIT_OUT` / `MAESTRI=f1,f2,…` / `TD` / `ALFA`
+  (distillazione: lo studente impara anche le probabilità medie dei maestri);
+  `ESAME_OUT` (probabilità sull'esame, per misurare l'insieme: `insieme.py`); `PREALLENA`
+  (parole coperte, come BERT) ed `EMA` (media dei pesi); `PESO_PARAFRASI`.
+- Risultati sulla palestra: le varianti (D128/D160, vocabolario 6-8 mila,
+  12-14 giri) sono nel rumore; scelta D128 L2 V8000 E14. Pulizia: 164
+  sospette su 52.801, solo 2 davvero sbagliate (corrette): i dati sono puliti.
+  PREALLENA ed EMA: nessun guadagno (tolti dalla ricetta, restano come
+  opzioni). Le frasi mirate (confini 2) hanno dato il salto più grande.
+- Ricetta finale: 4 maestri D128 (semi 1-4) + 1 maestro D160 (seme 5) →
+  studente D128 L2 V8000 E14, TD 2, alfa 0,5, seme 7. `modello-neurale.json`
+  1,9 MB, 1,3 milioni di parametri, 6,6 ms a frase, uguale a PyTorch su
+  4663/4666 (`verifica.mjs`).
+- Esame alla cieca, neurale da solo (`confronta.mjs`, `NEURALE=file` per un
+  altro modello): giro 16 1013 → **1031/1068 (97%)**, giro 17 1008 →
+  **1034/1059 (98%)**; il modello di oggi a parole 87%.
+- App intera (`frasi-nuove-mestieri.test.js`): giro 16 964 → 964, giro 17
+  960 → 965. Il guadagno si perde perché le regole decidono prima: delle
+  104 frasi del giro 16 che l'app sbaglia o passa all'AI, il neurale da solo
+  ne capisce il cassetto giusto 90 (giro 17: 88 su 94). È il lavoro del passo
+  3 (il neurale decide il cassetto, poi i dettagli).
+- App (`provaModello` in `index.html`): `chiedeDiFare(testo)` blocca
+  `cerca_documento` per "fammi/fai/prepara/crea/scrivi/compila…" (anche in
+  `chiediCosaFare`); da una nota a `urgenza` solo con p ≥ 0,9 (bloccarlo del
+  tutto costava ~8 emergenze vere per giro). Finale: suite 70/70; giro 16
+  app 964, giro 17 app 965; giro 5 184/186 (2 note → urgenza: "messa a terra
+  non c'è", "muro portante").
+- La prova delle app (`frasi-nuove-mestieri.test.js`) usa la data vera: dal
+  30/09 "sposta … a giovedì alle 9" (giro 10, prova cieca) risulta sbagliata
+  anche col modello di prima (le frasi sono scritte per il 29/09). Da fissare
+  con una data finta nella prova.
+- Limite noto: "apri la scheda di X" nell'esame è `cerca_documento`
+  (risorsa), nella maestra è `cliente`: 5 errori della palestra vengono da qui,
+  da decidere nel passo 3 insieme all'esecutore.
+
 ### Giro 15: 5 scrittori indipendenti (30/09/2026 notte, ROADMAP 0b.18)
 
 - Dati: `eval/dati/frasi-giro15.json` (1.062 frasi, 5 mestieri), scritte da 5

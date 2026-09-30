@@ -1,0 +1,241 @@
+{ "stile": "artigiano veneto/friulano, italiano con inflessioni venete, pratico, poche parole", "frasi": [
+["grassie, bon", "saluto"],
+["grazie tante, ciò", "saluto"],
+["ostrega, grassie mille EON", "saluto"],
+
+["ciò, chiamame la Rosa Palumbo", "chiamata"],
+["fame na telefonata a la Nives Toffolo", "chiamata"],
+["telefona al Bepi Zanin, subito", "chiamata"],
+
+["scrivi na mail al geometra Visentin co' le misure del cortile", "email"],
+["manda na email al geometra Dal Bo co' le misure de la corte, 12 per 8", "email"],
+["ciò, na mail al geometra Furlan che ghe mando le misure del piazzale", "email"],
+
+["fame el preventivo de le grondaie in rame pal condominio Glicine, 45 metri", "documento"],
+["preventivo grondaie de rame, condominio Le Rose, 72 metri lineari", "documento"],
+["ciò, prepara un preventivo pa' 50 metri de grondaia in rame al condominio Tiglio", "documento"],
+
+["el lavoro in piazza Garibaldi de lunedì 12 spostalo a giovedì 8", "calendario_modifica"],
+["anticipa a mercoledì 10 l'inizio lavori de via Roma che gavevo lunedì 15", "calendario_modifica"],
+["ciò, la partenza del cantiere a Oderzo xe lunedì 20: portala avanti a venerdì 17", "calendario_modifica"],
+
+["manda un whatsapp al Toni de l'osteria Al Ponte, domandighe se ghe va ben giovedì", "messaggio"],
+["scrivi su whatsapp al Gigi del bar Stella se giovedì ghe sta ben", "messaggio"],
+["whatsapp al Nane de la pizzeria: ghe va ben mercoledì?", "messaggio"],
+
+["ostrega, el Zennaro ga ciapà la scossa da la lavatrice", "urgenza"],
+["no so se xe grave, ma la Marcon ga preso la scossa dal frigo", "urgenza"],
+["ciò, el Pavan ga ciapà na scossa tocando la lavastoviglie", "urgenza"],
+
+["fa na cartella Magazin e mettighe dentro le foto de stamattina", "cartella"],
+["crea la cartella Cantiere Mestre co' dentro le foto de ancuo", "cartella"],
+["ciò, cartella nova 'Soffitta Bortolin', e mettighe le foto de oggi", "cartella"],
+
+["telefona a l'avvocato Zorzi sul telefonin", "chiamata"],
+["chiama el dotor Scarpa al cellulare", "chiamata"],
+["ciò, chiamame l'avvocata Bianchin sul cellular", "chiamata"],
+
+["manda la fattura de l'acconto a l'amministrator del condominio I Pini", "invio_documento"],
+["spedissi la fattura d'anticipo a l'amministratore del condominio Stella Alpina", "invio_documento"],
+["ciò, la fattura de acconto za fata mandighela a l'amministratore del Residence Laguna", "invio_documento"],
+
+["sal de fin mese pal geometra Zanella", "sal"],
+["fame el stato avanzamento lavori de fine mese pal geom. Bortoluzzi", "sal"],
+["SAL de fine mese, xe pal geometra Rizzo", "sal"],
+
+["dico impianto idraulico de l'orto del Tonon", "dico"],
+["dichiarazion de conformità pa' l'impianto de l'acqua a l'orto del Bellotto", "dico"],
+["fame la di.co de l'impianto idrico, orto de la Scaramuzza", "dico"],
+
+["el termostato del Pizzolato xe un Vaillant, lo go pagà 95 al grossista", "mente"],
+["ricorda che el cronotermostato de la Gobbo xe un BTicino, pagà 140 al fornidor", "mente"],
+["ciò, el termostato de casa Dal Moro xe un Siemens, costà 110 schei al fornitore", "mente"],
+
+["bon, va ben cussì", "saluto"],
+["perfeto, ciò, xe a posto", "saluto"],
+["benon, lassa cussì", "saluto"],
+
+["na mail al Vianello, scrivighe che l'ordine de ieri lo anulo", "email"],
+["scrivi na email a la ditta Rossetto: l'ordine de l'altro ieri xe anulà", "email"],
+["ciò, manda na mail a Ferrari Forniture e dighe che anulo l'ordine fato ieri", "email"],
+
+["el Pellizzari dise che la stufeta eletrica ga fato scintille", "urgenza"],
+["ostrega, la stufa elettrica de la Moro fa faville", "urgenza"],
+["la Bergamin me ga chiamà, la stufa eletrica buta scintille", "urgenza"],
+
+["preventivo pa' na wallbox al signor Zago, linea dedicata dal contator, 1.250 euro più IVA", "documento"],
+["fame el preventivo de la colonnina pa' la machina eletrica del Fabris, installazion co' linea nova dal contatore, 980 più IVA", "documento"],
+["ciò, preventivo wallbox pal Carraro: linea dedicata dal contator e installazion, 1.300 schei più IVA", "documento"],
+
+["fame vedar el documento del bagno del Boscolo", "cerca_documento"],
+["tira fora el preventivo del bagno de la Trevisan", "cerca_documento"],
+["ciò, dove xe el documento del bagno de casa Semenzato? mostrimelo", "cerca_documento"],
+
+["cercheme la fattura de acconto del Barbieri", "cerca_documento"],
+["trovame la fattura d'anticipo de la Zampieri", "cerca_documento"],
+["ciò, dove xe la fattura de acconto che go fato a la Cecchetto?", "cerca_documento"],
+
+["scheda del Brunello", "cliente"],
+["verzi la scheda de la Cattelan", "cliente"],
+["fame vedar la scheda cliente del Zanon", "cliente"],
+
+["bondì", "saluto"],
+["bongiorno EON", "saluto"],
+["ciao, bon dì a ti", "saluto"],
+
+["SAL final del capanon Dal Pozzo", "sal"],
+["stato avanzamento lavori finale pal magazin del Munaron", "sal"],
+["fame el sal finale del capannone de la ditta Zuccon", "sal"],
+
+["messaggio al Bepi: ciapa el camion grando", "messaggio"],
+["scrivighe al Toni: vien col furgon grando", "messaggio"],
+["manda un sms al Loris che porta el camion grande", "messaggio"],
+
+["ghe xe fatture scadute?", "dati"],
+["chi xe che no me ga ancora pagà le fatture scadute?", "dati"],
+["ciò, go fatture scadute da incassar?", "dati"],
+
+["incassà 310 euro da la Giulia Pavanello co' PayPal", "incasso"],
+["la Elisa Bottacin me ga pagà 190 schei su PayPal", "incasso"],
+["ciò, ricevui 275 euro dal Marco Scarpa via PayPal", "incasso"],
+
+["cava da l'agenda la riunion in banca", "calendario_modifica"],
+["cancela l'apuntamento in banca", "calendario_modifica"],
+["ciò, la riunion co' la banca tirala via dal calendario", "calendario_modifica"],
+
+["preparime la dichiarazion de conformità del Tomasin", "dico"],
+["fame la dico pa' casa Cozzarin", "dico"],
+["ciò, dichiarazione de conformità pal Furlanetto, me la prepari?", "dico"],
+
+["el Salvador de martedì 14 a Treviso anulalo, el lavoro xe saltà", "calendario_modifica"],
+["cancela el Bortolotto de venerdì 9 a Conegliano, no se fa più", "calendario_modifica"],
+["ciò, giovedì 16 dal Marchetto a Castelfranco tirelo via, el ga disdito", "calendario_modifica"],
+
+["convoca l'assemblea pal cambio de la caldaia del condominio", "assemblea"],
+["ciò, fa l'assemblea condominiale pa' la caldaia nova", "assemblea"],
+["convocazion assemblea: sostituzion caldaia centralizzata", "assemblea"],
+
+["telefona a la siora Bettiol", "chiamata"],
+["chiama la siora Nives Marangon", "chiamata"],
+["ciò, dai un colpo de telefono a la siora Pegoraro", "chiamata"],
+
+["verzi l'ultima fattura che go fato", "cerca_documento"],
+["fame vedar l'ultima fattura", "cerca_documento"],
+["ciò, tira su l'ultima fattura emessa", "cerca_documento"],
+
+["che lavori go sta setimana?", "dati"],
+["ciò, cossa go in programma sta settimana?", "dati"],
+["quanti cantieri go da far sta setimana?", "dati"],
+
+["comprar guarnizioni da 3/4 e canapa, xe finie", "mente"],
+["no ghe xe più teflon e raccordi da mezo, da comprar", "mente"],
+["ciò, segna: prender guarnizioni da 1 pollice e teflon", "mente"],
+
+["el Gasparini me ga za dà l'anticipo?", "dati"],
+["la Mazzon ga pagà l'acconto o no?", "dati"],
+["ciò, el Bonato l'anticipo me lo ga dà?", "dati"],
+
+["scheda cliente Stocco", "cliente"],
+["verzi el cliente Bernardi", "cliente"],
+["ciò, mostrime la scheda del Sartor", "cliente"],
+
+["scrivi un messaggio al Zambon co' l'indirizzo de la botega", "messaggio"],
+["manda al Pierobon un messagio co' l'indirizzo del laboratorio", "messaggio"],
+["ciò, messaggio a la Lorenzon: ghe dago l'indirizzo de la botega", "messaggio"],
+
+["meti tute le robe del Favaretto in na cartella", "cartella"],
+["fa na cartella co' tuto quel del Beraldo", "cartella"],
+["ciò, ragruppa in cartella tute le carte de la Callegaro", "cartella"],
+
+["come fasso a trovar operai che sa lavorar?", "domanda"],
+["ciò, dove se trova boce bravi da assumer?", "domanda"],
+["gavaria bisogno de un bon operaio, come lo trovo?", "domanda"],
+
+["el 10 de ottobre trattamento contro la cocciniglia ai limoni de la siora Basso", "calendario"],
+["segna pal 12 ottobre el trattamento anti cocciniglia a i agrumi del Rigon", "calendario"],
+["ciò, a metà ottobre, el 15, trattamento anticocciniglia pa' i aranci de la Favero", "calendario"],
+
+["go ciapà i schei da la Luisa Menegon, 140 euro", "incasso"],
+["la Anna Scattolin me ga dà 95 euro", "incasso"],
+["ciò, 130 euro incassai dal Dario Gallina", "incasso"],
+
+["cliente novo: Gino Tessaro de Castelfranco", "cliente"],
+["zonta el cliente Paolo Michielin de Noale", "cliente"],
+["ciò, go un cliente novo, el Franco Bragato de Mirano", "cliente"],
+
+["manda el preventivo al De Rossi", "invio_documento"],
+["spedissi el preventivo a la Dalla Costa", "invio_documento"],
+["ciò, el preventivo del Pavanetto mandighelo", "invio_documento"],
+
+["dopodoman a le sete e mezo cantier a Spinea, se demolisse el bagno", "calendario"],
+["doman a le 8 demolizion del bagno a Mogliano", "calendario"],
+["ciò, venerdì a le 7 cantiere a Scorzè, butemo zo el bagno", "calendario"],
+
+["sul coperto del Bortolan l'antena xe ligada al camin co' le fascete", "mente"],
+["ricordite: da la Zanetti l'antenna la xe fissada al comignolo co' fil de fero", "mente"],
+["ciò, casa Moretto: antenna tacada al camin co' le fascette", "mente"],
+
+["fattura a Edilveneta pa' la trasferta a Padova, 420 euro", "documento"],
+["fame la fattura a Costruzioni Piave, trasferta a Vicenza, 300 schei", "documento"],
+["ciò, fattura pa' la trasferta a Udine, 380 euro, a la ditta Friulcasa", "documento"],
+
+["scrivi na mail de scuse a la siora Brugnaro pal ritardo", "email"],
+["manda na email a la Callegari, domandighe scusa che semo in ritardo", "email"],
+["ciò, na mail pa' scusarme co' la siora Rigoni del ritardo", "email"],
+
+["doman matina a le sete go da ritirar el materiale da Termoidraulica Piave, ricordimelo", "calendario"],
+["ricordime doman verso le 6 e mezo de passar a tor el materiale da Comet", "calendario"],
+["ciò, sabato a le 8 ritiro materiale da Elettroveneta, segnilo", "calendario"],
+
+["el superbonus ghe xe ancora o xe finio?", "domanda"],
+["ciò, come xe messa co' sto superbonus, esiste ancora?", "domanda"],
+["se pol ancora far el superbonus o no?", "domanda"],
+
+["na foto al manometro", "foto"],
+["scatta na foto al manometro de la caldaia", "foto"],
+["ciò, fotografa el manometro de la pression", "foto"],
+
+["cossa vol dir solidarietà passiva in condominio?", "domanda"],
+["ciò, spiegame ben sta solidarietà passiva del condominio", "domanda"],
+["la solidarietà passiva condominiale, cossa xe de preciso?", "domanda"],
+
+["compila la di.co pa' la ditta Edil Piave, apartamento 2", "dico"],
+["dico pa' Costruzioni Furlan, app. 7", "dico"],
+["ciò, fame la dichiarazion de conformità pa' la Edilbenetton, interno 3", "dico"],
+
+["stato avanzamento lavori del giardin del Camping Laguna, semo al 60", "sal"],
+["sal de l'area verde del camping Bella Italia, fato l'80 per cento", "sal"],
+["ciò, SAL del verde al Camping Marina, xe al 65", "sal"],
+
+["scatta na foto al bagno desmontà", "foto"],
+["fa na foto adesso al bagno smontà", "foto"],
+["ciò, fotografa el bagno tuto disfà", "foto"],
+
+["scusa, fame na foto desso al vaso roto", "foto"],
+["fotografa subito el water spacà", "foto"],
+["ciò, na foto al vaso rotto, adesso", "foto"],
+
+["meti la foto de la targheta ne la cartella Pompe", "cartella"],
+["la foto de la targa de la caldaia metila in cartella Caldaie", "cartella"],
+["ciò, sposta la foto de la targhetta ne la cartella Motori Elettrici", "cartella"],
+
+["convocazion assemblea: riscaldamento centralizzato e contabilizzatori, condominio via Terraglio 45", "assemblea"],
+["assemblea condominio via Castellana 88, odg riscaldamento centrale e contabilizzatori", "assemblea"],
+["ciò, convoca l'assemblea del condominio de viale Venezia 20 pal riscaldamento centralizzato", "assemblea"],
+
+["ghe xe odor de gas ne la cantina de la siora Elda", "urgenza"],
+["ostrega, se sente puzza de gas in taverna dal Bellin", "urgenza"],
+["ciò, la siora Gemma dise che in cantina spussa de gas", "urgenza"],
+
+["el Busato ga saldà el conto, 3.100", "incasso"],
+["la Pinton ga pagà tuto, 1.980 euro", "incasso"],
+["ciò, saldo ricevù dal Marcato, 2.400 schei", "incasso"],
+
+["inoltra el preventivo del magazin a la siora Tonello", "invio_documento"],
+["manda a la siora Pizzinato el preventivo del deposito", "invio_documento"],
+["ciò, el preventivo del capanon giralo a la siora Toffoletto", "invio_documento"],
+
+["Alora, nel condominio dove stago a Mestre i vol meter le colonnine pa' le machine eletriche e el consiglier me ga domandà de esserghe a spiegar; l'assemblea xe el 29 ottobre a le 20 e 30, segnila", "assemblea"],
+["ciò, assemblea del me condominio a Treviso el 5 novembre a le 21 pa' le colonnine de ricarica, i me ga chiamà a spiegar, segnala", "assemblea"],
+["segna l'assemblea de condominio a Jesolo, 3 novembre ore 20, se parla de colonnine eletriche e mi go da spiegar", "assemblea"]
+] }

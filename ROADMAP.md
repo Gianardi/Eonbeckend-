@@ -91,7 +91,8 @@ Prova: `eval/mente-cartelle.test.js` (8 controlli, 2 foto).
 avviso "credito finito" che si spegne alla prima risposta buona (restava 24
 ore dopo la ricarica); **addestramento potenziato (0b.18)**: 1.062 frasi di 5
 scrittori indipendenti, **82% al primo colpo → 97%**, cervello riallenato,
-nessuna regressione.
+nessuna regressione. **Modello neurale nostro allenato tutta la notte
+(0b.19)**: da solo, alla cieca, 97-98% (era 95%); nell'app si vedrà col passo 3.
 **Fatto il 30/09 (notte), già online (PR #145):** addestramento, giri 13-14
 (0b.17). Stili mai provati prima, alla cieca: **giro 13: 57/72 (79%) al primo
 colpo** → 72/72; **giro 14 (stessi stili, frasi nuove): 47/47 (100%) al primo
@@ -385,6 +386,69 @@ DiCo, verifiche periodiche); 2) manuale per "Altra attività" che si adatta
 alle risposte del questionario (negozio, bar, servizi…); 3) almeno 15 casi
 di prova per ogni professione in `eval/casi.json`, da far girare con
 `eval/live-check.js` sull'AI vera (serve il credito; pochi centesimi a giro).
+
+### 0b.19 EON piccola AI specializzata: modello neurale nostro e codice pulito — PRIORITÀ 1 (deciso il 30/09, notte)
+Andrea: "EON deve funzionare perfettamente ed essere una piccola AI
+specializzata"; "vorrei un codice scritto perfettamente, lineare e pulito, e un
+modello neurale importante nostro"; "bisogna essere allineati al 100% alle grandi
+app". Nessuna funzione nuova finché questo non è finito.
+
+**Fatto (in corso di verifica):** modello neurale NOSTRO (piccolo transformer,
+~1 milione di parametri, 1,5 MB, 6 ms a frase, gira nel telefono), allenato da
+zero su ~34 mila frasi, di cui **8.000 scritte a mano da 16 "maestri"** (scrittori
+AI con personaggi diversi: muratore bergamasco, idraulico napoletano,
+amministratrice milanese, piastrellista rumeno…, `eval/neurale/maestra/`).
+Esame alla cieca (giro 16, 1.068 frasi di 5 scrittori nuovi): modello di oggi da
+solo 87%, **neurale da solo 95%**. Stessi risultati nel telefono e in PyTorch
+(`eval/neurale/verifica.mjs`). Palestra (per tarare) = giro 15; esame = giro 16;
+conferma = un giro 17 nuovo alla fine.
+
+**Allenamento della notte (30/09, come le grandi aziende), FATTO:** dati
+portati a ~55 mila frasi. Ci sono 40 maestri. 23 scrittori "di confine" hanno
+scritto frasi simili con cassetti diversi, mirate sugli errori. 14 scrittori
+hanno riscritto le frasi in 14 stili: telegrafico come Andrea, dettatura
+sporca, dialetti, chat, anziano, straniero.
+
+- **Pulizia dei dati:** 5 modelli hanno giudicato frasi che non avevano mai
+  visto. Su 52.800 frasi solo 2 etichette erano sbagliate: i dati sono puliti.
+- **Distillazione:** 5 modelli "maestri" insegnano a uno "studente" piccolo.
+  Lo studente pesa 1,9 MB e risponde in 7 millesimi di secondo nel telefono.
+- **Provato e scartato perché non migliora:** modelli più grandi,
+  pre-allenamento tipo BERT, media dei pesi.
+- **Esame alla cieca, modello da solo:**
+  - giro 16: **da 95% a 97%**;
+  - giro 17, mai visto prima: **da 95% a 98%**.
+- **App intera:** quasi uguale (giro 16: 964 → 964; giro 17: 960 → 965),
+  perché oggi le regole vecchie decidono prima del modello. Delle ~100 frasi
+  che l'app sbaglia per giro, il modello da solo ne capirebbe il cassetto
+  giusto circa 90. Questo si prende col passo 3 qui sotto.
+
+**Protezioni aggiunte nell'app:**
+- "Fammi un documento per il DURC" non apre il DURC che c'è già.
+- Un appunto diventa urgenza solo se il modello è sicuro almeno al 90%. Bloccare
+  del tutto faceva perdere emergenze vere dette senza "urgente" ("odore
+  fortissimo di gas nel vano scala").
+
+**Resta:** nel giro 5, 2 appunti tranquilli su 186 sono segnati come urgenti
+("la messa a terra non c'è").
+
+**Prove:** 70 prove su 70 passano; giri vecchi uguali o +1 (tranne il giro 5,
+-2).
+
+**La strada, in ordine:**
+1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
+2. Rete di sicurezza automatica: le prove partono da sole a ogni pacchetto e
+   bloccano il merge se qualcosa si rompe (prima di toccare il codice a fondo).
+3. Codice rifatto a catena unica, un cassetto alla volta (prima gli
+   appuntamenti): pulizia della frase → **il neurale decide il cassetto** →
+   lettura dei dettagli (date, importi, cliente, telefono: un modulo ciascuno) →
+   controlli di sicurezza (conferme, "chiede se non è sicuro") → esecutore →
+   AI grande solo per consigli e casi nuovi. Via: modello vecchio, arbitro,
+   regole che indovinano il cassetto, doppioni app/server; il file unico
+   dell'app diviso in file ordinati. Ogni cassetto passa solo se le 3.600 frasi
+   etichettate e i test danno risultati uguali o migliori.
+4. Un secondo modello neurale nostro per i dettagli (nomi, date, importi).
+5. Dopo ogni passo grande, un esame nuovo alla cieca con scrittori mai usati.
 
 ### 0b.18 Addestramento potenziato: 5 scrittori che non conoscono EON — FATTO il 30/09 (notte)
 Andrea: "Facciamo altro addestramento potenziato?". Scelta (sua): **più

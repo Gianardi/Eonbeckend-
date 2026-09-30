@@ -1,0 +1,240 @@
+{ "stile": "artigiano straniero (rumeno, albanese o marocchino) in Italia da anni, italiano non perfetto", "frasi": [
+["tu mandare fattura del Ercoli a mio commercialista, per favore", "invio_documento"],
+["fattura di signor Venturini, manda a commercialista mio", "invio_documento"],
+["commercialista aspetta fattura di Ercoli, tu spedire a lui adesso", "invio_documento"],
+
+["lavoro di Pirovano non più il 12, spostare al 19 per favore", "calendario_modifica"],
+["cambiare giorno per signor Bellotti, noi cominciare il 22 e non il 15", "calendario_modifica"],
+["appuntamento da Marchesini tu spostare, prima era il 5, adesso il 9", "calendario_modifica"],
+
+["io fare preventivo per signor Petruzzelli, clima trial split, tre macchina da 9000, prezzo 2600", "documento"],
+["prepara preventivo per Caputo, condizionatore dual split, due da 12000, metti 1900 euro", "documento"],
+["preventivo per famiglia Loiacono: trial split, tre unità da 9000 BTU, totale 2750", "documento"],
+
+["da Lupinacci rotto colonna di scarico, tutta acqua sporca va in cantina!", "urgenza"],
+["problema grosso da signora Ferraro, tubo di scarico spaccato, cantina piena di schifo", "urgenza"],
+["colonna scarico rompere in casa di Mancuso, esce tutto sotto in cantina", "urgenza"],
+
+["giovedì io avere qualche lavoro?", "dati"],
+["cosa c'è per me giovedì? tu guardare agenda", "dati"],
+["per martedì io sono libero o ho appuntamenti?", "dati"],
+
+["segheria Candotti tanta polvere, sempre portare mascherina quando andare là", "mente"],
+["ricorda che da falegnameria Zanon c'è polvere dappertutto, noi portare sempre mascherine", "mente"],
+["tu segnare: in segheria Del Bianco polvere tanta, mascherine sempre in furgone", "mente"],
+
+["manda messaggio a Locatelli, dire che domani noi arrivare alle 8", "messaggio"],
+["whatsapp per signora Brambilla: domani noi venire ore 7 e mezza", "messaggio"],
+["scrivere a Colombo che domattina noi arriviamo verso le otto", "messaggio"],
+
+["come io dire no a cliente che sempre chiede sconto? non sapere come fare", "domanda"],
+["cliente vuole sempre prezzo più basso, cosa io devo rispondere per non perderlo?", "domanda"],
+["tu consigliare: come dire no gentile quando cliente chiede sconto ogni volta", "domanda"],
+
+["chiama quella... come si chiama... nuova, Svetlana, sì, lei, chiamare", "chiamata"],
+["fai telefonata a quella signora nuova, la Irina, come si dice... sì, Irina", "chiamata"],
+["chiamare per me la... aspetta... Oksana, quella cliente nuova", "chiamata"],
+
+["creare cartella furgone, per mettere spese e assicurazione", "cartella"],
+["fare nuova cartella camion, dentro io mettere spese e assicurazione", "cartella"],
+["io voglio cartella per furgone, tutte le spese e polizza là dentro", "cartella"],
+
+["SAL a corpo per cantiere di via Lulli, noi siamo a 45 per cento", "sal"],
+["fare stato avanzamento per cantiere in via Verdi, lavori al 60%", "sal"],
+["SAL cantiere di via Garibaldi, arrivati a metà, 50 per cento", "sal"],
+
+["creare cliente nuovo, Hotel Villa Serena, partita iva 02345670361", "cliente"],
+["aggiungere cliente Albergo Bellavista, partita iva 01987650432", "cliente"],
+["nuovo cliente per me: Ristorante Da Gino, p iva 03456780129", "cliente"],
+
+["fai vedere tutte foto di spose che io ho salvato", "cerca_documento"],
+["dove sono foto di matrimonio che io salvare? voglio vedere", "cerca_documento"],
+["aprire foto delle spose, quelle salvate prima", "cerca_documento"],
+
+["per piacere chiamare grossista Checcucci a Prato", "chiamata"],
+["telefona a magazzino Bartolini di Empoli, il grossista", "chiamata"],
+["tu fare chiamata a grossista Checcucci, quello di Prato", "chiamata"],
+
+["scrivere PEC a INAIL per comunicazione di infortunio piccolo di Nicola", "email"],
+["fai PEC per INAIL, mio operaio Ahmed fatto piccolo infortunio, dire a loro", "email"],
+["mandare mail PEC a INAIL, comunicare infortunio lieve di ragazzo Florin", "email"],
+
+["spedire fattura a signora Rinaldi Paola", "invio_documento"],
+["manda fattura a Paola Rinaldi, quella già fatta", "invio_documento"],
+["fattura per signora Gatti Maria, tu mandare a lei", "invio_documento"],
+
+["fare fattura... no scusa, preventivo, per agenzia Eventi Sud di Polignano, trucco per dieci modelle, 40 euro ogni una", "documento"],
+["preventivo per agenzia Moda Sole di Bari: trucco dodici ragazze per sfilata, 35 euro a testa", "documento"],
+["io fare preventivo trucco sfilata, agenzia Eventi Sud, dieci modelle, quaranta euro per una", "documento"],
+
+["Cabra dato a me acconto di 30 per cento", "incasso"],
+["preso acconto da Cabra, 30 percento di totale", "incasso"],
+
+["trovare foto di cantiere a Spinea", "cerca_documento"],
+["dove sono foto di cantiere di Mestre? tu cercare", "cerca_documento"],
+["cerca foto che io fatto a cantiere Spinea", "cerca_documento"],
+
+["puoi preparare dichiarazione conformità per faretti in giardino di signora Solari?", "dico"],
+["fare dico per luci giardino da Solari, quelli faretti", "dico"],
+["io serve dichiarazione di conformità, impianto faretti giardino da Bonetti", "dico"],
+
+["chiamare assistenza Baxi", "chiamata"],
+["telefona a assistenza di caldaia Vaillant", "chiamata"],
+["fai chiamata a numero assistenza Baxi per favore", "chiamata"],
+
+["buona notte EON, io andare dormire", "saluto"],
+["notte EON, grazie di tutto oggi", "saluto"],
+["ciao EON, buonanotte a te", "saluto"],
+
+["mail a Buffoli per confermare inizio di lavori", "email"],
+["scrivere email a signor Pedretti, dire che lavori cominciano come deciso", "email"],
+["manda mail a Buffoli, conferma che noi iniziare lavori", "email"],
+
+["preso 180 da Zambanini per lavoro, soldi contanti", "incasso"],
+["signora Pedrotti pagare me 220 euro contanti per intervento", "incasso"],
+["Zambanini dato 180 euro cash, per riparazione", "incasso"],
+
+["mandare messaggio a giardiniere Pirovano, ricordare potare siepe di glicine, condomini arrabbiati perché arriva a primo piano", "messaggio"],
+["scrivi a giardiniere Sala: tagliare glicine, lui arriva fino primo piano e gente di condominio si lamenta", "messaggio"],
+["messaggio per giardiniere, dire a lui che deve potare siepi, condòmini lamentare tanto", "messaggio"],
+
+["scrivi nota: Laterizi Pontini cambiato IBAN", "mente"],
+["ricorda che fornitore Edilmarmi ha nuovo IBAN", "mente"],
+["segnare per me, Laterizi Pontini adesso ha IBAN diverso", "mente"],
+
+["va bene EON", "saluto"],
+["ok ok, tutto bene", "saluto"],
+["sì EON, ok così", "saluto"],
+
+["aspetta, fare foto, no, prima accendere luce, flash, poi foto a tubo", "foto"],
+["accendi flash e fai foto a tubo sotto lavandino", "foto"],
+["foto adesso a tubo, ma prima luce che qua buio", "foto"],
+
+["scrivere a segretaria di condominio Tucci, io serve chiave di centrale termica", "messaggio"],
+["manda messaggio a signora di amministrazione condominio Aurora, mi serve chiave di caldaia centrale", "messaggio"],
+["messaggio per segretaria Tucci: io avere bisogno chiave centrale", "messaggio"],
+
+["DiCo per negozio di Tanghetti", "dico"],
+["fare dichiarazione conformità per negozio del signor Ferrari", "dico"],
+["dico per bottega Tanghetti, impianto nuovo", "dico"],
+
+["ricordare me tra due ore di chiamare di nuovo Belardi", "calendario"],
+["fra un'ora e mezza tu dire me richiamare signor Rossetti", "calendario"],
+["tra 3 ore ricorda me, telefonare ancora a Belardi", "calendario"],
+
+["fare cartella Ricevute benzina", "cartella"],
+["creare cartella per scontrini di gasolio", "cartella"],
+["nuova cartella, nome Benzina ricevute", "cartella"],
+
+["mandare email a ditta Bearzi per confermare due furgoni", "email"],
+["scrivere mail a noleggio Autotrans, confermare noi prendere due furgoni", "email"],
+["email a Bearzi: sì, confermo due furgoni", "email"],
+
+["arrivato acconto 500 euro da supermercato Di Maio", "incasso"],
+["supermercato di Esposito pagato acconto di 700", "incasso"],
+["Di Maio supermercato dato me 500 di acconto", "incasso"],
+
+["cancello di garage in via Ripamonti non apre, macchine tutte bloccate dentro box", "urgenza"],
+["cancello grande di condominio via Padova rotto, gente non può uscire con auto", "urgenza"],
+["urgente, cancello carraio via Ripamonti bloccato, auto chiuse in box", "urgenza"],
+
+["mandare preventivo di manutenzione caldaia a signora Pozzobon", "invio_documento"],
+["invia a signora Zanella preventivo per caldaia, quello già fatto", "invio_documento"],
+["preventivo caldaia di Pozzobon, tu mandare a lei", "invio_documento"],
+
+["mamma mia quanto traffico... racconta me qualcosa, io sto addormentando", "domanda"],
+["sono in coda da un'ora, dimmi qualche storia che io non dormire", "domanda"],
+["traffico terribile, parla con me un po', racconta cosa", "domanda"],
+
+["segnare assemblea di condominio Primavera, mercoledì 21 ottobre ore 18", "assemblea"],
+["assemblea condominio Le Rose giovedì 22 ottobre alle sei di sera", "assemblea"],
+["prendere nota: assemblea per condominio Primavera, 21 ottobre, mercoledì, ore 18", "assemblea"],
+
+["preventivo per smontare e montare cucina di Driussi, 350", "documento"],
+["fare preventivo, smontaggio cucina e rimontaggio da famiglia Popescu, 400 euro", "documento"],
+["Driussi cucina: togliere e rimettere, preventivo 350 euro", "documento"],
+
+["cambiare ora di Pietrina Lai, da quattro e mezza a cinque", "calendario_modifica"],
+["signora Deiana, spostare appuntamento da tre a tre e mezza", "calendario_modifica"],
+["Pietrina Lai non più alle 16 e 30, mettere alle 17", "calendario_modifica"],
+
+["nuova cartella per camioncino: assicurazione, bollo, revisione", "cartella"],
+["fare cartella di furgone e mettere dentro bollo, assicurazione e revisione", "cartella"],
+["cartella nuova per macchina di lavoro, con bollo e revisione dentro", "cartella"],
+
+["grazie", "saluto"],
+["grazie tante EON", "saluto"],
+["grazie mille, gentile", "saluto"],
+
+["oddio, quasi dimenticare: sabato 10 ottobre ore 8 trasloco di Fantin a Sacile, piano terra", "calendario"],
+["sabato 17 ottobre alle 7 noi fare trasloco per famiglia Rossi a Pordenone, primo piano", "calendario"],
+["segna: trasloco Fantin, sabato 10 ottobre, ore otto, Sacile, piano terra", "calendario"],
+
+["geometra Carofiglio fatto sopralluogo, scrivere in SAL che noi siamo a 55 per cento", "sal"],
+["geometra venuto a vedere cantiere, mettere nel SAL 55%", "sal"],
+["dopo sopralluogo di geometra Russo, stato avanzamento a 60 per cento", "sal"],
+
+["preventivo di Onnis loro accettare o ancora aspettare?", "dati"],
+["signor Pinna ha detto sì a preventivo o no ancora?", "dati"],
+["tu guardare: preventivo Onnis è accettato o sospeso?", "dati"],
+
+["Marius fatto male con flessibile, grande taglio su mano", "urgenza"],
+["mio collega Ionut tagliato mano con smerigliatrice, tanto sangue", "urgenza"],
+["incidente, Marius mano tagliata forte da flessibile", "urgenza"],
+
+["fare foto di ponteggio", "foto"],
+["foto adesso a impalcatura", "foto"],
+["scatta foto a ponteggio, per favore", "foto"],
+
+["compilare stato avanzamento per muratore, demolizioni finite 100 per cento", "sal"],
+["SAL per lavoro di muratura: demolizione tutta fatta, 100%", "sal"],
+["stato avanzamento lavori, muratore, demolizioni complete tutte", "sal"],
+
+["aggiungere a clienti bar Centrale di Soliera, padrone Cuoghi", "cliente"],
+["nuovo cliente: pizzeria Napoli di Carpi, titolare signor Esposito", "cliente"],
+["mettere in clienti bar Centrale, Soliera, capo è Cuoghi", "cliente"],
+
+["fa vedere scheda di signora Mariani", "cliente"],
+["aprire scheda cliente di Ferrari", "cliente"],
+["io voglio vedere scheda di Mariani", "cliente"],
+
+["appuntamento in ufficio di amministratore venerdì ore 11 per permesso di cestello", "calendario"],
+["venerdì alle undici io andare da amministratore, parlare permesso per piattaforma", "calendario"],
+["giovedì ore 10 in ufficio amministratore per autorizzazione cestello", "calendario"],
+
+["fai vedere foto di cantiere a Nervi", "cerca_documento"],
+["dove foto di cantiere a Sampierdarena? cercare", "cerca_documento"],
+["voglio vedere foto cantiere Nervi, quelle fatte", "cerca_documento"],
+
+["assemblea condominio", "assemblea"],
+["fare assemblea", "assemblea"],
+["assemblea nuova", "assemblea"],
+
+["Pellegrino venuto pagare o no?", "dati"],
+["signor Longo ha pagato fattura?", "dati"],
+["Pellegrino ha dato soldi o ancora deve?", "dati"],
+
+["come calcolare volume di calcestruzzo per platea 10 per 8 alta 30?", "domanda"],
+["quanto cemento serve per platea 12 per 6, spessore 25 centimetri? come fare conto", "domanda"],
+["platea 10 x 8, alta 30 centimetri, quanti metri cubi calcestruzzo?", "domanda"],
+
+["cancellare tutto di sabato, io vado a matrimonio di mio nipote", "calendario_modifica"],
+["togli tutti appuntamenti di domenica, io ho battesimo di figlia di mio fratello", "calendario_modifica"],
+["sabato niente lavoro, cancella tutto, matrimonio di nipote mio", "calendario_modifica"],
+
+["preparare DiCo per cucina di Pellegrini", "dico"],
+["fare dichiarazione conformità per impianto gas cucina da signora Moretti", "dico"],
+["dico x cucina Pellegrini, tu preparare", "dico"],
+
+["fare foto adesso a bombola", "foto"],
+["foto subito a bombola di gas", "foto"],
+["scatta adesso foto a bombola", "foto"],
+
+["da comprare a Brico: tasselli da 10, schiuma, nastro di carta", "mente"],
+["segna cose da prendere in ferramenta: viti da 6, silicone, nastro", "mente"],
+["ricordare comprare tasselli 10, schiuma e nastro carta a Brico", "mente"],
+
+["assemblea straordinaria in via Novara per dividere spese", "assemblea"],
+["convocare assemblea straordinaria condominio via Torino, parlare di ripartizione spese", "assemblea"],
+["fare assemblea straordinaria via Novara, argomento spese come dividere", "assemblea"]
+] }

@@ -1,0 +1,241 @@
+{ "stile": "ordine rovesciato: prima i dettagli, il comando alla fine o sottinteso", "frasi": [
+["bagno dei Villa, sabato alle 10, video del prima e dopo: segnamelo", "calendario"],
+["Colombo, il bagno rifatto, giovedì alle 9 e mezza giro il video prima e dopo. mettilo in agenda", "calendario"],
+["domenica mattina alle 11, casa Brambilla, riprese del bagno finito: in calendario", "calendario"],
+
+["villetta di Torre del Greco, impianto gas: 'a DiCo, compilala", "dico"],
+["Esposito, Ercolano, caldaia a gas nuova. dichiarazione di conformità da fare", "dico"],
+["per l'impianto idrico dei Russo a Portici la dichiarazione di conformità, preparamela tu", "dico"],
+
+["ditta Sacchetto, palazzina, prima tranche da 8.000: arrivati sul conto, segna pagato", "incasso"],
+["i 5.500 della Bortolin per il primo lotto, entrati stamattina col bonifico", "incasso"],
+["Marchesin, acconto di 3.200 della villetta, ricevuto adesso. segnalo come incassato", "incasso"],
+
+["Pirovano, ristrutturazione: cartella nuova", "cartella"],
+["per il rifacimento del tetto dei Cattaneo, una cartella, creala", "cartella"],
+["Brivio, lavori della mansarda. fammi una cartella apposta", "cartella"],
+
+["ad Antonella, che mi serve il numero dell'amministratore: scrivile un messaggio", "messaggio"],
+["alla Donatella, un whatsapp: mi manda il numero del geometra?", "messaggio"],
+["Loredana, via sms: ho bisogno del contatto dell'amministratore del condominio", "messaggio"],
+
+["Salvadori, garanzia della pompa di calore, scade il 30 ottobre: ricordamelo il 23", "calendario"],
+["la caldaia dei Fumagalli, garanzia fino al 15 novembre, una settimana prima avvisami", "calendario"],
+["12 dicembre, fine garanzia del condizionatore della Pellegrini. tre giorni prima me lo ricordi", "calendario"],
+
+["condominio di via Tasso, cartella nuova: aprila", "cartella"],
+["per il palazzo di via Caracciolo una cartella nuova, falla", "cartella"],
+["via Tasso 14, il condominio. una cartella solo per lui", "cartella"],
+
+["il pavimento del salone condominiale, da decidere: convoca l'assemblea", "assemblea"],
+["rifacimento dell'ascensore, decisione dei condomini: assemblea da convocare", "assemblea"],
+["per scegliere la ditta delle facciate, un'assemblea di condominio. convocala", "assemblea"],
+
+["la signora Galli, grazie eh, ma quanto mi deve ancora?", "dati"],
+["Pozzi, quanto gli resta da pagarmi? grazie", "dati"],
+["grazie. la Morandi, a quanto sta ancora il suo debito con me?", "dati"],
+
+["a dopo allora, grazie", "saluto"],
+["per ora è tutto, grazie, ci sentiamo dopo", "saluto"],
+["a più tardi, e grazie", "saluto"],
+
+["a Terraneo, il preventivo della contabilità lavori: spediscilo", "invio_documento"],
+["il preventivo del bagno della Corti, a lei, mandaglielo adesso", "invio_documento"],
+["Zanetti, il preventivo già pronto della cucina: invialo", "invio_documento"],
+
+["alla Vidoni, via sms: finito, la luce in reparto c'è di nuovo", "messaggio"],
+["Ferraresi, luce tornata in magazzino, tutto a posto: mandagli un messaggio", "messaggio"],
+["whatsapp al Bonetti. lavoro finito, il quadro ora regge", "messaggio"],
+
+["Tomassetti, la riunione: un'ora più tardi, spostala", "calendario_modifica"],
+["l'appuntamento con la Serafini di domani, mezz'ora avanti, fallo slittare", "calendario_modifica"],
+["incontro con Tomassetti già fissato, rimandalo di un'ora", "calendario_modifica"],
+
+["d'accordo così", "saluto"],
+["sì sì, d'accordo, va benissimo", "saluto"],
+["perfetto, siamo d'accordo", "saluto"],
+
+["Zorzenon, telefonata di venerdì: a lunedì alle 11, spostala", "calendario_modifica"],
+["la chiamata con la Bressan di giovedì, a martedì alle 10. mi ha scritto lei, spostala", "calendario_modifica"],
+["Zorzenon mi ha scritto. venerdì non va, la telefonata mettila lunedì alle undici", "calendario_modifica"],
+
+["cantiere di via Mazzini, una cartella: creala", "cartella"],
+["via Garibaldi, il cantiere nuovo. cartella apposta", "cartella"],
+["per il cantiere di piazza Duomo, crea la cartella", "cartella"],
+
+["el Carraro, la DiCo, me serve", "dico"],
+["Zanon, impianto elettrico finito: la dichiarazione di conformità, fammela", "dico"],
+["per la casa del Carraro a Mestre la DiCo, preparala", "dico"],
+
+["Parisi, il giardino, ha chiesto se possiamo farlo anche noi", "mente"],
+["la signora Barbieri, anche la recinzione vorrebbe, ha chiesto se ce ne occupiamo noi. tienilo a mente", "mente"],
+["i Parisi, oltre al resto anche il giardino, se riusciamo: appuntatelo", "mente"],
+
+["Mariani, per parlare del prezzo: chiamalo", "chiamata"],
+["il prezzo del parquet con la Moretti, da discutere a voce, telefonale", "chiamata"],
+["per lo sconto sul preventivo, Mariani, fammelo chiamare adesso", "chiamata"],
+
+["ok, ok, va bene", "saluto"],
+["okay perfetto", "saluto"],
+["va bene, ok", "saluto"],
+
+["il pavimento vecchio che c'è sotto, fotografalo", "foto"],
+["le piastrelle originali sotto il linoleum, una foto adesso", "foto"],
+["sotto il parquet, il pavimento vecchio. apri la fotocamera", "foto"],
+
+["Costruzioni Mazzei, stato avanzamento lavori entro venerdì: preparalo", "sal"],
+["per la Edilnord il SAL numero tre, lo vogliono entro fine mese, fallo", "sal"],
+["impresa Mazzei, il SAL. me lo prepari", "sal"],
+
+["agenzia Eventi Sud, di Polignano a Mare: cliente nuovo, aggiungilo", "cliente"],
+["Pasticceria Dolce Puglia, Monopoli, nuovo cliente. inseriscilo", "cliente"],
+["studio Fanelli, Conversano, cliente nuovo da registrare", "cliente"],
+
+["alla banca, per il bancomat nuovo quando arriva: mandagli una mail", "email"],
+["'o bancomat nuovo, quando arriva? chiedilo alla banca per email", "email"],
+["Credito Cooperativo, la carta nuova ancora non arriva. scrivigli una mail", "email"],
+
+["corso Casale, le scale, luci di emergenza guaste: stasera è tutto buio", "urgenza"],
+["via Nizza 30, l'illuminazione delle scale non va più, stanotte al buio. urgente", "urgenza"],
+["le luci del garage condominiale di corso Francia, saltate tutte, e qui si resta al buio", "urgenza"],
+
+["il Parenti, quello della cantina, non il cugino: chiamalo", "chiamata"],
+["la Ghelardini del ristorante, non la sorella, telefonale", "chiamata"],
+["Parenti della cantina. fammi telefonare, non l'altro", "chiamata"],
+
+["un'assemblea: convoca", "assemblea"],
+["condominio, assemblea da fare", "assemblea"],
+["assemblea di condominio", "assemblea"],
+
+["a metà getto, la betoniera: rotta", "urgenza"],
+["la pompa del calcestruzzo, ferma col solaio mezzo gettato", "urgenza"],
+["getto del solaio a metà e betoniera in panne, guaio grosso", "urgenza"],
+
+["De Santis, il preventivo: al figlio ingegnere mandalo, non a lui", "invio_documento"],
+["il preventivo della Colella, alla nuora, non a lei, inviaglielo", "invio_documento"],
+["al figlio di De Santis, quello ingegnere, il preventivo già fatto. mandalo", "invio_documento"],
+
+["Lorenzon, la fattura da 450: mandagliela", "invio_documento"],
+["la fattura dei 780 al Toffolo, inviala", "invio_documento"],
+["al Lorenzon, fattura de 450 già fatta, spediscigliela", "invio_documento"],
+
+["via Gemona, il portone, le foto: dove sono? fammele vedere", "cerca_documento"],
+["le foto del cancello di via Cividale, aprimele", "cerca_documento"],
+["portone di via Gemona. le foto che avevo fatto, trovamele", "cerca_documento"],
+
+["Tedesco, fotovoltaico: 6 kilowatt, 10 di accumulo", "mente"],
+["i Zamparo hanno il fotovoltaico da 4,5 kW senza batteria, segnatelo", "mente"],
+["casa Tedesco, impianto 6 kW e batteria da 10. da ricordare", "mente"],
+
+["Martini, fatture dell'anno scorso: cercamele", "cerca_documento"],
+["le fatture della Benedetti del 2025, trovamele", "cerca_documento"],
+["anno scorso, Martini, tutte le fatture. fammele vedere", "cerca_documento"],
+
+["per l'autoclave da decidere, una convocazione di assemblea: falla", "assemblea"],
+["l'impermeabilizzazione del terrazzo condominiale, decisione in assemblea. convocala", "assemblea"],
+["sostituzione dell'autoclave, i condomini devono votare: convoca l'assemblea", "assemblea"],
+
+["un apprendista che abbia voglia di lavorare, come lo trovo?", "domanda"],
+["un ragazzo giovane da mettere a bottega, dove lo cerco?", "domanda"],
+["garzone serio, oggi, come si fa a trovarlo", "domanda"],
+
+["il Vottero, il commercialista: chiamamelo", "chiamata"],
+["il consulente del lavoro, la dottoressa Ferrero, telefonale", "chiamata"],
+["commercialista, Vottero. fammi chiamare", "chiamata"],
+
+["il bonus verde, quest'anno c'è ancora o l'hanno tolto? un cliente me l'ha chiesto e non sapevo rispondere", "domanda"],
+["bonus verde 2026, esiste ancora?", "domanda"],
+["per il giardino di un cliente, il bonus verde, si può ancora usare quest'anno o no", "domanda"],
+
+["dal Queirolo, 620 euro, incassati", "incasso"],
+["la Parodi, 1.150 in contanti, pagato tutto oggi", "incasso"],
+["620 dal Queirolo, presi", "incasso"],
+
+["Edil Tre, la scheda", "cliente"],
+["impresa Edil Tre, aprimi la scheda", "cliente"],
+["Edil Tre, cliente nuovo", "cliente"],
+
+["al fornitore, per la consegna delle caldaie in ritardo, una mail di sollecito", "email"],
+["le caldaie che ancora non arrivano... [rumore]... sollecito al fornitore per email", "email"],
+["Termoidraulica Rossetti, i radiatori non consegnati: email di sollecito", "email"],
+
+["dopodomani alle sette e mezza, Fuorigrotta, montaggio caldaia: mettimelo", "calendario"],
+["giovedì alle otto, cantiere di Bagnoli, posa dei termosifoni. in agenda", "calendario"],
+["cantiere del Vomero, montaggio scaldabagno, lunedì alle 7 e 45: segna", "calendario"],
+
+["Carrai, Galluzzo, impianti fatti per metà: stato avanzamento lavori", "sal"],
+["la Bianchini a Scandicci, murature al 70 per cento. SAL da fare", "sal"],
+["Galluzzo, cantiere Carrai, a metà con gli impianti: il SAL, preparalo", "sal"],
+
+["agosto, quanto ho incassato?", "dati"],
+["a luglio, il totale incassato, quant'è", "dati"],
+["incassi del mese scorso, quanto fanno", "dati"],
+
+["la salumeria Tatò, il preventivo, aprimelo che devo correggere na cosa", "cerca_documento"],
+["il preventivo del bar Lopez, fammelo aprire, c'è un errore da sistemare", "cerca_documento"],
+["Tatò, salumeria, preventivo già fatto. aprilo che ci guardo", "cerca_documento"],
+
+["la macchina parcheggiata nel posto auto del sig. Carotenuto, una foto", "foto"],
+["nel box del signor Iovine, lo scooter parcheggiato: fotografalo adesso", "foto"],
+["posto auto di Carotenuto, auto parcheggiata. scatta una foto", "foto"],
+
+["il corso per i ponteggi, ogni quanto va rifatto?", "domanda"],
+["l'aggiornamento del corso PIMUS, dopo quanti anni scade", "domanda"],
+["patentino ponteggi, ogni quanto si rinnova", "domanda"],
+
+["Edil Sud, SAL due, piante messe a dimora all'ottanta per cento", "sal"],
+["secondo SAL Edil Sud: piantumazione all'80 per cento", "sal"],
+["Verde Sud, giardino del resort, prato seminato al 60 per cento: stato avanzamento lavori", "sal"],
+
+["Ferri, la posa del gres, che giorno l'avevo messa?", "dati"],
+["la posa del parquet dai Neri, quando l'avevo fissata?", "dati"],
+["posa gres da Ferri. in che giorno era in agenda", "dati"],
+
+["Fiorini, massetto di 120 metri quadri, 22 euro al metro materiale compreso: preventivo", "documento"],
+["per la Gatti, 80 metri di intonaco a 18 euro al metro, fammi il preventivo", "documento"],
+["massetto, 150 mq, 20 al metro tutto compreso, cliente Fiorini. preventivo", "documento"],
+
+["Hotel Palazzo Lanfredini, referente il direttore Bruni: nuovo cliente, registralo", "cliente"],
+["Residenza Le Logge, la signora Cecchi è la referente. cliente nuovo da aggiungere", "cliente"],
+["referente il direttore Bruni, Hotel Lanfredini, aggiungilo ai clienti", "cliente"],
+
+["i Rinaldi, bonifico del saldo: arrivato", "incasso"],
+["saldo della cucina dai Lombardi, ricevuto col bonifico ieri", "incasso"],
+["Rinaldi, saldo pagato, bonifico fatto", "incasso"],
+
+["Gianni Repetto, il biotrituratore per sabato, me lo presta? scriviglielo", "messaggio"],
+["al Canepa, se mi presta il tagliasiepi domenica: mandagli un messaggio", "messaggio"],
+["Repetto Gianni. whatsapp: mi presti il biotrituratore sabato?", "messaggio"],
+
+["all'avvocato Cereda, per la perizia di parte, una mail", "email"],
+["e mail... avvocata Brambati, la perizia del tribunale: scrivile", "email"],
+["perizia di parte, avvocato Cereda: e-mail", "email"],
+
+["il serbatoio del wc, dentro, col flash che è buio: apri la camera che faccio la foto", "foto"],
+["dentro il pozzetto, al buio, col flash: fotografa", "foto"],
+["la cassetta del water aperta, foto adesso, flash acceso", "foto"],
+
+["dott. Alfieri, velatura veneziana all'ingresso, una giornata e mezza: preventivo", "documento"],
+["per la signora Mancini, stucco veneziano in soggiorno, 3 giornate, preventivo", "documento"],
+["velatura ingresso, giornata e mezza di lavoro, cliente Alfieri. fammi il preventivo", "documento"],
+
+["da Scanu, blackout, e la cella della macelleria è piena", "urgenza"],
+["macelleria Pinna, corrente saltata e frigo pieno di carne", "urgenza"],
+["Scanu, cella frigorifera piena e niente corrente", "urgenza"],
+
+["Marchetti, il tetto: tegole portoghesi, difficili da trovare", "mente"],
+["i coppi di casa Sartori sono antichi, introvabili, tienilo a mente", "mente"],
+["tegole portoghesi sul tetto dei Marchetti, roba rara. appuntalo", "mente"],
+
+["dai Leonardi, il lavoro, la dichiarazione di conformità: falla", "dico"],
+["Colonna, impianto finito: DiCo da preparare", "dico"],
+["Leonardi, la DiCo del lavoro, compilala", "dico"],
+
+["Bartolucci, domani pomeriggio: spostalo a domani mattina", "calendario_modifica"],
+["la Guerrini, da giovedì mattina a venerdì pomeriggio", "calendario_modifica"],
+["domani, Bartolucci, non più al pomeriggio ma di mattina", "calendario_modifica"],
+
+["studio Dibenedetto, manutenzione annuale di cinque split, 60 euro l'uno: preventivo", "documento"],
+["per la farmacia Lorusso, pulizia di otto split a 55 euro, preventivo", "documento"],
+["cinque condizionatori, 60 a split, manutenzione annuale, studio Dibenedetto. preventivo da fare", "documento"]
+] }

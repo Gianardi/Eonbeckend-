@@ -1,0 +1,244 @@
+{
+"stile": "chiede tutto in forma di domanda o in modo indiretto, anche i comandi",
+"frasi": [
+["riesci a mandare per mail la fattura al Bar Sport?", "invio_documento"],
+["la fattura della Pizzeria Italia gliela giri via email, per favore?", "invio_documento"],
+["e se mandassimo adesso per posta elettronica la fattura alla Trattoria Da Gino?", "invio_documento"],
+
+["mi crei una cartella che si chiama scuola elementare?", "cartella"],
+["si può aprire una cartella nuova, tipo 'palestra comunale'?", "cartella"],
+["riusciresti a farmi una cartella per il lavoro dell'asilo nido?", "cartella"],
+
+["l'ultima fattura che ho emesso la puoi mandare a Villa Rosa?", "invio_documento"],
+["riesci a girare a Casa Bianchi l'ultima fattura che ho fatto?", "invio_documento"],
+["e se mandassimo al B&B Il Glicine la fattura che ho appena fatto?", "invio_documento"],
+
+["mi prepari la dichiarazione di conformità dell'impianto elettrico delle cantine di via Padova?", "dico"],
+["si può fare la DiCo per l'impianto elettrico dei garage in corso Lodi?", "dico"],
+["riesci a compilarmi la dichiarazione di conformità elettrica per i box di viale Monza?", "dico"],
+
+["mi fai una foto allo schema elettrico appeso nel locale caldaia?", "foto"],
+["si può fotografare adesso lo schema dell'impianto che c'è attaccato sul quadro?", "foto"],
+["riesci a scattare una foto al disegno dell'impianto appeso in centrale termica?", "foto"],
+
+["mi segni che la Porcu mi ha dato metà, 410 euro?", "incasso"],
+["riesci a registrare un acconto di 280 euro da Deiana, la metà del totale?", "incasso"],
+["Sanna ha versato la prima metà, sono 150 euro: me lo segni?", "incasso"],
+
+["mi dici quanto ho portato a casa questo mese?", "dati"],
+["sai dirmi quanti soldi sono entrati da lunedì a oggi?", "dati"],
+["a quanto siamo di incassi in questi ultimi sette giorni?", "dati"],
+
+["sai mica come si pulisce la muffa da uno scuro di legno vecchio?", "domanda"],
+["c'è un modo per levare la muffa da una persiana di legno senza rovinarla?", "domanda"],
+["cosa si usa di solito per la muffa sulle imposte in legno vecchie?", "domanda"],
+
+["mi segni che il Ferretti ha saldato il portone blindato?", "incasso"],
+["puoi registrare che la Gasperini mi ha pagato la porta d'ingresso?", "incasso"],
+["riesci a mettere che Martinelli ha pagato il lavoro della porta blindata, tutto saldato?", "incasso"],
+
+["riesci a mandare la fattura alla Pozzi?", "invio_documento"],
+["la fattura alla Bertolini gliela inoltri tu?", "invio_documento"],
+["si può spedire la fattura alla signora Colombo?", "invio_documento"],
+
+["mi fai il SAL numero 2 del cantiere di Spoleto? siamo al 60 per cento", "sal"],
+["si può preparare il terzo stato avanzamento lavori per Orvieto, al 75%?", "sal"],
+["riesci a emettere il SAL quattro del cantiere Foligno, che siamo al 90 per cento?", "sal"],
+
+["mi prepari la convocazione dell'assemblea condominiale per approvare il preventivo del fotovoltaico da 20 kWp?", "assemblea"],
+["si può convocare l'assemblea di condominio con all'ordine del giorno i pannelli solari da 45 kWp?", "assemblea"],
+["riesci a indire l'assemblea dei condomini per votare il preventivo del FV da 25 kWp?", "assemblea"],
+
+["ehi EON, mi senti?", "saluto"],
+["buongiorno EON, sei sveglio?", "saluto"],
+["EON, ci sei o no? ciao", "saluto"],
+
+["va bene così, no? non serve altro", "saluto"],
+["direi che siamo a posto così, o no?", "saluto"],
+["ok così, può bastare, giusto?", "saluto"],
+
+["riesci a scrivere una mail all'amministratore Pesenti che ci servono le chiavi della soffitta?", "email"],
+["si può mandare un'email al signor Carminati, l'amministratore, per chiedere le chiavi del sottotetto?", "email"],
+["mi butti giù una mail per l'amministratore Rota dicendo che servono le chiavi del solaio?", "email"],
+
+["si può cancellare l'appuntamento dal dentista del capo di giovedì?", "calendario_modifica"],
+["riesci a togliere il dentista del titolare che c'era giovedì?", "calendario_modifica"],
+["e se annullassimo la visita dal dentista del principale di martedì?", "calendario_modifica"],
+
+["mi fai il SAL dell'hotel Bellavista? abbiamo finito 30 camere su 52", "sal"],
+["si può segnare lo stato avanzamento lavori all'albergo Miramare, 12 stanze fatte su 40?", "sal"],
+["riesci a preparare il SAL per il Grand Hotel Lido, siamo a 25 camere completate su 60?", "sal"],
+
+["puoi segnare che alla trattoria del Molo perde la bombola del gas fuori? si sente fischiare e la puzza arriva dentro", "urgenza"],
+["riesci a segnarmi subito che all'agriturismo Le Rondini la bombola esterna perde, sibila e l'odore entra in sala?", "urgenza"],
+["mi metti come urgente che alla pizzeria del Porto sfiata la bombola di fuori e c'è odore di gas tra i tavoli?", "urgenza"],
+
+["riesci a scrivere a Bernardi un messaggio per chiedergli se la fattura la vuole alla ditta o a nome suo?", "messaggio"],
+["mi mandi un WhatsApp a Cattaneo per sapere se intesto la fattura alla società o a lui?", "messaggio"],
+["si può scrivere a Galli se la fattura gliela intesto personale o all'azienda?", "messaggio"],
+
+["mi fai la dichiaraz. di conformità per lo scaldabagno della Rossi?", "dico"],
+["si può fare la dico dello scaldabagno di Bassi?", "dico"],
+["riesci a prepararmi la dichiarazione di conformità dello scaldabagno nuovo di Fiorentini?", "dico"],
+
+["mi segni l'assemblea del condominio Residenza I Pini martedì 21 alle 21?", "assemblea"],
+["si può fissare l'assemblea condominiale del Parco dei Tigli per giovedì 9 alle 18:30?", "assemblea"],
+["e se mettessimo l'assemblea di condominio della Residenza Aurora lunedì 13 alle 20?", "assemblea"],
+
+["mi sposti il service di Lorusso... anzi no, quello di Caputo, a giovedì 15 alle dieci?", "calendario_modifica"],
+["riesci a spostare l'intervento della Loiacono, no scusa, della Stella, a martedì 13 alle otto?", "calendario_modifica"],
+["e se il tagliando di Colonna... no aspetta, quello di De Santis, lo spostassimo a venerdì 16 alle nove e mezza?", "calendario_modifica"],
+
+["buonanotte EON, ci sentiamo dopo, eh?", "saluto"],
+["notte EON, io stacco, va bene?", "saluto"],
+["ciao, vado a dormire, a domani ok?", "saluto"],
+
+["riesci a trovarmi la fattura dello sgombero cantina di Carli?", "cerca_documento"],
+["dov'è finita la fattura del trasloco di Fabbri? me la apri?", "cerca_documento"],
+["si può vedere la fattura che ho fatto a Farinelli per lo sgombero?", "cerca_documento"],
+
+["dove sarà il preventivo dell'armadio a muro del dottor Neri? me lo fai vedere?", "cerca_documento"],
+["riesci a tirarmi fuori il preventivo della libreria del notaio Baldi?", "cerca_documento"],
+["si può aprire il preventivo delle mensole per l'avvocato Mori, che non lo trovo più?", "cerca_documento"],
+
+["mi avvisi il 19 novembre che entro il 20 devo disdire l'abbonamento della palestra?", "calendario"],
+["riesci a ricordarmi il 30 ottobre di disdire l'assicurazione del furgone che scade il 31?", "calendario"],
+["si può mettere un promemoria per il 9 dicembre per disdire l'abbonamento a Sky prima del 10?", "calendario"],
+
+["mi emetti il SAL di questo mese per l'albergo?", "sal"],
+["si può fare lo stato avanzamento lavori mensile per il cantiere dell'hotel?", "sal"],
+["riesci a tirare fuori il SAL di settembre dell'hotel?", "sal"],
+
+["le foto del parquet gonfio di Toffolo me le metti in una cartella nuova che chiami Toffolo reclamo?", "cartella"],
+["si può creare una cartella 'Bortolin contestazione' e buttarci dentro le foto del pavimento rigonfio?", "cartella"],
+["riesci a spostare le foto del rigonfiamento degli Zanon in una cartella nuova, tipo Zanon reclamo?", "cartella"],
+
+["mi aggiungi un cliente nuovo? Bar Stazione di Marco Bassi, a Monza", "cliente"],
+["si può inserire tra i clienti la Pasticceria Dolce Vita di Anna Conti, a Cinisello?", "cliente"],
+["riesci a registrarmi come nuovo cliente il Caffè Roma di Luigi Sala, a Rho?", "cliente"],
+
+["mi segni un incasso di 80 euro dalla signora Pinna per l'uscita?", "incasso"],
+["si può registrare che la signora Mura mi ha dato 50 euro per il diritto di chiamata?", "incasso"],
+["riesci a mettere che ho preso 70 euro dalla signora Loi per il sopralluogo?", "incasso"],
+
+["mi prepari la dichiarazione di conformità dell'impianto idraulico dell'appartamento Galli?", "dico"],
+["si può fare la DiCo idraulica per la casa dei Bianchi?", "dico"],
+["riesci a compilare la dichiarazione di conformità per l'idraulica dell'alloggio di Russo?", "dico"],
+
+["EON, mi sai dire quanto devo ancora prendere in totale da quelli che non hanno pagato?", "dati"],
+["a quanto ammontano in tutto i soldi che i clienti mi devono ancora?", "dati"],
+["quant'è la somma di tutto quello che non mi hanno ancora pagato?", "dati"],
+
+["si può rimandare di una settimana il bagno degli Esposito? le piastrelle non sono arrivate", "calendario_modifica"],
+["riesci a spostare di sette giorni il lavoro del bagno dai Russo, che mancano ancora le mattonelle?", "calendario_modifica"],
+["e se il bagno dei Gargiulo lo facessimo slittare di una settimana? le piastrelle ancora non ci stanno", "calendario_modifica"],
+
+["potrebbe inserire in anagrafica la ditta Infissi Zanella, partita IVA 04567890123?", "cliente"],
+["si può aggiungere ai clienti la Serramenti Pavan, P.IVA 02345670287?", "cliente"],
+["riesce a registrare la ditta Finestre Scarpa come nuovo cliente, partita IVA 03987650264?", "cliente"],
+
+["mi fai un preventivo per la Mancini? 8 punti luce a 40 l'uno e 5 prese a 30", "documento"],
+["si può preparare un preventivo x il Ruggeri: 4 punti luce a 50 euro e 6 prese a 38?", "documento"],
+["riesci a buttare giù il preventivo della Santarelli con 10 punti luce da 45 e 3 prese da 35?", "documento"],
+
+["dove sono finite le foto del teak che ho in magazzino? me le trovi?", "cerca_documento"],
+["riesci a trovarmi le foto delle tavole di rovere del deposito?", "cerca_documento"],
+["si possono vedere le foto del parquet di iroko che avevo fatto in magazzino?", "cerca_documento"],
+
+["mi fai la fattura per il bar Italia? sostituzione boiler, trecentottanta euro più iva", "documento"],
+["si può emettere la fattura al bar Sport per il cambio dello scaldabagno, 450 più iva?", "documento"],
+["riesci a preparare la fattura del bar Lux, boiler nuovo, cinquecentodieci euro iva esclusa?", "documento"],
+
+["riesci a scrivere una mail al commercialista per chiedere se il furgone nuovo posso scaricarlo?", "email"],
+["si può mandare un'email al mio consulente fiscale per sapere se il camioncino lo scarico dalle tasse?", "email"],
+["mi prepari una mail per il dottor Bassi, il commercialista, chiedendogli se il Ducato nuovo è deducibile?", "email"],
+
+["potrebbe preparare la convocazione dell'assemblea del condominio Aurora per approvare il preventivo di gestione?", "assemblea"],
+["si riesce a fare la convocazione per l'assemblea del condominio Girasole, per il bilancio preventivo?", "assemblea"],
+["mi prepara la lettera di convocazione dell'assemblea del condominio Le Rose per approvare il preventivo di gestione ordinaria?", "assemblea"],
+
+["puoi ricordarti che la marchesa Strozzi vuole la fattura sempre a nome del marito?", "mente"],
+["riesci a tenere a mente che la signora Pieri vuole le fatture intestate al marito?", "mente"],
+["si può segnare da qualche parte che alla dottoressa Tanzi la fattura va fatta sempre al coniuge?", "mente"],
+
+["mi dici qual è il preventivo più alto ancora in sospeso?", "dati"],
+["sai qual è il preventivo di importo maggiore che non mi hanno ancora accettato?", "dati"],
+["tra i preventivi aperti, quale vale di più?", "dati"],
+
+["la nota di credito me la metti nella cartella Colombo?", "cartella"],
+["si può spostare la nota di credito nella cartella di Brambilla?", "cartella"],
+["riesci ad archiviare la nota di credito dentro la cartella Ferrari?", "cartella"],
+
+["riesci a scrivere alla Paoli che la chiamo stasera dopo le sette?", "messaggio"],
+["mi mandi un messaggio alla Tonelli per dirle che la sento stasera dopo le 18:30?", "messaggio"],
+["si può avvisare con un WhatsApp la Gentili che la richiamo stasera dopo le 17?", "messaggio"],
+
+["mi scrivi a Mario Conti che stasera gli faccio sapere?", "messaggio"],
+["riesci a mandare un messaggio a Gino Ferri, che stasera gli do una risposta?", "messaggio"],
+["si può mandare un SMS a Piero Leone per dirgli che gli faccio sapere in serata?", "messaggio"],
+
+["riesci a chiamare la signora Cossu?", "chiamata"],
+["mi fai partire una telefonata alla signora Serra?", "chiamata"],
+["si può telefonare alla signora Piras?", "chiamata"],
+
+["riesci a segnarti che la signora Gina ha in bagno uno scaldabagno a gas vecchio, con lo scarico fumi fuori norma?", "mente"],
+["si può annotare che dalla signora Tina lo scaldabagno a gas in bagno è vecchio e lo scarico non è a norma?", "mente"],
+["mi tieni a mente che la signora Rina ha quel boiler a gas vecchio in bagno con i fumi non a norma?", "mente"],
+
+["ma il libretto della caldaia bisogna averlo per forza?", "domanda"],
+["è vero che è obbligatorio il libretto d'impianto della caldaia?", "domanda"],
+["sai se c'è l'obbligo di tenere il libretto per la caldaia di casa?", "domanda"],
+
+["mi segni sabato 10 alle otto e mezza a casa del Brivio, quello col cane grande, per vedere il lavoro?", "calendario"],
+["si può mettere un appuntamento lunedì 5 alle dieci dal Pagani, quello del pastore tedesco, per il sopralluogo?", "calendario"],
+["e se andassimo giovedì 8 alle nove dal Bonetti, quello col cane grosso, a vedere il lavoro? me lo segni?", "calendario"],
+
+["ti ricordi per me che la Bertola ha un gatto che scappa e la porta va sempre chiusa?", "mente"],
+["si può annotare che dalla Giordano bisogna chiudere sempre la porta perché il gatto scappa?", "mente"],
+["mi tieni a mente che la Bonino ha il gatto che esce e bisogna stare attenti alla porta?", "mente"],
+
+["mi aggiungi la cliente Marta Rinaldi, via Garibaldi 8, Padova?", "cliente"],
+["si può creare un nuovo cliente, Giulia Fontana, via Roma 22, Vicenza?", "cliente"],
+["riesci a inserire tra i clienti Paola De Rossi, viale Verdi 5, Treviso?", "cliente"],
+
+["mi ricordi lunedì di telefonare al grossista per i tubi?", "calendario"],
+["riesci a mettermi un promemoria giovedì mattina per chiamare il fornitore dei cavi?", "calendario"],
+["e se mi avvisassi martedì alle 10 di sentire il grossista per il materiale elettrico?", "calendario"],
+
+["riesci a mandare una mail al commercialista Bianchi per chiedere quanto accantonare per le tasse?", "email"],
+["si può scrivere un'email al mio commercialista, il Gatti, per sapere quanto devo tenere da parte per le imposte?", "email"],
+["mi prepari una mail per la Vitali, la commercialista, chiedendo quanti soldi mettere via per le tasse?", "email"],
+
+["potrebbe chiamare il portinaio di via Savona?", "chiamata"],
+["riesce a telefonare al custode di corso Genova?", "chiamata"],
+["si può fare una chiamata al custode del palazzo di via Solari?", "chiamata"],
+
+["mi fai una foto alla bolla sotto la mattonella?", "foto"],
+["si può fotografare il vuoto d'aria sotto quella piastrella?", "foto"],
+["riesci a scattare adesso una foto alla piastrella che suona vuota?", "foto"],
+
+["riesci a fotografare la parete dove mettiamo l'inferriata?", "foto"],
+["si può fare una foto al muro dove va montata la grata?", "foto"],
+["mi scatti una foto alla parete della grata, prima di forare?", "foto"],
+
+["mi fai fatt da 280 a luca bellini x ritocchi negozio?", "documento"],
+["si può fare fattura di 350 euro a gianni sarti per i ritocchi in ufficio?", "documento"],
+["riesci a emettere una fattura da 410 a marco testa per le sistemate allo studio?", "documento"],
+
+["riesci a chiamare l'architetto Bruni per il gres invece del marmo?", "chiamata"],
+["si può telefonare all'architetta Conti per parlare del gres al posto del travertino?", "chiamata"],
+["mi chiami l'ingegner Riva per la storia del gres al posto del marmo?", "chiamata"],
+
+["puoi segnare che alla mensa Bertolini c'è una fuga di gas in cucina e hanno fatto uscire tutti?", "urgenza"],
+["riesci a segnare subito che alla mensa della scuola Pascoli c'è una perdita di gas in cucina? hanno evacuato tutti", "urgenza"],
+["mi metti come urgenza la fuga di gas nella cucina della mensa Galbiati? sono usciti tutti", "urgenza"],
+
+["sai più o meno quanto viene a rifare un bagno da zero?", "domanda"],
+["quanto si spende di solito per ristrutturare tutto un bagno?", "domanda"],
+["a occhio, qual è il prezzo medio per rifare un bagno completo?", "domanda"],
+
+["puoi segnare che è crollato il muretto al cantiere di Lanciano?", "urgenza"],
+["riesci a registrare un crollo del muro di cinta nel cantiere di Ortona?", "urgenza"],
+["si può segnare subito che nel cantiere di Chieti è venuto giù il muretto?", "urgenza"]
+]
+}

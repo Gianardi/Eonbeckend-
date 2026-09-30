@@ -1,0 +1,241 @@
+{ "stile": "titolare donna (impresa di pulizie o ditta di infissi) in multitasking: allora, ok quindi, ah e poi, voce femminile, precisa su soldi e orari, qualche parola milanese", "frasi": [
+["allora fai una foto al cassonetto qui davanti, adesso", "foto"],
+["ok quindi foto al bidone della differenziata qui in cortile, subito", "foto"],
+["ah e poi fotografami il cassonetto dell'umido prima che lo portino via", "foto"],
+
+["allora alla palestra di via Novara si è rotta la caldaia e le docce sono gelate, ci sono dentro le signore dell'acquagym", "urgenza"],
+["ok quindi al centro sportivo di Rho è andato lo scambiatore, la vasca piccola è fredda coi bambini del nuoto in acqua", "urgenza"],
+["sono appena passata alla piscina di Cesano, lo scambiatore ha mollato e l'acqua è gelata con il corso dei piccoli in corso", "urgenza"],
+
+["allora apri una cartella nuova per la villetta dei Brambilla", "cartella"],
+["ok quindi fammi una cartella Villetta Fumagalli, che ci metto dentro le misure degli infissi", "cartella"],
+["ah e poi crea la cartella per la casa del Colombo a Lissone... no aspetta, del Colombo a Seregno", "cartella"],
+
+["allora secondo te sul riscaldamento a pavimento il parquet è meglio flottante o incollato?", "domanda"],
+["ok quindi una domanda: sopra il radiante conviene posare il laminato flottante o va incollato?", "domanda"],
+["ah e poi dimmi, col pavimento riscaldato è meglio incollare il legno o lasciarlo flottante? me l'ha chiesto la sciura Pozzi", "domanda"],
+
+["allora scrivi a Katia e Samanta, tutte e due, che domattina il ritrovo al magazzino di Sesto è alle 7 e mezza e non alle 7", "messaggio"],
+["manda un whatsapp a Mirko, anzi no, a Mirko e Gabriel insieme, che lo scarico dei vetri a Cinisello è alle otto e non alle nove", "messaggio"],
+["ok quindi messaggio alle ragazze, Luana e Rosi, che il turno agli uffici di Assago comincia alle sei e un quarto, non alle sei", "messaggio"],
+
+["allora prepara la dichiarazione di conformità dei materiali in classe 1 per il teatro Manzoni", "dico"],
+["ok quindi mi serve la dico per le tende ignifughe in classe 1 della sala congressi dell'hotel Brera", "dico"],
+["ah e poi la dichiarazione di conformità dei serramenti in classe 1 di reazione al fuoco per l'auditorium di Legnano", "dico"],
+
+["allora il Brivio di Cantù ha pagato la zanzariera, 340 euro giusti", "incasso"],
+["ok quindi segna che la sciura Galbiati mi ha dato 185 euro per la pulizia dei vetri", "incasso"],
+["sono passata dalla Tagliabue e mi ha saldato la tapparella, 412 euro e 50", "incasso"],
+
+["ok perfetto, grazie", "saluto"],
+["allora a posto così, grazie cara", "saluto"],
+["benissimo, grazie EON", "saluto"],
+
+["allora urgente, è saltata la corrente nel condominio della Ferrario e la caldaia non si riaccende, c'è un neonato in casa", "urgenza"],
+["ok quindi blackout nella scala B di via Padova, riscaldamento morto e dentro c'è una signora di novant'anni", "urgenza"],
+["mi hanno chiamata adesso: black out alla palazzina dei Rizzi, la caldaia è in blocco e hanno una bimba di due mesi", "urgenza"],
+
+["allora fai la fattura d'acconto a Pellegatta, il 40% sugli 8000 del preventivo finestre", "documento"],
+["ok quindi fattura di anticipo del 30 per cento alla sciura Brambati su 4.500 euro di preventivo", "documento"],
+["ah e poi fattura d'acconto al condominio Rosales, metà dei 2.200 della pulizia straordinaria", "documento"],
+
+["allora il motore del portone sezionale dei Mauri va in protezione termica e si blocca ogni mezz'ora", "urgenza"],
+["ok quindi guasto: l'inverter della Sala va in sovratemperatura e si spegne di continuo, una volta all'ora", "urgenza"],
+["ah e poi la lavasciuga industriale al cantiere Bicocca va in allarme surriscaldamento e si spegne ogni venti minuti", "urgenza"],
+
+["allora dimmi tutta l'agenda della settimana prossima", "dati"],
+["ok quindi cosa ho in programma da lunedì prossimo a sabato? tutto, eh", "dati"],
+["leggimi gli impegni della prossima settimana, giorno per giorno", "dati"],
+
+["allora crea una cartella Serramenti Villa Borghi 2026", "cartella"],
+["ok quindi nuova cartella: Pulizie Uffici Brianza Acque 2027", "cartella"],
+["fammi la cartella Condominio Le Rose scale e vetri 2026", "cartella"],
+
+["allora domani alle 5 del pomeriggio passa la sciura Colombo a prendere le chiavi", "calendario"],
+["ok quindi giovedì alle 15 e 30 viene la Bianchi a ritirare le chiavi dell'ufficio", "calendario"],
+["ah e poi dopodomani alle quattro e mezza la Villa passa a lasciarmi le chiavi del negozio", "calendario"],
+
+["allora la dichiarazione di conformità per il riscaldamento dopo il cambio delle valvole in via Monza... no no, viale Monza", "dico"],
+["ok quindi dico per l'impianto termico, abbiamo sostituito le valvole termostatiche, in via Torino... anzi no, corso Buenos Aires", "dico"],
+["ah e poi fammi la dichiarazione di conformità del riscaldamento dove abbiamo cambiato le valvole, in piazza Napoli... sì sì, piazza Napoli", "dico"],
+
+["allora scrivi una mail per ringraziare la sciura Bertolini", "email"],
+["ok quindi fammi una mail di grazie all'ingegner Casati per la fiducia", "email"],
+["ah e poi una mail alla signora Radaelli per ringraziarla del lavoro", "email"],
+
+["allora il direttore lavori vuole il SAL per giovedì, preparalo per il cantiere dei Fontana", "sal"],
+["ok quindi fai lo stato avanzamento lavori per la ditta Mapelli, l'ingegnere lo vuole entro fine mese", "sal"],
+["ah e poi prepara il SAL dei serramenti della scuola di Vimercate, il DL lo aspetta per lunedì", "sal"],
+
+["allora fai la conformità del gas per la sciura Lina Brenna", "dico"],
+["ok quindi prepara la dichiarazione di conformità dell'impianto gas di Teresa Oldani", "dico"],
+["ah e poi mi serve la dico gas per Carla Motta", "dico"],
+
+["allora registra una cliente nuova: Sabrina Colnaghi, pulizie di casa", "cliente"],
+["ok quindi nuovo cliente, Studio Dentistico Perego, pulizia dello studio due volte a settimana", "cliente"],
+["aggiungimi la cliente Marta Fossati, finestre in pvc per la mansarda", "cliente"],
+
+["allora perfetto, grazie davvero", "saluto"],
+["ok bene così, ti ringrazio", "saluto"],
+["sei un tesoro, grazie tante", "saluto"],
+
+["allora scatta una foto", "foto"],
+["ok quindi foto adesso", "foto"],
+["fammi una foto al volo", "foto"],
+
+["allora segnati che a luglio ho speso 640 euro di benzina per il furgone", "mente"],
+["ok quindi ricordati che a marzo tra detersivi e sacchi ho speso 1.150 euro", "mente"],
+["sono stata a fare i conti: a settembre il gasolio mi è costato 870 euro", "mente"],
+
+["allora metti pagata la fattura numero 52", "incasso"],
+["ok quindi la fattura 38 è saldata, segnala pagata", "incasso"],
+["la 61 me l'hanno pagata, segnala incassata", "incasso"],
+
+["allora togli l'appuntamento con la Brambilla", "calendario_modifica"],
+["ok quindi annulla l'appuntamento col Cattaneo, non viene più", "calendario_modifica"],
+["cancellami l'appuntamento della sciura Mauri", "calendario_modifica"],
+
+["allora manda la fattura alla Rosetta Gerosa, quella da 180", "invio_documento"],
+["ok quindi la fattura da 345 euro inviala alla signora Pirovano", "invio_documento"],
+["ah e poi fai arrivare a Donatella Sironi la sua fattura, quella dei 260", "invio_documento"],
+
+["allora scrivi al vetraio Monti per il vetro della porta finestra dei Galli", "messaggio"],
+["ok quindi mandagli un messaggio al fabbro Sergio per la grata della cantina della Tremolada", "messaggio"],
+["ah e poi whatsapp al posatore Nando per il davanzale della sciura Longoni", "messaggio"],
+
+["allora chiama la ditta Brenna forniture per gli sgrassatori", "chiamata"],
+["ok quindi telefona al vetraio Carugo per i doppi vetri", "chiamata"],
+["chiamami il magazzino Frigerio per le guarnizioni nere", "chiamata"],
+
+["allora sposta tutte le foto della villa dei Longhi nella cartella Villa Ortensia", "cartella"],
+["ok quindi le foto delle vetrate del negozio della Riva mettile nella cartella Boutique Riva", "cartella"],
+["ah e poi metti tutte le foto del capannone Gerosa nella cartella Pulizia Fine Cantiere Gerosa", "cartella"],
+
+["allora tele fona alla Bram billa", "chiamata"],
+["ok quindi chia ma la sciura Pi rovano", "chiamata"],
+["te le fona al Fuma galli su bito", "chiamata"],
+
+["allora segnami l'assemblea del condominio di giovedì 15 a Cologno", "assemblea"],
+["ok quindi c'è l'assemblea condominiale lunedì 19 a Paderno, mettila giù", "assemblea"],
+["ah e poi l'assemblea dei condomini di via Mazzini a Monza, venerdì 9 alle 18, segnala", "assemblea"],
+
+["allora la fattura della Bonfanti mandala a lei... cioè non rifarla, c'è già, devi solo spedirgliela", "invio_documento"],
+["sì ok quindi la fattura di Cazzaniga, fagliela avere... ma non crearla nuova eh, è già fatta, solo da inviare", "invio_documento"],
+["ah e poi quella fattura della sciura Arosio che abbiamo già fatto, mandagliela e basta, non farne un'altra", "invio_documento"],
+
+["allora segnati che la villetta dei Pozzi ha il cancello verde, citofono a nome Rigamonti", "mente"],
+["ok quindi ricordati che l'ufficio della Sironi è al terzo piano, scala B, chiavi in portineria", "mente"],
+["ah e poi appuntati che la sciura Galli vuole solo detersivi senza profumo, è allergica", "mente"],
+
+["allora aprimi la scheda della Gianna Brivio", "cliente"],
+["ok quindi fammi vedere la scheda cliente di Rino Pessina", "cliente"],
+["scheda della sciura Mariuccia Frigerio", "cliente"],
+
+["allora il preventivo delle tapparelle mandalo alla Colombo", "invio_documento"],
+["ok quindi il preventivo della pulizia uffici giralo a Ghezzi", "invio_documento"],
+["ah e poi manda alla sciura Villa il preventivo delle persiane che le ho già fatto", "invio_documento"],
+
+["allora la Carla del bar ha la vetrina lunga tre metri e le tende da sole", "mente"],
+["ok quindi il Beppe della panetteria ha il forno sotto la finestra e la cappa da un metro e mezzo", "mente"],
+["sono passata dal Mario della trattoria: ha le finestre in legno vecchie e le zanzariere rotte", "mente"],
+
+["allora mi trovi il manuale del motore della tapparella dei Riva?", "cerca_documento"],
+["ok quindi cercami le istruzioni della lavapavimenti che avevo salvato", "cerca_documento"],
+["ah e poi dov'è il libretto del cancello automatico della Pozzoli? trovamelo", "cerca_documento"],
+
+["allora manda un messaggio a Loredana della Brianza Clean che il lavoro è confermato", "messaggio"],
+["ok quindi scrivi a Davide del cantiere che la posa è confermata", "messaggio"],
+["ah e poi whatsapp alla Grazia che la pulizia straordinaria è confermata, va bene così", "messaggio"],
+
+["allora faccia un SAL, cantiere di Monza, lavori al quaranta per cento, importo cinquemiladuecento", "sal"],
+["ok quindi stato avanzamento per il cantiere di Lainate: siamo al sessanta per cento, 7.800 euro", "sal"],
+["ah e poi SAL cantiere scuola di Arcore, trenta per cento fatto, importo 2.950", "sal"],
+
+["allora mi apri la scheda tecnica del serramento in pvc da 70 che avevo salvato?", "cerca_documento"],
+["ok quindi trovami la scheda di sicurezza dello sgrassatore che ho messo via", "cerca_documento"],
+["ah e poi aprimi la scheda tecnica della finestra Tipo 3 che avevo caricato", "cerca_documento"],
+
+["allora come faccio a far asciugare più in fretta il silicone?", "domanda"],
+["ok quindi una cosa: come faccio a far seccare prima la cera sul pavimento?", "domanda"],
+["ah e poi dimmi, c'è un trucco per far asciugare prima lo stucco sui telai?", "domanda"],
+
+["allora quante finestre ho montato quest'anno?", "dati"],
+["ok quindi quanti lavori di pulizia ho fatto quest'anno in tutto", "dati"],
+["quante porte blindate ho messo nel 2026", "dati"],
+
+["allora la Cereda ha disdetto l'appuntamento di venerdì, toglilo", "calendario_modifica"],
+["ok quindi il Sala lunedì non viene più, va' a ciapà i ratt, cancella l'appuntamento", "calendario_modifica"],
+["la sciura Pagani ha annullato giovedì, levalo dall'agenda", "calendario_modifica"],
+
+["allora mercoledì 7, finestre in pvc, signora Ronchi, Desio", "calendario"],
+["ok quindi giovedì 8 alle 9, pulizia di fondo dalla sciura Gerosa a Seveso", "calendario"],
+["Venerdì 16. Zanzariere. Famiglia Molteni, Meda.", "calendario"],
+
+["allora chiama il Walter della Vetreria Brianza", "chiamata"],
+["ok quindi telefona al Franco della Detergo", "chiamata"],
+["chiamami la Pinuccia dell'ufficio del condominio", "chiamata"],
+
+["allora mi scriva una mail all'INPS per sapere a che punto è la pensione di mia mamma", "email"],
+["ok quindi una mail al patronato per sapere come va la pratica della mia pensione", "email"],
+["ah e poi scrivi per posta elettronica al commercialista per chiedere a che punto è il mio rimborso", "email"],
+
+["grazie mille, perfetto così", "saluto"],
+["ok grazie, sei stata bravissima", "saluto"],
+["allora tutto a posto, grazie ciao", "saluto"],
+
+["allora conviene la pompa di calore in montagna a Livigno?", "domanda"],
+["ok quindi secondo te a Madesimo, con quel freddo, una pompa di calore rende o no?", "domanda"],
+["ah e poi una curiosità: in Valtellina a mille metri ha senso la pompa di calore?", "domanda"],
+
+["allora foto adesso al locale caldaia", "foto"],
+["ok quindi scatta ora una foto alla centrale termica", "foto"],
+["fotografa subito la sala motori dell'ascensore", "foto"],
+
+["allora apri la foto dello schema del motore della tapparella della Longoni che ho fatto la settimana scorsa", "cerca_documento"],
+["ok quindi fammi vedere la foto delle misure della finestra del Brambilla che ho scattato lunedì", "cerca_documento"],
+["ah e poi ritrovami la foto del quadro elettrico dell'ufficio Sironi di un mese fa", "cerca_documento"],
+
+["allora l'appuntamento di domani con la sciura Tremolada spostamelo a venerdì, stessa ora", "calendario_modifica"],
+["ok quindi quello di oggi pomeriggio con il Radaelli portalo a lunedì alle 14", "calendario_modifica"],
+["ah e poi sposta la Frigerio da mercoledì a giovedì, stessa ora", "calendario_modifica"],
+
+["allora segna l'assemblea dei condomini di via Manzoni, giovedì 22 alle 21", "assemblea"],
+["ok quindi assemblea condominiale di viale Lombardia martedì 20 alle 18 e 30, segnala", "assemblea"],
+["ah e poi c'è l'assemblea del condominio Le Betulle lunedì 26 alle 20 e 45", "assemblea"],
+
+["allora nuovo preventivo: pulizia di 12 finestre del bar Colombo, 15 euro a finestra", "documento"],
+["ok quindi preventivo per sanificare 8 uffici dello studio Ratti, 45 euro a stanza", "documento"],
+["ah e poi fammi un preventivo per 5 zanzariere a rullo casa Pozzi, 120 euro l'una", "documento"],
+
+["allora la Brenna mi ha dato 45 euro per la maniglia nuova", "incasso"],
+["ok quindi il Galli mi ha pagato 25 euro per sistemare la tapparella", "incasso"],
+["sono passata dalla sciura Oldani, mi ha dato 60 euro per il vetro del bagno", "incasso"],
+
+["allora cliente nuova, Rosanna Pirola, via Garibaldi 12 Lissone, il numero me lo dà dopo", "cliente"],
+["ok quindi aggiungi un cliente: Ernesto Cazzaniga, via Roma 4 a Carate, telefono ancora niente", "cliente"],
+["nuovo cliente, Condominio Il Glicine, viale Brianza 30 Monza, il telefono dell'amministratore non ce l'ho", "cliente"],
+
+["allora mi segni l'assemblea del condominio di giovedì 14 alle 20 al Tiglio?", "assemblea"],
+["ok quindi assemblea condominiale al Parco dei Pini, lunedì 18 alle 21, me la segni?", "assemblea"],
+["ah e poi l'assemblea condominiale del Glicine è martedì 12 alle 20 e 30, mettila", "assemblea"],
+
+["allora scrivi una mail a Frigerio Forniture per ordinare venti taniche di sgrassatore da 5 litri", "email"],
+["ok quindi mail al fornitore Vetroplast per ordinare 15 metri di guarnizione nera", "email"],
+["ah e poi manda una mail alla Brianza Detersivi per ordinare 30 rotoli di carta", "email"],
+
+["allora domani alle 8 e mezza dalla sciura Rigamonti a Seregno per le finestre", "calendario"],
+["ok quindi venerdì alle 7 pulizia uffici Pessina a Robbiano", "calendario"],
+["dopodomani alle 9 dai Longoni a Giussano a montare le tapparelle", "calendario"],
+
+["allora quanti preventivi ho ancora aperti?", "dati"],
+["ok quindi i preventivi in sospeso quanti sono", "dati"],
+["prev aperti quanti ne ho", "dati"],
+
+["allora fai la fattura d'acconto del 20 per cento all'architetto Sala", "documento"],
+["ok quindi fattura di acconto del 50% alla sciura Motta", "documento"],
+["ah e poi fattura d'anticipo del 30 per cento al geometra Brivio", "documento"],
+
+["allora stato avanzamento villa Ronchi ottanta per cento", "sal"],
+["ok quindi SAL serramenti palazzina Gerosa al settantacinque per cento", "sal"],
+["stato avanzamento lavori capannone Sironi, siamo al novantacinque", "sal"]
+] }

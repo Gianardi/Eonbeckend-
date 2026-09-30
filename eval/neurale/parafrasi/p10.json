@@ -1,0 +1,241 @@
+{ "stile": "giovane artigiano di 25 anni che scrive come in chat: abbreviazioni, senza accenti o maiuscole, qualche parola inglese", "frasi": [
+["il prev piu recente che ho fatto giralo al cliente pls", "invio_documento"],
+["manda al cliente il preventivo che ho fatto x ultimo, ok?", "invio_documento"],
+["raga l'ultimo prev che ho preparato mandalo al suo cliente asap", "invio_documento"],
+
+["dico x l'automazione cancelli edilmarche, cantiere a recanati", "dico"],
+["fammi la dichiarazione di conformita x l'impianto automazione di edilsud, quello a osimo", "dico"],
+["mi serve la dico dell'automazione edilmarche cantiere recanati asap", "dico"],
+
+["si puo fare la dico della messa a terra x mereu?", "dico"],
+["dichiarazione conformita impianto di terra casa pinna, la fai?", "dico"],
+["cmq serve la dico messa a terra di mereu, preparala pls", "dico"],
+
+["marius sabato nn viene piu, togli l'appuntamento dal calendario", "calendario_modifica"],
+["cancella sabato con marius, ha dato buca", "calendario_modifica"],
+["l'appuntamento di sabato con ionut e saltato, levalo dall'agenda", "calendario_modifica"],
+
+["segna 12 ottobre ore 14 riunione col geom pizzato x la variante", "calendario"],
+["metti in agenda il 15 ottobre alle 16 incontro col geometra ferro x la variante in corso d'opera", "calendario"],
+["il 20/10 alle 9 call col geometra pizzato sulla variante, segnalo pls", "calendario"],
+
+["chiedi via msg a colombo della ferramenta se gli sono rimasti i tasselli da 10", "messaggio"],
+["manda un msg al ferramenta ricci, chiedi se ci sono ancora i tasselli da 8", "messaggio"],
+["whatsapp a gigi della ferramenta: hai ancora i fischer da 10? me ne servono 50", "messaggio"],
+
+["venerdi pome ho qualcosa in agenda?", "dati"],
+["check agenda: giovedi pomeriggio sono impegnato?", "dati"],
+["c'e qualcosa segnato x venerdi dopo pranzo?", "dati"],
+
+["segnati sta idea: il cappotto proporlo anche alle villette di via verdi", "mente"],
+["appunto x me: alle case a schiera di via manzoni proporre il cappotto termico", "mente"],
+["tipo idea, alle villette di via roma potrei proporre il cappotto, nn scordartelo", "mente"],
+
+["caldaia in blocco a le betulle, gli anziani stanno al freddo, urgente", "urgenza"],
+["raga la caldaia della rsa villa serena e andata in blocco, vecchietti al gelo", "urgenza"],
+["emergenza: caldaia ferma alla casa di riposo, anziani al freddo asap", "urgenza"],
+
+["fammi vedere l'ultima fattura fatta", "cerca_documento"],
+["apri l'ultima ft che ho emesso pls", "cerca_documento"],
+["dov'e l'ultima fattura? voglio darci un occhio", "cerca_documento"],
+
+["convoca assemblea condominio via tiburtina giovedi 8 ottobre h 18", "assemblea"],
+["fai la convocazione dell'assemblea di via prenestina x martedi 13 ottobre alle 21", "assemblea"],
+["assemblea condominiale via tiburtina 12, giovedi 8/10 ore 18, convocala pls", "assemblea"],
+
+["chiama zanella", "chiamata"],
+["fammi fare una call con zanella al tel", "chiamata"],
+["passami bortolin al telefono pls", "chiamata"],
+
+["salva nuovo cliente nardecchia giorgio, ha chiamato stamattina x un bagno", "cliente"],
+["aggiungi cliente: giorgio nardecchia, vuole rifare il bagno", "cliente"],
+["nuovo cliente raga, tale bonanni marco, sentito stamattina x rifare il bagno", "cliente"],
+
+["segna assemblea condominio via verdi sabato 17 mattina", "assemblea"],
+["riunione condominiale... cioe assemblea di via garibaldi, sab 24 di mattina", "assemblea"],
+["assemblea via verdi sabato 17 ore 10, mettila pls", "assemblea"],
+
+["crea cartella manuali daikin", "cartella"],
+["nuova cartella x i manuali mitsubishi pls", "cartella"],
+["fammi una cartella tipo 'schede tecniche daikin'", "cartella"],
+
+["fai la dico x il gas della cucina esposito", "dico"],
+["dichiarazione conformita impianto gas, cucina casa russo", "dico"],
+["serve dico gas x esposito, cucina nuova", "dico"],
+
+["palazzo di via tasso tutto al buio, blackout totale", "urgenza"],
+["blackout in tutto il condominio di via manzoni, segna urgente", "urgenza"],
+["raga saltata la luce in tt lo stabile di via tasso, nn va niente", "urgenza"],
+
+["sposta bruno di dopodomani alle 10 (pavimento) a lunedi", "calendario_modifica"],
+["l'appuntamento con bruno x il parquet di giovedi alle 9 spostalo a martedi", "calendario_modifica"],
+["bruno dopodomani nn puo, metti il pavimento a lunedi stessa ora", "calendario_modifica"],
+
+["manda mail alla bianchi impianti, gli propongo di lavorare insieme sul cantiere di ostia", "email"],
+["scrivi una mail a rossi impianti srl x proporre una collaborazione sul cantiere di fiumicino", "email"],
+["mail alla ditta bianchi: tipo vi va di fare squadra sul lavoro di ostia?", "email"],
+
+["blackout in tutta la strada, ho il cliente davanti e zero luce", "urgenza"],
+["e saltata la corrente in tutta la via, sto dal cliente al buio", "urgenza"],
+["raga nn c'e luce in tt il quartiere, sono qui col cliente e nn si vede niente", "urgenza"],
+
+["lunedi pome sono libero?", "dati"],
+["ho impegni martedi dopo pranzo?", "dati"],
+["check: lunedi pomeriggio ho buchi in agenda?", "dati"],
+
+["fattura bonacini, montaggio dual split r32, totale 2900 piu iva", "documento"],
+["fai ft a ferrari x montaggio climatizzatore dual split, 3.100 + iva", "documento"],
+["fattura x bonacini: dual split r32 installato, 2.900 euro + iva pls", "documento"],
+
+["whatsapp alla sig bacciotti: x favore il gatto fuori dal salotto x 3 gg", "messaggio"],
+["scrivi alla signora neri su wa di tenere il cane fuori dalla cucina x due giorni, chiediglielo gentile pls", "messaggio"],
+["manda msg alla bacciotti, che tenga il gatto lontano dal salotto x tre giorni, ma con gentilezza", "messaggio"],
+
+["manda una mail di benvenuto a eleonora zaccaria la nuova, con gli orari del salone", "email"],
+["scrivi mail di benvenuto alla nuova ragazza, giulia conti, mettici gli orari del negozio", "email"],
+["mail x eleonora che inizia con noi: benvenuta + orari del salone", "email"],
+
+["togli il dentista di mercoledi, l'ho disdetto", "calendario_modifica"],
+["cancella l'appuntamento dal dentista di giovedi, ho annullato", "calendario_modifica"],
+["il dentista mercoledi salta, levalo", "calendario_modifica"],
+
+["mail a riva il cartongessista, digli che lo manda fiore", "email"],
+["scrivi una mail a bassi del cartongesso, dicendo che il contatto ce l'ha passato fiore", "email"],
+["manda mail a riva (cartongesso): gli dici che vengo da parte di fiore", "email"],
+
+["fissa con pace domani alle 17 x ritirare la betoniera", "calendario"],
+["segna domani h 17 ritiro betoniera da pace", "calendario"],
+["giovedi alle 8 passo da mancini a prendere la betoniera, segnalo", "calendario"],
+
+["manda il durc a edilnord che l'hanno chiesto", "invio_documento"],
+["invia il durc alla costruzioni ferri, me lo chiedono x il cantiere", "invio_documento"],
+["edilnord vuole il durc, mandaglielo asap", "invio_documento"],
+
+["vitale ha pagato 1980, tutto ok", "incasso"],
+["incassati 2.150 da vitale, saldato", "incasso"],
+["raga vitale ha saldato 1.980 euro, siamo a posto", "incasso"],
+
+["chiama il figlio di villa, il padre nn sente il tel", "chiamata"],
+["fammi chiamare il figlio del sig. villa xke il vecchio nn risponde", "chiamata"],
+["telefona al figlio del signor mariani, il papa nn sente mai il cell", "chiamata"],
+
+["fai fattura al condominio via torti 12, cambio pompa 400 euro", "documento"],
+["fattura x condominio via dante 5, sostituzione pompa di rilancio 450", "documento"],
+["pls ft al condominio di via torti x la pompa cambiata, 400", "documento"],
+
+["fai ft a fiorucci srl, 15 ore da 35 euro l'una", "documento"],
+["fattura x la mancini snc: 12 ore di manodopera a 40 l'ora", "documento"],
+["raga fattura fiorucci srl, sono 15 h x 35 euro, falla pls", "documento"],
+
+["il rag guidi tiene tutte le ricevute in un raccoglitore", "mente"],
+["ricordati che il commercialista ferri le ricevute le mette tutte in un classificatore", "mente"],
+["info: guidi il ragioniere conserva le ricevute tutte in un faldone", "mente"],
+
+["segnati sta cosa, nn e x ora: coi piatti doccia filo pavimento meglio abbondare con la pendenza, a portici ho avuto casini", "mente"],
+["appunto: piatto doccia a filo = pendenza sempre abbondante, l'ultima volta a ercolano ho avuto problemi", "mente"],
+["da tenere a mente: nei filo pavimento nn risparmiare sulla pendenza, lezione imparata a portici", "mente"],
+
+["fai foto alle piastrelle rotte", "foto"],
+["scatta una foto alle mattonelle spaccate", "foto"],
+["foto adesso alle piastrelle crepate del bagno pls", "foto"],
+
+["metti il preventivo di onnis nella cartella bar", "cartella"],
+["sposta il prev di porcu nella cartella ristoranti pls", "cartella"],
+["il preventivo di onnis mettilo in cartella bar, ok?", "cartella"],
+
+["apri condominio le querce", "cliente"],
+["scheda condominio i pini", "cliente"],
+["fammi vedere la scheda cliente del cond. le querce", "cliente"],
+
+["scrivi a sanna che la stufa a pellet e accesa", "messaggio"],
+["msg a sanna: stufa pellet accesa e va alla grande", "messaggio"],
+["manda un wa a deiana che la stufa a pellet l'ho accesa", "messaggio"],
+
+["merc 14 ore 15 dentista", "calendario"],
+["dentista giovedi 22 alle 16:30", "calendario"],
+["segna dentista mercoledi 14 alle 3 del pome", "calendario"],
+
+["quando ho il prox appuntamento con marotta?", "dati"],
+["check: quand'e che vedo di nuovo la sig. rinaldi?", "dati"],
+["marotta quando lo devo rivedere? guarda in agenda", "dati"],
+
+["scatta adesso", "foto"],
+["foto ora pls", "foto"],
+["fai una foto subito", "foto"],
+
+["fammi vedere la ft del subappalto edilcasa", "cerca_documento"],
+["apri la fattura di subappalto di edilpro", "cerca_documento"],
+["dov'e la fattura del subappalto con edilcasa? mostramela", "cerca_documento"],
+
+["vabbe niente dai, ok cosi grazie", "saluto"],
+["no niente, tutto ok, grazie eh", "saluto"],
+["ok ok va bene cosi, grz", "saluto"],
+
+["cos'e il glide del r407c? spiegamelo", "domanda"],
+["mi spieghi tipo il glide nel gas r407c cosa vuol dire?", "domanda"],
+["raga ma il glide dell'r407c come funziona?", "domanda"],
+
+["crea cartella x il supercondominio di via vigliani, con dentro 3 sottocartelle: contabilita, verbali, corrispondenza", "cartella"],
+["fammi una cartella supercondominio via washington e dentro: contabilita, verbali, lettere", "cartella"],
+["cartella nuova 'supercond vigliani' + sottocartelle contabilita / verbali / corrispondenza pls", "cartella"],
+
+["chiama la sig pozzobon", "chiamata"],
+["telefona alla pozzobon pls", "chiamata"],
+["fammi parlare con la signora zanin al tel", "chiamata"],
+
+["fammi vedere il prev fatto alla vernetti", "cerca_documento"],
+["apri il preventivo della sig. gallo", "cerca_documento"],
+["dov'e il preventivo x la vernetti? fammelo vedere", "cerca_documento"],
+
+["pagato la sala, 520 euro", "incasso"],
+["incassati 480 dalla signora sala", "incasso"],
+["la moretti mi ha dato 520, saldato", "incasso"],
+
+["nuovo cliente studio dentistico marino, via diaz 8 caserta", "cliente"],
+["aggiungi cliente: studio medico de luca, corso italia 22, aversa", "cliente"],
+["salva tra i clienti lo studio dentistico marino, via diaz 8 a caserta", "cliente"],
+
+["differenza tra libretto d'impianto e rapporto di efficienza energetica?", "domanda"],
+["ma il libretto impianto e il ree sono la stessa cosa o no?", "domanda"],
+["nn ho capito la diff tra libretto di impianto e rapporto di efficienza, me la spieghi?", "domanda"],
+
+["organizza assemblea condomini via mecenate x il collaudo finale", "assemblea"],
+["convoca l'assemblea del condominio di via properzio x il collaudo dei lavori", "assemblea"],
+["serve un'assemblea coi condomini di via mecenate x chiudere col collaudo, organizzala", "assemblea"],
+
+["fai foto alla valvola del gas", "foto"],
+["scatta una foto al rubinetto del gas adesso", "foto"],
+["foto alla valvola gas pls", "foto"],
+
+["sal lotti, 2 appartamenti: primo finito, secondo al 30%", "sal"],
+["stato avanzamento lavori x rossi: primo appartamento chiuso, secondo al 40", "sal"],
+["fai il sal del lotti, un appartamento finito e l'altro al trenta x cento", "sal"],
+
+["ok daccordo", "saluto"],
+["va bene raga", "saluto"],
+["si si ok", "saluto"],
+
+["grazie bro", "saluto"],
+["grz fra", "saluto"],
+["top, grazie fratello", "saluto"],
+
+["prepara il sal x il geom sabatini, cantiere di ostia", "sal"],
+["fammi il sal x il geometra conti sul cantiere di fiumicino", "sal"],
+["sal cantiere ostia x il geometra sabatini, preparalo asap", "sal"],
+
+["rizzo mi ha dato 200 cash x il cancello", "incasso"],
+["preso 250 in contanti da rizzo, acconto cancello", "incasso"],
+["incassati 200 euro contanti da longo x il cancello", "incasso"],
+
+["manda al condominio le palme il prev della manutenzione", "invio_documento"],
+["invia il preventivo manutenzione al cond. i gelsomini", "invio_documento"],
+["il preventivo x la manutenzione giralo al condominio le palme pls", "invio_documento"],
+
+["ritenuta d'acconto coi condomini come funziona?", "domanda"],
+["raga coi condomini la ritenuta del 4% come va gestita?", "domanda"],
+["nn ho capito la ritenuta d'acconto quando lavoro x un condominio, me la spieghi?", "domanda"],
+
+["prepara sal cappotto parco aurora, siamo al 40%", "sal"],
+["sal del cappotto termico residence aurora, siamo a meta", "sal"],
+["fai il sal x il cappotto al parco aurora, avanzamento 40 x cento", "sal"]
+] }
