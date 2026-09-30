@@ -1,0 +1,244 @@
+{
+"stile": "chiacchierone: prima racconta il contesto (cantiere, cliente, traffico) e solo alla fine chiede la cosa; 20-40 parole",
+"frasi": [
+["Allora, sono appena uscito dalla riunione con quelli della Cragnolini Holding, gente seria ma pignola su tutto, mi serve vedere cosa abbiamo segnato su di loro, aprimi la loro scheda cliente", "cliente"],
+["Guarda, il geometra della Cragnolini mi ha fermato al bar e mi ha fatto mille domande, non ricordo neanche l'indirizzo della sede, fammi vedere la scheda della Cragnolini Holding per favore", "cliente"],
+["Sono fermo in coda sulla tangenziale da mezz'ora e ne approfitto: tira fuori la scheda cliente della Cragnolini Holding, voglio ricontrollare i loro riferimenti prima di arrivare là", "cliente"],
+
+["Mi ha chiamato l'amministratrice delle Rose, dice che i condomini sono agitati per la facciata e vuole riunirli tutti, segna l'assemblea del condominio Le Rose giovedì 15 ottobre alle 21", "assemblea"],
+["Allora, al condominio Le Rose c'è maretta per le spese dell'ascensore, ne ho parlato con due proprietari mentre scaricavo il furgone, convochiamo l'assemblea condominiale per giovedì 22 ottobre alle nove di sera", "assemblea"],
+["Ero lì a sistemare il cancello e il signor Bassi del terzo piano mi ha detto che bisogna decidere sul tetto, quindi assemblea del condominio Le Rose mercoledì 14 ottobre alle 20:30", "assemblea"],
+
+["Ero appena rientrato a casa e mi chiama la Formisano in lacrime, la lavatrice butta acqua dappertutto, il parquet del corridoio è già fradicio e il marito non trova il rubinetto generale", "urgenza"],
+["Madonna che giornata, adesso ci si mette pure la signora Esposito: dice che da sotto la lavastoviglie esce un lago e l'acqua sta arrivando in salotto, non sanno come fermarla", "urgenza"],
+["Stavo per mettermi a tavola quando mi scrive il figlio dei Formisano, il tubo della lavatrice si è staccato e sta allagando tutto il corridoio, e non riescono a chiudere l'acqua", "urgenza"],
+
+["Quelli della Ferri Design mi hanno mandato un sacco di roba negli ultimi giorni e ormai è tutto mescolato con gli altri clienti, sposta i loro documenti in una cartella tutta loro", "cartella"],
+["C'è troppa confusione nel telefono, tra foto, carte e scontrini non si capisce più niente: prendi tutti i documenti della Ferri Design e mettili in una cartella separata, così li tengo in ordine", "cartella"],
+["Il titolare della Bianchi Arredi è uno che ti chiede le carte all'improvviso, quindi meglio essere ordinati, crea una cartella apposta e mettici dentro tutti i documenti della Bianchi Arredi", "cartella"],
+
+["Sono salito sul tetto con la scala del vicino, ci sono un bel po' di coppi rotti e il cliente vuole vedere com'è messo, apri la fotocamera che faccio subito una foto", "foto"],
+["Allora, il signor Longo giura che le infiltrazioni vengono dal camino, io non ne sono convinto, sono qua sopra adesso, fammi scattare una foto al tetto così gliela faccio vedere", "foto"],
+["C'è un vento che mi porta via e sta per piovere, devo fare in fretta: fai partire la fotocamera, voglio fotografare adesso la copertura con tutte le tegole spostate", "foto"],
+
+["Te lo dico perché l'ultima volta mi ha guardato storto per mezz'ora: il Valentini è fissato con la pulizia, quando si va da lui bisogna sempre mettere i copriscarpe, ricordatelo", "mente"],
+["Ah, una cosa sul signor Valentini, che è un tipo precisissimo e ti controlla pure le impronte sul pavimento: da lui ci vogliono sempre i copriscarpe, segnatelo da qualche parte", "mente"],
+["Parlando con la moglie del Galvani ho capito che sono molto pignoli in casa, hanno tappeti bianchi dappertutto, quindi tienilo a mente: da loro si entra solo con i copriscarpe", "mente"],
+
+["Qua a Portici il ferramenta sotto casa non ha più le viti che mi servono e gira tutto a rilento, manda una mail alla Ferramenta Gargiulo e chiedi se consegnano fino a Portici", "email"],
+["Ho perso un'ora nel traffico solo per andare a prendere due sacchi di stucco, adesso basta, scrivi un'email alla Ferramenta Gargiulo per sapere se fanno le consegne a Portici", "email"],
+["Un collega mi ha consigliato la Ferramenta Russo di Torre del Greco, dice che hanno buoni prezzi, scrivigli una mail e domanda se portano la merce anche in cantiere a Ercolano", "email"],
+
+["Il cliente mi ha chiesto il prezzo finale e io mi sono bloccato davanti a lui come uno scemo, dimmi un po': come si calcola l'iva al 22 per cento su 450 euro?", "domanda"],
+["Sto facendo due conti a mano sul cruscotto del furgone e non mi torna niente, scusa la domanda banale, ma l'iva al 22 su 620 euro quant'è esattamente?", "domanda"],
+["Mia figlia che studia ragioneria mi prende sempre in giro perché sbaglio i conti, allora spiegamelo tu: su un importo di 380 euro, quanto viene l'iva al 22 per cento?", "domanda"],
+
+["Ho una guaina da stendere su un terrazzo e se viene giù l'acqua è tutto lavoro buttato, tu che ne sai, domani a Napoli è prevista pioggia o no?", "domanda"],
+["Mia moglie vuole andare al mare e io le ho detto che il cielo non mi convince per niente, dimmi un po' com'è il meteo domani a Napoli, piove?", "domanda"],
+["Stavo guardando le nuvole dal ponteggio e sono tutte nere verso il Vesuvio, che previsioni ci sono per domani su Napoli, prende acqua o si lavora tranquilli?", "domanda"],
+
+["Oggi finalmente il collaudatore è venuto al cantiere Codeluppi e ha dato l'ok su tutto, eravamo tutti contenti, aggiorna lo stato avanzamento lavori, siamo al 95 per cento", "sal"],
+["Che fatica ma ce l'abbiamo fatta, al cantiere Codeluppi il collaudo è passato senza intoppi e il committente sorrideva pure, allora aggiorna il SAL e portalo al 95", "sal"],
+["Al cantiere Bertolini il direttore lavori ha firmato il collaudo, mancano solo le finiture esterne e un po' di pulizia, quindi aggiornami il SAL mettendo l'avanzamento al 92 per cento", "sal"],
+
+["Il furgone ormai ha più carte del commercialista, tra assicurazione, bollo, revisione e multe non ci capisco niente, fammi una cartella nuova solo per i documenti del furgone", "cartella"],
+["Mi ha fermato la stradale e ci ho messo dieci minuti a trovare il libretto in mezzo al cruscotto, che figura, crea una cartella per tutte le carte del furgone per favore", "cartella"],
+["Ho cambiato il Ducato e il concessionario mi ha riempito di fogli, voglio tenerli in ordine una volta tanto, apri una cartella nuova e chiamala documenti furgone", "cartella"],
+
+["Il commercialista mi fa sempre la ramanzina perché non so mai quanto spendo, allora prima che mi chiami lui dimmelo tu: quanto ho speso di materiale questo mese?", "dati"],
+["Ho la sensazione che tra tubi, raccordi e silicone sto buttando via un capitale, dammi il totale delle spese per il materiale di questo mese, voglio vederci chiaro", "dati"],
+["Mia moglie mi chiede sempre dove vanno a finire i soldi, e forse ha ragione lei, controlla un po' quanto è uscito per il materiale nel mese di settembre", "dati"],
+
+["Quelli dello studio Zanella mi hanno sollecitato due volte perché la segretaria deve chiudere la contabilità, la fattura è già pronta, mandagliela per mail così stanno tranquilli", "invio_documento"],
+["La dottoressa Zanella ha chiamato mentre ero sul ponteggio e non ho potuto rispondere, di sicuro vuole la fattura, quella che abbiamo già fatto, girala allo studio Zanella via email", "invio_documento"],
+["Allo studio Ferrante la contabile è gentile ma insistente, ha chiesto ancora la fattura del mese scorso, quella già emessa, inviala tu al loro indirizzo mail per favore", "invio_documento"],
+
+["Siamo andati avanti bene questa settimana nonostante il vento, i ragazzi hanno finito più di metà facciata, direi un 60 per cento buono, fammi il SAL", "sal"],
+["Il capocantiere mi ha mandato le foto ed è soddisfatto, ormai la facciata è fatta al sessanta per cento, prepara lo stato avanzamento lavori da dare al committente", "sal"],
+["Guarda, col cappotto termico siamo più o meno a due terzi, diciamo 65 per cento della facciata completata, fai il SAL così lo giriamo all'amministratore", "sal"],
+
+["Al mercato di Scorzè mi ha fermato una signora, la Dal Bo, che vuole rifare tutto il bagno, mi sembra una persona a posto, aggiungila tra i miei clienti", "cliente"],
+["Mi ha telefonato una signora di Scorzè, si chiama Dal Bo, l'ha mandata da me il suo vicino che è contento del lavoro, crea una nuova scheda cliente per lei", "cliente"],
+["Una signora di Noale, la sig.ra Tonetto, mi ha trovato su internet e ha una gran voglia di rifare la cucina, intanto inseriscila come nuova cliente, poi vediamo", "cliente"],
+
+["Eccomi qua, finalmente sono arrivato in ufficio, c'era una coda pazzesca sulla statale con un camion messo di traverso, comunque buongiorno a tutti e buon lavoro", "saluto"],
+["Allora, caffè preso, furgone parcheggiato, ragazzi già in cantiere a montare il ponteggio, direi che si può cominciare, buongiorno EON e buongiorno a tutti", "saluto"],
+["C'è un sole che fa piacere e pure il traffico era leggero, cosa rara da queste parti, quindi niente, volevo solo dire buongiorno a tutti quanti", "saluto"],
+
+["Il tecnico del comune mi ha chiesto di vedere le pratiche del cantiere Ferrari e io non ho idea di dove l'ho messa, trovami la CILA protocollata della Ferrari", "cerca_documento"],
+["C'è il vigile qua davanti al cantiere che vuole vedere le autorizzazioni e mi sta mettendo fretta, cercami subito la CILA con il protocollo dei Ferrari", "cerca_documento"],
+["L'architetto Monti dice che gli manca una copia della pratica edilizia di casa Lodi, io sono sicuro di averla salvata, trova la CILA protocollata dei Lodi e aprimela", "cerca_documento"],
+
+["Con questo freddo che arriva i clienti di corso Regina Margherita mi tempestano di telefonate, quindi segna: lunedì alle tre del pomeriggio appuntamento col caldaista per accendere il riscaldamento", "calendario"],
+["Ho sentito il tecnico della caldaia, un tipo simpatico ma sempre pieno di lavoro, siamo riusciti a incastrarci lunedì alle 15 in corso Regina Margherita per l'accensione dell'impianto", "calendario"],
+["L'amministratore di via Nizza ha fretta perché gli inquilini si lamentano del freddo, fissa martedì alle 16 l'appuntamento col caldaista per accendere il riscaldamento centralizzato", "calendario"],
+
+["La siora Pittana mi ha chiamato tre volte, la cantina è piena di roba del marito buonanima e vuole svuotarla, mettimi giovedì mattina il sopralluogo in via Aquileia", "calendario"],
+["Dopo anni che rimanda, finalmente la signora Pittana ha deciso di sgomberare la cantina di via Aquileia, andiamo a vedere giovedì verso le nove, segnalo in agenda", "calendario"],
+["Ho incrociato il signor Zanon al bar e mi ha detto che la soffitta è stracolma e vuole liberarla, segna un sopralluogo venerdì mattina in via Cividale per lo sgombero", "calendario"],
+
+["Devo attaccare la caldaia nuova dai Rinaldi ma in quella casa non si trova niente, è un labirinto, mandagli un messaggio e chiedigli dove si trova il contatore del gas", "messaggio"],
+["Sono davanti al palazzo di Rinaldi e ho già girato due volte il cortile senza trovare niente, scrivigli un whatsapp per chiedere dov'è il contatore del gas", "messaggio"],
+["Il signor Morelli non risponde mai al telefono però i messaggi li legge sempre, allora scrivigli per sapere in che punto del giardino sta il contatore dell'acqua", "messaggio"],
+
+["Finalmente una buona notizia dopo una settimana di rogne, ho controllato il conto e il Pellegrini ha saldato la fattura, segnala come pagata", "incasso"],
+["Pensavo di dover andare a bussare di nuovo da lui, invece mi è arrivato il bonifico di Pellegrini, la fattura è pagata tutta, registra l'incasso", "incasso"],
+["Il signor Ghidini mi ha fermato in piazza, mi ha offerto il caffè e mi ha detto del bonifico per la fattura, ho appena visto che è arrivato, ha pagato", "incasso"],
+
+["Dicevo al cliente che lo scarico fumi della caldaia è montato proprio male, tutto storto e senza pendenza, fammi fare una foto adesso così ha la prova", "foto"],
+["Allora, come ti stavo dicendo prima che squillasse il telefono, apri la fotocamera che voglio fotografare lo scarico fumi, tanto sono già qua sul balcone", "foto"],
+["Il tecnico dei fumi vorrà vedere com'era prima del lavoro, quindi scattiamo subito una foto della canna fumaria finché è ancora smontata e si vede tutto", "foto"],
+
+["Mia mamma è in ansia per la pensione e al telefono il patronato non risponde mai, scrivi una mail al patronato per chiedere quali carte servono per la sua pratica", "email"],
+["Sono passato dal patronato ma c'era una fila fino in strada e ho lasciato perdere, mandagli un'email e chiedi quali sono le carte della pensione di mia madre", "email"],
+["Mio zio non ci capisce niente di queste cose e mi ha chiesto una mano, scrivi un'email al CAF per sapere che documenti servono per la domanda di pensione", "email"],
+
+["L'anno scorso mi sono dimenticato un paio di rinnovi e ci ho fatto una brutta figura, allora dimmi: quali clienti hanno il libretto d'impianto in scadenza nei prossimi due mesi?", "dati"],
+["Sto organizzando il lavoro dell'autunno e voglio riempire i buchi in agenda, controlla chi tra i miei clienti ha il libretto impianto da rinnovare entro fine novembre", "dati"],
+["Un collega mi diceva che le manutenzioni sono l'unica entrata sicura d'inverno, fammi vedere quali libretti di impianto dei miei clienti scadono nei prossimi sessanta giorni", "dati"],
+
+["In via Tasso non si mettono mai d'accordo su niente, adesso litigano pure per il portone, prepara l'avviso di convocazione dell'assemblea per quel condominio", "assemblea"],
+["L'amministratore è in ferie e mi ha girato la palla, adesso tocca a me mettere tutti d'accordo, fai la convocazione dell'assemblea per il condominio di via Tasso", "assemblea"],
+["I condomini di via Petrarca vogliono votare per i lavori al tetto e hanno chiesto di riunirsi, fammi l'avviso di assemblea condominiale da appendere nell'androne", "assemblea"],
+
+["La signora Galli ha il piatto doccia tutto crepato, l'ho visto con i miei occhi ed è da buttare, fammi il preventivo per sostituirlo, 1.100 euro compreso il materiale", "documento"],
+["Il Galli è uno che contratta su tutto ma stavolta ci siamo trovati d'accordo, prepara il preventivo per il cambio del piatto doccia, mille e cento euro materiale incluso", "documento"],
+["La famiglia Conte ha deciso di togliere la vecchia vasca, vogliono un piatto doccia filo pavimento, fai un preventivo da 1.350 euro con fornitura e posa", "documento"],
+
+["Pisanu me l'ha chiesto ieri al telefono e io tra una cosa e l'altra me ne sono dimenticato, si può mandare a lui il preventivo del garage già pronto?", "invio_documento"],
+["Mi ha scritto di nuovo il signor Pisanu e mi sembra un po' seccato, riesci a inviargli il preventivo della serranda del garage che avevamo già preparato?", "invio_documento"],
+["Il signor Deiana è passato in cantiere a chiedere il preventivo del box, quello che abbiamo fatto la settimana scorsa, puoi mandarglielo tu che io sono sulla scala?", "invio_documento"],
+
+["Mi ha appena chiamato il portiere in panico, in via Bardonecchia è saltata la corrente in tutto il condominio, l'ascensore è bloccato e c'è gente dentro", "urgenza"],
+["Ero in coda in corso Francia quando mi chiama l'amministratore, tutto il palazzo di via Bardonecchia è al buio, blackout totale, segnala subito come emergenza", "urgenza"],
+["Dal condominio di via Nizza mi scrivono che non c'è luce da nessuna parte, scale, cantine e appartamenti tutti spenti, pare sia saltato il quadro generale", "urgenza"],
+
+["Ciò, il ragioniere del Miramonti mi fa impazzire, dice che non gli è mai arrivato niente, dov'è finita la fattura dell'acconto del Miramonti? Trovamela", "cerca_documento"],
+["Ho girato tutto il telefono e non la trovo più, eppure sono sicuro di averla fatta, cercami la fattura d'acconto dell'hotel Miramonti e aprimela", "cerca_documento"],
+["Il titolare della trattoria Al Ponte dice che gli manca un documento per il commercialista, fammi vedere dov'è la fattura dell'anticipo che avevamo fatto per la trattoria", "cerca_documento"],
+
+["Burdèl, all'hotel Belvedere stiamo correndo come matti perché il titolare vuole aprire per Pasqua, primo e secondo piano ormai finiti, fammi lo stato avanzamento lavori", "sal"],
+["Al Belvedere i ragazzi hanno lavorato anche di sabato e si vede, due piani su quattro chiusi, il primo e il secondo, prepara il SAL dell'hotel", "sal"],
+["Il direttore dell'hotel Mare Blu mi ha chiesto a che punto siamo, gli ho detto che il piano terra e il primo sono completati, prepara il SAL con questi dati", "sal"],
+
+["Il signor Arata passava ogni giorno a vedere se avevamo finito, il muretto adesso è sistemato e bello dritto, per cortesia mandagli un messaggio per dirglielo", "messaggio"],
+["Abbiamo finito di intonacare proprio adesso, il muretto del giardino di Arata è a posto, gentilmente scrivigli due righe su WhatsApp così sta tranquillo", "messaggio"],
+["La signora Parodi era preoccupata per le crepe, ma adesso la recinzione è rifatta e sta su benissimo, per favore mandale un sms per dirle che è tutto a posto", "messaggio"],
+
+["Minchia che settimana, siamo tutti cotti e il fornitore non consegna niente, scrivi sul gruppo dei picciotti che sabato non si lavora, si riposano", "messaggio"],
+["Il cliente è partito per le ferie e ci ha chiesto di fermarci qualche giorno, manda un messaggio al gruppo della squadra: sabato restiamo tutti a casa", "messaggio"],
+["Con la pioggia che hanno messo per il weekend è inutile montare il ponteggio, scrivi nel gruppo dei ragazzi che sabato non si viene in cantiere", "messaggio"],
+
+["Il Sguanci mi ha richiamato per il letto a castello dei bambini e voglio rileggere i prezzi, cerca la fattura... no aspetta, il preventivo, quello dei Sguanci", "cerca_documento"],
+["Ero convinto che fosse una fattura e invece no, era un preventivo, quello del letto a castello per la famiglia Sguanci, me lo ritrovi e me lo apri?", "cerca_documento"],
+["La signora Bechi mi ha chiesto se il prezzo della libreria su misura è ancora valido, trovami il preventivo, non la fattura, quello della libreria dei Bechi", "cerca_documento"],
+
+["Sono passato dal garage e ci sono ancora i sacchi di calcinacci ammucchiati, il De Santis aveva promesso di portarli via, fammi telefonare a lui", "chiamata"],
+["Il vicino si lamenta che i calcinacci nel garage bloccano il passaggio e c'è polvere dappertutto, chiama De Santis che dobbiamo risolvere la cosa", "chiamata"],
+["Il muratore ha lasciato un disastro di macerie in cantina e nessuno sa chi le deve togliere, chiamami il signor Mariani così ne parliamo", "chiamata"],
+
+["La signora Ferretti ha scelto finalmente le piastrelle, dopo tre visite allo showroom, fai il preventivo per la posa in cucina, 18 metri quadri a 35 euro al metro", "documento"],
+["Mi sono fatto un giro nella cucina della Ferretti con il metro in mano, sono 18 metri quadri, prepara il preventivo di posa piastrelle a 35 euro al metro quadro", "documento"],
+["Il signor Gatti vuole rifare il pavimento del soggiorno perché il vecchio è tutto rigato, ho misurato 24 metri, fammi un preventivo di posa gres a 30 euro al metro", "documento"],
+
+["Mi ha chiamato un amministratore nuovo, Spadoni, che gestisce il condominio di via Casilina 45 e vuole lavorare con me, crea la scheda cliente per il condominio", "cliente"],
+["Finalmente un condominio grosso, via Casilina 45, amministratore Spadoni, ci siamo stretti la mano poco fa davanti al portone, aggiungilo come nuovo cliente", "cliente"],
+["Pare che ci affideranno la manutenzione del condominio di via Prenestina 120, l'amministratrice è la dottoressa Ricci, gentilissima, crea il cliente nuovo", "cliente"],
+
+["Dovevo sentire la signora Neri per le mattonelle ma quella parla tanto e decide poco, chiama la Neri, anzi no, chiama direttamente il marito, Giorgio", "chiamata"],
+["Il cliente sulla carta è la Neri ma chi decide davvero in casa è il marito, quindi lascia stare lei e telefona a Giorgio Neri", "chiamata"],
+["Volevo chiamare la signora Fabbri ma so che a quest'ora è al lavoro, chiama piuttosto suo marito, Stefano, che è in pensione e risponde sempre", "chiamata"],
+
+["Ho il telefono pieno di foto del cantiere di Pula mischiate con quelle delle vacanze e dei bambini, raggruppale tutte in una cartella dedicata", "cartella"],
+["Il cliente di Pula vuole vedere com'è venuto il lavoro, ma le foto sono sparse dappertutto nel telefono, mettile tutte insieme in una cartella sola", "cartella"],
+["Tra un cantiere e l'altro la galleria è diventata un caos totale, prendi tutte le foto dei lavori di Villasimius e mettile in una cartella apposta", "cartella"],
+
+["Il signor Moretti a Genzano è contento, abbiamo rifatto tutto l'impianto elettrico da zero e ora gli serve la carta per l'assicurazione, fai la dichiarazione di conformità", "dico"],
+["Finito l'impianto dai Moretti a Genzano, cavi nuovi, quadro nuovo, tutto rifatto completamente, prepara la dichiarazione di conformità per l'impianto elettrico", "dico"],
+["A Frascati dai Mancini abbiamo rifatto completamente l'impianto elettrico e adesso vogliono vendere casa, prepara la dichiarazione di conformità dell'impianto", "dico"],
+
+["Mi ha appena chiamato mia sorella, papà sta male e devo portarlo in ospedale, cancella tutto quello che ho in agenda domani mattina", "calendario_modifica"],
+["Scusa, è successa una cosa in famiglia e non ci sono proprio con la testa, annulla gli appuntamenti di domani mattina, tutti quanti, poi li recuperiamo", "calendario_modifica"],
+["Mio figlio ha la febbre alta e mia moglie è fuori città, devo restare a casa con lui, disdici tutti gli impegni che avevo domani mattina", "calendario_modifica"],
+
+["Stiamo comprando il capannone e mi serve un notaio bravo, mio cognato Renato ne conosce uno, scrivigli una mail e chiedigli il numero del notaio", "email"],
+["Renato, il fratello di mia moglie, mi aveva parlato di un notaio onesto e veloce, mandagli un'email per farti dare il numero di telefono del notaio", "email"],
+["Mio cognato Paolo ha appena fatto un rogito ed è rimasto contento, scrivigli una mail e chiedigli il contatto del notaio che ha usato", "email"],
+
+["Il Cirillo mi dice sempre che mi ha pagato fin troppo, ma io non ne sono mica sicuro, dimmi quanto ho incassato in totale da lui", "dati"],
+["Sto facendo il punto con Cirillo prima di accettare un altro lavoro da lui, quanti soldi mi ha dato in tutto finora? Fammi il totale", "dati"],
+["Con la famiglia Amato abbiamo fatto parecchi lavori negli anni, tra bagni e cucina, fammi vedere il totale che ho incassato da loro", "dati"],
+
+["Allo studio del dottor Dibenedetto l'aria è pesante e lui è fissato con l'igiene, quindi segnati questo: vuole i filtri antibatterici negli split", "mente"],
+["Il dentista Dibenedetto è un tipo pignolo e mi ha fatto un discorso lunghissimo sull'aria, ricordati che nei climatizzatori dello studio vuole i filtri antibatterici", "mente"],
+["La dottoressa Serra soffre d'asma e ci tiene tantissimo, prendi nota che nei condizionatori del suo ambulatorio vuole montati solo filtri antibatterici", "mente"],
+
+["Mia moglie mi ricorda sempre le cose all'ultimo momento, adesso salta fuori che lunedì sera alle 9 c'è l'assemblea del nostro condominio, segnala", "assemblea"],
+["L'amministratore ha attaccato il foglio in portineria, lunedì alle 21 c'è l'assemblea del mio condominio e io devo esserci per la questione del tetto", "assemblea"],
+["Nel mio palazzo litigano da mesi per il riscaldamento e hanno convocato tutti, c'è l'assemblea di condominio martedì sera alle 20:30, segnala", "assemblea"],
+
+["Abbiamo finito di collegare la cucina nuova all'agriturismo Ca' Bianca e il titolare vuole aprire presto, fai la dichiarazione di conformità per l'impianto gas", "dico"],
+["All'agriturismo Ca' Bianca aspettano il controllo e servono tutte le carte in regola, prepara la dichiarazione di conformità dell'impianto del gas", "dico"],
+["Al ristorante Il Casale abbiamo rifatto tutte le tubazioni del gas in cucina e il cuoco è già impaziente, prepara la dico per l'impianto gas", "dico"],
+
+["Stavo sistemando il furgone quando è arrivato il Fontana con una busta in mano, m'ha dato l'anticipo, 1.500 euro in contanti, segnali", "incasso"],
+["Il signor Fontana è proprio uno di parola, ha fatto il bonifico dell'acconto come promesso, sono 1.500 euro, segnali come incassati", "incasso"],
+["La signora Bruno è passata in ufficio a firmare il contratto e m'ha lasciato l'acconto, 2.000 euro con assegno, registralo come incassato", "incasso"],
+
+["I signori Pagnini hanno visto un corridoio decorato a casa di un'amica e se ne sono innamorati, fammi il preventivo per la decorazione a stencil del loro corridoio", "documento"],
+["Sono stato dai Pagnini, il corridoio è lungo e spoglio e vogliono qualcosa di elegante ma non troppo caro, prepara un preventivo per lo stencil decorativo", "documento"],
+["La famiglia Orsini vuole dare un tocco al vano scale, hanno visto le mie foto su Instagram e ne sono entusiasti, fai un preventivo per decorazione a stencil", "documento"],
+
+["C'è un cliente che mi deve dei soldi da mesi e ogni volta trova una scusa diversa, non so più cosa fare, meglio l'avvocato o c'è un'altra strada?", "domanda"],
+["Ho finito un bagno bellissimo e il cliente adesso fa finta di niente e non paga, cosa posso fare secondo te, ci sono alternative all'avvocato?", "domanda"],
+["Un collega mi parlava del decreto ingiuntivo ma io non ci capisco niente di queste cose, se uno non mi paga il lavoro fatto quali strade ho?", "domanda"],
+
+["La signora Pace ha chiamato mentre ero sul tetto, vuole spostare l'appuntamento dal tre al cinque, stessa ora di prima, cambialo tu in agenda", "calendario_modifica"],
+["Ha telefonato la Pace, dice che il tre ha il dentista e non può, allora spostiamo al cinque alla stessa ora, modifica l'appuntamento", "calendario_modifica"],
+["Il signor Fiore mi ha scritto che il giorno dieci è fuori per lavoro, passiamo al dodici con l'orario uguale, sposta il suo appuntamento", "calendario_modifica"],
+
+["In questa villa c'è un pavimento alla veneziana stupendo, originale, e il cliente non sa se tenerlo, fagli una foto adesso, poi ci penso con calma", "foto"],
+["Mentre smontavamo i mobili è saltato fuori un pavimento alla veneziana sotto la moquette, una meraviglia, apri la fotocamera e fotografalo subito", "foto"],
+["Sono in un palazzo antico e c'è un pavimento in cotto fatto a mano che non si vede più in giro, fammi fare una foto, dopo decido cosa proporre", "foto"],
+
+["Sono passato dallo Scalia per ritirare le chiavi e già che c'ero mi ha dato i soldi del lavoretto, 180 euro, segnali come incassati", "incasso"],
+["Finalmente la signora Scalia ha pagato la riparazione del rubinetto che le avevo fatto, erano 180 euro in contanti, registrali come incasso", "incasso"],
+["Il signor Lo Bue è passato dal magazzino e m'ha pagato in contanti la sostituzione della serratura, 220 euro, segna l'incasso", "incasso"],
+
+["Ok, ho riletto con calma tutto quello che mi hai preparato e mi sembra fatto proprio bene, non serve cambiare niente, va bene così, grazie", "saluto"],
+["Guarda, ho dato un'occhiata ed era proprio quello che avevo in mente, non tocchiamo più niente, per me va benissimo così", "saluto"],
+["Sì sì, perfetto, è venuto esattamente come te l'avevo chiesto e sono sicuro che piacerà anche al cliente, per me va bene così, grazie", "saluto"],
+
+["Il Rota deve accompagnare il figlio a scuola, quindi quello di domani no, aspetta, quello di dopodomani, spostalo alle nove invece che alle otto", "calendario_modifica"],
+["Mi ha scritto il Rota, dopodomani ha un imprevisto la mattina presto, allora l'appuntamento spostalo dalle otto alle nove, quello di domani lascialo com'è", "calendario_modifica"],
+["La signora Colombo lavora fino a tardi e non ce la fa ad arrivare in tempo, l'appuntamento di giovedì spostalo dalle sei alle sette di sera", "calendario_modifica"],
+
+["Marco ha cercato il flessibile tutta la mattina e ha dato la colpa a me, ma l'ha lasciato lui da Conti, devo ricordarmi di dirglielo", "mente"],
+["Sono passato dal Conti a sistemare un rubinetto e ho visto il flessibile di Marco appoggiato sul tavolo, devo dire a Marco che è rimasto lì", "mente"],
+["Luca continua a chiedere dove sia finita la sua livella laser, l'ha dimenticata dalla signora Russo, segnati che devo dirglielo quando lo vedo", "mente"],
+
+["A signora Bellia m'ha chiamato di nuovo, è senza acqua calda e vuole decidere in fretta, mandaci il preventivo dello scaldabagno, quello già pronto", "invio_documento"],
+["La signora Bellia aspetta il preventivo dello scaldabagno da giorni e mi pare già scocciata, inviaglielo subito, quello che abbiamo fatto", "invio_documento"],
+["Il signor Cassarà dice che la caldaia fa i capricci ogni mattina e vuole cambiarla, mandagli il preventivo della caldaia che gli ho già fatto", "invio_documento"],
+
+["Bene, sei stato velocissimo, mi hai sistemato un bel po' di cose e adesso me ne torno in cantiere dai ragazzi, grazie, per ora è tutto", "saluto"],
+["Allora, credo di averti detto tutto quello che mi serviva, non mi viene in mente nient'altro da chiederti, grazie mille e alla prossima", "saluto"],
+["Perfetto, mi hai tolto un bel peso, adesso vado a mangiare un panino con i ragazzi, per il momento non ho altro, ti ringrazio", "saluto"],
+
+["Mi ha chiamato la Merello agitatissima, si è spaccato il tubo dell'irrigazione in giardino e l'acqua sta entrando in cantina, è già tutto allagato", "urgenza"],
+["Ero dal gommista e mi chiama la figlia della Merello, dice che il tubo dell'irrigazione è saltato e la cantina si sta riempiendo d'acqua", "urgenza"],
+["Il signor Parodi mi manda un video disperato, è scoppiato il tubo del giardino e la cantina sta andando sott'acqua, la caldaia è a rischio", "urgenza"],
+
+["Il camion del calcestruzzo è già arrivato e i ragazzi non sanno dove farlo scaricare, serve Florin che sa tutto, chiamalo subito", "chiamata"],
+["Florin ha le chiavi del magazzino e io sono rimasto chiuso fuori sotto la pioggia con tutto il materiale, telefonagli immediatamente", "chiamata"],
+["Il cliente è arrivato in anticipo in cantiere e vuole parlare col capocantiere, chiama subito Ionut che è l'unico che sa come stanno le cose", "chiamata"],
+
+["Alla pizzeria La Rustica abbiamo finito l'impianto del forno e i controlli dell'Asl sono dietro l'angolo, il titolare è in ansia, fai la dico", "dico"],
+["Il titolare della pizzeria La Rustica mi ha chiesto le carte per l'assicurazione del locale, prepara la dichiarazione di conformità dell'impianto", "dico"],
+["Abbiamo chiuso i lavori al bar Centrale, impianto elettrico nuovo in tutta la sala e nel retro, prepara la dico per il bar", "dico"],
+
+["Il fornitore di parquet ha finalmente trovato un buco libero, quindi con l'Anna e con lui ci vediamo venerdì alle 12 per scegliere il rovere", "calendario"],
+["L'Anna vuole vedere i campioni dal vivo prima di decidere, quindi fissiamo con lei e il fornitore del parquet venerdì a mezzogiorno", "calendario"],
+["La signora Marta non riesce a scegliere il pavimento dal catalogo, metti un appuntamento con lei e il fornitore del gres mercoledì alle 11", "calendario"]
+]
+}
