@@ -32,6 +32,10 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.56.1
           npx playwright install --with-deps chromium
+      # Le prove sostituiscono Supabase con un database finto: la libreria vera
+      # dal CDN non deve arrivare a sovrascriverlo (come nell'ambiente di sviluppo)
+      - name: Niente librerie esterne durante le prove
+        run: echo "127.0.0.1 cdn.jsdelivr.net" | sudo tee -a /etc/hosts
       - name: Prove
         env:
           PEZZO: ${{ matrix.pezzo }}
@@ -51,6 +55,10 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.56.1
           npx playwright install --with-deps chromium
+      # Le prove sostituiscono Supabase con un database finto: la libreria vera
+      # dal CDN non deve arrivare a sovrascriverlo (come nell'ambiente di sviluppo)
+      - name: Niente librerie esterne durante le prove
+        run: echo "127.0.0.1 cdn.jsdelivr.net" | sudo tee -a /etc/hosts
       - name: Frasi dei giri 5-17 nell'app intera
         env:
           TZ: UTC
