@@ -20292,7 +20292,9 @@ let profiloUtente = null;
 const NOMI_PROFESSIONE = { edile:"Edile", idraulico:"Idraulico", elettricista:"Elettricista", avvocato:"Avvocato", amministratore:"Amministratore di condominio", artigiano:"Altra attività" };
 function ricordaProfilo(profilo, email){
   profiloUtente = { full_name: (profilo && profilo.full_name) || "", business_name: (profilo && profilo.business_name) || "", profession: (profilo && profilo.profession) || "", email: email || "",
-    attivita_tipo: (profilo && profilo.attivita_tipo) || null, attivita_persone: (profilo && profilo.attivita_persone) || null };
+    attivita_tipo: (profilo && profilo.attivita_tipo) || null, attivita_persone: (profilo && profilo.attivita_persone) || null,
+    // "Aiuta a migliorare EON": acceso una volta, resta acceso anche riaprendo l'app (30/09/2026)
+    aiuta_migliorare: !!(profilo && profilo.aiuta_migliorare), aiuta_migliorare_dal: (profilo && profilo.aiuta_migliorare_dal) || null };
   aggiornaAvatarHome();
   try{ if(currentSession && currentSession.user) localStorage.setItem("eon-profilo", JSON.stringify({ ...profiloUtente, id: currentSession.user.id })); }catch(e){}
 }

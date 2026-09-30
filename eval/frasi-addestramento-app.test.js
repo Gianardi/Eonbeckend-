@@ -75,6 +75,12 @@ async function main() {
     const up = acceso.db[acceso.db.length - 1] || {};
     verifica("\"Accendi\": salvato nel profilo con la data", acceso.p === true && up.dati && up.dati.aiuta_migliorare === true && !!up.dati.aiuta_migliorare_dal && /Acceso/.test(acceso.testo), JSON.stringify(acceso));
 
+    // Riaprendo l'app il profilo arriva dal server: l'interruttore resta acceso (bug trovato da Andrea il 30/09)
+    const riaperto = await page.evaluate(() => { ricordaProfilo({ full_name: "Simone", business_name: "Prova", profession: "edile", aiuta_migliorare: true, aiuta_migliorare_dal: "2026-09-30T20:28:11Z" }, "a@b.it"); chiudiRisorsaCard(); navigateTo("impostazioni"); return profiloUtente.aiuta_migliorare; });
+    await page.click("#impVocePrivacy");
+    const dopoRiapertura = await page.evaluate(() => document.getElementById("impMigliora").innerText);
+    verifica("riaprendo l'app (profilo dal server) resta acceso", riaperto === true && /Acceso/.test(dopoRiapertura), dopoRiapertura);
+
     // Acceso: la frase parte senza dati personali (un appunto: lo fa il codice, con "Annulla")
     await scrivi("appunto: il cancello di Brambilla in via Garibaldi 22 va riverniciato, il suo numero è 339 1234567");
     let f = await frasi();
