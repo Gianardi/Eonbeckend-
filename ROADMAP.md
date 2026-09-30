@@ -91,7 +91,8 @@ Prova: `eval/mente-cartelle.test.js` (8 controlli, 2 foto).
 avviso "credito finito" che si spegne alla prima risposta buona (restava 24
 ore dopo la ricarica); **addestramento potenziato (0b.18)**: 1.062 frasi di 5
 scrittori indipendenti, **82% al primo colpo → 97%**, cervello riallenato,
-nessuna regressione.
+nessuna regressione. **Modello neurale nostro allenato tutta la notte
+(0b.19)**: da solo, alla cieca, 97-98% (era 95%); nell'app si vedrà col passo 3.
 **Fatto il 30/09 (notte), già online (PR #145):** addestramento, giri 13-14
 (0b.17). Stili mai provati prima, alla cieca: **giro 13: 57/72 (79%) al primo
 colpo** → 72/72; **giro 14 (stessi stili, frasi nuove): 47/47 (100%) al primo
@@ -401,6 +402,26 @@ Esame alla cieca (giro 16, 1.068 frasi di 5 scrittori nuovi): modello di oggi da
 solo 87%, **neurale da solo 95%**. Stessi risultati nel telefono e in PyTorch
 (`eval/neurale/verifica.mjs`). Palestra (per tarare) = giro 15; esame = giro 16;
 conferma = un giro 17 nuovo alla fine.
+
+**Allenamento della notte (30/09, come le grandi aziende), FATTO:** dati
+portati a ~55 mila frasi. Ci sono 40 maestri. 23 scrittori "di confine" hanno
+scritto frasi simili con cassetti diversi, mirate sugli errori. 14 scrittori
+hanno riscritto le frasi in 14 stili: telegrafico come Andrea, dettatura
+sporca, dialetti, chat, anziano, straniero.
+
+- **Pulizia dei dati:** 5 modelli hanno giudicato frasi che non avevano mai
+  visto. Su 52.800 frasi solo 2 etichette erano sbagliate: i dati sono puliti.
+- **Distillazione:** 5 modelli "maestri" insegnano a uno "studente" piccolo.
+  Lo studente pesa 1,9 MB e risponde in 7 millesimi di secondo nel telefono.
+- **Provato e scartato perché non migliora:** modelli più grandi,
+  pre-allenamento tipo BERT, media dei pesi.
+- **Esame alla cieca, modello da solo:**
+  - giro 16: **da 95% a 97%**;
+  - giro 17, mai visto prima: **da 95% a 98%**.
+- **App intera:** quasi uguale (giro 16: 964 → 964; giro 17: 960 → 965),
+  perché oggi le regole vecchie decidono prima del modello. Delle ~100 frasi
+  che l'app sbaglia per giro, il modello da solo ne capirebbe il cassetto
+  giusto circa 90. Questo si prende col passo 3 qui sotto.
 
 **La strada, in ordine:**
 1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
