@@ -758,6 +758,57 @@
      finché non c'è (primi istanti dopo l'apertura) decide il modello di parole */
   let NEURALE = null;
   function usaNeurale(n) { NEURALE = n && n.pronto && n.pronto() ? n : null; return !!NEURALE; }
+  /* Il modello dei DETTAGLI (passo 4): uno o più modelli (la media dei loro voti).
+     Finché non ci sono, gli importi li leggono solo le regole. */
+  let DETTAGLI = [];
+  function usaDettagli(lista) { DETTAGLI = (lista || []).filter((m) => m && m.pronto && m.pronto()); return DETTAGLI.length; }
+  const SICURO_DETTAGLI = 0.98;
+  function dettagliNeurali(testo) {
+    if (!DETTAGLI.length) return null;
+    const s = segniDettagli(testo);
+    if (!s.valori.some((v) => v != null)) return null;
+    const voti = DETTAGLI.map((m) => m.etichetta(s.segni));
+    if (voti.some((v) => !v)) return null;
+    const ruoli = [], sic = [];
+    s.segni.forEach((w, j) => {
+      if (s.valori[j] == null) { ruoli.push("O"); sic.push(1); return; }
+      const media = RUOLI_DETTAGLI.map((_, k) => voti.reduce((t, v) => t + (v[j].pp ? v[j].pp[k] : (k === 0 ? 1 : 0)), 0) / voti.length);
+      let k = 0; media.forEach((x, q) => { if (x > media[k]) k = q; });
+      ruoli.push(RUOLI_DETTAGLI[k]); sic.push(media[k]);
+    });
+    return { ...componiImporti(s.valori, ruoli), ruoli, sicurezza: Math.min(...sic), segni: s };
+  }
+  /* Il conto delle regole e quello del modello: se sono diversi e il modello è sicurissimo
+     (ogni numero ≥ 98%), vale il modello. Le descrizioni restano quelle delle regole
+     (la voce con lo stesso prezzo) o le parole prima del prezzo. */
+  function conDettagli(l, testo) {
+    const d = dettagliNeurali(testo);
+    if (!d || d.sicurezza < SICURO_DETTAGLI || !(d.totale > 0)) return l;
+    const regole = l.voci && l.voci.length ? l.voci.reduce((t, v) => t + (v.quantita || 1) * v.prezzo, 0) : l.importo;
+    if (regole != null && Math.abs(regole - d.totale) < 0.005) return l;
+    const parole = d.segni.parole;
+    const senzaImporto = (l.manca || []).filter((x) => x !== "importo");
+    const descrizione = (riga, k) => {
+      const uguale = (l.voci || []).find((v) => Math.abs(v.prezzo - riga.prezzo) < 0.005);
+      if (uguale) return uguale.descrizione;
+      if (riga.i < 0) return "Acconto";
+      let a = riga.i - 1;
+      const inizio = d.righe[k - 1] ? d.righe[k - 1].i + 1 : 0;
+      const pp = [];
+      for (; a >= inizio && pp.length < 6; a--) { if (d.segni.valori[a] != null) break; pp.unshift(parole[a]); }
+      const t = pp.join(" ").replace(/^(?:(?:e|poi|più|piu|anche|ci|metti|mettici|aggiungi|di|per|il|la|lo|i|le|a|da|al|alla|un|una|allora|poi)\s+)+/i, "").replace(/\s+(?:a|da|di|per|euro|l'uno|l'una|metti)$/i, "").trim();
+      return t ? t.charAt(0).toUpperCase() + t.slice(1) : (l.lavoro || "Voce " + (k + 1));
+    };
+    // sconto o acconto: una voce sola col totale giusto (la descrizione dice perché)
+    if (d.sconto != null || d.scontoEuro != null || d.righe.some((r) => r.acconto)) {
+      const perche = d.righe.some((r) => r.acconto) ? "acconto" : d.sconto != null ? "sconto " + d.sconto + "%" : "sconto " + d.scontoEuro + " euro";
+      const base = l.lavoro || (d.righe[0] ? descrizione(d.righe[0], 0) : "Lavoro");
+      return { ...l, voci: [{ descrizione: base + " (" + perche + ")", quantita: 1, prezzo: d.totale }], importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
+    }
+    const voci = d.righe.map((r, k) => ({ descrizione: descrizione(r, k), quantita: r.quantita, prezzo: r.prezzo }));
+    if (voci.length === 1 && voci[0].quantita === 1) return { ...l, voci: undefined, importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
+    return { ...l, voci, importo: d.totale, manca: senzaImporto, dettagliNeurali: true };
+  }
   function classifica(testo, ctx) {
     if (NEURALE) { const r = NEURALE.classifica(segni(testo)); if (r) return r; }
     if (!MODELLO) return null;
@@ -1263,8 +1314,8 @@
     const dopoNuovo = (String(testoOriginale).split(/client[ei]\s+nuov[oa]|nuov[oa]\s+client[ei]/i)[1] || "").replace(/^[\s,:]+/, "").split(/\s+/).slice(0, 3).join(" ");
     const nuovoSenzaNome = /\b(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\b/i.test(testoOriginale) && l.clienteNuovo
       && !/^(?:(?:il|la|lo)\s+)?(?:signor|signora|sig|ditta|condominio|studio|bar|hotel|ristorante|trattoria|pizzeria)\b|^(?:(?:il|la)\s+)?\p{Lu}/u.test(dopoNuovo);
-    if (nuovoSenzaNome) return { ...l, lavoro: (l.clienteNuovo + " " + (l.lavoro || "")).trim(), clienteNuovo: null, manca: [...new Set([...(l.manca || []), "cliente"])], testoLetto: t };
-    return { ...l, testoLetto: t };
+    if (nuovoSenzaNome) return conDettagli({ ...l, lavoro: (l.clienteNuovo + " " + (l.lavoro || "")).trim(), clienteNuovo: null, manca: [...new Set([...(l.manca || []), "cliente"])], testoLetto: t }, testoOriginale);
+    return conDettagli({ ...l, testoLetto: t }, testoOriginale);
   }
 
   /* ---------------- Domande sui propri dati (passo 3, 30/09/2026) ----------------
@@ -2099,7 +2150,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, segniDettagli, componiImporti, RUOLI_DETTAGLI, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

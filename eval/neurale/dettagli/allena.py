@@ -182,7 +182,7 @@ if SALVA:
     vocab = sorted(VOC.items(), key=lambda kv: kv[1])
     out = {"versione": time.strftime("%Y-%m-%d"), "tipo": "etichettatore", "ruoli": RUOLI, "D": D, "strati": STRATI, "teste": TESTE, "ff": FF, "maxlen": MAXLEN,
            "vocab": [w for w, _ in vocab], "pesi": pz}
-    f = os.path.join(RADICE, "modello-dettagli.json")
+    f = os.path.join(RADICE, os.environ.get("USCITA", "modello-dettagli.json"))
     json.dump(out, open(f, "w"), separators=(",", ":"))
-    torch.save(modello.state_dict(), os.path.join(QUI, "dati", "modello.pt"))
+    torch.save(modello.state_dict(), os.path.join(QUI, "dati", "modello-%d.pt" % SEME))
     print(f"Salvato modello-dettagli.json ({os.path.getsize(f) / 1024:.0f} KB)")
