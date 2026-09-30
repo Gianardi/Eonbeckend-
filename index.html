@@ -15996,6 +15996,18 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       ricordaEsitoCodice(testo, "invio_documento");
       return;
     }
+    /* Il modello dice "manda un documento" (passo 3) e le regole non l'hanno letto
+       ("spedisci al condominio il preventivo…", "il preventivo della palestra mandalo al
+       titolare"): tipo e cliente dal lettore, poi lo stesso invio di sempre */
+    if(!inContinuazione && cassettoNeurale(testo) === "invio_documento"){
+      const li = EonLettore.leggiInvioDocumento(testo, contestoLettore());
+      if(li && provaInvioDocumento(li.testo)){
+        campo.value = "";
+        hint.textContent = hintBaseDi();
+        ricordaEsitoCodice(testo, "invio_documento_neurale");
+        return;
+      }
+    }
 
     /* Stesso principio, per le piccole domande di lettura rispondibili
        dai dati già in memoria (es. "appuntamenti di oggi"): anche qui

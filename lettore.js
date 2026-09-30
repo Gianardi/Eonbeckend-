@@ -1246,6 +1246,27 @@
     return { percentuale, importo: importi.length === 1 ? importi[0].v : null, cliente: cl.stato === "trovato" ? cl.cliente : null };
   }
 
+  /* ---------------- Mandare un documento già fatto (passo 3, 30/09/2026) ----------------
+     Il modello ha deciso che la frase chiede di MANDARE un preventivo o una fattura; qui
+     il tipo, il cliente (dovunque sia nella frase: "il preventivo della palestra mandalo
+     al titolare", "spedisci al condominio…") e il mese se detto. Torna la frase nella
+     forma che il codice d'invio conosce: "manda la fattura di settembre a Paola Castelli". */
+  function leggiInvioDocumento(testoOriginale, ctx) {
+    ctx = ctx || {};
+    const pp = parole(pulisci(testoOriginale).testo);
+    const n = pp.map((x) => x.n).join(" ");
+    const tipo = /\bfattur/.test(n) ? "fattura" : /\bpreventiv/.test(n) ? "preventivo" : null;
+    if (!tipo) return null;
+    // "manda la fattura da 500 a Rossi": con un importo è un documento NUOVO, non un invio
+    if (/\bda\s+\d|\d\s*(?:euro|€)|€/.test(n) || pp.some((x) => /^\d{3,}$/.test(x.n.replace(/\./g, "")) && !/^(?:n|numero)$/.test((pp[pp.indexOf(x) - 1] || {}).n || ""))) return null;
+    const cl = trovaCliente(pp, ctx.clienti || [], new Set());
+    if (cl.stato !== "trovato") return null;
+    const mese = MESI.find((m) => new RegExp("\\b" + m + "\\b").test(n));
+    const numero = (n.match(/\b(?:n|numero)\s+(\d+)\b/) || [])[1];
+    const testo = "manda " + (tipo === "fattura" ? "la fattura" : "il preventivo") + (numero ? " numero " + numero : "") + (mese ? " di " + mese : "") + " a " + cl.cliente.name;
+    return { tipo, cliente: cl.cliente, mese: mese || null, testo };
+  }
+
   function leggiNuovoCliente(testo) {
     const tel = trovaTelefono(testo);
     let t = tel ? tel.testo.slice(0, tel.inizio) + " ; " + tel.testo.slice(tel.fine) : String(testo || "");
@@ -1897,7 +1918,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);
