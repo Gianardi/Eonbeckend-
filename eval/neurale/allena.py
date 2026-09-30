@@ -241,6 +241,9 @@ for ins in dict.fromkeys(x["insieme"] for x in esame):
 json.dump([{"frase": x["frase"], "insieme": x["insieme"], "atteso": x["intento"], "letto": INTENTI[pred[i]], "p": round(conf[i].item(), 3)} for i, x in enumerate(esame)],
           open(os.path.join(DATI, "esito-neurale.json"), "w"), ensure_ascii=False, indent=0)
 
+if os.environ.get("ESAME_OUT"):  # le probabilità sull'esame, per misurare l'insieme dei maestri
+    json.dump([[round(v, 4) for v in r] for r in p.tolist()], open(os.environ["ESAME_OUT"], "w"))
+
 if os.environ.get("LOGIT_OUT"):
     tutte = tr + val + (fuori if PIEGA else [])
     modello.eval()
