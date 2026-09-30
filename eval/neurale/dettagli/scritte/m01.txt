@@ -1,0 +1,123 @@
+# Frasi scritte a mano per il modello dei dettagli (30/09/2026). Un numero seguito da
+# {RUOLO} ha quel ruolo; i numeri senza segno sono O (indirizzi, misure, date, IVA).
+# QTA quantità · PRZ prezzo a pezzo · TOT totale di una voce · ANN annullato
+# PERC/BASE acconto (percentuale di una base) · SCO sconto % · SCOV sconto in euro
+# edile
+preventivo per il signor Ruggeri rifacimento terrazzo 3.800{TOT} più ringhiera 1.200{TOT}
+fai un preventivo alla Bassi: tinteggiatura soggiorno 650{TOT}, cucina 420{TOT} e corridoio 280{TOT}
+preventivo casa Donati demolizione tramezzi 900{TOT} nuovi tramezzi 1.700{TOT} intonaco 1.100{TOT}
+allora preventivo per il condominio via Verdi 31, rifacimento facciata 42.000{TOT} e ponteggio 7.500{TOT}
+fattura al signor Negri per la posa di 45{QTA} metri quadri di parquet a 28{PRZ} euro al metro
+preventivo pavimento garage 60{QTA} mq a 22{PRZ} più rampa 1.300{TOT}
+fai la fattura a Rota, cappotto termico 120{QTA} metri quadri a 65{ANN}, eh no 60{ANN}... no scusa 62{PRZ}
+preventivo per la Ferri: bagno completo 7.500{ANN}, anzi mettiamo 7.200{TOT}
+fattura Colombo muretto di cinta 1.850{TOT} euro più iva al 10
+preventivo tetto casa Vitali 18.000{TOT}, lattoneria 2.400{TOT}, linea vita 1.600{TOT}
+fai la fattura per il secondo SAL della palazzina 25.000{TOT}
+preventivo per la villetta di via Po 12: scavo 2.200{TOT} fondazioni 6.800{TOT} vespaio 1.900{TOT}
+fattura Gatti, 16{QTA} ore di escavatore a 75{PRZ} all'ora e trasporto 250{TOT}
+preventivo per il bar Sport: controsoffitto 35{QTA} metri a 38{PRZ}, e poi 8{QTA} faretti incassati da 25{PRZ} l'uno
+senti fai un preventivo per la signora Pozzi, le scale sono 14{QTA} gradini in marmo a 120{PRZ} a gradino
+preventivo per l'asilo: tinteggiatura aule 3.200{TOT} e rasatura 1.400{TOT} meno 200{SCOV} euro di sconto perché è un ente
+fattura al condominio Le Betulle acconto del 40{PERC}% su 30.000{BASE}
+fai fattura d'acconto a Fumagalli, il 20{PERC} per cento del totale che è 18.500{BASE}
+preventivo box auto Mauri: basculante 1.450{TOT}, montaggio 350{TOT}, smaltimento vecchia porta 80{TOT}
+preventivo Crippa, due{QTA} finestre in pvc da 120 per 140 a 680{PRZ} l'una e una portafinestra 950{TOT}
+fattura Villa per sistemazione grondaie ottocentocinquanta{TOT} euro
+preventivo per il signor Longhi duemilatrecento{TOT} per il marciapiede
+fai il preventivo per la ditta Marelli pavimento industriale 400{QTA} mq a 18{PRZ} euro con lo sconto del 5{SCO} per cento
+preventivo per il condominio via Roma 8, impermeabilizzazione terrazzo 5.600{TOT}, IVA al 10%
+fattura per la signora Riva, piccola manutenzione 180{TOT}, materiale 45{TOT}
+preventivo muro di contenimento 12{QTA} metri lineari a 350{PRZ} al metro
+preventivo per rifare il bagno della Monti, 6.800{TOT} tutto compreso, pagamento a 30 giorni
+fammi il preventivo per l'ingresso del condominio di viale Lombardia 45: marmo 3.100{TOT}, posa 900{TOT}
+fattura al comune per la manutenzione del parco giochi 2.750{TOT} euro
+preventivo per Sala, sottofondo 1.200{TOT}, massetto 1.500{TOT}, c'eravamo detti 1.000{ANN} per la posa ma facciamo 900{TOT}
+# idraulico
+preventivo per la signora Galli caldaia nuova 2.300{TOT} più installazione 400{TOT}
+fattura Barbieri sostituzione sifone 60{TOT} e guarnizioni 15{TOT}
+fai un preventivo alla pizzeria per 3{QTA} lavandini a 190{PRZ} l'uno e la cappa 1.100{TOT}
+preventivo per il bagno di servizio del bar, wc 280{TOT}, lavabo 180{TOT}, rubinetto 90{TOT}
+fattura per il signor Orlando: pronto intervento notturno 150{TOT}, perdita riparata materiale 35{TOT}
+preventivo impianto di riscaldamento a pavimento 95{QTA} mq a 55{PRZ} al metro quadro
+fattura condominio via Solferino 3 sostituzione autoclave mille e otto{TOT}
+preventivo per la palestra Olimpo, 6{QTA} docce complete a 850{PRZ} e scarichi 700{TOT}
+fai fattura alla Moretti per lo spurgo 220{ANN}, eh no, 250{TOT}
+preventivo pompa di calore da 12 kW per la villa Rizzi 8.900{TOT} con l'installazione
+fattura Ricci: 2{QTA} ore di lavoro a 45{PRZ} e raccordi 28{TOT}
+preventivo addolcitore per l'hotel Stella 1.450{TOT}, montaggio 300{TOT}
+senti fammi la fattura per la Coppola, la riparazione della perdita sotto il lavello 95{TOT} euro
+preventivo per il condominio di via Bixio 22 sostituzione colonna montante 3.400{TOT} e ripristino muratura 800{TOT}
+fattura veloce per Serra 130{TOT}
+preventivo 10{QTA} radiatori in alluminio a 140{PRZ} più 10{QTA} valvole termostatiche a 45{PRZ}
+fattura a Ferraro per il primo acconto di 3.000{TOT}
+fai la fattura dell'anticipo per la Colombo, il 50{PERC}% di 6.400{BASE}
+preventivo per la scuola: sostituzione di 12{QTA} rubinetti temporizzati da 95{PRZ} l'uno
+fattura per il ristorante Il Gabbiano sostituzione scaldabagno da 80 litri 420{TOT}
+preventivo per casa Marchi, impianto idrico cucina 1.100{TOT}, scarichi 450{TOT}, meno il 10{SCO}% perché paga subito
+fattura Grasso sblocco caldaia 80{TOT} e analisi fumi 60{TOT}
+preventivo per il B&B Il Glicine quattro{QTA} bagni rifatti a 4.500{PRZ} l'uno
+fammi un preventivo per la Parisi, boiler elettrico da 100 litri 380{TOT}, installazione 120{TOT}, trasporto 40{TOT}
+fattura condominio via Mazzini 47 per la manutenzione annuale della centrale termica 1.250{TOT} più iva
+preventivo tubazioni gas cucina Sartori, 15{QTA} metri a 22{PRZ} euro e collaudo 150{TOT}
+fattura per la famiglia Conte perdita in bagno 180{ANN}, ma gli faccio 150{ANN}... no metti 160{TOT}
+# elettricista
+preventivo impianto elettrico appartamento Rinaldi 110 metri quadri 6.200{TOT}
+fattura per il bar Roma: 5{QTA} punti luce a 45{PRZ} e quadro 380{TOT}
+preventivo per l'officina Beretta 20{QTA} plafoniere led da 60 watt a 75{PRZ} euro e cablaggio 900{TOT}
+fai la fattura a Bassi per l'antenna 250{TOT} e il decoder 70{TOT}
+preventivo videosorveglianza per la gioielleria, 6{QTA} telecamere a 210{PRZ}, registratore 450{TOT}, montaggio 600{TOT}
+fattura per la signora Neri sostituzione salvavita 120{TOT}
+preventivo per il capannone Rossi impianto fotovoltaico da 20 kW 24.000{TOT}
+fattura al condominio via Carducci 5 illuminazione scale 1.300{ANN}, anzi 1.250{TOT}
+preventivo per l'ambulatorio, 18{QTA} prese a 35{PRZ} e 10{QTA} punti luce a 50{PRZ}, certificazione 200{TOT}
+preventivo automazione cancello villa Ferri 1.650{TOT} più fotocellule 180{TOT}
+fattura per il signor Longo, citofono nuovo 320{TOT}, meno 20{SCOV} euro di sconto
+fai un preventivo per la palestra: 30{QTA} faretti a 38{PRZ} euro l'uno, 2{QTA} quadri a 900{PRZ}
+preventivo per la villa Sartori impianto di allarme, centrale 700{TOT} e 8{QTA} sensori a 70{PRZ} l'uno
+fattura hotel Miramare per la manutenzione dei gruppi di continuità 480{TOT} euro
+preventivo colonnina di ricarica da 7 kW per la signora Fontana 1.350{TOT}, installazione 400{TOT}
+fattura per l'ufficio Ricci, 3{QTA} ore a 38{PRZ} più materiale 64{TOT}
+preventivo per la chiesa di san Marco 40{QTA} lampade led a 25{PRZ}
+fattura acconto 30{PERC}% sul preventivo di 12.000{BASE} per il capannone Villa
+preventivo per casa Monti: quadro elettrico 850{TOT}, nuove linee 1.200{TOT}, 25{QTA} punti presa a 40{PRZ}
+fammi la fattura di Paolo Gatti ottocentoventi{TOT} per la messa a norma
+preventivo luci giardino Brambilla 12{QTA} lampioncini a 95{PRZ} più scavo 600{TOT}
+fattura veloce per la parrucchiera Anna 260{TOT}
+preventivo per il ristorante Da Mario rifacimento impianto cucina 4.800{TOT}, c'eravamo detti 5.000{ANN} ma gli faccio 4.800
+preventivo per il condominio di via Po 36, videocitofono per 16{QTA} appartamenti a 110{PRZ} ad appartamento e centralino 950{TOT}
+# artigiano, servizi
+preventivo per la sposa Martina, abito su misura 1.800{TOT} e 3{QTA} prove incluse
+fattura per la signora Rota, orli a 4{QTA} pantaloni da 10{PRZ} euro e una gonna 18{TOT}
+preventivo torta per il battesimo, 60{QTA} persone a 3,50{PRZ} a porzione
+fattura catering per la festa di Bianchi, 80{QTA} coperti a 32{PRZ} a persona
+preventivo per il trasloco della famiglia Gallo: furgone 400{TOT}, 3 operai per 8 ore a 25{ANN} all'ora... no scusa, facciamo tutto 950{TOT}
+fattura per il Bar Italia, 2{QTA} tende da sole a 780{PRZ} l'una
+preventivo falegnameria per la cucina dei Longhi 6.500{TOT}, montaggio 700{TOT}
+fattura massaggi per la signora Villa pacchetto da 10{QTA} sedute 450{TOT}
+preventivo pulizie ufficio Galli 12{QTA} ore a settimana a 16{PRZ} all'ora
+fattura per la Ferrari: taglio 25{TOT}, colore 50{TOT}, piega 20{TOT}
+preventivo per il negozio di Bruno insegna 1.100{TOT} più vetrofanie 250{TOT}
+fattura al signor Costa 2{QTA} lezioni di chitarra a 30{PRZ} euro
+preventivo restauro 6{QTA} sedie antiche a 140{PRZ} a sedia
+fattura per la Leone, riparazione tapparella 90{TOT} e cinghia nuova 15{TOT}
+preventivo per il fotografo al matrimonio dei Riva 1.600{TOT} più album 350{TOT}
+fattura giardinaggio villa Marini taglio siepi 280{TOT}, potatura di 5{QTA} alberi a 60{PRZ} l'uno
+preventivo per la casa vacanze: 4{QTA} materassi a 390{ANN}, eh no, 350{PRZ}, e consegna 80{TOT}
+fattura per la signora Caputo riparazione lavatrice 110{TOT} euro compresa l'uscita
+preventivo stampe per la fiera 2.000{QTA} volantini a 0,12{PRZ} e 30{QTA} manifesti a 4{PRZ}
+fattura per l'hotel Aurora, lavaggio di 45{QTA} tende a 12{PRZ}
+preventivo per il ristorante Le Rose, 25 coperti, menu degustazione 55{PRZ} a persona per 25{QTA} persone
+# amministratore
+fattura al condominio Le Magnolie compenso primo trimestre 1.350{TOT}
+fattura per il condominio via Tasso 9 compenso annuale 3.600{TOT} più spese postali 85{TOT}
+preventivo di gestione per il condominio nuovo di via Oberdan 17, 22{QTA} unità a 95{PRZ} euro l'una
+fattura al Parco dei Pini per 2{QTA} assemblee straordinarie a 180{PRZ} l'una
+fattura condominio Aurora rendiconto 450{TOT}, fotocopie 60{ANN}, anzi niente fotocopie
+fattura per la pratica di detrazione del condominio di via Manin 3 750{TOT} euro
+preventivo per il supercondominio Le Querce compenso 5.200{TOT}, con lo sconto del 10{SCO}% del primo anno
+fattura al condominio Rosa dei Venti per la gestione del sinistro 300{TOT}
+fattura al condominio Tre Pini compenso secondo semestre 1.900{TOT} e 12{QTA} raccomandate a 6,50{PRZ}
+fattura per il condominio via dei Mille 4 per la convocazione straordinaria duecentoventi{TOT}
+fattura alla signora Esposito per le copie dei verbali 35{TOT}
+preventivo amministrazione condominio Quattro Stagioni 2.800{TOT} più spese 300{TOT}
