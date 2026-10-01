@@ -1377,6 +1377,9 @@
     const tempiRiconosci = iVerbo >= 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i < iVerbo) : tempi;
     // Le parole che dicono QUALE impegno (cliente, lavoro, posto)
     const piene = pp.filter((x, k) => k >= da && k < a && !usateTempo.has(k) && x.n.length >= 3 && !VUOTE.has(x.n) && !PAROLE_NON_NOME.test(x.n) && numeroParola(x.n) === null).map((x) => x.n);
+    /* Detto un nome ("rimanda il Tomasin di domani"), un impegno che lo combacia solo per il
+       giorno non è lui (giro 20: proponeva "Ricordami di ordinare i pannelli" di domani) */
+    const nomiDetti = piene.some((w) => !TIPI_IMPEGNO.test(w));
     const punteggi = (impegni || []).map((imp) => {
       const suo = norm((imp.titolo || "") + " " + (imp.chi || "")).split(" ");
       const radice = (w) => w.slice(0, Math.max(4, w.length - 2));
@@ -1400,7 +1403,7 @@
       const giornoOk = giorniDetti.some((t) => t.giornoIso === giornoDi(imp.iso));
       const estraneo = tipiDetti.length > 0 && giorniDetti.length > 0 && !tipoOk && !giornoOk;
       return { imp, p, parole, estraneo };
-    }).filter((x) => (x.parole > 0 || x.p >= 4) && !x.estraneo).sort((a, b) => b.p - a.p);
+    }).filter((x) => (x.parole > 0 || (x.p >= 4 && !nomiDetti)) && !x.estraneo).sort((a, b) => b.p - a.p);
     const migliori = [];
     punteggi.filter((x) => x.p === (punteggi[0] && punteggi[0].p)).forEach((x) => { if (!migliori.some((m) => m.titolo === x.imp.titolo && m.iso === x.imp.iso)) migliori.push(x.imp); });
     // Il nuovo quando: giorno e ora detti, non negati, diversi da quelli che ha
