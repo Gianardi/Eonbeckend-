@@ -12453,7 +12453,13 @@ async function provaSal(testo){
   let s = capisciSal(testo) || (normalizzaSal(testo) ? capisciSal(normalizzaSal(testo)) : null);
   /* Passo 3: il modello dice "SAL" e le regole non l'hanno letto ("siamo a metà", "all'80",
      "secondo stato di avanzamento…"): cliente e percentuale dal lettore */
-  if(!s && cassettoNeurale(testo) === "sal"){
+  /* "La facciata delle Stella Maris è al 60 per cento", "siamo al 40 per cento", "siamo a metà"
+     (giro 19): un cliente + "è/siamo al N per cento" è l'avanzamento, anche se il modello è incerto.
+     Non con soldi, sconti, acconti o documenti di mezzo. */
+  const nT = EonLettore.norm(testo);
+  const avanzamento = /\b(?:e|siamo|sono|stiamo|semo)\s+(?:arrivati\s+)?(?:al|all|a)\s+(?:\d{1,3}|\p{L}+)\s*(?:%|per\s*cento|percento)|\b(?:siamo|semo|e)\s+a\s+(?:meta|tre\s+quarti)\b|\b(?:fatt[oa]|complet\w+)\s+(?:al|all)\s+\d{1,3}\s*(?:%|per\s*cento)/u.test(nT)
+    && !/\b(?:euro|fattur\w*|preventiv\w*|scont\w*|acconto|pagat\w*|iva)\b/.test(nT);
+  if(!s && (avanzamento || cassettoNeurale(testo) === "sal")){
     const x = EonLettore.leggiSal(testo, contestoLettore());
     const cl = x.cliente && clients.find(c => c.id === x.cliente.id);
     if(cl && x.percentuale) s = { cliente: cl, percentuale: x.percentuale, importo: x.importo };
@@ -12567,7 +12573,8 @@ function capisciUrgenza(testo){
   if(/\bassemble[ae]\b/i.test(t)) return null; // "un'assemblea urgente": è un'assemblea da convocare (giro 15)
   // "…non è urgente, ci vado giovedì": detto proprio che NON è un'urgenza (giro 15)
   if(/\bnon\s+(?:è\s+|e'\s+|e\s+)?(?:urgent|un'?\s*urgenza|un'?\s*emergenza|grave)|\bniente\s+di\s+urgente|\bsenza\s+urgenza|\bcon\s+calma\b/i.test(t)) return null;
-  if(/\b(?:domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|settimana|prossim[oa]|\d{1,2}\/\d{1,2})\b/i.test(t)) return null;
+  // (la "ì" finale non è una lettera per \b: "giovedì alle quattro… il perito per il sinistro" era un'urgenza, giro 20)
+  if(/(?:^|[^\p{L}\d])(?:domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|settimana|prossim[oa]|\d{1,2}\/\d{1,2})(?![\p{L}\d])/iu.test(t)) return null;
   const mOra = t.match(/\b(?:alle|ore)\s+(\d{1,2})(?:[:.](\d{2}))?\b/i);
   const ora = mOra ? String(mOra[1]).padStart(2, "0") + ":" + (mOra[2] || "00") : null;
   let titolo = t.replace(/(?:^|\s)(?:è\s+|e'\s+)?(?:urgent[ei]|urgenza|urgentissim[oa]|emergenza|di\s+corsa)(?=\s|$|[,.!:;])/gi, " ")
@@ -13355,7 +13362,18 @@ function gestisciIncasso(l, testo){
   };
   if(!l.cliente && !l.candidati && !l.clienteSimile){
     if(!l.nomeDetto) return null;
-    mostraRispostaEON(testo, l.nomeDetto + " non è tra i tuoi clienti. Aggiungilo (\"aggiungi " + l.nomeDetto + "\") e poi riprova.", { titolo: "Cliente non trovato" });
+    /* Chi ha pagato non è in rubrica (giro 19): un tocco per aggiungerlo e segnare l'incasso,
+       invece di "aggiungilo e poi riprova" */
+    const nome = l.nomeDetto;
+    domandaDelCodice({ titolo: "Incasso · " + nome, domanda: nome + " non è tra i tuoi clienti" + (l.importo ? ": ha pagato " + euroConti(l.importo) + "." : ".") + " Lo aggiungo e segno l'incasso?", senzaCampo: true,
+      scelte: [{ etichetta: "Sì, aggiungi " + nome, valore: "si" }, { etichetta: "No", valore: "no" }],
+      onRisposta: async (x) => {
+        chiudiRisorsaCard();
+        if(x !== "si") return;
+        const c = await creaClienteDalCodice(nome);
+        if(!c){ showAIToast("Non salvato", "Non sono riuscita ad aggiungere " + nome + ": riprova."); return; }
+        conCliente(c);
+      } });
     return { fatto: "incasso_senza_cliente" };
   }
   const r = risolviClienteLettura(l, "Incasso", conCliente);
@@ -13479,6 +13497,15 @@ function rispondiSuiDati(l){
   }
   // "Cosa mi ero segnato su Fontana?": la sua scheda, con gli appunti
   if(l.tema === "note_cliente" && l.cliente){ chiudiRisorsaCard(); mostraSchedaCliente(clients.find(c => c.id === l.cliente.id) || l.cliente); return { gestito: true }; }
+  /* "Cosa mi ero scritto sull'Endrizzi?", "…sul codice del cancello" senza un cliente in rubrica
+     (giro 19): si cercano le parole dette tra gli appunti della Mente */
+  if(l.tema === "note_cliente"){
+    const dopo = n.split(/\b(?:su|sul|sull|sulla|sullo|sui|sugli|sulle|riguardo\s+(?:a|al|alla|allo|ai)|di|del|della|per)\b/).slice(1).join(" ");
+    const chiavi = [...new Set((dopo || n).split(/\s+/).filter(w => w.length > 3 && !/^(?:cosa|avevo|scritto|scritta|segnato|segnata|annotato|appuntato|dimmele|dimmelo|ricordo|ricordavo|quello|quella|questo|questa|della|delle|degli|sono|stato)$/.test(w)))];
+    if(!chiavi.length) return null;
+    const trovati = cantiereAppunti.filter(a => { const t = EonLettore.norm(a.testo || ""); return chiavi.some(k => t.includes(k)); }).slice(0, 8);
+    return { titolo: chiavi.slice(0, 3).join(" "), testo: trovati.length ? trovati.map(a => a.testo).join("\n") : "Non trovo appunti su «" + chiavi.join(" ") + "» nella Mente." };
+  }
   /* "Quanti preventivi ho fatto questo mese?" (giro 5): contati dai documenti fatti con EON */
   if(l.tema === "documenti"){
     const tipo = /\bfattur/.test(n) ? "fattura" : "preventivo";
@@ -13548,7 +13575,12 @@ function provaModello(l, testo, arbitro){
   /* "Madonna che giornata oggi, non ne posso più", "son stanco morto stasera" (giro 18): le regole
      vedono "oggi" e fanno un "da fare"; se il modello è sicurissimo che è una chiacchiera o una
      domanda, e non c'è un'ora, risponde EON e non si segna niente. */
-  if(l && !arbitro && l.azione === "da_fare" && !(l.quando && l.quando.ora) && /^(?:domanda|saluto)$/.test(r.intento) && r.p >= 0.97) return { alServer: true, intento: r.intento };
+  if(l && !arbitro && l.azione === "da_fare" && !(l.quando && l.quando.ora) && /^(?:domanda|saluto)$/.test(r.intento) && r.p >= 0.9) return { alServer: true, intento: r.intento };
+  /* "uagliò so stanco morto oggi sto dalle sei sulla scala", "si può fare l'intonaco a mezzogiorno?"
+     (giro 19): un'ora detta dentro uno sfogo o una domanda non è un appuntamento. Solo se il modello
+     è sicurissimo e non c'è una parola da agenda. */
+  if(l && !arbitro && l.azione === "impegno" && /^(?:domanda|saluto)$/.test(r.intento) && r.p >= 0.95
+    && !/\b(?:segn\w*|mett\w*|fiss\w*|ricord\w*|appuntament\w*|sopralluog\w*|incontr\w*|riunion\w*|consegn\w*|devo|dobbiamo|vado|andiamo|passo|passare|andare|chiam\w*|telefon\w*)\b/.test(EonLettore.norm(testo))) return { alServer: true, intento: r.intento };
   const AZIONI = /^(?:calendario|messaggio|email|chiamata|incasso|invio_documento|cerca_documento|urgenza|cliente)$/;
   if(arbitro || (l && /^(?:dati|domanda|impegno|da_fare)$/.test(l.azione))){
     const soglia = arbitro ? 0.7 : l && /^(?:impegno|da_fare)$/.test(l.azione) ? 0.95 : 0.9;
@@ -13561,12 +13593,18 @@ function provaModello(l, testo, arbitro){
     }
     if(arbitro || (l && /^(?:dati|impegno|da_fare)$/.test(l.azione))) return null;
   }
+  /* Una domanda di mestiere che le regole mettevano nella Mente ("per una facciata al mare meglio
+     i silicati o i silossani", "il triplo vetro conviene?"): il modello è poco sicuro ma la frase
+     ha la forma di una domanda → risponde EON (giro 19) */
+  if(l && l.azione === "mente" && r.intento === "domanda" && r.p >= 0.4 && /\b(?:meglio|conviene|convien\w*|si\s+puo|che\s+sezione|quale|qual|quanto\s+(?:costa|ci\s+vuole|tempo)|come\s+si|ha\s+senso|e\s+normale|secondo\s+te)\b|\?\s*$/.test(EonLettore.norm(testo) + (/\?\s*$/.test(testo) ? "?" : ""))) return { alServer: true, intento: r.intento };
   if(r.p < 0.85) return null;
   if(/^(?:mente|cartella|calendario|documento|dati)$/.test(r.intento)) return null; // quelli li leggono già le regole
   // Un appunto diventa urgenza solo se il modello è sicurissimo: le emergenze dette senza
   // "urgente" le prende lui, ma niente allarmi per un fatto tranquillo ("il portiere è in ferie")
   if(r.intento === "urgenza" && l && l.azione === "mente" && r.p < 0.9) return null;
-  if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" ? { alServer: true, intento: r.intento } : null;
+  // "Controllare assicurazioni infortunio", "Verificare DURC": una cosa da fare all'infinito resta un appunto, anche se il modello pensa a una domanda (frasi vere di Andrea)
+  const daFareAllInfinito = /^\s*\p{L}+(?:are|ere|ire)\b/iu.test(testo) && !/\?\s*$/.test(testo);
+  if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" && !daFareAllInfinito ? { alServer: true, intento: r.intento } : null;
   // Scrivere a un cliente partendo da una nota: solo se il modello è sicurissimo (e il messaggio chiede sempre conferma)
   if((r.intento === "messaggio" || r.intento === "email") && l && l.azione === "mente" && r.p < 0.95) return null;
   const x = EonLettore.riscrivi(r.intento, testo, ctx);
@@ -15366,7 +15404,7 @@ function capisciRichiestaMeteo(testo){
      Ho problemi con il meteo?", "pioverà sabato sul cantiere?" → il meteo di
      quel giorno, qui (una domanda, con il meteo o la pioggia nominati) */
   if(!m && /\?\s*$/.test(String(testo || "").trim()) && /\b(?:meteo|pioggia|piov\w*|nev\w*|maltempo|temporal\w*|vento)\b/.test(t) && t.length <= 160){
-    const giorno = (t.match(/\b(oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)\b/) || [])[1] || "";
+    const giorno = (t.match(/\b(oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)(?![\wàèéìòù])/) || [])[1] || "";
     m = [t, " " + giorno + " "];
   }
   if(!m) return null;
@@ -16105,7 +16143,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Il modello dice "assemblea" (passo 3, amministratori): condominio, giorno, ora e motivo
        dal lettore anche quando la frase non comincia con "convoca" ("mettimi l'assemblea
        del Parco Verde…", "c'è da convocare n'altra volta l'assemblea dell'Aurora…") */
-    if(testo && !inCorso && !inContinuazione && currentProfession === "amministratore" && /\bassemble[ae]\b/i.test(testo) && cassettoNeurale(testo) === "assemblea"){
+    // "l'assemblea di domani spostala alle 19" sposta quella che c'è, non ne segna una nuova (giro 20)
+    const cambiaAssemblea = /\b(?:spost\p{L}*|anticip\p{L}*|posticip\p{L}*|rimand\p{L}*|slitt\p{L}*|annull\p{L}*|cancell\p{L}*|invece|non\s+(?:è|e)\s+più)\b/iu.test(testo) && !/\bconvoc/i.test(testo);
+    if(testo && !inCorso && !inContinuazione && currentProfession === "amministratore" && /\bassemble[ae]\b/i.test(testo) && !cambiaAssemblea && cassettoNeurale(testo) === "assemblea"){
       const la = EonLettore.leggiAssemblea(testo, contestoLettore());
       const ra = la ? gestisciAssemblea(la, (frase, p) => elabora(frase, false, p)) : null;
       if(ra && ra.comando){ ricordaEsitoCodice(testo, "assemblea_neurale"); return inviaAlServer(testo, viaVoce, false, ra); }

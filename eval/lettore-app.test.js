@@ -187,7 +187,7 @@ async function main() {
     verifica("\"DURC machi Alessia\" senza DURC caricato: lo dice e porta a Documenti impresa", s.pagina === "documenti-impresa" && /Non hai ancora caricato il DURC/.test(s.card || ""), JSON.stringify(s));
 
     /* 6. Domande sui dati */
-    for (const [frase, atteso] of [["Quanti soldi devo incassare ?", /Ti devono €4\.200/], ["Chi non ha ancora pagato?", /Ti devono €4\.200/], ["Clienti che devono pagare?", /Ti devono/], ["Quanto ho di IVA questo mese?", /IVA di/], ["Quanti cantieri attivi ho?", /5 cantieri attivi/], ["Guarda se ho impegni sabato", /Sabato|sabato/]]) {
+    for (const [frase, atteso] of [["Quanti soldi devo incassare ?", /Ti devono €4\.200/], ["Chi non ha ancora pagato?", /Ti devono €4\.200/], ["Clienti che devono pagare?", /Ti devono/], ["Quanto ho di IVA questo mese?", /IVA di/], ["Quanti cantieri attivi ho?", /5 cantieri attivi/], ["Guarda se ho impegni sabato", /sabato|dopodomani|domani|oggi/i]]) {
       await scrivi(frase);
       s = await stato();
       verifica(`"${frase}" → risposta dai dati, col codice`, soloAI() === 0 && s.card && atteso.test(s.card), s.card);

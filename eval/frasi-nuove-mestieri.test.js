@@ -98,7 +98,8 @@ globalThis.fetch = async (url, init) => {
 const conta = () => ({
   tasks: (tabelle.tasks || []).filter((t) => !t.deleted_at).length,
   tasksJson: JSON.stringify((tabelle.tasks || []).map((t) => [t.id, t.scheduled_at, t.deleted_at, t.status])),
-  quando: [...(tabelle.tasks || []), ...(tabelle.messages || []).filter((m) => m.event_type === "appt")].map((t) => String(t.scheduled_at || "")),
+  // anche l'ora delle assemblee convocate (giro 19: "convoca l'assemblea… alle 18" risultava senza ora)
+  quando: [...(tabelle.tasks || []), ...(tabelle.messages || []).filter((m) => m.event_type === "appt"), ...(tabelle.assemblee || []).map((a) => ({ scheduled_at: a.quando }))].map((t) => String(t.scheduled_at || "")),
   doc: (tabelle.messages || []).filter((m) => m.event_type === "doc").length,
   imponibili: (tabelle.messages || []).filter((m) => m.event_type === "doc").map((m) => { try { return JSON.parse(m.file_name).imponibile; } catch (e) { return null; } }),
   appt: (tabelle.messages || []).filter((m) => m.event_type === "appt").length,
@@ -195,8 +196,11 @@ async function main() {
           const paginaPrima = paginaAttuale;
           try { await eonInviaHome(frase); } catch (e) { return { errore: e.message }; }
           await new Promise((r) => setTimeout(r, 60));
-          // Una conferma del codice ("Sposto…?", "Annulla 1 impegno"): si tocca Sì, come farebbe l'utente
-          const si = [...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, (?:sposta|aggiorna|creala)$/.test(b.textContent)) || document.getElementById("annullaConferma");
+          /* Una conferma del codice ("Sposto…?", "Annulla 1 impegno"): si tocca Sì, come farebbe l'utente.
+             Solo se la card è aperta (1/10/2026, giro 20: la prova toccava il "Sì, sposta" rimasto
+             nascosto da una frase prima, e 25 appunti giusti risultavano sbagliati) */
+          const aperta = () => document.getElementById("risorsaOverlay").style.display === "flex";
+          const si = aperta() && ([...document.querySelectorAll("#risorsaCorpo .scheda-scelta")].find((b) => /^Sì, (?:sposta|aggiorna|creala)$/.test(b.textContent)) || document.getElementById("annullaConferma"));
           let confermato = "";
           if (si && !si.disabled && (atteso === "calendario_modifica" || atteso === "cliente" || atteso === "mente")) { confermato = document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); si.click(); await new Promise((r) => setTimeout(r, 250)); }
           // "Con quale Dini?": si sceglie il primo, come farebbe l'utente
@@ -204,9 +208,9 @@ async function main() {
           if (quale && document.getElementById("risorsaOverlay").style.display === "flex") { confermato = "scelto " + quale.textContent; quale.click(); await new Promise((r) => setTimeout(r, 300)); }
           await new Promise((r) => setTimeout(r, 120));
           // Il preventivo con più voci: si tocca "Crea" sulla card delle voci, come l'utente
-          const crea = document.getElementById("vociCrea");
+          const crea = aperta() && document.getElementById("vociCrea");
           if (crea && atteso === "documento") { confermato = confermato || "voci: " + document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); crea.click(); await new Promise((r) => setTimeout(r, 500)); }
-          const scatta = document.getElementById("fotoRapidaScatta");
+          const scatta = aperta() && document.getElementById("fotoRapidaScatta");
           if (scatta) { confermato = confermato || document.getElementById("risorsaCorpo").textContent.replace(/\s+/g, " ").slice(0, 100); scatta.click(); }
           const landing = [...document.querySelectorAll(".ai-landing-overlay")].filter((o) => o.style.display !== "none" && o.offsetParent !== null).map((o) => o.textContent.replace(/\s+/g, " ").trim()).join(" ");
           return {
