@@ -13590,7 +13590,9 @@ function provaModello(l, testo, arbitro){
   // Un appunto diventa urgenza solo se il modello è sicurissimo: le emergenze dette senza
   // "urgente" le prende lui, ma niente allarmi per un fatto tranquillo ("il portiere è in ferie")
   if(r.intento === "urgenza" && l && l.azione === "mente" && r.p < 0.9) return null;
-  if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" ? { alServer: true, intento: r.intento } : null;
+  // "Controllare assicurazioni infortunio", "Verificare DURC": una cosa da fare all'infinito resta un appunto, anche se il modello pensa a una domanda (frasi vere di Andrea)
+  const daFareAllInfinito = /^\s*\p{L}+(?:are|ere|ire)\b/iu.test(testo) && !/\?\s*$/.test(testo);
+  if(r.intento === "domanda" || r.intento === "saluto") return l && l.azione === "mente" && !daFareAllInfinito ? { alServer: true, intento: r.intento } : null;
   // Scrivere a un cliente partendo da una nota: solo se il modello è sicurissimo (e il messaggio chiede sempre conferma)
   if((r.intento === "messaggio" || r.intento === "email") && l && l.azione === "mente" && r.p < 0.95) return null;
   const x = EonLettore.riscrivi(r.intento, testo, ctx);
