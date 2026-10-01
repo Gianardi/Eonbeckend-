@@ -6,6 +6,22 @@ Leggere **prima di tutto**:
 2. `TODO.md` — il dettaglio di ogni voce, comprese le decisioni prese e il
    perché (cercare la sezione giusta, è lungo).
 
+## REGOLA N. 1 (Andrea, 1/10/2026) — EON è una piccola AI con un modello neurale
+
+- **A capire le frasi è solo il modello neurale** (tipo di richiesta e tutti i
+  dettagli: chi, quando, quanto, quale lavoro, quale canale…). **Niente regole
+  nuove scritte a mano** (espressioni regolari, elenchi di parole) per capire:
+  è lo stile 2015-2018 che Andrea non vuole.
+- Il codice serve solo a **fare** (salvare, creare la fattura, chiamare), a
+  **normalizzare** quello che il modello ha trovato ("giovedì" → la data) e ai
+  **controlli di sicurezza** (conferme prima di mandare o cancellare).
+- Una frase nuova da capire → **frasi per il modello** (scrittori, confini),
+  riallenare, misurare sui giri. Mai una regola.
+- **Nessuna funzione nuova finché ROADMAP 0b.19 (passo A) non è finito.** Se
+  Andrea chiede una funzione nuova, dirglielo PRIMA di scrivere codice.
+- A ogni pacchetto: `node eval/regole-conta.mjs` e dirgli il numero (deve
+  scendere; 893 il 1/10/2026).
+
 ## Chi è Andrea
 
 Andrea (Gianardi) è il fondatore, non è un tecnico, lavora **solo dal

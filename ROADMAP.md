@@ -455,6 +455,28 @@ sporca, dialetti, chat, anziano, straniero.
 **Prove:** 70 prove su 70 passano; giri vecchi uguali o +1 (tranne il giro 5,
 -2).
 
+**PASSO A (deciso il 1/10/2026 sera, dopo l'errore del 1/10): il modello legge TUTTA la frase.**
+Andrea: "il codice scritto a mano stile 2015-2018 non va bene. Noi dobbiamo creare il modello
+neurale". Il 1/10 avevo aggiunto ~20 regole a mano per capire frasi nuove: errore mio, contro
+questa linea guida. Regola scritta in cima a CLAUDE.md. Oggi il modello capisce solo il cassetto
+(20 tipi, 97-98%) e gli importi; il resto lo leggono **893 regole a mano** (`eval/regole-conta.mjs`:
+lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai peggio.
+- A1. Ruoli di ogni parola (oltre agli importi, che restano al modello dei dettagli): CHI (la persona
+  o ditta nominata), GIO e ORA (quando), NGIO e NORA (il nuovo quando, negli spostamenti), LAV (il
+  lavoro o l'impegno), TESTO (cosa scrivere o ricordare), CAN (canale), DOC (documento nominato),
+  NUM (numero del documento), TEL, MAIL, IND, AVANZ (percentuale del SAL), CART (cartella).
+- A2. Dati: scrittori AI con personaggi diversi scrivono frasi già segnate parola per parola
+  ("manda a [Rossi]{CHI} il preventivo del [bagno]{LAV}"), anche per le cose nuove del 1/10
+  (preventivo accettato, sollecito, foto da mandare, indirizzo, "ricordami di chiedere…"); un
+  controllo automatico scarta quelle segnate male. Poi frasi "d'argento" dai dati di oggi.
+- A3. Un modello unico: cassetto + ruoli di ogni parola. Allenato qui (CPU), int8, nel telefono.
+- A4. Cassetto per cassetto: i dettagli li prende dal modello, il codice normalizza ("giovedì" →
+  data, il nome → il cliente in rubrica); si cancellano le regole che li cercavano. Si tiene solo
+  se nessun giro peggiora (prove-frasi, frasi vere di Andrea).
+- A5. A ogni pacchetto il numero delle regole a mano, ad Andrea.
+- Poi (da decidere coi numeri): B, partire da un modello che sa già l'italiano (serve sbloccare
+  huggingface.co nella rete dell'ambiente); C, un modello che "scrive" il comando (serve una GPU).
+
 **La strada, in ordine:**
 1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
 2. Rete di sicurezza automatica: le prove partono da sole a ogni pacchetto e
