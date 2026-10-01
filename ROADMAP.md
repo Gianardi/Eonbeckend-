@@ -741,6 +741,13 @@ sporca, dialetti, chat, anziano, straniero.
    descrizione ("3x2m") e il conto è giusto. "8 tavoli a 450 e 32 sedie" non sono 450,32 €.
    Importi giusti sulle 628 frasi dei giri 8-20: 568 (prima 553). App: giro 16 1.044, 17 1.040,
    18 998, 19 1.008, **20 1.011 (96%)**.
+
+   **1/10 sera: "manda il preventivo a X" quando il preventivo non c'è ancora** (idea di Andrea).
+   Prima EON diceva "Non trovo un preventivo" (o apriva la Mail vuota). Ora: «Il preventivo per
+   Condominio I Pini (cornicione) non l'abbiamo ancora fatto. Lo facciamo adesso?» [Sì, facciamolo]
+   [No]. Con «Sì» parte il preventivo per quel cliente e quel lavoro, EON chiede solo quello che
+   manca (di solito l'importo) e, fatto, mostra i tasti per mandarlo. Vale anche per la fattura.
+   Pilastri *tempo* e *soldi*.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo

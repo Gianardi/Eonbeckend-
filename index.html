@@ -16872,7 +16872,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
 
   send.addEventListener("click", () => elabora(campo.value));
   // Per l'utente virtuale (eval/utente-virtuale-mestieri.test.js): la frase e l'attesa della fine
-  if(sendId === "homeHeroSend") window.eonInviaHome = (t) => elabora(t, false);
+  if(sendId === "homeHeroSend") window.eonInviaHome = (t, p) => elabora(t, false, p);
 
   /* Microfono: tocca per parlare, tocca di nuovo per fermarti e inviare
      — usa lo stesso riconoscimento vocale del browser già in uso per la
@@ -18645,7 +18645,9 @@ function capisciInvioDocumento(testo){
   let tipo, numero, nome, canale;
   if(m){ [, , tipo, numero, nome, canale] = m; }
   else {
-    m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:a|al|alla|allo|ad)\\s+(.+?)\\s+(?:(?:il|la|l|lo)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?" + CANALE_INVIO + "$"));
+    /* "manda per mail al condominio I Pini il preventivo del cornicione": il lavoro detto
+       dopo il documento (1/10/2026); con un numero ("del bagno da 500") è un documento nuovo */
+    m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:a|al|alla|allo|ad)\\s+(.+?)\\s+(?:(?:il|la|l|lo)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:del|della|dello|dell|dei|degli|delle|di|per)\\s+(?:(?:il|la|lo|l|i|gli|le)\\s+)?[^\\d]+?)?" + CANALE_INVIO + "$"));
     if(!m) return null;
     [, nome, , tipo, numero, canale] = m;
   }
@@ -18690,6 +18692,14 @@ function provaInvioDocumento(testo, primaDiAprire){
   if(typeof primaDiAprire === "function") primaDiAprire();
   const cosa = r.tipo === "fattura" ? "fattura" : "preventivo";
   if(!d){
+    /* Andrea (1/10/2026): "manda per mail al condominio I Pini il preventivo del cornicione",
+       e il preventivo non c'è ancora: si dice e si offre di farlo subito (poi si manda) */
+    const perNome = nominaCliente ? clients.filter(c => r.parole.every(p => normalizzaComando(c.name).split(" ").includes(p))) : [];
+    const clienteDoc = clienteNominato || (perNome.length === 1 ? perNome[0] : null);
+    if(clienteDoc && !r.numero){
+      offriDiFareDocumento(testo, r.tipo, clienteDoc);
+      return true;
+    }
     const chi = clienteNominato ? " per " + clienteNominato.name : r.parole.length ? " per " + r.parole.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ") : "";
     mostraRispostaEON(testo, "Non trovo " + (r.tipo === "fattura" ? "una fattura" : "un preventivo") + (r.numero ? " n. " + r.numero : "") + chi + ". Se vuoi, fallo prima: «" + cosa + " da 500 per" + (chi ? chi.slice(4) : " Rossi") + "».", { titolo: "Documento non trovato" });
     return true;
@@ -18722,6 +18732,39 @@ function provaInvioDocumento(testo, primaDiAprire){
   corpo.appendChild(creaRigaInvioDocumento(() => d.dati, d.clienteChat));
   apriRisorsaCard((r.tipo === "fattura" ? "Fattura " : "Preventivo ") + d.dati.numero + " · " + nomeCliente, corpo);
   return true;
+}
+
+/* Il lavoro detto nella frase d'invio: "il preventivo del cornicione" → "Cornicione".
+   Il nome del cliente e il canale non sono il lavoro. */
+function lavoroDaFraseInvio(testo, tipo, cliente){
+  const n = normalizzaComando(String(testo || "").replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, " "));
+  const m = n.match(new RegExp("\\b" + tipo + "\\s+(?:(?:per|di|del|della|dello|dell|dei|degli|delle)\\s+)?(?:(?:il|la|lo|l|i|gli|le)\\s+)?(.+)$"));
+  if(!m) return "";
+  const resto = (" " + m[1]).split(/\s+(?:a|al|alla|allo|all|ad|ai|alle|su|via|tramite|con|col|in|e|che|mandal\w*|invial\w*)\s+/)[0];
+  const nomeCli = new Set(normalizzaComando(cliente ? cliente.name : "").split(" "));
+  const parole = resto.split(" ").filter(w => w && !nomeCli.has(w) && !/^(?:whatsapp|wa|email|mail|posta|eon|chat|per|il|la|lo|l|i|gli|le|cliente|condominio|signor|signora|sig)$/.test(w));
+  if(!parole.length || /^(?:ultim[oa]|nuov[oa]|solito|stesso)$/.test(parole[0])) return "";
+  const lav = parole.join(" ");
+  return lav.charAt(0).toUpperCase() + lav.slice(1);
+}
+function offriDiFareDocumento(testo, tipo, cliente){
+  const fattura = tipo === "fattura";
+  const lavoro = lavoroDaFraseInvio(testo, fattura ? "fattura" : "preventivo", cliente);
+  domandaDelCodice({
+    titolo: fattura ? "La fattura non c'è ancora" : "Il preventivo non c'è ancora",
+    domanda: (fattura ? "La fattura per " : "Il preventivo per ") + cliente.name + (lavoro ? " (" + lavoro.toLowerCase() + ")" : "")
+      + (fattura ? " non l'abbiamo ancora fatta. La facciamo adesso?" : " non l'abbiamo ancora fatto. Lo facciamo adesso?"),
+    scelte: [{ etichetta: "Sì, facciamolo", valore: "si" }, { etichetta: "No", valore: "no" }],
+    senzaCampo: true,
+    onRisposta: (v) => {
+      if(v !== "si") return chiudiRisorsaCard();
+      const frase = (fattura ? "Fattura per " : "Preventivo per ") + cliente.name + (lavoro ? ", " + lavoro.toLowerCase() : "");
+      const invia = (f, p) => { if(typeof window.eonInviaHome === "function") window.eonInviaHome(f, p); };
+      // Si chiede solo quello che manca (di solito l'importo); fatto, i tasti per mandarlo
+      const esito = gestisciDocumento({ tipo: fattura ? "fattura" : "preventivo", modo: "crea", cliente, importo: null, lavoro: lavoro || null, invio: true }, frase, invia);
+      if(esito && esito.comando){ chiudiRisorsaCard(); invia(frase, esito); }
+    },
+  });
 }
 
 function creaRigaInvioDocumento(getDati, clienteNome){

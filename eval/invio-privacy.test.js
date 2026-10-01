@@ -130,7 +130,8 @@ async function main() {
 
     await page.evaluate(() => { clients.push({ id: "c3", name: "Luca Bianchi", status: "attivo", value: 0, archived: false, phone: "", email: "" }); });
     await chiedi("invia la fattura a Bianchi");
-    verifica("cliente senza quel documento: lo dice, senza AI", /Non trovo una fattura per Bianchi/.test(await page.textContent("body")));
+    // 1/10/2026: lo dice e propone di farla subito ("La facciamo adesso?")
+    verifica("cliente senza quel documento: lo dice e propone di farla, senza AI", /La fattura per Luca Bianchi non l'abbiamo ancora fatta\. La facciamo adesso\?/.test(await page.textContent("body")));
 
     await chiedi("manda la fattura da 500 a Rossi");
     verifica("\"manda la fattura da 500 a Rossi\" (un documento nuovo): non è un invio, va avanti come prima", (await page.evaluate(() => window.__aperti.length + window.__mail.length)) === 0);

@@ -4999,6 +4999,22 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 sera: il preventivo da mandare non c'è ancora → "Lo facciamo adesso?" (ROADMAP 0b.19 passo 5)
+- Andrea: "se chiede manda e-mail al condominio X il preventivo e il preventivo non c'è perché non è
+  stato ancora fatto, si dovrebbe dire che bisogna farlo e dare subito la possibilità di farlo".
+- `index.html provaInvioDocumento`: documento non trovato, cliente riconosciuto e nessun numero detto →
+  `offriDiFareDocumento`: "Il preventivo per X (lavoro) non l'abbiamo ancora fatto. Lo facciamo
+  adesso?" [Sì, facciamolo] [No] (fattura: "La fattura … fatta. La facciamo adesso?"). "Sì" →
+  `gestisciDocumento` con cliente, lavoro e `invio: true`: chiede solo quello che manca, poi i tasti
+  per mandarlo. Con un numero ("la fattura 7") resta "Non trovo una fattura n. 7".
+- `lavoroDaFraseInvio`: il lavoro dopo "preventivo/fattura del|della|per il…", senza nome del cliente
+  e canale. `capisciInvioDocumento`: anche "manda per mail al X il preventivo del Y" (prima apriva una
+  Mail vuota); con un numero nel lavoro ("del bagno da 500") resta un documento nuovo.
+- `window.eonInviaHome(t, p)` passa anche il comando pronto (serve al "Sì").
+- Prove: `documento-da-fare-app.test.js` (nuova, porta 9039); `invio-privacy.test.js` (Bianchi: ora
+  propone di farla); giro 10: "manda per mail al condominio i pini il preventivo del cornicione"
+  atteso `invio` (prima `email`: era la Mail vuota, ora è la scelta di Andrea).
+
 ### 1/10 sera: misure nei preventivi (ROADMAP 0b.19 passo 5)
 - `lettore.senzaMisure` (in `leggiDocumento` dopo `senzaCivici`, quindi per regole e modello): date "del 24
   settembre" → "24settembre", "anno 2027" → "anno2027"; dimensioni "A [unità] per|x B [unità]" →
