@@ -13421,11 +13421,54 @@ function rispondiSuiDati(l){
     if(l.cliente) return soldiDi(l.cliente);
     return capisciDomandaSoldi("chi mi deve");
   }
-  if(l.tema === "incassi"){
+  if(l.tema === "incassi" && (l.cliente || !/\b(?:settimana|contant\w*)\b/.test(n))){
     if(l.cliente) return soldiDi(l.cliente);
     const mese = MESI_LUNGHI.find(m => new RegExp("\\b" + m + "\\b").test(n));
     const periodo = /\bmese\s+scorso|scorso\s+mese\b/.test(n) ? "il mese scorso" : /\banno\b/.test(n) ? "quest anno" : mese ? mese : "questo mese";
     return capisciDomandaSoldi("quanto ho incassato " + periodo);
+  }
+  /* "Quanti soldi ho preso in contanti questa settimana?" (giro 20): gli incassi della settimana.
+     Contanti o bonifico EON non lo sa ancora: lo dice, non inventa. */
+  if(l.tema === "incassi" && !l.cliente && /\bsettimana\b/.test(n)){
+    const inizio = new Date(); inizio.setHours(0, 0, 0, 0); inizio.setDate(inizio.getDate() - ((inizio.getDay() + 6) % 7));
+    const scorsa = /\bscorsa\b/.test(n); if(scorsa) inizio.setDate(inizio.getDate() - 7);
+    const fine = new Date(inizio); fine.setDate(fine.getDate() + 7);
+    const dellaSett = incomes.filter(i => i.status === "incassato" && (() => { const d = dataVoceConti(i); return d && d >= inizio && d < fine; })());
+    const tot = dellaSett.reduce((t, i) => t + (Number(i.amount) || 0), 0);
+    const et = scorsa ? "la settimana scorsa" : "questa settimana";
+    navigateTo("entrate");
+    const nota = /\bcontant/.test(n) ? "\nContanti o bonifico EON non lo segna ancora: è il totale degli incassi." : "";
+    return { titolo: "Incassi " + et, testo: (dellaSett.length ? "Incassati **" + euroConti(tot) + "**\n" + dellaSett.slice(0, 8).map(i => (i.client || "") + " – " + euroConti(Number(i.amount) || 0)).join("\n") : "Nessun incasso segnato " + et + ".") + nota };
+  }
+  if(l.tema === "incassi" && /\bcontant/.test(n)){
+    const r = capisciDomandaSoldi("quanto ho incassato " + (/\bmese\s+scorso|scorso\s+mese\b/.test(n) ? "il mese scorso" : /\banno\b/.test(n) ? "quest anno" : "questo mese"));
+    if(r) return { ...r, testo: r.testo + "\nContanti o bonifico EON non lo segna ancora: è il totale degli incassi." };
+  }
+  /* "Quand'è l'ultima volta che sono stato dai Tosi?", "quant'è che nu vado dalle Ancore" (giro 20):
+     l'ultimo impegno passato con quel nome (e il prossimo, se c'è) */
+  if(l.tema === "ultima_visita"){
+    const chi = l.cliente ? l.cliente.name : l.nomeDetto;
+    if(!chi) return null;
+    const nomi = EonLettore.norm(chi).split(" ").filter(w => w.length > 2 && !/^(?:condominio|signora|signor|ditta|bar|hotel|ristorante|studio|impresa)$/.test(w));
+    if(!nomi.length) return null;
+    const oggiD = new Date(); oggiD.setHours(0, 0, 0, 0);
+    const tutte = [];
+    tasks.forEach(t => { if(t.time && t.status !== "annullato") tutte.push({ titolo: t.title, quando: t.time }); });
+    chats.forEach(c => (c.messages || []).forEach(m => { if(m.eventType === "appt") tutte.push({ titolo: m.title || c.name, chi: c.name, quando: m.text }); }));
+    const sue = tutte.map(v => ({ ...v, d: interpretaQuando(v.quando) })).filter(v => v.d && nomi.some(w => EonLettore.norm((v.titolo || "") + " " + (v.chi || "")).split(" ").includes(w)));
+    const passate = sue.filter(v => v.d < oggiD).sort((a, b) => b.d - a.d), prossime = sue.filter(v => v.d >= oggiD).sort((a, b) => a.d - b.d);
+    const giorni = passate.length ? Math.round((oggiD - passate[0].d) / 86400000) : 0;
+    const testo = (passate.length ? "L'ultima volta: **" + passate[0].d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }) + "** (" + (giorni === 1 ? "ieri" : giorni + " giorni fa") + ") – " + passate[0].titolo : "Non trovo appuntamenti passati con " + chi + " in agenda.")
+      + (prossime.length ? "\nLa prossima: " + quandoBreve(prossime[0].quando) + " – " + prossime[0].titolo : "");
+    return { titolo: chi, testo };
+  }
+  /* "Il numero del Merlo della carrozzeria ce l'ho?" (giro 20): sì (e qual è) o no */
+  if(l.tema === "contatto"){
+    const c = l.cliente || (l.nomeDetto ? clienteDaNomeDetto(l.nomeDetto) : null);
+    if(c && c.phone) return { titolo: c.name, testo: "Sì: **" + c.phone + "**" };
+    const chi = c ? c.name : l.nomeDetto;
+    if(!chi) return null;
+    return { titolo: chi, testo: c ? "Hai " + c.name + " in rubrica ma senza numero." : "Non hai il numero di " + chi + ": non è tra i tuoi clienti." };
   }
   if(l.tema === "iva"){
     const scorso = /\bmese\s+scorso|scorso\s+mese\b/.test(n), anno = /\banno\b/.test(n);
@@ -16159,8 +16202,12 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Il modello dice "domanda sui tuoi dati" (passo 3): il lettore capisce il tema
        (agenda, soldi di un cliente, chi ti deve, incassi, documenti) e risponde il codice */
     // (una o due parole, "apri…", "vai…": è il nome di una pagina, non una domanda)
-    if(testo && !inCorso && !inContinuazione && testo.trim().split(/\s+/).length >= 3 && !/^\s*(?:apri|aprimi|vai|mostra|mostrami|fammi\s+vedere)\b/i.test(testo) && cassettoNeurale(testo) === "dati"){
-      const ld = EonLettore.leggiDomandaDati(testo, contestoLettore());
+    /* …o una domanda sui dati detta chiara ("quanti soldi ho preso in contanti questa settimana",
+       "il numero del Merlo ce l'ho?", "fammi vedé le fatture non pagate"): risponde il codice
+       anche se il modello pensa ad altro (1/10/2026, giri 16-20: andavano all'AI) */
+    const domandaDatiForte = testo && !inCorso && !inContinuazione && (!chiedeDiFare(testo) || /^\s*fammi\s+(?:il|un)\s+punto\b/i.test(testo)) ? EonLettore.leggiDomandaDati(testo, contestoLettore()) : null;
+    if(testo && !inCorso && !inContinuazione && testo.trim().split(/\s+/).length >= 3 && ((domandaDatiForte && domandaDatiForte.forte) || (!/^\s*(?:apri|aprimi|vai|mostra|mostrami|fammi\s+vedere)\b/i.test(testo) && cassettoNeurale(testo) === "dati"))){
+      const ld = domandaDatiForte || EonLettore.leggiDomandaDati(testo, contestoLettore());
       const r = ld ? rispondiSuiDati(ld) : null;
       if(r){
         if(!r.gestito){
@@ -16384,6 +16431,19 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "sposta_impegno");
       return;
+    }
+    /* Il modello dice "sposta/annulla" ma l'impegno non c'è ("rimanda il Tomasin di domani" e quello di
+       domani era già annullato): lo dice subito il codice, l'AI non ne saprebbe di più (giro 20) */
+    if(!inContinuazione && cassettoNeurale(testo) === "calendario_modifica" && isDbReady()){
+      const lista = impegniDaAnnullare({ nome: [], oggetto: null, data: null, fascia: null, ora: null }).map((v, i) => ({ id: i, titolo: v.titolo, chi: v.chat ? v.chat.name : "", iso: isoImpegno(v) })).filter(x => x.iso);
+      const x = EonLettore.leggiModificaImpegno(testo, lista, new Date());
+      const nomi = x && x.tipo && !x.impegni.length ? (x.parole || []).filter(w => !/^(?:sopralluog|appuntament|riunion|verific|intervent|consegn|incontr|visit|lavor|collaud|manutenzion)/.test(w)) : [];
+      if(nomi.length){
+        const giorno = (x.tempi || []).find(t => t.giornoIso && !t.negato);
+        mostraRispostaEON(testo, "Non trovo in agenda un impegno con «" + nomi.join(" ") + "»" + (giorno && x.tempi.length > 1 ? " per quel giorno" : "") + ": forse è già stato spostato o annullato. Dimmi quale impegno e lo " + (x.tipo === "annulla" ? "annullo" : "sposto") + ".", { titolo: "Non lo trovo" });
+        campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "impegno_non_trovato");
+        return;
+      }
     }
 
     /* "Fai foto a pavimenti": fotocamera subito (prima di ogni attesa,

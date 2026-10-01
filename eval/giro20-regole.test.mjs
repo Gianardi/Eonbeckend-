@@ -59,6 +59,8 @@ let x = L.leggiModificaImpegno(frase, lista, ctx.oggi);
 verifica("la riunione di sabato: sposta la riunione", x.tipo === "sposta" && x.impegni.length === 1 && x.impegni[0].id === 1, JSON.stringify(x.impegni));
 x = L.leggiModificaImpegno(frase, [lista[0]], ctx.oggi);
 verifica("riunione già annullata: NON propone di spostare la polizza", !x.impegni.length, JSON.stringify(x.impegni));
+x = L.leggiModificaImpegno("rimanda il Tomasin di domani a giovedì", [{ id: 0, titolo: "Ricordami di ordinare i pannelli per il Tomasin", chi: "", iso: "2026-10-02T09:00:00" }], ctx.oggi);
+verifica("\"il Tomasin di domani\": non propone un impegno del Tomasin di venerdì", !x.impegni.length, JSON.stringify(x.impegni));
 x = L.leggiModificaImpegno("la polizza del Rione Azzurro spostala a lunedì", lista, ctx.oggi);
 verifica("\"la polizza … spostala\": la polizza", x.impegni.length === 1 && x.impegni[0].id === 0);
 

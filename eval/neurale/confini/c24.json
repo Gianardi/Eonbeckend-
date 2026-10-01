@@ -1,0 +1,933 @@
+{
+"confini": "1/10 mattina, dagli errori del giro 17 col modello riallenato: racconti di cantiere e informazioni sui clienti = appunti; fatture e preventivi brevi (\"fattura Ferretti 640 euro più iva\") = documento; domande di mestiere = domanda; incasso con il nome corretto a metà; appuntamenti telegrafici col numero dopo il giorno; \"devo prendere…\" = appunto; \"apri la fotocamera\" = foto. Frasi nuove, nessuna presa dagli esami.",
+"frasi": [
+[
+"oggi da Silvestri abbiamo trovato i ferri del solaio arrugginiti",
+"mente"
+],
+[
+"oggi da Ferri abbiamo trovato i ferri del solaio arrugginiti",
+"mente"
+],
+[
+"stamattina dal Farina sotto le piastrelle c'era il massetto marcio",
+"mente"
+],
+[
+"stamattina dal Benedetti sotto le piastrelle c'era il massetto marcio",
+"mente"
+],
+[
+"ieri da Marchetti il muro della cantina era umido fino a un metro",
+"mente"
+],
+[
+"ieri da Lombardi il muro della cantina era umido fino a un metro",
+"mente"
+],
+[
+"oggi sono passato da Marchetti, la grondaia sul retro è staccata da un lato",
+"mente"
+],
+[
+"oggi sono passato da Lombardi, la grondaia sul retro è staccata da un lato",
+"mente"
+],
+[
+"dal Marchetti il quadro elettrico è vecchio, ha ancora i fusibili a tappo",
+"mente"
+],
+[
+"dal Vitale il quadro elettrico è vecchio, ha ancora i fusibili a tappo",
+"mente"
+],
+[
+"sono stato dalla Vitale, il parquet in sala si è alzato vicino alla finestra",
+"mente"
+],
+[
+"sono stato dalla Galli, il parquet in sala si è alzato vicino alla finestra",
+"mente"
+],
+[
+"da Silvestri abbiamo scoperto che il tubo del gas passa dentro il muro della cucina",
+"mente"
+],
+[
+"da Grasso abbiamo scoperto che il tubo del gas passa dentro il muro della cucina",
+"mente"
+],
+[
+"oggi dal Conti la pendenza del terrazzo è sbagliata, l'acqua ristagna",
+"mente"
+],
+[
+"oggi dal Orlando la pendenza del terrazzo è sbagliata, l'acqua ristagna",
+"mente"
+],
+[
+"stamattina da Silvestri c'era la muffa dietro l'armadio della camera",
+"mente"
+],
+[
+"stamattina da Santini c'era la muffa dietro l'armadio della camera",
+"mente"
+],
+[
+"dalla Monti il contatore è in cortile dentro la cassetta verde",
+"mente"
+],
+[
+"dalla Martini il contatore è in cortile dentro la cassetta verde",
+"mente"
+],
+[
+"ieri sono stato da Grasso, la caldaia ha quindici anni e fa rumore",
+"mente"
+],
+[
+"ieri sono stato da Bianchi, la caldaia ha quindici anni e fa rumore",
+"mente"
+],
+[
+"da Bassi il bagno di sopra ha lo scarico a pavimento, non a parete",
+"mente"
+],
+[
+"oggi dal Valentini abbiamo finito le tracce, domani si chiude",
+"mente"
+],
+[
+"oggi dal Monti abbiamo finito le tracce, domani si chiude",
+"mente"
+],
+[
+"dal Riva la porta del garage si apre solo da dentro",
+"mente"
+],
+[
+"dal Ferrara la porta del garage si apre solo da dentro",
+"mente"
+],
+[
+"stamattina dalla Bianchi il vicino si è lamentato del rumore",
+"mente"
+],
+[
+"stamattina dalla Gallo il vicino si è lamentato del rumore",
+"mente"
+],
+[
+"da Marchetti il cancello automatico ogni tanto si ferma a metà",
+"mente"
+],
+[
+"da Neri il cancello automatico ogni tanto si ferma a metà",
+"mente"
+],
+[
+"sono passato dal Monti, le tegole sul lato nord sono da sostituire",
+"mente"
+],
+[
+"sono passato dal Valentini, le tegole sul lato nord sono da sostituire",
+"mente"
+],
+[
+"oggi da Bassi ho visto che il cappotto si sta staccando sotto il balcone",
+"mente"
+],
+[
+"oggi da Vitale ho visto che il cappotto si sta staccando sotto il balcone",
+"mente"
+],
+[
+"dalla Santini l'acqua calda arriva tiepida al secondo piano",
+"mente"
+],
+[
+"dalla Neri l'acqua calda arriva tiepida al secondo piano",
+"mente"
+],
+[
+"ieri dal Galli il cane in giardino non fa entrare nessuno, avvisare prima",
+"mente"
+],
+[
+"ieri dal Vitale il cane in giardino non fa entrare nessuno, avvisare prima",
+"mente"
+],
+[
+"da Grasso sotto il pavimento ci sono ancora i vecchi tubi in ferro",
+"mente"
+],
+[
+"da Fontana sotto il pavimento ci sono ancora i vecchi tubi in ferro",
+"mente"
+],
+[
+"stamattina dal Farina abbiamo trovato una trave crepata nel sottotetto",
+"mente"
+],
+[
+"stamattina dal Sala abbiamo trovato una trave crepata nel sottotetto",
+"mente"
+],
+[
+"oggi dalla Marchetti le prese della cucina non hanno la terra",
+"mente"
+],
+[
+"oggi dalla Vitale le prese della cucina non hanno la terra",
+"mente"
+],
+[
+"dal Rinaldi il muro portante non è dove diceva il progetto",
+"mente"
+],
+[
+"dal Santini il muro portante non è dove diceva il progetto",
+"mente"
+],
+[
+"sono stato da Galli, la vasca perde dal silicone, non dal tubo",
+"mente"
+],
+[
+"sono stato da Pellegrini, la vasca perde dal silicone, non dal tubo",
+"mente"
+],
+[
+"da Riva il condizionatore gocciola sul balcone del vicino",
+"mente"
+],
+[
+"da Caruso il condizionatore gocciola sul balcone del vicino",
+"mente"
+],
+[
+"dalla Vitale manca una fila di piastrelle uguali, sono fuori produzione",
+"mente"
+],
+[
+"dalla Fabbri manca una fila di piastrelle uguali, sono fuori produzione",
+"mente"
+],
+[
+"oggi dal Moretti il geometra ha detto che il muretto va rifatto",
+"mente"
+],
+[
+"oggi dal Martini il geometra ha detto che il muretto va rifatto",
+"mente"
+],
+[
+"ieri dalla Lombardi abbiamo lasciato la scala in cantina",
+"mente"
+],
+[
+"ieri dalla Rinaldi abbiamo lasciato la scala in cantina",
+"mente"
+],
+[
+"da Rinaldi il tetto in legno è più basso di quello che pensavamo",
+"mente"
+],
+[
+"da Fabbri il tetto in legno è più basso di quello che pensavamo",
+"mente"
+],
+[
+"Monti dice che il saldo lo fa a fine mese quando prende lo stipendio",
+"mente"
+],
+[
+"Galli dice che il saldo lo fa a fine mese quando prende lo stipendio",
+"mente"
+],
+[
+"il fornitore nuovo di piastrelle si chiama Ceramiche Sole, sembrano seri",
+"mente"
+],
+[
+"la signora Barbieri vuole sempre la fattura stampata, non per mail",
+"mente"
+],
+[
+"la signora Vitale vuole sempre la fattura stampata, non per mail",
+"mente"
+],
+[
+"Sala non risponde mai al telefono la mattina, meglio scrivergli",
+"mente"
+],
+[
+"Orlando non risponde mai al telefono la mattina, meglio scrivergli",
+"mente"
+],
+[
+"il magazzino di Conti chiude il sabato pomeriggio",
+"mente"
+],
+[
+"il magazzino di Farina chiude il sabato pomeriggio",
+"mente"
+],
+[
+"il geometra Valentini vuole le foto prima di ogni getto",
+"mente"
+],
+[
+"il geometra Neri vuole le foto prima di ogni getto",
+"mente"
+],
+[
+"Valentini paga sempre con assegno, mai bonifico",
+"mente"
+],
+[
+"Santini paga sempre con assegno, mai bonifico",
+"mente"
+],
+[
+"il cognato di Fontana fa l'idraulico, magari ci serve",
+"mente"
+],
+[
+"il cognato di Pellegrini fa l'idraulico, magari ci serve",
+"mente"
+],
+[
+"dalla Monti si parcheggia solo nel cortile dietro",
+"mente"
+],
+[
+"dalla Fontana si parcheggia solo nel cortile dietro",
+"mente"
+],
+[
+"Martini preferisce che si lavori dopo le nove",
+"mente"
+],
+[
+"Lombardi preferisce che si lavori dopo le nove",
+"mente"
+],
+[
+"il portiere del condominio Galli ha le chiavi della centrale termica",
+"mente"
+],
+[
+"il portiere del condominio Benedetti ha le chiavi della centrale termica",
+"mente"
+],
+[
+"Neri ha un gatto che scappa, tenere la porta chiusa",
+"mente"
+],
+[
+"Orlando ha un gatto che scappa, tenere la porta chiusa",
+"mente"
+],
+[
+"il rivenditore di Conti fa il dieci per cento se paghi subito",
+"mente"
+],
+[
+"il rivenditore di Riva fa il dieci per cento se paghi subito",
+"mente"
+],
+[
+"Conti ha detto che il bagno lo vuole tutto bianco",
+"mente"
+],
+[
+"Rinaldi ha detto che il bagno lo vuole tutto bianco",
+"mente"
+],
+[
+"la ditta Neri Impianti lavora bene ma è sempre in ritardo",
+"mente"
+],
+[
+"la ditta Lombardi Impianti lavora bene ma è sempre in ritardo",
+"mente"
+],
+[
+"Vitale è in ferie tutto agosto",
+"mente"
+],
+[
+"Sala è in ferie tutto agosto",
+"mente"
+],
+[
+"il consigliere Orlando vuole essere avvisato prima di ogni lavoro",
+"mente"
+],
+[
+"il consigliere Conti vuole essere avvisato prima di ogni lavoro",
+"mente"
+],
+[
+"Neri ha già un preventivo di un altro, il nostro deve essere chiaro",
+"mente"
+],
+[
+"Gallo ha già un preventivo di un altro, il nostro deve essere chiaro",
+"mente"
+],
+[
+"la figlia della Fontana si occupa lei dei pagamenti",
+"mente"
+],
+[
+"la figlia della Gallo si occupa lei dei pagamenti",
+"mente"
+],
+[
+"Grasso vuole le piastrelle grandi, almeno sessanta per sessanta",
+"mente"
+],
+[
+"Barbieri vuole le piastrelle grandi, almeno sessanta per sessanta",
+"mente"
+],
+[
+"fai fattura Orlando per la riparazione 380 euro",
+"documento"
+],
+[
+"fammi la fattura a Conti per il lavoro in bagno 480 più iva",
+"documento"
+],
+[
+"fammi la fattura a Pellegrini per il quadro 950 euro iva inclusa",
+"documento"
+],
+[
+"preventivo per Lombardi per la manutenzione 2.400 euro",
+"documento"
+],
+[
+"preventivo per Galli per l'intervento 480 più iva",
+"documento"
+],
+[
+"fattura a Fontana per la manutenzione 1.200 più iva",
+"documento"
+],
+[
+"fammi la fattura a Benedetti per la manutenzione 150 euro",
+"documento"
+],
+[
+"fattura a Valentini per la riparazione 480 più iva",
+"documento"
+],
+[
+"fattura Moretti per la manutenzione 3.100 euro più iva",
+"documento"
+],
+[
+"fammi la fattura a Rinaldi per l'intervento 3.100 euro più iva",
+"documento"
+],
+[
+"fattura Moretti 480 più iva",
+"documento"
+],
+[
+"fammi la fattura a Testa per la manutenzione 150 euro",
+"documento"
+],
+[
+"fai fattura Neri per la caldaia 720 euro",
+"documento"
+],
+[
+"preventivo per Valentini per l'intervento 950 euro iva inclusa",
+"documento"
+],
+[
+"fattura a Santini per il lavoro in bagno 2.400 euro",
+"documento"
+],
+[
+"preventivo Rinaldi per il quadro 380 euro",
+"documento"
+],
+[
+"fai fattura Riva per la manutenzione 640 euro più iva",
+"documento"
+],
+[
+"fattura a Martini per la caldaia 640 euro più iva",
+"documento"
+],
+[
+"fammi la fattura a Riva per l'intervento 150 euro",
+"documento"
+],
+[
+"fammi la fattura a Ferri per il lavoro in bagno 2.400 euro",
+"documento"
+],
+[
+"preventivo per Ferri per il quadro 480 più iva",
+"documento"
+],
+[
+"fattura a Valentini per il quadro 640 euro più iva",
+"documento"
+],
+[
+"preventivo per Martini 3.100 euro più iva",
+"documento"
+],
+[
+"preventivo per Orlando 1.200 più iva",
+"documento"
+],
+[
+"preventivo Valentini per la riparazione 720 euro",
+"documento"
+],
+[
+"fammi la fattura a Fabbri per la caldaia 950 euro iva inclusa",
+"documento"
+],
+[
+"preventivo per Conti per la riparazione 640 euro più iva",
+"documento"
+],
+[
+"fattura Farina 640 euro più iva",
+"documento"
+],
+[
+"preventivo Martini 720 euro",
+"documento"
+],
+[
+"fammi la fattura a Neri 1.200 più iva",
+"documento"
+],
+[
+"fattura a Orlando per il lavoro in bagno 380 euro",
+"documento"
+],
+[
+"preventivo Ferrara per la riparazione 720 euro",
+"documento"
+],
+[
+"fattura Sala per la manutenzione 720 euro",
+"documento"
+],
+[
+"preventivo per Gallo per il quadro 2.400 euro",
+"documento"
+],
+[
+"fattura a Vitale per il quadro 3.100 euro più iva",
+"documento"
+],
+[
+"preventivo per Riva per l'intervento 150 euro",
+"documento"
+],
+[
+"fammi la fattura a Valentini per il quadro 1.200 più iva",
+"documento"
+],
+[
+"fattura a Galli per la riparazione 720 euro",
+"documento"
+],
+[
+"preventivo Marchetti per la riparazione 3.100 euro più iva",
+"documento"
+],
+[
+"fattura a Santini per la manutenzione 950 euro iva inclusa",
+"documento"
+],
+[
+"fammi la fattura a Sala per la riparazione 950 euro iva inclusa",
+"documento"
+],
+[
+"fattura Santini per il quadro quattrocento euro",
+"documento"
+],
+[
+"fai fattura Sala per la riparazione 2.400 euro",
+"documento"
+],
+[
+"preventivo per Galli per la riparazione 950 euro iva inclusa",
+"documento"
+],
+[
+"preventivo per Sala per la caldaia 3.100 euro più iva",
+"documento"
+],
+[
+"in cucina a che altezza vanno le prese sopra il piano",
+"domanda"
+],
+[
+"che sezione di cavo serve per un forno da 3 kW",
+"domanda"
+],
+[
+"quanto deve asciugare il massetto prima di posare il parquet",
+"domanda"
+],
+[
+"in bagno a che distanza dalla doccia posso mettere l'interruttore",
+"domanda"
+],
+[
+"che pendenza deve avere uno scarico della lavatrice",
+"domanda"
+],
+[
+"quanti punti luce servono per una cucina di 12 metri",
+"domanda"
+],
+[
+"che colla si usa per le piastrelle in esterno",
+"domanda"
+],
+[
+"ogni quanto si fa il controllo fumi della caldaia",
+"domanda"
+],
+[
+"posso mettere il laminato sopra le piastrelle vecchie",
+"domanda"
+],
+[
+"serve la pratica per sostituire le finestre",
+"domanda"
+],
+[
+"quanto costa di solito rifare un bagno di sei metri",
+"domanda"
+],
+[
+"che garanzia devo dare su una caldaia nuova",
+"domanda"
+],
+[
+"il differenziale da 30 milliampere va bene per il bagno",
+"domanda"
+],
+[
+"quanto tempo ci vuole per un intonaco a calce",
+"domanda"
+],
+[
+"si può gettare il calcestruzzo con cinque gradi",
+"domanda"
+],
+[
+"che spessore di isolante serve sotto il pavimento radiante",
+"domanda"
+],
+[
+"come si calcola la potenza di un condizionatore per una stanza",
+"domanda"
+],
+[
+"conviene la pompa di calore in una casa vecchia",
+"domanda"
+],
+[
+"che vernice si usa per il ferro esterno",
+"domanda"
+],
+[
+"quanti metri quadri fa un sacco di rasante",
+"domanda"
+],
+[
+"va messa la messa a terra anche nel garage",
+"domanda"
+],
+[
+"ogni quanti anni si rifà la guaina del terrazzo",
+"domanda"
+],
+[
+"che differenza c'è tra cila e scia",
+"domanda"
+],
+[
+"mi ha pagato la Benedetti, no aspetta la Rinaldi, 2000 euro",
+"incasso"
+],
+[
+"la Valentini... no scusa la Conti, mi ha dato 300 euro",
+"incasso"
+],
+[
+"ha pagato Marchetti, anzi no Farina, 2000 euro in contanti",
+"incasso"
+],
+[
+"la Farina... no scusa la Barbieri, mi ha dato 300 euro",
+"incasso"
+],
+[
+"mi ha pagato la Fontana, no aspetta la Santini, 2000 euro",
+"incasso"
+],
+[
+"incassati 300 euro da Sala, no da Monti",
+"incasso"
+],
+[
+"Fabbri cioè Rinaldi mi ha fatto il bonifico di 300",
+"incasso"
+],
+[
+"incassati 450 euro da Santini, no da Neri",
+"incasso"
+],
+[
+"Bianchi cioè Barbieri mi ha fatto il bonifico di 2000",
+"incasso"
+],
+[
+"Sala cioè Benedetti mi ha fatto il bonifico di 300",
+"incasso"
+],
+[
+"ha pagato Caruso, anzi no Farina, 1200 euro in contanti",
+"incasso"
+],
+[
+"la Ferri... no scusa la Rinaldi, mi ha dato 150 euro",
+"incasso"
+],
+[
+"mi ha pagato la Caruso, no aspetta la Bassi, 450 euro",
+"incasso"
+],
+[
+"incassati 800 euro da Bassi, no da Neri",
+"incasso"
+],
+[
+"la Barbieri... no scusa la Moretti, mi ha dato 300 euro",
+"incasso"
+],
+[
+"lunedì alle 15 da Farina",
+"calendario"
+],
+[
+"martedì 10 e mezza Lombardi",
+"calendario"
+],
+[
+"Ferrara giovedì alle 16",
+"calendario"
+],
+[
+"giovedì 9 e mezza Sala",
+"calendario"
+],
+[
+"sabato 10 Gallo",
+"calendario"
+],
+[
+"Santini dopodomani alle 15",
+"calendario"
+],
+[
+"mercoledì alle 17 da Bianchi",
+"calendario"
+],
+[
+"Martini martedì ore 11 sopralluogo",
+"calendario"
+],
+[
+"lunedì alle 11 da Grasso",
+"calendario"
+],
+[
+"Martini dopodomani alle 8 e mezza",
+"calendario"
+],
+[
+"giovedì 10 e mezza Ferrara",
+"calendario"
+],
+[
+"Vitale martedì alle 16",
+"calendario"
+],
+[
+"Rinaldi giovedì alle 10 e mezza",
+"calendario"
+],
+[
+"Barbieri mercoledì ore 10 e mezza sopralluogo",
+"calendario"
+],
+[
+"Pellegrini venerdì ore 8 e mezza sopralluogo",
+"calendario"
+],
+[
+"lunedì alle 8 e mezza da Caruso",
+"calendario"
+],
+[
+"Farina venerdì ore 11 sopralluogo",
+"calendario"
+],
+[
+"giovedì alle 10 da Farina",
+"calendario"
+],
+[
+"Pellegrini lunedì alle 15",
+"calendario"
+],
+[
+"martedì alle 9 e mezza da Gallo",
+"calendario"
+],
+[
+"giovedì 8 e mezza Benedetti",
+"calendario"
+],
+[
+"Caruso giovedì 10",
+"calendario"
+],
+[
+"Conti dopodomani 10 e mezza",
+"calendario"
+],
+[
+"mercoledì 16 Testa",
+"calendario"
+],
+[
+"Testa giovedì alle 9",
+"calendario"
+],
+[
+"passare in ferramenta per il tassellante",
+"mente"
+],
+[
+"mi serve i tasselli da 8 per domani",
+"mente"
+],
+[
+"devo comprare il silicone trasparente",
+"mente"
+],
+[
+"ricordarsi di prendere la colla per piastrelle",
+"mente"
+],
+[
+"devo comprare le viti da legno",
+"mente"
+],
+[
+"devo comprare il nastro telato",
+"mente"
+],
+[
+"mi serve due sacchi di cemento per domani",
+"mente"
+],
+[
+"ricordarsi di prendere la guaina liquida",
+"mente"
+],
+[
+"devo comprare i raccordi da tre quarti",
+"mente"
+],
+[
+"passare in ferramenta per il flessibile della doccia",
+"mente"
+],
+[
+"passare in ferramenta per le lame per il seghetto",
+"mente"
+],
+[
+"passare in ferramenta per la livella nuova",
+"mente"
+],
+[
+"devo comprare il cavo da 2,5",
+"mente"
+],
+[
+"passare in ferramenta per le scatole da incasso",
+"mente"
+],
+[
+"devo prendere il primer",
+"mente"
+],
+[
+"mi serve le punte da muro per domani",
+"mente"
+],
+[
+"apri la fotocamera che faccio la foto al quadro",
+"foto"
+],
+[
+"apri la camera che fotografo la crepa",
+"foto"
+],
+[
+"fammi aprire la fotocamera per il contatore",
+"foto"
+],
+[
+"apri la fotocamera, foto al tracciato",
+"foto"
+],
+[
+"apri la fotocamera che scatto la foto alla perdita",
+"foto"
+],
+[
+"voglio fare una foto al cantiere, apri la camera",
+"foto"
+],
+[
+"apri la fotocamera che faccio le foto del bagno",
+"foto"
+],
+[
+"apri la camera che fotografo la targhetta della caldaia",
+"foto"
+],
+[
+"apri la fotocamera per la foto del preventivo firmato",
+"foto"
+],
+[
+"apri fotocamera foto al tetto",
+"foto"
+]
+]
+}

@@ -1374,7 +1374,11 @@
     const iVerbo = pp.findIndex((x) => VERBO_CAMBIO.test(x.n));
     const iMotivo = pp.findIndex((x, k) => k > Math.max(0, iVerbo) && /^(?:che|perche|siccome|cosi|visto)$/.test(x.n));
     const [da, a] = iVerbo > 0 ? [0, iVerbo] : [0, iMotivo > 0 ? iMotivo : pp.length];
-    const tempiRiconosci = iVerbo >= 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i < iVerbo) : tempi;
+    /* Col verbo in testa ("rimanda il Tomasin di domani a giovedì") il giorno che dice QUALE impegno
+       è quello dopo "di/del" (giro 20: senza, "domani" non contava e veniva proposto un impegno di venerdì) */
+    const tempiRiconosci = iVerbo > 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i < iVerbo)
+      : iVerbo === 0 && !ANNULLA_PAROLE.test(n) ? tempi.filter((t) => t.i > 0 && /^(?:di|del|della|dello|dell|dei|delle|degli)$/.test(pp[t.i - 1].n))
+      : tempi;
     // Le parole che dicono QUALE impegno (cliente, lavoro, posto)
     const piene = pp.filter((x, k) => k >= da && k < a && !usateTempo.has(k) && x.n.length >= 3 && !VUOTE.has(x.n) && !PAROLE_NON_NOME.test(x.n) && numeroParola(x.n) === null).map((x) => x.n);
     /* Detto un nome ("rimanda il Tomasin di domani"), un impegno che lo combacia solo per il
@@ -1401,7 +1405,8 @@
       const giorniDetti = tempiRiconosci.filter((t) => t.giornoIso);
       const tipoOk = tipiDetti.some((w) => suo.some((x) => x.slice(0, 5) === w.slice(0, 5)));
       const giornoOk = giorniDetti.some((t) => t.giornoIso === giornoDi(imp.iso));
-      const estraneo = tipiDetti.length > 0 && giorniDetti.length > 0 && !tipoOk && !giornoOk;
+      // detto il giorno per riconoscerlo ("il Tomasin di domani"), un impegno di un altro giorno non è lui
+      const estraneo = (tipiDetti.length > 0 && giorniDetti.length > 0 && !tipoOk && !giornoOk) || (giorniDetti.length > 0 && !giornoOk);
       return { imp, p, parole, estraneo };
     }).filter((x) => (x.parole > 0 || (x.p >= 4 && !nomiDetti)) && !x.estraneo).sort((a, b) => b.p - a.p);
     const migliori = [];
@@ -1579,7 +1584,10 @@
     else if (/\b(?:lavori|giri|appuntament\w*|impegn\w*|consegn\w*)\b.*\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mese)\b|\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b.*\b(?:lavori|giri|appuntament\w*|impegn\w*)\b|\bc\s*ho\b|\bcom\s*e\s+messa\b|\b(?:riepilogo|punto|riassunto)\s+dei\s+lavori\b|\bquand\s*e\s+che\s+devo\b|\bin\s+agenda\b/.test(n)) tema = "agenda";
     else if ((/\b(?:cosa|che)\s+(?:mi\s+)?(?:ero|avevo)\s+segnat\w*\b/.test(n) || NOTE_SEGNATE.test(n)) && cliente) tema = "note_cliente";
     if (!tema) tema = temaDomanda(n);
-    return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim() } : null;
+    const forte = DOMANDA_DATI_FORTE.test(n) || tema === "note_cliente";
+    // per "l'ultima volta dai Tosi", "il numero del Merlo": il nome detto, anche se non è in rubrica
+    const nomeDetto = !cliente && /^(?:ultima_visita|contatto)$/.test(tema || "") ? ((p.testo.match(/\b(?:da|dal|dalla|dai|dalle|dallo|del|della|dello|dei|delle|di)\s+((?:l['’]\s*)?\p{Lu}[\p{L}'’]+(?:\s+\p{Lu}[\p{L}'’]+)?|[\p{L}'’]+)/u) || [])[1] || "").replace(/^l['’]\s*/, "") : "";
+    return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim(), forte, nomeDetto } : null;
   }
 
   /* ---------------- SAL: stato avanzamento lavori (passo 3, 30/09/2026) ----------------
@@ -1865,8 +1873,17 @@
 
   /* Temi delle domande sui dati: basta che ci sia la parola del tema */
   // "cosa mi ero scritto sull'Endrizzi", "le misure della cucina Pedrotti me le ero segnate?" (giro 19)
-  const NOTE_SEGNATE = /\b(?:cosa|che\s+cosa|che)\s+(?:mi\s+|m\s+)?(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:me\s+)?l[aoie]?\s+(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:avevo|ero)\s+(?:segnat|scritt|annotat|appuntat)\w*\s+qualcosa/;
+  const NOTE_SEGNATE = /^(?:\S+\s+){0,2}(?:cosa|che|che\s+cosa|quant\w*|quale|quali)\b(?:\s+\S+){0,3}\s+(?:mi\s+|m\s+)?avevo\s+(?:detto|dett[aoie])\b|\b(?:cosa|che\s+cosa|che)\s+(?:mi\s+|m\s+)?(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:me\s+)?l[aoie]?\s+(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:avevo|ero)\s+(?:segnat|scritt|annotat|appuntat)\w*\s+qualcosa/;
+  /* Domande sui propri dati dette chiare (1/10/2026, giro 16-20: andavano all'AI). Vale anche
+     quando il modello pensa ad altro ("fammi vedé le fatture non pagate"): lo dice la forma */
+  const DOMANDA_DATI_FORTE = /\bl\s+ultima\s+volta\s+che\s+(?:sono|siamo)\s+(?:stat|andat|passat)\w*|\bquant\s*e\s+che\s+(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b|\bda\s+quanto\s+(?:tempo\s+)?(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b|\b(?:numero|telefono|cellulare)\s+(?:di|del|della|dello|dei|dell)\b.*\b(?:ce\s+l\s+ho|c\s+l\s+ho|ce\s+l\s+hai|ce\s+l\s+abbiamo)\b|\bche\s+numero\s+ha\b|\b(?:soldi|contanti)\b.*\b(?:preso|presi|dato|dati|incassat\w*|entrat\w*)\b|\b(?:fatture|preventivi)\b.*\b(?:non\s+pagat\w*|non\s+firmat\w*|ancora\s+aperti)\b|\bschei\b.*\bricever|\bdevo\s+(?:ancora\s+)?ricevere\b|\bquanto\s+sto\s+(?:pien|impegnat|caric)\w*|\bchi\s+(?:e\s+che\s+)?deve\s+pass\w*|\bdovevo\s+ricordar\w*|\bpunto\s+dei\s+lavori\b|\bl\s+avevo\s+mess[aoie]\b|\bappuntamenti\s+(?:della|di\s+questa|di)\s+(?:settimana|domani|oggi)|\bultim[oa]\s+(?:preventivo|fattura)\b.*\bquanto\b|^l\s+ho\s+(?:gia\s+)?fatt[ao]\s+(?:la|il)\s+(?:fattura|preventivo)\b|^ho\s+(?:gia\s+)?mandato\s+(?:la|il)\s+(?:fattura|preventivo)\b/;
   function temaDomanda(n) {
+    if (/\bl\s+ultima\s+volta\s+che\s+(?:sono|siamo)\s+(?:stat|andat|passat)\w*|\bquant\s*e\s+che\s+(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b|\bda\s+quanto\s+(?:tempo\s+)?(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b/.test(n)) return "ultima_visita";
+    if (/\b(?:numero|telefono|cellulare)\s+(?:di|del|della|dello|dei|dell)\b.*\b(?:ce\s+l\s+ho|c\s+l\s+ho|ce\s+l\s+hai|ce\s+l\s+abbiamo)\b|\bche\s+numero\s+ha\b/.test(n)) return "contatto";
+    if (/\b(?:fatture|preventivi)\b.*\bnon\s+pagat\w*|\bschei\b.*\bricever|\bdevo\s+(?:ancora\s+)?ricevere\b/.test(n)) return "crediti";
+    if (/\b(?:soldi|contanti)\b.*\b(?:preso|presi|dato|dati|incassat\w*|entrat\w*)\b/.test(n)) return "incassi";
+    if (/\b(?:preventivi|fatture)\b.*\b(?:non\s+firmat\w*|ancora\s+aperti)\b|\bultim[oa]\s+(?:preventivo|fattura)\b.*\bquanto\b|^l\s+ho\s+(?:gia\s+)?fatt[ao]\s+(?:la|il)\s+(?:fattura|preventivo)\b|^ho\s+(?:gia\s+)?mandato\s+(?:la|il)\s+(?:fattura|preventivo)\b/.test(n)) return "documenti";
+    if (/\bquanto\s+sto\s+(?:pien|impegnat|caric)\w*|\bchi\s+(?:e\s+che\s+)?deve\s+pass\w*|\bdovevo\s+ricordar\w*|\bpunto\s+dei\s+lavori\b|\bl\s+avevo\s+mess[aoie]\b/.test(n)) return "agenda";
     if (NOTE_SEGNATE.test(n)) return "note_cliente";
     if (/\biva\b/.test(n)) return "iva";
     if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|quanto\s+(?:mi\s+|ci\s+|m\s+)?dev(?:e|ono)|(?:mi|ci)\s+dev(?:e|ono)|dev(?:e|ono)\s+(?:ancora|dare|pagare|saldare)|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|prendere\s+ancora|ancora\s+da\s+prendere|devo\s+(?:ancora\s+)?prendere|moros\w*|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
