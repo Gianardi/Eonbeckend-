@@ -198,7 +198,7 @@
     ["nuovo cliente [Andrea e Sara Bellotti]{CHI} [via Pace 3 Monza]{IND}", "cliente"],
 
     ["quanto mi deve ancora [Cremonesi]{CHI}", "dati"],
-    ["quanto ho fatturato a [settembre]{GIO}", "dati"],
+    ["ué quanto ho fatturato in tutto a [settembre]{GIO} tra cantieri e manutenzioni", "dati"],
     ["che appuntamenti ho [domani]{GIO}", "dati"],
     ["dove abita [Mantegazza]{CHI}", "dati"],
     ["qual è il numero di [Ponteggi Lario]{CHI}", "dati"],
@@ -326,7 +326,7 @@
     ["l'amministratore [Bellini]{CHI} ha convocato l'[assemblea straordinaria]{LAV} per il [tetto]{LAV}", "assemblea"],
     ["registra l'[assemblea]{LAV} che sta iniziando adesso", "assemblea"],
 
-    ["ciao EON sono in furgone", "saluto"],
+    ["ciao EON sono in furgone sulla tangenziale", "saluto"],
     ["buongiorno EON si parte", "saluto"],
     ["ué ciao come va oggi", "saluto"],
     ["grazie mille sei una bomba", "saluto"],
