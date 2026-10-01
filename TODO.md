@@ -4999,6 +4999,38 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### Notte del 1/10: importi v5, giro 20 alla cieca (ROADMAP 0b.19 passo 5)
+- Dettagli v5: `scritte/m07.txt` (misure dentro la frase = O, date, correzioni su prezzo e quantità,
+  "al mese per N mesi" = MOLT, percentuali su un importo = PERC/BASE, "togli X" = SCOV, "solo gli 80" = FIN).
+  `conDettagli`: soglia 0,7 quando il modello vede un ruolo speciale (SCO|SCOV|PERC|BASE|ANN|MOLT|FIN),
+  0,98 altrimenti; guardie `totaleDetto`, percentuale senza ruolo, `scontoSenzaParola`, percentuale
+  "in/nella/come nota"; il modello legge la frase GIÀ corretta da `togliRipensamenti` se cambia.
+- Regole (`lettore.js`): `RIPENSA_IMPORTO` con `PER_UNITA_DETTO` in mezzo ("a 220 l'uno no a 250") e
+  "no" / "no anzi" da solo; `ripensaInFondo` ("…non a 290 anzi 310": sostituisce l'ultimo 290 di prima);
+  `conCentesimi` ("6 euro e cinquanta" = 6,50); voce in meno se la parola prima del prezzo è
+  meno/togli/leva…; `percentualeSuBase` (solo 2 numeri, non IVA/sconto/nota, le regole avevano la base);
+  `scontoPercentuale` (voce "Sconto N%" se il modello non ha deciso); "120 a boiler" (`qtaRif`: il nome
+  dopo "a/al/per/ogni" che combacia con una cosa contata prima); `civiciDi`: il civico solo subito dopo
+  il nome della via (parole maiuscole o particelle) e non se è "N cose a PREZZO"; `centimetri/millimetri`
+  in `UNITA`; "venerdì nove e mezza" (ora a parole nuda dopo il giorno, solo con e mezza/un quarto/tre
+  quarti); `leggiModificaImpegno`: detti tipo E giorno, un impegno né di quel tipo né di quel giorno è
+  scartato; incasso: non con "se … ha pagato" né "ricordami…".
+- App/server: `capisciUrgenza` e tre regex (`index.html` meteo, `api` `RIFERIMENTO_TEMPO_RAPIDO`,
+  `TEMPO_PRECISO`) avevano `gioved[iì]\b`: con la "ì" il `\b` non c'è → giovedì non riconosciuto;
+  ora `(?![\wàèéìòù])`. Assemblea dal modello: non se la frase sposta/annulla (`cambiaAssemblea`).
+  Parafrasi "dov'è il… aprilo" → "mostrami il…".
+- Prova `frasi-nuove-mestieri.test.js`: tocca "Sì, sposta"/"Crea"/"Scatta" solo se la card è aperta
+  (giro 20: 25 appunti giusti contati come sbagliati per un tasto nascosto rimasto da una frase prima).
+- Giro 20: scritto prima di misurare come `giro20-cieco.json` (nome che le prove non leggono), misurato
+  una volta (934), poi rinominato `frasi-giro20.json` e messo nell'esame di `prepara.mjs`. Dopo: 981.
+- Prove: `giro20-regole.test.mjs` (nuova); `modello-dettagli.test.mjs` MINIMO 550 (628 frasi, giri 8-20).
+- Da fare: "apri/cerca un documento" (14 all'AI nel giro 20); misure nei preventivi ("4 metri per 6",
+  "250 A", "da 25 watt", "trenta per quaranta"); quantità che vale per più voci ("due poltroncine 220
+  l'una e doratura 380 l'una"); preventivi che il cassetto manda altrove (con "togli", "assemblea",
+  "cliente nuovo" nella frase); "rimanda il Tomasin di domani" propone un impegno di domani senza
+  Tomasin (scartare se il nome detto non c'è); nella prova, l'incasso da chi non è in rubrica conta
+  sbagliato anche se EON fa la domanda giusta.
+
 ### Correzioni del giro 18, giro 19, considerazioni del tester (30/09 sera – 1/10, ROADMAP 0b.19 passo 5)
 - `lettore.riscrivi`: `nomeLibero(annuncio)` — per chiamata/messaggio/incasso senza cliente in rubrica,
   il nome con la maiuscola dopo "chiama/ciama/wa/sms/scrivi" o "da/dal/dalla" (saltando articoli,

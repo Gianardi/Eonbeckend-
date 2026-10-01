@@ -675,6 +675,38 @@ sporca, dialetti, chat, anziano, straniero.
    - **Prossimo:** importi (la parte più debole: correzioni "950, no scusa 980",
      acconti e sconti detti in tanti modi), poi un allenamento grande del modello dei
      cassetti con tutte le frasi nuove.
+
+   **Notte del 1/10: importi, giro 20 alla cieca.**
+   - **Modelli degli importi v5** (frasi scritte a mano m07, dagli errori del giro 19) e
+     regole nuove: correzione col prezzo per unità ("a 220 l'uno no a 250", "a 45 al metro
+     anzi 42") o detta in fondo ("le telecamere non a 290 anzi 310"), "6 euro e cinquanta",
+     "meno 50 di sconto", "il 2 per cento su 85.000", "sconto del 10 per cento",
+     "installazione 120 a boiler" (per ognuno dei 3 boiler), il civico della via che non
+     ruba la quantità ("via Leuca impianto idrico 4 bagni"), una percentuale detta "in nota"
+     che non entra nel conto. Sulle 628 frasi con importo dei giri 8-20: regole da sole 535,
+     regole + modello 553 (ieri sulle 524 dei giri 8-19: 450, oggi 464).
+   - **Altro codice:** incasso da chi non è in rubrica ("Lo aggiungo e segno l'incasso?" con
+     un tocco); "venerdì nove e mezza" senza "alle"; "giovedì" con l'accento non era
+     riconosciuto in tre controlli (un appuntamento di giovedì diventava un'urgenza);
+     "ricordami di ricontrollare SE ha pagato" è un promemoria, non un incasso; "l'assemblea
+     di domani spostala alle 19" sposta, non ne crea una nuova; spostare non propone più un
+     impegno di altro tipo e altro giorno (la riunione era già annullata ed EON proponeva di
+     spostare la polizza).
+   - **Modello dei cassetti:** riallenato con le frasi mirate e quelle di ChatGPT: meglio sui
+     giri 18-19, ma sbaglia 3 frasi vere di Andrea ("Controllare assicurazioni infortunio").
+     **Resta quello di prima.**
+   - **Giro 20 alla cieca** (5 scrittori nuovi: impresa edile a Brescia, idraulico a Lecce,
+     elettricista a Udine, amministratrice a Napoli, restauratore di mobili a Siena; 1.052
+     frasi, `eval/dati/frasi-giro20.json`): **934 al primo colpo (89%)**, come il giro 19.
+     Nota onesta: 25 di quegli errori erano della prova, non dell'app (la prova toccava un
+     tasto "Sì, sposta" rimasto nascosto da una frase prima): l'app vera era a circa 959 (91%).
+     **Dopo le correzioni: 981 su 1.052 (93%)**, 31 all'AI, 40 sbagliate.
+   - **Dove sbaglia ancora (giro 20):** 15 importi (misure dentro la frase "4 metri per 6",
+     "250 A", "da 25 watt"; "due poltroncine 220 l'una e doratura 380 l'una"), 14 "apri/cerca
+     un documento" che vanno all'AI, 8 domande sui dati, frasi in dialetto toscano e
+     salentino, chiacchiere che diventano appunti.
+   - **Prossimo:** "apri/cerca un documento" col codice; le misure nei preventivi; poi un
+     allenamento grande del modello dei cassetti (giri 18-20 tutti nell'esame).
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo

@@ -1,5 +1,5 @@
 {
- "nota": "Giro 20 (1/10/2026, notte): ESAME ALLA CIECA dopo le correzioni del giro 19. Frasi scritte da 5 scrittori NUOVI indipendenti (uno per mestiere: impresa edile a Brescia, idraulico a Lecce, elettricista a Udine, amministratrice di condominio a Napoli, restauratore di mobili a Siena) che NON hanno visto il codice di EON né i giri precedenti: solo le istruzioni con le etichette. Salvate nel repository PRIMA di misurare (con un nome che le prove automatiche non leggono, per non vederle prima); misurate una volta prima di correggere. Nomi inventati.",
+ "nota": "Giro 20 (1/10/2026, notte): ESAME ALLA CIECA dopo le correzioni del giro 19. Frasi scritte da 5 scrittori NUOVI indipendenti (uno per mestiere: impresa edile a Brescia, idraulico a Lecce, elettricista a Udine, amministratrice di condominio a Napoli, restauratore di mobili a Siena) che NON hanno visto il codice di EON né i giri precedenti: solo le istruzioni con le etichette. Salvate nel repository PRIMA di misurare (col nome giro20-cieco.json, che le prove automatiche non leggono, per non vederle prima); misurate una volta prima di correggere: 934/1052 al primo colpo (25 errori erano della prova), 981 dopo le correzioni. Nomi inventati.",
  "mestieri": {
   "edile": {
    "clienti": [
