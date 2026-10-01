@@ -401,7 +401,9 @@ async function main() {
          nel messaggio successivo. */
       await invia("come va il lavoro questo mese", { stato: "concluso", testo: "Non lo so.", azioni: [] });
       // Turno 2: il server dichiara un focus esplicito (foto del cantiere Trani).
-      await invia("fammi vedere le foto del cantiere Trani", {
+      // (dal 1/10 "fammi vedere le foto del cantiere Trani" la cerca il codice e, se non c'è, dice
+      // "Non lo trovo" senza AI: qui serve una frase che arrivi al server)
+      await invia("secondo te come sta andando il cantiere Trani?", {
         stato: "concluso", testo: "Ecco le foto.", azioni: [],
         focus: { tipo: "foto", riferimento: "cantiere Trani" },
       });

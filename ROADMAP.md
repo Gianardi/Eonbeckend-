@@ -707,6 +707,20 @@ sporca, dialetti, chat, anziano, straniero.
      salentino, chiacchiere che diventano appunti.
    - **Prossimo:** "apri/cerca un documento" col codice; le misure nei preventivi; poi un
      allenamento grande del modello dei cassetti (giri 18-20 tutti nell'esame).
+
+   **1/10 mattina: "cerca un documento" lo fa il codice** (Andrea: "se l'artigiano chiede una
+   cosa EON gliela fa subito").
+   - "Trovami il computo del capannone Zanola", "cerca lo schema dell'impianto della masseria",
+     "dov'è il regolamento…": il codice cerca ovunque (documenti dell'impresa, allegati dei
+     clienti, foto con la loro nota) e lo apre. Se non c'è lo dice subito ("Non lo trovo",
+     con il tasto **Carica il documento**). Prima andava all'AI, che non lo trovava lo stesso.
+   - "fammi vedé le foto…" (dialetto) è vedere, non fare una foto.
+   - Spostare: detto un nome ("rimanda il Tomasin di domani"), un impegno che combacia solo per
+     il giorno non viene proposto.
+   - App: giro 18 987 (+11), 19 995 (+4), **20 997 (+16, 95%)**; giri 5-17 uguali.
+   - Modello dei cassetti riallenato di nuovo (con il giro 20 nell'esame): nell'app +2/+3 sui
+     giri 16, 18, 20 ma −5 sul giro 17 e −1 sull'11 → **non messo**. Prossimo: frasi mirate per
+     i racconti di cantiere (appunti) e le fatture brevi, poi riprovare.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo

@@ -4999,6 +4999,24 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 mattina: documenti cercati dal codice (ROADMAP 0b.19 passo 5)
+- `index.html provaCercaOvunque` (dopo `provaDocumentoImpresa` e `provaRisorsaImmediata`): solo con
+  un verbo di ricerca in testa (`VERBI_CERCA`: trovami/cerca/apri/mostrami/fammi vedé/dov'è…) e una
+  cosa da cercare (`COSE_DA_CERCARE`: computo, permesso, schema, libretto, verbale, contratto,
+  regolamento, scheda tecnica, certificato, polizza, foto, pdf…; NON fatture/preventivi/mail, che
+  hanno le loro funzioni, NON "scheda" da sola). Cerca in `cantiereDocumenti`, allegati e documenti
+  delle chat dei clienti, `cantiereFoto` (nota, descrizione, cliente); combacia se ≥60% delle parole
+  utili. Niente → `domandaDelCodice` "Non lo trovo" con "Carica il documento" (Documenti impresa).
+  Esclusi: `chiedeDiFare`, importi, "apri la fotocamera / faccio la foto". Senza verbo NON usa il
+  modello ("mi manca il certificato della caldaia" è un appunto; "DURC machi Alessia" resta al DURC).
+- `chiedeDiFare` e la foto immediata: "vedé/vede" (dialetto) = vedere.
+- `leggiModificaImpegno`: `nomiDetti` → con un nome detto non vale il solo giorno.
+- Prove: `cerca-ovunque-app.test.js` (nuova, FOTO=file per lo screenshot); `router.test.js` turno 2
+  ora "secondo te come sta andando il cantiere Trani?" (la frase di prima la cerca il codice);
+  `frasi-nuove-mestieri.test.js`: "Lo aggiungo e segno l'incasso?" per chi non è in rubrica = giusta.
+- Modello dei cassetti riallenato (`maestri4`, c23, giro 20 nell'esame): da solo +8 g16, +15 g18,
+  +14 g19, +4 g20, −2 g17, Andrea uguale; nell'app g11 −1, g17 −5 → non adottato (file in scratchpad).
+
 ### Notte del 1/10: importi v5, giro 20 alla cieca (ROADMAP 0b.19 passo 5)
 - Dettagli v5: `scritte/m07.txt` (misure dentro la frase = O, date, correzioni su prezzo e quantità,
   "al mese per N mesi" = MOLT, percentuali su un importo = PERC/BASE, "togli X" = SCOV, "solo gli 80" = FIN).

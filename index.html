@@ -15401,10 +15401,13 @@ const PAROLE_VUOTE_CERCA = /^(?:il|lo|la|i|gli|le|l|un|una|uno|di|del|della|dell
 function provaCercaOvunque(testo){
   const t = String(testo || "").trim().replace(/[.!?]+$/, "");
   if(!t || chiedeDiFare(t)) return false;
+  // solo con una parola che chiede di cercare ("trovami", "apri", "dov'è"…): "mi manca il certificato
+  // della caldaia" è un appunto, non una ricerca
   const m = t.match(VERBI_CERCA);
-  const neurale = !m && cassettoNeurale(t, 0.9) === "cerca_documento";
-  const cosa = m ? m[1] : neurale ? t : "";
+  const cosa = m ? m[1] : "";
   if(!cosa || !COSE_DA_CERCARE.test(cosa)) return false;
+  // "apri la fotocamera che faccio la foto": è fare una foto
+  if(/\b(?:fotocamera|camera|scatt\p{L}*|faccio\s+(?:la|una|le|delle)\s+fot\p{L}*|fare\s+(?:la|una|le)\s+fot\p{L}*)\b/iu.test(cosa)) return false;
   // un importo è un documento da FARE ("cerca di fare la fattura da 300…"), non da cercare
   if(/\d[\d.,]*\s*(?:euro|€)|€/.test(cosa) || /\b(?:crea|creami|fai|fammi\s+un|fammi\s+una|prepara|preparami|nuov[oa]|carica|caricami)\b/i.test(cosa)) return false;
   const parole = normalizzaComando(cosa).split(" ").filter(w => w.length > 1 && !PAROLE_VUOTE_CERCA.test(w));
