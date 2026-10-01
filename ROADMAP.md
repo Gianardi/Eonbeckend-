@@ -734,6 +734,13 @@ sporca, dialetti, chat, anziano, straniero.
    - Il modello dice "chiamata" ma nella frase non c'è una parola da telefono: non chiama.
    - Modello dei cassetti riallenato con 232 frasi mirate (c24): nell'app giro 18 +4, 17 +2, 5 +2,
      ma giro 19 −5 (domande di mestiere "meglio X o Y") → **non messo**, di nuovo.
+
+   **1/10 sera: le misure nei preventivi non entrano nel conto.** "Vetrata 3 metri per 2 850 euro"
+   (contava 2 €), "4 finestre da 120 per 140 a 920" (140 finestre), "diametro 110", "da 1 pollice",
+   "2 metri e 40", "3 cavalli", "250 A", "intervento del 24 settembre": la misura resta nella
+   descrizione ("3x2m") e il conto è giusto. "8 tavoli a 450 e 32 sedie" non sono 450,32 €.
+   Importi giusti sulle 628 frasi dei giri 8-20: 568 (prima 553). App: giro 16 1.044, 17 1.040,
+   18 998, 19 1.008, **20 1.011 (96%)**.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
