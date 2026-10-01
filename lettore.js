@@ -1024,7 +1024,7 @@
     const libero = nome ? null
       : intento === "chiamata" ? nomeLibero(/^(?:chiama|chiamami|chiamare|chiamà|ciama|ciamar|ciamame|telefona|telefonare|telefonà|parla|parlà|parlare)$/)
       : intento === "messaggio" ? nomeLibero(/^(?:wa|whatsapp|whats|wapp|sms|messaggio|scrivi|scrivigli|scrivere)$/)
-      : intento === "incasso" ? nomeLibero(/^(?:da|dal|dalla|dallo|dai)$/)
+      : intento === "incasso" ? (nomeLibero(/^(?:da|dal|dalla|dallo|dai)$/) || nomeLibero(/^(?:signora|signor|signore|dottor|dottore|dottoressa|ingegner|geometra|avvocato)$/))
       : null;
     switch (intento) {
       case "chiamata": return nome ? "chiama " + nome : libero ? "chiama " + libero.nome : null;
@@ -1467,7 +1467,7 @@
     else if (/\bnon\s+(?:mi\s+|m\s+)?(?:paga|pagano|ha\s+(?:ancora\s+)?pagato|hanno\s+(?:ancora\s+)?pagato|(?:ha|hanno)\s+(?:ancora\s+)?dato)\b|\bda\s+riscuotere\b|\briscuot\w*\b|\bmi\s+deve\w*\b/.test(n)) tema = "crediti";
     else if (/\b(?:quanto|cosa)\b.*\b(?:dato|versato|pagato|preso|saldato)\b|\b(?:ha|hanno)\s+(?:gia\s+)?(?:saldato|pagato)\b|\bacconto\b.*\b(?:dato|dat[oi]|versat[oi])\b|\b(?:riepilogo|riassunto|resoconto)\s+degli\s+incassi\b|\bquanto\s+ho\s+(?:preso|incassato)\b/.test(n)) tema = "incassi";
     else if (/\b(?:lavori|giri|appuntament\w*|impegn\w*|consegn\w*)\b.*\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mese)\b|\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b.*\b(?:lavori|giri|appuntament\w*|impegn\w*)\b|\bc\s*ho\b|\bcom\s*e\s+messa\b|\b(?:riepilogo|punto|riassunto)\s+dei\s+lavori\b|\bquand\s*e\s+che\s+devo\b|\bin\s+agenda\b/.test(n)) tema = "agenda";
-    else if (/\b(?:cosa|che)\s+(?:mi\s+)?(?:ero|avevo)\s+segnat\w*\b/.test(n) && cliente) tema = "note_cliente";
+    else if ((/\b(?:cosa|che)\s+(?:mi\s+)?(?:ero|avevo)\s+segnat\w*\b/.test(n) || NOTE_SEGNATE.test(n)) && cliente) tema = "note_cliente";
     if (!tema) tema = temaDomanda(n);
     return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim() } : null;
   }
@@ -1750,7 +1750,10 @@
   const DOC_IMPRESA = /^(?:durc|visura|camerale|dvr|pos|polizza|assicurazione|rct|rc|soa|f24|unilav|dico)$/;
 
   /* Temi delle domande sui dati: basta che ci sia la parola del tema */
+  // "cosa mi ero scritto sull'Endrizzi", "le misure della cucina Pedrotti me le ero segnate?" (giro 19)
+  const NOTE_SEGNATE = /\b(?:cosa|che\s+cosa|che)\s+(?:mi\s+|m\s+)?(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:me\s+)?l[aoie]?\s+(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:avevo|ero)\s+(?:segnat|scritt|annotat|appuntat)\w*\s+qualcosa/;
   function temaDomanda(n) {
+    if (NOTE_SEGNATE.test(n)) return "note_cliente";
     if (/\biva\b/.test(n)) return "iva";
     if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|quanto\s+(?:mi\s+|ci\s+|m\s+)?dev(?:e|ono)|(?:mi|ci)\s+dev(?:e|ono)|dev(?:e|ono)\s+(?:ancora|dare|pagare|saldare)|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|prendere\s+ancora|ancora\s+da\s+prendere|devo\s+(?:ancora\s+)?prendere|moros\w*|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
     if (/\b(?:incassato|incassi|entrat[oaie]|guadagnat[oaie]|guadagno|fatturato|tirato\s+su|preso\s+di\s+acconto|acconti?\s+(?:ho|mi)\b)\b/.test(n)) return "incassi";
