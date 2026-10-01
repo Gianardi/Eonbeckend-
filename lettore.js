@@ -828,6 +828,11 @@
   let DETTAGLI = [];
   function usaDettagli(lista) { DETTAGLI = (lista || []).filter((m) => m && m.pronto && m.pronto()); return DETTAGLI.length; }
   const SICURO_DETTAGLI = 0.98;
+  /* Con uno sconto, un acconto, una percentuale, una correzione, "per 12 mesi" o un prezzo
+     finale le regole sbagliano spesso e il modello ha ragione anche se è meno sicuro: lì basta
+     0,7 (giri 8-18: da 366 a 375 giuste su 420, nessuna rotta; misurato il 1/10). */
+  const SICURO_DETTAGLI_SPECIALI = 0.7;
+  const RUOLI_SPECIALI = /^(?:SCO|SCOV|PERC|BASE|ANN|MOLT|FIN)$/;
   function dettagliNeurali(testo) {
     if (!DETTAGLI.length) return null;
     const s = segniDettagli(testo);
@@ -852,13 +857,18 @@
      (la voce con lo stesso prezzo) o le parole prima del prezzo. */
   function conDettagli(l, testo) {
     const d = dettagliNeurali(testo);
-    if (!d || d.sicurezza < SICURO_DETTAGLI || !(d.totale > 0)) return l;
+    const soglia = d && d.ruoli.some((r) => RUOLI_SPECIALI.test(r)) ? SICURO_DETTAGLI_SPECIALI : SICURO_DETTAGLI;
+    if (!d || d.sicurezza < soglia || !(d.totale > 0)) return l;
     // "…totale 9.000": un totale detto per controllo; le regole lo confrontano con le voci e avvisano
     if (l.totaleDetto != null) return l;
     // una percentuale che il modello lascia senza ruolo e non è l'IVA ("sconto del cinque per
     // cento", in lettere: non l'ha mai vista): non è sicuro, decidono le regole (giro 18)
     const percSenzaRuolo = d.segni.segni.some((w, i) => /%>$/.test(w) && d.ruoli[i] === "O" && !d.segni.segni.slice(Math.max(0, i - 3), i).some((x) => /^(?:iva|aliquota)$/.test(x)));
     if (percSenzaRuolo) return l;
+    // uno "sconto" senza una parola di sconto nella frase ("con acconto del 30 per cento a inizio
+    // lavori" è una condizione di pagamento, non uno sconto): decidono le regole (1/10)
+    const scontoSenzaParola = d.ruoli.some((r) => r === "SCO" || r === "SCOV") && !/\b(?:scont\w*|meno|togli\w*|tolgo|leva\w*|ribass\w*|abbuon\w*|riduzion\w*|riduci\w*|defalc\w*|detra\w*|sottra\w*|gia\s+(?:dato|data|dati|versat\w*|pagat\w*|preso|ricevut\w*)|acconto\s+(?:gia|che|ricevut))/.test(norm(testo));
+    if (scontoSenzaParola) return l;
     const regole = l.voci && l.voci.length ? l.voci.reduce((t, v) => t + (v.quantita || 1) * v.prezzo, 0) : l.importo;
     if (regole != null && Math.abs(regole - d.totale) < 0.005) return l;
     const parole = d.segni.parole;
@@ -1401,7 +1411,28 @@
     if (n.length >= 6 && n.length <= 9 && /^fat/.test(n) && distanza(n, "fattura") <= 2) return "fattura";
     return null;
   }
+  /* Il testo senza i numeri civici (giro 19), per le regole e per il modello dei dettagli:
+     "via Bacaredda 23 demolizione 700" → "via Bacaredda demolizione 700". Non si tocca un numero
+     che sta nel nome di un cliente ("Condominio Via Saragozza 118"). */
+  function senzaCivici(testo, ctx) {
+    const pp = parole(testo);
+    const civ = civiciDi(pp);
+    if (!civ.length) return testo;
+    const nomi = (ctx && ctx.clienti || []).map((c) => norm(c.name || ""));
+    const togli = civ.filter((i) => !nomi.some((n) => n.split(" ").includes(pp[i].n) && n.split(" ").includes(pp[i - 1].n)));
+    if (!togli.length) return testo;
+    // l'n-esima occorrenza del numero nel testo, una per una
+    let out = String(testo);
+    togli.sort((a, b) => b - a).forEach((i) => {
+      const quante = pp.slice(0, i).filter((x) => x.n === pp[i].n).length;
+      let k = -1, da = 0;
+      for (let c = 0; c <= quante; c++) { const re = new RegExp("(^|[^\\d.,])" + pp[i].n + "(?![\\d.,]\\d)", "gi"); re.lastIndex = da; const m = re.exec(out); if (!m) { k = -1; break; } k = m.index + m[1].length; da = k + pp[i].n.length; }
+      if (k >= 0) out = out.slice(0, k) + out.slice(k + pp[i].n.length).replace(/^\s*,?/, "");
+    });
+    return out.replace(/\s{2,}/g, " ");
+  }
   function leggiDocumento(testoOriginale, ctx) {
+    testoOriginale = senzaCivici(String(testoOriginale || ""), ctx);
     let t = String(testoOriginale || "").split(/(\s+)/).map((w) => { const x = parolaDocumento(w.replace(/[^\p{L}]/gu, "")); return x ? w.replace(/[\p{L}]+/u, x) : w; }).join("");
     t = t.replace(/\b(?:per\s+)?(?:un|una|il|la)?\s*(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\s*[,:]?\s*/i, (m) => (/^per\b/i.test(m) ? "per " : ""))
       .replace(/\bper\s+(?:il|la)\s+(signor|signora|sig\.?)\s+/i, "per $1 ");
@@ -1660,6 +1691,32 @@
     return !!(nn && nn.some((i) => NOMI.has(pp[i].n)) && nn.some((i) => usateSimile.includes(i)));
   }
 
+  /* Il numero civico di un indirizzo non è un importo (giro 19: "via Bacaredda 23 demolizione 700",
+     "corso Sardegna 48", "salita San Nicolò 12", "via dell'Artigianato 7"). Dopo via/viale/corso/
+     piazza/salita… e 1-4 parole del nome, un numero intero piccolo NON seguito da un'unità
+     ("via Andrea Costa 16 appartamenti" sono appartamenti). Dopo "via" il nome deve avere la
+     maiuscola o una preposizione ("porta via il materiale 300" non è un indirizzo). */
+  const STRADA = /^(?:via|viale|corso|piazza|piazzale|salita|vicolo|largo|strada|contrada|borgo|localita|lungomare|calata|vico|traversa)$/;
+  const PARTICELLA_NOME = /^(?:dei|del|della|delle|degli|dell|di|de|da|san|santa|santo|sant|s|lo|la|le|il)$/;
+  function civiciDi(pp) {
+    const out = [];
+    for (let i = 0; i < pp.length; i++) {
+      if (!STRADA.test(pp[i].n)) continue;
+      const primo = pp[i + 1];
+      if (!primo || /\d/.test(primo.n)) continue;
+      if (pp[i].n === "via" && !(/^\p{Lu}/u.test(primo.o) || PARTICELLA_NOME.test(primo.n))) continue;
+      for (let j = i + 1; j <= i + 5 && j < pp.length; j++) {
+        if (/^\d{1,4}[a-z]?$/.test(pp[j].n) && j > i + 1) {
+          const dopo = pp[j + 1] ? pp[j + 1].n : "";
+          if (!UNITA.test(dopo) && !/^(?:euro|eur|€|%|percento|per|x|mila|k|appartament\w*|unita|negoz\w*|box|posti|scale|piani|famiglie|condomini)$/.test(dopo)) out.push(j);
+          break;
+        }
+        if (/\d/.test(pp[j].n) || pp[j].sep) break;
+      }
+    }
+    return out;
+  }
+
   /* ---------------- Cartelle ---------------- */
   function trovaCartella(pp, cartelle, giaUsate) {
     let migliore = null;
@@ -1912,6 +1969,7 @@
       const nelNome = new Set(clPrima.stato === "trovato" ? clPrima.usate.filter((i) => /^\d+$/.test(pp[i].n)) : []);
       // "via Leopardi 7" senza "condominio": il 7 dopo il nome, se è nel nome del cliente
       if (clPrima.stato === "trovato") clPrima.usate.forEach((i) => { const k = i + 1; if (pp[k] && /^\d+$/.test(pp[k].n) && norm(clPrima.cliente.name).split(" ").includes(pp[k].n)) nelNome.add(k); });
+      civiciDi(pp).forEach((i) => nelNome.add(i)); // "via Bacaredda 23", "corso Sardegna 48": il numero civico (giro 19)
       const importi = trovaImporto(pp, new Set([...usate, ...nelNome]));
       nelNome.forEach((i) => usate.add(i)); // fa parte del nome: nemmeno una voce del preventivo
       let importo = null;

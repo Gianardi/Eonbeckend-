@@ -11,7 +11,7 @@ const RADICE = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..
 const L = require(path.join(RADICE, "lettore.js"));
 const N = require(path.join(RADICE, "neurale.js"));
 const FILE = process.env.MODELLO || path.join(RADICE, "modello-dettagli.json");
-const MINIMO = 420, PESO_MAX_KB = 2048, MS_MAX = 60;
+const MINIMO = 448, PESO_MAX_KB = 2048, MS_MAX = 60;
 let falliti = 0;
 const verifica = (nome, ok, dettaglio = "") => { console.log(`  ${ok ? "OK  " : "FAIL"} ${nome}${!ok && dettaglio ? " — " + dettaglio : ""}`); if (!ok) falliti++; };
 
