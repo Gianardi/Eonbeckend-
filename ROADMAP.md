@@ -769,6 +769,9 @@ sporca, dialetti, chat, anziano, straniero.
    ("Rossi ha accettato il preventivo": segnato nella Mente, poi "Facciamo la fattura con le stesse
    voci, o fissiamo l'inizio dei lavori?"). Ogni «Sì» è provato fino al risultato (fattura creata dal
    server, foto, link, indirizzo salvato, SAL fatturato, assemblea convocata), senza AI.
+   **Modello dei cassetti nuovo (c24 + c25: domande "meglio X o Y?", "tieni presente che…",
+   messaggi brevi), messo insieme:** nessun giro peggiora (giro 5 186, 15 1.053, 16 1.047 +3,
+   17 1.040, 18 1.000 +2, 19 1.010 +2, 20 1.013 +2; frasi vere di Andrea 133/136 come prima).
    Da fare a parte: "sollecita il pagamento a X" (funzione nuova: messaggio con le fatture non
    pagate); "ricordami di chiedere a Rossi se ha accettato il preventivo" apre un preventivo nuovo
    (errore che c'era già prima).

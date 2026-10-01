@@ -14992,7 +14992,9 @@ function provaSpostaImmediato(testo, viaVoce){
   if(!voci.length && r.oggetto) voci = impegniDaAnnullare({ ...r, nome: nomiClienti.length ? nomiClienti : r.nome, oggetto: null });
   /* Non c'è in agenda, ma il cliente è nominato e il nuovo giorno è detto: "Lo metto giovedì?"
      (1/10/2026). Chiede sempre prima: forse era stato annullato apposta. */
-  if(!voci.length && nomiClienti.length && letto.nuovoGiorno){
+  // "manda un whatsapp a Elisa per spostare a sabato" è un messaggio, non lo spostamento (giro 9)
+  const perMessaggio = /\b(?:whatsapp|whats\s+app|messaggio|messaggino|sms|mail|email|e\s+mail|scrivi|scrivere|scrivigli|scrivile|avvisa|avvisare|avvisalo|avvisala|chiama|chiamare|telefona|telefonare|dì|di\s+a|dire\s+a|digli|dille)\b/i.test(EonLettore.norm(testo));
+  if(!voci.length && nomiClienti.length && letto.nuovoGiorno && !perMessaggio){
     const cl = clients.filter(c => nomiClienti.every(w => EonLettore.norm(c.name).split(" ").includes(w)));
     if(cl.length === 1){ offriDiMettereImpegno(cl[0], testo, letto.nuovoGiorno, letto.nuovaOra); return true; }
   }

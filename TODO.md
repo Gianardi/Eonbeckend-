@@ -4999,6 +4999,15 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 notte: modello c25 adottato, misure finali (ROADMAP 0b.19 passo 5)
+- `modello-neurale.json` = studente distillato con confini c24 + c25 (maestri in scratchpad). Con
+  tutto il codice del pacchetto, app: g5 186 (+2), g15 1053 (=), g16 1047 (+3), g17 1040, g18 1000
+  (+2), g19 1010 (+2), g20 1013 (+2), g10 127; frasi vere di Andrea 133/136 (=). `soglie-app.json`
+  alzate. La guardia `PAROLE_MESSAGGIO` serve a questo modello (Tiziana delle pulizie).
+- Giro 9: "manda un whatsapp a Elisa per spostare a sabato" finiva in "Lo metto in agenda?":
+  `provaSpostaImmediato` non propone se la frase parla di messaggi/telefonate (`perMessaggio`).
+- `modello-neurale.test.mjs`: 4364 giuste (minimo 4344).
+
 ### 1/10 sera: "Lo facciamo adesso?", secondo giro (ROADMAP 0b.19 passo 5)
 - `offriFatturaSeMaiFatta(cl)` in `rispondiSuiDati` (soldi di un cliente) e `capisciDomandaSoldi`
   ("quanto ho incassato da X"); `provaLetturaLocale` ora accetta `gestito`.
