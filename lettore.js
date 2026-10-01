@@ -871,6 +871,8 @@
     // lavori" è una condizione di pagamento, non uno sconto): decidono le regole (1/10)
     const scontoSenzaParola = d.ruoli.some((r) => r === "SCO" || r === "SCOV") && !/\b(?:scont\w*|meno|togli\w*|tolgo|leva\w*|ribass\w*|abbuon\w*|riduzion\w*|riduci\w*|defalc\w*|detra\w*|sottra\w*|gia\s+(?:dato|data|dati|versat\w*|pagat\w*|preso|ricevut\w*)|acconto\s+(?:gia|che|ricevut))/.test(norm(testo));
     if (scontoSenzaParola) return l;
+    // "…e scrivi in nota che il 30 per cento l'ha già dato": la percentuale è nella nota, non nel conto
+    if (d.ruoli.some((r) => /^(?:SCO|SCOV|PERC|BASE)$/.test(r)) && /\b(?:in|nella|come)\s+nota\b/.test(norm(testo))) return l;
     const regole = l.voci && l.voci.length ? l.voci.reduce((t, v) => t + (v.quantita || 1) * v.prezzo, 0) : l.importo;
     if (regole != null && Math.abs(regole - d.totale) < 0.005) return l;
     const parole = d.segni.parole;
