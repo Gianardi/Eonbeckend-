@@ -147,8 +147,16 @@ async function main() {
     c = await card();
     verifica("\"…domani pomeriggio\": niente (sono tutti di mattina), senza AI", c.aperta && /Niente da annullare/.test(c.titolo) && richiesteAI.length === 0, JSON.stringify({ c, ai: richiesteAI.length }));
 
+    /* 5b — un impegno con un nome che in agenda non c'è (1/10/2026): lo dice subito il codice, senza AI */
+    await prepara();
+    richiesteAI.length = 0;
+    await chiedi("annulla l'appuntamento con Pinco");
+    await page.waitForTimeout(300);
+    const nonTrovo = await page.evaluate(() => document.body.innerText.includes("Non trovo in agenda un impegno con «pinco»"));
+    verifica("\"annulla l'appuntamento con Pinco\" (non c'è): \"Non trovo in agenda…\", senza AI e senza annullare niente", nonTrovo && richiesteAI.length === 0 && (await page.evaluate(() => window.__scritture.length === 0)), JSON.stringify({ nonTrovo, ai: richiesteAI.length }));
+
     /* 6 — queste NO: decide l'AI */
-    for (const frase of ["annulla gli appuntamenti", "annulla l'appuntamento con Pinco", "annulla la fattura di Rossi", "cancella la chiamata a Walter e segna Rossi domani alle 10"]) {
+    for (const frase of ["annulla gli appuntamenti", "annulla la fattura di Rossi", "cancella la chiamata a Walter e segna Rossi domani alle 10"]) {
       await prepara();
       richiesteAI.length = 0;
       await chiedi(frase);

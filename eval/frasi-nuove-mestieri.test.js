@@ -274,7 +274,9 @@ async function main() {
         else if (fatto[atteso] && !ai) esito = "giusta";
         else if (!ai && !scrittoQualcosa && /Ho trovato \d+ clienti|Quale |Intendi |Per quale cliente|Per quando la convoco/.test(st.card)) esito = "giusta";
         // chi ha pagato non è in rubrica: EON chiede se aggiungerlo e segnare l'incasso (giro 20): giusto
-        else if (atteso === "incasso" && !ai && !scrittoQualcosa && /non è tra i tuoi clienti.*Lo aggiungo e segno l'incasso/.test(st.card)) esito = "giusta"; // chiede quale (o, per l'assemblea senza data, quando): giusto
+        else if (atteso === "incasso" && !ai && !scrittoQualcosa && /non è tra i tuoi clienti.*Lo aggiungo e segno l'incasso/.test(st.card)) esito = "giusta";
+        // l'impegno da spostare non c'è più (annullato da una frase prima): EON lo dice, non sposta un altro impegno (giro 20)
+        else if (atteso === "calendario_modifica" && !ai && !scrittoQualcosa && /Non trovo in agenda un impegno/.test(st.card)) esito = "giusta"; // chiede quale (o, per l'assemblea senza data, quando): giusto
         else if (ai && !scrittoQualcosa) esito = "ai";
         else esito = "sbagliata";
         perMestiere[mestiere][esito]++;
