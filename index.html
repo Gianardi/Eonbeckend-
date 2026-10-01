@@ -13361,7 +13361,18 @@ function gestisciIncasso(l, testo){
   };
   if(!l.cliente && !l.candidati && !l.clienteSimile){
     if(!l.nomeDetto) return null;
-    mostraRispostaEON(testo, l.nomeDetto + " non è tra i tuoi clienti. Aggiungilo (\"aggiungi " + l.nomeDetto + "\") e poi riprova.", { titolo: "Cliente non trovato" });
+    /* Chi ha pagato non è in rubrica (giro 19): un tocco per aggiungerlo e segnare l'incasso,
+       invece di "aggiungilo e poi riprova" */
+    const nome = l.nomeDetto;
+    domandaDelCodice({ titolo: "Incasso · " + nome, domanda: nome + " non è tra i tuoi clienti" + (l.importo ? ": ha pagato " + euroConti(l.importo) + "." : ".") + " Lo aggiungo e segno l'incasso?", senzaCampo: true,
+      scelte: [{ etichetta: "Sì, aggiungi " + nome, valore: "si" }, { etichetta: "No", valore: "no" }],
+      onRisposta: async (x) => {
+        chiudiRisorsaCard();
+        if(x !== "si") return;
+        const c = await creaClienteDalCodice(nome);
+        if(!c){ showAIToast("Non salvato", "Non sono riuscita ad aggiungere " + nome + ": riprova."); return; }
+        conCliente(c);
+      } });
     return { fatto: "incasso_senza_cliente" };
   }
   const r = risolviClienteLettura(l, "Incasso", conCliente);

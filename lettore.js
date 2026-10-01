@@ -2107,7 +2107,7 @@
       if (importi.length === 1) importi[0].usate.forEach((i) => usate.add(i));
       const cl = trovaCliente(pp, ctx.clienti, usate, { nomeSolo: true });
       return { ...base, azione: "incasso", importo, cliente: cl.stato === "trovato" ? cl.cliente : null, clienteSimile: cl.stato === "simile" ? cl.cliente : null,
-        candidati: cl.stato === "ambiguo" ? cl.candidati : null, nomeDetto: cl.stato === "nessuno" ? (nomeDopoA(pp, new Set()) || null) : null, quando };
+        candidati: cl.stato === "ambiguo" ? cl.candidati : null, nomeDetto: cl.stato === "nessuno" ? (nomeDopoA(pp, new Set()) || nomeConMaiuscola(pp, usate) || null) : null, quando };
     }
 
     /* Più comandi in una frase: ognuno letto da solo */
@@ -2283,6 +2283,20 @@
         if (pp[j].sep) break; // "Tiziana: grazie per…"
       }
       if (nome.length) return { nome: nomeBello(nome.map((k) => pp[k].o).join(" ")), idx: nome, fine: nome[nome.length - 1] };
+    }
+    return null;
+  }
+  /* Il nome di chi ha pagato quando non è in rubrica (giro 19): "la signora Pedemonte 60 euro",
+     "Pedemonte ha pagato 60 euro", "dalla signora Moser". Le parole con la maiuscola (a inizio
+     frase solo se dopo c'è "ha/mi"), saltando titoli e articoli. */
+  function nomeConMaiuscola(pp, usate) {
+    for (let i = 0; i < pp.length; i++) {
+      if ((usate && usate.has(i)) || !/^\p{Lu}\p{Ll}/u.test(pp[i].o) || /\d/.test(pp[i].n)) continue;
+      if (/^(?:eon|euro|bonifico|satispay|paypal|pos|iban)$/.test(pp[i].n)) continue;
+      if (i === 0 && !(pp[1] && /^(?:ha|mi|m|hanno)$/.test(pp[1].n))) continue;
+      const nome = [];
+      for (let j = i; j < pp.length && nome.length < 3 && /^\p{Lu}/u.test(pp[j].o) && !/\d/.test(pp[j].n); j++) nome.push(pp[j].o);
+      return nomeBello(nome.join(" "));
     }
     return null;
   }
