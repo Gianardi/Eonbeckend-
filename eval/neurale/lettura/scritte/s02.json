@@ -1,0 +1,1445 @@
+{
+ "personaggio": "Idraulica romana di 38 anni con ditta propria (caldaie, bagni, perdite); scrive di fretta come in chat, abbreviazioni (x, cmq, nn, xké), romanesco leggero (annamo, mo', daje, der, de).",
+ "frasi": [
+  [
+   "[domani]{GIO} [alle 8]{ORA} c'ho [la caldaia]{LAV} dai [Proietti]{CHI} segnamelo",
+   "calendario"
+  ],
+  [
+   "segna [giovedì]{GIO} [alle 9 e mezza]{ORA} [sopralluogo]{LAV} dalla [sig.ra Ceccarelli]{CHI} x [il bagno]{LAV}",
+   "calendario"
+  ],
+  [
+   "ricordami [oggi]{GIO} [verso le 6]{ORA} de richiamà [Idrotermica Sbardella]{CHI} x i raccordi",
+   "calendario"
+  ],
+  [
+   "mettimi [lunedì prossimo]{GIO} [la mattina presto]{ORA} [cambio scaldabagno]{LAV} a [via delle Ortensie 22]{IND}",
+   "calendario"
+  ],
+  [
+   "[alle 3]{ORA} [dopodomani]{GIO} [perdita sotto il lavello]{LAV} da [Mastrangeli]{CHI} annamo",
+   "calendario"
+  ],
+  [
+   "appuntamento [il 14 ottobre]{GIO} [alle 10]{ORA} con [l'amministratore Pignatelli]{CHI} x [la colonna di scarico]{LAV}",
+   "calendario"
+  ],
+  [
+   "nn me fa scordà [venerdì]{GIO} [alle 2 e mezza]{ORA} [revisione caldaia]{LAV} dal [dottor Fiorucci]{CHI}",
+   "calendario"
+  ],
+  [
+   "segna [sabato]{GIO} [in mattinata]{ORA} [montaggio box doccia]{LAV} da [Trombetti]{CHI} in [via Monte Brancastello 9]{IND}",
+   "calendario"
+  ],
+  [
+   "ricordami [fra due giorni]{GIO} [de ordinà il miscelatore termostatico]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[martedì]{GIO} [alle sette e un quarto]{ORA} c'ho [la Vaillant]{LAV} der [sor Bonanni]{CHI}",
+   "calendario"
+  ],
+  [
+   "mo' segnami [domattina]{GIO} [alle 7]{ORA} [ritiro materiale]{LAV} da [Termoidraulica Lucidi]{CHI}",
+   "calendario"
+  ],
+  [
+   "metti [mercoledì della settimana prossima]{GIO} [rifacimento bagno]{LAV} dai [Colasanti]{CHI} [tutto il giorno]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [domani]{GIO} [alle 13]{ORA} [che devo passà in banca]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[il 22]{GIO} [alle 4]{ORA} vado dalla [signora Ricciotti]{CHI} x [lo scarico della cucina]{LAV} e poi dalla [Pandolfi]{CHI}",
+   "calendario"
+  ],
+  [
+   "segna [giovedì]{GIO} [alle 11]{ORA} no anzi [alle 12]{ORA} [sopralluogo infiltrazione]{LAV} da [Marzocchi]{CHI}",
+   "calendario"
+  ],
+  [
+   "x [venerdì 17]{GIO} metti [sostituzione sanitari]{LAV} da [Sciarra]{CHI} [ner pomeriggio]{ORA}",
+   "calendario"
+  ],
+  [
+   "daje segnami [domani]{GIO} [dopo pranzo]{ORA} [la Ariston]{LAV} della [signora Ottaviani]{CHI} che nn parte",
+   "calendario"
+  ],
+  [
+   "[alle 8 e mezza]{ORA} [lunedì]{GIO} [cantiere]{LAV} da [Ciampoli]{CHI} in [via dei Carpini 41]{IND}",
+   "calendario"
+  ],
+  [
+   "ricordami [il 3 novembre]{GIO} [de rinnovà l'assicurazione der furgone]{TESTO}",
+   "calendario"
+  ],
+  [
+   "metti in agenda [fra una settimana]{GIO} [controllo fumi]{LAV} al [Condominio Le Gardenie]{CHI} [alle 9]{ORA}",
+   "calendario"
+  ],
+  [
+   "[mercoledì]{GIO} [verso le 5]{ORA} passo da [Fabbrocini]{CHI} x [il termosifone che gocciola]{LAV}",
+   "calendario"
+  ],
+  [
+   "segna [dopodomani]{GIO} [primo pomeriggio]{ORA} [allaccio lavatrice]{LAV} da [Petrocchi]{CHI} tel [347 5521908]{TEL}",
+   "calendario"
+  ],
+  [
+   "nn me lo fa scordà [giovedì]{GIO} [alle 6]{ORA} [riunione]{LAV} co [mio fratello Claudio]{CHI} x il furgone",
+   "calendario"
+  ],
+  [
+   "[domani]{GIO} [alle 10]{ORA} [sopralluogo]{LAV} a [via Gerolamo Tassinari 5]{IND} cor [geometra Carosi]{CHI}",
+   "calendario"
+  ],
+  [
+   "ricordami [tra un'ora]{ORA} de chiamà [la Mancinelli]{CHI} xké cmq aspetta",
+   "calendario"
+  ],
+  [
+   "[sabato]{GIO} [alle 9]{ORA} [cambio rubinetteria]{LAV} da [Di Bartolo]{CHI} ma solo se nn piove",
+   "calendario"
+  ],
+  [
+   "metti [il 30]{GIO} [alle 15 e 30]{ORA} [collaudo impianto]{LAV} al [Residence Le Querce]{CHI}",
+   "calendario"
+  ],
+  [
+   "segnami [lunedì 20]{GIO} [la mattina]{ORA} [disostruzione]{LAV} da [Zaccagnini]{CHI} cmq porta la sonda",
+   "calendario"
+  ],
+  [
+   "[venerdì]{GIO} c'ho [l'appuntamento]{LAV} cor [commercialista Iacobelli]{CHI} [alle 17]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [domenica]{GIO} [de caricà il furgone x il cantiere de Rinaldoni]{TESTO}",
+   "calendario"
+  ],
+  [
+   "segna [mercoledì]{GIO} [alle 8]{ORA} [installazione caldaia a condensazione]{LAV} da [Spadoni]{CHI} e [alle 14]{ORA} [perdita doccia]{LAV} da [Cerqua]{CHI}",
+   "calendario"
+  ],
+  [
+   "[tra tre giorni]{GIO} [verso mezzogiorno]{ORA} [la Baxi]{LAV} der [bar da Ruggeri]{CHI}",
+   "calendario"
+  ],
+  [
+   "sposta [la caldaia]{LAV} dei [Silvestrelli]{CHI} da [domani]{GIO} a [giovedì]{NGIO} [alle 9]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [il sopralluogo]{LAV} de [venerdì]{GIO} da [Benedetti]{CHI} nn ce vado più",
+   "calendario_modifica"
+  ],
+  [
+   "mo' sposta [l'appuntamento]{LAV} de [martedì]{GIO} [alle 10]{ORA} a [mercoledì]{NGIO} sempre [alle 10]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[la Leoni]{CHI} ha chiamato, [il bagno]{LAV} lo famo [la settimana dopo]{NGIO} invece de [lunedì]{GIO}",
+   "calendario_modifica"
+  ],
+  [
+   "cancella [domani]{GIO} [alle 3]{ORA} da [Antonucci]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [la revisione]{LAV} dal [ragionier Tedeschi]{CHI} a [fine mese]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [alle 11]{NORA} [il cambio boiler]{LAV} de [oggi]{GIO} da [Gentilini]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "[giovedì]{GIO} da [Ferracci]{CHI} nn se fa più, mettilo [il 25]{NGIO} [alle 8 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "annullame tutto [sabato]{GIO} che c'ho la comunione de mi nipote",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la perdita]{LAV} de [Morganti]{CHI} da [le 2]{ORA} a [le 4]{NORA} stesso giorno",
+   "calendario_modifica"
+  ],
+  [
+   "[il sopralluogo]{LAV} cor [geometra Pallottini]{CHI} spostalo [domattina]{NGIO} [presto]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "nn posso [mercoledì]{GIO}, sposta [la Immergas]{LAV} dei [Ventura]{CHI} a [venerdì]{NGIO} [nel pomeriggio]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "togli [l'appuntamento]{LAV} co [la Testa]{CHI} de [lunedì]{GIO} [alle 9]{ORA}",
+   "calendario_modifica"
+  ],
+  [
+   "anticipa [la manutenzione]{LAV} al [Condominio Villa Serena]{CHI} da [venerdì]{GIO} a [domani]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "posticipa de mezz'ora [l'allaccio]{LAV} da [Brancaleoni]{CHI} cioè [alle 10 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [domani]{GIO} [alle 8]{ORA} a [dopodomani]{NGIO} [alle 8]{NORA} xké nn arriva er materiale",
+   "calendario_modifica"
+  ],
+  [
+   "[la signora Vitali]{CHI} nn c'è [giovedì]{GIO}, rimettila [martedì 12]{NGIO} [verso le 5]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [la riunione]{LAV} cor [fornitore Termosud]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "cambia l'ora de [la Saunier]{LAV} dei [Coppola]{CHI}: nn [alle 9]{ORA} ma [alle 11]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [er rifacimento bagno]{LAV} de [Lattanzi]{CHI} [alla settimana prossima]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "da [Salvucci]{CHI} [oggi]{GIO} nn ce la faccio, spostalo a [domani]{NGIO} [stessa ora]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "cancella [il collaudo]{LAV} der [18]{GIO} all'[Hotel Belsito]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "[lunedì]{GIO} da [Cicconi]{CHI} spostalo a [giovedì]{NGIO} no anzi a [venerdì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda de 2 giorni [lo scarico]{LAV} de [Paolucci]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta tutto [domani]{GIO} a [lunedì]{NGIO} che c'ho la febbre",
+   "calendario_modifica"
+  ],
+  [
+   "[alle 10]{ORA} de [giovedì]{GIO} co [Montanari]{CHI} mettilo [alle 15]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [il sopralluogo]{LAV} [domani]{GIO} [ner pomeriggio]{ORA} dai [Mariani]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "[la Junkers]{LAV} de [Rossetti]{CHI} spostala [il 9 novembre]{NGIO} [alle otto]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "segnati [che i Proietti vonno le piastrelle grigie opache]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordate [che a casa Fiorucci il contatore sta in cantina]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunta [che la sig.ra Ceccarelli c'ha il cane che morde]{TESTO}",
+   "mente"
+  ],
+  [
+   "[il rubinetto d'arresto de Trombetti è dietro il frigo]{TESTO} segnatelo",
+   "mente"
+  ],
+  [
+   "segna [che da Sbardella i raccordi da tre quarti costano meno]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunto: [Mastrangeli paga sempre in ritardo]{TESTO}",
+   "mente"
+  ],
+  [
+   "tieni a mente [che il citofono de Colasanti nn funziona, bussa]{TESTO}",
+   "mente"
+  ],
+  [
+   "segnate [che il vaso d'espansione dei Bonanni è da 8 litri]{TESTO}",
+   "mente"
+  ],
+  [
+   "nota x me [la caldaia de Ottaviani è una Beretta del 2011]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordate sta cosa [er parcheggio da Marzocchi è solo dopo le 9]{TESTO}",
+   "mente"
+  ],
+  [
+   "scrivi negli appunti [che Termoidraulica Lucidi chiude il sabato]{TESTO}",
+   "mente"
+  ],
+  [
+   "segnati [chiave der cancello de Ciampoli sotto il vaso]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunta [che la signora Pandolfi vuole il bidet sospeso]{TESTO}",
+   "mente"
+  ],
+  [
+   "mo' segnate [che x i bagni piccoli conviene il piatto doccia 70x90]{TESTO}",
+   "mente"
+  ],
+  [
+   "nn me lo devo scordà [che Petrocchi c'ha la pressione bassa all'ultimo piano]{TESTO}",
+   "mente"
+  ],
+  [
+   "annota [il tubo multistrato da 20 è finito in magazzino]{TESTO}",
+   "mente"
+  ],
+  [
+   "segnati [che Di Bartolo vuole la fattura intestata alla moglie]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati cmq [che al condominio Le Gardenie l'acqua se chiude dal locale caldaia]{TESTO}",
+   "mente"
+  ],
+  [
+   "[a Spadoni gli ho promesso lo sconto sulla prossima]{TESTO} segnalo",
+   "mente"
+  ],
+  [
+   "appunto veloce [Cerqua preferisce esse chiamato dopo le 18]{TESTO}",
+   "mente"
+  ],
+  [
+   "fai un [preventivo]{DOC} x [Silvestrelli]{CHI} [rifacimento bagno completo]{LAV} 4800 euro",
+   "documento"
+  ],
+  [
+   "preparami [la fattura]{DOC} a [Benedetti]{CHI} x [sostituzione caldaia]{LAV} 2300 più iva",
+   "documento"
+  ],
+  [
+   "famo [un preventivo]{DOC} [cambio scaldabagno]{LAV} pe [la signora Leoni]{CHI}, 650 tutto compreso",
+   "documento"
+  ],
+  [
+   "fattura a [Antonucci]{CHI} [riparazione perdita]{LAV} 180 euro",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} x [Condominio Villa Serena]{CHI} [rifacimento colonna montante]{LAV} sui 7000",
+   "documento"
+  ],
+  [
+   "fammi [fattura]{DOC} [ragionier Tedeschi]{CHI} [manutenzione annuale caldaia]{LAV} 120",
+   "documento"
+  ],
+  [
+   "mo' prepara [un preventivo]{DOC} a [Gentilini]{CHI}: [box doccia]{LAV} 900, [miscelatore]{LAV} 150 e manodopera 400",
+   "documento"
+  ],
+  [
+   "fai [la fattura]{DOC} de [Ferracci]{CHI} co l'acconto de 500 già preso",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [impianto riscaldamento a pavimento]{LAV} x [Morganti]{CHI} a [via dei Ciclamini 7]{IND}",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} a [Pallottini srl]{CHI} [intervento urgente scarico]{LAV} 250 euro, pagamento a 30 giorni",
+   "documento"
+  ],
+  [
+   "preparame [un preventivo]{DOC} x [i Ventura]{CHI}, [la Immergas]{LAV} nuova co installazione 2100",
+   "documento"
+  ],
+  [
+   "rifai [la fattura]{DOC} [14]{NUM} de [Brancaleoni]{CHI} che c'era l'iva sbagliata",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} x [la Vitali]{CHI}: [sostituzione sanitari]{LAV} e [piastrellatura]{LAV}, metti 3200",
+   "documento"
+  ],
+  [
+   "fai [fattura]{DOC} a [Coppola]{CHI} x [la Saunier]{LAV} 95 euro de manutenzione",
+   "documento"
+  ],
+  [
+   "[un preventivo]{DOC} veloce x [Lattanzi]{CHI} [disostruzione]{LAV} co sonda 200 euro",
+   "documento"
+  ],
+  [
+   "fammi [preventivo]{DOC} pe [Salvucci]{CHI} [rifacimento impianto idrico]{LAV} cucina e bagno, metti 15 percento de sconto",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} all'[Hotel Belsito]{CHI} x [la sostituzione delle valvole termostatiche]{LAV} 40 pezzi a 35 euro",
+   "documento"
+  ],
+  [
+   "crea [preventivo]{DOC} [Cicconi]{CHI} [addolcitore]{LAV} 1100",
+   "documento"
+  ],
+  [
+   "fai [la fattura]{DOC} de saldo a [Paolucci]{CHI} [lavori bagno]{LAV} 2600",
+   "documento"
+  ],
+  [
+   "prepara [un preventivo]{DOC} x [Montanari]{CHI} e uno x [suo cognato Bernardini]{CHI} stessa [caldaia]{LAV}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [pompa di calore]{LAV} x [Mariani]{CHI} 8500 chiavi in mano",
+   "documento"
+  ],
+  [
+   "fatturame [la Junkers]{LAV} de [Rossetti]{CHI} 1850",
+   "documento"
+  ],
+  [
+   "nuova [fattura]{DOC} a [Studio Dentistico Fabiani]{CHI} [allaccio acqua riunito]{LAV} 300",
+   "documento"
+  ],
+  [
+   "fai [preventivo]{DOC} [spostamento attacchi lavatrice]{LAV} pe [Giordani]{CHI} cmq nn più de 400",
+   "documento"
+  ],
+  [
+   "trovami [il preventivo]{DOC} de [Silvestrelli]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "apri [la fattura]{DOC} [23]{NUM}",
+   "cerca_documento"
+  ],
+  [
+   "dov'è [la DiCo]{DOC} de [via delle Ortensie]{IND}?",
+   "cerca_documento"
+  ],
+  [
+   "cercami [le foto]{DOC} der [bagno]{LAV} dei [Colasanti]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "fammi vedè [il DURC]{DOC}",
+   "cerca_documento"
+  ],
+  [
+   "nn trovo [la fattura]{DOC} der [fornitore Idrotermica Sbardella]{CHI} de settembre",
+   "cerca_documento"
+  ],
+  [
+   "apri [il preventivo]{DOC} [8]{NUM} quello [della caldaia]{LAV}",
+   "cerca_documento"
+  ],
+  [
+   "cerca [la visura]{DOC} de [Pallottini srl]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "tirame fuori [le foto]{DOC} de [la perdita]{LAV} da [Morganti]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "dove sta [il SAL]{DOC} der [Condominio Le Gardenie]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "fammi vedé [l'ultima fattura]{DOC} a [Tedeschi]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "trova [il libretto]{DOC} de [la Beretta]{LAV} de [Ottaviani]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "aprime [la dichiarazione de conformità]{DOC} de [Spadoni]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "cerca [il preventivo]{DOC} [del box doccia]{LAV} che avevo fatto a [Gentilini]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "manda [il preventivo]{DOC} [del bagno]{LAV} a [Silvestrelli]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "inviaje [la fattura]{DOC} a [Benedetti]{CHI} [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "giraje [le foto]{DOC} de [la perdita]{LAV} all'[amministratore Pignatelli]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda [il DURC]{DOC} a [Edilnova Costruzioni]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "mandaje [la DiCo]{DOC} alla [signora Leoni]{CHI} [via mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "mo' manda [la fattura]{DOC} [31]{NUM} a [Antonucci]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "spedisci [il SAL]{DOC} al [geometra Carosi]{CHI} [sulla mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [la visura]{DOC} a [mio marito]{CHI} su [whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia [il preventivo]{DOC} [12]{NUM} a [Ferracci]{CHI} e pure a [sua figlia Sara]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda [le foto]{DOC} [del cantiere]{LAV} a [Termoidraulica Lucidi]{CHI} [su whatsapp]{CAN} che devono vedé i tubi",
+   "invio_documento"
+  ],
+  [
+   "giraje [il preventivo]{DOC} a [Ventura]{CHI} [x sms]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [la fattura]{DOC} [della caldaia]{LAV} ai [Morelli]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "mandaje [il libretto]{DOC} [della caldaia]{LAV} a [Coppola]{CHI} [per email]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia [la DiCo]{DOC} der [condominio Villa Serena]{CHI} all'[amministratrice Ruspantini]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda a [Lattanzi]{CHI} [le foto]{DOC} [del bagno finito]{LAV}",
+   "invio_documento"
+  ],
+  [
+   "[il preventivo]{DOC} de [Salvucci]{CHI} mandalo a [suo figlio Marco]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [la fattura]{DOC} all'[Hotel Belsito]{CHI} a [amministrazione@hotelbelsito.it]{MAIL}",
+   "invio_documento"
+  ],
+  [
+   "inviaje [il DURC]{DOC} e [la visura]{DOC} a [Impresa Fratelli Cosentini]{CHI} [x mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [il SAL]{DOC} [3]{NUM} a [Paolucci]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "daje manda [il preventivo]{DOC} [della pompa di calore]{LAV} a [Mariani]{CHI} [su whatsapp]{CAN} no anzi [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [la foto]{DOC} [della caldaia]{LAV} a [Ricambi Tiburtini]{CHI} che me dicono er pezzo",
+   "invio_documento"
+  ],
+  [
+   "inoltra [la fattura]{DOC} [17]{NUM} al [commercialista Iacobelli]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "mandaje [la dichiarazione de conformità]{DOC} a [Giordani]{CHI} al [339 4417260]{TEL}",
+   "invio_documento"
+  ],
+  [
+   "manda [il preventivo]{DOC} a [Fabiani]{CHI} [per pec]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "scrivi a [Proietti]{CHI} [che arrivo verso le 9 e mezza]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un messaggio alla [sig.ra Ceccarelli]{CHI} [che domani nn posso, je dico io quando]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "dì a [Mastrangeli]{CHI} [de lascià aperto er cancello]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi [su whatsapp]{CAN} a [Fiorucci]{CHI} [che il pezzo è arrivato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio a [Trombetti]{CHI}: [sto in ritardo de 20 minuti scusa]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "mandaje un [sms]{CAN} a [Bonanni]{CHI} [che passo dopo pranzo x la Vaillant]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [mio marito]{CHI} [de prende i bambini a scuola]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [Colasanti]{CHI} [che domani se chiude l'acqua dalle 8 alle 12]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Ricciotti]{CHI} e a [Pandolfi]{CHI} [che lunedì nn se lavora]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[whatsapp]{CAN} a [Marzocchi]{CHI}: [mandame la foto der contatore]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "dije a [Sciarra]{CHI} [che le piastrelle arrivano giovedì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Dario er garzone]{CHI} [de portà la flessibile in cantiere]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un messaggio a [Ottaviani]{CHI} [nn accenda la caldaia fino a domani]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivije a [Ciampoli]{CHI} [grazie della pazienza, finiamo venerdì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio x [Fabbrocini]{CHI} [er termosifone va spurgato ogni tanto]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi al [347 5521908]{TEL} [che sto sotto casa]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "dì a [Carosi]{CHI} [su whatsapp]{CAN} [che il sopralluogo è confermato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [la Mancinelli]{CHI} [che servono le chiavi de cantina]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Zaccagnini]{CHI} [ok x domani, porto io il sifone nuovo]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda a [Rinaldoni]{CHI} [mo' arrivo]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Cerqua]{CHI} [che il preventivo glielo mando stasera]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "rispondi a [Ruggeri]{CHI} [sì va bene sabato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Spadoni]{CHI} [che la caldaia va registrata, ce penso io]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "dije a [mia sorella Patrizia]{CHI} [che stasera nn ce la faccio a cena]{TESTO} [via sms]{CAN}",
+   "messaggio"
+  ],
+  [
+   "manda una mail a [Idrotermica Sbardella]{CHI} [che me serve il listino aggiornato]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una mail all'[amministratore Pignatelli]{CHI} [che i lavori alla colonna iniziano lunedì]{TESTO}",
+   "email"
+  ],
+  [
+   "email a [Edilnova Costruzioni]{CHI}: [confermo la disponibilità x il cantiere de ottobre]{TESTO}",
+   "email"
+  ],
+  [
+   "mandaje una mail a [Tedeschi]{CHI} a [r.tedeschi@studiotedeschi.it]{MAIL} [co gli orari]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una email al [commercialista Iacobelli]{CHI} [che le fatture de settembre gliele porto venerdì]{TESTO}",
+   "email"
+  ],
+  [
+   "mail a [Ricambi Tiburtini]{CHI} [se c'hanno la scheda della Baxi Luna]{TESTO}",
+   "email"
+  ],
+  [
+   "fai una mail alla [ditta Termosud]{CHI} [che il pezzo è arrivato rotto]{TESTO}",
+   "email"
+  ],
+  [
+   "rispondi alla mail de [Pallottini srl]{CHI} [che va bene la data proposta]{TESTO}",
+   "email"
+  ],
+  [
+   "manda una email a [info@condominiolegardenie.it]{MAIL} [co la relazione der controllo fumi]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una mail all'[Hotel Belsito]{CHI} [x chiede quando possiamo entrà nelle camere]{TESTO}",
+   "email"
+  ],
+  [
+   "mail a [Impresa Fratelli Cosentini]{CHI} [ce vediamo in cantiere martedì]{TESTO}",
+   "email"
+  ],
+  [
+   "email x [la signora Vitali]{CHI} [con le istruzioni della caldaia nuova]{TESTO}",
+   "email"
+  ],
+  [
+   "manda una mail a [Fabiani]{CHI} [x ricordaje la manutenzione der riunito]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una mail all'[agenzia assicurazioni Lombardi]{CHI} [x la denuncia der sinistro da Morganti]{TESTO}",
+   "email"
+  ],
+  [
+   "chiama [Proietti]{CHI}",
+   "chiamata"
+  ],
+  [
+   "telefona alla [sig.ra Ceccarelli]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiamame [Idrotermica Sbardella]{CHI} daje",
+   "chiamata"
+  ],
+  [
+   "fai er numero de [Mastrangeli]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [mio marito]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama er [06 5583120]{TEL}",
+   "chiamata"
+  ],
+  [
+   "telefona all'[amministratore Pignatelli]{CHI} x [la colonna]{LAV}",
+   "chiamata"
+  ],
+  [
+   "richiama [Bonanni]{CHI} che m'ha cercato",
+   "chiamata"
+  ],
+  [
+   "mettimi in linea co [Termoidraulica Lucidi]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [Dario er garzone]{CHI} mo'",
+   "chiamata"
+  ],
+  [
+   "fai una telefonata a [Carosi]{CHI} [su whatsapp]{CAN}",
+   "chiamata"
+  ],
+  [
+   "chiama [la Ottaviani]{CHI} e poi [Fabbrocini]{CHI}",
+   "chiamata"
+  ],
+  [
+   "squilla a [Ruggeri del bar]{CHI}",
+   "chiamata"
+  ],
+  [
+   "nuovo cliente [Gianluca Ferretti]{CHI} [via delle Mimose 18]{IND} tel [333 7781245]{TEL}",
+   "cliente"
+  ],
+  [
+   "aggiungi [la signora Ornella Bucci]{CHI}, sta a [via Ugo Pratesi 11]{IND}",
+   "cliente"
+  ],
+  [
+   "salva [Studio Dentistico Fabiani]{CHI} mail [segreteria@studiofabiani.it]{MAIL}",
+   "cliente"
+  ],
+  [
+   "crea cliente [Condominio Le Gardenie]{CHI} amministratore [Pignatelli]{CHI}",
+   "cliente"
+  ],
+  [
+   "cambia il numero de [Petrocchi]{CHI}, mo' è [347 6610932]{TEL}",
+   "cliente"
+  ],
+  [
+   "er nuovo indirizzo de [Zaccagnini]{CHI} è [viale dei Pini Marittimi 63]{IND}",
+   "cliente"
+  ],
+  [
+   "metti tra i clienti [Bar La Fontanella]{CHI} de [Ruggeri]{CHI}",
+   "cliente"
+  ],
+  [
+   "nuova cliente [Loredana Sabatini]{CHI} [328 9902315]{TEL} [loredana.sab@mail.it]{MAIL}",
+   "cliente"
+  ],
+  [
+   "aggiorna la mail de [Coppola]{CHI}: [coppola.antonio@posta.it]{MAIL}",
+   "cliente"
+  ],
+  [
+   "registra [Pallottini srl]{CHI} [via dell'Artigianato 4]{IND}",
+   "cliente"
+  ],
+  [
+   "dati de [Cicconi]{CHI}: [via dei Tulipani Rossi 27]{IND} cell [366 2209814]{TEL}",
+   "cliente"
+  ],
+  [
+   "aggiungi [Residence Le Querce]{CHI} referente [signor Gismondi]{CHI} tel [06 7712094]{TEL}",
+   "cliente"
+  ],
+  [
+   "nuovo cliente: [Mauro Pelliccioni]{CHI}, [caldaia a condensazione]{LAV}, abita a [via San Remigio 8]{IND}",
+   "cliente"
+  ],
+  [
+   "segna come cliente [la nuora de Bonanni, Federica Lauri]{CHI}",
+   "cliente"
+  ],
+  [
+   "quanto ho fatturato a settembre?",
+   "dati"
+  ],
+  [
+   "quanto me deve ancora [Mastrangeli]{CHI}?",
+   "dati"
+  ],
+  [
+   "che c'ho [domani]{GIO}?",
+   "dati"
+  ],
+  [
+   "a che ora c'ho [Fiorucci]{CHI} [giovedì]{GIO}?",
+   "dati"
+  ],
+  [
+   "qual è l'indirizzo de [Trombetti]{CHI}?",
+   "dati"
+  ],
+  [
+   "dammi il numero de [Termoidraulica Lucidi]{CHI}",
+   "dati"
+  ],
+  [
+   "quanti [preventivi]{DOC} ho fatto sto mese",
+   "dati"
+  ],
+  [
+   "chi nn m'ha pagato ancora?",
+   "dati"
+  ],
+  [
+   "quanto ho incassato [la settimana scorsa]{GIO}",
+   "dati"
+  ],
+  [
+   "[venerdì]{GIO} so libera [ner pomeriggio]{ORA}?",
+   "dati"
+  ],
+  [
+   "quanto avevo chiesto a [Colasanti]{CHI} x [il bagno]{LAV}?",
+   "dati"
+  ],
+  [
+   "la mail de [Pignatelli]{CHI} qual è",
+   "dati"
+  ],
+  [
+   "quante [fatture]{DOC} so ancora aperte",
+   "dati"
+  ],
+  [
+   "che lavori c'ho [la settimana prossima]{GIO}",
+   "dati"
+  ],
+  [
+   "[la Vaillant]{LAV} de [Bonanni]{CHI} quando l'ho installata?",
+   "dati"
+  ],
+  [
+   "quanto ho speso de materiale da [Idrotermica Sbardella]{CHI} quest'anno",
+   "dati"
+  ],
+  [
+   "a [via delle Ortensie 22]{IND} chi ce sta?",
+   "dati"
+  ],
+  [
+   "dimme gli appuntamenti de [oggi]{GIO}",
+   "dati"
+  ],
+  [
+   "[la fattura]{DOC} [23]{NUM} è stata pagata?",
+   "dati"
+  ],
+  [
+   "quant'è il totale der [preventivo]{DOC} de [Pandolfi]{CHI}",
+   "dati"
+  ],
+  [
+   "quanti clienti nuovi ho preso quest'anno",
+   "dati"
+  ],
+  [
+   "[dopodomani]{GIO} [alle 10]{ORA} so impegnata?",
+   "dati"
+  ],
+  [
+   "er telefono de [la signora Ricciotti]{CHI} ce l'hai?",
+   "dati"
+  ],
+  [
+   "quanto m'ha pagato [Condominio Villa Serena]{CHI} finora",
+   "dati"
+  ],
+  [
+   "che differenza c'è tra una caldaia a condensazione e una tradizionale",
+   "domanda"
+  ],
+  [
+   "ogni quanto va fatto il controllo fumi?",
+   "domanda"
+  ],
+  [
+   "l'iva sui lavori de ristrutturazione bagno è al 10?",
+   "domanda"
+  ],
+  [
+   "come se calcola er bonus x la sostituzione caldaia",
+   "domanda"
+  ],
+  [
+   "che pressione deve avè l'impianto a caldo",
+   "domanda"
+  ],
+  [
+   "mi conviene comprà un furgone elettrico x la ditta?",
+   "domanda"
+  ],
+  [
+   "come rispondo a un cliente che nn vuole pagà l'uscita",
+   "domanda"
+  ],
+  [
+   "che documenti servono x il libretto d'impianto",
+   "domanda"
+  ],
+  [
+   "quanto se fa pagà de solito una disostruzione a Roma",
+   "domanda"
+  ],
+  [
+   "serve [la DiCo]{DOC} pure x cambià solo il miscelatore?",
+   "domanda"
+  ],
+  [
+   "come faccio a trovà clienti nuovi in zona mia",
+   "domanda"
+  ],
+  [
+   "er multistrato è meglio der rame x un bagno?",
+   "domanda"
+  ],
+  [
+   "[Proietti]{CHI} m'ha pagato 850",
+   "incasso"
+  ],
+  [
+   "ha pagato [la sig.ra Ceccarelli]{CHI}, 300 in contanti",
+   "incasso"
+  ],
+  [
+   "incassati 1200 da [Condominio Villa Serena]{CHI}",
+   "incasso"
+  ],
+  [
+   "[Benedetti]{CHI} ha saldato [la fattura]{DOC} [19]{NUM}",
+   "incasso"
+  ],
+  [
+   "m'è arrivato er bonifico de [Pallottini srl]{CHI}",
+   "incasso"
+  ],
+  [
+   "segna che [Antonucci]{CHI} ha dato l'acconto de 500",
+   "incasso"
+  ],
+  [
+   "[Gentilini]{CHI} ha pagato tutto daje",
+   "incasso"
+  ],
+  [
+   "preso 180 da [Morganti]{CHI} x [la perdita]{LAV}",
+   "incasso"
+  ],
+  [
+   "[l'Hotel Belsito]{CHI} ha pagato metà, 1400",
+   "incasso"
+  ],
+  [
+   "ricevuto pagamento da [Lattanzi]{CHI} co assegno",
+   "incasso"
+  ],
+  [
+   "[Fabbrocini]{CHI} m'ha dato 90 x [il termosifone]{LAV}",
+   "incasso"
+  ],
+  [
+   "[i Ventura]{CHI} hanno pagato [la Immergas]{LAV}",
+   "incasso"
+  ],
+  [
+   "incassato saldo [Paolucci]{CHI} 2600 cmq segnalo pagato",
+   "incasso"
+  ],
+  [
+   "fai una foto",
+   "foto"
+  ],
+  [
+   "scatta una foto [alla caldaia]{LAV}",
+   "foto"
+  ],
+  [
+   "fotografa [er contatore]{LAV} de [Marzocchi]{CHI}",
+   "foto"
+  ],
+  [
+   "mo' apri la fotocamera che devo fotografà er sifone rotto",
+   "foto"
+  ],
+  [
+   "famme una foto [della perdita]{LAV} x [Pignatelli]{CHI}",
+   "foto"
+  ],
+  [
+   "foto [al bagno finito]{LAV} de [Sciarra]{CHI}",
+   "foto"
+  ],
+  [
+   "scatta foto der [cantiere]{LAV} prima de comincià",
+   "foto"
+  ],
+  [
+   "fotografa [la targhetta della Baxi]{LAV}",
+   "foto"
+  ],
+  [
+   "mo' fai una foto [allo scarico]{LAV} e mettila in [Ciampoli]{CART}",
+   "foto"
+  ],
+  [
+   "scatta una foto [ar collettore]{LAV}",
+   "foto"
+  ],
+  [
+   "crea la cartella [Fornitori]{CART}",
+   "cartella"
+  ],
+  [
+   "metti [la fattura]{DOC} de [Sbardella]{CHI} nella cartella [Fornitori]{CART}",
+   "cartella"
+  ],
+  [
+   "nuova cartella [Cantiere Gardenie]{CART}",
+   "cartella"
+  ],
+  [
+   "sposta [le foto]{DOC} [del bagno]{LAV} de [Colasanti]{CHI} in [Lavori finiti]{CART}",
+   "cartella"
+  ],
+  [
+   "apri la cartella [Caldaie 2026]{CART}",
+   "cartella"
+  ],
+  [
+   "fai una cartella x [Edilnova Costruzioni]{CHI} chiamala [Edilnova]{CART}",
+   "cartella"
+  ],
+  [
+   "schiaffa [il DURC]{DOC} aggiornato dentro [Carte ditta Roma]{CART}",
+   "cartella"
+  ],
+  [
+   "rinomina la cartella [Varie]{CART} in [Garanzie]{CART}",
+   "cartella"
+  ],
+  [
+   "butta [la visura]{DOC} nella cartella [Burocrazia]{CART}",
+   "cartella"
+  ],
+  [
+   "cosa c'è nella cartella [Hotel Belsito]{CART}?",
+   "cartella"
+  ],
+  [
+   "crea cartella [Manutenzioni condominio]{CART} e mettice [il SAL]{DOC}",
+   "cartella"
+  ],
+  [
+   "cancella la cartella [Prove]{CART}",
+   "cartella"
+  ],
+  [
+   "aiuto è scoppiato un tubo da [Pandolfi]{CHI} urgente",
+   "urgenza"
+  ],
+  [
+   "[la signora Bucci]{CHI} c'ha l'acqua che esce dar soffitto, corri",
+   "urgenza"
+  ],
+  [
+   "emergenza al [condominio Le Gardenie]{CHI}: allagata la cantina",
+   "urgenza"
+  ],
+  [
+   "urgente [Ottaviani]{CHI} senza riscaldamento co la nonna malata",
+   "urgenza"
+  ],
+  [
+   "c'è puzza de gas da [Fabbrocini]{CHI} che faccio",
+   "urgenza"
+  ],
+  [
+   "corri a [via dei Tulipani Rossi 27]{IND} è saltato [il flessibile]{LAV}",
+   "urgenza"
+  ],
+  [
+   "[Hotel Belsito]{CHI} nn c'ha acqua calda in tutte le camere, urgentissimo",
+   "urgenza"
+  ],
+  [
+   "[Ruggeri]{CHI} der bar s'è allagato er bagno, subito",
+   "urgenza"
+  ],
+  [
+   "m'hanno chiamato [i Lauri]{CHI} [la caldaia]{LAV} va in blocco e c'hanno un neonato, priorità",
+   "urgenza"
+  ],
+  [
+   "urgente perdita [sotto il pavimento]{LAV} da [Bernardini]{CHI}",
+   "urgenza"
+  ],
+  [
+   "mollo tutto, [Spadoni]{CHI} c'ha [lo scarico]{LAV} che rigurgita",
+   "urgenza"
+  ],
+  [
+   "aiuto [la Junkers]{LAV} de [Rossetti]{CHI} fa fumo",
+   "urgenza"
+  ],
+  [
+   "fai [il SAL]{DOC} x [Condominio Villa Serena]{CHI} siamo al [40 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [Edilnova Costruzioni]{CHI} [rifacimento colonne]{LAV} al [70%]{AVANZ}",
+   "sal"
+  ],
+  [
+   "aggiorna lo [stato avanzamento]{DOC} de [Paolucci]{CHI} al [50 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[il bagno]{LAV} de [Salvucci]{CHI} è all'[80 percento]{AVANZ} fai [il SAL]{DOC}",
+   "sal"
+  ],
+  [
+   "siamo a [metà lavori]{AVANZ} da [Montanari]{CHI} prepara [lo stato avanzamento]{DOC}",
+   "sal"
+  ],
+  [
+   "secondo [SAL]{DOC} x [l'Hotel Belsito]{CHI} al [65 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "fai [il SAL]{DOC} [2]{NUM} de [Impresa Fratelli Cosentini]{CHI} al [90 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[Mariani]{CHI} [impianto a pavimento]{LAV} [tre quarti]{AVANZ} fatto, fai [il SAL]{DOC}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} finale [Lattanzi]{CHI} [100 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "aggiorna [il SAL]{DOC} der [condominio Le Gardenie]{CHI} siamo al [trenta per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "prepara [stato avanzamento lavori]{DOC} [Residence Le Querce]{CHI} al [55%]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[il SAL]{DOC} de [Giordani]{CHI} mettilo al [20 per cento]{AVANZ} xké è appena iniziato",
+   "sal"
+  ],
+  [
+   "fai [la DiCo]{DOC} x [Spadoni]{CHI} [caldaia a condensazione]{LAV}",
+   "dico"
+  ],
+  [
+   "prepara [la dichiarazione de conformità]{DOC} [impianto idrico]{LAV} de [Paolucci]{CHI}",
+   "dico"
+  ],
+  [
+   "[DiCo]{DOC} x [la Immergas]{LAV} dei [Ventura]{CHI}",
+   "dico"
+  ],
+  [
+   "me serve [la dico]{DOC} [del bagno]{LAV} de [Salvucci]{CHI}",
+   "dico"
+  ],
+  [
+   "compila [la DiCo]{DOC} x [Hotel Belsito]{CHI} [impianto termico]{LAV}",
+   "dico"
+  ],
+  [
+   "fai [la dichiarazione di conformità]{DOC} a [via dei Ciclamini 7]{IND}",
+   "dico"
+  ],
+  [
+   "[DiCo]{DOC} [impianto gas]{LAV} x [Giordani]{CHI} co tutti gli allegati",
+   "dico"
+  ],
+  [
+   "prepara [la conformità]{DOC} [della pompa di calore]{LAV} de [Mariani]{CHI}",
+   "dico"
+  ],
+  [
+   "nuova [DiCo]{DOC} [sostituzione scaldabagno]{LAV} [signora Leoni]{CHI}",
+   "dico"
+  ],
+  [
+   "fai [la dico]{DOC} x [Condominio Villa Serena]{CHI} [colonna montante]{LAV}",
+   "dico"
+  ],
+  [
+   "genera [la DiCo]{DOC} de [Rossetti]{CHI} [la Junkers]{LAV} nuova",
+   "dico"
+  ],
+  [
+   "[dichiarazione conformità]{DOC} x [Cicconi]{CHI} [addolcitore]{LAV}",
+   "dico"
+  ],
+  [
+   "[giovedì]{GIO} [alle 21]{ORA} c'è [l'assemblea]{LAV} der [Condominio Villa Serena]{CHI}",
+   "assemblea"
+  ],
+  [
+   "preparami le cose x [l'assemblea]{LAV} der [condominio Le Gardenie]{CHI}",
+   "assemblea"
+  ],
+  [
+   "all'[assemblea]{LAV} der [Residence Le Querce]{CHI} hanno approvato il rifacimento colonne",
+   "assemblea"
+  ],
+  [
+   "fai il riassunto dell'[assemblea]{LAV} der [Condominio Le Magnolie]{CHI}",
+   "assemblea"
+  ],
+  [
+   "[l'amministratore Pignatelli]{CHI} m'ha invitato all'[assemblea]{LAV} [il 20]{GIO}",
+   "assemblea"
+  ],
+  [
+   "cosa devo portà all'[assemblea]{LAV} condominiale de [via Gerolamo Tassinari 5]{IND}",
+   "assemblea"
+  ],
+  [
+   "devo presentà [il preventivo]{DOC} all'[assemblea]{LAV} der [Condominio Aurora]{CHI}",
+   "assemblea"
+  ],
+  [
+   "il verbale dell'[assemblea]{LAV} der [Condominio Il Pino]{CHI} me lo riassumi?",
+   "assemblea"
+  ],
+  [
+   "preparami cosa dì all'[assemblea]{LAV} der [Condominio Le Robinie]{CHI} sulla caldaia centralizzata",
+   "assemblea"
+  ],
+  [
+   "riassumi [l'assemblea]{LAV} de [ieri]{GIO} der [Condominio Aurora]{CHI}",
+   "assemblea"
+  ],
+  [
+   "aho EON bongiorno, annamo",
+   "saluto"
+  ],
+  [
+   "buongiorno",
+   "saluto"
+  ],
+  [
+   "daje EON ce sei?",
+   "saluto"
+  ],
+  [
+   "grazie mille",
+   "saluto"
+  ],
+  [
+   "ciao bella mia, grazie de tutto",
+   "saluto"
+  ],
+  [
+   "bona giornata",
+   "saluto"
+  ],
+  [
+   "buonasera EON",
+   "saluto"
+  ],
+  [
+   "grazie, sei 'na forza",
+   "saluto"
+  ],
+  [
+   "ok perfetto grazie",
+   "saluto"
+  ],
+  [
+   "mo' basta, ciao",
+   "saluto"
+  ],
+  [
+   "[Silvestrelli]{CHI} ha accettato [il preventivo]{DOC} [der bagno]{LAV}",
+   "accettato"
+  ],
+  [
+   "[la signora Leoni]{CHI} dice de sì [allo scaldabagno]{LAV}",
+   "accettato"
+  ],
+  [
+   "[Condominio Villa Serena]{CHI} ha approvato [il preventivo]{DOC} [della colonna]{LAV}",
+   "accettato"
+  ],
+  [
+   "accettato [il preventivo]{DOC} [27]{NUM} da [Morganti]{CHI}",
+   "accettato"
+  ],
+  [
+   "[Gentilini]{CHI} m'ha detto ok x [il box doccia]{LAV} daje",
+   "accettato"
+  ],
+  [
+   "[i Ventura]{CHI} hanno firmato [il preventivo]{DOC}",
+   "accettato"
+  ],
+  [
+   "[Salvucci]{CHI} ha accettato ma vole lo sconto der 5",
+   "accettato"
+  ],
+  [
+   "[l'Hotel Belsito]{CHI} conferma [le valvole]{LAV}, se parte",
+   "accettato"
+  ],
+  [
+   "segna accettato [il preventivo]{DOC} de [Cicconi]{CHI}",
+   "accettato"
+  ],
+  [
+   "[Mariani]{CHI} ha detto sì [alla pompa de calore]{LAV}",
+   "accettato"
+  ],
+  [
+   "[il preventivo]{DOC} [della caldaia]{LAV} [Montanari]{CHI} l'ha accettato",
+   "accettato"
+  ],
+  [
+   "[Bernardini]{CHI} ha accettato, partimo [lunedì]{GIO}",
+   "accettato"
+  ],
+  [
+   "sollecita [Mastrangeli]{CHI} x [la fattura]{DOC} [11]{NUM}",
+   "sollecito"
+  ],
+  [
+   "ricorda a [Antonucci]{CHI} che me deve ancora 180",
+   "sollecito"
+  ],
+  [
+   "manda un sollecito a [Pallottini srl]{CHI} [per mail]{CAN}",
+   "sollecito"
+  ],
+  [
+   "[Benedetti]{CHI} nn ha pagato, scrivije gentile ma deciso",
+   "sollecito"
+  ],
+  [
+   "sollecito pagamento [Condominio Villa Serena]{CHI} [fattura]{DOC} [20]{NUM}",
+   "sollecito"
+  ],
+  [
+   "[Tedeschi]{CHI} so tre mesi che aspetto, sollecitalo",
+   "sollecito"
+  ],
+  [
+   "rammenta a [Lattanzi]{CHI} [la fattura]{DOC} scaduta",
+   "sollecito"
+  ],
+  [
+   "manda il promemoria de pagamento a [Ferracci]{CHI} [su whatsapp]{CAN}",
+   "sollecito"
+  ],
+  [
+   "[Brancaleoni]{CHI} deve ancora il saldo, sollecita",
+   "sollecito"
+  ],
+  [
+   "sollecita [l'Hotel Belsito]{CHI} x l'altra metà",
+   "sollecito"
+  ],
+  [
+   "riscrivi a [Coppola]{CHI} che [la fattura]{DOC} [della Saunier]{LAV} è scaduta da 15 giorni",
+   "sollecito"
+  ],
+  [
+   "sollecita tutti quelli che nn hanno pagato",
+   "sollecito"
+  ],
+  [
+   "[Lauri]{CHI} nn ha pagato [l'intervento]{LAV}, manda sollecito",
+   "sollecito"
+  ],
+  [
+   "secondo sollecito a [Studio Dentistico Fabiani]{CHI} [per pec]{CAN}",
+   "sollecito"
+  ]
+ ]
+}
