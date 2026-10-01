@@ -906,7 +906,7 @@
    "dati"
   ],
   [
-   "la [fattura]{DOC} [23]{NUM} è stata pagata?",
+   "ja' la [fattura]{DOC} [23]{NUM} chillo l'ha pagata o no?",
    "dati"
   ],
   [
@@ -1114,7 +1114,7 @@
    "cartella"
   ],
   [
-   "rinomina la cartella [Varie]{CART} in [Garanzie]{CART}",
+   "mo' rinominami la cartella [Robe varie]{CART} e chiamala [Garanzie cancelli]{CART}",
    "cartella"
   ],
   [
