@@ -13581,6 +13581,8 @@ const SOGLIA_NEURALE = 0.9;
 const MESSAGGIO_ESPLICITO = /^\s*(?:wa|whatsapp|whats|wapp|sms|manda\s+un\s+(?:wa|whatsapp|messaggio|sms))\b/i;
 // "fammi un documento…" chiede di FARE; "fammi (ri)vedere / trovare / aprire…" chiede di cercare
 const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b(?!\s+(?:ri)?(?:vedere|vedé|vede|trovare|aprire|cercare|leggere|sentire|avere|mandare)(?![\wàèéìòù]))/i.test(String(testo || ""));
+// una "chiamata" senza nessuna parola da telefono ("Elisa Fontana è allergica all'ammoniaca") non è una chiamata (1/10)
+const PAROLE_CHIAMATA = /\b(?:chiam\p{L}*|ciam\p{L}*|kiam\p{L}*|telefon\p{L}*|squill\p{L}*|richiam\p{L}*|sent\p{L}*|tel|parla\p{L}*|passami|numero)\b/iu;
 function provaModello(l, testo, arbitro){
   if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
   // "aggiungi in EON queste foto", "segna in Fornitori…": una cartella che c'è, la gestisce la sua funzione
@@ -13589,6 +13591,7 @@ function provaModello(l, testo, arbitro){
   const ctx = contestoLettore();
   const r = EonLettore.classifica(testo, ctx);
   if(!r) return null;
+  if(r.intento === "chiamata" && !PAROLE_CHIAMATA.test(testo)) return null;
   // chi chiede di FARE qualcosa ("fammi un documento per il DURC") non si vede aprire quello che c'è
   if(r.intento === "cerca_documento" && chiedeDiFare(testo)) return null;
   /* Il modello neurale decide il cassetto (30/09/2026, come le grandi app): se è
@@ -16224,7 +16227,8 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        fornitore del cemento") e cosa li legge il lettore (leggiDestinatario), poi lo stesso
        invio di sempre. Prima delle urgenze e degli impegni ("…domani cantiere ore 7" è il testo) */
     if(testo && !inCorso && !inContinuazione){
-      const tipoC = cassettoNeurale(testo);
+      let tipoC = cassettoNeurale(testo);
+      if(tipoC === "chiamata" && !PAROLE_CHIAMATA.test(testo)) tipoC = null;
       const vecchia = /^(?:messaggio|email|chiamata)$/.test(tipoC || "") ? leggiConLettore(testo) : null;
       // le regole l'hanno già letto tutto (a chi e, per scrivere, cosa): come prima
       const giaLetta = vecchia && /^(?:messaggio|email|whatsapp|chiama)$/.test(vecchia.azione) && (vecchia.cliente || vecchia.candidati || vecchia.clienteSimile || vecchia.nomeDetto) && (vecchia.azione === "chiama" || vecchia.messaggio);
