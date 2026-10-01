@@ -4999,6 +4999,28 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 pomeriggio: domande sui dati, spostamenti, modello c24 (ROADMAP 0b.19 passo 5)
+- `lettore.js`: `DOMANDA_DATI_FORTE` (ultima volta da…, quant'è che non vado, numero di X ce l'ho,
+  soldi/contanti presi, fatture non pagate, preventivi non firmati/aperti, schei da ricevere, quanto
+  sto piena, chi deve passare, dovevo ricordarmi, punto dei lavori, l'avevo messa…, appuntamenti
+  della settimana, ultimo preventivo… quanto, l'ho fatta/ho mandato la fattura); `temaDomanda`: temi
+  nuovi `ultima_visita` e `contatto`; `NOTE_SEGNATE` anche "cosa/quante… avevo detto";
+  `leggiDomandaDati` → `forte` (mai con un verbo di comando in testa) e `nomeDetto`.
+- `index.html`: la strada "dati" anche con `forte` (pure "fammi vedere…", "fammi il punto");
+  `rispondiSuiDati`: incassi della settimana (e "contanti": lo dice onesto), `ultima_visita`
+  (tasks + appuntamenti nelle chat, passati e prossimo), `contatto`.
+- Spostare: `leggiModificaImpegno` col verbo in testa usa i tempi dopo "di/del…" per riconoscere;
+  detto il giorno, un impegno di un altro giorno è scartato; "non trovo in agenda…" dal codice se il
+  modello dice calendario_modifica, ci sono nomi e non si trova (solo frasi con un comando).
+- `PAROLE_CHIAMATA`: niente chiamata dal modello senza una parola da telefono.
+- Prove: `domande-dati-app.test.js` (nuova); `annulla.test.js` (Pinco: lo dice il codice);
+  `frasi-nuove-mestieri.test.js`: "Non trovo in agenda un impegno" = giusta per uno spostamento il
+  cui impegno è stato annullato prima; `giro20-regole` col Tomasin.
+- Modello c24 (`confini/c24.json`, 232 frasi; maestri5 in scratchpad): da solo +11 g16, +7 g18,
+  +7 g19, +6 g20, Andrea −1; nell'app g5 +2, g17 +2, g18 +4, **g19 −5** (4 domande di mestiere
+  "meglio X o Y?" e 3 appunti) → non adottato. Prossimo: capire perché le domande "meglio X o Y"
+  cambiano strada (probabilmente le frasi "domanda" di c24), poi riprovare.
+
 ### 1/10 mattina: documenti cercati dal codice (ROADMAP 0b.19 passo 5)
 - `index.html provaCercaOvunque` (dopo `provaDocumentoImpresa` e `provaRisorsaImmediata`): solo con
   un verbo di ricerca in testa (`VERBI_CERCA`: trovami/cerca/apri/mostrami/fammi vedé/dov'è…) e una

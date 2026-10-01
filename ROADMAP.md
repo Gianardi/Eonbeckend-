@@ -721,6 +721,19 @@ sporca, dialetti, chat, anziano, straniero.
    - Modello dei cassetti riallenato di nuovo (con il giro 20 nell'esame): nell'app +2/+3 sui
      giri 16, 18, 20 ma −5 sul giro 17 e −1 sull'11 → **non messo**. Prossimo: frasi mirate per
      i racconti di cantiere (appunti) e le fatture brevi, poi riprovare.
+
+   **1/10 pomeriggio: le domande sui tuoi dati le risponde il codice.**
+   - "Quand'è l'ultima volta che sono stato dai Tosi?" (la data e quanti giorni fa), "il numero del
+     Merlo ce l'ho?" (sì e qual è, o no), "quanti soldi ho preso in contanti questa settimana" (il
+     totale; contanti o bonifico EON non lo segna ancora e lo dice), "fammi vedé le fatture non
+     pagate", "fammi il punto dei lavori di questa settimana", "cosa avevo detto del tetto dello
+     Scalvini". Sui giri 16-20, 18 domande su 21 che andavano all'AI ora le fa il codice.
+   - Spostare: "rimanda il Tomasin di domani a giovedì" usa il giorno detto; se quell'impegno non
+     c'è più, EON lo dice ("Non trovo in agenda un impegno con Tomasin"), non ne propone un altro.
+     Anche "annulla l'appuntamento con Pinco" (non c'è): lo dice il codice, senza AI.
+   - Il modello dice "chiamata" ma nella frase non c'è una parola da telefono: non chiama.
+   - Modello dei cassetti riallenato con 232 frasi mirate (c24): nell'app giro 18 +4, 17 +2, 5 +2,
+     ma giro 19 −5 (domande di mestiere "meglio X o Y") → **non messo**, di nuovo.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
