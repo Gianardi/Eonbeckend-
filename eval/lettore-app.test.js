@@ -184,7 +184,8 @@ async function main() {
 
     await scrivi("DURC machi Alessia");
     s = await stato();
-    verifica("\"DURC machi Alessia\" senza DURC caricato: lo dice e porta a Documenti impresa", s.pagina === "documenti-impresa" && /Non hai ancora caricato il DURC/.test(s.card || ""), JSON.stringify(s));
+    // 1/10/2026: lo dice e propone di caricarlo subito ("Lo carichiamo adesso?")
+    verifica("\"DURC machi Alessia\" senza DURC caricato: lo dice e propone di caricarlo", /Il DURC non è ancora caricato in EON\. Lo carichiamo adesso\?/.test(s.card || ""), JSON.stringify(s));
 
     /* 6. Domande sui dati */
     for (const [frase, atteso] of [["Quanti soldi devo incassare ?", /Ti devono €4\.200/], ["Chi non ha ancora pagato?", /Ti devono €4\.200/], ["Clienti che devono pagare?", /Ti devono/], ["Quanto ho di IVA questo mese?", /IVA di/], ["Quanti cantieri attivi ho?", /5 cantieri attivi/], ["Guarda se ho impegni sabato", /sabato|dopodomani|domani|oggi/i]]) {

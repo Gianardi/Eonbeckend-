@@ -24,7 +24,7 @@
         ["mandi un messaggio a Marcello Fiore che domani il getto slitta per la pioggia?", "messaggio"],
         ["mi chiami Emilio Sorrentino", "chiamata"],
         ["puoi telefonare all'osteria del borgo?", "chiamata"],
-        ["manda per mail al condominio i pini il preventivo del cornicione", "email"],
+        ["manda per mail al condominio i pini il preventivo del cornicione", "invio"],
         ["la fattura di Sorrentino mandagliela su whatsapp", "invio"],
         ["dove sono le fatture del condominio i pini?", "risorsa"],
         ["fammi rivedere le foto del bagno della Rocca", "foto"],

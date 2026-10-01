@@ -169,7 +169,8 @@ async function main() {
     verifica("\"fattura testolina\" (senza verbo): idem", richieste.nuda && richieste.nuda.titolo === "Fattura n. 4/2026", JSON.stringify(richieste.nuda));
     verifica("\"mi fai vedere la fattura di testolina\": idem", richieste.vedere && richieste.vedere.titolo === "Fattura n. 4/2026", JSON.stringify(richieste.vedere));
     // Al plurale è una domanda (27/09/2026, "preventivi di Rossi"): se non ce ne sono lo dice, senza AI
-    verifica("\"preventivi testolina\" senza preventivi: lo dice subito", richieste.preventiviTestolina && richieste.preventiviTestolina.titolo === "Preventivi di Testolina", JSON.stringify(richieste.preventiviTestolina));
+    // 1/10/2026: lo dice e propone di farlo ("Il preventivo non c'è ancora … Lo facciamo adesso?")
+    verifica("\"preventivi testolina\" senza preventivi: lo dice subito e propone di farlo", richieste.preventiviTestolina && richieste.preventiviTestolina.titolo === "Il preventivo non c'è ancora", JSON.stringify(richieste.preventiviTestolina));
     verifica("con un importo (\"fattura testolina 300 per porte\"): è da CREARE, decide l'AI", richieste.conImporto === false);
     verifica("\"fammi una fattura per testolina\": è da creare, decide l'AI", richieste.creare === false);
     verifica("\"preventivo per Rossi pulizia scale\" (lavoro nuovo): decide l'AI", richieste.nuovoLavoro === false, JSON.stringify(richieste.nuovoLavoro));

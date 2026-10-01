@@ -1,8 +1,8 @@
 {
-  "nota": "Frasi giuste dell'app intera per ogni serie (giorno fisso 29/09). eval/prove-frasi.sh fallisce se una serie scende sotto il minimo. Si alzano quando l'app migliora, mai si abbassano senza dirlo ad Andrea. Ultimo aggiornamento: 1/10 sera, misure nei preventivi (16 1044, 17 1040, 18 998, 19 1008, 20 1011).",
+  "nota": "Frasi giuste dell'app intera per ogni serie (giorno fisso 29/09). eval/prove-frasi.sh fallisce se una serie scende sotto il minimo. Si alzano quando l'app migliora, mai si abbassano senza dirlo ad Andrea. Ultimo aggiornamento: 1/10 notte, modello c25 + \"Lo facciamo adesso?\" (5 186, 15 1053, 16 1047, 17 1040, 18 1000, 19 1010, 20 1013).",
   "serie": {
     "frasi-nuove-mestieri.json": 143,
-    "frasi-giro5.json": 184,
+    "frasi-giro5.json": 186,
     "frasi-giro6.json": 175,
     "frasi-giro7.json": 123,
     "frasi-giro8.json": 120,
@@ -14,11 +14,11 @@
     "frasi-giro14.json": 47,
     "frasi-prova-cieca.json": 77,
     "frasi-prova-finale-app.json": 99,
-    "frasi-giro15.json": 1051,
-    "frasi-giro16.json": 1044,
+    "frasi-giro15.json": 1053,
+    "frasi-giro16.json": 1047,
     "frasi-giro17.json": 1040,
-    "frasi-giro18.json": 998,
-    "frasi-giro19.json": 1008,
-    "frasi-giro20.json": 1011
+    "frasi-giro18.json": 1000,
+    "frasi-giro19.json": 1010,
+    "frasi-giro20.json": 1013
   }
 }

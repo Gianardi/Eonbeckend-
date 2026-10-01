@@ -741,6 +741,40 @@ sporca, dialetti, chat, anziano, straniero.
    descrizione ("3x2m") e il conto è giusto. "8 tavoli a 450 e 32 sedie" non sono 450,32 €.
    Importi giusti sulle 628 frasi dei giri 8-20: 568 (prima 553). App: giro 16 1.044, 17 1.040,
    18 998, 19 1.008, **20 1.011 (96%)**.
+
+   **1/10 sera: "manda il preventivo a X" quando il preventivo non c'è ancora** (idea di Andrea).
+   Prima EON diceva "Non trovo un preventivo" (o apriva la Mail vuota). Ora: «Il preventivo per
+   Condominio I Pini (cornicione) non l'abbiamo ancora fatto. Lo facciamo adesso?» [Sì, facciamolo]
+   [No]. Con «Sì» parte il preventivo per quel cliente e quel lavoro, EON chiede solo quello che
+   manca (di solito l'importo) e, fatto, mostra i tasti per mandarlo. Vale anche per la fattura.
+   Pilastri *tempo* e *soldi*.
+   **Esteso a tutta l'app (Andrea: "non solo ai preventivi, a ogni attività dove ha senso").**
+   Quando quello che chiedi manca, EON lo dice e propone di farlo subito; con «Sì» lo fa:
+   chiamare/scrivere senza numero o email (li chiede, li salva e chiama o prepara il messaggio),
+   "il numero di X ce l'ho?" (me lo dici? lo salvo, anche aggiungendo il cliente), "il preventivo di X
+   l'ho fatto?" / "mi serve la fattura di X" (lo facciamo adesso?), DiCo dell'elettricista e SAL
+   dell'edile che non ci sono, "quando vedo X?" senza impegni (lo fissiamo?), "sposta l'appuntamento
+   con X a giovedì" che in agenda non c'è (lo metto giovedì? — chiede sempre, forse era annullato
+   apposta), "apri la scheda di X" che non è tra i clienti (lo aggiungo?), il tasto «Portami» in
+   agenda per chi non è cliente. Non messo dove non c'è niente da creare (annullare, cancellare,
+   cercare nella Mente, incassi) né ai messaggi a chi non è cliente (geometra, fornitore: sarebbe
+   fastidioso). Il verbale dell'assemblea EON non lo prepara ancora: da fare a parte.
+   **Secondo giro (stesso giorno):** "quanto mi deve X?" e a X non hai mai fatto fatture (la
+   facciamo?), le foto di un cliente che non ci sono (le scattiamo? scatta o galleria), "manda le
+   foto del cantiere a X" (WhatsApp/Email/EON con i link alle foto: il telefono non lascia allegarle
+   da un link), "l'indirizzo di X ce l'ho?" (me lo dici? lo salvo; c'è → Portami lì), il DURC non
+   caricato (lo carichiamo? il tasto apre subito la scelta del file), "fattura il SAL di X" (la rata
+   del SAL, o "il SAL non c'è: lo facciamo? poi la fattura"), "quando è l'assemblea di X?"
+   (amministratore: la data, o "non è convocata: la convochiamo?"), **il preventivo accettato**
+   ("Rossi ha accettato il preventivo": segnato nella Mente, poi "Facciamo la fattura con le stesse
+   voci, o fissiamo l'inizio dei lavori?"). Ogni «Sì» è provato fino al risultato (fattura creata dal
+   server, foto, link, indirizzo salvato, SAL fatturato, assemblea convocata), senza AI.
+   **Modello dei cassetti nuovo (c24 + c25: domande "meglio X o Y?", "tieni presente che…",
+   messaggi brevi), messo insieme:** nessun giro peggiora (giro 5 186, 15 1.053, 16 1.047 +3,
+   17 1.040, 18 1.000 +2, 19 1.010 +2, 20 1.013 +2; frasi vere di Andrea 133/136 come prima).
+   Da fare a parte: "sollecita il pagamento a X" (funzione nuova: messaggio con le fatture non
+   pagate); "ricordami di chiedere a Rossi se ha accettato il preventivo" apre un preventivo nuovo
+   (errore che c'era già prima).
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
@@ -1342,7 +1376,7 @@ posto"** (il gestionale tiene i conti, EON la giornata e la memoria).
 |---|---|---|
 | **Vercel Pro** (~20 $/mese) | [Andrea] | Il piano gratuito vieta l'uso commerciale e ha il limite di pubblicazioni che ci ha bloccato il 25/09. |
 | **Supabase Pro** (~25 $/mese) | [Andrea] | Backup giornalieri, nessuna pausa del progetto. |
-| **Servizio email vero** (es. Resend) | [insieme] | Oggi Supabase manda email solo a noi del team. Poi: email in italiano e **conferma email obbligatoria** accesa. |
+| **Servizio email vero** (es. Resend, Brevo, Postmark) | [insieme] | Oggi Supabase manda email solo a noi del team. Poi: email in italiano e **conferma email obbligatoria** accesa. **Costo (1/10, da verificare quando si attiva):** i piani gratuiti (qualche migliaio di email al mese) dovrebbero bastare all'inizio; serve il **dominio** per spedire (vedi riga sotto) e qualche impostazione sul dominio, che preparo io. **Deciso con Andrea il 1/10: non serve adesso**, finché i tester sono pochi; si fa prima di aprire le iscrizioni a tutti. Nel frattempo gli account dei tester li creo io a mano (confermati, password provvisoria) e anche "password dimenticata" lo sistemo io, perché quell'email oggi non arriva. |
 | **Privacy, termini, consenso GDPR** | [insieme] | **Fatto per la prova (27/09)**: /privacy, /termini (con accordo art. 28), casella "Accetto", registro dei trattamenti. Da fare: controllo di un legale, poi versione con la società. Storage privato fatto (27/09). |
 | **Dominio tuo** (es. eon.it) | [insieme] | Tu lo compri (~10–20 €/anno), io lo collego al posto di eonbeckend.vercel.app. |
 | **Avviso automatico degli errori** | [Claude] | **Fatto (27/09)**: ogni errore dell'app e del server va nel pannello Admin (`/admin`, pagina a parte, non dentro l'app). Notifica sul telefono anche ad app chiusa: basta impostare `AVVISO_ERRORI_URL` su Vercel (es. un canale ntfy.sh) [Andrea]. |

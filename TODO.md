@@ -4999,6 +4999,80 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 notte: modello c25 adottato, misure finali (ROADMAP 0b.19 passo 5)
+- `modello-neurale.json` = studente distillato con confini c24 + c25 (maestri in scratchpad). Con
+  tutto il codice del pacchetto, app: g5 186 (+2), g15 1053 (=), g16 1047 (+3), g17 1040, g18 1000
+  (+2), g19 1010 (+2), g20 1013 (+2), g10 127; frasi vere di Andrea 133/136 (=). `soglie-app.json`
+  alzate. La guardia `PAROLE_MESSAGGIO` serve a questo modello (Tiziana delle pulizie).
+- Giro 9: "manda un whatsapp a Elisa per spostare a sabato" finiva in "Lo metto in agenda?":
+  `provaSpostaImmediato` non propone se la frase parla di messaggi/telefonate (`perMessaggio`).
+- `modello-neurale.test.mjs`: 4364 giuste (minimo 4344).
+
+### 1/10 sera: "Lo facciamo adesso?", secondo giro (ROADMAP 0b.19 passo 5)
+- `offriFatturaSeMaiFatta(cl)` in `rispondiSuiDati` (soldi di un cliente) e `capisciDomandaSoldi`
+  ("quanto ho incassato da X"); `provaLetturaLocale` ora accetta `gestito`.
+- `offriDiFareFoto(cliente, premessa)` da `mostraRisorsaFoto` (nessuna foto di un cliente) e
+  `provaInvioFoto` ("manda/gira le foto (del cantiere) a X": le ultime 6, WhatsApp col numero del
+  cliente, Email, EON, con i link alle foto).
+- `provaIndirizzoCliente` ("l'indirizzo di X ce l'ho?", "qual è/dammi l'indirizzo di X");
+  `chiediContatto(…, "indirizzo", …)` salva `address`; chi non è cliente → "Lo aggiungo?".
+- `mostraDocImpresaPer`: documento dell'impresa non caricato → "Lo/La carichiamo adesso?" → apre
+  `#cantiereDocumentiInput` in Documenti impresa (prima: solo il messaggio e la pagina).
+- `FATTURA_SAL` / `fatturaDelSal` in `provaSal`: l'ultimo SAL non fatturato (rata chiesta se manca,
+  salvata, poi `creaFatturaSal`); nessun SAL → `chiediPercentualeSal(cliente, poi)` → fattura.
+- `provaQuandoAssemblea` (amministratore): la prossima data, o "non è ancora convocata. La
+  convochiamo?" → "convoca l'assemblea di X" (chiede giorno e ora come sempre).
+- `provaPreventivoAccettato` (prima delle domande sui dati; mai con "?", "non ha accettato",
+  "ricordami/se/quando"): nota nella Mente "Preventivo n. N accettato da X (€…)", poi [Fai la
+  fattura] (comando documento con le stesse voci e IVA del preventivo) [Fissa l'inizio lavori]
+  ("inizio lavori da X <quando>") [Non ora]. Senza preventivo in EON: "si può fatturare. La
+  facciamo adesso?".
+- `gestisciDocumento` modo "cerca": "mi serve il preventivo di X" senza preventivi resta come deciso
+  il 29/09 (si prepara subito); solo la domanda ("l'ho fatto?") chiede "Lo facciamo adesso?".
+- Prove aggiornate: `lettore-app` (DURC: "Lo carichiamo adesso?"), `pacchetto-27-09` (chiama senza
+  numero; "preventivi di Rossi"), `domande-dati-app` (numero dei Tosi), `fatture` ("preventivi
+  testolina"); `non-ce-facciamolo-app` con i punti 8-15.
+- Errore trovato, c'era già prima (non toccato): "ricordami di chiedere a Rossi se ha accettato il
+  preventivo" → apre "Nuovo preventivo". Da sistemare nel lettore ("ricordami di…" è un promemoria).
+
+### 1/10 sera: "Non c'è? Lo facciamo adesso?" in tutta l'app (ROADMAP 0b.19 passo 5)
+- Controllo fatto su tutti i "non trovo / non c'è" dell'app (`index.html`). Già così: incasso da chi
+  non è cliente, nota in cartella che non c'è, documento cercato (carica), "portami da X" senza
+  indirizzo, preventivo/fattura da mandare.
+- Nuovi aiutanti: `chiediContatto(c, tipo, dopo, poi, salta)` (chiede numero/email, salva in
+  `clients`, poi continua; tasto "La scrivo io nella Mail" / "Lo scelgo in WhatsApp"),
+  `offriDiAggiungereCliente(nome, poi)`, `offriDiFissare(titolo, risposta, nome)` (Sì → "Quando?" →
+  "appuntamento con X <quando>" alla strada di sempre), `offriDiMettereImpegno(cliente, testo, giorno,
+  ora)`, `mostraOFaiDico`, `chiediPercentualeSal`, `offriDiFareDocumento(…, lavoroDetto, conEon)`.
+- Dove: `gestisciChiamata`, "chiama X" in `provaComandiSemplici`, tasti Chiama in agenda e in chat,
+  `gestisciScrittura` (email e WhatsApp senza contatto); `rispondiSuiDati` contatto / documenti /
+  agenda; `gestisciDocumento` modo "cerca" (prima preparava subito un preventivo nuovo, ora chiede;
+  "l'ho fatto?" non è il lavoro); `provaRisorsaImmediata` ("mandami le fatture di X" senza fatture);
+  `provaSpostaImmediato` (cliente nominato + nuovo giorno, nessun impegno); `provaSchedaCliente`
+  ("apri la scheda di / fammi vedere il cliente X"); `CERCA_SAL` in `provaSal`; `CERCA_DICO` in
+  `provaDico` e DiCo in `mostraDocImpresaPer`; tasto «Portami» in agenda.
+- Prova: `non-ce-facciamolo-app.test.js` (nuova, porta 9041, server vero con database e AI finti:
+  numero salvato e chiamata, email salvata, cliente aggiunto col numero, preventivo fino all'importo,
+  SAL al 40%, DiCo aperta, appuntamento fissato e impegno rimesso dal codice del server, 0 AI).
+- Non fatto: verbale dell'assemblea (EON non lo prepara ancora); "portami da X" a voce per chi non è
+  cliente resta la ricerca nelle Mappe.
+
+### 1/10 sera: il preventivo da mandare non c'è ancora → "Lo facciamo adesso?" (ROADMAP 0b.19 passo 5)
+- Andrea: "se chiede manda e-mail al condominio X il preventivo e il preventivo non c'è perché non è
+  stato ancora fatto, si dovrebbe dire che bisogna farlo e dare subito la possibilità di farlo".
+- `index.html provaInvioDocumento`: documento non trovato, cliente riconosciuto e nessun numero detto →
+  `offriDiFareDocumento`: "Il preventivo per X (lavoro) non l'abbiamo ancora fatto. Lo facciamo
+  adesso?" [Sì, facciamolo] [No] (fattura: "La fattura … fatta. La facciamo adesso?"). "Sì" →
+  `gestisciDocumento` con cliente, lavoro e `invio: true`: chiede solo quello che manca, poi i tasti
+  per mandarlo. Con un numero ("la fattura 7") resta "Non trovo una fattura n. 7".
+- `lavoroDaFraseInvio`: il lavoro dopo "preventivo/fattura del|della|per il…", senza nome del cliente
+  e canale. `capisciInvioDocumento`: anche "manda per mail al X il preventivo del Y" (prima apriva una
+  Mail vuota); con un numero nel lavoro ("del bagno da 500") resta un documento nuovo.
+- `window.eonInviaHome(t, p)` passa anche il comando pronto (serve al "Sì").
+- Prove: `documento-da-fare-app.test.js` (nuova, porta 9039); `invio-privacy.test.js` (Bianchi: ora
+  propone di farla); giro 10: "manda per mail al condominio i pini il preventivo del cornicione"
+  atteso `invio` (prima `email`: era la Mail vuota, ora è la scelta di Andrea).
+
 ### 1/10 sera: misure nei preventivi (ROADMAP 0b.19 passo 5)
 - `lettore.senzaMisure` (in `leggiDocumento` dopo `senzaCivici`, quindi per regole e modello): date "del 24
   settembre" → "24settembre", "anno 2027" → "anno2027"; dimensioni "A [unità] per|x B [unità]" →
