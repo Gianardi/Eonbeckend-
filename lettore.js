@@ -889,8 +889,12 @@
     if (!LETTURA) return null;
     const pp = paroleModello(testo);
     if (!pp.length) return null;
-    const c = LETTURA.classifica(pp.join(" "));
-    const ruoli = LETTURA.etichetta(pp);
+    // la rubrica: per ogni parola, se fa parte del nome di un cliente (un dato per il modello, non una regola)
+    const nomiRubrica = new Set();
+    (ctx.clienti || []).forEach((cl) => paroleModello(String(cl.name || "").toLowerCase()).forEach((w) => { if (w.length >= 3) nomiRubrica.add(w); }));
+    const letto = LETTURA.leggi ? LETTURA.leggi(pp, pp.map((w) => (nomiRubrica.has(w.toLowerCase()) ? 1 : 0))) : null;
+    const c = letto || LETTURA.classifica(pp.join(" "));
+    const ruoli = letto ? letto.ruoli : LETTURA.etichetta(pp);
     // parole vicine con lo stesso ruolo = un pezzo; la sicurezza del pezzo = la più bassa delle sue parole
     const pezzi = {};
     let prima = null;

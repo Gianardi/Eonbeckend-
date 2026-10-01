@@ -35,10 +35,11 @@ def dividi(t): return [w for w in re.sub(r"([’'])", r"\1 ", str(t)).split() if
 def norm(w): return w.lower().replace("’", "'")
 
 scritte = leggi(os.path.join(QUI, "dati", "scritte.jsonl"))
+variate = leggi(os.path.join(QUI, "dati", "variate.jsonl")) if os.path.exists(os.path.join(QUI, "dati", "variate.jsonl")) else []
 FUORI = set(x for x in os.environ.get("TIENI_FUORI", "s12").split(",") if x)
 fuori = lambda x: any(("/" + f + ".") in x["fonte"] for f in FUORI)
 prova_ruoli = [x for x in scritte if fuori(x)]
-segnate = [x for x in scritte if not fuori(x)]
+segnate = [x for x in scritte if not fuori(x)] + [x for x in variate if not fuori(x)]
 solo_cassetto = [{"parole": dividi(x["frase"]), "intento": x["intento"]} for x in leggi(os.path.join(RADICE, "eval", "neurale", "dati", "allenamento.jsonl")) if x["intento"] in C]
 # esame del cassetto: i giri 16-20 (frasi d'esame: solo per misurare)
 DA_CAT = {"risorsa": "cerca_documento", "foto": "cerca_documento", "foto_scatta": "foto", "invio": "invio_documento", "ai": "domanda", "risposta": "saluto", "calendario": "calendario", "calendario_modifica": "calendario_modifica"}
@@ -64,13 +65,33 @@ def pezzi_parola(w):
     w = norm(w)
     if w not in cache: cache[w] = tok.encode(w).ids or [VOC["[UNK]"]]
     return cache[w]
-def codifica(parole):
-    ids, primi = [VOC["[CLS]"]], []
-    for w in parole:
+def codifica(parole, rubrica=None):
+    ids, primi, segnali = [VOC["[CLS]"]], [], [0]
+    for j, w in enumerate(parole):
         p = pezzi_parola(w)
         if len(ids) + len(p) > MAXLEN: break
-        primi.append(len(ids)); ids.extend(p)
-    return ids, primi
+        primi.append(len(ids)); ids.extend(p); segnali.extend([rubrica[j] if rubrica else 0] * len(p))
+    return ids, primi, segnali
+PAROLA_CHI = re.compile(r"^[^\W\d_]{3,}$")
+def rubrica_finta(parole, ruoli):
+    """La rubrica come la vedrà l'app: i nomi dei clienti. In allenamento: i nomi segnati CHI sono
+    in rubrica 8 volte su 10 (2 su 10 è un cliente nuovo); ogni tanto una parola qualunque c'è
+    per caso (un cliente che si chiama come un lavoro): il modello impara a fidarsi, non a copiare."""
+    flag = [0] * len(parole)
+    i = 0
+    while i < len(parole):
+        if ruoli[i] == "CHI":
+            j = i
+            while j < len(parole) and ruoli[j] == "CHI": j += 1
+            if random.random() < 0.8:
+                for k in range(i, j):
+                    if PAROLA_CHI.match(parole[k]) and parole[k].lower() not in ("il", "la", "lo", "signor", "signora", "sig", "dottor"): flag[k] = 1
+            i = j
+        else: i += 1
+    if random.random() < 0.08:
+        k = random.randrange(len(parole))
+        if PAROLA_CHI.match(parole[k]): flag[k] = 1
+    return flag
 def sporca(parole, ruoli):
     """dettatura: qualche parola persa o storpiata (mai una parola segnata intera)"""
     ps, rs = [], []
@@ -104,14 +125,14 @@ class Strato(nn.Module):
 class Modello(nn.Module):
     def __init__(s):
         super().__init__()
-        s.emb = nn.Embedding(V, D); s.pos = nn.Embedding(MAXLEN, D)
+        s.emb = nn.Embedding(V, D); s.pos = nn.Embedding(MAXLEN, D); s.rub = nn.Embedding(2, D)
         s.strati = nn.ModuleList([Strato() for _ in range(STRATI)])
         s.ln = nn.LayerNorm(D)
         s.out = nn.Linear(D, len(CASSETTI))   # il cassetto (media delle parole, come il modello di oggi)
         s.outR = nn.Linear(D, len(RUOLI))     # il ruolo di ogni parola
         s.drop = nn.Dropout(0.1)
-    def forward(s, ids, maschera):
-        x = s.drop(s.emb(ids) + s.pos(torch.arange(ids.shape[1])[None]))
+    def forward(s, ids, maschera, segnali):
+        x = s.drop(s.emb(ids) + s.pos(torch.arange(ids.shape[1])[None]) + s.rub(segnali))
         for st in s.strati: x = st(x, maschera)
         x = s.ln(x)
         m = maschera.float()[..., None]
@@ -119,29 +140,31 @@ class Modello(nn.Module):
         return s.out(media), s.outR(x)
 
 def lotto(esempi, rumore):
-    seq, pos, lab, cas = [], [], [], []
+    seq, pos, lab, cas, seg = [], [], [], [], []
     for x in esempi:
         pr, rl = x["parole"], x.get("ruoli")
         if rumore: pr, rl = sporca(pr, rl or ["O"] * len(pr))
-        ids, primi = codifica(pr)
-        seq.append(ids); pos.append(primi); cas.append(C[x["intento"]])
+        rub = rubrica_finta(pr, rl) if x.get("ruoli") else None
+        ids, primi, segn = codifica(pr, rub)
+        seq.append(ids); pos.append(primi); cas.append(C[x["intento"]]); seg.append(segn)
         lab.append([R[r] for r in rl[:len(primi)]] if x.get("ruoli") else None)
     T = max(len(q) for q in seq)
     ids = torch.zeros(len(seq), T, dtype=torch.long)
+    sg = torch.zeros(len(seq), T, dtype=torch.long)
     y = torch.full((len(seq), T), -100, dtype=torch.long)
     for i, (q, p, l) in enumerate(zip(seq, pos, lab)):
-        ids[i, :len(q)] = torch.tensor(q)
+        ids[i, :len(q)] = torch.tensor(q); sg[i, :len(q)] = torch.tensor(seg[i])
         if l is not None:
             for j, k in enumerate(p): y[i, k] = l[j]
-    return ids, ids != 0, y, torch.tensor(cas), pos
+    return ids, ids != 0, y, torch.tensor(cas), pos, sg
 
 def predici(esempi):
     modello.eval(); out = []
     with torch.no_grad():
         for i in range(0, len(esempi), 256):
             b = esempi[i:i + 256]
-            ids, m, _, _, pos = lotto(b, False)
-            zc, zr = modello(ids, m)
+            ids, m, _, _, pos, sg = lotto(b, False)
+            zc, zr = modello(ids, m, sg)
             pc, pr = F.softmax(zc, -1), F.softmax(zr, -1)
             for k, x in enumerate(b):
                 ruoli = [RUOLI[int(pr[k, pos[k][j]].argmax())] if j < len(pos[k]) else "O" for j in range(len(x["parole"]))]
@@ -180,8 +203,8 @@ t0 = time.time()
 for ep in range(EPOCHE):
     modello.train(); dati = solo_cassetto + segnate * RIPETI; random.shuffle(dati); tot = 0
     for i in range(0, len(dati), BS):
-        ids, m, y, c, _ = lotto(dati[i:i + BS], True)
-        zc, zr = modello(ids, m)
+        ids, m, y, c, _, sg = lotto(dati[i:i + BS], True)
+        zc, zr = modello(ids, m, sg)
         perdita = F.cross_entropy(zc, c)
         if (y != -100).any(): perdita = perdita + F.cross_entropy(zr.reshape(-1, len(RUOLI)), y.reshape(-1), weight=pesi, ignore_index=-100)
         opt.zero_grad(); perdita.backward(); nn.utils.clip_grad_norm_(modello.parameters(), 1.0); opt.step(); sched.step()

@@ -37,7 +37,9 @@
       M = { D, H: json.teste, FF: json.ff, maxlen: json.maxlen, intenti: json.intenti, ruoli: json.ruoli, T: json.temperatura || 1, vocab,
         emb: w("emb.weight"), pos: w("pos.weight"), strati, lng: v("ln.weight"), lnb: v("ln.bias"), out: w("out.weight"), outB: v("out.bias"), versione: json.versione,
         // passo A (1/10/2026): il modello che legge tutta la frase ha due uscite, il cassetto (out) e il ruolo di ogni parola (outR)
-        outR: P["outR.weight"] ? w("outR.weight") : null, outRB: P["outR.bias"] ? v("outR.bias") : null, minuscolo: !!json.minuscolo };
+        outR: P["outR.weight"] ? w("outR.weight") : null, outRB: P["outR.bias"] ? v("outR.bias") : null, minuscolo: !!json.minuscolo,
+        // e la "rubrica": per ogni parola, se fa parte del nome di un cliente (un dato, come i contatti per Siri)
+        rub: P["rub.weight"] ? w("rub.weight") : null };
       return true;
     }
 
@@ -94,10 +96,10 @@
     const gelu = (x) => 0.5 * x * (1 + erf(x / Math.SQRT2));
 
     /* Il transformer: per ogni pezzo della frase, il suo vettore dopo gli strati */
-    function corpo(ids) {
+    function corpo(ids, segnali) {
       const T = ids.length, D = M.D, H = M.H, dh = D / H;
       let x = new Float32Array(T * D);
-      for (let t = 0; t < T; t++) for (let i = 0; i < D; i++) x[t * D + i] = M.emb[ids[t] * D + i] + M.pos[t * D + i];
+      for (let t = 0; t < T; t++) for (let i = 0; i < D; i++) x[t * D + i] = M.emb[ids[t] * D + i] + M.pos[t * D + i] + (M.rub ? M.rub[((segnali && segnali[t]) || 0) * D + i] : 0);
       for (const s of M.strati) {
         const h = normaStrato(x, T, D, s.ln1g, s.ln1b);
         const qkv = lineare(h, T, D, s.qkv, s.qkvB, 3 * D);
@@ -154,6 +156,30 @@
         return { ruolo: M.ruoli[k], p: pp[k], pp };
       });
     }
+    /* PASSO A: una lettura sola della frase (parole già divise) → il cassetto e il ruolo di ogni
+       parola. rubrica[j] = 1 se la parola j fa parte del nome di un cliente. */
+    function leggi(parole, rubrica) {
+      if (!M || !M.intenti || !M.outR) return null;
+      const UNK = M.vocab.get("[UNK]"), ids = [M.vocab.get("[CLS]")], primi = [], segnali = [0];
+      for (let j = 0; j < parole.length; j++) {
+        const p = pezziDi(M.minuscolo ? String(parole[j]).toLowerCase() : parole[j], UNK);
+        if (ids.length + p.length > M.maxlen) break;
+        primi.push(ids.length); ids.push(...p);
+        for (let k = 0; k < p.length; k++) segnali.push(rubrica && rubrica[j] ? 1 : 0);
+      }
+      const xn = corpo(ids, segnali), T = ids.length, D = M.D, K = M.ruoli.length;
+      const media = new Float32Array(D);
+      for (let t = 0; t < T; t++) for (let i = 0; i < D; i++) media[i] += xn[t * D + i] / T;
+      const pc = morbida(lineare(media, 1, D, M.out, M.outB, M.intenti.length), M.T);
+      const ordine = pc.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]);
+      const ruoli = parole.map((w, j) => {
+        if (j >= primi.length) return { ruolo: "O", p: 0 };
+        const pp = morbida(lineare(xn.subarray(primi[j] * D, primi[j] * D + D), 1, D, M.outR, M.outRB, K), 1);
+        let k = 0; for (let i = 1; i < K; i++) if (pp[i] > pp[k]) k = i;
+        return { ruolo: M.ruoli[k], p: pp[k] };
+      });
+      return { intento: M.intenti[ordine[0][1]], p: ordine[0][0], secondo: M.intenti[ordine[1][1]], p2: ordine[1][0], ruoli };
+    }
     /* Come EonLettore.classifica: { intento, p, secondo, p2 } */
     function classifica(segni) {
       const p = probabilita(segni);
@@ -161,7 +187,7 @@
       const ordine = p.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]);
       return { intento: M.intenti[ordine[0][1]], p: ordine[0][0], secondo: M.intenti[ordine[1][1]], p2: ordine[1][0] };
     }
-    return { carica, classifica, probabilita, etichetta, pezzi, pronto: () => !!M, versione: () => (M ? M.versione : null), ruoli: () => (M && M.ruoli) || null };
+    return { carica, classifica, probabilita, etichetta, leggi, pezzi, pronto: () => !!M, versione: () => (M ? M.versione : null), ruoli: () => (M && M.ruoli) || null };
   }
   const EonNeurale = crea();
   EonNeurale.crea = crea;
