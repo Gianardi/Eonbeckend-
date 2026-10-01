@@ -791,7 +791,7 @@
      di una base), lo sconto (in percentuale o in euro); i numeri annullati non contano */
   function componiImporti(valori, ruoli) {
     const righe = [], qta = [];
-    let perc = null, base = null, sco = null, scov = 0, conScov = false, fin = null;
+    let perc = null, base = null, sco = null, scov = 0, conScov = false, fin = null, iPercBase = -1, moltPerc = 1;
     const prossimaQta = (i) => { for (let j = i + 1; j < ruoli.length; j++) { if (ruoli[j] === "QTA" && valori[j] != null) return j; if (/^(?:PRZ|TOT)$/.test(ruoli[j])) return -1; } return -1; };
     const usate = new Set();
     for (let i = 0; i < ruoli.length; i++) {
@@ -805,14 +805,16 @@
         righe.push({ quantita: q == null ? 1 : q, prezzo: v, i });
         qta.length = 0;
       } else if (r === "TOT") { righe.push({ quantita: 1, prezzo: v, i }); qta.length = 0; }
-      else if (r === "MOLT") { if (righe.length) righe[righe.length - 1].quantita *= v; }
-      else if (r === "PERC") perc = v;
-      else if (r === "BASE") base = v;
+      // "il 6 per cento del canone di 800 al mese per 12 mesi": il "per 12 mesi" detto dopo la
+      // percentuale moltiplica quella, non la voce prima (1/10)
+      else if (r === "MOLT") { if (perc != null && base != null && (!righe.length || righe[righe.length - 1].i < iPercBase)) moltPerc *= v; else if (righe.length) righe[righe.length - 1].quantita *= v; }
+      else if (r === "PERC") { perc = v; iPercBase = Math.max(iPercBase, i); }
+      else if (r === "BASE") { base = v; iPercBase = Math.max(iPercBase, i); }
       else if (r === "SCO") sco = v;
       else if (r === "SCOV") { scov += v; conScov = true; }
       else if (r === "FIN") fin = v;
     }
-    if (perc != null && base != null) righe.push({ quantita: 1, prezzo: Math.round(base * perc) / 100, i: -1, acconto: { perc, base } });
+    if (perc != null && base != null) righe.push({ quantita: moltPerc, prezzo: Math.round(base * perc) / 100, i: -1, acconto: { perc, base } });
     let totale = righe.reduce((s, x) => s + x.quantita * x.prezzo, 0);
     if (sco != null) totale = totale * (1 - sco / 100);
     if (conScov) totale -= scov;

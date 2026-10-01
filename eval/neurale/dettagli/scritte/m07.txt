@@ -1,0 +1,45 @@
+# Frasi scritte a mano (settima serie, 1/10 notte, dagli errori del giro 19): misure dentro la frase
+# (O), date ("del 24 settembre" = O), correzioni su prezzo e quantità, "al mese per N mesi" (MOLT dopo),
+# percentuali su un importo senza la parola acconto (PERC/BASE), "togli X" (SCOV), "solo gli 80" (FIN).
+fattura Rinaldi 3{QTA} finestre da 100 per 130 a 780{PRZ} l'una
+preventivo per la villa Sanna 6{QTA} porte da 80 per 210 a 450{PRZ} cadauna più posa 300{TOT}
+fattura hotel Miramare 5{QTA} finestre da 120 per 150 a 960{PRZ}
+preventivo Boi sostituzione dieci{QTA} plafoniere 60 per 60 con led a 38{PRZ} cadauna e manodopera 4{QTA} ore a 40{PRZ}
+fattura negozio Corsi 12{QTA} pannelli 1 per 2 a 55{PRZ} l'uno
+preventivo cavo FG16 3 per 2,5 per 60{QTA} metri a 4{PRZ} al metro più quadro 900{TOT}
+preventivo scarichi in pvc diametro 125, 18{QTA} metri a 20{PRZ} euro, 6{QTA} curve a 8{PRZ}
+preventivo armadio per la signora Pinna 3 metri e 20 di larghezza 2800{TOT} tutto compreso
+preventivo scaffale su misura 1 metro e 60 per 2 metri 950{TOT}
+fattura Lai box doccia 90 per 70 a 480{TOT} più montaggio 120{TOT}
+fattura al Melis intervento del 12 settembre 3{QTA} ore a 42{PRZ} euro e materiale 30{TOT}
+fattura condominio Ginepro intervento del 27 agosto sostituzione valvola 85{TOT} e 2{QTA} ore a 40{PRZ}
+fattura del 3 ottobre per la Serra riparazione 160{TOT}
+fattura Orrù manodopera 10{QTA} ore a 32{ANN} anzi a 35{PRZ} l'ora più materiale 400{TOT}
+preventivo intonaco 150{QTA} metri quadri a 20{ANN} anzi a 23{PRZ} euro e tinteggiatura 2000{TOT}
+preventivo bagno Atzori demolizione 500{TOT} impianto 1500{TOT} sanitari 800{ANN} no aspetta 850{TOT}
+preventivo 8{QTA} portoncini cantina a 410{ANN} anzi facciamo 390{PRZ}
+preventivo pratica detrazioni compenso 900{TOT} più 2{QTA} sopralluoghi a 70{ANN} euro l'uno ah no a 90{PRZ}
+preventivo colonnine 3{ANN} wallbox a 950{PRZ} ma aspetta mettine 4{QTA} posa 800{TOT}
+preventivo telecamere 5{ANN} a 140{PRZ} no facciamo 6{QTA} più installazione 400{TOT}
+preventivo gestione negozio Piras 80{PRZ} euro al mese per 12{MOLT} mesi più 120{TOT} una tantum per la pratica
+preventivo gestione garage 50{PRZ} al mese per 6{MOLT} mesi
+fattura gestione affitto Deiana 3{QTA} mesi a 110{PRZ} euro al mese
+fattura gestione bilocale trimestre luglio agosto settembre 3{QTA} mesi a 95{PRZ}
+preventivo gestione condominio Cedri 30{QTA} unità a 75{PRZ} euro l'una all'anno
+preventivo gestione 18{QTA} appartamenti a 80{PRZ} euro l'uno
+preventivo per il condominio Querce contabilità separata il 3{PERC} per cento sull'importo dei lavori che è 60.000{BASE} euro
+preventivo direzione lavori il 4{PERC} per cento su 45.000{BASE} di lavori
+fattura compenso straordinario l'1{PERC} per cento dei 120.000{BASE} euro del cappotto
+preventivo gestione affitto il 6{PERC} per cento del canone di 800{BASE} euro al mese per 12{MOLT} mesi
+fattura gestione affitto il 7{PERC} per cento su un canone di 650{BASE} euro per 3{MOLT} mesi
+fattura Spano ricerca guasto 150{TOT} euro più 2{QTA} ore a 45{PRZ} e togli 10{SCOV} euro di arrotondamento
+fattura condominio Pini compenso annuo 2.800{TOT} però togli 150{SCOV} che gli avevo promesso
+preventivo copertura 300{QTA} mq a 40{PRZ} smaltimento 4000{TOT} e togli 800{SCOV} euro di sconto
+fattura trattoria tre{QTA} ore di intervento notturno a 70{PRZ} più uscita 40{TOT} e togli 30{SCOV} che è un amico
+fattura controllo caldaia Ledda 90{TOT} euro e bollino 15{ANN} no il bollino non va in fattura, solo i 90{FIN}
+fattura Cossu manutenzione 120{TOT} e trasferta 30{ANN} anzi la trasferta non la metto, solo i 120{FIN}
+fattura alla Mura per le tende quattro{QTA} a ottanta{PRZ}
+fattura per i davanzali sette{QTA} a centoventi{PRZ}
+preventivo per Usai bagno 4500{TOT} e cucina 6200{TOT} con acconto del 30 per cento alla firma
+preventivo per la Fadda facciata 9000{TOT} pagamento 50 per cento all'inizio e 50 alla fine
+preventivo cucina Murgia mobili 6500{TOT} piano 900{TOT} e tolgo 300{SCOV} di sconto
