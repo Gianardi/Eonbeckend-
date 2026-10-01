@@ -13537,7 +13537,7 @@ const SOGLIA_NEURALE = 0.9;
 // "wa a Didonna…", "whatsapp al grossista…", "sms alla Pini…": un messaggio detto chiaro, anche con un'ora dentro (giro 18)
 const MESSAGGIO_ESPLICITO = /^\s*(?:wa|whatsapp|whats|wapp|sms|manda\s+un\s+(?:wa|whatsapp|messaggio|sms))\b/i;
 // "fammi un documento…" chiede di FARE; "fammi (ri)vedere / trovare / aprire…" chiede di cercare
-const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b(?!\s+(?:ri)?(?:vedere|trovare|aprire|cercare|leggere|sentire|avere|mandare))/i.test(String(testo || ""));
+const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b(?!\s+(?:ri)?(?:vedere|vedé|vede|trovare|aprire|cercare|leggere|sentire|avere|mandare)(?![\wàèéìòù]))/i.test(String(testo || ""));
 function provaModello(l, testo, arbitro){
   if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
   // "aggiungi in EON queste foto", "segna in Fornitori…": una cartella che c'è, la gestisce la sua funzione
@@ -15388,6 +15388,57 @@ function provaDocumentoImpresa(testo){
   return true;
 }
 
+/* Cercare un documento che non è fra quelli che il codice riconosce per nome (1/10/2026,
+   Gianardi: "se l'artigiano chiede una cosa EON gliela fa subito"). "Trovami il computo del
+   capannone Zanola", "apri il pdf del permesso della cascina", "cerca lo schema dell'impianto
+   della masseria": si cerca OVUNQUE (documenti dell'impresa, allegati e documenti dei clienti,
+   foto con la loro nota) contando le parole che combaciano. Trovato → si apre; non trovato →
+   lo dice subito il codice ("Non lo trovo") con il tasto per caricarlo. Prima andava all'AI,
+   che non lo trovava lo stesso: più lento e a pagamento. */
+const VERBI_CERCA = /^(?:(?:ehi\s+)?eon\s*,?\s+)?(?:mi\s+(?:trovi|cerchi|apri|mostri|fai\s+vedere)|trovami|trova|cercami|cerca|cercate|aprimi|apri|mostrami|mostra|fammi\s+ved(?:ere|é|e)|famme\s+ved(?:ere|é|e)|voglio\s+vedere|dov['’ ]?\s*(?:è|e)|dove\s+(?:sta|è|e|ho\s+messo|l['’ ]?\s*ho\s+messo)|recupera|recuperami|tirami\s+fuori)\s+(.+)$/i;
+const COSE_DA_CERCARE = /\b(?:document\p{L}*|pdf|file|foto|fotografi\p{L}*|computo|computi|permess\p{L}*|schem\p{L}*|librett\p{L}*|verbal\p{L}*|contratt\p{L}*|regolament\p{L}*|sched[ae]\s+tecnic\p{L}*|dichiarazion\p{L}*|certificat\p{L}*|visura|visure|durc|polizz\p{L}*|planimetri\p{L}*|progett\p{L}*|disegn\p{L}*|relazion\p{L}*|ricevut\p{L}*|bolla|bolle|ddt|manual\p{L}*|garanzi\p{L}*|pratica|pratiche|cila|scia|perizia|capitolat\p{L}*|offert\p{L}*|listin\p{L}*|attestat\p{L}*|bilanci\p{L}*|rendicont\p{L}*|ripart\p{L}*|estratt\p{L}*|catastal\p{L}*|rogito|atto|delibera|tabelle|millesim\p{L}*)\b/iu;
+const PAROLE_VUOTE_CERCA = /^(?:il|lo|la|i|gli|le|l|un|una|uno|di|del|della|dello|dei|delle|degli|d|dell|al|alla|allo|ai|alle|all|a|da|dal|dalla|in|nel|nella|nell|su|sul|sulla|sull|per|con|che|e|me|mi|mio|mia|miei|mie|quel|quella|quello|ultimo|ultima|ultimi|ultime|avevo|ho|salvato|salvata|messo|messa|caricato|caricata|aprilo|aprila|aprimelo|subito|per|favore|pdf|file|copia|documento|documenti|settimana|scorsa|scorso|mese|ieri|oggi|prima|dopo)$/;
+function provaCercaOvunque(testo){
+  const t = String(testo || "").trim().replace(/[.!?]+$/, "");
+  if(!t || chiedeDiFare(t)) return false;
+  const m = t.match(VERBI_CERCA);
+  const neurale = !m && cassettoNeurale(t, 0.9) === "cerca_documento";
+  const cosa = m ? m[1] : neurale ? t : "";
+  if(!cosa || !COSE_DA_CERCARE.test(cosa)) return false;
+  // un importo è un documento da FARE ("cerca di fare la fattura da 300…"), non da cercare
+  if(/\d[\d.,]*\s*(?:euro|€)|€/.test(cosa) || /\b(?:crea|creami|fai|fammi\s+un|fammi\s+una|prepara|preparami|nuov[oa]|carica|caricami)\b/i.test(cosa)) return false;
+  const parole = normalizzaComando(cosa).split(" ").filter(w => w.length > 1 && !PAROLE_VUOTE_CERCA.test(w));
+  if(!parole.length) return false;
+  const voci = [];
+  cantiereDocumenti.forEach(d => voci.push({ testo: nomeDocumentoPulito(d.nome), apri: () => mostraDocumentoImpresa(d), elenco: { id: d.id, tipo: "allegato", titolo: nomeDocumentoPulito(d.nome), url: d.url, quando: d.created } }));
+  chats.forEach(c => (c.messages || []).forEach(msg => {
+    if(msg.fileUrl) voci.push({ testo: (msg.fileName || "") + " " + c.name, elenco: { id: msg.id, tipo: "allegato", titolo: msg.fileName || "(senza nome)", url: msg.fileUrl, quandoTesto: msg.time } });
+    else if(msg.eventType === "doc") voci.push({ testo: (msg.title || "") + " " + c.name + " " + (msg.docDati && msg.docDati.tipo || ""), elenco: { id: msg.id, tipo: "preventivo_o_fattura", titolo: msg.title, riepilogo: msg.text || null, importoTesto: msg.amount || null, url: null, quandoTesto: msg.time, dati: msg.docDati || null } });
+  }));
+  const fotoTrovate = [];
+  cantiereFoto.forEach(f => { const cl = clients.find(c => c.id === f.clientId); fotoTrovate.push({ f, testo: (f.nota || "") + " " + (f.descrizione || "") + " " + (cl ? cl.name : "") + " foto" }); });
+  const combacia = (x) => { const w = normalizzaComando(x).split(" "); return parole.filter(p => w.some(q => q === p || (p.length >= 5 && q.startsWith(p.slice(0, p.length - 1))))).length; };
+  const serve = Math.max(1, Math.ceil(parole.length * 0.6));
+  const vociOk = voci.map(v => ({ v, n: combacia(v.testo) })).filter(x => x.n >= serve).sort((a, b) => b.n - a.n);
+  const fotoOk = /\bfot/i.test(cosa) ? fotoTrovate.map(x => ({ ...x, n: combacia(x.testo) })).filter(x => x.n >= serve).sort((a, b) => b.n - a.n) : [];
+  if(fotoOk.length && !vociOk.length){
+    if(fotoOk.length === 1) mostraSchedaFoto(fotoOk[0].f, ((clients.find(c => c.id === fotoOk[0].f.clientId) || {}).name) || null);
+    else mostraRisorsaFoto(fotoOk.slice(0, 10).map(x => ({ id: x.f.id, url: x.f.url, quando: x.f.created, nota: x.f.nota, descrizione: x.f.descrizione })), null);
+    return true;
+  }
+  if(vociOk.length){
+    const migliori = vociOk.filter(x => x.n === vociOk[0].n);
+    if(migliori.length === 1 && migliori[0].v.apri) migliori[0].v.apri();
+    else mostraRisorsaDocumenti(migliori.slice(0, 10).map(x => x.v.elenco), null);
+    return true;
+  }
+  const cosaDetta = cosa.replace(/\s*,?\s*\b(?:aprilo|aprila|aprimelo|aprimela|per\s+favore)\b.*$/i, "").trim();
+  domandaDelCodice({ titolo: "Non lo trovo", domanda: "Non trovo «" + cosaDetta + "» tra i tuoi documenti e le tue foto. Vuoi caricarlo adesso? Poi te lo trovo in un attimo.", senzaCampo: true,
+    scelte: [{ etichetta: "Carica il documento", valore: "carica" }, { etichetta: "No", valore: "no" }],
+    onRisposta: (x) => { chiudiRisorsaCard(); if(x === "carica"){ navigateTo("documenti-impresa"); document.getElementById("cantiereDocumentiInput").click(); } } });
+  return true;
+}
+
 /* Meteo e strade (26/09/2026). "Che tempo fa", "piove domani a Pisa?":
    previsioni vere (MET Norway, gratuito) in una card, senza AI. Senza
    città si usa la posizione del telefono. Le domande più articolate
@@ -15617,7 +15668,7 @@ function capisciFotoRapida(testo){
   return { ...letta, clienteId: esiste ? esiste.id : null, clienteNome: creaCliente, creaCliente: esiste ? null : creaCliente, nota: letta.nota.replace(/^(?:Questo|Questa)$/i, "") };
 }
 function capisciFotoRapidaSemplice(t){
-  if(!/\bfot/.test(t) || /\b(vedere|rivedere|rivedi|vedi|guarda|guardare|mostra|mostrami|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|trovami|recupera|dove|quali|ultime)\b/.test(t)) return null;
+  if(!/\bfot/.test(t) || /\bved(?:é|e)(?![\wàèéìòù])/.test(t) || /\b(vedere|rivedere|rivedi|vedi|guarda|guardare|mostra|mostrami|mandami|manda|invia|crea|creami|cliente|elimina|cancella|cerca|trova|trovami|recupera|dove|quali|ultime)\b/.test(t)) return null;
   /* Giro 15: "aspetta prima di smontare fai una foto a…", "EON fai una foto al colore
      della Colombo adesso che è finito", "scatta 'na foto all'unità esterna", "apri la
      fotocamera che fotografo il salvavita": il comando anche a metà, il perché si toglie */
@@ -16381,6 +16432,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "risorsa");
       if(viaVoce) parlaRisposta("Ecco quello che hai chiesto");
+      return;
+    }
+    // Un documento chiamato col suo nome ("il computo del capannone Zanola"): lo cerca il codice ovunque
+    if(!inContinuazione && provaCercaOvunque(testo)){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "cerca_ovunque");
       return;
     }
 
