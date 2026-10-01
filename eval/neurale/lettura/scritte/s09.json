@@ -98,7 +98,7 @@
     ["prepara la [fattura]{DOC} per [la Brioschi]{CHI} [messa a norma impianto elettrico]{LAV}", "documento"],
 
     ["trovami il [preventivo]{DOC} di [Arienti]{CHI}", "cerca_documento"],
-    ["apri la [fattura]{DOC} [23]{NUM}", "cerca_documento"],
+    ["aprimi un attimo la [fattura]{DOC} [223]{NUM} quella di [Cementi Lura]{CHI}", "cerca_documento"],
     ["dov'è il [DURC]{DOC} di [Termoidraulica Lambro]{CHI}", "cerca_documento"],
     ["fammi vedere le [foto]{DOC} del [bagno]{LAV} di [Maggioni]{CHI}", "cerca_documento"],
     ["cerca il [SAL]{DOC} del [Condominio Aurora]{CHI}", "cerca_documento"],
@@ -215,7 +215,7 @@
     ["a che ora ho il [sopralluogo]{LAV} da [Rusconi]{CHI}", "dati"],
     ["la [fattura]{DOC} [19]{NUM} è stata pagata?", "dati"],
     ["che indirizzo ha il cantiere di [Gavazzi]{CHI}", "dati"],
-    ["quanto ho incassato [la settimana scorsa]{GIO}", "dati"],
+    ["quanto ho tirato su di incassi [la settimana scorsa]{GIO} con i cantieri", "dati"],
     ["chi ho in agenda [venerdì]{GIO}", "dati"],
     ["quanto avevo messo per il [massetto]{LAV} nel preventivo di [Folli]{CHI}", "dati"],
     ["quali preventivi sono ancora in attesa di risposta", "dati"],
