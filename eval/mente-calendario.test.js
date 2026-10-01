@@ -140,7 +140,7 @@ async function main() {
     }));
     verifica("\"aggiungi in EON queste foto\": fotocamera, foto salvata nella cartella, la cartella si riapre con la miniatura", scatto.scatti === 1 && scatto.cartella === scatto.id && foto.scritta.length === 1 && foto.scritta[0] === foto.id && foto.titolo === "EON" && foto.miniature === 1 && /1 foto/.test(foto.sotto), JSON.stringify({ scatto, foto }));
     const tasto = await page.evaluate(() => { window.__scatti = 0; document.querySelector('.ap-azioni button[data-az="foto"]').click(); return window.__scatti; });
-    verifica("nella cartella c'è \"Aggiungi foto\"", tasto === 1, String(tasto));
+    verifica("nella cartella c'è \"Scatta foto\"", tasto === 1, String(tasto));
     verifica("nessun errore nella pagina", errori.length === 0, JSON.stringify(errori));
     await page.close();
 

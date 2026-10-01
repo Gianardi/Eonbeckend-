@@ -1377,7 +1377,11 @@ const TOOLS = {
       if (eStringaNonVuota(input.cartella)) {
         const c = await trovaCartellaPerNome(input.cartella, ctx);
         if (!c.trovata) throw fail(`Cartella "${input.cartella}" non trovata. Le cartelle sono: ${c.nomi.join(", ") || "nessuna"}. Chiedi all'utente quale intende.`);
-        cartellaId = c.trovata.id;
+        /* Solo se la cartella l'ha nominata lui (30/09/2026, tester: "mi dice «In MD via Roma 37»
+           ma io non l'ho detto"): altrimenti l'appunto resta nella Mente */
+        const dette = new Set(paroleNormalizzate(ctx.testoUtente || ""));
+        const nomeDetto = !ctx.testoUtente || paroleNormalizzate(c.trovata.nome).filter((w) => w.length > 1).every((w) => dette.has(w));
+        if (nomeDetto) cartellaId = c.trovata.id;
       }
       const creati = await db(
         "cantiere_appunti",

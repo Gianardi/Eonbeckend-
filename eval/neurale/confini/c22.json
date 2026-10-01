@@ -1,0 +1,1037 @@
+{
+"confini": "Frasi di ChatGPT chieste da Andrea (30/09/2026): impresa edile a Milano, amministratore di condominio a Torino, falegname in Veneto. Ricontrollate: \"mail con il preventivo\" spostate in invio_documento; tolte le frasi dal canale incerto (\"scrivi al fornitore…\" senza dire mail o WhatsApp), quelle che mandano foto o documenti non di EON, le assemblee in agenda (confondibili con \"convoca l'assemblea\"), la fattura ricevuta dal tecnico e \"Conte ha già pagato metà\" (appunto o incasso?)",
+"frasi": [
+[
+"domani alle 8 devo essere in via Padova 118 per iniziare la demolizione",
+"calendario"
+],
+[
+"segna lunedì alle 9 il sopralluogo da Marco Bellini in via Ripamonti",
+"calendario"
+],
+[
+"giovedì alle 7 e mezza porto la squadra in via Solari 44",
+"calendario"
+],
+[
+"metti venerdì alle 15 il controllo lavori da Rossi a Sesto",
+"calendario"
+],
+[
+"martedì alle 10 abbiamo il cantiere in via Washington",
+"calendario"
+],
+[
+"ricordami mercoledì alle 8 di ritirare i ponteggi",
+"calendario"
+],
+[
+"sabato alle 9 devo vedere il geometra Ferri",
+"calendario"
+],
+[
+"domani alle 14 passiamo al condominio Navigli",
+"calendario"
+],
+[
+"sposta il sopralluogo di Bellini da lunedì a martedì alle 11",
+"calendario_modifica"
+],
+[
+"no il cantiere di via Solari non giovedì ma venerdì alle 7",
+"calendario_modifica"
+],
+[
+"cancella il controllo da Rossi di venerdì",
+"calendario_modifica"
+],
+[
+"quello di via Washington spostalo alle 10 e mezza",
+"calendario_modifica"
+],
+[
+"il geometra Ferri non sabato ma lunedì mattina",
+"calendario_modifica"
+],
+[
+"annulla il ritiro dei ponteggi di mercoledì",
+"calendario_modifica"
+],
+[
+"sposta il lavoro al Navigli alle 16",
+"calendario_modifica"
+],
+[
+"ricordati che Bellini vuole il pavimento protetto prima di iniziare",
+"mente"
+],
+[
+"in via Padova abbiamo le chiavi dal portinaio",
+"mente"
+],
+[
+"il geometra Ferri vuole sempre le foto a fine giornata",
+"mente"
+],
+[
+"Rossi ha già scelto le piastrelle grigie",
+"mente"
+],
+[
+"nel cantiere di Solari non possiamo usare il montacarichi",
+"mente"
+],
+[
+"il condominio Navigli ha il citofono rotto",
+"mente"
+],
+[
+"per Washington servono due sacchi di macerie in più",
+"mente"
+],
+[
+"chi mi deve ancora pagare dei cantieri finiti",
+"dati"
+],
+[
+"quanto devo ancora incassare questo mese",
+"dati"
+],
+[
+"che lavori ho domani mattina",
+"dati"
+],
+[
+"cosa avevo scritto sul cantiere di Bellini",
+"dati"
+],
+[
+"quanto avevo preventivato a Rossi",
+"dati"
+],
+[
+"ho già mandato il preventivo al Navigli",
+"dati"
+],
+[
+"qual è il prossimo sopralluogo",
+"dati"
+],
+[
+"fammi un preventivo per Rossi 3200 di manodopera e 850 di materiali",
+"documento"
+],
+[
+"prepara la fattura per Bellini da 6800 euro",
+"documento"
+],
+[
+"fai un preventivo per demolizione e smaltimento 2400 più 600",
+"documento"
+],
+[
+"preparami la fattura del cantiere Solari da 9250 euro",
+"documento"
+],
+[
+"fammi un prev per rifare il bagno 4800 più 1200 di materiali",
+"documento"
+],
+[
+"prepara una fattura per il condominio Navigli di 3700 euro",
+"documento"
+],
+[
+"fai un preventivo per tinteggiatura 1800 più 450 di preparazione",
+"documento"
+],
+[
+"manda a Bellini il preventivo appena fatto",
+"invio_documento"
+],
+[
+"invia a Rossi la fattura del cantiere",
+"invio_documento"
+],
+[
+"manda al Navigli il preventivo definitivo",
+"invio_documento"
+],
+[
+"invia a Solari la fattura firmata",
+"invio_documento"
+],
+[
+"manda a Bellini il preventivo corretto",
+"invio_documento"
+],
+[
+"gira al cliente la fattura che abbiamo preparato",
+"invio_documento"
+],
+[
+"prepara una mail a Rossi con il nuovo preventivo",
+"invio_documento"
+],
+[
+"scrivi a Bellini che domani partiamo alle 8",
+"messaggio"
+],
+[
+"manda a Rossi che oggi la squadra arriva mezz'ora dopo",
+"messaggio"
+],
+[
+"scrivi al custode del Navigli che siamo sotto",
+"messaggio"
+],
+[
+"scrivi al cliente che il materiale è arrivato",
+"messaggio"
+],
+[
+"manda a Solari che il lavoro slitta a lunedì",
+"messaggio"
+],
+[
+"scrivi a Marco che servono altre piastrelle",
+"messaggio"
+],
+[
+"manda una mail al fornitore per 30 sacchi di cemento",
+"email"
+],
+[
+"chiama Bellini e chiedigli se possiamo entrare alle 8",
+"chiamata"
+],
+[
+"chiama il custode del Navigli",
+"chiamata"
+],
+[
+"senti Rossi per il pagamento chiamalo tu",
+"chiamata"
+],
+[
+"chiama Ferri e chiedigli delle misure",
+"chiamata"
+],
+[
+"chiama il fornitore per sapere se è arrivato il cemento",
+"chiamata"
+],
+[
+"prova a chiamare Solari che non risponde",
+"chiamata"
+],
+[
+"chiama il cliente di via Washington",
+"chiamata"
+],
+[
+"Bellini mi ha appena pagato 6800 euro",
+"incasso"
+],
+[
+"Rossi ha fatto un bonifico di 4050 euro",
+"incasso"
+],
+[
+"il condominio Navigli ha saldato 3700 euro",
+"incasso"
+],
+[
+"ho ricevuto 2000 euro di acconto da Marco",
+"incasso"
+],
+[
+"Solari mi ha pagato 9250 euro",
+"incasso"
+],
+[
+"Ferri mi ha dato 800 euro in contanti",
+"incasso"
+],
+[
+"mi sono entrati 1500 euro dal cliente di via Padova",
+"incasso"
+],
+[
+"si è staccato un pezzo di facciata in via Solari e ci sono persone sotto",
+"urgenza"
+],
+[
+"è crollato il controsoffitto in un appartamento a Lambrate",
+"urgenza"
+],
+[
+"c'è una perdita enorme nel cantiere e sta entrando acqua nei piani sotto",
+"urgenza"
+],
+[
+"il muro del bagno è venuto giù e ci sono macerie dappertutto",
+"urgenza"
+],
+[
+"il ponteggio si è danneggiato dopo il vento forte",
+"urgenza"
+],
+[
+"mi chiamano dal Navigli perché entra acqua dal tetto",
+"urgenza"
+],
+[
+"si è rotta una tubazione durante la demolizione e stanno allagando il piano",
+"urgenza"
+],
+[
+"il cantiere di Bellini è al 70 per cento",
+"sal"
+],
+[
+"in via Solari abbiamo finito le demolizioni siamo al 40",
+"sal"
+],
+[
+"Rossi è al 90 per cento manca solo la tinteggiatura",
+"sal"
+],
+[
+"il Navigli è al 55 per cento abbiamo finito due appartamenti",
+"sal"
+],
+[
+"via Washington è fermo al 30 per cento per il materiale",
+"sal"
+],
+[
+"il bagno di Marco è praticamente finito",
+"sal"
+],
+[
+"abbiamo completato il tetto siamo al 80 per cento",
+"sal"
+],
+[
+"secondo te per questo muro conviene rifare tutto o solo la parte rovinata",
+"domanda"
+],
+[
+"oggi abbiamo perso due ore solo per trovare parcheggio",
+"domanda"
+],
+[
+"quanto margine devo considerare normalmente sui materiali",
+"domanda"
+],
+[
+"secondo te conviene comprare o noleggiare i ponteggi",
+"domanda"
+],
+[
+"il cliente continua a cambiare idea e sto impazzendo",
+"domanda"
+],
+[
+"per un bagno completo quanto tempo metteresti con due operai",
+"domanda"
+],
+[
+"secondo te è meglio fare il preventivo a corpo",
+"domanda"
+],
+[
+"oggi Milano è un delirio non si muove niente",
+"domanda"
+],
+[
+"come posso organizzare meglio le squadre sui cantieri",
+"domanda"
+],
+[
+"venerdì alle 10 devo vedere il tecnico Bassi al condominio Dora",
+"calendario"
+],
+[
+"martedì alle 15 ho il sopralluogo in via Nizza 44",
+"calendario"
+],
+[
+"lunedì alle 11 appuntamento con l'impresa Verdi",
+"calendario"
+],
+[
+"mercoledì alle 17 devo incontrare il signor Ferrero",
+"calendario"
+],
+[
+"ricordami venerdì alle 8 di chiamare il manutentore",
+"calendario"
+],
+[
+"sabato alle 10 ho il controllo del tetto in via Cibrario",
+"calendario"
+],
+[
+"sposta l'assemblea di via Po a martedì alle 18",
+"calendario_modifica"
+],
+[
+"quella di Madama Cristina non giovedì ma venerdì",
+"calendario_modifica"
+],
+[
+"cancella il sopralluogo di via Nizza",
+"calendario_modifica"
+],
+[
+"Bassi viene alle 11 invece delle 10",
+"calendario_modifica"
+],
+[
+"sposta l'appuntamento con Verdi a mercoledì",
+"calendario_modifica"
+],
+[
+"Ferrero non alle 17 ma alle 16",
+"calendario_modifica"
+],
+[
+"annulla il controllo del tetto di sabato",
+"calendario_modifica"
+],
+[
+"ricordati che il signor Ferrero è il referente della scala B",
+"mente"
+],
+[
+"nel condominio Galleria le chiavi sono dal portiere",
+"mente"
+],
+[
+"Madama Cristina ha un moroso che si chiama Rossi",
+"mente"
+],
+[
+"il tecnico Bassi ha già fatto il sopralluogo",
+"mente"
+],
+[
+"l'impresa Verdi deve ancora consegnare il certificato",
+"mente"
+],
+[
+"in via Nizza il contatore dell'acqua è nel cortile",
+"mente"
+],
+[
+"il tetto di Cibrario è stato rifatto tre anni fa",
+"mente"
+],
+[
+"chi deve ancora pagare le quote condominiali",
+"dati"
+],
+[
+"quanto abbiamo incassato questo mese",
+"dati"
+],
+[
+"che assemblee ho questa settimana",
+"dati"
+],
+[
+"cosa avevo scritto sul condominio Galleria",
+"dati"
+],
+[
+"chi è il referente della scala B",
+"dati"
+],
+[
+"l'impresa Verdi ha già mandato la fattura",
+"dati"
+],
+[
+"qual è il prossimo sopralluogo",
+"dati"
+],
+[
+"prepara una fattura per l'impresa Verdi da 2800 euro",
+"documento"
+],
+[
+"fai un preventivo per la manutenzione del tetto 4500 più 900 di materiali",
+"documento"
+],
+[
+"prepara una fattura al condominio Dora da 3200 euro",
+"documento"
+],
+[
+"fammi un preventivo per la pulizia delle scale 1200 più 250",
+"documento"
+],
+[
+"fai un preventivo per la riparazione del cancello 900 più 180 di pezzi",
+"documento"
+],
+[
+"preparami una fattura per il controllo impianti da 650 euro",
+"documento"
+],
+[
+"manda all'impresa Verdi la fattura approvata",
+"invio_documento"
+],
+[
+"invia ai condomini il preventivo del tetto",
+"invio_documento"
+],
+[
+"manda a Verdi il preventivo definitivo",
+"invio_documento"
+],
+[
+"invia ai proprietari la fattura già pronta",
+"invio_documento"
+],
+[
+"scrivi al signor Ferrero che l'assemblea è stata spostata",
+"messaggio"
+],
+[
+"manda a Verdi che domani può iniziare i lavori",
+"messaggio"
+],
+[
+"scrivi ai condomini che l'acqua verrà chiusa alle 10",
+"messaggio"
+],
+[
+"manda a Bassi che il sopralluogo è confermato",
+"messaggio"
+],
+[
+"scrivi al portiere che arriva il tecnico alle 15",
+"messaggio"
+],
+[
+"manda a Rossi un promemoria per la quota",
+"messaggio"
+],
+[
+"scrivi al proprietario che ho ricevuto la documentazione",
+"messaggio"
+],
+[
+"manda una mail ai condomini con il verbale dell'assemblea",
+"email"
+],
+[
+"prepara una mail ai proprietari con il riepilogo delle spese",
+"email"
+],
+[
+"manda una mail al tecnico del tetto",
+"email"
+],
+[
+"chiama Ferrero per confermare l'assemblea",
+"chiamata"
+],
+[
+"chiama l'impresa Verdi e chiedi quando finiscono",
+"chiamata"
+],
+[
+"chiama Bassi per il sopralluogo",
+"chiamata"
+],
+[
+"senti il portiere del Galleria",
+"chiamata"
+],
+[
+"chiama Rossi per la quota arretrata",
+"chiamata"
+],
+[
+"chiama il tecnico del tetto",
+"chiamata"
+],
+[
+"chiama il proprietario di via Nizza",
+"chiamata"
+],
+[
+"Rossi ha appena pagato 850 euro di quote",
+"incasso"
+],
+[
+"il condominio Galleria ha versato 3200 euro",
+"incasso"
+],
+[
+"ho ricevuto 2800 euro dall'impresa Verdi",
+"incasso"
+],
+[
+"Ferrero ha pagato 650 euro",
+"incasso"
+],
+[
+"sono entrati 1450 euro per le quote di Madama Cristina",
+"incasso"
+],
+[
+"il proprietario di via Nizza ha pagato 500 euro",
+"incasso"
+],
+[
+"Dora ha saldato 3200 euro",
+"incasso"
+],
+[
+"c'è una perdita d'acqua enorme nel condominio Galleria",
+"urgenza"
+],
+[
+"si è bloccato l'ascensore con una persona dentro",
+"urgenza"
+],
+[
+"dal tetto di Dora entra acqua negli appartamenti",
+"urgenza"
+],
+[
+"è saltato l'impianto elettrico delle scale",
+"urgenza"
+],
+[
+"c'è una fuga di gas segnalata da un condomino",
+"urgenza"
+],
+[
+"si è rotto il tubo principale e stanno allagando il garage",
+"urgenza"
+],
+[
+"è caduto un pezzo di cornicione sul marciapiede",
+"urgenza"
+],
+[
+"il lavoro sul tetto di Dora è al 70 per cento",
+"sal"
+],
+[
+"la manutenzione del Galleria è al 40 per cento",
+"sal"
+],
+[
+"l'impresa Verdi ha completato il 90 per cento dei lavori",
+"sal"
+],
+[
+"in via Nizza siamo al 50 per cento",
+"sal"
+],
+[
+"la riparazione del cancello è quasi finita",
+"sal"
+],
+[
+"il lavoro sulle scale è al 60 per cento",
+"sal"
+],
+[
+"il controllo degli impianti è completato al 100 per cento",
+"sal"
+],
+[
+"secondo te conviene fare un'assemblea straordinaria per questa spesa",
+"domanda"
+],
+[
+"oggi ho tre condomini che mi chiamano per la stessa cosa",
+"domanda"
+],
+[
+"come posso organizzare meglio le scadenze delle quote",
+"domanda"
+],
+[
+"secondo te questa spesa va considerata ordinaria o straordinaria",
+"domanda"
+],
+[
+"sto impazzendo dietro alle morosità",
+"domanda"
+],
+[
+"per una perdita così grande quanto può costare l'intervento",
+"domanda"
+],
+[
+"secondo te conviene chiedere tre preventivi",
+"domanda"
+],
+[
+"ho una giornata piena di sopralluoghi e assemblee",
+"domanda"
+],
+[
+"come posso evitare di dimenticare i certificati dei fornitori",
+"domanda"
+],
+[
+"domani alle 8 vado da Luca Zanetti a Treviso",
+"calendario"
+],
+[
+"segna mercoledì alle 10 il sopralluogo a casa di Marta Rizzo",
+"calendario"
+],
+[
+"giovedì alle 9 devo consegnare la cucina a Padova",
+"calendario"
+],
+[
+"venerdì alle 14 ho il mobile su misura da Bianchi a Vicenza",
+"calendario"
+],
+[
+"lunedì alle 7 e mezza devo passare dal fornitore del legno",
+"calendario"
+],
+[
+"martedì alle 11 ho il montaggio della libreria a Mestre",
+"calendario"
+],
+[
+"ricordami sabato alle 9 di vedere il laboratorio di Rossi",
+"calendario"
+],
+[
+"domani alle 16 devo tornare da Andrea Conte",
+"calendario"
+],
+[
+"sposta Zanetti a domani alle 9",
+"calendario_modifica"
+],
+[
+"il sopralluogo da Rizzo facciamolo giovedì alle 10",
+"calendario_modifica"
+],
+[
+"cancella la consegna della cucina di Padova",
+"calendario_modifica"
+],
+[
+"Bianchi non venerdì ma lunedì alle 14",
+"calendario_modifica"
+],
+[
+"sposta il ritiro del legno a martedì mattina",
+"calendario_modifica"
+],
+[
+"la libreria di Mestre la monto alle 15 invece delle 11",
+"calendario_modifica"
+],
+[
+"Rossi non sabato ma venerdì pomeriggio",
+"calendario_modifica"
+],
+[
+"ricordati che Zanetti vuole il rovere naturale",
+"mente"
+],
+[
+"Rizzo ha scelto le maniglie nere",
+"mente"
+],
+[
+"la cucina di Padova va consegnata senza elettrodomestici",
+"mente"
+],
+[
+"Bianchi vuole il mobile alto fino al soffitto",
+"mente"
+],
+[
+"il fornitore di legno chiude alle 17",
+"mente"
+],
+[
+"la libreria di Mestre va fissata anche al muro",
+"mente"
+],
+[
+"chi mi deve ancora pagare",
+"dati"
+],
+[
+"quanto ho incassato questa settimana",
+"dati"
+],
+[
+"che consegne ho domani",
+"dati"
+],
+[
+"cosa avevo scritto sul mobile di Zanetti",
+"dati"
+],
+[
+"quanto era il preventivo di Rizzo",
+"dati"
+],
+[
+"Bianchi ha già pagato l'acconto",
+"dati"
+],
+[
+"qual è il prossimo montaggio",
+"dati"
+],
+[
+"fammi un preventivo per Zanetti 1800 di lavoro e 650 di legno",
+"documento"
+],
+[
+"prepara la fattura per Rizzo da 3200 euro",
+"documento"
+],
+[
+"fammi un preventivo per una cucina 4800 più 900 di montaggio",
+"documento"
+],
+[
+"prepara la fattura di Bianchi da 2750 euro",
+"documento"
+],
+[
+"fai un preventivo per una libreria 1900 più 350 di verniciatura",
+"documento"
+],
+[
+"fammi una fattura a Conte da 1200 più 180 di materiale",
+"documento"
+],
+[
+"prepara il preventivo per un tavolo su misura da 2100 euro",
+"documento"
+],
+[
+"manda a Zanetti il preventivo appena fatto",
+"invio_documento"
+],
+[
+"invia a Rizzo la fattura",
+"invio_documento"
+],
+[
+"manda a Bianchi il preventivo definitivo",
+"invio_documento"
+],
+[
+"gira a Conte la fattura già pronta",
+"invio_documento"
+],
+[
+"manda a Zanetti il preventivo corretto",
+"invio_documento"
+],
+[
+"gira a Rizzo la fattura firmata",
+"invio_documento"
+],
+[
+"prepara una mail a Bianchi con il preventivo aggiornato",
+"invio_documento"
+],
+[
+"scrivi a Zanetti che arrivo alle 9",
+"messaggio"
+],
+[
+"scrivi a Bianchi che il mobile è quasi pronto",
+"messaggio"
+],
+[
+"manda a Conte che domani passo in laboratorio",
+"messaggio"
+],
+[
+"scrivi al cliente di Padova che la consegna slitta",
+"messaggio"
+],
+[
+"manda a Rossi che ho bisogno delle misure",
+"messaggio"
+],
+[
+"scrivi a Marta che porto io le maniglie",
+"messaggio"
+],
+[
+"manda una mail al fornitore per ordinare rovere",
+"email"
+],
+[
+"chiama Zanetti e chiedigli se è a casa",
+"chiamata"
+],
+[
+"chiama Rizzo per confermare le misure",
+"chiamata"
+],
+[
+"senti Bianchi per il pagamento",
+"chiamata"
+],
+[
+"chiama il fornitore del legno",
+"chiamata"
+],
+[
+"chiama il cliente di Padova per la consegna",
+"chiamata"
+],
+[
+"prova a chiamare Conte che non risponde",
+"chiamata"
+],
+[
+"chiama Rossi per il sopralluogo",
+"chiamata"
+],
+[
+"Zanetti mi ha appena pagato 2450 euro",
+"incasso"
+],
+[
+"Rizzo ha fatto un bonifico di 3200 euro",
+"incasso"
+],
+[
+"Bianchi mi ha dato 1000 euro di acconto",
+"incasso"
+],
+[
+"ho ricevuto 2250 euro dal cliente di Mestre",
+"incasso"
+],
+[
+"Conte ha saldato 1380 euro",
+"incasso"
+],
+[
+"il cliente di Padova ha pagato 5700 euro",
+"incasso"
+],
+[
+"Rossi mi ha dato 500 euro in contanti",
+"incasso"
+],
+[
+"si è staccata un'anta pesante e ha colpito una persona",
+"urgenza"
+],
+[
+"il mobile fissato al muro si è staccato ed è caduto",
+"urgenza"
+],
+[
+"una vetrata della cucina si è rotta e ci sono vetri dappertutto",
+"urgenza"
+],
+[
+"il cliente dice che una mensola sta cedendo",
+"urgenza"
+],
+[
+"la porta blindata non si chiude e siamo bloccati",
+"urgenza"
+],
+[
+"un armadio appena montato si è inclinato e rischia di cadere",
+"urgenza"
+],
+[
+"si è rotto il vetro del tavolo e ci sono pezzi per terra",
+"urgenza"
+],
+[
+"la cucina di Padova è al 90 per cento manca il montaggio",
+"sal"
+],
+[
+"il mobile di Zanetti è al 60 per cento",
+"sal"
+],
+[
+"da Rizzo abbiamo finito la struttura manca la verniciatura",
+"sal"
+],
+[
+"Bianchi è al 75 per cento manca solo l'anta grande",
+"sal"
+],
+[
+"la libreria di Mestre è completata al 100 per cento",
+"sal"
+],
+[
+"il tavolo di Conte è al 40 per cento",
+"sal"
+],
+[
+"nel laboratorio Rossi abbiamo iniziato il taglio del legno",
+"sal"
+],
+[
+"secondo te per questo mobile meglio rovere o noce",
+"domanda"
+],
+[
+"oggi ho fatto cento chilometri per una sola consegna",
+"domanda"
+],
+[
+"quanto margine devo mettere sul legno di pregio",
+"domanda"
+],
+[
+"secondo te conviene verniciare in laboratorio o dal cliente",
+"domanda"
+],
+[
+"il cliente continua a cambiare le misure e non ne usciamo",
+"domanda"
+],
+[
+"per una cucina su misura quanto tempo calcoleresti",
+"domanda"
+],
+[
+"secondo te è meglio comprare un nuovo banco da lavoro",
+"domanda"
+],
+[
+"sto perdendo un sacco di tempo con le consegne",
+"domanda"
+],
+[
+"come organizzeresti i lavori quando ho tre mobili insieme",
+"domanda"
+],
+[
+"oggi il traffico in Veneto mi ha fatto perdere mezza giornata",
+"domanda"
+]
+]
+}

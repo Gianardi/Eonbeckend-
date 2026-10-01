@@ -152,10 +152,14 @@
   const GIORNI = ["domenica", "lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato"];
   const MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
   function isoGiorno(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
-  const ORE_PAROLE = { una: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, undici: 11, dodici: 12, tredici: 13, quattordici: 14, quindici: 15, sedici: 16, diciassette: 17, diciotto: 18, diciannove: 19, venti: 20, ventuno: 21, ventidue: 22, ventitre: 23 };
+  const ORE_PAROLE = { una: 1, due: 2, tre: 3, quattro: 4, cinque: 5, sei: 6, sette: 7, otto: 8, nove: 9, dieci: 10, undici: 11, dodici: 12, tredici: 13, quattordici: 14, quindici: 15, sedici: 16, diciassette: 17, diciotto: 18, diciannove: 19, venti: 20, ventuno: 21, ventidue: 22, ventitre: 23, sete: 7, oto: 8, diese: 10, undese: 11 };
   const MINUTI_PAROLE = { cinque: 5, dieci: 10, quindici: 15, venti: 20, venticinque: 25, trenta: 30, trentacinque: 35, quaranta: 40, quarantacinque: 45, cinquanta: 50, cinquantacinque: 55 };
   /* Trova giorno e ora, e segna le parole usate */
+  // i mesi detti in dialetto o scritti male (giro 18: "el 12 de otobre")
+  const MESI_ALTRI = { genaio: "gennaio", febraio: "febbraio", setembre: "settembre", otobre: "ottobre", novembar: "novembre", dicembar: "dicembre" };
+  const meseDi = (n) => MESI_ALTRI[n] || n;
   function trovaQuando(pp, oggiRif) {
+    pp = pp.map((x) => (MESI_ALTRI[x.n] ? { ...x, n: MESI_ALTRI[x.n] } : x));
     const oggi = new Date(oggiRif || Date.now()); oggi.setHours(0, 0, 0, 0);
     const usate = new Set(), racconto = new Set();
     let giorno = null, ora = null, fascia = null;
@@ -211,7 +215,8 @@
           for (let k = i - 1; k >= i - 3 && k >= 0 && /^(?:la|prossima|settimana)$/.test(pp[k].n); k--) usate.add(k);
         }
         /* "giovedì 15": il 15 (questo mese o il prossimo), non il primo giovedì */
-        const num = pp[i + 1] && /^\d{1,2}$/.test(pp[i + 1].n) ? Number(pp[i + 1].n) : 0;
+        // "lunedì dodici ottobre" (giro 18): il numero a parole, solo se c'è il mese dopo
+        const num = pp[i + 1] && /^\d{1,2}$/.test(pp[i + 1].n) ? Number(pp[i + 1].n) : pp[i + 1] && ORE_PAROLE[pp[i + 1].n] && pp[i + 2] && MESI.includes(meseDi(pp[i + 2].n)) ? ORE_PAROLE[pp[i + 1].n] : 0;
         // "giovedì 8 e mezza": è l'ora, non il giorno 8 (30/09)
         const eMezza = pp[i + 2] && pp[i + 2].n === "e" && pp[i + 3] && /^(?:mezza|mezzo|un|quarto|trenta|quindici|dieci|venti|quaranta|quarantacinque)$/.test(pp[i + 3].n);
         if (num >= 1 && num <= 31 && !eMezza && !(pp[i + 2] && /^(?:euro|€|%|mila|ore|minuti|:)$/.test(pp[i + 2].n))) {
@@ -229,10 +234,11 @@
         const d = new Date(a ? (a < 100 ? 2000 + a : a) : oggi.getFullYear(), m - 1, g);
         if (!a && d < oggi) d.setFullYear(d.getFullYear() + 1);
         if (d.getDate() === g) { giorno = d; usate.add(i); if (i > 0 && /^(?:il|per|entro)$/.test(pp[i - 1].n)) usate.add(i - 1); }
-      } else if (/^\d{1,2}$/.test(n) && pp[i + 1] && MESI.includes(pp[i + 1].n)) {
-        const d = new Date(oggi.getFullYear(), MESI.indexOf(pp[i + 1].n), Number(n));
+      } else if (/^\d{1,2}$/.test(n) && pp[i + 1] && (MESI.includes(pp[i + 1].n) || (/^(?:di|de)$/.test(pp[i + 1].n) && pp[i + 2] && MESI.includes(pp[i + 2].n)))) {
+        const salto = MESI.includes(pp[i + 1].n) ? 1 : 2; // "12 ottobre", "12 de otobre"
+        const d = new Date(oggi.getFullYear(), MESI.indexOf(pp[i + salto].n), Number(n));
         if (d < oggi) d.setFullYear(d.getFullYear() + 1);
-        giorno = d; usate.add(i); usate.add(i + 1);
+        giorno = d; usate.add(i); usate.add(i + 1); usate.add(i + salto);
         if (i > 0 && /^(?:il|per|entro)$/.test(pp[i - 1].n)) usate.add(i - 1);
       }
     }
@@ -257,20 +263,38 @@
       ora = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
     }
     // "domattina alle sei e mezza", "domani mattina alle 6", "presto alle 5": di mattina (giro 15)
-    const diMattina = pp.some((x, k) => !racconto.has(k) && /^(?:domattina|stamattina|stamani|mattina|mattino|mattinata|alba|presto)$/.test(x.n)) && !pp.some((x) => /^(?:pomeriggio|sera|stasera|serata|notte)$/.test(x.n));
+    const diMattina = pp.some((x, k) => !racconto.has(k) && /^(?:domattina|stamattina|stamani|mattina|matina|mattino|mattinata|alba|presto)$/.test(x.n)) && !pp.some((x) => /^(?:pomeriggio|sera|stasera|serata|notte)$/.test(x.n));
     const diSera = pp.some((x) => /^(?:sera|stasera|serata|pomeriggio)$/.test(x.n)) && !pp.some((x) => /^(?:domattina|stamattina|mattina|mattino|mattinata)$/.test(x.n));
+    /* Le ore da saltare (giro 18): quella corretta subito dopo ("alle sei e mezza, no aspetta alle
+       sette", "alle quattro anzi facciamo alle cinque") e quella vecchia ("invece che alle due e
+       mezza falla alle quattro", "a mezzogiorno e mezza invece che a mezzogiorno"). */
+    const oraQui = (k) => k > 0 && pp[k] && (/^\d{1,2}(?:[:.]\d{2})?$/.test(pp[k].n) || ORE_PAROLE[pp[k].n] || pp[k].n === "mezzogiorno") && (pp[k].n === "mezzogiorno" || /^(?:alle|all|ore|le|h|a)$/.test(pp[k - 1].n)) && !(pp[k + 1] && /^(?:euro|€|mila|k|%|percento|metri|mq|pezzi|persone|operai|giorni|ore)$/.test(pp[k + 1].n));
+    const vecchie = new Set();
+    const segnaVecchia = (k) => { vecchie.add(k); usate.add(k); if (k > 0 && /^(?:alle|all|ore|le|h|a)$/.test(pp[k - 1].n)) usate.add(k - 1); if (pp[k + 1] && pp[k + 1].n === "e" && pp[k + 2] && (/^(?:mezza|mezzo|trenta|quarto|un|tre)$/.test(pp[k + 2].n) || MINUTI_PAROLE[pp[k + 2].n] || /^\d{1,2}$/.test(pp[k + 2].n))) { usate.add(k + 1); usate.add(k + 2); if (/^(?:un|tre)$/.test(pp[k + 2].n) && pp[k + 3]) usate.add(k + 3); } };
+    for (let k = 1; k < pp.length; k++) {
+      if (!oraQui(k)) continue;
+      const prima = pp.slice(Math.max(0, k - 4), k).map((x) => x.n).join(" ");
+      if (/\b(?:invece\s+(?:che|di|delle|dell)|anziche|al\s+posto\s+(?:delle|di))\s*(?:alle|all|a|le)?$/.test(prima)) { segnaVecchia(k); continue; }
+      for (let q = k + 1; q < Math.min(pp.length, k + 15); q++) {
+        if (!oraQui(q)) continue;
+        const inMezzo = pp.slice(k + 1, q).map((x) => x.n).join(" ");
+        if (/\b(?:no|anzi|cioe|aspetta|facciamo|meglio|scusa|correggo)\b/.test(inMezzo) && !/\b(?:poi|dopo)\b/.test(inMezzo)) segnaVecchia(k);
+        break;
+      }
+    }
     // L'ora: "alle 11", "ore 11:30", "11:30", "alle 3 e mezza", "alle 15 in punto"
     for (let i = 0; i < pp.length && !ora; i++) {
+      if (vecchie.has(i)) continue;
       // "a mezzogiorno" (giro 7)
       // ("verso mezzogiorno" = 12, 30/09)
-      if (pp[i].n === "mezzogiorno" && !(i > 0 && /^(?:dopo|prima)$/.test(pp[i - 1].n))) { usate.add(i); if (i > 0 && /^(?:a|alle|verso)$/.test(pp[i - 1].n)) usate.add(i - 1); ora = "12:00"; break; }
+      if (pp[i].n === "mezzogiorno" && !(i > 0 && /^(?:dopo|prima)$/.test(pp[i - 1].n))) { usate.add(i); if (i > 0 && /^(?:a|alle|verso)$/.test(pp[i - 1].n)) usate.add(i - 1); ora = "12:00"; if (pp[i + 1] && pp[i + 1].n === "e" && pp[i + 2] && /^(?:mezza|mezzo)$/.test(pp[i + 2].n)) { ora = "12:30"; usate.add(i + 1); usate.add(i + 2); } break; }
       // "per le 17", "verso le 9", "entro le 18": come "alle"
       // "verso l'una", "per l'una" (giro 15)
       const lUna = pp[i].n === "una" && i > 1 && pp[i - 1].n === "l" && /^(?:verso|per|entro|dopo|prima|alle)$/.test(pp[i - 2].n);
-      const conMarca = i > 0 && (/^(?:alle|all|ore|dalle|verso|per|entro)$/.test(pp[i - 1].n) || (pp[i - 1].n === "le" && i > 1 && /^(?:per|verso|entro|dopo|fino|prima)$/.test(pp[i - 2].n)) || lUna);
+      const conMarca = i > 0 && (/^(?:alle|all|ore|dalle|verso|per|entro|h)$/.test(pp[i - 1].n) || (pp[i - 1].n === "le" && i > 1 && /^(?:per|verso|entro|dopo|fino|prima)$/.test(pp[i - 2].n)) || lUna);
       // l'ora detta a parole ("alle nove e un quarto", "alle sette e mezza"): giro 7, 29/09/2026
       // (solo dopo "alle/ore/dalle/per le": "preventivo per due bagni" non è un'ora)
-      const marcaForte = i > 0 && (/^(?:alle|all|ore|dalle)$/.test(pp[i - 1].n) || pp[i - 1].n === "le") || lUna;
+      const marcaForte = i > 0 && (/^(?:alle|all|ore|dalle|h)$/.test(pp[i - 1].n) || pp[i - 1].n === "le") || lUna;
       const n = lUna ? "1" : conMarca && marcaForte && ORE_PAROLE[pp[i].n] ? String(ORE_PAROLE[pp[i].n]) : pp[i].n;
       const m = n.match(/^(\d{1,2})(?:[:.](\d{2}))?$/);
       if (!m || (!conMarca && !m[2])) continue;
@@ -284,7 +308,9 @@
       usate.add(i); if (conMarca) { usate.add(i - 1); if (pp[i - 1].n === "le" || lUna) usate.add(i - 2); }
       const hDetta = h; // "alle sette meno un quarto" di mattina resta di mattina
       let j = i + 1;
-      if (pp[j] && pp[j].n === "e" && pp[j + 1] && /^(?:mezza|mezzo|trenta|un|quarto)$/.test(pp[j + 1].n)) {
+      if (pp[j] && pp[j].n === "e" && pp[j + 1] && pp[j + 1].n === "tre" && pp[j + 2] && pp[j + 2].n === "quarti") {
+        mi = 45; usate.add(j); usate.add(j + 1); usate.add(j + 2); j += 3; // "alle nove e tre quarti" (giro 18)
+      } else if (pp[j] && pp[j].n === "e" && pp[j + 1] && /^(?:mezza|mezzo|trenta|un|quarto)$/.test(pp[j + 1].n)) {
         mi = /^(?:un|quarto)$/.test(pp[j + 1].n) ? 15 : 30; usate.add(j); usate.add(j + 1); if (pp[j + 1].n === "un" && pp[j + 2] && pp[j + 2].n === "quarto") { usate.add(j + 2); j++; }
         j += 2;
       } else if (!m[2] && pp[j] && pp[j].n === "e" && pp[j + 1] && (MINUTI_PAROLE[pp[j + 1].n] || (/^\d{1,2}$/.test(pp[j + 1].n) && Number(pp[j + 1].n) > 0 && Number(pp[j + 1].n) < 60 && !(pp[j + 2] && /^(?:euro|€|%|mila|metri|mq|pezzi)$/.test(pp[j + 2].n))))) {
@@ -971,12 +997,29 @@
     const dopoNome = cl.stato === "trovato" ? pp.slice(Math.max(...cl.usate) + 1).map((x) => x.o).join(" ").replace(/^(?:che|di|:|,)\s*/i, "") : "";
     const daParola = (re) => { const i = pp.findIndex((x) => re.test(x.n)); return i >= 0 ? pp.slice(i).map((x) => x.o).join(" ") : null; };
     const importo = trovaImporto(pp, new Set())[0];
+    /* Un nome che non è tra i clienti (giro 18): "ciama el Sergio", "wa a Didonna la lavatrice va",
+       "preso 80 euro contanti dal signor Chiabrando". Il nome con la maiuscola subito dopo la parola
+       che lo annuncia (saltando articoli e titoli); poi decide l'app (chiede chi è, o se aggiungerlo). */
+    const nomeLibero = (annuncio) => {
+      const i = pp.findIndex((x) => annuncio.test(x.n));
+      if (i < 0) return null;
+      let j = i + 1;
+      while (j < pp.length && /^(?:el|il|la|lo|l|al|alla|allo|a|ai|col|con|cor|co|dal|dalla|dallo|da|signor|signore|signora|sig|dottor|dottore|dottoressa|dott|ing|ingegner|geom|geometra|ragionier|rag|avvocato|avv|grossista|fornitore|fabbro|idraulico|elettricista|muratore|imbianchino|amministratore|architetto|commercialista|ditta)$/.test(pp[j].n)) j++;
+      const nomi = [];
+      while (j < pp.length && nomi.length < 3 && /^\p{Lu}/u.test(pp[j].o)) nomi.push(pp[j++].o);
+      return nomi.length ? { nome: nomi.join(" "), resto: pp.slice(j).map((x) => x.o).join(" ").replace(/^(?:che|di|:|,)\s*/i, "") } : null;
+    };
+    const libero = nome ? null
+      : intento === "chiamata" ? nomeLibero(/^(?:chiama|chiamami|chiamare|chiamà|ciama|ciamar|ciamame|telefona|telefonare|telefonà|parla|parlà|parlare)$/)
+      : intento === "messaggio" ? nomeLibero(/^(?:wa|whatsapp|whats|wapp|sms|messaggio|scrivi|scrivigli|scrivere)$/)
+      : intento === "incasso" ? nomeLibero(/^(?:da|dal|dalla|dallo|dai)$/)
+      : null;
     switch (intento) {
-      case "chiamata": return nome ? "chiama " + nome : null;
+      case "chiamata": return nome ? "chiama " + nome : libero ? "chiama " + libero.nome : null;
       case "calendario": { const q = trovaQuando(pp, ctx.oggi); return (q.ora || q.giornoIso) && !/^(?:segna|segnami)\b/i.test(t) ? "segna " + t.replace(/^(?:me\s+lo|me\s+la|mi)\s+(?:metti|segni)\s+(?:in\s+agenda\s+)?/i, "") : null; }
-      case "messaggio": return nome && dopoNome.length >= 3 ? "scrivi a " + nome + " che " + dopoNome : null;
+      case "messaggio": return nome && dopoNome.length >= 3 ? "scrivi a " + nome + " che " + dopoNome : libero && libero.resto.length >= 3 ? "scrivi a " + libero.nome + " che " + libero.resto : null;
       case "email": return nome ? "manda una mail a " + nome + (dopoNome ? " " + dopoNome : "") : null;
-      case "incasso": return nome && importo ? nome + " ha pagato " + importo.valore + " euro" : nome ? nome + " ha pagato" : null;
+      case "incasso": { const chi = nome || (libero && libero.nome); return chi && importo ? chi + " ha pagato " + importo.valore + " euro" : chi ? chi + " ha pagato" : null; }
       case "cerca_documento": { const d = daParola(/^(?:foto|fotografi[ae]|preventiv[oi]|fattur[ae]|document[oi]|durc|visura|polizza|contratt[oi]|dico)$/); return d ? "mostrami " + d : null; }
       case "invio_documento": { const d = daParola(/^(?:preventiv[oi]|fattur[ae]|documento|pdf)$/); return d ? "manda il " + d.replace(/^(?:il|la|lo|i|le)\s+/i, "") : null; }
       case "foto": { const i = pp.findIndex((x) => /^(?:foto|fotografi[ae]|fotografa)$/.test(x.n)); return "fai foto " + (i >= 0 ? pp.slice(i + 1).map((x) => x.o).join(" ") : "").trim(); }
@@ -1671,7 +1714,8 @@
 
   /* ---------------- Più comandi ---------------- */
   const VERBI_COMANDO = "(?:cancella|annulla|elimina|segna|segnami|metti|fissa|vai|andare|passa|passare|sentire|senti|chiama|chiamare|richiama|telefona|telefonare|manda|mandare|inviare|invia|scrivi|scrivere|fai|fare|crea|prepara|compra|comprare|ritira|ritirare|porta|portare|ricordami|devo|appuntamento|sopralluogo|riunione|incontro|visita)";
-  const SEPARA = new RegExp(`\\s*(?:[.;]\\s+|,?\\s+(?:e\\s+poi|poi|ah\\s+e|e\\s+anche|inoltre)\\s+|,\\s*(?=${VERBI_COMANDO}\\b)|\\s+e\\s+(?=${VERBI_COMANDO}\\b)|,?\\s+e\\s+(?=(?:alle|ore|dalle)\\s+\\d))`, "i"); // "…alle 11 officina Tosi e alle 16 pizzeria" (giro 7)
+  const ORE_A_PAROLE = "(?:una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|venti)";
+  const SEPARA = new RegExp(`\\s*(?:[.;]\\s+|,?\\s+(?:e\\s+poi|poi|ah\\s+e|e\\s+anche|inoltre)\\s+|,\\s*(?=${VERBI_COMANDO}\\b)|\\s+e\\s+(?=${VERBI_COMANDO}\\b)|,?\\s+e\\s+(?=(?:alle|ore|dalle)\\s+(?:\\d|${ORE_A_PAROLE}\\b)))`, "i"); // "…alle 11 officina Tosi e alle 16 pizzeria" (giro 7), "…e alle undici dal Tosi" (giro 18)
   function dividi(testo) {
     /* Un elenco di impegni con le virgole (29/09/2026): "domani mattina sentire
        prospect, sentite clienti per aggiuntivi, Brigida alle 18 per…, 18:30
@@ -1691,7 +1735,14 @@
       const pp = parole(parti[k]);
       const q = trovaQuando(pp, new Date());
       const resto = pp.filter((x, i) => !q.usate.has(i) && !/^(?:segna|segnami|metti|mettimi|fissa|fissami|prenota|per|il|la)$/.test(x.n));
-      if (!resto.length && (q.ora || q.giornoIso)) { parti.splice(k, 2, parti[k] + " " + parti[k + 1]); k--; }
+      if (!resto.length && (q.ora || q.giornoIso)) {
+        /* "giovedì alle 10 e poi alle 16 due sopralluoghi a Pinerolo" (giro 18): anche il pezzo
+           dopo ha la sua ora, allora sono due impegni con la stessa cosa da fare */
+        const pp2 = parole(parti[k + 1]), q2 = trovaQuando(pp2, new Date());
+        const cosa = pp2.filter((x, i) => !q2.usate.has(i)).map((x) => x.o).join(" ").replace(/^(?:due|2|tre|3)\s+/i, "").trim();
+        if (q.ora && q2.ora && cosa.split(/\s+/).length >= 2) { parti[k] = parti[k] + " " + cosa; continue; }
+        parti.splice(k, 2, parti[k] + " " + parti[k + 1]); k--;
+      }
     }
     return parti.length >= 2 && parti.length <= 5 ? parti : null;
   }

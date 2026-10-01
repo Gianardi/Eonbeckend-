@@ -1,0 +1,113 @@
+{
+"confini": "Frasi mandate da Andrea (30/09/2026, scritte con ChatGPT), solo quelle dette dall'artigiano a EON (le frasi del cliente all'impresa escluse): richieste senza dettagli (documento: EON chiede cosa manca), domande di mestiere e prezzi (domanda), fatti sul lavoro (mente)",
+"frasi": [
+[
+"Mi serve un preventivo per rifare un bagno",
+"documento"
+],
+[
+"Quanto costa rifare un tetto di circa 150 mq?",
+"domanda"
+],
+[
+"Devo ristrutturare completamente un appartamento",
+"mente"
+],
+[
+"Quanto costa mediamente una ristrutturazione al metro quadro?",
+"domanda"
+],
+[
+"Quanto ci vuole per rifare un tetto?",
+"domanda"
+],
+[
+"Il cliente vuole iniziare i lavori a novembre",
+"mente"
+],
+[
+"Mi fai un preventivo dettagliato?",
+"documento"
+],
+[
+"Quanto costa abbattere una parete?",
+"domanda"
+],
+[
+"Quanto costa rifare facciata e balconi?",
+"domanda"
+],
+[
+"Mi serve una fattura per il cliente",
+"documento"
+],
+[
+"Il cliente ha cambiato idea sui materiali",
+"mente"
+],
+[
+"Ho bisogno di modificare il preventivo",
+"documento"
+],
+[
+"Puoi mandarmi il preventivo via mail?",
+"invio_documento"
+],
+[
+"Quanto costa la manodopera?",
+"domanda"
+],
+[
+"Il lavoro è più grande del previsto",
+"mente"
+],
+[
+"Mi serve una mano per fare il computo",
+"domanda"
+],
+[
+"Quanto posso chiedere per questo lavoro?",
+"domanda"
+],
+[
+"Il muratore deve coordinarsi con l'idraulico",
+"mente"
+],
+[
+"Ci sono materiali che devo ordinare prima?",
+"domanda"
+],
+[
+"Abbiamo trovato un problema durante la demolizione",
+"mente"
+],
+[
+"Il preventivo è stato accettato",
+"mente"
+],
+[
+"Il cliente non ha ancora confermato",
+"mente"
+],
+[
+"Mi serve una fattura per il lavoro di ieri",
+"documento"
+],
+[
+"Devo aggiungere una lavorazione al preventivo",
+"documento"
+],
+[
+"Quanto costa uscire per un intervento?",
+"domanda"
+],
+[
+"Il bagno è completamente da rifare",
+"mente"
+],
+[
+"Devo sostituire un vecchio boiler",
+"mente"
+]
+]
+}

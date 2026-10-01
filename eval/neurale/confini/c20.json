@@ -1,0 +1,421 @@
+{
+"confini": "Frasi di ChatGPT chieste da Andrea (30/09/2026, idraulico a Napoli, col testo-guida di EON), ricontrollate: due \"email\" che mandano un documento spostate in invio_documento, due troppo vaghe tolte",
+"frasi": [
+[
+"oggi alle 8 devo passare da Gennaro Esposito a via Toledo 184",
+"calendario"
+],
+[
+"domani mattina alle 9 appuntamento da Maria Russo a Fuorigrotta",
+"calendario"
+],
+[
+"segna per venerdì alle 15 il sopralluogo da Luca Ferri in via Manzoni 72",
+"calendario"
+],
+[
+"metti martedì alle 10 il lavoro al condominio Vesuvio in via Posillipo 31",
+"calendario"
+],
+[
+"giovedì alle 8 e mezza devo andare da Salvatore Romano a Ponticelli",
+"calendario"
+],
+[
+"ricordami sabato alle 11 di passare da Anna De Rosa per il preventivo",
+"calendario"
+],
+[
+"oggi pomeriggio alle 16 ho da vedere il bagno di Pasquale Esposito a Vomero",
+"calendario"
+],
+[
+"metti lunedì prossimo alle 7 e 30 il ritiro del materiale da Termoidraulica Napoli",
+"calendario"
+],
+[
+"domani alle 14 devo andare dai Bianchi a via Caracciolo 118",
+"calendario"
+],
+[
+"no aspetta quello delle 9 spostalo alle 10",
+"calendario_modifica"
+],
+[
+"l'appuntamento con Russo di mercoledì cancellalo che non viene nessuno",
+"calendario_modifica"
+],
+[
+"quello da Ferri non è venerdì è giovedì alle 16",
+"calendario_modifica"
+],
+[
+"sposta il condominio Vesuvio da martedì a venerdì mattina",
+"calendario_modifica"
+],
+[
+"il lavoro di via Manzoni anticipalo alle 8",
+"calendario_modifica"
+],
+[
+"annulla l'uscita da Gennaro per oggi pomeriggio",
+"calendario_modifica"
+],
+[
+"quello di domani con De Rosa fallo alle 11 invece delle 10",
+"calendario_modifica"
+],
+[
+"sposta il sopralluogo di Posillipo a lunedì prossimo",
+"calendario_modifica"
+],
+[
+"ricordati che il muro dai Rossi in via Tasso è portante e non si tocca",
+"mente"
+],
+[
+"il signor Bianchi preferisce sempre essere chiamato prima di arrivare",
+"mente"
+],
+[
+"da Esposito ho lasciato due raccordi da 3 4",
+"mente"
+],
+[
+"il condominio Vesuvio vuole fatture separate per ogni scala",
+"mente"
+],
+[
+"Riccardo Russo ha già il mio preventivo ma vuole pensarci",
+"mente"
+],
+[
+"il fornitore Termoidraulica Napoli mi fa il 15 per cento di sconto",
+"mente"
+],
+[
+"da Maria De Rosa la caldaia è una Vaillant vecchia di circa dieci anni",
+"mente"
+],
+[
+"il numero del custode del condominio è 333 7812046",
+"mente"
+],
+[
+"chi mi deve ancora pagare questo mese",
+"dati"
+],
+[
+"quanto deve ancora darmi il signor Ferri",
+"dati"
+],
+[
+"che lavoro ho domani mattina",
+"dati"
+],
+[
+"cosa avevo scritto sul bagno dei Rossi",
+"dati"
+],
+[
+"quanto avevo preventivato per il condominio Vesuvio",
+"dati"
+],
+[
+"chi ho in programma venerdì pomeriggio",
+"dati"
+],
+[
+"qual era il nome del fornitore dove devo ritirare i raccordi",
+"dati"
+],
+[
+"che appuntamento ho alle 10 oggi",
+"dati"
+],
+[
+"fammi un preventivo per Rossi per sostituzione miscelatore 180 euro più uscita 50",
+"documento"
+],
+[
+"preparami la fattura per Esposito 850 di manodopera e 320 di materiale",
+"documento"
+],
+[
+"fammi il prev per rifacimento bagno da 4200 euro più 650 di tubazioni",
+"documento"
+],
+[
+"prepara una fattura per il condominio Vesuvio da 1280 euro",
+"documento"
+],
+[
+"fai un preventivo a Ferri per sostituzione caldaia 1950 e installazione 450",
+"documento"
+],
+[
+"preparami la fattura per De Rosa 390 euro per la riparazione della perdita",
+"documento"
+],
+[
+"fammi un prev per 12 termosifoni a 180 l'uno più 700 di posa",
+"documento"
+],
+[
+"prepara la fattura per Bianchi 600 euro di intervento e 140 di pezzi",
+"documento"
+],
+[
+"manda a Rossi il preventivo che abbiamo fatto stamattina",
+"invio_documento"
+],
+[
+"invia la fattura a Esposito via mail",
+"invio_documento"
+],
+[
+"manda al condominio Vesuvio il preventivo approvato",
+"invio_documento"
+],
+[
+"gira a Ferri la fattura del lavoro di ieri",
+"invio_documento"
+],
+[
+"invia a De Rosa il prev aggiornato",
+"invio_documento"
+],
+[
+"manda a Bianchi la fattura appena preparata",
+"invio_documento"
+],
+[
+"manda al geometra Russo il preventivo definitivo",
+"invio_documento"
+],
+[
+"manda al commercialista la fattura di Esposito",
+"invio_documento"
+],
+[
+"scrivi a Ferri una mail con il preventivo aggiornato",
+"invio_documento"
+],
+[
+"scrivi a Gennaro che arrivo verso le 10 perché sono ancora dal cliente",
+"messaggio"
+],
+[
+"manda un WhatsApp a Rossi e digli che il pezzo arriva domani",
+"messaggio"
+],
+[
+"scrivi a Ferri che il lavoro slitta a giovedì",
+"messaggio"
+],
+[
+"manda al custode del Vesuvio che passo alle 14",
+"messaggio"
+],
+[
+"scrivi a De Rosa di mandarmi una foto della caldaia",
+"messaggio"
+],
+[
+"manda a Bianchi che il preventivo è pronto",
+"messaggio"
+],
+[
+"scrivi a Salvatore che oggi non riesco a passare dal fornitore",
+"messaggio"
+],
+[
+"manda a Maria che per il bagno mi serve una foto del contatore",
+"messaggio"
+],
+[
+"manda una mail a Termoidraulica Napoli per ordinare 6 valvole",
+"email"
+],
+[
+"scrivi una mail al condominio Vesuvio con il riepilogo dei lavori",
+"email"
+],
+[
+"prepara una mail a Rossi con la data del sopralluogo",
+"email"
+],
+[
+"scrivi al geometra Bianchi per chiedere il computo aggiornato",
+"email"
+],
+[
+"chiama Gennaro Esposito e chiedigli se è arrivato il materiale",
+"chiamata"
+],
+[
+"fai partire una chiamata a Rossi per sapere se posso entrare domani",
+"chiamata"
+],
+[
+"chiama il custode del Vesuvio prima che vado al condominio",
+"chiamata"
+],
+[
+"devo sentire Ferri per il preventivo chiamalo tu",
+"chiamata"
+],
+[
+"chiama De Rosa e chiedile che modello di caldaia ha",
+"chiamata"
+],
+[
+"fammi chiamare Termoidraulica Napoli per sapere se è pronto l'ordine",
+"chiamata"
+],
+[
+"chiama Bianchi e digli che ho finito il lavoro",
+"chiamata"
+],
+[
+"prova a chiamare il signor Romano che non risponde da ieri",
+"chiamata"
+],
+[
+"mi ha pagato Rossi 450 euro con bonifico",
+"incasso"
+],
+[
+"segnami ricevuti 800 euro da Esposito",
+"incasso"
+],
+[
+"il condominio Vesuvio mi ha appena pagato 1280 euro",
+"incasso"
+],
+[
+"ho ricevuto 390 euro da De Rosa",
+"incasso"
+],
+[
+"Bianchi mi ha dato 600 euro in contanti",
+"incasso"
+],
+[
+"Ferri ha pagato il preventivo con bonifico 2400 euro",
+"incasso"
+],
+[
+"mi sono arrivati 740 euro da Russo",
+"incasso"
+],
+[
+"Romano mi ha appena saldato 350 euro",
+"incasso"
+],
+[
+"è esploso un tubo in via Toledo 184 e sta uscendo acqua dappertutto",
+"urgenza"
+],
+[
+"dal bagno dei Rossi sta uscendo acqua dal soffitto chiamami qualcuno subito",
+"urgenza"
+],
+[
+"al condominio Vesuvio si è rotta la tubazione principale e non hanno acqua",
+"urgenza"
+],
+[
+"la caldaia di De Rosa perde tantissima acqua serve andare subito",
+"urgenza"
+],
+[
+"c'è una perdita grossa nel negozio di Ferri e sta allagando il locale",
+"urgenza"
+],
+[
+"il tubo sotto il pavimento si è rotto e il cliente sta chiudendo l'acqua",
+"urgenza"
+],
+[
+"mi hanno chiamato dal condominio perché l'acqua sta entrando nell'ascensore",
+"urgenza"
+],
+[
+"a Ponticelli è scoppiato un flessibile e stanno allagando il piano terra",
+"urgenza"
+],
+[
+"il bagno dei Bianchi è al 70 per cento",
+"sal"
+],
+[
+"il lavoro al condominio Vesuvio è praticamente finito manca solo il collaudo",
+"sal"
+],
+[
+"da Rossi abbiamo finito le tubazioni ma manca ancora il montaggio dei sanitari",
+"sal"
+],
+[
+"il cantiere di via Manzoni è fermo al 40 per cento perché manca il materiale",
+"sal"
+],
+[
+"il bagno di De Rosa è al 90 per cento devo solo montare il box doccia",
+"sal"
+],
+[
+"da Ferri abbiamo completato il riscaldamento manca da fare la prova",
+"sal"
+],
+[
+"il lavoro a Ponticelli è a metà e oggi finisco la parte idraulica",
+"sal"
+],
+[
+"il cantiere di Posillipo è finito resta solo da mandare la fattura",
+"sal"
+],
+[
+"che giornata oggi non ne posso più",
+"domanda"
+],
+[
+"secondo te per una perdita nel muro conviene fare prima la ricerca o rompere subito",
+"domanda"
+],
+[
+"ma quanto posso chiedere per montare un boiler da 80 litri",
+"domanda"
+],
+[
+"sto pensando di cambiare furgone secondo te conviene prenderlo nuovo",
+"domanda"
+],
+[
+"che tubo useresti tu per questa installazione in appartamento vecchio",
+"domanda"
+],
+[
+"oggi ho fatto sette interventi sono distrutto",
+"domanda"
+],
+[
+"secondo te questo cliente sta chiedendo troppo per il prezzo che gli ho fatto",
+"domanda"
+],
+[
+"ma è normale che una caldaia nuova faccia quel rumore quando parte",
+"domanda"
+],
+[
+"mi sa che oggi non riesco neanche a mangiare con tutti questi lavori",
+"domanda"
+],
+[
+"secondo te quanto ci vuole per rifare tutto l'impianto idraulico di un appartamento di 90 metri",
+"domanda"
+]
+]
+}

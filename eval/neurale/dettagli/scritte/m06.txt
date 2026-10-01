@@ -1,0 +1,20 @@
+# Frasi scritte a mano (sesta serie, 30/09 notte): sconti detti in dialetto ("sconto de 300",
+# "sconto da 200"), e percentuali dette solo come nota ("scrivi in nota che il 30% l'ha già dato",
+# "in nota: acconto del 40 per cento già versato") che NON cambiano il conto: restano O.
+preventivo par el Toni rifacimento terrazzo 3800{TOT} e guaina 500{TOT}, sconto de 200{SCOV} euro
+preventivo pa' la siora Nina bagno 5200{TOT} e piastrelle 900{TOT}, fasemo sconto de 400{SCOV}
+fattura al Bepi cancello 1600{TOT}, sconto de 100{SCOV}
+preventivo par la cesa tetto 12000{TOT} e grondaie 1500{TOT} con sconto de 500{SCOV} euro
+fattura a Gino scala 2300{TOT} sconto da 150{SCOV} euro
+preventivo pe' Mario cucina 6000{TOT} e 'o top 1200{TOT}, sconto 'e 300{SCOV}
+fattura Nando infissi 4400{TOT} col sconto de 10{SCO} per cento
+preventivo par el Gigio muro 2200{TOT} e intonaco 800{TOT}, ghe fasso sconto de 250{SCOV}
+fammi una fattura alla Riva per il restauro del tavolo 900{TOT} e scrivi in nota che il 30 per cento l'ha già dato in contanti
+fattura Neri divano 1200{TOT}, in nota metti che il 50% è già stato pagato
+fattura al Colombo per il bagno 4800{TOT}, nota: acconto del 40 per cento già versato a luglio
+preventivo Conti cucina 7500{TOT}, scrivi che il 30 per cento si paga alla firma
+preventivo per la Sala tetto 9000{TOT}, nella nota metti pagamento 50 per cento all'ordine e 50 a fine lavori
+fattura Moretti poltrona 650{TOT} e scrivi in nota che gli ho fatto il 10 per cento in meno già nel prezzo
+fattura al Gatti per il cancello 2100{TOT}, aggiungi in nota che il 20 per cento lo salda a novembre
+preventivo Ferri impianto 3400{TOT} con nota: acconto 30% alla conferma
+fattura Bianchi 800{TOT} per la riparazione, e in nota scrivi IVA al 10 per cento per ristrutturazione

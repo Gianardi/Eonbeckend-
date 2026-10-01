@@ -1,0 +1,31 @@
+# Frasi scritte a mano (quinta serie, 30/09 sera): una correzione a metà e poi altre voci.
+# Dopo "no aspetta 2.200" la frase continua: le voci dopo la correzione contano (TOT/PRZ), non sono annullate.
+fattura Rossi per il tetto, erano 3.100{ANN} di manodopera, no aspetta 2.900{TOT}, più 800{TOT} di materiale
+preventivo Galli 1.500{ANN} di demolizione, anzi 1.300{TOT}, poi 600{TOT} di smaltimento
+fattura al bar Sport 900{ANN} per la vetrina, no scusa 950{TOT}, e 120{TOT} di trasporto
+preventivo per la signora Neri tinteggiatura 2.000{ANN} cioè no 1.800{TOT} più stucco 350{TOT} e ponteggio 400{TOT}
+fattura Colombo, allora erano 700{ANN} di manodopera, eh no 750{TOT}, più 230{TOT} di pezzi
+preventivo Serra impianto 4.200{ANN}, no aspetta, 4.000{TOT}, quadro 650{TOT} e collaudo 200{TOT}
+fai la fattura a Moretti per il capannone: 5.500{ANN} di lavoro no 5.300{TOT} e 1.200{TOT} di materiale
+preventivo Bianchi bagno 6.000{ANN} anzi no 5.800{TOT}, sanitari 1.100{TOT}
+fattura Ferri 12{ANN} ore, no 14{QTA} ore a 35{PRZ} più 90{TOT} di materiale
+preventivo pavimento 40{ANN} metri, anzi 45{QTA} metri a 38{PRZ}, più battiscopa 300{TOT}
+fattura hotel Lido 8{QTA} tende a 120{ANN} no a 130{PRZ} più binari 240{TOT}
+preventivo Riva cancello 1.900{ANN} cioè 2.100{TOT}, motore 600{TOT}, e poi la posa 350{TOT}
+fattura per la Conti lavori 3.300{ANN}... no 3.200{TOT} più 180{TOT} di bolli e trasporto
+preventivo al condominio Aurora facciata 18.000{ANN} no facciamo 17.500{TOT} più ponteggio 4.000{TOT}
+fattura Gallo, gli avevo detto 800{ANN} ma metti 750{TOT}, poi 150{TOT} per l'uscita
+preventivo De Luca cucina 7.400{ANN} anzi 7.200{TOT}, elettrodomestici 2.300{TOT}, montaggio 400{TOT}
+fattura Lombardi manutenzione 450{ANN} no no 480{TOT} e il pezzo di ricambio 95{TOT}
+preventivo Marchi 2{ANN} giorni anzi 3{QTA} giorni a 280{PRZ} più noleggio 150{TOT}
+fattura Villa, 1.050{ANN} di manodopera no aspetta 1.150{TOT}, più il materiale 420{TOT}, più il trasporto 60{TOT}
+preventivo per il ristorante Da Mario banco 3.000{ANN} no 3.400{TOT} e 6{QTA} sgabelli a 90{PRZ}
+fattura Esposito 2.600{ANN} di opere murarie, no scusa, 2.450{TOT}, poi 700{TOT} di impianto
+preventivo Fontana 380{ANN} a porta anzi 360{PRZ} a porta, sono 5{QTA} porte, più maniglie 150{TOT}
+fattura Caruso tagliando 220{ANN} no 240{TOT} più 2{QTA} gomme a 110{PRZ}
+preventivo Greco scala 4.800{ANN} eh no 4.500{TOT} ringhiera 1.600{TOT} verniciatura 500{TOT}
+fattura condominio Tigli pulizie 300{ANN} al mese anzi 320{PRZ} al mese per 3{MOLT} mesi
+preventivo Pellegrini 900{ANN} per il sopralluogo, no aspetta, 600{TOT}, più la relazione 400{TOT}
+fattura Rinaldi intervento 180{ANN} cioè no 200{TOT} e uscita notturna 80{TOT}
+preventivo per la Sala impianto elettrico 3.800{ANN} no facciamo 3.600{TOT} più 12{QTA} punti luce a 45{PRZ}
+fattura Mancini lavori finiti 9.000{ANN} no 9.400{TOT} meno l'acconto di 3.000{SCOV}
