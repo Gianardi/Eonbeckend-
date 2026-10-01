@@ -865,6 +865,65 @@
      finché non c'è (primi istanti dopo l'apertura) decide il modello di parole */
   let NEURALE = null;
   function usaNeurale(n) { NEURALE = n && n.pronto && n.pronto() ? n : null; return !!NEURALE; }
+  /* PASSO A (1/10/2026): il modello che legge TUTTA la frase (modello-lettura.json). Dice il
+     cassetto e il ruolo di ogni parola; qui il codice NON capisce niente: normalizza soltanto
+     quello che il modello ha segnato (il nome → il cliente in rubrica, "giovedì alle 9" → data e
+     ora, il canale e il documento → la loro parola di sistema). */
+  let LETTURA = null;
+  function usaLettura(n) { LETTURA = n && n.pronto && n.pronto() && n.ruoli && n.ruoli() ? n : null; return !!LETTURA; }
+  const CANALI = { whatsapp: "whatsapp", whats: "whatsapp", wa: "whatsapp", app: "whatsapp", mail: "email", email: "email", "e-mail": "email", posta: "email", sms: "sms", messaggino: "sms", eon: "eon", chat: "eon" };
+  // parole come le divide il modello (spazi e apostrofi: "l'ho" → "l'" "ho"), senza regole
+  const SPAZI = new Set([" ", "\t", "\n", "\r"]);
+  function paroleModello(testo) {
+    const out = []; let w = "";
+    for (const ch of String(testo || "")) {
+      if (SPAZI.has(ch)) { if (w) out.push(w); w = ""; }
+      else if (ch === "'" || ch === "’") { out.push(w + ch); w = ""; }
+      else w += ch;
+    }
+    if (w) out.push(w);
+    return out.filter((x) => x && x !== "'" && x !== "’");
+  }
+  const unisci = (pp) => pp.join(" ").split("' ").join("'").split("’ ").join("’");
+  function leggiConModello(testo, ctx = {}) {
+    if (!LETTURA) return null;
+    const pp = paroleModello(testo);
+    if (!pp.length) return null;
+    const c = LETTURA.classifica(pp.join(" "));
+    const ruoli = LETTURA.etichetta(pp);
+    // parole vicine con lo stesso ruolo = un pezzo; la sicurezza del pezzo = la più bassa delle sue parole
+    const pezzi = {};
+    let prima = null;
+    ruoli.forEach((r, i) => {
+      if (r.ruolo === "O") { prima = null; return; }
+      if (prima && prima.ruolo === r.ruolo) { prima.parole.push(pp[i]); prima.p = Math.min(prima.p, r.p); return; }
+      prima = { ruolo: r.ruolo, parole: [pp[i]], p: r.p };
+      (pezzi[r.ruolo] = pezzi[r.ruolo] || []).push(prima);
+    });
+    const testoDi = (r, k = 0) => (pezzi[r] && pezzi[r][k] ? unisci(pezzi[r][k].parole) : "");
+    const quandoDi = (rg, ro) => {
+      const pg = pezzi[rg] ? pezzi[rg].flatMap((x) => x.parole) : [], po = pezzi[ro] ? pezzi[ro].flatMap((x) => x.parole) : [];
+      if (!pg.length && !po.length) return null;
+      const q = trovaQuando(parole(pulisci([...pg, ...po].join(" ")).testo), ctx.oggi || new Date());
+      return { giornoIso: q.giornoIso || null, ora: q.ora || null, fascia: q.fascia || null, detto: [...pg, ...po].join(" ") };
+    };
+    const chi = (pezzi.CHI || []).map((x) => {
+      const nome = unisci(x.parole);
+      const t = trovaCliente(parole(pulisci(nome).testo), ctx.clienti || [], new Set());
+      return { detto: nome, p: x.p, stato: t.stato, cliente: t.cliente || null, candidati: t.candidati || null };
+    });
+    const soloLettere = (w) => [...w].filter((ch) => (ch >= "a" && ch <= "z") || ch === "-").join("");
+    const can = paroleModello(testoDi("CAN").toLowerCase()).map((w) => CANALI[soloLettere(w)]).find(Boolean) || null;
+    const cifre = [...testoDi("NUM")].filter((ch) => ch >= "0" && ch <= "9").join("");
+    const num = cifre ? parseInt(cifre, 10) : null;
+    return {
+      intento: c ? c.intento : null, p: c ? c.p : 0, secondo: c ? c.secondo : null,
+      chi, quando: quandoDi("GIO", "ORA"), nuovoQuando: quandoDi("NGIO", "NORA"),
+      lavoro: testoDi("LAV") || null, testo: testoDi("TESTO") || null, canale: can, documento: testoDi("DOC").toLowerCase() || null, numero: num,
+      telefono: testoDi("TEL") || null, email: testoDi("MAIL") || null, indirizzo: testoDi("IND") || null, avanzamento: testoDi("AVANZ") || null, cartella: testoDi("CART") || null,
+      pezzi, parole: pp, ruoli: ruoli.map((r) => r.ruolo),
+    };
+  }
   /* Il modello dei DETTAGLI (passo 4): uno o più modelli (la media dei loro voti).
      Finché non ci sono, gli importi li leggono solo le regole. */
   let DETTAGLI = [];
@@ -2505,7 +2564,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, senzaMisure, anonimizza, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { usaLettura, leggiConModello, letturaAttiva: () => !!LETTURA, leggi, segni, senzaMisure, anonimizza, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

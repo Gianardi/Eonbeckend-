@@ -35,14 +35,16 @@
       }
       const vocab = new Map(json.vocab.map((t, i) => [t, i]));
       M = { D, H: json.teste, FF: json.ff, maxlen: json.maxlen, intenti: json.intenti, ruoli: json.ruoli, T: json.temperatura || 1, vocab,
-        emb: w("emb.weight"), pos: w("pos.weight"), strati, lng: v("ln.weight"), lnb: v("ln.bias"), out: w("out.weight"), outB: v("out.bias"), versione: json.versione };
+        emb: w("emb.weight"), pos: w("pos.weight"), strati, lng: v("ln.weight"), lnb: v("ln.bias"), out: w("out.weight"), outB: v("out.bias"), versione: json.versione,
+        // passo A (1/10/2026): il modello che legge tutta la frase ha due uscite, il cassetto (out) e il ruolo di ogni parola (outR)
+        outR: P["outR.weight"] ? w("outR.weight") : null, outRB: P["outR.bias"] ? v("outR.bias") : null, minuscolo: !!json.minuscolo };
       return true;
     }
 
     /* WordPiece: per ogni parola il pezzo più lungo che c'è nel vocabolario, poi "##resto" */
     function pezzi(testo) {
       const ids = [M.vocab.get("[CLS]")], UNK = M.vocab.get("[UNK]");
-      for (const parola of String(testo || "").split(/\s+/).filter(Boolean)) ids.push(...pezziDi(parola, UNK));
+      for (const parola of String(testo || "").split(/\s+/).filter(Boolean)) ids.push(...pezziDi(M.minuscolo ? parola.toLowerCase() : parola, UNK));
       return ids.slice(0, M.maxlen);
     }
     function pezziDi(parola, UNK) {
@@ -140,14 +142,14 @@
       if (!M || !M.ruoli) return null;
       const UNK = M.vocab.get("[UNK]"), ids = [M.vocab.get("[CLS]")], primi = [];
       for (const w of parole) {
-        const p = pezziDi(w, UNK);
+        const p = pezziDi(M.minuscolo ? String(w).toLowerCase() : w, UNK);
         if (ids.length + p.length > M.maxlen) break;
         primi.push(ids.length); ids.push(...p);
       }
       const xn = corpo(ids), D = M.D, K = M.ruoli.length;
       return parole.map((w, j) => {
         if (j >= primi.length) return { ruolo: "O", p: 0, pp: null };
-        const pp = morbida(lineare(xn.subarray(primi[j] * D, primi[j] * D + D), 1, D, M.out, M.outB, K), 1);
+        const pp = morbida(lineare(xn.subarray(primi[j] * D, primi[j] * D + D), 1, D, M.outR || M.out, M.outR ? M.outRB : M.outB, K), 1);
         let k = 0; for (let i = 1; i < K; i++) if (pp[i] > pp[k]) k = i;
         return { ruolo: M.ruoli[k], p: pp[k], pp };
       });
