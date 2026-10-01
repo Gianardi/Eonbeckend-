@@ -98,7 +98,8 @@ globalThis.fetch = async (url, init) => {
 const conta = () => ({
   tasks: (tabelle.tasks || []).filter((t) => !t.deleted_at).length,
   tasksJson: JSON.stringify((tabelle.tasks || []).map((t) => [t.id, t.scheduled_at, t.deleted_at, t.status])),
-  quando: [...(tabelle.tasks || []), ...(tabelle.messages || []).filter((m) => m.event_type === "appt")].map((t) => String(t.scheduled_at || "")),
+  // anche l'ora delle assemblee convocate (giro 19: "convoca l'assemblea… alle 18" risultava senza ora)
+  quando: [...(tabelle.tasks || []), ...(tabelle.messages || []).filter((m) => m.event_type === "appt"), ...(tabelle.assemblee || []).map((a) => ({ scheduled_at: a.quando }))].map((t) => String(t.scheduled_at || "")),
   doc: (tabelle.messages || []).filter((m) => m.event_type === "doc").length,
   imponibili: (tabelle.messages || []).filter((m) => m.event_type === "doc").map((m) => { try { return JSON.parse(m.file_name).imponibile; } catch (e) { return null; } }),
   appt: (tabelle.messages || []).filter((m) => m.event_type === "appt").length,

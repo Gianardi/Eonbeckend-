@@ -3983,7 +3983,11 @@ function letturaImpegnoDallApp(l, testo) {
   const titolo = String(l.titolo || "").trim().slice(0, 120);
   if (titolo.length < 3) return null;
   const detto = new Set(paroleNormalizzate(testo));
-  if (!paroleNormalizzate(titolo).every((w) => detto.has(w))) return null;
+  /* Le parole del titolo devono essere state dette. L'app ripulisce la frase ("x" → "per",
+     "mi raccomando" tolto): le parole corte non contano e ne può mancare una su dieci
+     (giro 19: "…x vedere il cancello" finiva all'AI per un "per") */
+  const piene = paroleNormalizzate(titolo).filter((w) => w.length > 3);
+  if (!piene.length || piene.filter((w) => detto.has(w)).length < Math.ceil(piene.length * 0.9)) return null;
   const nome = String(l.nome || "").trim();
   if (nome && !paroleNormalizzate(nome).every((w) => detto.has(w))) return null;
   const tipo = TIPI_IMPEGNO.has(l.tipo) ? l.tipo : "commissione";

@@ -274,7 +274,7 @@
     for (let k = 1; k < pp.length; k++) {
       if (!oraQui(k)) continue;
       const prima = pp.slice(Math.max(0, k - 4), k).map((x) => x.n).join(" ");
-      if (/\b(?:invece\s+(?:che|di|delle|dell)|anziche|al\s+posto\s+(?:delle|di))\s*(?:alle|all|a|le)?$/.test(prima)) { segnaVecchia(k); continue; }
+      if (/\b(?:invece\s+(?:che|di|delle|dell)|anziche|al\s+posto\s+(?:delle|di)|non\s+(?:e\s+)?(?:piu\s+)?)\s*(?:alle|all|a|le)?$/.test(prima)) { segnaVecchia(k); continue; } // "non è più alle 18 ma alle 19 e 30" (giro 19)
       for (let q = k + 1; q < Math.min(pp.length, k + 15); q++) {
         if (!oraQui(q)) continue;
         const inMezzo = pp.slice(k + 1, q).map((x) => x.n).join(" ");
@@ -1774,7 +1774,7 @@
   /* ---------------- Più comandi ---------------- */
   const VERBI_COMANDO = "(?:cancella|annulla|elimina|segna|segnami|metti|fissa|vai|andare|passa|passare|sentire|senti|chiama|chiamare|richiama|telefona|telefonare|manda|mandare|inviare|invia|scrivi|scrivere|fai|fare|crea|prepara|compra|comprare|ritira|ritirare|porta|portare|ricordami|devo|appuntamento|sopralluogo|riunione|incontro|visita)";
   const ORE_A_PAROLE = "(?:una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|venti)";
-  const SEPARA = new RegExp(`\\s*(?:[.;]\\s+|,?\\s+(?:e\\s+poi|poi|ah\\s+e|e\\s+anche|inoltre)\\s+|,\\s*(?=${VERBI_COMANDO}\\b)|\\s+e\\s+(?=${VERBI_COMANDO}\\b)|,?\\s+e\\s+(?=(?:alle|ore|dalle)\\s+(?:\\d|${ORE_A_PAROLE}\\b)))`, "i"); // "…alle 11 officina Tosi e alle 16 pizzeria" (giro 7), "…e alle undici dal Tosi" (giro 18)
+  const SEPARA = new RegExp(`\\s*(?:[.;]\\s+|,?\\s+(?:e\\s+poi|poi|ah\\s+e|e\\s+anche|inoltre)\\s+|,\\s*(?=${VERBI_COMANDO}\\b)|\\s+e\\s+(?=${VERBI_COMANDO}\\b)|,?\\s+e\\s+(?:dopo\\s+)?(?=(?:alle|ore|dalle)\\s+(?:\\d|${ORE_A_PAROLE}\\b)))`, "i"); // "…alle 11 officina Tosi e alle 16 pizzeria" (giro 7), "…e alle undici dal Tosi" (giro 18)
   function dividi(testo) {
     /* Un elenco di impegni con le virgole (29/09/2026): "domani mattina sentire
        prospect, sentite clienti per aggiuntivi, Brigida alle 18 per…, 18:30
@@ -1895,7 +1895,9 @@
        e senza giorno e ora l'app li chiede */
     const convocaA = iAss >= 0 && pp.some((x) => /^(?:convoca\w*|convocazione|convocare)$/.test(x.n));
     const prefissoA = iAss >= 0 && iAss <= 3 && pp.slice(0, iAss).every((x) => /^(?:convoca|convocare|segna|segnami|fissa|fissare|metti|crea|nuova|l|un|una|la|devo|dobbiamo|bisogna|fare|organizza|organizzare|segnare)$/.test(x.n));
-    if (iAss >= 0 && ((prefissoA && q.giornoIso && q.ora) || convocaA)) {
+    // "l'assemblea delle Palme domani non è più alle 18 ma alle 19 e 30" sposta quella che c'è (giro 19)
+    const cambiaA = /\b(?:non\s+(?:e\s+)?piu|spost\w*|anticip\w*|posticip\w*|slitt\w*|rimand\w*|annull\w*|cancell\w*|invece)\b/.test(n);
+    if (iAss >= 0 && ((prefissoA && q.giornoIso && q.ora && !cambiaA) || convocaA)) {
       const tipoA = ha(/^straordinari[ae]$/) ? "straordinaria" : "ordinaria";
       let cl = trovaCliente(pp, ctx.clienti, usate);
       /* "…assemblea, Magnolie, punto unico cambio della ditta delle pulizie": il motivo può
