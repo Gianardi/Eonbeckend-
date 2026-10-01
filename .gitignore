@@ -6,3 +6,6 @@ node_modules/
 
 # Dati rigenerabili del modello dei dettagli (genera.mjs, argento.mjs, scritte.mjs, esame.mjs)
 eval/neurale/dettagli/dati/
+
+# Dati rigenerabili del modello che legge tutta la frase (verifica.mjs)
+eval/neurale/lettura/dati/
