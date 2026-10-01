@@ -1,0 +1,389 @@
+{
+"confini": "1/10 sera, dopo c24: le domande di mestiere (\"meglio X o Y\", \"conviene…\", \"che sezione mi conviene\") sono domande, non appunti sui materiali; \"tieni presente che X il venerdì…\" è un appunto, non un appuntamento; i messaggi brevi \"manda a X …\". Frasi nuove, nessuna presa dagli esami.",
+"frasi": [
+[
+"per un condominio vecchio meglio piastrelle in gres o in ceramica",
+"domanda"
+],
+[
+"secondo te in montagna va meglio il cappotto in eps o in lana di roccia",
+"domanda"
+],
+[
+"in cucina meglio il silicone o lo stucco epossidico",
+"domanda"
+],
+[
+"per una cantina umida meglio il multistrato o il rame",
+"domanda"
+],
+[
+"per una cantina umida conviene la caldaia a condensazione o la pompa di calore",
+"domanda"
+],
+[
+"per un terrazzo meglio le prese da 16 o da 10",
+"domanda"
+],
+[
+"meglio il cavo da 4 o da 6 per una villetta",
+"domanda"
+],
+[
+"secondo te su un tetto vecchio va meglio la guaina liquida o quella ardesiata",
+"domanda"
+],
+[
+"secondo te in una casa al mare va meglio il parquet prefinito o il massello",
+"domanda"
+],
+[
+"su un tetto vecchio conviene il laminato o il vinilico",
+"domanda"
+],
+[
+"su un tetto vecchio meglio la colla bicomponente o quella cementizia",
+"domanda"
+],
+[
+"secondo te per un terrazzo va meglio la vernice all'acqua o al solvente",
+"domanda"
+],
+[
+"secondo te per un condominio vecchio va meglio il legno di larice o di abete",
+"domanda"
+],
+[
+"meglio le tapparelle in alluminio o in pvc in montagna",
+"domanda"
+],
+[
+"per una villetta conviene il boiler elettrico o quello a gas",
+"domanda"
+],
+[
+"per un terrazzo meglio l'intonaco a calce o il premiscelato",
+"domanda"
+],
+[
+"per un condominio vecchio meglio i faretti led o le plafoniere",
+"domanda"
+],
+[
+"meglio il serramento in legno o in pvc su un tetto vecchio",
+"domanda"
+],
+[
+"meglio il massetto alleggerito o quello tradizionale in bagno",
+"domanda"
+],
+[
+"meglio il cartongesso idrofugo o quello normale per un terrazzo",
+"domanda"
+],
+[
+"il doppio vetro basta in pianura o serve il triplo",
+"domanda"
+],
+[
+"la pompa di calore conviene davvero in una casa non isolata",
+"domanda"
+],
+[
+"il cappotto da 12 centimetri conviene o basta il 10",
+"domanda"
+],
+[
+"conviene rifare il tetto ventilato in collina",
+"domanda"
+],
+[
+"il fotovoltaico con accumulo conviene per un bar",
+"domanda"
+],
+[
+"il radiante a pavimento conviene in una ristrutturazione",
+"domanda"
+],
+[
+"la vasca idromassaggio conviene ancora",
+"domanda"
+],
+[
+"il fibrocemento si può togliere da soli",
+"domanda"
+],
+[
+"il condizionatore canalizzato conviene in un appartamento piccolo",
+"domanda"
+],
+[
+"il legno lamellare regge meglio al mare",
+"domanda"
+],
+[
+"si può posare il parquet sul riscaldamento a pavimento",
+"domanda"
+],
+[
+"la resina in bagno tiene con l'umidità",
+"domanda"
+],
+[
+"il gres effetto legno scivola fuori",
+"domanda"
+],
+[
+"conviene il quadro con differenziali separati in una casa",
+"domanda"
+],
+[
+"il boiler in pompa di calore conviene per due persone",
+"domanda"
+],
+[
+"per una linea da 25 ampere su 30 metri che sezione mi conviene",
+"domanda"
+],
+[
+"che spessore di isolante mi conviene sotto il pavimento",
+"domanda"
+],
+[
+"che diametro di scarico serve per una doccia a filo",
+"domanda"
+],
+[
+"per un forno da 3 kW che cavo mi conviene",
+"domanda"
+],
+[
+"che pendenza conviene dare a un terrazzo di 20 metri",
+"domanda"
+],
+[
+"che sezione di cavo per una colonnina da 7 kW",
+"domanda"
+],
+[
+"che spessore di massetto serve sopra il radiante",
+"domanda"
+],
+[
+"quanti centimetri di guaina servono sui risvolti",
+"domanda"
+],
+[
+"che diametro di tubo per un bagno con due lavabi",
+"domanda"
+],
+[
+"per un portone da 3 metri che motore conviene",
+"domanda"
+],
+[
+"il geometra il mercoledì non c'è mai, tienilo presente",
+"mente"
+],
+[
+"Carla la domenica porta la madre dal medico, tienilo presente",
+"mente"
+],
+[
+"Stefano il giovedì porta la madre dal medico, tienilo presente",
+"mente"
+],
+[
+"segnati che Mirko il venerdì pomeriggio non c'è mai",
+"mente"
+],
+[
+"la segretaria il venerdì pomeriggio porta la madre dal medico, tienilo presente",
+"mente"
+],
+[
+"ricordati che l'apprendista la domenica fa la mezza giornata",
+"mente"
+],
+[
+"tieni presente che Mirko il venerdì pomeriggio va dal fisioterapista",
+"mente"
+],
+[
+"ricordati che Mirko il martedì sera non lavora",
+"mente"
+],
+[
+"ricordati che Mirko il giovedì fa la mezza giornata",
+"mente"
+],
+[
+"ricordati che Mirko il martedì sera porta la madre dal medico",
+"mente"
+],
+[
+"segnati che il ragazzo nuovo il sabato porta la madre dal medico",
+"mente"
+],
+[
+"la segretaria il mercoledì non c'è mai, tienilo presente",
+"mente"
+],
+[
+"l'apprendista il sabato va dal fisioterapista, tienilo presente",
+"mente"
+],
+[
+"segnati che l'apprendista il sabato ha scuola",
+"mente"
+],
+[
+"ricordati che Carla il venerdì pomeriggio non lavora",
+"mente"
+],
+[
+"segnati che il geometra il venerdì pomeriggio va a prendere i figli",
+"mente"
+],
+[
+"tieni presente che Stefano la domenica non lavora",
+"mente"
+],
+[
+"tieni presente che il ragazzo nuovo il lunedì mattina fa la mezza giornata",
+"mente"
+],
+[
+"tieni presente che il garzone il mercoledì non lavora",
+"mente"
+],
+[
+"segnati che Mirko il sabato va dal fisioterapista",
+"mente"
+],
+[
+"tieni presente che Carla il lunedì mattina non lavora",
+"mente"
+],
+[
+"tieni presente che il garzone la domenica ha scuola",
+"mente"
+],
+[
+"segnati che Mirko la domenica fa il turno in negozio",
+"mente"
+],
+[
+"segnati che il garzone il martedì sera va dal fisioterapista",
+"mente"
+],
+[
+"tieni presente che il ragazzo nuovo il venerdì pomeriggio porta la madre dal medico",
+"mente"
+],
+[
+"il magazzino di Rossi il sabato chiude a mezzogiorno",
+"mente"
+],
+[
+"il bar del Corso il lunedì è chiuso",
+"mente"
+],
+[
+"la ferramenta in centro il mercoledì pomeriggio è chiusa",
+"mente"
+],
+[
+"dai Bianchi la mattina presto non si può fare rumore",
+"mente"
+],
+[
+"il portiere del Parco Verde il giovedì non c'è",
+"mente"
+],
+[
+"mandagli a la signora Rossi la fattura te la mando stasera",
+"messaggio"
+],
+[
+"manda un messaggio a la signora Rossi oggi non riesco, ci sentiamo domani",
+"messaggio"
+],
+[
+"manda a Gino Melis oggi non riesco, ci sentiamo domani",
+"messaggio"
+],
+[
+"scrivi a Franco oggi non riesco, ci sentiamo domani",
+"messaggio"
+],
+[
+"manda a la signora Rossi arrivo alle nove",
+"messaggio"
+],
+[
+"wa a Gino Melis la fattura te la mando stasera",
+"messaggio"
+],
+[
+"scrivi a Franco passo dopo pranzo",
+"messaggio"
+],
+[
+"scrivi a Paolo la fattura te la mando stasera",
+"messaggio"
+],
+[
+"mandagli a Franco oggi non riesco, ci sentiamo domani",
+"messaggio"
+],
+[
+"scrivi a Tonino oggi non riesco, ci sentiamo domani",
+"messaggio"
+],
+[
+"eja manda a Tonino lunedì si comincia",
+"messaggio"
+],
+[
+"manda a il Bepi domani ci sono tutto confermato",
+"messaggio"
+],
+[
+"wa a la Marta il materiale è arrivato",
+"messaggio"
+],
+[
+"mandagli a il geometra Sanna domani ci sono tutto confermato",
+"messaggio"
+],
+[
+"eja manda a Gino Melis arrivo alle nove",
+"messaggio"
+],
+[
+"wa a Tonino oggi non riesco, ci sentiamo domani",
+"messaggio"
+],
+[
+"mandagli a Franco arrivo alle nove",
+"messaggio"
+],
+[
+"manda un messaggio a la Marta arrivo alle nove",
+"messaggio"
+],
+[
+"wa a Paolo domani ci sono tutto confermato",
+"messaggio"
+],
+[
+"manda a la Marta passo dopo pranzo",
+"messaggio"
+],
+[
+"manda a Paolo il materiale è arrivato",
+"messaggio"
+]
+]
+}
