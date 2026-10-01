@@ -16434,7 +16434,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
     /* Il modello dice "sposta/annulla" ma l'impegno non c'è ("rimanda il Tomasin di domani" e quello di
        domani era già annullato): lo dice subito il codice, l'AI non ne saprebbe di più (giro 20) */
-    if(!inContinuazione && cassettoNeurale(testo) === "calendario_modifica" && isDbReady()){
+    if(!inContinuazione && cassettoNeurale(testo) === "calendario_modifica" && isDbReady() && (EonLettore.dividi(testo) || [testo]).length <= 1){
       const lista = impegniDaAnnullare({ nome: [], oggetto: null, data: null, fascia: null, ora: null }).map((v, i) => ({ id: i, titolo: v.titolo, chi: v.chat ? v.chat.name : "", iso: isoImpegno(v) })).filter(x => x.iso);
       const x = EonLettore.leggiModificaImpegno(testo, lista, new Date());
       const nomi = x && x.tipo && !x.impegni.length ? (x.parole || []).filter(w => !/^(?:sopralluog|appuntament|riunion|verific|intervent|consegn|incontr|visit|lavor|collaud|manutenzion)/.test(w)) : [];

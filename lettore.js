@@ -1584,7 +1584,8 @@
     else if (/\b(?:lavori|giri|appuntament\w*|impegn\w*|consegn\w*)\b.*\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mese)\b|\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b.*\b(?:lavori|giri|appuntament\w*|impegn\w*)\b|\bc\s*ho\b|\bcom\s*e\s+messa\b|\b(?:riepilogo|punto|riassunto)\s+dei\s+lavori\b|\bquand\s*e\s+che\s+devo\b|\bin\s+agenda\b/.test(n)) tema = "agenda";
     else if ((/\b(?:cosa|che)\s+(?:mi\s+)?(?:ero|avevo)\s+segnat\w*\b/.test(n) || NOTE_SEGNATE.test(n)) && cliente) tema = "note_cliente";
     if (!tema) tema = temaDomanda(n);
-    const forte = DOMANDA_DATI_FORTE.test(n) || tema === "note_cliente";
+    // un comando ("annulla gli appuntamenti di domani", "segna…") non è mai una domanda
+    const forte = (DOMANDA_DATI_FORTE.test(n) || tema === "note_cliente") && !/^(?:annull\w*|cancell\w*|elimin\w*|togli\w*|spost\w*|rimand\w*|anticip\w*|segna\w*|metti\w*|fissa\w*|crea\w*|aggiung\w*|scriv\w*|manda\w*|chiama\w*)\b/.test(n);
     // per "l'ultima volta dai Tosi", "il numero del Merlo": il nome detto, anche se non è in rubrica
     const nomeDetto = !cliente && /^(?:ultima_visita|contatto)$/.test(tema || "") ? ((p.testo.match(/\b(?:da|dal|dalla|dai|dalle|dallo|del|della|dello|dei|delle|di)\s+((?:l['’]\s*)?\p{Lu}[\p{L}'’]+(?:\s+\p{Lu}[\p{L}'’]+)?|[\p{L}'’]+)/u) || [])[1] || "").replace(/^l['’]\s*/, "") : "";
     return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim(), forte, nomeDetto } : null;
