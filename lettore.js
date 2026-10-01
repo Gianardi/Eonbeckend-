@@ -606,10 +606,11 @@
       if (unitarioPrima && corrente.length && /^(?:a|da)$/.test(corrente[corrente.length - 1].n)) corrente.pop();
       let j = i + 1;
       if (pp[j] && /^(?:mila|k)$/.test(pp[j].n)) { prezzo *= 1000; j++; }
-      if (pp[j] && /^(?:euro|eur|€)$/.test(pp[j].n)) j++;
+      const conEuroDetto = !!(pp[j] && /^(?:euro|eur|€)$/.test(pp[j].n));
+      if (conEuroDetto) j++;
       // "8 euro e 50": i centesimi
-      // ("8 tavoli a 450 e 32 sedie a 95": "e 32 sedie" non sono centesimi, giro 19)
-      if (pp[j] && pp[j].n === "e" && /^\d{1,2}$/.test((pp[j + 1] || {}).n || "") && (!pp[j + 2] || pp[j + 1].sep || /^(?:centesimi|cent|piu|iva|l|cadauno|cadauna|al|ciascuno|ciascuna|e|per)$/.test(pp[j + 2].n))) {
+      // ("8 tavoli a 450 e 32 sedie a 95", senza "euro": "e 32 sedie" non sono centesimi, giro 19)
+      if (pp[j] && pp[j].n === "e" && /^\d{1,2}$/.test((pp[j + 1] || {}).n || "") && (conEuroDetto ? !(pp[j + 2] && (UNITA.test(pp[j + 2].n) || /^(?:euro|eur|€|a|da)$/.test(pp[j + 2].n))) : (!pp[j + 2] || pp[j + 1].sep || /^(?:centesimi|cent|piu|iva|l|cadauno|cadauna|al|ciascuno|ciascuna|e|per)$/.test(pp[j + 2].n)))) {
         prezzo = Math.round((prezzo + Number(pp[j + 1].n) / (pp[j + 1].n.length === 1 ? 10 : 100)) * 100) / 100; j += 2;
         if (pp[j] && /^(?:centesimi|cent)$/.test(pp[j].n)) j++;
       }
