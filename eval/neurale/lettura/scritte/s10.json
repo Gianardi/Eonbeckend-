@@ -1,0 +1,1445 @@
+{
+ "personaggio": "Fabbro e serramentista napoletano di 52 anni (cancelli, infissi, inferriate, automazioni). Parla tanto e colorito, napoletano leggero (ja, mo, nu poco, chillo, tengo, dimane), spesso dice prima l ora e poi il giorno, si corregge con no anzi.",
+ "frasi": [
+  [
+   "ja' segnami [dimane]{GIO} [alle 8]{ORA} [sopralluogo per il cancello scorrevole]{LAV} da [don Gennaro Scognamiglio]{CHI}",
+   "calendario"
+  ],
+  [
+   "[alle nove e mezza]{ORA} [giovedì]{GIO} tengo da montà [l'inferriata]{LAV} dalla [signora Pasquariello]{CHI} mettimelo in agenda",
+   "calendario"
+  ],
+  [
+   "mo' scrivi in agenda che [venerdì]{GIO} [nel pomeriggio]{ORA} vado a pigliare le misure per [gli infissi in alluminio]{LAV} a [via Sant'Erasmo ai Pioppi 41]{IND}",
+   "calendario"
+  ],
+  [
+   "ricordami [lunedì]{GIO} [alle 7 e mezza]{ORA} [di passare a ritirare le cerniere]{TESTO} dal [ferramenta Cuomo]{CHI}",
+   "calendario"
+  ],
+  [
+   "[il 14 ottobre]{GIO} [verso le 10]{ORA} [montaggio cancello carrabile]{LAV} al [Condominio Parco Azzurra]{CHI}",
+   "calendario"
+  ],
+  [
+   "nu poco di attenzione ja', [alle 3]{ORA} [dopodomani]{GIO} viene [l'ingegnere Esposito Ruotolo]{CHI} per [il collaudo della scala in ferro]{LAV}, segna",
+   "calendario"
+  ],
+  [
+   "mettimi n'appuntamento con [Salvatore Iovine]{CHI} [mercoledì prossimo]{GIO} [di mattina]{ORA} per [la ringhiera del balcone]{LAV}",
+   "calendario"
+  ],
+  [
+   "[sabato]{GIO} [alle 9]{ORA} no anzi [alle 10]{ORA} [saldatura del portone]{LAV} da [Carmela Russo Afeltra]{CHI}",
+   "calendario"
+  ],
+  [
+   "ricordami [fra due giorni]{GIO} [di chiamare il verniciatore per la polvere epossidica]{TESTO}",
+   "calendario"
+  ],
+  [
+   "chillo [geometra Capasso]{CHI} vuole vederci [martedì]{GIO} [alle undici]{ORA} in cantiere a [via Croce del Carmine 7]{IND} segnamelo",
+   "calendario"
+  ],
+  [
+   "[domani]{GIO} [prima di pranzo]{ORA} devo andà a [sistemare la serranda]{LAV} della [pizzeria Da Totore e Figli]{CHI}",
+   "calendario"
+  ],
+  [
+   "in agenda [il 3 novembre]{GIO} [alle 8 e un quarto]{ORA} [posa delle grate antintrusione]{LAV} [famiglia Del Giudice]{CHI}",
+   "calendario"
+  ],
+  [
+   "[alle 16]{ORA} [giovedì]{GIO} metti [preventivo sul posto]{LAV} con [la dottoressa Maiello]{CHI}",
+   "calendario"
+  ],
+  [
+   "ricordami [la settimana prossima]{GIO} [che scade l'assicurazione del furgone]{TESTO}",
+   "calendario"
+  ],
+  [
+   "tengo [il 22]{GIO} [alle 2 e mezza]{ORA} [riparazione del cancelletto pedonale]{LAV} dal [ragionier Fusco]{CHI} mettilo",
+   "calendario"
+  ],
+  [
+   "[fra tre giorni]{GIO} [verso mezzogiorno]{ORA} [consegna delle persiane in ferro]{LAV} a [Villa Annunziata]{CHI}",
+   "calendario"
+  ],
+  [
+   "segna che [lunedì 20]{GIO} [tutta la mattina]{ORA} sto da [Ciro Langella]{CHI} a [montà la veranda]{LAV}",
+   "calendario"
+  ],
+  [
+   "mo' mo' m'hanno chiamato, [domani]{GIO} [alle 17]{ORA} [sopralluogo]{LAV} in [via Pignasecca Nuova 3]{IND} da [Assunta Mele]{CHI}",
+   "calendario"
+  ],
+  [
+   "metti in agenda [venerdì]{GIO} [alle sette]{ORA} [carico del materiale]{LAV} con [mio cognato Peppe]{CHI}",
+   "calendario"
+  ],
+  [
+   "ricordami [giovedì]{GIO} [alle 18]{ORA} [di portare la bambina a calcetto]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[il primo dicembre]{GIO} [di pomeriggio]{ORA} [manutenzione cancello automatico]{LAV} [Condominio I Gelsomini]{CHI}",
+   "calendario"
+  ],
+  [
+   "ja' Eon segnami pe' [martedì]{GIO} [alle 9]{ORA} [il motorino Rolland]{LAV} da sistemà dal [signor Amitrano]{CHI}",
+   "calendario"
+  ],
+  [
+   "[dimane]{GIO} [matina presto]{ORA} vado a [smontà la vecchia inferriata]{LAV} da [Rosaria Capuozzo]{CHI}",
+   "calendario"
+  ],
+  [
+   "mettimi [mercoledì]{GIO} [alle 15 e 30]{ORA} dal [commercialista Ianniello]{CHI} che dobbiamo vedé i conti",
+   "calendario"
+  ],
+  [
+   "ricordami [fra una settimana]{GIO} [di rifare il DURC]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[alle 8]{ORA} [il 9 ottobre]{GIO} [montaggio porta blindata]{LAV} da [Vincenzo Sannino]{CHI}",
+   "calendario"
+  ],
+  [
+   "segna [domenica]{GIO} [alle 11]{ORA} [battesimo del nipote]{LAV}, non mi mettere lavori chillo giorno",
+   "calendario"
+  ],
+  [
+   "[giovedì 16]{GIO} [verso le 4]{ORA} [sopralluogo]{LAV} per [la tettoia in ferro e policarbonato]{LAV} da [Lello Abbate]{CHI}",
+   "calendario"
+  ],
+  [
+   "ricordami [domani]{GIO} [alle 6 e mezza]{ORA} [che devo passà a prendere Gaetano il garzone]{TESTO}",
+   "calendario"
+  ],
+  [
+   "mettimi [dopodomani]{GIO} [di mattina]{ORA} [verniciatura del cancello]{LAV} dalla [Pasticceria Sfogliatella d'Oro]{CHI} e [nel pomeriggio]{ORA} [la ringhiera]{LAV} da [Titina Palumbo]{CHI}",
+   "calendario"
+  ],
+  [
+   "ja' sposta [il sopralluogo]{LAV} di [domani]{GIO} a [venerdì]{NGIO} [alle 10]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "chillo [Gennaro Ascione]{CHI} m'ha chiamato, [l'appuntamento]{LAV} di [giovedì]{GIO} lo mettiamo [lunedì]{NGIO} [alle 9]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [il montaggio del cancello]{LAV} di [sabato]{GIO} da [Michele Cozzolino]{CHI}, ha rimandato lui",
+   "calendario_modifica"
+  ],
+  [
+   "[alle 11]{NORA} [martedì]{NGIO}, spostami là [la consegna delle grate]{LAV} che stava [domani]{GIO}",
+   "calendario_modifica"
+  ],
+  [
+   "leva dall'agenda [la riunione]{LAV} con [l'architetto Vitiello]{CHI} del [12 ottobre]{GIO}",
+   "calendario_modifica"
+  ],
+  [
+   "mo' [la posa degli infissi]{LAV} da [Anna Ferrara Coppola]{CHI} passa da [mercoledì]{GIO} a [giovedì]{NGIO}, stessa ora",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [di una settimana]{NGIO} [la manutenzione]{LAV} al [Condominio Villa Gioia]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [il sopralluogo]{LAV} di [Pasquale Maglione]{CHI} [dalle 3]{ORA} [alle 5]{NORA}, stesso giorno",
+   "calendario_modifica"
+  ],
+  [
+   "cancella tutti gli appuntamenti di [venerdì]{GIO} [pomeriggio]{ORA} che tengo la febbre",
+   "calendario_modifica"
+  ],
+  [
+   "[la saldatura]{LAV} da [Raffaele Marigliano]{CHI} spostala a [dopodomani]{NGIO} [verso le 8]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "non ce la faccio [domani]{GIO} [alle 9]{ORA}, metti [il montaggio]{LAV} [alle 2]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "annullami [la visita]{LAV} di [lunedì]{GIO} [alle 10]{ORA} con [l'avvocato Santoro Pignataro]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "[il 20]{GIO} non posso, [il collaudo]{LAV} del [Condominio Le Mimose]{CHI} portalo [al 27]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la ringhiera]{LAV} di [Concetta]{CHI} a [fine mese]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "chillo appuntamento [alle 8]{ORA} [giovedì]{GIO} con [Tonino Carannante]{CHI} fallo diventare [alle 9 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "rinvia [il sopralluogo per la scala a chiocciola]{LAV} alla [settimana prossima]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "ha piovuto tutta la notte, [la verniciatura]{LAV} di [oggi]{GIO} la facciamo [domani]{NGIO} [di mattina]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "togli [l'appuntamento]{LAV} con [Ferdinando Starace]{CHI}, nun se ne fa niente",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [domani]{GIO} [alle 4]{ORA} a [sabato]{NGIO} [alle 8]{NORA}, [il montaggio della zanzariera]{LAV} da [nonna Lucia]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "anticipa [la consegna]{LAV} a [Edilsud Carrillo]{CHI} da [venerdì]{GIO} a [mercoledì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la cena]{LAV} con [mia moglie]{CHI} da [sabato]{GIO} a [domenica]{NGIO} che sabato lavoro",
+   "calendario_modifica"
+  ],
+  [
+   "[il collaudo dell'automazione]{LAV} del [5 novembre]{GIO} cancellalo proprio",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la posa]{LAV} [alle 7]{NORA} invece che [alle 8]{ORA}, [domani]{GIO} da [Giuseppina Orefice]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "l'appuntamento di [lunedì]{GIO} no anzi di [martedì]{GIO} con [Biagio Terracciano]{CHI} mettilo a [giovedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [l'incontro]{LAV} col [geometra Pagliuca]{CHI} [fra quindici giorni]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "disdici [il sopralluogo]{LAV} di [stamattina]{GIO}, chillo nun sta a casa",
+   "calendario_modifica"
+  ],
+  [
+   "[la grata]{LAV} di [Rocco Varriale]{CHI} non è pronta, spostala da [giovedì]{GIO} a [lunedì 24]{NGIO} [nel pomeriggio]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "ja' cancella [il calcetto]{LAV} di [mercoledì]{GIO} [alle 21]{ORA}, nun tengo forza",
+   "calendario_modifica"
+  ],
+  [
+   "segnati [che don Peppino Capone vuole il cancello color antracite]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati [che la signora Ambrosio paga sempre in ritardo]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunta [che il profilato da 40 per 40 da Ferrosud costa meno che da altri]{TESTO}",
+   "mente"
+  ],
+  [
+   "mettiti in testa [che a via Nuova Agnano 9 il citofono non funziona, bisogna chiamare il figlio]{TESTO}",
+   "mente"
+  ],
+  [
+   "annotati [che Ciccio il saldatore è bravo ma beve troppo caffè]{TESTO}",
+   "mente"
+  ],
+  [
+   "ja' segna [che le cerniere grosse stanno nel secondo scaffale del capannone]{TESTO}",
+   "mente"
+  ],
+  [
+   "tieni a mente [che il Condominio Il Glicine vuole tutto in nero opaco]{TESTO}",
+   "mente"
+  ],
+  [
+   "scrivi nella memoria [che la figlia di Esposito si sposa a giugno]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati [che l'avvocato Mazzarella ha il cane cattivo, suonare prima]{TESTO}",
+   "mente"
+  ],
+  [
+   "segnati na cosa, [la serratura a tre punti per i Gargiulo va ordinata da Martusciello]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunta [che il cancello di Lello Abbate cigola a destra]{TESTO}",
+   "mente"
+  ],
+  [
+   "mo' memorizza [che il geometra Pagliuca preferisce essere chiamato dopo le 3]{TESTO}",
+   "mente"
+  ],
+  [
+   "tieni presente [che il furgone fa un rumore strano quando freno]{TESTO}",
+   "mente"
+  ],
+  [
+   "segna [che Rosaria Capuozzo vuole la veranda senza vetro sopra]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati [che io il sabato pomeriggio non lavoro mai]{TESTO}",
+   "mente"
+  ],
+  [
+   "annota [che la vernice Ferrolux grigio canna di fucile è finita]{TESTO}",
+   "mente"
+  ],
+  [
+   "scrivi da qualche parte [che alla scuola media di Casalnuovo Alta servono le grate nuove al piano terra]{TESTO}",
+   "mente"
+  ],
+  [
+   "tieni a mente [che Arturo Vollaro è il cugino di Biagio, fai prezzo buono]{TESTO}",
+   "mente"
+  ],
+  [
+   "appuntati [che il portone di vico Tre Pigne si apre all'interno]{TESTO}",
+   "mente"
+  ],
+  [
+   "segnati [le misure della casa Cacace, finestra cucina 120 per 140, bagno 60 per 80]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati [che il garzone nuovo non sa saldare a filo]{TESTO}",
+   "mente"
+  ],
+  [
+   "ja' metti nella memoria [che da Metallurgica Vesuviana chiedere sempre di Nunzia, l'altro è scortese]{TESTO}",
+   "mente"
+  ],
+  [
+   "fammi nu [preventivo]{DOC} per [Carmine Auricchio]{CHI} per [un cancello in ferro battuto]{LAV}, ottocento euro più iva",
+   "documento"
+  ],
+  [
+   "ja' prepara la [fattura]{DOC} al [Condominio Le Palme]{CHI} per [la manutenzione]{LAV} di settembre, 450 euro",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} per [Lucia Formisano]{CHI}, [inferriate per quattro finestre]{LAV}, 1200 euro tutto compreso",
+   "documento"
+  ],
+  [
+   "mo' mi fai un [preventivo]{DOC} per [la ditta Edilcostruzioni Pianese]{CHI}, [ringhiere per tre piani di scale]{LAV}, a metro lineare novanta euro",
+   "documento"
+  ],
+  [
+   "preparami la [fattura]{DOC} per [Gaetano Sepe]{CHI}, [porta blindata montata]{LAV}, 1350 euro con acconto di 500 già preso",
+   "documento"
+  ],
+  [
+   "fai [preventivo]{DOC} per [la serranda motorizzata]{LAV} del [bar Il Golfo Piccolo]{CHI}",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} a [Mario Ruggiero]{CHI} per [la scala in ferro]{LAV} 2800 più iva al 10",
+   "documento"
+  ],
+  [
+   "ja' Eon, [preventivo]{DOC} per [la veranda in alluminio]{LAV} di [Nunzia Barra]{CHI}, mettici 3400 e lo sconto del 5",
+   "documento"
+  ],
+  [
+   "prepara un [preventivo]{DOC} intestato alla [Pasticceria Dolce Vesuvio]{CHI} per [le grate del retro]{LAV}",
+   "documento"
+  ],
+  [
+   "fammi un [preventivo]{DOC} con due voci, [cancello]{LAV} 1500 e [motore]{LAV} 700, per [Domenico Liguori]{CHI}",
+   "documento"
+  ],
+  [
+   "fai la [fattura]{DOC} al [Condominio Parco degli Aranci]{CHI} per [sostituzione cerniere portone]{LAV} 320 euro",
+   "documento"
+  ],
+  [
+   "mi serve nu [preventivo]{DOC} per [la tettoia sopra il garage]{LAV} del [signor Imparato]{CHI}",
+   "documento"
+  ],
+  [
+   "fammi [preventivo]{DOC} pe' [Teresa Castaldo]{CHI} [infissi in pvc per tutta la casa]{LAV} sette finestre e due balconi",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} all'[Hotel Belvedere Marino]{CHI} per [i parapetti delle terrazze]{LAV}, 4100 euro",
+   "documento"
+  ],
+  [
+   "prepara la [fattura]{DOC} per [Antonio Cimmino]{CHI} [riparazione cancello dopo l'incidente]{LAV}, 280 euro",
+   "documento"
+  ],
+  [
+   "fammi un [preventivo]{DOC} [ringhiera balcone]{LAV} per la [signora De Simone]{CHI}, nu poco largo che poi tratta",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} per [l'Istituto Santa Rita]{CHI} [porte tagliafuoco]{LAV} quattro pezzi a 600 l'una",
+   "documento"
+  ],
+  [
+   "fai la [fattura]{DOC} per [Raimondo Coppola]{CHI}, [lavori in ferro alla villetta]{LAV}, totale 5200, iva al 22",
+   "documento"
+  ],
+  [
+   "fammi n'altro [preventivo]{DOC} per [Fortunato Mele]{CHI} ma senza il motore",
+   "documento"
+  ],
+  [
+   "prepara la [fattura]{DOC} dell'acconto a [Immobiliare Partenope Sud]{CHI}, 1000 euro per [i cancelli del parco]{LAV}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [cancello scorrevole con automazione]{LAV} per [Salvatore Cennamo]{CHI}, mettici pure lo smontaggio del vecchio",
+   "documento"
+  ],
+  [
+   "emetti [fattura]{DOC} a [Officine Riunite Afragola]{CHI} per [taglio e piegatura lamiere]{LAV} 640 euro",
+   "documento"
+  ],
+  [
+   "fai la [fattura]{DOC} a [Fulvio De Martino]{CHI} per [la grata della cantina]{LAV}, 390 euro, è privato",
+   "documento"
+  ],
+  [
+   "fammi il [preventivo]{DOC} pe' [Michelina Iorio]{CHI}, [sostituzione del motore del cancello]{LAV}, chillo vecchio è morto",
+   "documento"
+  ],
+  [
+   "trovami il [preventivo]{DOC} di [Carmine Auricchio]{CHI} ja'",
+   "cerca_documento"
+  ],
+  [
+   "aprimi la [fattura]{DOC} [12]{NUM} che la devo ricontrollà",
+   "cerca_documento"
+  ],
+  [
+   "ja' dove sta la [foto]{DOC} del [cancello]{LAV} di [Vincenzo Sannino]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "famme vedé il [DURC]{DOC} mo' mo'",
+   "cerca_documento"
+  ],
+  [
+   "cerca la [fattura]{DOC} del [Condominio Le Palme]{CHI} di settembre",
+   "cerca_documento"
+  ],
+  [
+   "tengo bisogno della [visura]{DOC} della [ditta Ferrosud]{CHI}, trovamela",
+   "cerca_documento"
+  ],
+  [
+   "apri il [preventivo]{DOC} [45]{NUM} quello della [veranda]{LAV}",
+   "cerca_documento"
+  ],
+  [
+   "mostrami le [foto]{DOC} dell'[inferriata]{LAV} di [Rosaria Capuozzo]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "trova la [DiCo]{DOC} del [cancello automatico]{LAV} di [via Caravaggio Alto 112]{IND}",
+   "cerca_documento"
+  ],
+  [
+   "dove l'aggio messa la [fattura]{DOC} del fornitore [Metalli Partenopei]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "cercami il [SAL]{DOC} del [Condominio Bellavista Due]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "apri l'ultimo [preventivo]{DOC} che ho fatto a [Teresa Castaldo]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "famme truvà la [fattura]{DOC} numero [7]{NUM} dell'anno scorso",
+   "cerca_documento"
+  ],
+  [
+   "manda a [Carmine Auricchio]{CHI} il [preventivo]{DOC} del [cancello]{LAV} su [whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "ja' gira la [fattura]{DOC} [23]{NUM} al [Condominio Le Palme]{CHI} [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "mandagli le [foto]{DOC} della [ringhiera]{LAV} a [Titina Palumbo]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "invia il [DURC]{DOC} a [Edilsud Carrillo]{CHI}, che lo vogliono pe' pagà",
+   "invio_documento"
+  ],
+  [
+   "manda il [preventivo]{DOC} della [veranda]{LAV} a [Nunzia Barra]{CHI} e pure a [suo marito Gigi]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "mo' mandami la [fattura]{DOC} [31]{NUM} al [commercialista Ianniello]{CHI} [per email]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "gira all'[ingegnere Esposito Ruotolo]{CHI} la [DiCo]{DOC} del [cancello automatico]{LAV}",
+   "invio_documento"
+  ],
+  [
+   "manda [su whatsapp]{CAN} a [Domenico Liguori]{CHI} le [foto]{DOC} del [lavoro finito]{LAV}",
+   "invio_documento"
+  ],
+  [
+   "inviagli il [SAL]{DOC} al [geometra Capasso]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda la [visura]{DOC} alla [Banca di Credito Vesuviano]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "ja' fa' na cosa, manda il [preventivo]{DOC} [45]{NUM} a [Lello Abbate]{CHI} [per sms]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "spedisci la [fattura]{DOC} all'[Hotel Belvedere Marino]{CHI} all'indirizzo [amministrazione@belvederemarino.it]{MAIL}",
+   "invio_documento"
+  ],
+  [
+   "mandale le [foto]{DOC} delle [inferriate]{LAV} alla [signora Pasquariello]{CHI} che le vuole vedé",
+   "invio_documento"
+  ],
+  [
+   "manda a [mia moglie]{CHI} la [foto]{DOC} del [cancello]{LAV} che è venuto na bellezza",
+   "invio_documento"
+  ],
+  [
+   "inoltra il [preventivo]{DOC} di [Salvatore Cennamo]{CHI} pure a [suo figlio Marco]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda la [fattura]{DOC} a [Antonio Cimmino]{CHI} e il [preventivo]{DOC} a [Fortunato Mele]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "invia il [DURC]{DOC} e la [visura]{DOC} all'[Immobiliare Partenope Sud]{CHI} [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "mandagli a [Biagio Terracciano]{CHI} la [foto]{DOC} della [serratura rotta]{LAV}",
+   "invio_documento"
+  ],
+  [
+   "gira la [DiCo]{DOC} all'[amministratore Sgambati]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda a [Gaetano Sepe]{CHI} la [fattura]{DOC} della [porta blindata]{LAV} [su whatsapp]{CAN}, no anzi [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia il [preventivo]{DOC} a [Raimondo Coppola]{CHI} al numero [338 4471920]{TEL}",
+   "invio_documento"
+  ],
+  [
+   "manda il [SAL]{DOC} [2]{NUM} all'[impresa Di Lauro Costruzioni]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "spediscile la [fattura]{DOC} a [Teresa Castaldo]{CHI} [per pec]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda a [Officine Riunite Afragola]{CHI} le [foto]{DOC} delle [lamiere tagliate]{LAV}",
+   "invio_documento"
+  ],
+  [
+   "condividi il [preventivo]{DOC} del [motore del cancello]{LAV} con [Ciro Langella]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "ja' manda la [fattura]{DOC} [18]{NUM} alla [Pasticceria Dolce Vesuvio]{CHI} e mettici in copia [il commercialista]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "scrivi a [Rita Formicola]{CHI} [che arrivo alle 10 e mezza]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda nu messaggio a [Gennaro Ascione]{CHI} [che il cancello è pronto, può venire a vederlo]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "ja' scrivi su [whatsapp]{CAN} a [Michele Cozzolino]{CHI} [che domani nun pozzo venì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "di' a [mio cognato Peppe]{CHI} [di portare la smerigliatrice grande]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio a [Assunta Mele]{CHI} [stiamo arrivando, dieci minuti]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi alla [dottoressa Maiello]{CHI} [che le misure le prendo giovedì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda n'[sms]{CAN} a [Tonino Carannante]{CHI} [che il materiale è arrivato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Concetta]{CHI} e a [Rocco Varriale]{CHI} [che il lavoro slitta di una settimana]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [l'architetto Vitiello]{CHI} [che il ferro zincato costa di più, ne parliamo]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "mo' scrivigli a [Ferdinando Starace]{CHI} [grazie, tutto a posto]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "di' a [Gaetano il garzone]{CHI} [che domani si parte alle 6 e mezza dal capannone]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi in [whatsapp]{CAN} a [Giuseppina Orefice]{CHI} [che mi serve la chiave del cortile per domani]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un messaggio al [Condominio Le Mimose]{CHI} [che il cancello resterà aperto tutto il giorno per i lavori]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Lello]{CHI} [ja' chiammame quando puoi]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "rispondi a [Nunzia Barra]{CHI} [sì va bene, ci vediamo lunedì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda a [Pasquale Maglione]{CHI} [l'iban per il bonifico]{TESTO} su [whatsapp]{CAN}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Arturo Vollaro]{CHI} [auguri per la bambina]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [i Gargiulo]{CHI} [che la serratura nuova arriva venerdì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "ja' fai sapé a [don Gennaro Scognamiglio]{CHI} [che domani porto pure il campione di vernice]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [mia figlia Martina]{CHI} [che stasera torno tardi]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un [whatsapp]{CAN} a [Biagio Terracciano]{CHI} [che il preventivo glielo mando stasera]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "di' a [Raffaele Marigliano]{CHI} [che chillo pezzo l'ho trovato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Ciro Langella]{CHI} no anzi a [suo fratello Enzo]{CHI} [che la veranda la montiamo sabato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda per [sms]{CAN} a [Carmela Russo Afeltra]{CHI} [ricordo appuntamento domani mattina]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi alla [signora Ambrosio]{CHI} [che il cancello è verniciato, manca solo da montarlo]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [Salvatore Iovine]{CHI} [che faccio nu poco tardi, traffico sulla tangenziale]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda una [mail]{CAN} all'[architetto Vitiello]{CHI} [con le misure della scala]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una email a [Ferrosud]{CHI} [per ordinare venti barre da 40 per 40]{TESTO}",
+   "email"
+  ],
+  [
+   "mandami una mail a [Studio Sgambati]{CHI} all'indirizzo [studiosgambati@postaok.it]{MAIL} [chiedendo la conferma dei lavori]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi [per email]{CAN} al [commercialista Ianniello]{CHI} [che le fatture di settembre le mando lunedì]{TESTO}",
+   "email"
+  ],
+  [
+   "componi una mail per [Metalli Partenopei]{CHI} [che il materiale è arrivato graffiato]{TESTO}",
+   "email"
+  ],
+  [
+   "manda una email all'[Istituto Santa Rita]{CHI} [con oggetto lavori porte tagliafuoco]{TESTO}",
+   "email"
+  ],
+  [
+   "rispondi alla mail di [Edilsud Carrillo]{CHI} [che accettiamo le condizioni]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una email alla [Banca di Credito Vesuviano]{CHI} [per avere l'estratto conto]{TESTO}",
+   "email"
+  ],
+  [
+   "mail a [Immobiliare Partenope Sud]{CHI} [ci servono le chiavi del parco per lunedì]{TESTO}",
+   "email"
+  ],
+  [
+   "manda una email a [ufficiotecnico@comunesanpaolino.it]{MAIL} [per chiedere il permesso per il cancello sulla strada]{TESTO}",
+   "email"
+  ],
+  [
+   "ja' scrivi alla [Vernici Flegree]{CHI} [per mail]{CAN} [che voglio il catalogo nuovo]{TESTO}",
+   "email"
+  ],
+  [
+   "email all'[ingegnere Esposito Ruotolo]{CHI} [con i calcoli della scala in allegato]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una mail seria all'[avvocato Santoro Pignataro]{CHI} [che il lavoro è stato fatto a regola d'arte]{TESTO}",
+   "email"
+  ],
+  [
+   "chiama [Gennaro Ascione]{CHI} ja'",
+   "chiamata"
+  ],
+  [
+   "ja' telefona a [mia moglie]{CHI} che m'aggio scordato le chiavi",
+   "chiamata"
+  ],
+  [
+   "chiammame [don Peppino Capone]{CHI} mo'",
+   "chiamata"
+  ],
+  [
+   "fai il numero di [Ferrosud]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama il [geometra Capasso]{CHI} sul cellulare",
+   "chiamata"
+  ],
+  [
+   "telefona a [Tonino Carannante]{CHI} e se non risponde a [suo figlio Alfredo]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama il [338 9012257]{TEL}",
+   "chiamata"
+  ],
+  [
+   "mettimi in linea con l'[amministratore Sgambati]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama la [pizzeria Da Totore e Figli]{CHI}",
+   "chiamata"
+  ],
+  [
+   "fa' squillà a [Gaetano il garzone]{CHI} che sta in ritardo",
+   "chiamata"
+  ],
+  [
+   "chiama [Metalli Partenopei]{CHI} per l'ordine",
+   "chiamata"
+  ],
+  [
+   "ja' Eon chiamami [Nunzia]{CHI}, quella della [veranda]{LAV}",
+   "chiamata"
+  ],
+  [
+   "telefona al [Comune di San Paolino]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [Rocco Varriale]{CHI} [su whatsapp]{CAN}",
+   "chiamata"
+  ],
+  [
+   "chiama a [mia madre]{CHI} che è domenica",
+   "chiamata"
+  ],
+  [
+   "mi chiami il [dottor Fiore]{CHI}, quello della [ringhiera]{LAV}",
+   "chiamata"
+  ],
+  [
+   "fai na chiamata a [Raimondo Coppola]{CHI} pe' sapé quando passo",
+   "chiamata"
+  ],
+  [
+   "chiama [Officine Riunite Afragola]{CHI} e chiedi di [Nunzio]{CHI}",
+   "chiamata"
+  ],
+  [
+   "richiama [Lucia Formisano]{CHI}",
+   "chiamata"
+  ],
+  [
+   "telefona al [339 6650183]{TEL}, è [il fornitore delle lamiere]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [Vincenzo Sannino]{CHI}, no anzi chiama [Pasquale Maglione]{CHI}",
+   "chiamata"
+  ],
+  [
+   "videochiamata a [mio figlio Totore]{CHI} [su whatsapp]{CAN}",
+   "chiamata"
+  ],
+  [
+   "nuovo cliente [Aniello Cacace]{CHI}, numero [347 2286541]{TEL}, abita a [via Cupa San Marcellino 14]{IND}",
+   "cliente"
+  ],
+  [
+   "aggiungi la [signora Rosa Piccirillo]{CHI} tra i clienti, telefono [320 7718843]{TEL}",
+   "cliente"
+  ],
+  [
+   "salva il cliente [Condominio Villa Flora Nuova]{CHI}, amministratore [Ernesto Gallo]{CHI}",
+   "cliente"
+  ],
+  [
+   "la mail di [Domenico Liguori]{CHI} è [domenicoliguori72@posta.it]{MAIL}, aggiornala",
+   "cliente"
+  ],
+  [
+   "cambia l'indirizzo di [Teresa Castaldo]{CHI}, mo' sta a [via Pianura Vecchia 33]{IND}",
+   "cliente"
+  ],
+  [
+   "metti nei clienti la [ditta Edilcostruzioni Pianese]{CHI}, sede a [via Provinciale Marano 210]{IND}",
+   "cliente"
+  ],
+  [
+   "crea scheda cliente per [Fulvio De Martino]{CHI}, cellulare [333 5560912]{TEL}, mail [fulviodm@mailbox.it]{MAIL}",
+   "cliente"
+  ],
+  [
+   "nuovo cliente, [Bar Il Golfo Piccolo]{CHI}, titolare [Giovanni Pane]{CHI}",
+   "cliente"
+  ],
+  [
+   "il numero nuovo di [Lello Abbate]{CHI} è [366 1029384]{TEL}",
+   "cliente"
+  ],
+  [
+   "registra [Immacolata Sorrentino]{CHI} come cliente, vuole [un cancelletto]{LAV}",
+   "cliente"
+  ],
+  [
+   "aggiungi l'[avvocato Mazzarella]{CHI}, studio in [piazzetta dei Ramai 2]{IND}",
+   "cliente"
+  ],
+  [
+   "salva [Michelina Iorio]{CHI}, [via del Riposo Sereno 5]{IND}, [329 4401176]{TEL}",
+   "cliente"
+  ],
+  [
+   "quanto ho incassato a settembre ja'?",
+   "dati"
+  ],
+  [
+   "che tengo [domani]{GIO}?",
+   "dati"
+  ],
+  [
+   "ja' dimmi quanto mi deve ancora [Carmine Auricchio]{CHI}",
+   "dati"
+  ],
+  [
+   "a che ora sto da [don Gennaro Scognamiglio]{CHI} [giovedì]{GIO}?",
+   "dati"
+  ],
+  [
+   "qual è il numero di [Assunta Mele]{CHI}?",
+   "dati"
+  ],
+  [
+   "dove abita [Rosaria Capuozzo]{CHI}?",
+   "dati"
+  ],
+  [
+   "quanti [preventivi]{DOC} ho fatto sto mese?",
+   "dati"
+  ],
+  [
+   "chi non mi ha ancora pagato fino a mo'?",
+   "dati"
+  ],
+  [
+   "quanto ho speso da [Ferrosud]{CHI} quest'anno?",
+   "dati"
+  ],
+  [
+   "che appuntamenti tengo [la settimana prossima]{GIO}?",
+   "dati"
+  ],
+  [
+   "la [fattura]{DOC} [23]{NUM} è stata pagata?",
+   "dati"
+  ],
+  [
+   "quanto fatturato ho fatto da gennaio a mo'?",
+   "dati"
+  ],
+  [
+   "mo' dimmi l'indirizzo del [Condominio Le Mimose]{CHI}",
+   "dati"
+  ],
+  [
+   "sto libero [venerdì]{GIO} [nel pomeriggio]{ORA}?",
+   "dati"
+  ],
+  [
+   "quanto devo pagà di iva sto trimestre",
+   "dati"
+  ],
+  [
+   "a [Teresa Castaldo]{CHI} quanto le avevo fatto il [preventivo]{DOC} per [gli infissi]{LAV}?",
+   "dati"
+  ],
+  [
+   "la mail di [Domenico Liguori]{CHI} qual era?",
+   "dati"
+  ],
+  [
+   "quanti [cancelli]{LAV} ho montato quest'anno?",
+   "dati"
+  ],
+  [
+   "quando scade il [DURC]{DOC}?",
+   "dati"
+  ],
+  [
+   "a che punto stanno [i lavori]{LAV} del [Condominio Bellavista Due]{CHI}?",
+   "dati"
+  ],
+  [
+   "ja' quanto tengo da incassà in totale?",
+   "dati"
+  ],
+  [
+   "che ho fatto [il 15 settembre]{GIO}?",
+   "dati"
+  ],
+  [
+   "chi è [Fulvio De Martino]{CHI}, che lavoro gli ho fatto?",
+   "dati"
+  ],
+  [
+   "[sabato]{GIO} a che ora finisco da [Ciro Langella]{CHI}?",
+   "dati"
+  ],
+  [
+   "che spessore ci vuole per n'inferriata antisfondamento?",
+   "domanda"
+  ],
+  [
+   "ja' come si calcola l'iva agevolata sui cancelli?",
+   "domanda"
+  ],
+  [
+   "meglio la zincatura a caldo o la verniciatura a polvere pe' stare vicino al mare?",
+   "domanda"
+  ],
+  [
+   "serve il permesso del comune per mettere un cancello carrabile?",
+   "domanda"
+  ],
+  [
+   "quanto pesa a metro un tubolare 40 per 40 da 2 millimetri?",
+   "domanda"
+  ],
+  [
+   "mo' che gas ci vuole per saldà l'alluminio a tig?",
+   "domanda"
+  ],
+  [
+   "come faccio a fare la dichiarazione di conformità per un'automazione?",
+   "domanda"
+  ],
+  [
+   "che bonus ci stanno quest'anno per gli infissi?",
+   "domanda"
+  ],
+  [
+   "come convinco un cliente che il ferro buono costa di più?",
+   "domanda"
+  ],
+  [
+   "conviene comprare la piegatrice nuova o pigliarla in leasing?",
+   "domanda"
+  ],
+  [
+   "che cosa dice la norma sulle ringhiere, quanto alte devono essere?",
+   "domanda"
+  ],
+  [
+   "[Carmine Auricchio]{CHI} m'ha pagato 800 euro",
+   "incasso"
+  ],
+  [
+   "ja' segna che il [Condominio Le Palme]{CHI} ha fatto il bonifico",
+   "incasso"
+  ],
+  [
+   "è arrivato il saldo di [Gaetano Sepe]{CHI}, 850 euro",
+   "incasso"
+  ],
+  [
+   "[Nunzia Barra]{CHI} ha pagato l'acconto della [veranda]{LAV}, mille euro in contanti",
+   "incasso"
+  ],
+  [
+   "hanno pagato la [fattura]{DOC} [23]{NUM}",
+   "incasso"
+  ],
+  [
+   "mo' m'ha dato 300 euro [Antonio Cimmino]{CHI}, il resto la settimana prossima",
+   "incasso"
+  ],
+  [
+   "incassato da [Hotel Belvedere Marino]{CHI}, tutta la [fattura]{DOC}",
+   "incasso"
+  ],
+  [
+   "l'[Immobiliare Partenope Sud]{CHI} ha saldato finalmente",
+   "incasso"
+  ],
+  [
+   "segna pagato [Mario Ruggiero]{CHI}, 2800 con assegno",
+   "incasso"
+  ],
+  [
+   "finalmente la [signora Ambrosio]{CHI} ha pagato, nun ce credevo",
+   "incasso"
+  ],
+  [
+   "[Raimondo Coppola]{CHI} m'ha mandato il bonifico di 2000 per [la villetta]{LAV}",
+   "incasso"
+  ],
+  [
+   "fai na foto al [cancello]{LAV} prima che lo smonto",
+   "foto"
+  ],
+  [
+   "scatta na [foto]{DOC} pe' [Lello Abbate]{CHI}",
+   "foto"
+  ],
+  [
+   "ja' apri la fotocamera ca mo' scatto",
+   "foto"
+  ],
+  [
+   "fotografa la [ringhiera]{LAV} che è tutta arrugginita",
+   "foto"
+  ],
+  [
+   "fai la [foto]{DOC} alla bolla di [Ferrosud]{CHI}",
+   "foto"
+  ],
+  [
+   "scatta le foto del prima per [il portone]{LAV} di [Giuseppina Orefice]{CHI}",
+   "foto"
+  ],
+  [
+   "fammi fà na foto allo [scontrino]{DOC} del gasolio",
+   "foto"
+  ],
+  [
+   "foto alla [serratura]{LAV} rotta, mo'",
+   "foto"
+  ],
+  [
+   "mo' scatta, voglio salvà le misure scritte sul muro",
+   "foto"
+  ],
+  [
+   "fai una foto per il cantiere di [vico Lungo Sant'Anna 6]{IND}",
+   "foto"
+  ],
+  [
+   "crea la cartella [Fornitori ferro]{CART}",
+   "cartella"
+  ],
+  [
+   "metti sta foto nella cartella [Cancelli 2026]{CART}",
+   "cartella"
+  ],
+  [
+   "ja' fammi na cartella nuova [Condominio Bellavista]{CART}",
+   "cartella"
+  ],
+  [
+   "sposta le fatture di [Ferrosud]{CHI} nella cartella [Spese materiale]{CART}",
+   "cartella"
+  ],
+  [
+   "apri la cartella [Automazioni]{CART}",
+   "cartella"
+  ],
+  [
+   "metti il [preventivo]{DOC} di [Fulvio De Martino]{CHI} nella cartella [Da confermare]{CART}",
+   "cartella"
+  ],
+  [
+   "rinomina la cartella [Varie]{CART} in [Garanzie]{CART}",
+   "cartella"
+  ],
+  [
+   "cancella la cartella [Vecchi lavori 2019]{CART}",
+   "cartella"
+  ],
+  [
+   "salva le [foto]{DOC} della [veranda]{LAV} nella cartella [Lavori finiti]{CART}",
+   "cartella"
+  ],
+  [
+   "crea la cartella [Cliente Cacace]{CART} e mettici dentro tutto",
+   "cartella"
+  ],
+  [
+   "ja' urgente, il cancello di [Michelina Iorio]{CHI} s'è bloccato e la macchina nun esce",
+   "urgenza"
+  ],
+  [
+   "emergenza, [Condominio Villa Flora Nuova]{CHI}, il portone non si chiude",
+   "urgenza"
+  ],
+  [
+   "aiuto mi sono tagliato la mano col flessibile",
+   "urgenza"
+  ],
+  [
+   "corri, [don Peppino Capone]{CHI} sta chiuso fuori casa, la serratura s'è rotta",
+   "urgenza"
+  ],
+  [
+   "urgentissimo, è caduta n'inferriata in [salita Arenella Bassa 19]{IND}",
+   "urgenza"
+  ],
+  [
+   "subito, il furgone s'è fermato sulla tangenziale col cancello sopra",
+   "urgenza"
+  ],
+  [
+   "presto presto, [Fulvio De Martino]{CHI} dice che i ladri hanno forzato la grata",
+   "urgenza"
+  ],
+  [
+   "è un'urgenza, la serranda del [bar Il Golfo Piccolo]{CHI} è bloccata a metà",
+   "urgenza"
+  ],
+  [
+   "mo' mo' chiamata d'urgenza dall'[Istituto Santa Rita]{CHI}, porta tagliafuoco incastrata",
+   "urgenza"
+  ],
+  [
+   "urgente, sta uscendo fumo dal motore del cancello di [Aniello Cacace]{CHI}",
+   "urgenza"
+  ],
+  [
+   "ja' fai presto, il garzone è caduto dalla scala in cantiere",
+   "urgenza"
+  ],
+  [
+   "fai il [SAL]{DOC} del [Condominio Bellavista Due]{CHI}, siamo al [60 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "ja' stato avanzamento per [Immobiliare Partenope Sud]{CHI}, [cancelli del parco]{LAV} al [40 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "prepara il [SAL]{DOC} [3]{NUM} per l'[impresa Di Lauro Costruzioni]{CHI}, siamo all'[80 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "siamo a [metà]{AVANZ} con [le ringhiere]{LAV} di [Edilcostruzioni Pianese]{CHI}, fammi il [SAL]{DOC}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} per [la scala in ferro]{LAV} di [Mario Ruggiero]{CHI}, [tre quarti]{AVANZ} fatto",
+   "sal"
+  ],
+  [
+   "mo' i lavori dell'[Hotel Belvedere Marino]{CHI} stanno al [30 per cento]{AVANZ}, prepara lo stato avanzamento",
+   "sal"
+  ],
+  [
+   "aggiorna il [SAL]{DOC} della [villetta]{LAV} di [Raimondo Coppola]{CHI} al [90 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "fammi il primo [SAL]{DOC} per l'[Istituto Santa Rita]{CHI}, [25 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [Condominio Parco degli Aranci]{CHI}, [infissi]{LAV} montati al [70 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "stato avanzamento lavori [cancello e recinzione]{LAV} [Villa Annunziata]{CHI}, siamo al [50 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "ja' prepara il [SAL]{DOC} finale, [cento per cento]{AVANZ}, per [Officine Riunite Afragola]{CHI}",
+   "sal"
+  ],
+  [
+   "fai la [DiCo]{DOC} per il [cancello automatico]{LAV} di [Aniello Cacace]{CHI}",
+   "dico"
+  ],
+  [
+   "prepara la [dichiarazione di conformità]{DOC} dell'[automazione]{LAV} al [Condominio Villa Flora Nuova]{CHI}",
+   "dico"
+  ],
+  [
+   "ja' mi serve la [DiCo]{DOC} per [la serranda motorizzata]{LAV} del [bar Il Golfo Piccolo]{CHI}",
+   "dico"
+  ],
+  [
+   "[dichiarazione di conformità]{DOC} per [Michelina Iorio]{CHI}, [motore cancello scorrevole]{LAV}",
+   "dico"
+  ],
+  [
+   "fammi la [DiCo]{DOC} del [portone automatico]{LAV} in [traversa Pietravalle Sud 11]{IND}",
+   "dico"
+  ],
+  [
+   "compila la [DiCo]{DOC} per [Domenico Liguori]{CHI} che l'impianto è finito",
+   "dico"
+  ],
+  [
+   "mo' la [dichiarazione di conformità]{DOC} per le [porte tagliafuoco]{LAV} dell'[Istituto Santa Rita]{CHI}",
+   "dico"
+  ],
+  [
+   "fai la [DiCo]{DOC} per [l'impianto del cancello]{LAV} di [Fortunato Mele]{CHI}, montato [ieri]{GIO}",
+   "dico"
+  ],
+  [
+   "[DiCo]{DOC} [Hotel Belvedere Marino]{CHI} [barriera automatica del parcheggio]{LAV}",
+   "dico"
+  ],
+  [
+   "ja' prepara la [DiCo]{DOC} e mandala all'[amministratore Sgambati]{CHI}",
+   "dico"
+  ],
+  [
+   "[giovedì]{GIO} [alle 18]{ORA} c'è l'assemblea del [Condominio Le Mimose]{CHI}, prepara i punti sul [cancello]{LAV}",
+   "assemblea"
+  ],
+  [
+   "fammi il riassunto dell'assemblea del [Condominio Parco Azzurra]{CHI}",
+   "assemblea"
+  ],
+  [
+   "ja' all'assemblea del [Condominio Bellavista Due]{CHI} hanno approvato il [cancello nuovo]{LAV}",
+   "assemblea"
+  ],
+  [
+   "prepara cosa dire per l'assemblea di [lunedì]{GIO} al [Condominio I Gelsomini]{CHI}",
+   "assemblea"
+  ],
+  [
+   "l'amministratore [Ernesto Gallo]{CHI} vuole che vado all'assemblea [il 28]{GIO} [alle 20]{ORA}",
+   "assemblea"
+  ],
+  [
+   "cosa hanno deciso all'assemblea del [Condominio Villa Gioia]{CHI} sulle [grate]{LAV}?",
+   "assemblea"
+  ],
+  [
+   "mo' scrivi il verbale dell'assemblea, hanno votato [la recinzione]{LAV} sette a tre",
+   "assemblea"
+  ],
+  [
+   "segna che all'assemblea del [Condominio Le Palme]{CHI} vogliono un altro [preventivo]{DOC}",
+   "assemblea"
+  ],
+  [
+   "preparami i punti per l'assemblea al [Condominio Villa Flora Nuova]{CHI} per [l'automazione del portone]{LAV}",
+   "assemblea"
+  ],
+  [
+   "l'assemblea del [Condominio Parco degli Aranci]{CHI} è stata rimandata, chillo amministratore è nu disastro",
+   "assemblea"
+  ],
+  [
+   "ue' Eon buongiorno, comme jamme?",
+   "saluto"
+  ],
+  [
+   "ciao bella, comme staje stammatina?",
+   "saluto"
+  ],
+  [
+   "buonasera ja', so' stanco morto",
+   "saluto"
+  ],
+  [
+   "grazie assaje Eon",
+   "saluto"
+  ],
+  [
+   "buongiorno a te, oggi è na giornata pesante assaje",
+   "saluto"
+  ],
+  [
+   "sei na cannonata, grazie",
+   "saluto"
+  ],
+  [
+   "ciao Eon, ci sentiamo dimane",
+   "saluto"
+  ],
+  [
+   "ue' ci sei? rispondi",
+   "saluto"
+  ],
+  [
+   "buonanotte, mo' me vaco a cuccà",
+   "saluto"
+  ],
+  [
+   "grazie mille, sei meglio di mio cognato",
+   "saluto"
+  ],
+  [
+   "[Carmine Auricchio]{CHI} ha accettato il [preventivo]{DOC}",
+   "accettato"
+  ],
+  [
+   "ja' il [Condominio Le Palme]{CHI} ha detto sì per [la recinzione]{LAV}",
+   "accettato"
+  ],
+  [
+   "[Nunzia Barra]{CHI} ha firmato il [preventivo]{DOC} della [veranda]{LAV}",
+   "accettato"
+  ],
+  [
+   "mo' m'ha chiamato [Domenico Liguori]{CHI}, va bene il [preventivo]{DOC}, possiamo partire",
+   "accettato"
+  ],
+  [
+   "il [preventivo]{DOC} [45]{NUM} è stato accettato",
+   "accettato"
+  ],
+  [
+   "[Teresa Castaldo]{CHI} ha accettato pe' [gli infissi]{LAV}",
+   "accettato"
+  ],
+  [
+   "segna accettato il [preventivo]{DOC} di [Salvatore Cennamo]{CHI}",
+   "accettato"
+  ],
+  [
+   "l'[Istituto Santa Rita]{CHI} ci dà il lavoro delle [porte tagliafuoco]{LAV}, ha accettato",
+   "accettato"
+  ],
+  [
+   "ha confermato [Fortunato Mele]{CHI}, il preventivo senza motore come voleva",
+   "accettato"
+  ],
+  [
+   "la [Pasticceria Dolce Vesuvio]{CHI} m'ha detto ok per [le grate del retro]{LAV}",
+   "accettato"
+  ],
+  [
+   "evviva, [Edilcostruzioni Pianese]{CHI} ha accettato, [ringhiere]{LAV} per tre piani",
+   "accettato"
+  ],
+  [
+   "la [signora De Simone]{CHI} ha accettato ma vuole lo sconto del 5",
+   "accettato"
+  ],
+  [
+   "sollecita la [signora Ambrosio]{CHI} per il saldo",
+   "sollecito"
+  ],
+  [
+   "ja' manda un sollecito a [Antonio Cimmino]{CHI}, mi deve ancora 280 euro",
+   "sollecito"
+  ],
+  [
+   "ricorda a [Gaetano Sepe]{CHI} che deve pagà la [fattura]{DOC}",
+   "sollecito"
+  ],
+  [
+   "sollecito di pagamento per la [fattura]{DOC} [31]{NUM}",
+   "sollecito"
+  ],
+  [
+   "[Mario Ruggiero]{CHI} non ha ancora pagato, mandagli un sollecito [su whatsapp]{CAN}",
+   "sollecito"
+  ],
+  [
+   "fai un sollecito gentile al [Condominio Villa Gioia]{CHI}, sono tre mesi che aspetto",
+   "sollecito"
+  ],
+  [
+   "sollecita il pagamento di [Hotel Belvedere Marino]{CHI} [per mail]{CAN}",
+   "sollecito"
+  ],
+  [
+   "mo' basta, manda il secondo sollecito a [Biagio Terracciano]{CHI}",
+   "sollecito"
+  ],
+  [
+   "chillo [Ferdinando Starace]{CHI} nun paga, sollecitalo",
+   "sollecito"
+  ],
+  [
+   "manda il sollecito per la [fattura]{DOC} [18]{NUM} alla [Pasticceria Dolce Vesuvio]{CHI}",
+   "sollecito"
+  ],
+  [
+   "ricordagli a [Pasquale Maglione]{CHI} il pagamento del [cancello]{LAV}, 1500 euro",
+   "sollecito"
+  ],
+  [
+   "sollecita tutti quelli che mi devono soldi da più di trenta giorni",
+   "sollecito"
+  ],
+  [
+   "manda un sollecito all'[Immobiliare Partenope Sud]{CHI} per l'acconto",
+   "sollecito"
+  ],
+  [
+   "ja' fai un sollecito a [Rocco Varriale]{CHI} [per sms]{CAN}, con le buone",
+   "sollecito"
+  ]
+ ]
+}
