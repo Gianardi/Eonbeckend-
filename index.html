@@ -12453,16 +12453,44 @@ function normalizzaSal(testo){
 /* "Mandami il SAL di Ferraro", "fammi vedere il SAL del cantiere Ferraro": c'è → la scheda
    del cliente (con i SAL); non c'è → "Lo facciamo adesso?" (1/10/2026) */
 const CERCA_SAL = /^(?:mandami|mostrami|fammi\s+vedere|fammi\s+vede|mi\s+serve|apri|aprimi|trovami|cerca|dov['’]?\s*[eè])\s+(?:il\s+|l['’]?\s*)?(?:ultimo\s+)?(?:sal|s\.a\.l\.?|stato\s+(?:di\s+)?avanzamento(?:\s+(?:dei\s+)?lavori)?)\s+(?:(?:n\.?|numero)\s*\d+\s+)?(?:di|del|della|dello|dell['’]?|per|dal|al)\s*(.+)$/i;
-function chiediPercentualeSal(cliente){
+function chiediPercentualeSal(cliente, poi){
   domandaDelCodice({ titolo: "SAL · " + cliente.name, domanda: "A che punto sono i lavori? (percentuale, es. 40%)", segnaposto: "Es. 40%", onRisposta: async (t) => {
     const n = Number(String(t).replace(",", ".").replace(/[^\d.]/g, ""));
     if(!(n > 0 && n <= 100)) return;
     chiudiRisorsaCard();
+    if(poi){ const nuovo = await creaSal(cliente, n, null, ""); if(nuovo) poi(nuovo); return; }
     await provaSal("sal " + n + "% " + cliente.name);
+  } });
+}
+/* "Fattura il SAL del cantiere Ferraro" (1/10/2026): l'ultimo SAL da fatturare (con il suo
+   importo, o lo chiede); se il SAL non c'è, "Lo facciamo adesso?" e poi la fattura */
+const FATTURA_SAL = /^(?:(?:fai|fammi|prepara|preparami|crea|emetti)\s+(?:la\s+)?fattura\s+(?:del|dello|per\s+il)|fattura(?:mi)?)\s+(?:il\s+|l['’]?\s*)?(?:ultimo\s+)?(?:sal|s\.a\.l\.?|stato\s+(?:di\s+)?avanzamento(?:\s+(?:dei\s+)?lavori)?)\s+(?:(?:n\.?|numero)\s*\d+\s+)?(?:di|del|della|dello|dell['’]?|per|dal|al)\s*(.+)$/i;
+function fatturaDelSal(sal){
+  if(sal.importo !== null) return creaFatturaSal(sal);
+  const cl = clients.find(c => c.id === sal.clientId);
+  domandaDelCodice({ titolo: "SAL " + sal.numero + " · " + (cl ? cl.name : ""), domanda: "Di quanto è la rata del SAL " + sal.numero + " (lavori al " + sal.percentuale + "%)? (IVA esclusa)", segnaposto: "Es. 3.000", onRisposta: (t) => {
+    const v = leggiImporto(t);
+    if(!(v > 0)) return;
+    sal.importo = v;
+    if(sal.id && isDbReady()) dbUpdate("sal", sal.id, { importo: v });
+    creaFatturaSal(sal);
   } });
 }
 async function provaSal(testo){
   if(currentProfession !== "edile") return false;
+  const fattSal = String(testo || "").trim().replace(/[.!?]+$/, "").match(FATTURA_SAL);
+  const clFatt = fattSal ? clienteDaNomeDetto(fattSal[1].replace(/^(?:cantiere|lavori|cliente)\s+(?:(?:di|del|della|dello)\s+)?/i, "")) || clienteDaNomeDetto(fattSal[1]) : null;
+  if(clFatt){
+    const daFatturare = salDelCliente(clFatt.id).filter(x => !x.fatturato);
+    if(daFatturare.length){ fatturaDelSal(daFatturare[daFatturare.length - 1]); return true; }
+    if(!salDelCliente(clFatt.id).length){
+      domandaDelCodice({ titolo: "Il SAL non c'è ancora", domanda: "Il SAL per " + clFatt.name + " non l'abbiamo ancora fatto. Lo facciamo adesso? Poi la fattura.", senzaCampo: true,
+        scelte: [{ etichetta: "Sì, facciamolo", valore: "si" }, { etichetta: "No", valore: "no" }],
+        onRisposta: (v) => { if(v === "si") chiediPercentualeSal(clFatt, fatturaDelSal); else chiudiRisorsaCard(); } });
+      return true;
+    }
+    // tutti già fatturati: decide chi viene dopo, come prima
+  }
   const cercaSal = String(testo || "").trim().replace(/[.!?]+$/, "").match(CERCA_SAL);
   const clSal = cercaSal ? clienteDaNomeDetto(cercaSal[1].replace(/^(?:cantiere|lavori|cliente)\s+(?:(?:di|del|della|dello)\s+)?/i, "")) || clienteDaNomeDetto(cercaSal[1]) : null;
   if(clSal){
@@ -12985,13 +13013,12 @@ function gestisciDocumento(l, testo, invia){
     if(!l.cliente) return null;
     // "il preventivo del Bar Aurora l'ho fatto?": è una domanda, e "ho fatto" non è il lavoro
     const domanda = /\?\s*$/.test(testo) || /\b(?:ho|hai|hanno|abbiamo|avevo)\s+(?:gia\s+|già\s+)?(?:fatt|mandat|accettat|firmat|inviat|spedit)/i.test(testo);
-    const lavoro = l.lavoro && !/\b(?:ho|hai|hanno|abbiamo|fatt\w*|mandat\w*|accettat\w*|firmat\w*|inviat\w*)\b/i.test(l.lavoro) ? l.lavoro : "";
-    offriDiFareDocumento(testo, cosa, l.cliente, domanda ? "" : lavoro, domanda);
-    return { fatto: "documento_da_fare" };
+    // "mi serve il preventivo di X" e non c'è: si prepara subito, come deciso il 29/09
+    if(domanda){ offriDiFareDocumento(testo, cosa, l.cliente, "", true); return { fatto: "documento_da_fare" }; }
   }
   const s = { tipo: l.tipo, cliente: l.cliente, clienteNuovo: l.clienteNuovo, importo: l.importo, lavoro: l.lavoro, invio: l.invio, dubbio: l.dubbio,
     voci: l.voci && l.voci.length ? l.voci : null, aliquota: l.aliquotaIva || null, totaleDetto: l.totaleDetto || null, confermato: false,
-    simile: l.clienteSimile, candidati: l.candidati, primaVolta: true, nota: "" };
+    simile: l.clienteSimile, candidati: l.candidati, primaVolta: true, nota: l.modo === "cerca" ? "Non trovo " + (cosa === "fattura" ? "fatture" : "preventivi") + " di " + l.cliente.name + ": ne preparo uno nuovo. " : "" };
   const titolo = "Nuovo " + cosa;
   const chiedi = (domanda, altro) => domandaDelCodice({ titolo: cosa === "fattura" ? "Nuova fattura" : titolo, domanda: (s.nota || "") + domanda, ...altro });
   const passo = () => {
@@ -13123,16 +13150,20 @@ function offriInvioDocumento(risposta){
    attività dove ha senso") ---- */
 /* Manca il numero o l'email: EON lo chiede, lo salva nella scheda e va avanti */
 function chiediContatto(c, tipo, dopo, poi, saltaEtichetta){
-  const email = tipo === "email";
+  const email = tipo === "email", indirizzo = tipo === "indirizzo";
   domandaDelCodice({
-    titolo: (email ? "Email di " : "Numero di ") + c.name,
-    domanda: (email ? "Non ho l'email di " + c.name + ". Me la dici? La salvo" : "Non ho il numero di " + c.name + ". Me lo dici? Lo salvo") + (dopo ? " e " + dopo : "") + ".",
+    titolo: (email ? "Email di " : indirizzo ? "Indirizzo di " : "Numero di ") + c.name,
+    domanda: (email ? "Non ho l'email di " + c.name + ". Me la dici? La salvo" : "Non ho " + (indirizzo ? "l'indirizzo" : "il numero") + " di " + c.name + ". Me lo dici? Lo salvo") + (dopo ? " e " + dopo : "") + ".",
     scelte: saltaEtichetta ? [{ etichetta: saltaEtichetta, valore: "__salta" }] : null,
-    segnaposto: email ? "Es. nome@gmail.com" : "Es. 333 1234567",
+    segnaposto: email ? "Es. nome@gmail.com" : indirizzo ? "Es. via Roma 12, Bari" : "Es. 333 1234567",
     onRisposta: (v, tasto) => {
       if(tasto && v === "__salta") return poi(c, true);
       const t = String(v || "").trim();
-      if(email){
+      if(indirizzo){
+        if(t.length < 4){ showAIToast("Indirizzo non valido", "Scrivi via, numero e paese, es. via Roma 12, Bari."); return; }
+        c.address = t;
+        if(c.id && isDbReady()) dbUpdate("clients", c.id, { address: t });
+      } else if(email){
         const m = t.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
         if(!m){ showAIToast("Email non valida", "Scrivi l'indirizzo, es. nome@gmail.com."); return; }
         c.email = m[0];
@@ -13198,6 +13229,134 @@ function offriDiMettereImpegno(cliente, testo, giornoIso, ora){
       if(v === "si" && typeof window.eonInviaHome === "function") window.eonInviaHome(cosa + " con " + cliente.name + " " + quando);
     },
   });
+}
+
+/* "Manda le foto del cantiere al Bar Aurora": le ultime foto del cliente, con WhatsApp, Email
+   o EON (il telefono non lascia allegare le foto da un link: vanno i link alle foto);
+   se non ce ne sono, "Le scattiamo adesso?" (1/10/2026) */
+function provaInvioFoto(testo){
+  const n = normalizzaComando(testo);
+  const m = n.match(/^(?:mi\s+)?(?:manda|mandagli|mandale|invia|inviagli|gira|girale|giragli|inoltra)\s+(?:(?:le|delle|un\s+po\s+di|tutte\s+le)\s+)?(?:foto|fotografie)(?:\s+(?:del|dei|della|dello|di)\s+(?:cantiere|lavoro|lavori))?\s+(?:a|al|alla|allo|ad|all)\s+(.+)$/)
+    || n.match(/^(?:manda|invia|gira)\s+(?:a|al|alla|allo|ad|all)\s+(.+?)\s+(?:le\s+)?(?:foto|fotografie)(?:\s+(?:del|dei|della|di)\s+(?:cantiere|lavoro|lavori))?$/);
+  if(!m) return false;
+  const c = clienteDaNomeDetto(m[1]);
+  if(!c) return false;
+  const foto = cantiereFoto.filter(f => f.clientId === c.id && f.url).sort((a, b) => new Date(b.created) - new Date(a.created)).slice(0, 6);
+  if(!foto.length){ offriDiFareFoto(c, "Di " + c.name + " non ci sono ancora foto da mandare."); return true; }
+  const corpo = document.createElement("div");
+  corpo.className = "termini-card";
+  const p = document.createElement("p");
+  p.textContent = (foto.length === 1 ? "1 foto" : "Le ultime " + foto.length + " foto") + " di " + c.name + ": scegli come mandarle.";
+  corpo.appendChild(p);
+  const testoFoto = "Ciao " + c.name.split(/\s+/)[0] + ", ti mando le foto del lavoro:\n" + foto.map(f => f.url).join("\n");
+  const riga = document.createElement("div");
+  riga.className = "scheda-invio";
+  [["WhatsApp", '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', () => window.open("https://wa.me/" + numeroWhatsApp(c.phone) + "?text=" + encodeURIComponent(testoFoto), "_blank")],
+   ["Email", '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', () => apriLinkEsterno("mailto:" + (c.email ? encodeURIComponent(c.email).replace(/%40/g, "@") : "") + "?subject=" + encodeURIComponent("Foto del lavoro") + "&body=" + encodeURIComponent(testoFoto))],
+   ["EON", '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', () => inviaRisorsaEonInterna(c.name, testoFoto)]].forEach(([nome, icona, azione]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "scheda-invio-btn"; b.dataset.canale = nome;
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + icona + "</svg>";
+    const t = document.createElement("span"); t.textContent = nome; b.appendChild(t);
+    b.addEventListener("click", azione);
+    riga.appendChild(b);
+  });
+  corpo.appendChild(riga);
+  apriRisorsaCard("Foto · " + c.name, corpo);
+  return true;
+}
+/* "L'indirizzo del Bar Aurora ce l'ho?", "qual è l'indirizzo di Rossi": c'è (con Portami lì) o
+   "Me lo dici? Lo salvo" (1/10/2026) */
+function provaIndirizzoCliente(testo){
+  const n = normalizzaComando(testo);
+  const m = n.match(/^(?:ce\s+l\s+ho\s+)?l?\s*indirizzo\s+(?:del|della|dello|dell|di|dei)\s+(.+?)(?:\s+(?:ce\s+l\s+ho|ce\s+l\s+abbiamo|l\s+ho|lo\s+ho|ce\s+lo\s+ho))?$/)
+    || n.match(/^(?:qual\s+e|qual\s+è|com\s+e|dammi|mi\s+dai|mandami|dimmi|mi\s+dici)\s+l?\s*indirizzo\s+(?:del|della|dello|dell|di|dei)\s+(.+)$/);
+  if(!m) return false;
+  const nome = m[1].replace(/\s+(?:per\s+favore|grazie)$/, "").trim();
+  const c = clienteDaNomeDetto(nome);
+  if(!c){
+    if(!nome || /\d/.test(nome) || nome.split(" ").length > 4 || clients.some(x => nome.split(" ").every(p => normalizzaComando(x.name).split(" ").includes(p)))) return false;
+    offriDiAggiungereCliente(nome, (nuovo) => chiediContatto(nuovo, "indirizzo", "", (c2) => { chiudiRisorsaCard(); showAIToast("Indirizzo salvato", c2.name + ": " + c2.address + "."); }));
+    return true;
+  }
+  if(c.address && c.address.trim()){
+    const corpo = document.createElement("div");
+    corpo.className = "termini-card";
+    const p = document.createElement("p");
+    p.textContent = "Sì: " + c.address;
+    corpo.appendChild(p);
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "scheda-scelta"; b.textContent = "Portami lì";
+    b.addEventListener("click", () => { chiudiRisorsaCard(); portamiDaCliente(c); });
+    corpo.appendChild(b);
+    apriRisorsaCard("Indirizzo · " + c.name, corpo);
+    return true;
+  }
+  chiediContatto(c, "indirizzo", "", (c2) => { chiudiRisorsaCard(); showAIToast("Indirizzo salvato", c2.name + ": " + c2.address + "."); });
+  return true;
+}
+/* Amministratore: "quando è l'assemblea di via Roma 12?": la data, o "Non è ancora convocata.
+   La convochiamo?" (1/10/2026) */
+function provaQuandoAssemblea(testo){
+  if(currentProfession !== "amministratore") return false;
+  const n = normalizzaComando(testo);
+  const m = n.match(/^(?:quando|a\s+che\s+ora|che\s+giorno)\s+(?:e|è|c\s+e|ho|abbiamo|faccio|facciamo|si\s+fa|sara)\s+(?:l\s+|la\s+)?(?:prossima\s+)?assemblea\s+(?:di|del|della|dello|dell|in|a|al|alla)?\s*(.+)$/);
+  if(!m) return false;
+  const detto = m[1].trim();
+  const parole = detto.split(" ").filter(w => w.length > 1 && !/^(?:condominio|via|viale|piazza|corso|il|la|lo|di|del|della)$/.test(w));
+  if(!parole.length) return false;
+  const oggiIso = new Date().toISOString().slice(0, 16);
+  const sue = assemblee.filter(a => { const w = normalizzaComando(a.condominio || "").split(" "); return parole.every(p => w.includes(p)); });
+  const prossima = sue.filter(a => a.quando && a.quando >= oggiIso && a.stato !== "fatta").sort((a, b) => a.quando.localeCompare(b.quando))[0];
+  if(prossima){
+    const d = new Date(prossima.quando);
+    mostraRispostaEON(testo, "L'assemblea " + (prossima.tipo ? prossima.tipo.toLowerCase() + " " : "") + "di **" + prossima.condominio + "** è " + d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }) + " alle " + prossima.quando.slice(11, 16) + ".", { titolo: "Assemblea · " + prossima.condominio });
+    return true;
+  }
+  const nome = sue.length ? sue[0].condominio : nomeBelloCodice(detto);
+  domandaDelCodice({ titolo: "Assemblea · " + nome, domanda: "L'assemblea di " + nome + " non è ancora convocata. La convochiamo?", senzaCampo: true,
+    scelte: [{ etichetta: "Sì, convochiamola", valore: "si" }, { etichetta: "No", valore: "no" }],
+    onRisposta: (v) => { chiudiRisorsaCard(); if(v === "si" && typeof window.eonInviaHome === "function") window.eonInviaHome("convoca l'assemblea di " + nome); } });
+  return true;
+}
+/* "Il Bar Aurora ha accettato il preventivo", "il preventivo del bagno di Rossi l'hanno
+   accettato": lo segna nella Mente e propone il passo dopo: la fattura con le stesse voci o
+   l'inizio dei lavori (1/10/2026, pilastro soldi) */
+function provaPreventivoAccettato(testo){
+  const grezzo = String(testo || "").trim();
+  if(/\?\s*$/.test(grezzo)) return false; // la domanda la fa rispondiSuiDati
+  const n = normalizzaComando(grezzo);
+  if(!/\bpreventiv/.test(n) || !/\baccettat[oaie]\b|\bha\s+accettato\b/.test(n)) return false;
+  if(/^(?:se|quando|chissa|non\s+so|ricordami|devo)\b|\bnon\s+(?:l\s+)?(?:ha|hanno)\b|\bnon\s+(?:e|è)\s+stato\s+accettat/.test(n)) return false;
+  if(typeof EonLettore === "undefined") return false;
+  const r = EonLettore.trovaCliente(EonLettore.parole(grezzo), contestoLettore().clienti, new Set());
+  if(r.stato !== "trovato") return false;
+  const c = clients.find(x => x.id === r.cliente.id) || r.cliente;
+  const prev = documentiVeri().find(d => d.dati && d.dati.tipo === "preventivo" && (nomeChiave(d.clienteChat || "") === nomeChiave(c.name) || nomeChiave(d.dati.cliente || "") === nomeChiave(c.name)));
+  if(!prev){
+    offriDiFareDocumento("", "fattura", c, "", "Non trovo in EON il preventivo di " + c.name + ", ma se l'ha accettato si può fatturare.");
+    return true;
+  }
+  const nota = "Preventivo n. " + prev.dati.numero + " accettato da " + c.name + " (" + euroConti(Number(prev.dati.totale) || 0) + ")";
+  if(isDbReady()) dbInsert("cantiere_appunti", { testo: nota, client_id: c.id }).then(creato => { if(creato){ cantiereAppunti.push(mappaAppunto(creato)); try { renderCantiereAppunti(); } catch(e){} } });
+  domandaDelCodice({ titolo: "Preventivo accettato · " + c.name, domanda: "Bene! L'ho segnato nella Mente. Facciamo la fattura con le stesse voci, o fissiamo l'inizio dei lavori?", senzaCampo: true,
+    scelte: [{ etichetta: "Fai la fattura", valore: "fattura" }, { etichetta: "Fissa l'inizio lavori", valore: "inizio" }, { etichetta: "Non ora", valore: "no" }],
+    onRisposta: (v) => {
+      if(v === "fattura"){
+        const voci = (prev.dati.voci || []).map(x => ({ descrizione: x.desc, quantita: Number(x.qta) || 1, prezzo: Number(x.prezzo) || 0 })).filter(x => x.descrizione && x.prezzo);
+        if(!voci.length){ chiudiRisorsaCard(); return gestisciDocumento({ tipo: "fattura", modo: "crea", cliente: c, importo: null, lavoro: null, invio: true }, "Fattura per " + c.name, (f, p) => window.eonInviaHome && window.eonInviaHome(f, p)); }
+        const comando = { azione: "documento", tipo: "fattura", cliente_id: c.id, voci, importo: null, lavoro: null };
+        if(prev.dati.aliquota !== undefined && prev.dati.aliquota !== null) comando.aliquota_iva = prev.dati.aliquota;
+        chiudiRisorsaCard();
+        if(typeof window.eonInviaHome === "function") window.eonInviaHome("Fattura per " + c.name + " dal preventivo n. " + prev.dati.numero, { comando, dopo: (risposta) => offriInvioDocumento(risposta) });
+      } else if(v === "inizio"){
+        domandaDelCodice({ titolo: "Inizio lavori · " + c.name, domanda: "Quando iniziamo?", segnaposto: "Es. lunedì alle 8", onRisposta: (t) => {
+          chiudiRisorsaCard();
+          if(typeof window.eonInviaHome === "function") window.eonInviaHome("inizio lavori da " + c.name + " " + t);
+        } });
+      } else chiudiRisorsaCard();
+    } });
+  return true;
 }
 
 /* ---- Messaggio, email, WhatsApp, chiamata ---- */
@@ -13354,8 +13513,12 @@ function mostraDocImpresaPer(l, testo){
   // La DiCo di un cliente si fa con EON: quelle fatte, o "La facciamo adesso?" (1/10/2026)
   if(!trovati.length && l.documento === "dico" && l.cliente && currentProfession === "elettricista"){ mostraOFaiDico(l.cliente, ""); return { fatto: "dico_cliente" }; }
   if(!trovati.length){
-    navigateTo("documenti-impresa");
-    mostraRispostaEON(testo, "Non hai ancora caricato " + (l.documento === "durc" ? "il DURC" : "questo documento") + ": caricalo qui in «Documenti impresa» e poi te lo trovo in un attimo.", { titolo: l.documento.toUpperCase() });
+    const nomeDoc = l.documento === "durc" ? "Il DURC" : l.documento === "visura" || l.documento === "camerale" ? "La visura camerale" : l.documento === "polizza" || l.documento === "assicurazione" || l.documento === "rct" || l.documento === "rc" ? "La polizza" : "Questo documento";
+    const femminile = /^La /.test(nomeDoc);
+    // 1/10/2026: "Lo carichiamo adesso?" e il tasto apre subito la scelta del file
+    domandaDelCodice({ titolo: l.documento.toUpperCase(), domanda: nomeDoc + " non è ancora " + (femminile ? "caricata" : "caricato") + " in EON. " + (femminile ? "La carichiamo adesso?" : "Lo carichiamo adesso?") + " Poi te " + (femminile ? "la" : "lo") + " trovo in un attimo.", senzaCampo: true,
+      scelte: [{ etichetta: femminile ? "Sì, caricala" : "Sì, caricalo", valore: "si" }, { etichetta: "No", valore: "no" }],
+      onRisposta: (v) => { chiudiRisorsaCard(); if(v === "si"){ navigateTo("documenti-impresa"); document.getElementById("cantiereDocumentiInput").click(); } } });
     return { fatto: "doc_impresa_mancante" };
   }
   const d = trovati[trovati.length - 1];
@@ -13536,6 +13699,12 @@ function letturaImpegnoPerServer(l){
 }
 
 /* ---- Regola 4: domande sui dati ---- */
+/* "Quanto mi deve X?" e a X non hai mai fatto fatture: "La facciamo adesso?" (1/10/2026) */
+function offriFatturaSeMaiFatta(cl){
+  if(documentiVeri().some(d => d.dati && d.dati.tipo === "fattura" && (nomeChiave(d.clienteChat || "") === nomeChiave(cl.name) || nomeChiave(d.dati.cliente || "") === nomeChiave(cl.name)))) return false;
+  offriDiFareDocumento("", "fattura", cl, "", "Per " + cl.name + " non risultano né incassi né soldi da avere: con EON non gli abbiamo ancora fatto fatture.");
+  return true;
+}
 function rispondiSuiDati(l){
   const oggi = new Date();
   const n = EonLettore.norm(l.testo);
@@ -13543,6 +13712,7 @@ function rispondiSuiDati(l){
     const sue = incomes.filter(i => (i.clientId && i.clientId === cl.id) || nomeChiave(i.client || "") === nomeChiave(cl.name));
     const pagato = sue.filter(i => i.status === "incassato").reduce((t, i) => t + (Number(i.amount) || 0), 0);
     const deve = sue.filter(i => i.status !== "incassato").reduce((t, i) => t + (Number(i.amount) || 0), 0);
+    if(!sue.length && offriFatturaSeMaiFatta(cl)) return { gestito: true, titolo: cl.name, testo: "" };
     navigateTo("entrate");
     if(!sue.length) return { titolo: cl.name, testo: "Nessuna entrata per " + cl.name + "." };
     return { titolo: cl.name, testo: (deve > 0 ? "Ti deve ancora **" + euroConti(deve) + "**" : "Ha pagato tutto") + "\nIncassati " + euroConti(pagato) };
@@ -15417,6 +15587,7 @@ function capisciDomandaSoldi(testo){
       const sue = incomes.filter(i => nomeChiave(i.client) === nomeChiave(cl.name) || (i.clientId && i.clientId === cl.id));
       const pagato = sue.filter(i => i.status === "incassato").reduce((s, i) => s + (Number(i.amount) || 0), 0);
       const deve = sue.filter(i => i.status !== "incassato").reduce((s, i) => s + (Number(i.amount) || 0), 0);
+      if(!sue.length && offriFatturaSeMaiFatta(cl)) return { gestito: true, titolo: cl.name, testo: "" };
       navigateTo("entrate");
       if(!sue.length) return { titolo: cl.name, testo: "Nessuna entrata per " + cl.name + "." };
       return { titolo: cl.name, testo: "Incassati **" + euroConti(pagato) + "**" + (deve > 0 ? "\nTi deve ancora " + euroConti(deve) : "\nHa pagato tutto") };
@@ -16351,6 +16522,10 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       const rc = await aggiungiClienteLetto(EonLettore.leggiNuovoCliente(testo));
       if(rc){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "cliente_neurale"); return; }
     }
+    /* "Il Bar Aurora ha accettato il preventivo" (non una domanda): prima delle domande sui dati */
+    if(testo && !inCorso && !inContinuazione && provaPreventivoAccettato(testo)){
+      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "preventivo_accettato"); return;
+    }
     /* Il modello dice "domanda sui tuoi dati" (passo 3): il lettore capisce il tema
        (agenda, soldi di un cliente, chi ti deve, incassi, documenti) e risponde il codice */
     // (una o due parole, "apri…", "vai…": è il nome di una pagina, non una domanda)
@@ -16493,6 +16668,14 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       ricordaEsitoCodice(testo, "invio_documento");
       return;
     }
+    /* Foto da mandare, indirizzo, assemblea, preventivo accettato: col codice, e se manca
+       qualcosa "Lo facciamo adesso?" (1/10/2026) */
+    if(!inContinuazione && (provaInvioFoto(testo) || provaIndirizzoCliente(testo) || provaQuandoAssemblea(testo))){
+      campo.value = "";
+      hint.textContent = hintBaseDi();
+      ricordaEsitoCodice(testo, "codice_offerta");
+      return;
+    }
     /* Il modello dice "manda un documento" (passo 3) e le regole non l'hanno letto
        ("spedisci al condominio il preventivo…", "il preventivo della palestra mandalo al
        titolare"): tipo e cliente dal lettore, poi lo stesso invio di sempre */
@@ -16512,6 +16695,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
        sessione — i dati sono già quelli caricati nell'app. */
     if(!inContinuazione){
       const lettura = provaLetturaLocale(testo);
+      if(lettura && lettura.gestito){ campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "lettura_" + (lettura.tipo || "altro")); return; }
       if(lettura){
         campo.value = "";
         hint.textContent = hintBaseDi();
@@ -18908,7 +19092,8 @@ function offriDiFareDocumento(testo, tipo, cliente, lavoroDetto, conEon){
   const lavoro = lavoroDetto !== undefined ? String(lavoroDetto || "") : lavoroDaFraseInvio(testo, fattura ? "fattura" : "preventivo", cliente);
   domandaDelCodice({
     titolo: fattura ? "La fattura non c'è ancora" : "Il preventivo non c'è ancora",
-    domanda: conEon ? "Con EON non abbiamo ancora fatto " + (fattura ? "fatture" : "preventivi") + " per " + cliente.name + ". " + (fattura ? "La facciamo adesso?" : "Lo facciamo adesso?")
+    domanda: typeof conEon === "string" ? conEon + " " + (fattura ? "La facciamo adesso?" : "Lo facciamo adesso?")
+      : conEon ? "Con EON non abbiamo ancora fatto " + (fattura ? "fatture" : "preventivi") + " per " + cliente.name + ". " + (fattura ? "La facciamo adesso?" : "Lo facciamo adesso?")
       : (fattura ? "La fattura per " : "Il preventivo per ") + cliente.name + (lavoro ? " (" + lavoro.toLowerCase() + ")" : "")
       + (fattura ? " non l'abbiamo ancora fatta. La facciamo adesso?" : " non l'abbiamo ancora fatto. Lo facciamo adesso?"),
     scelte: [{ etichetta: "Sì, facciamolo", valore: "si" }, { etichetta: "No", valore: "no" }],
@@ -19030,7 +19215,19 @@ function creaVoceDocumento(doc, clienteNome){
   return el;
 }
 
+/* Nessuna foto di quel cliente: "Le scattiamo adesso?" (1/10/2026) */
+function offriDiFareFoto(cliente, premessa){
+  domandaDelCodice({ titolo: "Foto · " + cliente.name, domanda: (premessa || "Di " + cliente.name + " non ci sono ancora foto.") + " Le scattiamo adesso?", senzaCampo: true,
+    scelte: [{ etichetta: "Scatta foto", valore: "scatta" }, { etichetta: "Dalla galleria", valore: "galleria" }, { etichetta: "No", valore: "no" }],
+    onRisposta: (v) => {
+      chiudiRisorsaCard();
+      if(v === "scatta"){ clienteIdPerSchedaFoto = cliente.id; document.getElementById("schedaClienteFotoInput").click(); }
+      else if(v === "galleria") apriGalleriaFoto({ clienteId: cliente.id });
+    } });
+}
 function mostraRisorsaFoto(foto, clienteNome){
+  const clienteFoto = !foto.length && clienteNome ? clients.find(c => nomeChiave(c.name) === nomeChiave(clienteNome)) : null;
+  if(clienteFoto) return offriDiFareFoto(clienteFoto);
   const wrap = document.createElement("div");
   if(!foto.length){
     const vuoto = document.createElement("div");

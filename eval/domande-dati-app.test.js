@@ -82,7 +82,7 @@ async function main() {
     await prova("quand'è l'ultima volta che sono stato dai Tosi?", /L'ultima volta.*6 giorni fa.*Sopralluogo tetto Tosi/, "l'ultima volta dai Tosi: 6 giorni fa, il sopralluogo");
     await prova("quant'è che non vado dalla Bianchi", /Non trovo appuntamenti passati con Bianchi/, "mai stato dalla Bianchi: lo dice");
     await prova("il numero del Merlo della carrozzeria ce l'ho?", /333 1234567/, "il numero del Merlo: sì, ed è quello");
-    await prova("il numero dei Tosi ce l'ho?", /senza numero/, "i Tosi senza numero: lo dice");
+    await prova("il numero dei Tosi ce l'ho?", /Non ho il numero di Famiglia Tosi\. Me lo dici\? Lo salvo\./, "i Tosi senza numero: lo dice e lo chiede per salvarlo"); // 1/10/2026
     await prova("quanti soldi ho preso in contanti questa settimana", /Incassati.*450.*Contanti o bonifico/, "incassi della settimana (contanti: lo dice onesto)");
     await prova("fammi vedé le fatture non pagate", /Nessuno ti deve soldi|ti deve|Hai incassato tutto/i, "fatture non pagate: chi deve ancora");
     await prova("fammi il punto dei lavori di questa settimana", /settimana|Settimana/, "il punto della settimana");

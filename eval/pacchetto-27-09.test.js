@@ -359,7 +359,7 @@ async function main() {
       r.chiamaVoce = provaComandiSemplici("chiama Rita", true) && /Chiama Rita Ambrosini/.test((document.querySelector(".percorso-meta") || {}).textContent || "") && /tel:\+?39?3331234567/.test((document.querySelector(".percorso-meta") || { getAttribute: () => "" }).getAttribute("href"));
       chiudiRisorsaCard();
       r.chiamaDueRossi = provaComandiSemplici("chiama Rossi", false) === false;
-      r.chiamaSenzaNumero = provaComandiSemplici("chiama Mario Rossi", false) && /Numero mancante/.test(document.getElementById("aiToastContainer").textContent);
+      r.chiamaSenzaNumero = provaComandiSemplici("chiama Mario Rossi", false) && /Non ho il numero di Mario Rossi\. Me lo dici\?/.test(document.getElementById("risorsaCorpo").textContent); // 1/10/2026: lo chiede e lo salva
       chiudiRisorsaCard();
       const riconosciuto = provaComandiSemplici("scrivi a Rita Ambrosini", false);
       await new Promise((ok) => setTimeout(ok, 50)); // la chat si apre appena pronta
@@ -452,7 +452,7 @@ async function main() {
       await new Promise((ok) => setTimeout(ok, 50));
       r.riattivato = clients[0].archived === false;
       document.getElementById("aiToastContainer").innerHTML = "";
-      r.preventiviDiRossi = provaRisorsaImmediata("preventivi di Rossi") && /Mario Rossi non ha ancora preventivi/.test(document.getElementById("risorsaCorpo").textContent);
+      r.preventiviDiRossi = provaRisorsaImmediata("preventivi di Rossi") && /Con EON non abbiamo ancora fatto preventivi per Mario Rossi\. Lo facciamo adesso\?/.test(document.getElementById("risorsaCorpo").textContent); // 1/10/2026
       chiudiRisorsaCard();
       r.preventivoPerRossiAllAI = provaRisorsaImmediata("preventivo per Rossi") === false;
       return r;

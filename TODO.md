@@ -4999,6 +4999,33 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 sera: "Lo facciamo adesso?", secondo giro (ROADMAP 0b.19 passo 5)
+- `offriFatturaSeMaiFatta(cl)` in `rispondiSuiDati` (soldi di un cliente) e `capisciDomandaSoldi`
+  ("quanto ho incassato da X"); `provaLetturaLocale` ora accetta `gestito`.
+- `offriDiFareFoto(cliente, premessa)` da `mostraRisorsaFoto` (nessuna foto di un cliente) e
+  `provaInvioFoto` ("manda/gira le foto (del cantiere) a X": le ultime 6, WhatsApp col numero del
+  cliente, Email, EON, con i link alle foto).
+- `provaIndirizzoCliente` ("l'indirizzo di X ce l'ho?", "qual è/dammi l'indirizzo di X");
+  `chiediContatto(…, "indirizzo", …)` salva `address`; chi non è cliente → "Lo aggiungo?".
+- `mostraDocImpresaPer`: documento dell'impresa non caricato → "Lo/La carichiamo adesso?" → apre
+  `#cantiereDocumentiInput` in Documenti impresa (prima: solo il messaggio e la pagina).
+- `FATTURA_SAL` / `fatturaDelSal` in `provaSal`: l'ultimo SAL non fatturato (rata chiesta se manca,
+  salvata, poi `creaFatturaSal`); nessun SAL → `chiediPercentualeSal(cliente, poi)` → fattura.
+- `provaQuandoAssemblea` (amministratore): la prossima data, o "non è ancora convocata. La
+  convochiamo?" → "convoca l'assemblea di X" (chiede giorno e ora come sempre).
+- `provaPreventivoAccettato` (prima delle domande sui dati; mai con "?", "non ha accettato",
+  "ricordami/se/quando"): nota nella Mente "Preventivo n. N accettato da X (€…)", poi [Fai la
+  fattura] (comando documento con le stesse voci e IVA del preventivo) [Fissa l'inizio lavori]
+  ("inizio lavori da X <quando>") [Non ora]. Senza preventivo in EON: "si può fatturare. La
+  facciamo adesso?".
+- `gestisciDocumento` modo "cerca": "mi serve il preventivo di X" senza preventivi resta come deciso
+  il 29/09 (si prepara subito); solo la domanda ("l'ho fatto?") chiede "Lo facciamo adesso?".
+- Prove aggiornate: `lettore-app` (DURC: "Lo carichiamo adesso?"), `pacchetto-27-09` (chiama senza
+  numero; "preventivi di Rossi"), `domande-dati-app` (numero dei Tosi), `fatture` ("preventivi
+  testolina"); `non-ce-facciamolo-app` con i punti 8-15.
+- Errore trovato, c'era già prima (non toccato): "ricordami di chiedere a Rossi se ha accettato il
+  preventivo" → apre "Nuovo preventivo". Da sistemare nel lettore ("ricordami di…" è un promemoria).
+
 ### 1/10 sera: "Non c'è? Lo facciamo adesso?" in tutta l'app (ROADMAP 0b.19 passo 5)
 - Controllo fatto su tutti i "non trovo / non c'è" dell'app (`index.html`). Già così: incasso da chi
   non è cliente, nota in cartella che non c'è, documento cercato (carica), "portami da X" senza

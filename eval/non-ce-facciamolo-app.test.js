@@ -8,6 +8,9 @@
    5. "quando vedo X?" senza impegni → lo fissiamo?;
    6. "sposta l'appuntamento con X a giovedì" e in agenda non c'è → lo metto giovedì?;
    7. "apri la scheda di X" e X non è tra i clienti → lo aggiungo?
+   Secondo giro: "quanto mi deve X?" senza fatture, foto che non ci sono, mandare le foto,
+   l'indirizzo, il DURC da caricare, "fattura il SAL", il preventivo accettato (fattura con le
+   stesse voci o inizio lavori), l'assemblea da convocare.
    Browser vero, server vero (api/index.js) con database e AI finti.
    Uso: NODE_PATH=/opt/node22/lib/node_modules node eval/non-ce-facciamolo-app.test.js */
 
@@ -247,6 +250,110 @@ async function main() {
     verifica("4b. DiCo che non c'è: \"La facciamo adesso?\"", /La dichiarazione di conformità per Villa Le Querce non l'abbiamo ancora fatta\. La facciamo adesso\?/.test(c.corpo), JSON.stringify(c));
     await tocca("Sì, facciamola");
     verifica("…\"Sì\": si apre la DiCo con Villa Le Querce come committente", await page.evaluate(() => (document.getElementById("dicoCommittente") || {}).value === "Villa Le Querce"));
+
+
+    /* ---- Secondo giro (1/10/2026): soldi, foto, indirizzo, DURC, SAL da fatturare, assemblea,
+       preventivo accettato ---- */
+    await page.evaluate(async () => { await applyProfession("edile", true); });
+    const ultimaRisposta = () => risposteServer[risposteServer.length - 1] || "";
+
+    // 8. "quanto mi deve X?" senza fatture → la facciamo
+    n0 = richieste.length;
+    await scrivi("quanto mi deve il Bar Aurora?");
+    c = await card();
+    verifica("8. \"quanto mi deve il Bar Aurora?\" senza fatture: \"La facciamo adesso?\"", /Per Bar Aurora non risultano né incassi né soldi da avere.*La facciamo adesso\?/.test(c.corpo), JSON.stringify(c));
+    await tocca("Sì, facciamolo");
+    await rispondi("insegna luminosa");
+    await rispondi("800");
+    const cmdF = ultimaAI().comando || {};
+    verifica("…la fattura parte: Bar Aurora, insegna luminosa, 800 (creata dal server, senza AI)", cmdF.tipo === "fattura" && cmdF.cliente_id === "aaaaaaaa-0000-4000-8000-000000000001" && cmdF.importo === 800 && /crea_preventivo_o_fattura/.test(ultimaRisposta()) && chiamateAI === 0, JSON.stringify(cmdF) + " " + ultimaRisposta().slice(0, 150));
+
+    // 9. foto di un cliente che non ci sono → le scattiamo
+    await page.evaluate(() => { document.getElementById("schedaClienteFotoInput").click = () => { window.__fotoPer = clienteIdPerSchedaFoto; }; document.getElementById("cantiereDocumentiInput").click = () => { window.__docCarica = true; }; });
+    await scrivi("fammi vedere le foto del Bar Aurora");
+    c = await card();
+    verifica("9. foto che non ci sono: \"Le scattiamo adesso?\"", /Di Bar Aurora non ci sono ancora foto\. Le scattiamo adesso\?/.test(c.corpo) && /Dalla galleria/.test(c.corpo), JSON.stringify(c));
+    await tocca("Scatta foto");
+    verifica("…\"Scatta foto\": fotocamera per il Bar Aurora", (await page.evaluate(() => window.__fotoPer)) === "aaaaaaaa-0000-4000-8000-000000000001");
+
+    // 10. manda le foto: ci sono → WhatsApp con i link
+    await page.evaluate(() => { cantiereFoto.push({ id: "f1", clientId: "aaaaaaaa-0000-4000-8000-000000000002", url: "https://file.test/bagno1.jpg", created: new Date().toISOString() }, { id: "f2", clientId: "aaaaaaaa-0000-4000-8000-000000000002", url: "https://file.test/bagno2.jpg", created: new Date().toISOString() }); });
+    await scrivi("manda le foto del cantiere a Mario Rossi");
+    c = await card();
+    verifica("10. \"manda le foto del cantiere a Mario Rossi\": le ultime 2 foto, scegli come", /Le ultime 2 foto di Mario Rossi/.test(c.corpo), JSON.stringify(c));
+    await page.evaluate(() => document.querySelector('#risorsaCorpo [data-canale="WhatsApp"]').click());
+    const wa = (await aperti()).find((u) => /wa\.me\/393331234567/.test(u)) || "";
+    verifica("…WhatsApp a Mario Rossi con i link alle foto", /bagno1\.jpg/.test(decodeURIComponent(wa)) && /bagno2\.jpg/.test(decodeURIComponent(wa)), wa);
+
+    // 11. indirizzo che manca → me lo dici, lo salvo; poi c'è
+    await scrivi("l'indirizzo del Bar Aurora ce l'ho?");
+    c = await card();
+    verifica("11. \"l'indirizzo del Bar Aurora ce l'ho?\": \"Me lo dici? Lo salvo.\"", /Non ho l'indirizzo di Bar Aurora\. Me lo dici\? Lo salvo\./.test(c.corpo), JSON.stringify(c));
+    await rispondi("via Sparano 40, Bari");
+    verifica("…indirizzo salvato", (await db("clients", "update")).some((x) => x.id === "aaaaaaaa-0000-4000-8000-000000000001" && x.patch.address === "via Sparano 40, Bari"));
+    await scrivi("qual è l'indirizzo del Bar Aurora");
+    c = await card();
+    verifica("…la volta dopo: \"Sì: via Sparano 40, Bari\" con Portami lì", /via Sparano 40, Bari/.test(c.corpo) && /Portami lì/.test(c.corpo), JSON.stringify(c));
+
+    // 12. DURC non caricato → lo carichiamo
+    await scrivi("mandami il DURC");
+    c = await card();
+    verifica("12. DURC non caricato: \"Lo carichiamo adesso?\"", /Il DURC non è ancora caricato in EON\. Lo carichiamo adesso\?/.test(c.corpo), JSON.stringify(c));
+    await tocca("Sì, caricalo");
+    verifica("…\"Sì\": si apre la scelta del file, in Documenti impresa", (await page.evaluate(() => window.__docCarica && paginaAttuale)) === "documenti-impresa");
+
+    // 13. "fattura il SAL": il SAL c'è (40%, senza importo) → chiede la rata e fa la fattura
+    n0 = richieste.length;
+    await scrivi("fattura il SAL del cantiere Ferraro");
+    c = await card();
+    verifica("13. \"fattura il SAL del cantiere Ferraro\": chiede la rata del SAL 1 (40%)", /Di quanto è la rata del SAL 1 \(lavori al 40%\)\?/.test(c.corpo), JSON.stringify(c));
+    await rispondi("3.000");
+    await page.waitForTimeout(800);
+    const cmdS = ultimaAI().comando || {};
+    verifica("…fattura del SAL da 3.000 per Cantiere Ferraro (dal server, senza AI)", richieste.length > n0 && /crea_preventivo_o_fattura/.test(ultimaRisposta()) && /Cantiere Ferraro/.test(ultimaRisposta()) && chiamateAI === 0 && (await page.evaluate(() => salLista.some((x) => x.importo === 3000 && x.fatturato))), JSON.stringify(cmdS).slice(0, 200) + " " + ultimaRisposta().slice(0, 200));
+
+    // 14. preventivo accettato → segnato nella Mente, fattura con le stesse voci
+    await page.evaluate(() => { chats.push({ name: "Mario Rossi", messages: [{ id: "m9", eventType: "doc", createdAt: "2026-09-30T10:00:00Z", docDati: { tipo: "preventivo", numero: "3", anno: 2026, cliente: "Mario Rossi", totale: 1220, aliquota: 22, voci: [{ desc: "Rifacimento bagno", qta: 1, prezzo: 1000 }] } }] }); window.__db.length = 0; });
+    n0 = richieste.length;
+    await scrivi("il preventivo di Mario Rossi l'hanno accettato");
+    c = await card();
+    verifica("14. \"il preventivo di Mario Rossi l'hanno accettato\": segnato e \"Facciamo la fattura…?\"", /L'ho segnato nella Mente\. Facciamo la fattura con le stesse voci, o fissiamo l'inizio dei lavori\?/.test(c.corpo), JSON.stringify(c));
+    verifica("…nella Mente: \"Preventivo n. 3 accettato da Mario Rossi\"", (await db("cantiere_appunti", "insert")).some((x) => /Preventivo n\. 3 accettato da Mario Rossi/.test(x.riga.testo) && x.riga.client_id === "aaaaaaaa-0000-4000-8000-000000000002"));
+    await tocca("Fai la fattura");
+    await page.waitForTimeout(800);
+    const cmdP = ultimaAI().comando || {};
+    verifica("…\"Fai la fattura\": stesse voci (Rifacimento bagno 1.000), IVA 22, creata dal server senza AI", cmdP.tipo === "fattura" && cmdP.cliente_id === "aaaaaaaa-0000-4000-8000-000000000002" && cmdP.voci && cmdP.voci.length === 1 && cmdP.voci[0].prezzo === 1000 && cmdP.aliquota_iva === 22 && /crea_preventivo_o_fattura/.test(ultimaRisposta()) && chiamateAI === 0, JSON.stringify(cmdP) + " " + ultimaRisposta().slice(0, 150));
+    // dopo la fattura l'app ricarica le conversazioni dal database finto (vuoto): si rimette il preventivo
+    await page.evaluate(() => { if(!documentiVeri().some((d) => d.dati.tipo === "preventivo")) chats.push({ name: "Mario Rossi", messages: [{ id: "m9", eventType: "doc", createdAt: "2026-09-30T10:00:00Z", docDati: { tipo: "preventivo", numero: "3", anno: 2026, cliente: "Mario Rossi", totale: 1220, aliquota: 22, voci: [{ desc: "Rifacimento bagno", qta: 1, prezzo: 1000 }] } }] }); });
+    await scrivi("Mario Rossi mi ha accettato il preventivo del bagno");
+    c = await card();
+    verifica("…\"Mario Rossi mi ha accettato il preventivo del bagno\": stessa proposta", /Fissa l'inizio lavori/.test(c.corpo), JSON.stringify(c));
+    if (/Fissa l'inizio lavori/.test(c.corpo)) await tocca("Fissa l'inizio lavori");
+    await rispondi("lunedì alle 8");
+    await page.waitForTimeout(500);
+    verifica("…\"Fissa l'inizio lavori\" lunedì alle 8: in agenda (dal server, senza AI)", /"tool":"crea_impegno"/.test(ultimaRisposta()) && /lun 5 ott, 08:00/.test(ultimaRisposta()) && chiamateAI === 0, ultimaRisposta().slice(0, 250));
+    await page.evaluate(() => { if(!documentiVeri().some((d) => d.dati.tipo === "preventivo")) chats.push({ name: "Mario Rossi", messages: [{ id: "m9", eventType: "doc", createdAt: "2026-09-30T10:00:00Z", docDati: { tipo: "preventivo", numero: "3", anno: 2026, cliente: "Mario Rossi", totale: 1220, aliquota: 22, voci: [{ desc: "Rifacimento bagno", qta: 1, prezzo: 1000 }] } }] }); });
+    await scrivi("il preventivo di Mario Rossi l'hanno accettato?");
+    c = await card();
+    verifica("…con il punto di domanda resta una domanda (l'elenco dei preventivi)", /Mario Rossi: 1 preventivo/.test(c.titolo), JSON.stringify(c));
+
+    // 15. amministratore: assemblea non convocata → la convochiamo; convocata → la data
+    tabelle.profiles[0].profession = "amministratore";
+    await page.evaluate(async () => { await applyProfession("amministratore", true); assemblee.length = 0; assemblee.push({ id: "as1", condominio: "Condominio Parco Verde", quando: "2026-10-20T21:00", tipo: "Ordinaria", stato: "convocata" }); });
+    await scrivi("quando è l'assemblea del Parco Verde?");
+    c = await card();
+    verifica("15. assemblea convocata: \"martedì 20 ottobre alle 21:00\"", /Condominio Parco Verde.*martedì 20 ottobre alle 21:00/.test(c.corpo), JSON.stringify(c));
+    n0 = richieste.length;
+    await scrivi("quando è l'assemblea di via Roma 12?");
+    c = await card();
+    verifica("…non convocata: \"La convochiamo?\"", /L'assemblea di Via Roma 12 non è ancora convocata\. La convochiamo\?/.test(c.corpo), JSON.stringify(c));
+    await tocca("Sì, convochiamola");
+    c = await card();
+    verifica("…\"Sì\": per quando la convoco?", /Per quando la convoco\?/.test(c.corpo), JSON.stringify(c));
+    await rispondi("giovedì 15 ottobre alle 21");
+    await page.waitForTimeout(500);
+    const cmdA = ultimaAI().comando || {};
+    verifica("…assemblea convocata giovedì 15 ottobre alle 21 (dal codice, senza AI)", cmdA.azione === "assemblea" && cmdA.giorno === "2026-10-15" && cmdA.ora === "21:00" && chiamateAI === 0 && (tabelle.assemblee || []).some((a) => /Via Roma 12/.test(a.condominio || "")), JSON.stringify(cmdA) + " AI " + chiamateAI + " " + ultimaRisposta().slice(0, 150));
 
     // Da non toccare: chi ha il numero si chiama subito; il cliente che c'è si apre
     await page.evaluate(async () => { await applyProfession("edile", true); });

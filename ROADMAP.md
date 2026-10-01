@@ -759,6 +759,19 @@ sporca, dialetti, chat, anziano, straniero.
    agenda per chi non è cliente. Non messo dove non c'è niente da creare (annullare, cancellare,
    cercare nella Mente, incassi) né ai messaggi a chi non è cliente (geometra, fornitore: sarebbe
    fastidioso). Il verbale dell'assemblea EON non lo prepara ancora: da fare a parte.
+   **Secondo giro (stesso giorno):** "quanto mi deve X?" e a X non hai mai fatto fatture (la
+   facciamo?), le foto di un cliente che non ci sono (le scattiamo? scatta o galleria), "manda le
+   foto del cantiere a X" (WhatsApp/Email/EON con i link alle foto: il telefono non lascia allegarle
+   da un link), "l'indirizzo di X ce l'ho?" (me lo dici? lo salvo; c'è → Portami lì), il DURC non
+   caricato (lo carichiamo? il tasto apre subito la scelta del file), "fattura il SAL di X" (la rata
+   del SAL, o "il SAL non c'è: lo facciamo? poi la fattura"), "quando è l'assemblea di X?"
+   (amministratore: la data, o "non è convocata: la convochiamo?"), **il preventivo accettato**
+   ("Rossi ha accettato il preventivo": segnato nella Mente, poi "Facciamo la fattura con le stesse
+   voci, o fissiamo l'inizio dei lavori?"). Ogni «Sì» è provato fino al risultato (fattura creata dal
+   server, foto, link, indirizzo salvato, SAL fatturato, assemblea convocata), senza AI.
+   Da fare a parte: "sollecita il pagamento a X" (funzione nuova: messaggio con le fatture non
+   pagate); "ricordami di chiedere a Rossi se ha accettato il preventivo" apre un preventivo nuovo
+   (errore che c'era già prima).
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo
