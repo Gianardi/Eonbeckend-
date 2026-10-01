@@ -12573,7 +12573,8 @@ function capisciUrgenza(testo){
   if(/\bassemble[ae]\b/i.test(t)) return null; // "un'assemblea urgente": è un'assemblea da convocare (giro 15)
   // "…non è urgente, ci vado giovedì": detto proprio che NON è un'urgenza (giro 15)
   if(/\bnon\s+(?:è\s+|e'\s+|e\s+)?(?:urgent|un'?\s*urgenza|un'?\s*emergenza|grave)|\bniente\s+di\s+urgente|\bsenza\s+urgenza|\bcon\s+calma\b/i.test(t)) return null;
-  if(/\b(?:domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|settimana|prossim[oa]|\d{1,2}\/\d{1,2})\b/i.test(t)) return null;
+  // (la "ì" finale non è una lettera per \b: "giovedì alle quattro… il perito per il sinistro" era un'urgenza, giro 20)
+  if(/(?:^|[^\p{L}\d])(?:domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|settimana|prossim[oa]|\d{1,2}\/\d{1,2})(?![\p{L}\d])/iu.test(t)) return null;
   const mOra = t.match(/\b(?:alle|ore)\s+(\d{1,2})(?:[:.](\d{2}))?\b/i);
   const ora = mOra ? String(mOra[1]).padStart(2, "0") + ":" + (mOra[2] || "00") : null;
   let titolo = t.replace(/(?:^|\s)(?:è\s+|e'\s+)?(?:urgent[ei]|urgenza|urgentissim[oa]|emergenza|di\s+corsa)(?=\s|$|[,.!:;])/gi, " ")
@@ -15403,7 +15404,7 @@ function capisciRichiestaMeteo(testo){
      Ho problemi con il meteo?", "pioverà sabato sul cantiere?" → il meteo di
      quel giorno, qui (una domanda, con il meteo o la pioggia nominati) */
   if(!m && /\?\s*$/.test(String(testo || "").trim()) && /\b(?:meteo|pioggia|piov\w*|nev\w*|maltempo|temporal\w*|vento)\b/.test(t) && t.length <= 160){
-    const giorno = (t.match(/\b(oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)\b/) || [])[1] || "";
+    const giorno = (t.match(/\b(oggi|domani|dopodomani|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)(?![\wàèéìòù])/) || [])[1] || "";
     m = [t, " " + giorno + " "];
   }
   if(!m) return null;
@@ -16142,7 +16143,9 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* Il modello dice "assemblea" (passo 3, amministratori): condominio, giorno, ora e motivo
        dal lettore anche quando la frase non comincia con "convoca" ("mettimi l'assemblea
        del Parco Verde…", "c'è da convocare n'altra volta l'assemblea dell'Aurora…") */
-    if(testo && !inCorso && !inContinuazione && currentProfession === "amministratore" && /\bassemble[ae]\b/i.test(testo) && cassettoNeurale(testo) === "assemblea"){
+    // "l'assemblea di domani spostala alle 19" sposta quella che c'è, non ne segna una nuova (giro 20)
+    const cambiaAssemblea = /\b(?:spost\p{L}*|anticip\p{L}*|posticip\p{L}*|rimand\p{L}*|slitt\p{L}*|annull\p{L}*|cancell\p{L}*|invece|non\s+(?:è|e)\s+più)\b/iu.test(testo) && !/\bconvoc/i.test(testo);
+    if(testo && !inCorso && !inContinuazione && currentProfession === "amministratore" && /\bassemble[ae]\b/i.test(testo) && !cambiaAssemblea && cassettoNeurale(testo) === "assemblea"){
       const la = EonLettore.leggiAssemblea(testo, contestoLettore());
       const ra = la ? gestisciAssemblea(la, (frase, p) => elabora(frase, false, p)) : null;
       if(ra && ra.comando){ ricordaEsitoCodice(testo, "assemblea_neurale"); return inviaAlServer(testo, viaVoce, false, ra); }

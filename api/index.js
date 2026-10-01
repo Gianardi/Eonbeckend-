@@ -3764,7 +3764,7 @@ async function descriviProssimaAzione(pendente, ctx) {
    risponde, data strana) → null → motore completo di sempre. */
 const MODELLO_RAPIDO = "claude-haiku-4-5";
 const PREFISSO_RACCONTO = "Il professionista ti ha appena raccontato cosa deve fare:";
-const RIFERIMENTO_TEMPO_RAPIDO = /\b(oggi|domani|dopodomani|stasera|stamattina|stanotte|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|alle|ore|fra|tra)\b|\d{1,2}[:.]\d{2}|\d{1,2}\/\d{1,2}/i;
+const RIFERIMENTO_TEMPO_RAPIDO = /\b(oggi|domani|dopodomani|stasera|stamattina|stanotte|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica|alle|ore|fra|tra)(?![\wàèéìòù])|\d{1,2}[:.]\d{2}|\d{1,2}\/\d{1,2}/i;
 // Richieste che non sono "segna un impegno": vanno sempre al motore completo, senza nemmeno provare.
 // "foto" come parola intera: "impianto fotovoltaico" è un lavoro, non una fotografia (29/09/2026)
 const ESCLUSI_RAPIDO = /fattur|preventiv|messaggi|scrivi|scrivere|manda|invia|\bfoto\b|\bfotograf|document|appunt[oi]\b|cancell|elimin|annull|disdic|cestino|\?/i;
@@ -4259,7 +4259,7 @@ async function provaPercorsoRapidoImpegno(body, ctx, user) {
 const PREFISSO_PAGINA_CLIENTI = "Il professionista ha scritto o dettato questo, riguardo a un cliente";
 const PAROLE_CLIENTE_HOME = /\b(client[ei]|anagrafica|rubrica|contatt[oi]|numero|telefono|cellulare)\b/i;
 // Con un giorno o un'ora dentro c'è anche un impegno da segnare: motore completo.
-const TEMPO_PRECISO = /\b(oggi|domani|dopodomani|stasera|stamattina|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)\b|\b\d{1,2}[:.]\d{2}\b|\balle\s+\d/i;
+const TEMPO_PRECISO = /\b(oggi|domani|dopodomani|stasera|stamattina|luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)(?![\wàèéìòù])|\b\d{1,2}[:.]\d{2}\b|\balle\s+\d/i;
 
 const STRUMENTO_LEGGI_CLIENTE = {
   name: "leggi_cliente",
