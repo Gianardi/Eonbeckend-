@@ -13583,6 +13583,9 @@ const MESSAGGIO_ESPLICITO = /^\s*(?:wa|whatsapp|whats|wapp|sms|manda\s+un\s+(?:w
 const chiedeDiFare = (testo) => /^\s*(?:fammi|fai|facciamo|prepara|preparami|crea|creami|scrivi|scrivimi|compila|compilami)\b(?!\s+(?:ri)?(?:vedere|vedé|vede|trovare|aprire|cercare|leggere|sentire|avere|mandare)(?![\wàèéìòù]))/i.test(String(testo || ""));
 // una "chiamata" senza nessuna parola da telefono ("Elisa Fontana è allergica all'ammoniaca") non è una chiamata (1/10)
 const PAROLE_CHIAMATA = /\b(?:chiam\p{L}*|ciam\p{L}*|kiam\p{L}*|telefon\p{L}*|squill\p{L}*|richiam\p{L}*|sent\p{L}*|tel|parla\p{L}*|passami|numero)\b/iu;
+// un messaggio o una mail senza nessuna parola da messaggio ("a Tiziana delle pulizie ci tiene ai pagamenti
+// puntuali, non farla aspettare": un appunto, non un messaggio da mandare) (1/10)
+const PAROLE_MESSAGGIO = /\b(?:mand\p{L}*|scriv\p{L}*|messagg\p{L}*|whatsapp|whats|wapp|wa|sms|mail|email|e-mail|posta|avvis\p{L}*|chied\p{L}*|domand\p{L}*|rispond\p{L}*|invia\p{L}*|inoltr\p{L}*|comunic\p{L}*|digli|dille|dagli|ditegli|ricorda\s+a|di\s+a|dì\s+a|fai\s+sapere|fagli\s+sapere|falle\s+sapere|spedisc\p{L}*|conferma\p{L}*|saluta\p{L}*)\b/iu;
 function provaModello(l, testo, arbitro){
   if(typeof EonLettore === "undefined" || !EonLettore.classifica) return null;
   // "aggiungi in EON queste foto", "segna in Fornitori…": una cartella che c'è, la gestisce la sua funzione
@@ -13592,6 +13595,7 @@ function provaModello(l, testo, arbitro){
   const r = EonLettore.classifica(testo, ctx);
   if(!r) return null;
   if(r.intento === "chiamata" && !PAROLE_CHIAMATA.test(testo)) return null;
+  if(/^(?:messaggio|email)$/.test(r.intento) && !PAROLE_MESSAGGIO.test(testo)) return null;
   // chi chiede di FARE qualcosa ("fammi un documento per il DURC") non si vede aprire quello che c'è
   if(r.intento === "cerca_documento" && chiedeDiFare(testo)) return null;
   /* Il modello neurale decide il cassetto (30/09/2026, come le grandi app): se è
@@ -16229,6 +16233,7 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(testo && !inCorso && !inContinuazione){
       let tipoC = cassettoNeurale(testo);
       if(tipoC === "chiamata" && !PAROLE_CHIAMATA.test(testo)) tipoC = null;
+      if(/^(?:messaggio|email)$/.test(tipoC || "") && !PAROLE_MESSAGGIO.test(testo)) tipoC = null;
       const vecchia = /^(?:messaggio|email|chiamata)$/.test(tipoC || "") ? leggiConLettore(testo) : null;
       // le regole l'hanno già letto tutto (a chi e, per scrivere, cosa): come prima
       const giaLetta = vecchia && /^(?:messaggio|email|whatsapp|chiama)$/.test(vecchia.azione) && (vecchia.cliente || vecchia.candidati || vecchia.clienteSimile || vecchia.nomeDetto) && (vecchia.azione === "chiama" || vecchia.messaggio);
