@@ -7132,6 +7132,8 @@ function renderCalendar(){
         if(cliente && cliente.phone && cliente.phone.trim()){
           chiamataInCorso = { cliente: cliente, iniziata: Date.now() };
           apriLinkEsterno("tel:" + cliente.phone.replace(/\s/g, ""));
+        } else if(cliente){
+          chiediContatto(cliente, "telefono", "lo chiamo", (c2) => apriLinkEsterno("tel:" + numeroPerLink(c2.phone)));
         } else {
           showAILanding("Numero mancante",
             "Non ho il telefono di " + it.contatto + ". Aggiungilo alla sua scheda in Clienti e potrai chiamare da qui.");
@@ -7142,7 +7144,7 @@ function renderCalendar(){
       if(bPortami) bPortami.addEventListener("click", (e) => {
         e.stopPropagation();
         if(cliente) portamiDaCliente(cliente);
-        else showAILanding("Cliente non trovato", it.contatto + " non è tra i tuoi clienti: aggiungilo con il suo indirizzo e potrai partire da qui.");
+        else offriDiAggiungereCliente(it.contatto, (c) => portamiDaCliente(c)); // poi chiede l'indirizzo e parte
       });
 
       const bElimina = row.querySelector(".cal-elimina");
@@ -12448,8 +12450,28 @@ function normalizzaSal(testo){
   const dopo = t.replace(/^.*?\bs\.?a\.?l\.?(?=\s|$|,)/i, "").replace(/\b(?:siamo|lavori|finale|al|a)\s*$/gi, " ").replace(/\s+(?:siamo|al|a)\b\s*/gi, " ").replace(/\s+/g, " ").trim();
   return "fai SAL al " + perc + "% " + dopo;
 }
+/* "Mandami il SAL di Ferraro", "fammi vedere il SAL del cantiere Ferraro": c'è → la scheda
+   del cliente (con i SAL); non c'è → "Lo facciamo adesso?" (1/10/2026) */
+const CERCA_SAL = /^(?:mandami|mostrami|fammi\s+vedere|fammi\s+vede|mi\s+serve|apri|aprimi|trovami|cerca|dov['’]?\s*[eè])\s+(?:il\s+|l['’]?\s*)?(?:ultimo\s+)?(?:sal|s\.a\.l\.?|stato\s+(?:di\s+)?avanzamento(?:\s+(?:dei\s+)?lavori)?)\s+(?:(?:n\.?|numero)\s*\d+\s+)?(?:di|del|della|dello|dell['’]?|per|dal|al)\s*(.+)$/i;
+function chiediPercentualeSal(cliente){
+  domandaDelCodice({ titolo: "SAL · " + cliente.name, domanda: "A che punto sono i lavori? (percentuale, es. 40%)", segnaposto: "Es. 40%", onRisposta: async (t) => {
+    const n = Number(String(t).replace(",", ".").replace(/[^\d.]/g, ""));
+    if(!(n > 0 && n <= 100)) return;
+    chiudiRisorsaCard();
+    await provaSal("sal " + n + "% " + cliente.name);
+  } });
+}
 async function provaSal(testo){
   if(currentProfession !== "edile") return false;
+  const cercaSal = String(testo || "").trim().replace(/[.!?]+$/, "").match(CERCA_SAL);
+  const clSal = cercaSal ? clienteDaNomeDetto(cercaSal[1].replace(/^(?:cantiere|lavori|cliente)\s+(?:(?:di|del|della|dello)\s+)?/i, "")) || clienteDaNomeDetto(cercaSal[1]) : null;
+  if(clSal){
+    if(salDelCliente(clSal.id).length){ chiudiRisorsaCard(); mostraSchedaCliente(clSal); return true; }
+    domandaDelCodice({ titolo: "Il SAL non c'è ancora", domanda: "Il SAL per " + clSal.name + " non l'abbiamo ancora fatto. Lo facciamo adesso?", senzaCampo: true,
+      scelte: [{ etichetta: "Sì, facciamolo", valore: "si" }, { etichetta: "No", valore: "no" }],
+      onRisposta: (v) => { if(v === "si") chiediPercentualeSal(clSal); else chiudiRisorsaCard(); } });
+    return true;
+  }
   let s = capisciSal(testo) || (normalizzaSal(testo) ? capisciSal(normalizzaSal(testo)) : null);
   /* Passo 3: il modello dice "SAL" e le regole non l'hanno letto ("siamo a metà", "all'80",
      "secondo stato di avanzamento…"): cliente e percentuale dal lettore */
@@ -12469,15 +12491,7 @@ async function provaSal(testo){
     const m = String(testo || "").trim().replace(/[.!?]+$/, "").match(/^(?:(?:fai|fammi|segna|segnami|registra|crea|nuovo|metti|prepara|preparami)\s+(?:il\s+|un\s+|lo\s+)?)?s\.?a\.?l\.?\b\s*(?:(?:n\.?|numero)\s*\d+\s*)?(.*)$/i);
     const resto = m ? m[1].replace(/^(?:(?:del|dei|della|dello|per|di|da|dal|al|a|il|lo|la)\s+)*(?:cantiere|lavori|lavoro|cliente)?\s*(?:(?:del|della|di|da|dal|per)\s+)?/i, "").trim() : "";
     const cliente = resto && !/\d/.test(resto) ? clienteDaNomeDetto(resto) : null;
-    if(cliente){
-      domandaDelCodice({ titolo: "SAL · " + cliente.name, domanda: "A che punto sono i lavori? (percentuale, es. 40%)", segnaposto: "Es. 40%", onRisposta: async (t) => {
-        const n = Number(String(t).replace(",", ".").replace(/[^\d.]/g, ""));
-        if(!(n > 0 && n <= 100)) return;
-        chiudiRisorsaCard();
-        await provaSal("sal " + n + "% " + cliente.name);
-      } });
-      return true;
-    }
+    if(cliente){ chiediPercentualeSal(cliente); return true; }
   }
   if(!s || !isDbReady()) return false;
   const nuovo = await creaSal(s.cliente, s.percentuale, s.importo, "");
@@ -12666,8 +12680,33 @@ function capisciDico(testo){
   if(!resto) return { cliente: null, nomeDetto: "" };
   return { cliente: clienteDaNomeDetto(resto), nomeDetto: resto };
 }
+/* "Mandami la dichiarazione di conformità di Le Querce", "mi serve la DiCo di Le Querce":
+   quelle fatte con EON; se non c'è, "La facciamo adesso?" (1/10/2026) */
+const CERCA_DICO = /^(?:mandami|mostrami|fammi\s+vedere|fammi\s+vede|mi\s+serve|apri|aprimi|trovami|cerca|dov['’]?\s*[eè])\s+(?:la\s+|l['’]?\s*)?(?:ultima\s+)?(?:dico|di\.?co\.?|dichiarazione\s+di\s+conformit[aà])\s+(?:(?:dell['’]?\s*|del\s+|per\s+l['’]?\s*)impianto\s+|del\s+\S+\s+)?(?:di|del|della|dello|dell['’]?|per|a|al|alla)\s*(.+)$/i;
+function mostraOFaiDico(cliente, nomeDetto){
+  const fatte = cliente ? dicoDelCliente(cliente.id) : [];
+  const nome = cliente ? cliente.name : nomeBelloCodice(nomeDetto);
+  if(fatte.length){
+    const corpo = document.createElement("div");
+    const lista = document.createElement("div");
+    lista.className = "sc-lista";
+    fatte.forEach(x => lista.appendChild(rigaDico(x, false)));
+    corpo.appendChild(lista);
+    apriRisorsaCard("DiCo · " + nome, corpo);
+    return;
+  }
+  domandaDelCodice({ titolo: "La DiCo non c'è ancora", domanda: "La dichiarazione di conformità per " + nome + " non l'abbiamo ancora fatta. La facciamo adesso?", senzaCampo: true,
+    scelte: [{ etichetta: "Sì, facciamola", valore: "si" }, { etichetta: "No", valore: "no" }],
+    onRisposta: (v) => { chiudiRisorsaCard(); if(v === "si") apriDico(cliente, cliente ? "" : nomeDetto); } });
+}
 async function provaDico(testo){
   if(currentProfession !== "elettricista") return false;
+  const cercaDico = String(testo || "").trim().replace(/[.!?]+$/, "").match(CERCA_DICO);
+  if(cercaDico){
+    const resto = cercaDico[1].replace(/^(?:(?:sig|signor|signora|sigra)\.?\s+)/i, "").trim();
+    const cl = clienteDaNomeDetto(resto);
+    if(cl || (resto && !/\d/.test(resto) && resto.split(" ").length <= 4)){ chiudiRisorsaCard(); mostraOFaiDico(cl, resto); return true; }
+  }
   const d = capisciDico(testo);
   if(!d) return false;
   chiudiRisorsaCard();
@@ -12944,10 +12983,15 @@ function gestisciDocumento(l, testo, invia){
   if(l.modo === "cerca"){
     if(l.cliente && provaRisorsaImmediata(cosa + " " + l.cliente.name + (l.lavoro ? " " + l.lavoro : ""))) return { fatto: "documento_cerca" };
     if(!l.cliente) return null;
+    // "il preventivo del Bar Aurora l'ho fatto?": è una domanda, e "ho fatto" non è il lavoro
+    const domanda = /\?\s*$/.test(testo) || /\b(?:ho|hai|hanno|abbiamo|avevo)\s+(?:gia\s+|già\s+)?(?:fatt|mandat|accettat|firmat|inviat|spedit)/i.test(testo);
+    const lavoro = l.lavoro && !/\b(?:ho|hai|hanno|abbiamo|fatt\w*|mandat\w*|accettat\w*|firmat\w*|inviat\w*)\b/i.test(l.lavoro) ? l.lavoro : "";
+    offriDiFareDocumento(testo, cosa, l.cliente, domanda ? "" : lavoro, domanda);
+    return { fatto: "documento_da_fare" };
   }
   const s = { tipo: l.tipo, cliente: l.cliente, clienteNuovo: l.clienteNuovo, importo: l.importo, lavoro: l.lavoro, invio: l.invio, dubbio: l.dubbio,
     voci: l.voci && l.voci.length ? l.voci : null, aliquota: l.aliquotaIva || null, totaleDetto: l.totaleDetto || null, confermato: false,
-    simile: l.clienteSimile, candidati: l.candidati, primaVolta: true, nota: l.modo === "cerca" ? "Non trovo " + (cosa === "fattura" ? "fatture" : "preventivi") + " di " + l.cliente.name + ": ne preparo uno nuovo. " : "" };
+    simile: l.clienteSimile, candidati: l.candidati, primaVolta: true, nota: "" };
   const titolo = "Nuovo " + cosa;
   const chiedi = (domanda, altro) => domandaDelCodice({ titolo: cosa === "fattura" ? "Nuova fattura" : titolo, domanda: (s.nota || "") + domanda, ...altro });
   const passo = () => {
@@ -13075,6 +13119,87 @@ function offriInvioDocumento(risposta){
   apriRisorsaCard(a.esito.titolo + " · " + a.esito.cliente, corpo);
 }
 
+/* ---- "Non c'è? Lo facciamo adesso?" (1/10/2026, Andrea: "il meccanismo estendilo a ogni
+   attività dove ha senso") ---- */
+/* Manca il numero o l'email: EON lo chiede, lo salva nella scheda e va avanti */
+function chiediContatto(c, tipo, dopo, poi, saltaEtichetta){
+  const email = tipo === "email";
+  domandaDelCodice({
+    titolo: (email ? "Email di " : "Numero di ") + c.name,
+    domanda: (email ? "Non ho l'email di " + c.name + ". Me la dici? La salvo" : "Non ho il numero di " + c.name + ". Me lo dici? Lo salvo") + (dopo ? " e " + dopo : "") + ".",
+    scelte: saltaEtichetta ? [{ etichetta: saltaEtichetta, valore: "__salta" }] : null,
+    segnaposto: email ? "Es. nome@gmail.com" : "Es. 333 1234567",
+    onRisposta: (v, tasto) => {
+      if(tasto && v === "__salta") return poi(c, true);
+      const t = String(v || "").trim();
+      if(email){
+        const m = t.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+        if(!m){ showAIToast("Email non valida", "Scrivi l'indirizzo, es. nome@gmail.com."); return; }
+        c.email = m[0];
+        if(c.id && isDbReady()) dbUpdate("clients", c.id, { email: c.email });
+      } else {
+        const cifre = t.replace(/[^\d+]/g, "");
+        if(cifre.replace(/\D/g, "").length < 6){ showAIToast("Numero non valido", "Scrivi solo il numero, es. 333 1234567."); return; }
+        c.phone = cifre;
+        if(c.id && isDbReady()) dbUpdate("clients", c.id, { phone: c.phone });
+      }
+      try { renderClientArchive(); } catch(e){}
+      poi(c, false);
+    },
+  });
+}
+/* Chi non è tra i clienti: "Lo aggiungo?", poi si va avanti col cliente nuovo */
+function offriDiAggiungereCliente(nomeDetto, poi){
+  const nome = nomeBelloCodice(nomeDetto);
+  domandaDelCodice({
+    titolo: nome,
+    domanda: nome + " non è tra i tuoi clienti. Lo aggiungo?",
+    scelte: [{ etichetta: "Sì, aggiungilo", valore: "si" }, { etichetta: "No", valore: "no" }],
+    senzaCampo: true,
+    onRisposta: async (v) => {
+      if(v !== "si") return chiudiRisorsaCard();
+      const c = await creaClienteDalCodice(nome);
+      if(!c){ showAIToast("Non riesco", "Non sono riuscito ad aggiungere " + nome + ": riprova tra poco."); return; }
+      poi(c);
+    },
+  });
+}
+/* Nessun appuntamento con quel cliente: "Lo fissiamo?" → quando → lo segna il calendario di sempre */
+function offriDiFissare(titolo, risposta, nome){
+  domandaDelCodice({
+    titolo,
+    domanda: risposta + " Lo fissiamo?",
+    scelte: [{ etichetta: "Sì, fissiamolo", valore: "si" }, { etichetta: "No", valore: "no" }],
+    senzaCampo: true,
+    onRisposta: (v) => {
+      if(v !== "si") return chiudiRisorsaCard();
+      domandaDelCodice({ titolo: "Appuntamento con " + nome, domanda: "Quando?", segnaposto: "Es. giovedì alle 9", onRisposta: (t) => {
+        chiudiRisorsaCard();
+        if(typeof window.eonInviaHome === "function") window.eonInviaHome("appuntamento con " + nome + " " + t);
+      } });
+    },
+  });
+}
+
+/* "Sposta l'appuntamento con Rossi a giovedì" e in agenda non c'è: "Lo metto giovedì?" */
+function offriDiMettereImpegno(cliente, testo, giornoIso, ora){
+  const d = new Date(giornoIso + "T12:00:00");
+  const quando = d.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }) + (ora ? " alle " + ora : "");
+  // il tipo detto nella frase ("sposta il sopralluogo…"), se no "appuntamento"
+  const parole = EonLettore.norm(testo || "").split(" ");
+  const cosa = ["sopralluogo", "riunione", "chiamata", "telefonata", "intervento", "consegna", "visita", "verifica", "collaudo", "manutenzione", "incontro", "appuntamento"].find(w => parole.some(p => p.length >= 5 && w.startsWith(p.slice(0, 6)))) || "appuntamento";
+  domandaDelCodice({
+    titolo: "Non c'è in agenda",
+    domanda: "Non trovo in agenda l'impegno con " + cliente.name + ": forse è già stato annullato. Lo metto " + quando + "?",
+    scelte: [{ etichetta: "Sì, mettilo", valore: "si" }, { etichetta: "No", valore: "no" }],
+    senzaCampo: true,
+    onRisposta: (v) => {
+      chiudiRisorsaCard();
+      if(v === "si" && typeof window.eonInviaHome === "function") window.eonInviaHome(cosa + " con " + cliente.name + " " + quando);
+    },
+  });
+}
+
 /* ---- Messaggio, email, WhatsApp, chiamata ---- */
 function risolviClienteLettura(l, titolo, poi){
   if(l.cliente) return poi(l.cliente);
@@ -13133,16 +13258,19 @@ function gestisciMessaggio(l, testo, invia){
 function gestisciScrittura(l, testo, viaVoce){
   const email = l.azione === "email";
   const titolo = email ? "Email" : "WhatsApp";
-  const apri = (c) => {
+  const apri = (c, senzaContatto) => {
+    if(!senzaContatto && (email ? !c.email : !c.phone)){
+      chiediContatto(c, email ? "email" : "telefono", email ? "preparo la mail" : "preparo il messaggio", apri, email ? "La scrivo io nella Mail" : "Lo scelgo in WhatsApp");
+      return { fatto: l.azione + "_contatto_chiesto" };
+    }
     const corpoMsg = "Ciao " + c.name.split(/\s+/)[0] + ", " + (l.messaggio ? l.messaggio.charAt(0).toLowerCase() + l.messaggio.slice(1) : "");
     const corpo = document.createElement("div");
     corpo.className = "percorso-card";
     const link = document.createElement("a");
     link.className = "percorso-meta";
     if(email){
-      if(!c.email){ mostraSchedaCliente(c); showAIToast("Email mancante", "Non ho l'email di " + c.name + ": aggiungila con Modifica."); return { fatto: "email_mancante" }; }
       const oggetto = l.messaggio ? l.messaggio.replace(/^Ti chiedo\s+/i, "").replace(/[.?!]+$/, "") : "";
-      link.href = "mailto:" + encodeURIComponent(c.email) + "?subject=" + encodeURIComponent(oggetto.charAt(0).toUpperCase() + oggetto.slice(1)) + "&body=" + encodeURIComponent(corpoMsg);
+      link.href = "mailto:" + encodeURIComponent(c.email || "") + "?subject=" + encodeURIComponent(oggetto.charAt(0).toUpperCase() + oggetto.slice(1)) + "&body=" + encodeURIComponent(corpoMsg);
     } else {
       link.href = "https://wa.me/" + numeroWhatsApp(c.phone) + "?text=" + encodeURIComponent(corpoMsg);
       link.target = "_blank"; link.rel = "noopener";
@@ -13167,7 +13295,7 @@ function gestisciScrittura(l, testo, viaVoce){
 function gestisciChiamata(l, viaVoce){
   const chiama = (c) => {
     const numero = numeroPerLink(c.phone);
-    if(!numero){ mostraSchedaCliente(c); showAIToast("Numero mancante", "Non ho il telefono di " + c.name + ": aggiungilo con Modifica."); return { fatto: "chiama" }; }
+    if(!numero){ chiediContatto(c, "telefono", "lo chiamo", chiama); return { fatto: "chiama_numero_chiesto" }; }
     const corpo = document.createElement("div");
     corpo.className = "percorso-card";
     corpo.innerHTML = `<a class="percorso-meta" href="tel:${escapeHtml(numero)}"><span>Chiama ${escapeHtml(c.name)}</span><svg class="percorso-freccia" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>`;
@@ -13223,6 +13351,8 @@ function apriCartelloPer(l){
 }
 function mostraDocImpresaPer(l, testo){
   const trovati = cercaDocumentiImpresa(l.documento);
+  // La DiCo di un cliente si fa con EON: quelle fatte, o "La facciamo adesso?" (1/10/2026)
+  if(!trovati.length && l.documento === "dico" && l.cliente && currentProfession === "elettricista"){ mostraOFaiDico(l.cliente, ""); return { fatto: "dico_cliente" }; }
   if(!trovati.length){
     navigateTo("documenti-impresa");
     mostraRispostaEON(testo, "Non hai ancora caricato " + (l.documento === "durc" ? "il DURC" : "questo documento") + ": caricalo qui in «Documenti impresa» e poi te lo trovo in un attimo.", { titolo: l.documento.toUpperCase() });
@@ -13468,7 +13598,17 @@ function rispondiSuiDati(l){
     if(c && c.phone) return { titolo: c.name, testo: "Sì: **" + c.phone + "**" };
     const chi = c ? c.name : l.nomeDetto;
     if(!chi) return null;
-    return { titolo: chi, testo: c ? "Hai " + c.name + " in rubrica ma senza numero." : "Non hai il numero di " + chi + ": non è tra i tuoi clienti." };
+    const salvato = (c2) => { chiudiRisorsaCard(); showAIToast("Numero salvato", c2.name + ": " + c2.phone + "."); };
+    if(c) chiediContatto(c, "telefono", "", salvato);
+    else domandaDelCodice({ titolo: nomeBelloCodice(chi), domanda: "Non hai il numero di " + nomeBelloCodice(chi) + ": non è tra i tuoi clienti. Me lo dici? Lo aggiungo ai clienti con il numero.", segnaposto: "Es. 333 1234567", onRisposta: async (v) => {
+      const cifre = String(v || "").replace(/[^\d+]/g, "");
+      if(cifre.replace(/\D/g, "").length < 6){ showAIToast("Numero non valido", "Scrivi solo il numero, es. 333 1234567."); return; }
+      const nuovo = await creaClienteDalCodice(nomeBelloCodice(chi));
+      if(!nuovo) return;
+      nuovo.phone = cifre; dbUpdate("clients", nuovo.id, { phone: cifre });
+      salvato(nuovo);
+    } });
+    return { gestito: true, titolo: chi, testo: "" };
   }
   if(l.tema === "iva"){
     const scorso = /\bmese\s+scorso|scorso\s+mese\b/.test(n), anno = /\banno\b/.test(n);
@@ -13498,7 +13638,7 @@ function rispondiSuiDati(l){
     if(l.cliente && !(l.quando && l.quando.giornoIso)){
       const nome = EonLettore.norm(l.cliente.name).split(" ").filter(w => w.length > 1);
       const voci = impegniDaAnnullare({ data: null, ora: null, nome: nome.length > 1 ? [nome[nome.length - 1]] : nome, oggetto: null }).filter(v => EonLettore.norm(v.titolo).split(" ").some(w => nome.includes(w)));
-      if(!voci.length) return { titolo: l.cliente.name, testo: "Non hai impegni in programma con " + l.cliente.name + "." };
+      if(!voci.length){ offriDiFissare(l.cliente.name, "Non hai impegni in programma con " + l.cliente.name + ".", l.cliente.name); return { gestito: true, titolo: l.cliente.name, testo: "" }; }
       return { titolo: l.cliente.name, testo: voci.slice(0, 5).map(v => "**" + quandoBreve(v.quando) + "** – " + v.titolo).join("\n") };
     }
     /* "Cosa ho la prossima settimana?", "cosa ho questa settimana?" (giro 5):
@@ -13533,7 +13673,8 @@ function rispondiSuiDati(l){
     const docs = documentiVeri().filter(d => d.dati && d.dati.tipo === tipo && (!l.cliente || nomeChiave(d.clienteChat || "") === nomeChiave(l.cliente.name)));
     const nome = tipo === "fattura" ? "fattura" : "preventivo", nomi = tipo === "fattura" ? "fatture" : "preventivi";
     const nota = chiedeEsito ? "\nSe l'hanno accettato EON non lo sa ancora: quando ti rispondono, dimmelo e lo segno nella Mente." : "";
-    if(!docs.length) return { titolo: l.cliente ? l.cliente.name : nomi.charAt(0).toUpperCase() + nomi.slice(1), testo: "Non trovo " + nomi + " fatti con EON" + (l.cliente ? " per " + l.cliente.name : "") + "." };
+    if(!docs.length && l.cliente){ offriDiFareDocumento("", tipo, l.cliente, "", true); return { gestito: true, titolo: l.cliente.name, testo: "" }; }
+    if(!docs.length) return { titolo: nomi.charAt(0).toUpperCase() + nomi.slice(1), testo: "Non trovo " + nomi + " fatti con EON." };
     const quandoDoc = (d) => { const x = d.createdAt ? new Date(d.createdAt) : null; return x && !isNaN(x) ? x.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : ""; };
     return { titolo: l.cliente ? l.cliente.name + ": " + (docs.length === 1 ? "1 " + nome : docs.length + " " + nomi) : "Ultimi " + nomi,
       testo: docs.slice(0, 6).map(d => (l.cliente ? "" : "**" + (d.clienteChat || "") + "** – ") + euroConti(Number(d.dati.totale) || 0) + (quandoDoc(d) ? " · fatto il " + quandoDoc(d) : "") + (d.dati.numero ? " · n. " + d.dati.numero : "")).join("\n") + nota };
@@ -13959,8 +14100,7 @@ function provaComandiSemplici(testo, viaVoce){
     if(!c) return false;
     const numero = numeroPerLink(c.phone);
     if(!numero){
-      mostraSchedaCliente(c);
-      showAIToast("Numero mancante", "Non ho il telefono di " + c.name + ": aggiungilo con Modifica.");
+      chiediContatto(c, "telefono", "lo chiamo", (c2) => apriLinkEsterno("tel:" + numeroPerLink(c2.phone)));
       return true;
     }
     if(!viaVoce){ apriLinkEsterno("tel:" + numero); return true; }
@@ -14680,6 +14820,12 @@ function provaSpostaImmediato(testo, viaVoce){
   let voci = impegniDaAnnullare(r);
   if(!voci.length && nomiClienti.length && nomiClienti.length < r.nome.length) voci = impegniDaAnnullare({ ...r, nome: nomiClienti });
   if(!voci.length && r.oggetto) voci = impegniDaAnnullare({ ...r, nome: nomiClienti.length ? nomiClienti : r.nome, oggetto: null });
+  /* Non c'è in agenda, ma il cliente è nominato e il nuovo giorno è detto: "Lo metto giovedì?"
+     (1/10/2026). Chiede sempre prima: forse era stato annullato apposta. */
+  if(!voci.length && nomiClienti.length && letto.nuovoGiorno){
+    const cl = clients.filter(c => nomiClienti.every(w => EonLettore.norm(c.name).split(" ").includes(w)));
+    if(cl.length === 1){ offriDiMettereImpegno(cl[0], testo, letto.nuovoGiorno, letto.nuovaOra); return true; }
+  }
   if(!voci.length || voci.length > 6) return false; // non lo trovo: forse l'ho letto male, decide l'AI
   const nuovoIso = (v) => {
     const d = interpretaQuando(v.quando);
@@ -15885,8 +16031,7 @@ function provaRisorsaImmediata(testo){
     // ("mi serve il preventivo di X" senza preventivi: si prepara, deciso il 29/09 — non qui)
     const chiedeDiVedere = /^(?:dammi|mandami|mi mandi|mi manderesti|manda|inviami|mi invii|mi dai|mi daresti|fammi avere|fammi vedere|mi fai vedere|voglio vedere|vorrei vedere|mostrami|mostra|recupera|cerca|trova|apri)\b/.test(t);
     if(!documenti.length && (/^(preventivi|fatture)$/.test(tipoRichiesto) || chiedeDiVedere) && soloNome){
-      const plurale = tipoDoc === "fattura" ? "fatture" : "preventivi";
-      mostraRispostaEON(testo, cliente.name + " non ha ancora " + plurale + ". Per farne " + (tipoDoc === "fattura" ? "una: «fattura" : "uno: «preventivo") + " per " + cliente.name + ", lavoro e importo».", { titolo: plurale.charAt(0).toUpperCase() + plurale.slice(1) + " di " + cliente.name });
+      offriDiFareDocumento(testo, tipoDoc, cliente, "", true); // "Lo facciamo adesso?" (1/10/2026)
       return true;
     }
     if(!documenti.length) return false;
@@ -17679,7 +17824,18 @@ function clienteDaNomeDetto(testo){
 
 function provaSchedaCliente(testo){
   const c = clienteDaNomeDetto(testo);
-  if(!c) return false;
+  if(!c){
+    /* Chiesta proprio la scheda ("apri la scheda di Gino Pace", "fammi vedere il cliente
+       Pace") e nessun cliente ha quel nome: "Lo aggiungo?" (1/10/2026) */
+    const t = String(testo || "").toLowerCase().replace(/[.,!?;:"]+/g, " ").replace(/\s+/g, " ").trim();
+    const m = t.match(/^(?:(?:apri(?:mi)?|mostra(?:mi)?|fammi vedere|fai vedere|dammi)\s+)?(?:la\s+)?(?:scheda|card)\s+(?:di|del|della|dello)\s+(?:cliente\s+)?(.+)$/)
+      || t.match(/^(?:apri(?:mi)?|mostra(?:mi)?|fammi vedere)\s+(?:il\s+|la\s+)?cliente\s+(.+)$/);
+    const nome = m ? m[1].replace(/^(?:sig|signor|signora|sigra|dott|ing|geom|arch)\s+/, "").trim() : "";
+    if(!nome || /\d/.test(nome) || nome.split(" ").length > 4) return false;
+    if(clients.some(x => nome.split(" ").every(p => String(x.name || "").toLowerCase().split(/\s+/).includes(p)))) return false; // più clienti con quel nome: decide chi viene dopo
+    offriDiAggiungereCliente(nome, (nuovo) => { chiudiRisorsaCard(); mostraSchedaCliente(nuovo); });
+    return true;
+  }
   mostraSchedaCliente(c);
   return true;
 }
@@ -18747,12 +18903,13 @@ function lavoroDaFraseInvio(testo, tipo, cliente){
   const lav = parole.join(" ");
   return lav.charAt(0).toUpperCase() + lav.slice(1);
 }
-function offriDiFareDocumento(testo, tipo, cliente){
+function offriDiFareDocumento(testo, tipo, cliente, lavoroDetto, conEon){
   const fattura = tipo === "fattura";
-  const lavoro = lavoroDaFraseInvio(testo, fattura ? "fattura" : "preventivo", cliente);
+  const lavoro = lavoroDetto !== undefined ? String(lavoroDetto || "") : lavoroDaFraseInvio(testo, fattura ? "fattura" : "preventivo", cliente);
   domandaDelCodice({
     titolo: fattura ? "La fattura non c'è ancora" : "Il preventivo non c'è ancora",
-    domanda: (fattura ? "La fattura per " : "Il preventivo per ") + cliente.name + (lavoro ? " (" + lavoro.toLowerCase() + ")" : "")
+    domanda: conEon ? "Con EON non abbiamo ancora fatto " + (fattura ? "fatture" : "preventivi") + " per " + cliente.name + ". " + (fattura ? "La facciamo adesso?" : "Lo facciamo adesso?")
+      : (fattura ? "La fattura per " : "Il preventivo per ") + cliente.name + (lavoro ? " (" + lavoro.toLowerCase() + ")" : "")
       + (fattura ? " non l'abbiamo ancora fatta. La facciamo adesso?" : " non l'abbiamo ancora fatto. Lo facciamo adesso?"),
     scelte: [{ etichetta: "Sì, facciamolo", valore: "si" }, { etichetta: "No", valore: "no" }],
     senzaCampo: true,
@@ -19573,6 +19730,8 @@ function apriArchivio(){
         if(cliente && cliente.phone && cliente.phone.trim()){
           chiamataInCorso = { cliente, iniziata: Date.now() };
           apriLinkEsterno("tel:" + cliente.phone.replace(/\s/g, ""));
+        } else if(cliente){
+          chiediContatto(cliente, "telefono", "lo chiamo", (c2) => apriLinkEsterno("tel:" + numeroPerLink(c2.phone)));
         } else {
           showAILanding("Numero mancante", "Non ho il telefono di " + chat.name + ". Aggiungilo alla sua scheda.");
         }

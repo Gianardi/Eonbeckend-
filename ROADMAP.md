@@ -748,6 +748,17 @@ sporca, dialetti, chat, anziano, straniero.
    [No]. Con «Sì» parte il preventivo per quel cliente e quel lavoro, EON chiede solo quello che
    manca (di solito l'importo) e, fatto, mostra i tasti per mandarlo. Vale anche per la fattura.
    Pilastri *tempo* e *soldi*.
+   **Esteso a tutta l'app (Andrea: "non solo ai preventivi, a ogni attività dove ha senso").**
+   Quando quello che chiedi manca, EON lo dice e propone di farlo subito; con «Sì» lo fa:
+   chiamare/scrivere senza numero o email (li chiede, li salva e chiama o prepara il messaggio),
+   "il numero di X ce l'ho?" (me lo dici? lo salvo, anche aggiungendo il cliente), "il preventivo di X
+   l'ho fatto?" / "mi serve la fattura di X" (lo facciamo adesso?), DiCo dell'elettricista e SAL
+   dell'edile che non ci sono, "quando vedo X?" senza impegni (lo fissiamo?), "sposta l'appuntamento
+   con X a giovedì" che in agenda non c'è (lo metto giovedì? — chiede sempre, forse era annullato
+   apposta), "apri la scheda di X" che non è tra i clienti (lo aggiungo?), il tasto «Portami» in
+   agenda per chi non è cliente. Non messo dove non c'è niente da creare (annullare, cancellare,
+   cercare nella Mente, incassi) né ai messaggi a chi non è cliente (geometra, fornitore: sarebbe
+   fastidioso). Il verbale dell'assemblea EON non lo prepara ancora: da fare a parte.
 6. **EON che conversa, scrive testi ed elabora documenti** (deciso da Andrea
    il 30/09). Il cervello che conversa e scrive non lo alleniamo noi: servono
    miliardi di parametri e verrebbe peggio. Lo usa EON: Claude, dal server, solo

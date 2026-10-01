@@ -4999,6 +4999,28 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 sera: "Non c'è? Lo facciamo adesso?" in tutta l'app (ROADMAP 0b.19 passo 5)
+- Controllo fatto su tutti i "non trovo / non c'è" dell'app (`index.html`). Già così: incasso da chi
+  non è cliente, nota in cartella che non c'è, documento cercato (carica), "portami da X" senza
+  indirizzo, preventivo/fattura da mandare.
+- Nuovi aiutanti: `chiediContatto(c, tipo, dopo, poi, salta)` (chiede numero/email, salva in
+  `clients`, poi continua; tasto "La scrivo io nella Mail" / "Lo scelgo in WhatsApp"),
+  `offriDiAggiungereCliente(nome, poi)`, `offriDiFissare(titolo, risposta, nome)` (Sì → "Quando?" →
+  "appuntamento con X <quando>" alla strada di sempre), `offriDiMettereImpegno(cliente, testo, giorno,
+  ora)`, `mostraOFaiDico`, `chiediPercentualeSal`, `offriDiFareDocumento(…, lavoroDetto, conEon)`.
+- Dove: `gestisciChiamata`, "chiama X" in `provaComandiSemplici`, tasti Chiama in agenda e in chat,
+  `gestisciScrittura` (email e WhatsApp senza contatto); `rispondiSuiDati` contatto / documenti /
+  agenda; `gestisciDocumento` modo "cerca" (prima preparava subito un preventivo nuovo, ora chiede;
+  "l'ho fatto?" non è il lavoro); `provaRisorsaImmediata` ("mandami le fatture di X" senza fatture);
+  `provaSpostaImmediato` (cliente nominato + nuovo giorno, nessun impegno); `provaSchedaCliente`
+  ("apri la scheda di / fammi vedere il cliente X"); `CERCA_SAL` in `provaSal`; `CERCA_DICO` in
+  `provaDico` e DiCo in `mostraDocImpresaPer`; tasto «Portami» in agenda.
+- Prova: `non-ce-facciamolo-app.test.js` (nuova, porta 9041, server vero con database e AI finti:
+  numero salvato e chiamata, email salvata, cliente aggiunto col numero, preventivo fino all'importo,
+  SAL al 40%, DiCo aperta, appuntamento fissato e impegno rimesso dal codice del server, 0 AI).
+- Non fatto: verbale dell'assemblea (EON non lo prepara ancora); "portami da X" a voce per chi non è
+  cliente resta la ricerca nelle Mappe.
+
 ### 1/10 sera: il preventivo da mandare non c'è ancora → "Lo facciamo adesso?" (ROADMAP 0b.19 passo 5)
 - Andrea: "se chiede manda e-mail al condominio X il preventivo e il preventivo non c'è perché non è
   stato ancora fatto, si dovrebbe dire che bisogna farlo e dare subito la possibilità di farlo".
