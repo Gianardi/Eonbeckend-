@@ -606,9 +606,11 @@
       if (unitarioPrima && corrente.length && /^(?:a|da)$/.test(corrente[corrente.length - 1].n)) corrente.pop();
       let j = i + 1;
       if (pp[j] && /^(?:mila|k)$/.test(pp[j].n)) { prezzo *= 1000; j++; }
-      if (pp[j] && /^(?:euro|eur|€)$/.test(pp[j].n)) j++;
+      const conEuroDetto = !!(pp[j] && /^(?:euro|eur|€)$/.test(pp[j].n));
+      if (conEuroDetto) j++;
       // "8 euro e 50": i centesimi
-      if (pp[j] && pp[j].n === "e" && /^\d{1,2}$/.test((pp[j + 1] || {}).n || "") && !(pp[j + 2] && (UNITA.test(pp[j + 2].n) || /^(?:euro|eur|€|a|da)$/.test(pp[j + 2].n)))) {
+      // ("8 tavoli a 450 e 32 sedie a 95", senza "euro": "e 32 sedie" non sono centesimi, giro 19)
+      if (pp[j] && pp[j].n === "e" && /^\d{1,2}$/.test((pp[j + 1] || {}).n || "") && (conEuroDetto ? !(pp[j + 2] && (UNITA.test(pp[j + 2].n) || /^(?:euro|eur|€|a|da)$/.test(pp[j + 2].n))) : (!pp[j + 2] || pp[j + 1].sep || /^(?:centesimi|cent|piu|iva|l|cadauno|cadauna|al|ciascuno|ciascuna|e|per)$/.test(pp[j + 2].n)))) {
         prezzo = Math.round((prezzo + Number(pp[j + 1].n) / (pp[j + 1].n.length === 1 ? 10 : 100)) * 100) / 100; j += 2;
         if (pp[j] && /^(?:centesimi|cent)$/.test(pp[j].n)) j++;
       }
@@ -1494,8 +1496,43 @@
     });
     return out.replace(/\s{2,}/g, " ");
   }
+  /* Le misure e le date dentro un preventivo non sono importi (1/10/2026, giri 17-20: "vetrata
+     3 metri per 2 850 euro" contava 2 euro, "4 finestre da 120 per 140 a 920" faceva 140 finestre,
+     "diametro 110", "da 1 pollice", "2 metri e 40", "intervento del 24 settembre", "3 cavalli").
+     Diventano una parola sola ("3x2m", "da120x140", "diam110"), che resta nella descrizione e che
+     né le regole né il modello leggono come un numero. */
+  const MESI_NOMI = "gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre";
+  function senzaMisure(testo) {
+    let t = String(testo || "");
+    const N = "\\d+(?:[.,]\\d+)?(?:\\s+e\\s+\\d{1,2}(?!\\s*(?:euro|€)))?";
+    const U = "(?:\\s*(?:metri|metro|mt|m|cm|mm|centimetri|millimetri))?";
+    const compatto = (x) => x.replace(/\s+e\s+/g, ",").replace(/\s+/g, "");
+    // date: "del 24 settembre", "il 3 ottobre"; anni: "anno 2027"
+    t = t.replace(new RegExp("\\b(del|dal|il|al|di|fino\\s+al)\\s+(\\d{1,2})\\s+(" + MESI_NOMI + ")\\b", "gi"), (m, a, g, me) => a + " " + g + me.toLowerCase());
+    t = t.replace(/\b(anno|nel|del|per\s+il)\s+(20[2-4]\d)\b/gi, (m, a, y) => (/^anno$/i.test(a) ? "" : a + " ") + "anno" + y);
+    // dimensioni: "3 metri per 2", "da 120 per 140", "1 e 60 per 2 e 70", "4 per 25 per 45 metri" (la sezione del cavo)
+    t = t.replace(new RegExp("(\\bda\\s+)?\\b(" + N + ")(" + U + ")\\s+(?:per|x)\\s+(" + N + ")(" + U + ")(?=(\\s+(?:per|x)\\s+\\d)?)", "gi"), (m, da, a, ua, b, ub, ancora, pos, tutto) => {
+      // "binari 6 metri x 25 euro al metro": è quantità per prezzo, non una misura
+      if (/^\s*(?:euro|€|eur\b|al\s|all|l['’ ]?\s*un|cad|ciascun|a\s+(?:metro|pezzo|testa))/i.test(tutto.slice(pos + m.length))) return m;
+      const conUnita = /\S/.test(ua || "") || /\S/.test(ub || "");
+      const conE = /\se\s/.test(a) || /\se\s/.test(b);
+      const virgola = /[.,]\d/.test(a + b);
+      if (!(da || conUnita || conE || virgola || ancora)) return m; // "6 per 25": una moltiplicazione
+      return (da ? "da" : "") + compatto(a) + "x" + compatto(b) + ((ua || ub || "").trim() ? "m" : "");
+    });
+    // "2 metri e 40", "alto 1 e 20", "2 metri e 80 di larghezza"
+    t = t.replace(/\b(\d+)\s+(metri|metro)\s+e\s+(\d{1,2})\b(?!\s*(?:euro|€|cent))/gi, (m, a, u, b) => a + "," + b + "m");
+    t = t.replace(/\b(alt[oa]|larg[oa]|lung[oa]|profond[oa]|altezza|larghezza|lunghezza|profondit\S*)\s+(\d+)\s+e\s+(\d{1,2})\b(?!\s*(?:euro|€))/gi, (m, w, a, b) => w + " " + a + "," + b + "m");
+    // caratteristiche tecniche: "diametro 110", "sezione 6", "da 1 pollice", "da 25 watt", "3 cavalli", "63 ampere", "250 A"
+    t = t.replace(/\b(diametro|diam|sezione|spessore)\s+(?:di\s+)?(\d+(?:[.,]\d+)?)\s*(mm|cm|mmq)?\b/gi, (m, w, n, u) => w + " " + "d" + n.replace(/[.,]/, "_") + (u || ""));
+    t = t.replace(/\b(\d+(?:[.,]\d+)?)\s*(pollici|pollice|cavalli|cv|hp|ampere|amp|watt|kva|volt|mmq|bar)\b/gi, (m, n, u) => n.replace(/[.,]/, "_") + u.toLowerCase());
+    t = t.replace(/\b(\d+)\s+A\b(?=\s+\d|\s*[,;]|\s+(?:da|con|e|più|piu)\b)/g, (m, n) => n + "amp");
+    // kW come potenza (non "a 1.300 al kW", dove è la quantità)
+    if (!/\b(?:al|a|per|ogni)\s+kw[p]?\b/i.test(t)) t = t.replace(/\b(\d+(?:[.,]\d+)?)\s*(kw|kwp)\b/gi, (m, n, u) => n.replace(/[.,]/, "_") + u.toLowerCase());
+    return t.replace(/\s{2,}/g, " ");
+  }
   function leggiDocumento(testoOriginale, ctx) {
-    testoOriginale = senzaCivici(String(testoOriginale || ""), ctx);
+    testoOriginale = senzaMisure(senzaCivici(String(testoOriginale || ""), ctx));
     let t = String(testoOriginale || "").split(/(\s+)/).map((w) => { const x = parolaDocumento(w.replace(/[^\p{L}]/gu, "")); return x ? w.replace(/[\p{L}]+/u, x) : w; }).join("");
     t = t.replace(/\b(?:per\s+)?(?:un|una|il|la)?\s*(?:nuov[oa]\s+client[ei]|client[ei]\s+nuov[oa])\s*[,:]?\s*/i, (m) => (/^per\b/i.test(m) ? "per " : ""))
       .replace(/\bper\s+(?:il|la)\s+(signor|signora|sig\.?)\s+/i, "per $1 ");
@@ -2468,7 +2505,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { leggi, segni, anonimizza, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { leggi, segni, senzaMisure, anonimizza, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiInvioDocumento, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -4999,6 +4999,17 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 1/10 sera: misure nei preventivi (ROADMAP 0b.19 passo 5)
+- `lettore.senzaMisure` (in `leggiDocumento` dopo `senzaCivici`, quindi per regole e modello): date "del 24
+  settembre" → "24settembre", "anno 2027" → "anno2027"; dimensioni "A [unità] per|x B [unità]" →
+  "AxBm" solo con "da" davanti, un'unità, "e" (1 e 60), una virgola o un altro "per" dopo (sezione del
+  cavo), MAI se dopo viene euro/al/l'uno/cad ("6 metri x 25 euro al metro" resta una moltiplicazione);
+  "2 metri e 40" → "2,40m"; "alto 1 e 20" → "1,20m"; "diametro|sezione|spessore N" → "dN"; N pollici,
+  cavalli, cv, hp, ampere, watt, kva, volt, mmq, bar → una parola; "250 A"; kW solo se non c'è "al kW".
+- Centesimi: senza "euro" detto, "e NN" è centesimi solo se dopo non c'è una parola ("8 tavoli a 450 e
+  32 sedie"); con "euro" detto vale la regola di prima ("16 euro e 50 posa").
+- Prove: `misure-preventivi.test.mjs` (nuova); `modello-dettagli` MINIMO 565 (568/628).
+
 ### 1/10 pomeriggio: domande sui dati, spostamenti, modello c24 (ROADMAP 0b.19 passo 5)
 - `lettore.js`: `DOMANDA_DATI_FORTE` (ultima volta da…, quant'è che non vado, numero di X ce l'ho,
   soldi/contanti presi, fatture non pagate, preventivi non firmati/aperti, schei da ricevere, quanto
