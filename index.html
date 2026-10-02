@@ -12456,8 +12456,7 @@ function normalizzaSal(testo){
   return "fai SAL al " + perc + "% " + dopo;
 }
 /* "Mandami il SAL di Ferraro", "fammi vedere il SAL del cantiere Ferraro": c'è → la scheda
-   del cliente (con i SAL); non c'è → "Lo facciamo adesso?" (1/10/2026) */
-const CERCA_SAL = /^(?:mandami|mostrami|fammi\s+vedere|fammi\s+vede|mi\s+serve|apri|aprimi|trovami|cerca|dov['’]?\s*[eè])\s+(?:il\s+|l['’]?\s*)?(?:ultimo\s+)?(?:sal|s\.a\.l\.?|stato\s+(?:di\s+)?avanzamento(?:\s+(?:dei\s+)?lavori)?)\s+(?:(?:n\.?|numero)\s*\d+\s+)?(?:di|del|della|dello|dell['’]?|per|dal|al)\s*(.+)$/i;
+   del cliente (con i SAL); non c'è → "Lo facciamo adesso?" (1/10/2026). PASSO A: lo capisce il modello. */
 function chiediPercentualeSal(cliente, poi){
   domandaDelCodice({ titolo: "SAL · " + cliente.name, domanda: "A che punto sono i lavori? (percentuale, es. 40%)", segnaposto: "Es. 40%", onRisposta: async (t) => {
     const n = Number(String(t).replace(",", ".").replace(/[^\d.]/g, ""));
@@ -12469,7 +12468,6 @@ function chiediPercentualeSal(cliente, poi){
 }
 /* "Fattura il SAL del cantiere Ferraro" (1/10/2026): l'ultimo SAL da fatturare (con il suo
    importo, o lo chiede); se il SAL non c'è, "Lo facciamo adesso?" e poi la fattura */
-const FATTURA_SAL = /^(?:(?:fai|fammi|prepara|preparami|crea|emetti)\s+(?:la\s+)?fattura\s+(?:del|dello|per\s+il)|fattura(?:mi)?)\s+(?:il\s+|l['’]?\s*)?(?:ultimo\s+)?(?:sal|s\.a\.l\.?|stato\s+(?:di\s+)?avanzamento(?:\s+(?:dei\s+)?lavori)?)\s+(?:(?:n\.?|numero)\s*\d+\s+)?(?:di|del|della|dello|dell['’]?|per|dal|al)\s*(.+)$/i;
 function fatturaDelSal(sal){
   if(sal.importo !== null) return creaFatturaSal(sal);
   const cl = clients.find(c => c.id === sal.clientId);
@@ -12483,8 +12481,10 @@ function fatturaDelSal(sal){
 }
 async function provaSal(testo){
   if(currentProfession !== "edile") return false;
-  const fattSal = String(testo || "").trim().replace(/[.!?]+$/, "").match(FATTURA_SAL);
-  const clFatt = fattSal ? clienteDaNomeDetto(fattSal[1].replace(/^(?:cantiere|lavori|cliente)\s+(?:(?:di|del|della|dello)\s+)?/i, "")) || clienteDaNomeDetto(fattSal[1]) : null;
+  const ms = letturaModello(testo);
+  const docSal = documentiDelModello(ms);
+  const clModello = docSal.includes("sal") ? clienteDelModello(ms) : null;
+  const clFatt = clModello && ms.intento === "documento" && docSal.includes("fattura") ? clModello : null;
   if(clFatt){
     const daFatturare = salDelCliente(clFatt.id).filter(x => !x.fatturato);
     if(daFatturare.length){ fatturaDelSal(daFatturare[daFatturare.length - 1]); return true; }
@@ -12496,8 +12496,7 @@ async function provaSal(testo){
     }
     // tutti già fatturati: decide chi viene dopo, come prima
   }
-  const cercaSal = String(testo || "").trim().replace(/[.!?]+$/, "").match(CERCA_SAL);
-  const clSal = cercaSal ? clienteDaNomeDetto(cercaSal[1].replace(/^(?:cantiere|lavori|cliente)\s+(?:(?:di|del|della|dello)\s+)?/i, "")) || clienteDaNomeDetto(cercaSal[1]) : null;
+  const clSal = clModello && (ms.intento === "cerca_documento" || ms.intento === "invio_documento") ? clModello : null;
   if(clSal){
     if(salDelCliente(clSal.id).length){ chiudiRisorsaCard(); mostraSchedaCliente(clSal); return true; }
     domandaDelCodice({ titolo: "Il SAL non c'è ancora", domanda: "Il SAL per " + clSal.name + " non l'abbiamo ancora fatto. Lo facciamo adesso?", senzaCampo: true,
@@ -12714,8 +12713,7 @@ function capisciDico(testo){
   return { cliente: clienteDaNomeDetto(resto), nomeDetto: resto };
 }
 /* "Mandami la dichiarazione di conformità di Le Querce", "mi serve la DiCo di Le Querce":
-   quelle fatte con EON; se non c'è, "La facciamo adesso?" (1/10/2026) */
-const CERCA_DICO = /^(?:mandami|mostrami|fammi\s+vedere|fammi\s+vede|mi\s+serve|apri|aprimi|trovami|cerca|dov['’]?\s*[eè])\s+(?:la\s+|l['’]?\s*)?(?:ultima\s+)?(?:dico|di\.?co\.?|dichiarazione\s+di\s+conformit[aà])\s+(?:(?:dell['’]?\s*|del\s+|per\s+l['’]?\s*)impianto\s+|del\s+\S+\s+)?(?:di|del|della|dello|dell['’]?|per|a|al|alla)\s*(.+)$/i;
+   quelle fatte con EON; se non c'è, "La facciamo adesso?" (1/10/2026). PASSO A: lo capisce il modello. */
 function mostraOFaiDico(cliente, nomeDetto){
   const fatte = cliente ? dicoDelCliente(cliente.id) : [];
   const nome = cliente ? cliente.name : nomeBelloCodice(nomeDetto);
@@ -12734,11 +12732,11 @@ function mostraOFaiDico(cliente, nomeDetto){
 }
 async function provaDico(testo){
   if(currentProfession !== "elettricista") return false;
-  const cercaDico = String(testo || "").trim().replace(/[.!?]+$/, "").match(CERCA_DICO);
-  if(cercaDico){
-    const resto = cercaDico[1].replace(/^(?:(?:sig|signor|signora|sigra)\.?\s+)/i, "").trim();
-    const cl = clienteDaNomeDetto(resto);
-    if(cl || (resto && !/\d/.test(resto) && resto.split(" ").length <= 4)){ chiudiRisorsaCard(); mostraOFaiDico(cl, resto); return true; }
+  const md = letturaModello(testo);
+  if(md && (md.intento === "cerca_documento" || md.intento === "invio_documento") && documentiDelModello(md).includes("dico")){
+    const chi = md.chi[0];
+    const cl = clienteDelModello(md);
+    if(cl || chi){ chiudiRisorsaCard(); mostraOFaiDico(cl, cl ? "" : chi.detto); return true; }
   }
   const d = capisciDico(testo);
   if(!d) return false;
@@ -13322,16 +13320,13 @@ function provaQuandoAssemblea(testo){
 /* "Il Bar Aurora ha accettato il preventivo", "il preventivo del bagno di Rossi l'hanno
    accettato": lo segna nella Mente e propone il passo dopo: la fattura con le stesse voci o
    l'inizio dei lavori (1/10/2026, pilastro soldi) */
+const SICURO_ACCETTATO = 0.95; // segna una cosa nella Mente: serve che il modello sia molto sicuro
 function provaPreventivoAccettato(testo){
-  const grezzo = String(testo || "").trim();
-  if(/\?\s*$/.test(grezzo)) return false; // la domanda la fa rispondiSuiDati
-  const n = normalizzaComando(grezzo);
-  if(!/\bpreventiv/.test(n) || !/\baccettat[oaie]\b|\bha\s+accettato\b/.test(n)) return false;
-  if(/^(?:se|quando|chissa|non\s+so|ricordami|devo)\b|\bnon\s+(?:l\s+)?(?:ha|hanno)\b|\bnon\s+(?:e|è)\s+stato\s+accettat/.test(n)) return false;
-  if(typeof EonLettore === "undefined") return false;
-  const r = EonLettore.trovaCliente(EonLettore.parole(grezzo), contestoLettore().clienti, new Set());
-  if(r.stato !== "trovato") return false;
-  const c = clients.find(x => x.id === r.cliente.id) || r.cliente;
+  // PASSO A: lo capisce il modello (cassetto "accettato", e chi); prima erano espressioni regolari
+  const m = letturaModello(testo);
+  if(!m || m.intento !== "accettato" || m.p < SICURO_ACCETTATO) return false;
+  const c = clienteDelModello(m);
+  if(!c) return false;
   const prev = documentiVeri().find(d => d.dati && d.dati.tipo === "preventivo" && (nomeChiave(d.clienteChat || "") === nomeChiave(c.name) || nomeChiave(d.dati.cliente || "") === nomeChiave(c.name)));
   if(!prev){
     offriDiFareDocumento("", "fattura", c, "", "Non trovo in EON il preventivo di " + c.name + ", ma se l'ha accettato si può fatturare.");
@@ -18962,22 +18957,36 @@ function mailtoDocumento(d, cliente){
    c'erano espressioni regolari (VERBO_INVIO, capisciInvioDocumento, invioDalLettore,
    lavoroDaFraseInvio, provaInvioFoto): tolte. */
 const SICURO_INVIO = 0.85;
+/* PASSO A: la lettura del modello per una frase, se il modello è caricato (null se no) */
+function letturaModello(testo){
+  if(typeof EonLettore === "undefined" || !EonLettore.letturaAttiva || !EonLettore.letturaAttiva()) return null;
+  return EonLettore.leggiConModello(testo, contestoLettore());
+}
+function clienteDelModello(m){
+  const chi = m && (m.chi.find(c => c.cliente) || null);
+  return chi ? (clients.find(c => c.id === chi.cliente.id) || chi.cliente) : null;
+}
+/* il documento nominato (pezzo DOC) normalizzato: fattura, preventivo, foto, sal, dico */
+function documentiDelModello(m){ return (m && m.pezzi.DOC || []).flatMap(x => x.parole).map(tipoDiDocumento).filter(Boolean); }
 function tipoDiDocumento(detto){
   const w = String(detto || "").toLowerCase();
   if(w.startsWith("fatt") || w === "ft") return "fattura";
   if(w.startsWith("prev")) return "preventivo";
   if(w.startsWith("foto") || w.startsWith("immagin")) return "foto";
+  if(w === "sal" || w === "s.a.l." || w === "s.a.l" || w.startsWith("avanzament")) return "sal"; // "stato avanzamento lavori"
+  if(w === "dico" || w === "di.co." || w === "di.co" || w.startsWith("dichiarazion")) return "dico";
   return null;
 }
 function invioDalModello(testo){
-  if(typeof EonLettore === "undefined" || !EonLettore.letturaAttiva || !EonLettore.letturaAttiva()) return null;
-  const m = EonLettore.leggiConModello(testo, contestoLettore());
+  const m = letturaModello(testo);
   if(!m) return null;
   /* Il modello è incerto tra MANDARE un documento già fatto e FARNE uno nuovo ("manda la fattura
      del compenso a Torre Marina"): si chiede, come le app grandi quando non sono sicure */
   const incerto = [m.intento, m.secondo].includes("invio_documento") && [m.intento, m.secondo].includes("documento") && m.p < SICURO_INVIO;
   if(!incerto && (m.intento !== "invio_documento" || m.p < SICURO_INVIO)) return null;
-  const tipo = (m.pezzi.DOC || []).flatMap(x => x.parole).map(tipoDiDocumento).find(Boolean) || null;
+  const docs = documentiDelModello(m);
+  if(docs.includes("sal") || docs.includes("dico")) return null; // il SAL e la DiCo li fanno provaSal e provaDico
+  const tipo = docs[0] || null;
   const chi = m.chi.find(c => c.cliente) || m.chi[0] || null;
   return { incerto, tipo, numero: m.numero, cliente: chi && chi.cliente ? (clients.find(c => c.id === chi.cliente.id) || chi.cliente) : null,
     nomeDetto: chi ? chi.detto : "", candidati: chi && !chi.cliente ? chi.candidati : null, lavoro: m.lavoro || "",
