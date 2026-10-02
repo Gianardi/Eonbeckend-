@@ -82,6 +82,14 @@ globalThis.fetch = async (url, init) => {
 };
 
 
+/* Le date dette nelle frasi ("giovedì", "lunedì"…) dipendono da oggi: si calcolano qui */
+const GG = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"], MM = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+const GL = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"], ML = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+function prossimo(g) { const d = new Date(); d.setHours(12, 0, 0, 0); do d.setDate(d.getDate() + 1); while (d.getDay() !== g); return d; }
+const breve = (d, ora) => GG[d.getDay()] + " " + d.getDate() + " " + MM[d.getMonth()] + ", " + ora;
+const lungo = (d) => GL[d.getDay()] + " " + d.getDate() + " " + ML[d.getMonth()];
+const isoGiorno = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+
 async function main() {
   const { default: handler } = await import("../api/index.js");
   const server = spawn("python3", ["-m", "http.server", String(PORT)], { cwd: ROOT, stdio: "ignore" });
@@ -220,12 +228,12 @@ async function main() {
     await page.waitForTimeout(500);
     // l'impegno lo crea il server col codice (crea_impegno), senza AI
     const impegnoCreato = (quando) => risposteServer.slice(-1).some((r) => /"tool":"crea_impegno"/.test(r) && /Bar Aurora/.test(r) && r.includes(quando));
-    verifica("…appuntamento con il Bar Aurora giovedì alle 9 in agenda, senza AI", impegnoCreato("gio 8 ott, 09:00") && chiamateAI === ai0, risposteServer.slice(-1) + " / AI: " + (chiamateAI - ai0));
+    verifica("…appuntamento con il Bar Aurora giovedì alle 9 in agenda, senza AI", impegnoCreato(breve(prossimo(4), "09:00")) && chiamateAI === ai0, risposteServer.slice(-1) + " / AI: " + (chiamateAI - ai0));
 
     // 6) Spostare un impegno che non c'è → lo metto?
     await scrivi("sposta l'appuntamento con Mario Rossi a lunedì alle 15");
     c = await card();
-    verifica("6. sposta un impegno che non c'è: \"Lo metto lunedì 5 ottobre alle 15:00?\"", /Non trovo in agenda l'impegno con Mario Rossi.*Lo metto lunedì 5 ottobre alle 15:00\?/.test(c.corpo), JSON.stringify(c));
+    verifica("6. sposta un impegno che non c'è: \"Lo metto lunedì 5 ottobre alle 15:00?\"", new RegExp("Non trovo in agenda l'impegno con Mario Rossi.*Lo metto " + lungo(prossimo(1)) + " alle 15:00\\?").test(c.corpo), JSON.stringify(c));
     const nServer0 = risposteServer.length;
     await tocca("No");
     const nServer = risposteServer.length;
@@ -233,7 +241,7 @@ async function main() {
     await scrivi("sposta il sopralluogo del Bar Aurora a venerdì alle 10");
     await tocca("Sì, mettilo");
     await page.waitForTimeout(500);
-    verifica("…\"Sì, mettilo\": sopralluogo con il Bar Aurora venerdì alle 10 in agenda, senza AI", impegnoCreato("ven 2 ott, 10:00") && /[Ss]opralluogo/.test(risposteServer.slice(-1)[0] || "") && chiamateAI === ai0, risposteServer.slice(-1) + " / AI: " + (chiamateAI - ai0));
+    verifica("…\"Sì, mettilo\": sopralluogo con il Bar Aurora venerdì alle 10 in agenda, senza AI", impegnoCreato(breve(prossimo(5), "10:00")) && /[Ss]opralluogo/.test(risposteServer.slice(-1)[0] || "") && chiamateAI === ai0, risposteServer.slice(-1) + " / AI: " + (chiamateAI - ai0));
 
     // 7) "Apri la scheda di X" e X non è tra i clienti → lo aggiungo
     await scrivi("apri la scheda di Ugo Neri");
@@ -331,7 +339,7 @@ async function main() {
     if (/Fissa l'inizio lavori/.test(c.corpo)) await tocca("Fissa l'inizio lavori");
     await rispondi("lunedì alle 8");
     await page.waitForTimeout(500);
-    verifica("…\"Fissa l'inizio lavori\" lunedì alle 8: in agenda (dal server, senza AI)", /"tool":"crea_impegno"/.test(ultimaRisposta()) && /lun 5 ott, 08:00/.test(ultimaRisposta()) && chiamateAI === 0, ultimaRisposta().slice(0, 250));
+    verifica("…\"Fissa l'inizio lavori\" lunedì alle 8: in agenda (dal server, senza AI)", /"tool":"crea_impegno"/.test(ultimaRisposta()) && ultimaRisposta().includes(breve(prossimo(1), "08:00")) && chiamateAI === 0, ultimaRisposta().slice(0, 250));
     await page.evaluate(() => { if(!documentiVeri().some((d) => d.dati.tipo === "preventivo")) chats.push({ name: "Mario Rossi", messages: [{ id: "m9", eventType: "doc", createdAt: "2026-09-30T10:00:00Z", docDati: { tipo: "preventivo", numero: "3", anno: 2026, cliente: "Mario Rossi", totale: 1220, aliquota: 22, voci: [{ desc: "Rifacimento bagno", qta: 1, prezzo: 1000 }] } }] }); });
     await scrivi("il preventivo di Mario Rossi l'hanno accettato?");
     c = await card();
@@ -339,10 +347,11 @@ async function main() {
 
     // 15. amministratore: assemblea non convocata → la convochiamo; convocata → la data
     tabelle.profiles[0].profession = "amministratore";
-    await page.evaluate(async () => { await applyProfession("amministratore", true); assemblee.length = 0; assemblee.push({ id: "as1", condominio: "Condominio Parco Verde", quando: "2026-10-20T21:00", tipo: "Ordinaria", stato: "convocata" }); });
+    const fraVenti = new Date(Date.now() + 18 * 864e5);
+    await page.evaluate(async (iso) => { await applyProfession("amministratore", true); assemblee.length = 0; assemblee.push({ id: "as1", condominio: "Condominio Parco Verde", quando: iso + "T21:00", tipo: "Ordinaria", stato: "convocata" }); }, isoGiorno(fraVenti));
     await scrivi("quando è l'assemblea del Parco Verde?");
     c = await card();
-    verifica("15. assemblea convocata: \"martedì 20 ottobre alle 21:00\"", /Condominio Parco Verde.*martedì 20 ottobre alle 21:00/.test(c.corpo), JSON.stringify(c));
+    verifica("15. assemblea convocata: la sua data e l'ora", new RegExp("Condominio Parco Verde.*" + lungo(fraVenti) + " alle 21:00").test(c.corpo), JSON.stringify(c));
     n0 = richieste.length;
     await scrivi("quando è l'assemblea di via Roma 12?");
     c = await card();
@@ -353,7 +362,7 @@ async function main() {
     await rispondi("giovedì 15 ottobre alle 21");
     await page.waitForTimeout(500);
     const cmdA = ultimaAI().comando || {};
-    verifica("…assemblea convocata giovedì 15 ottobre alle 21 (dal codice, senza AI)", cmdA.azione === "assemblea" && cmdA.giorno === "2026-10-15" && cmdA.ora === "21:00" && chiamateAI === 0 && (tabelle.assemblee || []).some((a) => /Via Roma 12/.test(a.condominio || "")), JSON.stringify(cmdA) + " AI " + chiamateAI + " " + ultimaRisposta().slice(0, 150));
+    verifica("…assemblea convocata giovedì 15 ottobre alle 21 (dal codice, senza AI)", cmdA.azione === "assemblea" && cmdA.giorno === isoGiorno(new Date(new Date().getFullYear(), 9, 15)) && cmdA.ora === "21:00" && chiamateAI === 0 && (tabelle.assemblee || []).some((a) => /Via Roma 12/.test(a.condominio || "")), JSON.stringify(cmdA) + " AI " + chiamateAI + " " + ultimaRisposta().slice(0, 150));
 
     // Da non toccare: chi ha il numero si chiama subito; il cliente che c'è si apre
     await page.evaluate(async () => { await applyProfession("edile", true); });

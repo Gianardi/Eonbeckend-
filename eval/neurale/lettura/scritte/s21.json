@@ -1,0 +1,1453 @@
+{
+"personaggio": "Fabbro piemontese di 70 anni di Cuneo, cancelli, inferriate, ringhiere e lavori in ferro battuto. Poco pratico del telefono: detta piano, con ripetizioni e incertezze (allora... ecco... mi segni... cioè no, mi sposti), si corregge a metà frase, piemontese leggero (neh, bogia nen, bela).",
+"frasi": [
+[
+"allora ricordami [verso le tre]{ORA} [di prendere le medicine]{TESTO} [dopo la fiera]{GIO} ecco fatto neh",
+"calendario"
+],
+[
+"eh allora mi segni [sabato]{GIO} [alle 10 e 45]{ORA} [cancello carraio]{LAV} da [mio nipote]{CHI} neh",
+"calendario"
+],
+[
+"ecco ho [la saldatura]{LAV} con [mia sorella]{CHI} [il 5 dicembre]{GIO} [alle nove]{ORA} mi segni neh",
+"calendario"
+],
+[
+"aspetta neh appuntamento [dopodomani]{GIO} [di mattina presto]{ORA} con [mio figlio]{CHI} per [portone blindato]{LAV}",
+"calendario"
+],
+[
+"EON senti segna che [il 30]{GIO} [alle 8 e mezza]{ORA} viene [il geometra Monge]{CHI} per [lampione in ferro battuto]{LAV}",
+"calendario"
+],
+[
+"allora [mercoledì prossimo]{GIO} cioè no aspetta... [dopodomani]{GIO} [alle sei di sera]{ORA} [chiusura del portico]{LAV} dall'[architetta Bongiovanni]{CHI}",
+"calendario"
+],
+[
+"aspetta neh mi segni... ecco... per [il 9]{GIO} [alle 8 e mezza]{ORA} che porto [saracinesca]{LAV} a [mio genero]{CHI}",
+"calendario"
+],
+[
+"ecco segna che [il 21]{GIO} [prima di pranzo]{ORA} viene [Dutto Sergio]{CHI} per [cancelletto pedonale]{LAV}",
+"calendario"
+],
+[
+"EON... allora... mi segni [oggi]{GIO} che da [Maria Spada]{CHI} c'è [cerniere del portone]{LAV} [alle 11]{ORA} bogia nen",
+"calendario"
+],
+[
+"segna che [il 5 dicembre]{GIO} [di buon'ora]{ORA} viene [Calandri]{CHI} per [pensilina]{LAV}",
+"calendario"
+],
+[
+"senti un po' segnami [a mezzogiorno e mezzo]{ORA} eh [il 18]{GIO} che devo andare da [mio nipote]{CHI} per [inferriata]{LAV}",
+"calendario"
+],
+[
+"mi segni... ecco... [alle sette e un quarto]{ORA} [la settimana prossima]{GIO} [serratura]{LAV} da [Bonetto]{CHI}",
+"calendario"
+],
+[
+"dunque mi segni... ecco... per [il giorno dopo la fiera]{GIO} [tardi nel pomeriggio]{ORA} che porto [porta tagliafuoco]{LAV} al [ragionier Musso]{CHI}",
+"calendario"
+],
+[
+"metti [martedì]{GIO} [alle 7]{ORA} che viene [Condominio I Castagni]{CHI} a vedere [saldatura della ringhiera]{LAV} grazie neh",
+"calendario"
+],
+[
+"mi segni... ecco... [alle 9 precise]{ORA} [fra una settimana]{GIO} [basculante del garage]{LAV} da [Rovera]{CHI}",
+"calendario"
+],
+[
+"aspetta neh segna che [oggi]{GIO} [in mattinata]{ORA} viene [Condominio Il Mulino]{CHI} per [cancello a battente]{LAV}",
+"calendario"
+],
+[
+"mettimi [il 5 dicembre]{GIO} il [misure]{LAV} in [strada della Bisalta 35]{IND} [sulle due]{ORA}",
+"calendario"
+],
+[
+"EON senti mi segni... ecco... per [dopo la fiera]{GIO} [alle 11]{ORA} che porto [appoggio per la stufa]{LAV} al [geometra Roccia]{CHI}",
+"calendario"
+],
+[
+"mi segni [sabato mattina]{GIO} [sulle due]{ORA} [zincatura dei pali]{LAV} dalla [dottoressa Vigliani]{CHI} che se no me lo dimentico",
+"calendario"
+],
+[
+"ecco ho [sopralluogo]{LAV} con [Marisa Tealdi]{CHI} [mercoledì]{GIO} [in mattinata]{ORA} mi segni neh",
+"calendario"
+],
+[
+"allora... ecco... metti [venerdì]{GIO} [prima di pranzo]{ORA} che viene [la geometra Brondino]{CHI} a vedere [rinforzo della trave]{LAV} neh",
+"calendario"
+],
+[
+"ma senti mettimi [martedì]{GIO} il [ringhiera]{LAV} in [via dei Mughetti 15]{IND} [alle cinque e mezza]{ORA} che se no me lo dimentico",
+"calendario"
+],
+[
+"eh allora mi segni [oggi]{GIO} [alle 10 e 45]{ORA} [saldatura della ringhiera]{LAV} da [Lombardo]{CHI} grazie neh",
+"calendario"
+],
+[
+"ma senti mettimi [venerdì]{GIO} il [rete del pollaio]{LAV} in [regione Moglia 8]{IND} [alle tre e mezza]{ORA}",
+"calendario"
+],
+[
+"EON senti segna che [il 5 dicembre]{GIO} [alle 8 e mezza]{ORA} viene [Rosetta Chiotti]{CHI} per [grata della cantina]{LAV}",
+"calendario"
+],
+[
+"ecco mettimi [lunedì]{GIO} il [corrimano]{LAV} in [via Cascina Bianca 63]{IND} [alle dieci e venti]{ORA}",
+"calendario"
+],
+[
+"EON senti mi segni [giovedì della settimana prossima]{GIO} [in serata]{ORA} [grate alle finestre]{LAV} da [Fantino]{CHI} che se no me lo dimentico",
+"calendario"
+],
+[
+"aspetta neh metti [il 3 novembre]{GIO} [alle tre e mezza]{ORA} che viene [Gastaldi]{CHI} a vedere [verniciatura del cancello]{LAV} va bene",
+"calendario"
+],
+[
+"allora ho [la saldatura]{LAV} con [mia nuora]{CHI} [il 30]{GIO} [sul mezzogiorno]{ORA} mi segni neh",
+"calendario"
+],
+[
+"allora ecco segna che [venerdì prossimo]{GIO} [sul mezzogiorno]{ORA} viene [il perito Biancotto]{CHI} per [cancello della chiesa]{LAV}",
+"calendario"
+],
+[
+"allora... ecco... segna [grate alle finestre]{LAV} da [Battista Ghigo]{CHI} per [mercoledì prossimo]{GIO} [alle tre e mezza]{ORA} eh... sì",
+"calendario"
+],
+[
+"ma senti segna [cancello]{LAV} da [Costamagna]{CHI} per [il 3 novembre]{GIO} [alle 14 e 30]{ORA} eh... sì",
+"calendario"
+],
+[
+"allora ecco segna [lucernario]{LAV} dalla [dottoressa Rosano]{CHI} per [il 18]{GIO} [verso le undici e mezza]{ORA} eh... sì",
+"calendario"
+],
+[
+"allora mi metti in agenda [cancello]{LAV} di [Lerda]{CHI} [fra quindici giorni]{GIO} verso [mezzogiorno]{ORA}",
+"calendario"
+],
+[
+"segnami [dopo pranzo]{ORA} eh [fra una settimana]{GIO} che devo andare dal [Condominio Il Glicine]{CHI} per [motorizzazione del cancello]{LAV} grazie neh",
+"calendario"
+],
+[
+"dunque segna che [giovedì della settimana prossima]{GIO} [di mattina presto]{ORA} viene [il dottor Cagnasso]{CHI} per [recinzione]{LAV}",
+"calendario"
+],
+[
+"senti un po' appuntamento [il 30]{GIO} [in serata]{ORA} con [Lovera]{CHI} per [insegna del bar]{LAV}",
+"calendario"
+],
+[
+"EON... allora... mi segni [venerdì]{GIO} che da [Ghigo Adele]{CHI} c'è [griglia del camino]{LAV} [alle 9 precise]{ORA} bogia nen",
+"calendario"
+],
+[
+"ma senti ricordami [alle 10 e 45]{ORA} [di andare in banca]{TESTO} [il 18]{GIO}",
+"calendario"
+],
+[
+"allora ecco allora [il 3 novembre]{GIO} cioè no aspetta... [giovedì della settimana prossima]{GIO} [alle sei di sera]{ORA} [staccionata]{LAV} dal [vecchio Bodino]{CHI}",
+"calendario"
+],
+[
+"allora... segnami [sulle sette di sera]{ORA} eh [lunedì]{GIO} che devo andare dall'[architetto Bellino]{CHI} per [cancello della chiesa]{LAV} neh",
+"calendario"
+],
+[
+"allora ecco segnami [alle sei di sera]{ORA} eh [il 9]{GIO} che devo andare da [Marengo Marisa]{CHI} per [struttura in acciaio]{LAV} grazie neh",
+"calendario"
+],
+[
+"ehm ricordami [alle 17 e 15]{ORA} [di dare da mangiare al cane]{TESTO} [dopo la fiera]{GIO}",
+"calendario"
+],
+[
+"dunque ricordami [verso sera]{ORA} [di prendere le medicine]{TESTO} [il 9]{GIO}",
+"calendario"
+],
+[
+"eh allora segnami [alle sei di sera]{ORA} eh [giovedì]{GIO} che devo andare da [Boglione Guido]{CHI} per [griglia del camino]{LAV} ecco",
+"calendario"
+],
+[
+"senti un po' ricordami [all'una]{ORA} [di affilare la troncatrice]{TESTO} [il giorno dopo la fiera]{GIO}",
+"calendario"
+],
+[
+"metti [oggi]{GIO} [dopo pranzo]{ORA} che viene [Condominio I Ciliegi]{CHI} a vedere [soppalco in ferro]{LAV} che se no me lo dimentico",
+"calendario"
+],
+[
+"allora... ecco... ricordami [giovedì della settimana prossima]{GIO} [verso le otto]{ORA} [di passare a prendere il ferro da ferramenta]{TESTO}",
+"calendario"
+],
+[
+"ecco ricordami [il giorno dopo la fiera]{GIO} [in mattinata]{ORA} [di passare a prendere il ferro da Bersezio]{TESTO}",
+"calendario"
+],
+[
+"eh allora allora [fra quindici giorni]{GIO} cioè no aspetta... [lunedì]{GIO} [a mezzogiorno e mezzo]{ORA} [serratura]{LAV} dall'[architetto Arese]{CHI}",
+"calendario"
+],
+[
+"segna che [fra una settimana]{GIO} [alle 9 precise]{ORA} viene [il geometra Tealdi]{CHI} per [fioriere in ferro]{LAV}",
+"calendario"
+],
+[
+"ricordami [dopodomani]{GIO} [alle due e un quarto]{ORA} [di passare a prendere il ferro alla ferramenta]{TESTO}",
+"calendario"
+],
+[
+"senti un po' mettimi [giovedì della settimana prossima]{GIO} il [inferriata della banca]{LAV} in [via del Lavatoio 35]{IND} [dopo le cinque]{ORA}",
+"calendario"
+],
+[
+"EON senti mi segni [il primo di novembre]{GIO} [alle sette e un quarto]{ORA} [riparazione della grondaia]{LAV} da [Giordanengo]{CHI} mi raccomando",
+"calendario"
+],
+[
+"ma senti allora [oggi]{GIO} cioè no aspetta... [sabato mattina]{GIO} [verso le otto]{ORA} [sopralluogo]{LAV} da [Tosello Adele]{CHI}",
+"calendario"
+],
+[
+"appuntamento [il 30]{GIO} [verso le dieci]{ORA} con [Livio Camisassa]{CHI} per [fioriere in ferro]{LAV}",
+"calendario"
+],
+[
+"senti un po' mi metti in agenda [scala antincendio]{LAV} di [Ditta Ghio e Figli]{CHI} [giovedì]{GIO} verso [le tre]{ORA}",
+"calendario"
+],
+[
+"eh allora segna [botola]{LAV} da [Officina Bernezzo]{CHI} per [il 3 novembre]{GIO} [prima di pranzo]{ORA} eh... sì",
+"calendario"
+],
+[
+"allora... segna che [venerdì]{GIO} [alle sei e mezza del mattino]{ORA} viene [il signor Bellino]{CHI} per [saracinesca]{LAV}",
+"calendario"
+],
+[
+"ho [la riparazione]{LAV} con [Dalmasso]{CHI} [sabato mattina]{GIO} [dopo le quattro]{ORA} mi segni neh",
+"calendario"
+],
+[
+"segnami [alle 7]{ORA} eh [il 14 ottobre]{GIO} che devo andare da [Rubiolo Marisa]{CHI} per [corrimano]{LAV}",
+"calendario"
+],
+[
+"allora ricordami [lunedì prossimo]{GIO} [alle 7]{ORA} [di passare a prendere il ferro al magazzino Cuneo]{TESTO}",
+"calendario"
+],
+[
+"ecco ho [le misure]{LAV} con [il ragionier Vigna]{CHI} [venerdì prossimo]{GIO} [dopo pranzo]{ORA} mi segni neh",
+"calendario"
+],
+[
+"eh allora mettimi [il 9]{GIO} il [balaustra della scala]{LAV} in [via Tetti Sottani 62]{IND} [all'una]{ORA} ecco fatto neh",
+"calendario"
+],
+[
+"ehm [in serata]{ORA} eh [il 5 dicembre]{GIO} [cancello a battente]{LAV} a [strada Madonna dei Boschi 5]{IND} neh bogia nen",
+"calendario"
+],
+[
+"ma senti mi metti in agenda [cancello carraio]{LAV} della [vedova Quaglia]{CHI} [dopo la fiera]{GIO} verso [le tre]{ORA}",
+"calendario"
+],
+[
+"ecco mi segni... cioè no, mi sposti [il lavoro]{LAV} di [martedì]{GIO} a sabato cioè no a [il 14 ottobre]{NGIO} grazie neh",
+"calendario_modifica"
+],
+[
+"eh allora sposta [le misure]{LAV} di [fra quindici giorni]{GIO} a le cinque cioè no [verso le dieci]{NORA} neh",
+"calendario_modifica"
+],
+[
+"l'appuntamento con [Condominio Villa Aurora]{CHI} spostalo [a mezzogiorno e mezzo]{NORA} invece che [verso sera]{ORA}",
+"calendario_modifica"
+],
+[
+"EON senti mi segni... cioè no, mi sposti [la posa]{LAV} di [il 18]{GIO} a il 5 dicembre cioè no a [fra due giorni]{NGIO}",
+"calendario_modifica"
+],
+[
+"mettimi [grate alle finestre]{LAV} di [giovedì della settimana prossima]{GIO} a [domani]{NGIO} sempre [alle 15]{NORA}",
+"calendario_modifica"
+],
+[
+"ecco [Varrone Adele]{CHI} ha chiamato... vuole spostare [tettoia in ferro]{LAV} a [lunedì]{NGIO} [dopo le quattro]{NORA} bogia nen",
+"calendario_modifica"
+],
+[
+"allora ecco sposta tutto quello che ho [il 30]{GIO} a [la settimana prossima]{NGIO} va bene",
+"calendario_modifica"
+],
+[
+"mettimi [pensilina]{LAV} di [sabato]{GIO} a [martedì]{NGIO} sempre [verso sera]{NORA}",
+"calendario_modifica"
+],
+[
+"EON senti l'appuntamento con [Massa]{CHI} spostalo [dopo le cinque]{NORA} invece che [alle 9 precise]{ORA}",
+"calendario_modifica"
+],
+[
+"mi segni... cioè no, mi sposti [montaggio delle grate]{LAV} da [Trattoria La Ruota]{CHI} da [di mattina presto]{ORA} a [alle 7]{NORA} e da [il 3 novembre]{GIO} a [domani]{NGIO}",
+"calendario_modifica"
+],
+[
+"allora mi segni... cioè no, mi sposti [lampione in ferro battuto]{LAV} dal [Condominio Gli Abeti]{CHI} da [prima di pranzo]{ORA} a [alle dieci e venti]{NORA} e da [il 14 ottobre]{GIO} a [giovedì della settimana prossima]{NGIO}",
+"calendario_modifica"
+],
+[
+"ecco rimanda [persiane in ferro]{LAV} di [Guido Oggero]{CHI} a [domani]{NGIO} grazie neh",
+"calendario_modifica"
+],
+[
+"eh allora mi sposti [scala della cascina]{LAV} di [Cometto]{CHI} da [venerdì]{GIO} a [dopo la fiera]{NGIO} neh bogia nen",
+"calendario_modifica"
+],
+[
+"mi sposti [porta della stalla]{LAV} da [Mattio]{CHI} da [dopo le cinque]{ORA} a [alle quattro meno un quarto]{NORA} mi raccomando",
+"calendario_modifica"
+],
+[
+"allora anticipa [misure]{LAV} a [sabato mattina]{NGIO} [in mattinata]{NORA} neh bogia nen",
+"calendario_modifica"
+],
+[
+"dunque cambia l'ora del [lavoro]{LAV} [il 14 ottobre]{GIO} metti [sulle sette di sera]{NORA}",
+"calendario_modifica"
+],
+[
+"mi sposti [grate alle finestre]{LAV} a fra due giorni no anzi a [il 9]{NGIO} sì ecco fatto neh",
+"calendario_modifica"
+],
+[
+"mi segni... cioè no, mi sposti [zincatura dei pali]{LAV} dalla [maestra Gerbino]{CHI} da [alle 11]{ORA} a [alle nove]{NORA} e da [lunedì prossimo]{GIO} a [dopo la fiera]{NGIO}",
+"calendario_modifica"
+],
+[
+"ma senti cambia l'ora del [sopralluogo]{LAV} [il 14 ottobre]{GIO} metti [sulle sette di sera]{NORA}",
+"calendario_modifica"
+],
+[
+"cambia l'ora del [sopralluogo]{LAV} [domani]{GIO} metti [prima di pranzo]{NORA}",
+"calendario_modifica"
+],
+[
+"allora ecco [Battista Mattio]{CHI} ha chiamato... vuole spostare [grata della cantina]{LAV} a [il giorno dopo la fiera]{NGIO} [alle quattro meno un quarto]{NORA} bogia nen",
+"calendario_modifica"
+],
+[
+"[Bruno Ghibaudo]{CHI} ha chiamato... vuole spostare [parapetto del balcone]{LAV} a [venerdì prossimo]{NGIO} [tardi nel pomeriggio]{NORA} bogia nen",
+"calendario_modifica"
+],
+[
+"eh allora sposta tutto quello che ho [il 18]{GIO} a [lunedì prossimo]{NGIO} ecco",
+"calendario_modifica"
+],
+[
+"aspetta neh ecco... il [lavoro]{LAV} di [Camisassa]{CHI} non è più [lunedì prossimo]{GIO} è [oggi]{NGIO} [alle sette e un quarto]{NORA}",
+"calendario_modifica"
+],
+[
+"allora... mi sposti [persiane in ferro]{LAV} dal [mio garzone]{CHI} da [alle 17 e 15]{ORA} a [alle sette e un quarto]{NORA}",
+"calendario_modifica"
+],
+[
+"allora... mi sposti [cancello della chiesa]{LAV} a il 3 novembre no anzi a [sabato mattina]{NGIO} sì grazie neh",
+"calendario_modifica"
+],
+[
+"dunque posticipa [la saldatura]{LAV} con [l'architetta Macario]{CHI} a [alle 8 e mezza]{NORA}",
+"calendario_modifica"
+],
+[
+"[l'ingegner Dogliani]{CHI} non può più [lunedì prossimo]{GIO} mi sposti [la consegna]{LAV} a [il primo di novembre]{NGIO} [sulle sette di sera]{NORA} che se no me lo dimentico",
+"calendario_modifica"
+],
+[
+"[Baudino Pina]{CHI} ha chiamato... vuole spostare [inferriata della banca]{LAV} a [il 27 di ottobre]{NGIO} [in mattinata]{NORA} bogia nen",
+"calendario_modifica"
+],
+[
+"ma senti posticipa [sopralluogo]{LAV} con [l'architetto Savio]{CHI} a [alle 16]{NORA}",
+"calendario_modifica"
+],
+[
+"allora ecco mi sposti [botola]{LAV} da [Arese]{CHI} da [sulle sette di sera]{ORA} a [sulle due]{NORA}",
+"calendario_modifica"
+],
+[
+"mi segni... cioè no, mi sposti [la consegna]{LAV} di [sabato mattina]{GIO} a dopodomani cioè no a [venerdì prossimo]{NGIO} ecco fatto neh",
+"calendario_modifica"
+],
+[
+"[Bellino]{CHI} non può più [il giorno dopo la fiera]{GIO} mi sposti [le misure]{LAV} a [fra quindici giorni]{NGIO} [alle sette e un quarto]{NORA} che se no me lo dimentico",
+"calendario_modifica"
+],
+[
+"ehm ecco... il [sopralluogo]{LAV} di [Sergio Massa]{CHI} non è più [il 5 dicembre]{GIO} è [dopodomani]{NGIO} [alle 16]{NORA}",
+"calendario_modifica"
+],
+[
+"allora mettimi [pensilina]{LAV} di [il 18]{GIO} a [fra quindici giorni]{NGIO} sempre [nel pomeriggio]{NORA}",
+"calendario_modifica"
+],
+[
+"allora ecco sposta tutto quello che ho [sabato mattina]{GIO} a [il 18]{NGIO} neh",
+"calendario_modifica"
+],
+[
+"EON senti sposta tutto quello che ho [il 14 ottobre]{GIO} a [oggi]{NGIO}",
+"calendario_modifica"
+],
+[
+"allora ecco ecco... il [sopralluogo]{LAV} del [vecchio Lombardo]{CHI} non è più [il 27 di ottobre]{GIO} è [il 30]{NGIO} [sulle sette di sera]{NORA}",
+"calendario_modifica"
+],
+[
+"ehm mi sposti [motorizzazione del cancello]{LAV} dal [vecchio Mattio]{CHI} da [sulle due]{ORA} a [sulle sette di sera]{NORA} che se no me lo dimentico",
+"calendario_modifica"
+],
+[
+"ehm mi segni... cioè no, mi sposti [saldatura della ringhiera]{LAV} da [Tortone]{CHI} da [verso sera]{ORA} a [alle otto meno dieci]{NORA} e da [dopo la fiera]{GIO} a [fra una settimana]{NGIO}",
+"calendario_modifica"
+],
+[
+"ecco mi sposti [botola]{LAV} da [Edilcasa Margarita]{CHI} da [alle otto meno dieci]{ORA} a [alle nove]{NORA} ecco",
+"calendario_modifica"
+],
+[
+"ma senti ecco... il [sopralluogo]{LAV} di [Bianco]{CHI} non è più [lunedì]{GIO} è [fra quindici giorni]{NGIO} [dopo pranzo]{NORA}",
+"calendario_modifica"
+],
+[
+"l'appuntamento con [Condominio Monviso]{CHI} spostalo [alle dieci e venti]{NORA} invece che [alle 10 e 45]{ORA}",
+"calendario_modifica"
+],
+[
+"posticipa [la riparazione]{LAV} con [il signor Bianco]{CHI} a [prima delle nove]{NORA}",
+"calendario_modifica"
+],
+[
+"ma senti ecco... il [montaggio]{LAV} del [Condominio La Meridiana]{CHI} non è più [dopo la fiera]{GIO} è [il 18]{NGIO} [alle cinque e mezza]{NORA}",
+"calendario_modifica"
+],
+[
+"ma senti [il vecchio Aimar]{CHI} ha chiamato... vuole spostare [basculante del garage]{LAV} a [il 21]{NGIO} [alle sette e un quarto]{NORA} bogia nen",
+"calendario_modifica"
+],
+[
+"allora... [Condominio Due Fiumi]{CHI} ha chiamato... vuole spostare [parapetto del balcone]{LAV} a [dopodomani]{NGIO} [prima di pranzo]{NORA} bogia nen",
+"calendario_modifica"
+],
+[
+"aspetta neh sposta tutto quello che ho [il 14 ottobre]{GIO} a [il giorno dopo la fiera]{NGIO} neh bogia nen",
+"calendario_modifica"
+],
+[
+"EON senti mi sposti [scala a chiocciola]{LAV} della [signora Barale]{CHI} da [giovedì]{GIO} a [sabato mattina]{NGIO} che se no me lo dimentico",
+"calendario_modifica"
+],
+[
+"allora... ecco... sposta [appuntamento]{LAV} di [lunedì]{GIO} a le cinque cioè no [alle 8 e mezza]{NORA} neh",
+"calendario_modifica"
+],
+[
+"posticipa [il lavoro]{LAV} con [Franco Spada]{CHI} a [prima delle nove]{NORA}",
+"calendario_modifica"
+],
+[
+"allora... mi sposti... cioè... il [montaggio]{LAV} di [il 21]{GIO} lo facciamo [lunedì]{NGIO} verso [mezzogiorno]{NORA}",
+"calendario_modifica"
+],
+[
+"ma senti ecco... il [lavoro]{LAV} di [Paschetta]{CHI} non è più [fra quindici giorni]{GIO} è [giovedì]{NGIO} [di buon'ora]{NORA}",
+"calendario_modifica"
+],
+[
+"eh allora allora... mi sposti... cioè... il [montaggio]{LAV} di [il 14 ottobre]{GIO} lo facciamo [il 5 dicembre]{NGIO} verso [le dieci]{NORA}",
+"calendario_modifica"
+],
+[
+"allora... cambia l'ora del [montaggio]{LAV} [la settimana prossima]{GIO} metti [verso le tre]{NORA}",
+"calendario_modifica"
+],
+[
+"allora... ecco... posticipa [la saldatura]{LAV} con [Pejrone]{CHI} a [alle 15]{NORA}",
+"calendario_modifica"
+],
+[
+"eh allora sposta [cancello della chiesa]{LAV} di [lunedì prossimo]{GIO} a [mercoledì prossimo]{NGIO} [verso sera]{NORA}",
+"calendario_modifica"
+],
+[
+"eh allora mi sposti [ringhiera]{LAV} del [geometra Bongiovanni]{CHI} da [il 27 di ottobre]{GIO} a [il 14 ottobre]{NGIO} che se no me lo dimentico",
+"calendario_modifica"
+],
+[
+"sposta [la visita]{LAV} di [dopo la fiera]{GIO} a le dieci cioè no [sul mezzogiorno]{NORA} neh",
+"calendario_modifica"
+],
+[
+"mettimi [staccionata]{LAV} di [il 18]{GIO} a [la settimana prossima]{NGIO} sempre [alle sei e mezza del mattino]{NORA}",
+"calendario_modifica"
+],
+[
+"EON senti togli [sopralluogo]{LAV} di [fra quindici giorni]{GIO} [alle dieci e venti]{ORA} neh",
+"calendario_modifica"
+],
+[
+"ehm annulla [il montaggio]{LAV} di [il 27 di ottobre]{GIO} con [Costruzioni Gaiola]{CHI} mi raccomando",
+"calendario_modifica"
+],
+[
+"ehm togli [la posa]{LAV} di [il 18]{GIO} [alle quattro meno un quarto]{ORA} neh",
+"calendario_modifica"
+],
+[
+"ehm cancella [riparazione della grondaia]{LAV} dalla [geometra Peano]{CHI} [la settimana prossima]{GIO} che non vengono più",
+"calendario_modifica"
+],
+[
+"ecco togli [il montaggio]{LAV} di [il primo di novembre]{GIO} [alle sei di sera]{ORA} neh",
+"calendario_modifica"
+],
+[
+"dunque annulla [la posa]{LAV} di [il 3 novembre]{GIO} con [il ragionier Arnaudo]{CHI} ecco fatto neh",
+"calendario_modifica"
+],
+[
+"aspetta neh manda [un sms]{CAN} a [Ferro e Fuoco snc]{CHI} e digli [che domani piove e non vengo]{TESTO}",
+"messaggio"
+],
+[
+"senti un po' scrivi a [Peano]{CHI} su [whatsapp]{CAN} [che mi richiami quando può]{TESTO}",
+"messaggio"
+],
+[
+"allora... ecco... dì al [dottor Musso]{CHI} con [whatsapp]{CAN} [di dirmi il colore della vernice]{TESTO}",
+"messaggio"
+],
+[
+"ehm mandami [whatsapp]{CAN} a [Zincatura Busca]{CHI} [che il motore del cancello arriva giovedì]{TESTO}",
+"messaggio"
+],
+[
+"EON senti mandami [col telefonino]{CAN} al [Condominio Palazzo Verde]{CHI} [che sabato sono chiuso]{TESTO} grazie neh",
+"messaggio"
+],
+[
+"manda [un sms]{CAN} a [Gerbaudo]{CHI} e digli [che arrivo verso le dieci]{TESTO}",
+"messaggio"
+],
+[
+"scrivi a [Delfino]{CHI} [che la saldatura deve asciugare due giorni]{TESTO} e anche al [geometra Oggero]{CHI} ecco fatto neh",
+"messaggio"
+],
+[
+"allora... dì al [Condominio Bisalta]{CHI} con [un sms]{CAN} [che passo a prendere le chiavi]{TESTO}",
+"messaggio"
+],
+[
+"allora... ecco... scrivi a [Giraudo]{CHI} [che sabato sono chiuso]{TESTO} col [messaggio]{CAN} grazie neh",
+"messaggio"
+],
+[
+"aspetta neh scrivi al [vecchio Monge]{CHI} [che mi serve la corrente nel garage]{TESTO} e anche a [Livio Calandri]{CHI} ecco",
+"messaggio"
+],
+[
+"manda [un sms]{CAN} a [Bergese]{CHI} e digli [che mi richiami quando può]{TESTO}",
+"messaggio"
+],
+[
+"ecco scrivi a [Aragno Michele]{CHI} su [whatsapp]{CAN} [che la scala è pronta da montare]{TESTO}",
+"messaggio"
+],
+[
+"allora allora... ecco... scrivi a [Tosello Felice]{CHI} [che arrivo verso le dieci]{TESTO} col [messaggio]{CAN} che se no me lo dimentico",
+"messaggio"
+],
+[
+"ma senti dì al [dottor Garnero]{CHI} con [un sms]{CAN} [che la saldatura deve asciugare due giorni]{TESTO}",
+"messaggio"
+],
+[
+"senti un po' dì a [Gigi Ghibaudo]{CHI} con [un sms]{CAN} [che la scala è pronta da montare]{TESTO}",
+"messaggio"
+],
+[
+"allora ecco allora... ecco... scrivi all'[ingegner Cagnasso]{CHI} [di dirmi il colore della vernice]{TESTO} col [messaggio]{CAN} va bene",
+"messaggio"
+],
+[
+"allora ecco scrivi [per pec]{CAN} a [Falegnameria Peveragno]{CHI} per dirgli [che la fattura la faccio la settimana prossima]{TESTO}",
+"email"
+],
+[
+"ma senti mandi [una mail]{CAN} all'[architetto Monge]{CHI} che [la fattura la faccio la settimana prossima]{TESTO} neh",
+"email"
+],
+[
+"ehm scrivi [per pec]{CAN} a [Bice Peano]{CHI} per dirgli [che mi mandi la planimetria]{TESTO}",
+"email"
+],
+[
+"ma senti scrivi [la posta]{CAN} a [Renato Brondino]{CHI} per dirgli [che non ho ricevuto il bonifico]{TESTO}",
+"email"
+],
+[
+"EON senti scrivi [per pec]{CAN} a [Racca]{CHI} per dirgli [che ringrazio per il lavoro]{TESTO}",
+"email"
+],
+[
+"allora... ecco... allora... fai una mail... cioè scrivi a [mia moglie]{CHI} [che mi mandi la planimetria]{TESTO} all'indirizzo [isoardi19@tiscali.it]{MAIL}",
+"email"
+],
+[
+"manda [una mail]{CAN} a [Isoardi]{CHI} [di mandarmi i dati per la fattura]{TESTO} neh",
+"email"
+],
+[
+"ecco allora... fai una mail... cioè scrivi al [ragionier Racca]{CHI} [che ho bisogno delle foto del balcone]{TESTO} all'indirizzo [mellano7@alice.it]{MAIL}",
+"email"
+],
+[
+"mandi [una mail]{CAN} a [Rinaudo]{CHI} che [la fattura la faccio la settimana prossima]{TESTO} neh",
+"email"
+],
+[
+"mandi [una mail]{CAN} a [Falco]{CHI} che [la scala antincendio è a norma]{TESTO} neh",
+"email"
+],
+[
+"allora mandi [una mail]{CAN} a [Carlo Brignone]{CHI} che [non ho ricevuto il bonifico]{TESTO} neh",
+"email"
+],
+[
+"allora ecco scrivi [una mail]{CAN} a [Giubergia]{CHI} per dirgli [che la scala antincendio è a norma]{TESTO}",
+"email"
+],
+[
+"allora scrivi [per pec]{CAN} a [Pellegrino]{CHI} per dirgli [di mandarmi i dati per la fattura]{TESTO}",
+"email"
+],
+[
+"ehm telefona a [Cascina Ruà]{CHI}",
+"chiamata"
+],
+[
+"telefona a [Fissore]{CHI} ecco fatto neh",
+"chiamata"
+],
+[
+"aspetta neh telefona al [commercialista]{CHI} ecco",
+"chiamata"
+],
+[
+"eh allora telefona a [Abello]{CHI} mi raccomando",
+"chiamata"
+],
+[
+"senti un po' telefona alla [vedova Aragno]{CHI}",
+"chiamata"
+],
+[
+"ecco chiama [Petiti Lucia]{CHI}",
+"chiamata"
+],
+[
+"fammi parlare con [Durando Luciano]{CHI} col [telefono]{CAN}",
+"chiamata"
+],
+[
+"allora chiama [il geometra Ristorto]{CHI} su [whatsapp]{CAN} che col telefono non risponde",
+"chiamata"
+],
+[
+"allora ecco chiama [Nives Paschetta]{CHI} ecco",
+"chiamata"
+],
+[
+"allora... chiama [la vedova Brignone]{CHI} su [whatsapp]{CAN} che col telefono non risponde",
+"chiamata"
+],
+[
+"allora mi chiami [Gianni Gastaldi]{CHI} che non lo trovo",
+"chiamata"
+],
+[
+"telefona al [dottor Ristorto]{CHI} grazie neh",
+"chiamata"
+],
+[
+"mi chiami [Ghiglione]{CHI} che non lo trovo",
+"chiamata"
+],
+[
+"ricordati bene [che Baralis vuole le grate senza le punte]{TESTO} va bene",
+"mente"
+],
+[
+"segnati neh [che le viti da otto sono nello scaffale in alto]{TESTO} mi raccomando",
+"mente"
+],
+[
+"tieni a mente [che Scotta è sordo e bisogna suonare forte]{TESTO}",
+"mente"
+],
+[
+"tieni a mente [che le chiavi della cantina di Fantino sono sul chiodo]{TESTO} ecco",
+"mente"
+],
+[
+"appuntati [che il ferro da Chiotti è arrivato storto]{TESTO} va bene",
+"mente"
+],
+[
+"segnati [che la saldatrice piccola fa le bizze]{TESTO} che se no me lo dimentico",
+"mente"
+],
+[
+"scriviti [che le chiavi del capannone le ha mio figlio]{TESTO} mi raccomando",
+"mente"
+],
+[
+"metti negli appunti [che Bergese ha già pagato metà in contanti]{TESTO}",
+"mente"
+],
+[
+"appuntati [che Ravera ha il cane cattivo in cortile]{TESTO} neh",
+"mente"
+],
+[
+"tieni a mente [che il furgone ha la gomma dietro bassa]{TESTO}",
+"mente"
+],
+[
+"mi tieni nota [che la Bosch la tiene mio nipote]{TESTO} neh",
+"mente"
+],
+[
+"allora... ecco... ricordati [che la mola grossa va cambiata]{TESTO} neh bogia nen",
+"mente"
+],
+[
+"segnati [che il pino davanti a il Giraudo dà fastidio al cancello]{TESTO} va bene",
+"mente"
+],
+[
+"segnati neh [che Olivero ha una figlia architetto]{TESTO}",
+"mente"
+],
+[
+"ricordati bene [che Bianco ha il cortile in salita]{TESTO}",
+"mente"
+],
+[
+"segnati neh [che le lamiere zincate le prendo dalla ditta di Busca]{TESTO}",
+"mente"
+],
+[
+"ricordati [che il motore Faac va sempre in blocco]{TESTO} va bene",
+"mente"
+],
+[
+"appuntati [che il ponteggio lo presta Allasia]{TESTO} neh bogia nen",
+"mente"
+],
+[
+"scriviti [che Arese vuole il cancello verde scuro]{TESTO} grazie neh",
+"mente"
+],
+[
+"segnati [che da il Giraudo il cancello tocca per terra]{TESTO} che se no me lo dimentico",
+"mente"
+],
+[
+"segnati neh [che la vernice antiruggine è finita]{TESTO} ecco fatto neh",
+"mente"
+],
+[
+"allora... ecco... ricordati [che il cancello di Ceirano è da regolare in primavera]{TESTO} neh",
+"mente"
+],
+[
+"segnati neh [che il Mellano vuole tutto nero opaco]{TESTO}",
+"mente"
+],
+[
+"metti negli appunti [che Ruatta ha il portone a due ante storto]{TESTO} mi raccomando",
+"mente"
+],
+[
+"ricordati [che il cancello di il Dutto lo avevo fatto io nel novantotto]{TESTO}",
+"mente"
+],
+[
+"ricordati bene [che bisogna fare la revisione all'estintore]{TESTO} ecco",
+"mente"
+],
+[
+"mi tieni nota [che Camisassa preferisce il ferro battuto liscio]{TESTO} che se no me lo dimentico",
+"mente"
+],
+[
+"segnati [che da Olivero si parcheggia nel cortile dietro]{TESTO} neh",
+"mente"
+],
+[
+"mi tieni nota [che Garnero vuole la ringhiera alta un metro e dieci]{TESTO}",
+"mente"
+],
+[
+"appuntati [che a il Cerato piacciono le punte a lancia]{TESTO}",
+"mente"
+],
+[
+"appuntati [che il trapano a colonna fa rumore]{TESTO}",
+"mente"
+],
+[
+"ricordati [che Giordanengo vuole una cassetta della posta in ferro]{TESTO} va bene",
+"mente"
+],
+[
+"ecco preventivo per [inferriata]{LAV} a [Serale]{CHI} circa 1500 più iva euro che se no me lo dimentico",
+"documento"
+],
+[
+"mi fai [la ricevuta]{DOC} alla [dottoressa Cravero]{CHI} per [persiane in ferro]{LAV}",
+"documento"
+],
+[
+"allora ecco devo fare [la fattura]{DOC} a [Daniele]{CHI} per [portone blindato]{LAV} che ho finito [venerdì prossimo]{GIO}",
+"documento"
+],
+[
+"ehm allora... ecco... mi prepari [il preventivo]{DOC} per [l'ingegner Gastaldi]{CHI} [saracinesca]{LAV} da 2400 euro",
+"documento"
+],
+[
+"ehm mi fai [la ricevuta]{DOC} a [Agriturismo Il Faggio]{CHI} per [scala antincendio]{LAV}",
+"documento"
+],
+[
+"allora... ecco... mi prepari [il preventivo]{DOC} per [Condominio Le Genziane]{CHI} [verniciatura del cancello]{LAV} da 1200 euro",
+"documento"
+],
+[
+"allora... fammi [il preventivo]{DOC} per [griglia del camino]{LAV} della [vedova Dalmasso]{CHI}",
+"documento"
+],
+[
+"senti un po' allora... ecco... mi prepari [il preventivo]{DOC} per [Giordanengo Battista]{CHI} [porta tagliafuoco]{LAV} da 800 euro",
+"documento"
+],
+[
+"mi fai [la ricevuta]{DOC} all'[architetta Tibaldi]{CHI} per [scala della cascina]{LAV}",
+"documento"
+],
+[
+"EON senti fammi [il preventivo]{DOC} per [basculante del garage]{LAV} della [vedova Boglione]{CHI} neh bogia nen",
+"documento"
+],
+[
+"ehm mi fai [la ricevuta]{DOC} a [Costamagna Battista]{CHI} per [verniciatura del cancello]{LAV}",
+"documento"
+],
+[
+"allora... ecco... devo fare [la fattura]{DOC} al [dottor Vigna]{CHI} per [saracinesca]{LAV} che ho finito [il 21]{GIO}",
+"documento"
+],
+[
+"ehm devo fare [la fattura]{DOC} al [perito Ceirano]{CHI} per [saldatura della ringhiera]{LAV} che ho finito [martedì]{GIO}",
+"documento"
+],
+[
+"eh allora mi fai [la ricevuta]{DOC} a [Odello]{CHI} per [misure]{LAV}",
+"documento"
+],
+[
+"dunque devo fare [la fattura]{DOC} al [Condominio Le Mimose]{CHI} per [porta tagliafuoco]{LAV} che ho finito [il 5 dicembre]{GIO}",
+"documento"
+],
+[
+"EON senti preventivo per [cancelletto pedonale]{LAV} al [commercialista]{CHI} circa 1500 più iva euro",
+"documento"
+],
+[
+"ecco fammi vedere [la DiCo]{DOC} di [mia sorella]{CHI}",
+"cerca_documento"
+],
+[
+"ehm aprimi [le foto]{DOC} del [cancello]{LAV} di [Audisio]{CHI}",
+"cerca_documento"
+],
+[
+"senti un po' fammi vedere [il DURC]{DOC} di [mia moglie]{CHI}",
+"cerca_documento"
+],
+[
+"eh allora cercami [la fattura]{DOC} di [mia sorella]{CHI} dell'anno scorso",
+"cerca_documento"
+],
+[
+"ehm aprimi [le foto]{DOC} del [sopralluogo]{LAV} di [Quaglia]{CHI}",
+"cerca_documento"
+],
+[
+"ehm dov'è [la fattura]{DOC} [58]{NUM}",
+"cerca_documento"
+],
+[
+"allora... ecco... trovami [il preventivo]{DOC} di [Ernesto Dalmasso]{CHI} neh bogia nen",
+"cerca_documento"
+],
+[
+"aprimi [le foto]{DOC} del [recinzione]{LAV} della [maestra Rosano]{CHI}",
+"cerca_documento"
+],
+[
+"aprimi [le foto]{DOC} del [fioriere in ferro]{LAV} del [geometra Lusso]{CHI}",
+"cerca_documento"
+],
+[
+"allora... allora... non trovo più [il preventivo]{DOC} del [saracinesca]{LAV} me lo cerchi",
+"cerca_documento"
+],
+[
+"allora... ecco... dov'è [la fattura]{DOC} [53]{NUM}",
+"cerca_documento"
+],
+[
+"allora... non trovo più [il preventivo]{DOC} del [scala a chiocciola]{LAV} me lo cerchi",
+"cerca_documento"
+],
+[
+"ehm manda a [Beltramo]{CHI} [il preventivo]{DOC} del [portone blindato]{LAV} su [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"allora... ecco... ecco... fai avere [il preventivo]{DOC} a [Ferrero]{CHI} e anche al [dottor Gazzera]{CHI} neh",
+"invio_documento"
+],
+[
+"aspetta neh invia [la visura]{DOC} a [Agnese]{CHI} [per mail]{CAN}",
+"invio_documento"
+],
+[
+"mandi [le foto]{DOC} del [tettoia in ferro]{LAV} a [Piero Beltramo]{CHI}",
+"invio_documento"
+],
+[
+"manda alla [dottoressa Peirone]{CHI} [il preventivo]{DOC} del [portone blindato]{LAV} su [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"allora... manda [la fattura]{DOC} [69]{NUM} a [Calandri Marisa]{CHI} [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"EON senti mandami [la foto]{DOC} della [ringhiera]{LAV} a [Lucia Arese]{CHI} su [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"allora... ecco... mandami [la foto]{DOC} della [ringhiera]{LAV} a [Revelli]{CHI} su [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"allora invia [il preventivo]{DOC} a [Oggero]{CHI} [per email]{CAN}",
+"invio_documento"
+],
+[
+"ecco ecco... fai avere [il preventivo]{DOC} a [Prato]{CHI} e anche a [Silvana Lusso]{CHI} va bene",
+"invio_documento"
+],
+[
+"aspetta neh allora... manda [la fattura]{DOC} [28]{NUM} alla [geometra Savio]{CHI} [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"allora ecco mandi [le foto]{DOC} del [zincatura dei pali]{LAV} a [Garnero]{CHI}",
+"invio_documento"
+],
+[
+"allora... manda [la fattura]{DOC} [52]{NUM} a [Odello Mario]{CHI} [per pec]{CAN}",
+"invio_documento"
+],
+[
+"allora... ecco... ecco... fai avere [il preventivo]{DOC} al [vecchio Bongiovanni]{CHI} e anche alla [maestra Rolfo]{CHI}",
+"invio_documento"
+],
+[
+"ecco manda a [Isoardi Maria]{CHI} [il preventivo]{DOC} del [cancelletto pedonale]{LAV} su [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"allora... ecco... mandi [le foto]{DOC} del [scala a chiocciola]{LAV} a [Abello Franco]{CHI} mi raccomando",
+"invio_documento"
+],
+[
+"eh allora manda all'[architetto Tomatis]{CHI} [il preventivo]{DOC} del [grata della cantina]{LAV} su [whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"ehm segna un cliente nuovo... [Ornella Streri]{CHI} abita in [via dei Mulini 19]{IND}",
+"cliente"
+],
+[
+"dunque cambia il numero di [Dario Chiotti]{CHI} adesso è [346 7173747]{TEL}",
+"cliente"
+],
+[
+"ecco il cliente [Testa]{CHI} ha la mail [testa98@libero.it]{MAIL}",
+"cliente"
+],
+[
+"eh allora nuovo cliente [Giuliano Iole]{CHI} [strada della Bisalta 18]{IND} [326 7791726]{TEL}",
+"cliente"
+],
+[
+"allora ecco il cliente [Boetti]{CHI} ha la mail [boetti2@gmail.com]{MAIL}",
+"cliente"
+],
+[
+"segna un cliente nuovo... [Gigi Oggero]{CHI} abita in [frazione Ronchi 50]{IND}",
+"cliente"
+],
+[
+"dunque nuovo cliente [Battaglino Carlo]{CHI} [via del Ciliegio 22]{IND} [341 936 7471]{TEL}",
+"cliente"
+],
+[
+"il cliente [Durando]{CHI} ha la mail [durando23@gmail.com]{MAIL}",
+"cliente"
+],
+[
+"ma senti il cliente [Roccia]{CHI} ha la mail [roccia61@tiscali.it]{MAIL}",
+"cliente"
+],
+[
+"allora... ecco... nuovo cliente [Monge Ottavio]{CHI} [via Cascina Bianca 50]{IND} [332 302 4478]{TEL}",
+"cliente"
+],
+[
+"dimmi un po' cosa devo fare [mercoledì]{GIO} [sul mezzogiorno]{ORA}",
+"dati"
+],
+[
+"ma senti mi dai il numero di [Ansaldi Michele]{CHI}",
+"dati"
+],
+[
+"ma senti dove abita [Anna Arneodo]{CHI}",
+"dati"
+],
+[
+"EON senti quanto mi deve ancora [Ruatta Michele]{CHI}",
+"dati"
+],
+[
+"ehm mi dai il numero di [Ambrogio]{CHI}",
+"dati"
+],
+[
+"ma senti dimmi un po' cosa devo fare [venerdì]{GIO} [alle 9 precise]{ORA}",
+"dati"
+],
+[
+"cosa ho [dopo la fiera]{GIO} ecco",
+"dati"
+],
+[
+"dove abita [Ornella Galfrè]{CHI}",
+"dati"
+],
+[
+"quanto mi deve ancora [Iole Mondino]{CHI}",
+"dati"
+],
+[
+"eh allora chi è che non mi ha ancora pagato",
+"dati"
+],
+[
+"mi dai il numero di [Aimar]{CHI}",
+"dati"
+],
+[
+"allora... quanti lavori ho [la settimana prossima]{GIO}",
+"dati"
+],
+[
+"che ore è l'appuntamento con [Edil Pesio]{CHI}",
+"dati"
+],
+[
+"eh allora quanto mi deve ancora [il ragionier Lingua]{CHI}",
+"dati"
+],
+[
+"ehm che ore è l'appuntamento con [Metalli Valgrana]{CHI}",
+"dati"
+],
+[
+"allora... ecco... quanti lavori ho [a ottobre]{GIO}",
+"dati"
+],
+[
+"allora... quanto deve essere alta una ringhiera per legge",
+"domanda"
+],
+[
+"che elettrodo uso per saldare l'inox",
+"domanda"
+],
+[
+"ecco... come si toglie la ruggine dal ferro battuto senza rovinarlo",
+"domanda"
+],
+[
+"ma la zincatura a caldo dura più della vernice",
+"domanda"
+],
+[
+"quanto costa adesso il ferro al chilo più o meno",
+"domanda"
+],
+[
+"che distanza devono avere le sbarre di una ringhiera neh",
+"domanda"
+],
+[
+"per il cancello automatico ci vuole la fotocellula per forza",
+"domanda"
+],
+[
+"come si fa a mettere una firma sul telefono",
+"domanda"
+],
+[
+"allora... segna che [Idraulica Caraglio]{CHI} ha saldato [ringhiera]{LAV}",
+"incasso"
+],
+[
+"EON senti mi ha dato l'acconto [il geometra Sobrero]{CHI} con un assegno da 1000",
+"incasso"
+],
+[
+"senti un po' segna che [Aragno]{CHI} ha saldato [lampione in ferro battuto]{LAV}",
+"incasso"
+],
+[
+"senti un po' [Acciai Morozzo]{CHI} ha pagato metà",
+"incasso"
+],
+[
+"allora è arrivato il bonifico di [Cravero]{CHI} per [la fattura]{DOC} [97]{NUM}",
+"incasso"
+],
+[
+"senti un po' [Autorimessa Boves Nord]{CHI} ha pagato 300 euro",
+"incasso"
+],
+[
+"è arrivato il bonifico di [Fenoglio]{CHI} per [la fattura]{DOC} [8]{NUM}",
+"incasso"
+],
+[
+"allora segna che [Condominio Le Ginestre]{CHI} ha saldato [corrimano]{LAV}",
+"incasso"
+],
+[
+"[Vigna]{CHI} ha pagato 300 euro",
+"incasso"
+],
+[
+"fai una foto",
+"foto"
+],
+[
+"allora... scatta una foto alla [ringhiera]{LAV}",
+"foto"
+],
+[
+"ecco fotografa [il cancello]{LAV} prima di smontarlo",
+"foto"
+],
+[
+"fammi una fotografia [alla serratura]{LAV} neh",
+"foto"
+],
+[
+"mi fai la foto [della trave]{LAV}",
+"foto"
+],
+[
+"come si fa... fai una foto qui",
+"foto"
+],
+[
+"scatta [la grata]{LAV} che la mando dopo",
+"foto"
+],
+[
+"crea una cartella [Ringhiere 2026]{CART}",
+"cartella"
+],
+[
+"metti queste foto nella cartella [Scala Einaudi]{CART}",
+"cartella"
+],
+[
+"allora... fai una cartella nuova [Garanzie]{CART}",
+"cartella"
+],
+[
+"sposta il preventivo nella cartella [Cascina Dho]{CART}",
+"cartella"
+],
+[
+"ecco... apri la cartella [Fatture vecchie]{CART}",
+"cartella"
+],
+[
+"mettimi tutto nella cartella [Condominio Monviso]{CART} neh",
+"cartella"
+],
+[
+"fai una cartella che si chiama [Inferriate banca]{CART}",
+"cartella"
+],
+[
+"urgente [la dottoressa Raviola]{CHI} è rimasta chiusa fuori il cancello non si apre",
+"urgenza"
+],
+[
+"allora... subito... da [Cerato]{CHI} la saracinesca è caduta",
+"urgenza"
+],
+[
+"emergenza la ringhiera del [Condominio Villa Aurora]{CHI} si è staccata",
+"urgenza"
+],
+[
+"ecco... corri... in [strada Basse di Stura 29]{IND} il portone blindato non si chiude più",
+"urgenza"
+],
+[
+"subito [il geometra Ghigo]{CHI} ha la serratura rotta e c'è il ladro che ha provato",
+"urgenza"
+],
+[
+"urgente il cancello della scuola è rimasto aperto e non si chiude",
+"urgenza"
+],
+[
+"aiuto [il perito Martini]{CHI} è chiuso dentro il garage col basculante bloccato",
+"urgenza"
+],
+[
+"presto [la tettoia]{LAV} di [Tibaldi]{CHI} sta venendo giù col vento",
+"urgenza"
+],
+[
+"allora... fai [il SAL]{DOC} per [Dho]{CHI} siamo [al 50 per cento]{AVANZ}",
+"sal"
+],
+[
+"stato avanzamento di [Rosetta Viale]{CHI} [al 90]{AVANZ}",
+"sal"
+],
+[
+"allora ecco fai [il SAL]{DOC} per [il mio garzone]{CHI} siamo [al 40 per cento]{AVANZ}",
+"sal"
+],
+[
+"EON senti fai [il SAL]{DOC} per [Ansaldi]{CHI} siamo [al 40 per cento]{AVANZ}",
+"sal"
+],
+[
+"fai [il SAL]{DOC} per [Manfredi]{CHI} siamo [al 50 per cento]{AVANZ}",
+"sal"
+],
+[
+"senti un po' stato avanzamento del [Baralis]{CHI} [al 60]{AVANZ}",
+"sal"
+],
+[
+"EON senti fai [il SAL]{DOC} per [Einaudi]{CHI} siamo [al 40 per cento]{AVANZ}",
+"sal"
+],
+[
+"prepara [la dichiarazione di conformità]{DOC} per [l'ingegner Ferrero]{CHI}",
+"dico"
+],
+[
+"ehm prepara [la dichiarazione di conformità]{DOC} per [la dottoressa Monge]{CHI}",
+"dico"
+],
+[
+"ecco... mi serve [la DiCo]{DOC} per [saracinesca motorizzata]{LAV} dell'[architetto Gastaldi]{CHI} ecco",
+"dico"
+],
+[
+"ehm ecco... mi serve [la DiCo]{DOC} per [saracinesca motorizzata]{LAV} di [Chiapello]{CHI} neh",
+"dico"
+],
+[
+"fai [la DiCo]{DOC} del [cancello automatico]{LAV} di [Livio Lingua]{CHI}",
+"dico"
+],
+[
+"ehm fai [la DiCo]{DOC} del [basculante motorizzato]{LAV} del [geometra Gallo]{CHI}",
+"dico"
+],
+[
+"fai [la DiCo]{DOC} del [cancello automatico]{LAV} della [geometra Lusso]{CHI}",
+"dico"
+],
+[
+"allora... cosa devo portare all' [assemblea]{LAV} del [Condominio Le Stelle Alpine]{CHI}",
+"assemblea"
+],
+[
+"ecco cosa devo portare all' [assemblea]{LAV} del [Condominio Villa Aurora]{CHI}",
+"assemblea"
+],
+[
+"[l'assemblea]{LAV} del [Condominio Palazzo Verde]{CHI} è [giovedì]{GIO} [prima di pranzo]{ORA}",
+"assemblea"
+],
+[
+"EON senti mi hanno chiamato all' [assemblea]{LAV} del [Condominio Villa Aurora]{CHI} [fra una settimana]{GIO} per spiegare la recinzione",
+"assemblea"
+],
+[
+"allora... prepara le carte per [l'assemblea]{LAV} del [Condominio Gli Abeti]{CHI} per il cancello nuovo",
+"assemblea"
+],
+[
+"ecco prepara le carte per [l'assemblea]{LAV} del [Condominio Il Glicine]{CHI} per il cancello nuovo",
+"assemblea"
+],
+[
+"allora... ecco... mi hanno chiamato all' [assemblea]{LAV} del [Condominio Palazzo Verde]{CHI} [lunedì]{GIO} per spiegare la recinzione",
+"assemblea"
+],
+[
+"ciao EON",
+"saluto"
+],
+[
+"buongiorno neh",
+"saluto"
+],
+[
+"allora... ci sei",
+"saluto"
+],
+[
+"ehi ci sei EON",
+"saluto"
+],
+[
+"buonasera",
+"saluto"
+],
+[
+"ciao bela",
+"saluto"
+],
+[
+"ecco... buongiorno EON come va",
+"saluto"
+],
+[
+"EON senti [il preventivo]{DOC} [116]{NUM} l'hanno accettato",
+"accettato"
+],
+[
+"allora... [Bruna]{CHI} ha detto di sì per [cancello a battente]{LAV}",
+"accettato"
+],
+[
+"allora... ecco... [il perito Reinero]{CHI} ha detto di sì per [cerniere del portone]{LAV}",
+"accettato"
+],
+[
+"allora... [il preventivo]{DOC} [12]{NUM} l'hanno accettato",
+"accettato"
+],
+[
+"dunque [il preventivo]{DOC} [81]{NUM} l'hanno accettato",
+"accettato"
+],
+[
+"[la signora Martini]{CHI} ha accettato [il preventivo]{DOC}",
+"accettato"
+],
+[
+"eh allora va bene a [Mattalia Franco]{CHI} [il preventivo]{DOC} del [pensilina]{LAV} segna che è accettato",
+"accettato"
+],
+[
+"eh allora [il preventivo]{DOC} [77]{NUM} l'hanno accettato",
+"accettato"
+],
+[
+"ehm [Mellano]{CHI} ha detto di sì per [parapetto del balcone]{LAV}",
+"accettato"
+],
+[
+"senti un po' ricorda all'[ingegner Ambrosino]{CHI} che mi deve ancora i soldi del [ringhiera]{LAV} neh",
+"sollecito"
+],
+[
+"ehm [Tecnoferro Fossano]{CHI} non ha ancora pagato... mandagli un sollecito neh bogia nen",
+"sollecito"
+],
+[
+"ecco [Lusso]{CHI} non ha ancora pagato... mandagli un sollecito",
+"sollecito"
+],
+[
+"manda un sollecito alla [vedova Peirone]{CHI} per [la fattura]{DOC} [91]{NUM}",
+"sollecito"
+],
+[
+"eh allora manda un sollecito a [Pasquero]{CHI} per [la fattura]{DOC} [2]{NUM}",
+"sollecito"
+],
+[
+"ricorda a [Carpenteria Valle Maira]{CHI} che mi deve ancora i soldi del [saracinesca]{LAV} grazie neh",
+"sollecito"
+],
+[
+"aspetta neh ricorda alla [dottoressa Botta]{CHI} che mi deve ancora i soldi del [scala a chiocciola]{LAV} ecco fatto neh",
+"sollecito"
+],
+[
+"ehm [Cerutti]{CHI} non ha ancora pagato... mandagli un sollecito ecco",
+"sollecito"
+],
+[
+"allora ricorda alla [dottoressa Streri]{CHI} che mi deve ancora i soldi del [lucernario]{LAV} mi raccomando",
+"sollecito"
+]
+]
+}
