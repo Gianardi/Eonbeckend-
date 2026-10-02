@@ -12542,9 +12542,11 @@ function creaFatturaSal(sal){
   if(!cliente || sal.importo === null) return;
   const importo = Number.isInteger(sal.importo) ? String(sal.importo) : sal.importo.toFixed(2).replace(".", ",");
   chiudiRisorsaCard(); navigateTo("home");
-  const campo = document.getElementById("homeHeroCampo");
-  campo.value = "fattura " + cliente.name + " SAL avanzamento lavori " + importo + " euro"; // senza "acconto": il server lo lascerebbe all'AI
-  document.getElementById("homeHeroSend").click();
+  /* Il comando diretto al server (2/10/2026): prima l'app scriveva una frase e la faceva rileggere;
+     con il modello quella frase ("fattura … SAL …") tornava a "fattura il SAL" e ripartiva da capo */
+  const frase = "fattura " + cliente.name + " SAL avanzamento lavori " + importo + " euro";
+  const comando = { azione: "documento", tipo: "fattura", cliente_id: cliente.id, importo: sal.importo, lavoro: "SAL " + sal.numero + " avanzamento lavori (" + sal.percentuale + "%)" };
+  if(typeof window.eonInviaHome === "function") window.eonInviaHome(frase, { comando, dopo: (risposta) => offriInvioDocumento(risposta) });
   sal.fatturato = true;
   if(isDbReady()) dbUpdate("sal", sal.id, { fatturato: true });
   aggiornaAvvisoMestiere();
