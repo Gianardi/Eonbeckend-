@@ -12484,7 +12484,7 @@ async function provaSal(testo){
   const ms = letturaModello(testo);
   const docSal = documentiDelModello(ms);
   const clModello = docSal.includes("sal") ? clienteDelModello(ms) : null;
-  const clFatt = clModello && ms.intento === "documento" && docSal.includes("fattura") ? clModello : null;
+  const clFatt = clModello && ms.intento === "documento" ? clModello : null; // "fattura il SAL di X": fare un documento sul SAL
   if(clFatt){
     const daFatturare = salDelCliente(clFatt.id).filter(x => !x.fatturato);
     if(daFatturare.length){ fatturaDelSal(daFatturare[daFatturare.length - 1]); return true; }
