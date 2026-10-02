@@ -905,6 +905,9 @@
       (pezzi[r.ruolo] = pezzi[r.ruolo] || []).push(prima);
     });
     const testoDi = (r, k = 0) => (pezzi[r] && pezzi[r][k] ? unisci(pezzi[r][k].parole) : "");
+    // il lavoro com'è da mostrare: senza articoli o preposizioni in testa ("del cornicione" → "cornicione")
+    const VUOTE_IN_TESTA = new Set(["del", "della", "dello", "dell'", "dei", "degli", "delle", "di", "per", "il", "la", "lo", "l'", "i", "gli", "le", "un", "una", "uno", "al", "alla", "allo", "ai", "agli", "alle"]);
+    const lavoroDi = () => { const pp = pezzi.LAV && pezzi.LAV[0] ? pezzi.LAV[0].parole.slice() : []; while (pp.length > 1 && VUOTE_IN_TESTA.has(pp[0].toLowerCase())) pp.shift(); return unisci(pp); };
     const quandoDi = (rg, ro) => {
       const pg = pezzi[rg] ? pezzi[rg].flatMap((x) => x.parole) : [], po = pezzi[ro] ? pezzi[ro].flatMap((x) => x.parole) : [];
       if (!pg.length && !po.length) return null;
@@ -923,7 +926,7 @@
     return {
       intento: c ? c.intento : null, p: c ? c.p : 0, secondo: c ? c.secondo : null,
       chi, quando: quandoDi("GIO", "ORA"), nuovoQuando: quandoDi("NGIO", "NORA"),
-      lavoro: testoDi("LAV") || null, testo: testoDi("TESTO") || null, canale: can, documento: testoDi("DOC").toLowerCase() || null, numero: num,
+      lavoro: lavoroDi() || null, testo: testoDi("TESTO") || null, canale: can, documento: testoDi("DOC").toLowerCase() || null, numero: num,
       telefono: testoDi("TEL") || null, email: testoDi("MAIL") || null, indirizzo: testoDi("IND") || null, avanzamento: testoDi("AVANZ") || null, cartella: testoDi("CART") || null,
       pezzi, parole: pp, ruoli: ruoli.map((r) => r.ruolo),
     };
