@@ -506,6 +506,16 @@ lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai pe
     l'apertura. Da tenere d'occhio se si aggiungono altre copie.
   - Restano a regole (servono nuovi ruoli o una "testa" per il tema della domanda): indirizzo di
     un cliente, quando è l'assemblea, scheda di chi non è cliente, domande sui dati.
+- **Fatto (2/10/2026, terzo pacchetto del passo A): le domande sui dati.**
+  - Il modello ha una **terza uscita: l'argomento** della domanda (agenda, incassi, chi mi deve,
+    documenti, telefono, email, indirizzo, ultima volta da un cliente, appunti, IVA, lavori in
+    corso, clienti, urgenze, assemblea, spese, scadenze, altro). Le 530 domande già scritte segnate a
+    mano una per una, più ~250 frasi nuove (s30, s31) per gli argomenti con pochi esempi.
+  - Tolte le regole che indovinavano l'argomento (leggiDomandaDati, temaDomanda, NOTE_SEGNATE,
+    DOMANDA_DATI_FORTE) e quelle dell'indirizzo e dell'assemblea (provaIndirizzoCliente,
+    provaQuandoAssemblea): ora c'è un solo ingresso, `datiDalModello`. Nuova risposta: la mail di
+    un cliente ("ce l'ho?" → sì, o "me la dici? la salvo").
+  - Se il modello non è sicuro dell'argomento (sotto 0,6), la domanda va all'AI come prima.
 - Poi (da decidere coi numeri): B, partire da un modello che sa già l'italiano (serve sbloccare
   huggingface.co nella rete dell'ambiente); C, un modello che "scrive" il comando (serve una GPU).
 

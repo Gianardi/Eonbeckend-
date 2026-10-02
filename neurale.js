@@ -39,7 +39,9 @@
         // passo A (1/10/2026): il modello che legge tutta la frase ha due uscite, il cassetto (out) e il ruolo di ogni parola (outR)
         outR: P["outR.weight"] ? w("outR.weight") : null, outRB: P["outR.bias"] ? v("outR.bias") : null, minuscolo: !!json.minuscolo,
         // e la "rubrica": per ogni parola, se fa parte del nome di un cliente (un dato, come i contatti per Siri)
-        rub: P["rub.weight"] ? w("rub.weight") : null };
+        rub: P["rub.weight"] ? w("rub.weight") : null,
+        // 2/10/2026: la terza uscita, l'argomento di una domanda sui dati (agenda, incassi, indirizzo…)
+        temi: Array.isArray(json.temi) && P["outT.weight"] ? json.temi : null, outT: P["outT.weight"] ? w("outT.weight") : null, outTB: P["outT.bias"] ? v("outT.bias") : null };
       return true;
     }
 
@@ -178,7 +180,8 @@
         let k = 0; for (let i = 1; i < K; i++) if (pp[i] > pp[k]) k = i;
         return { ruolo: M.ruoli[k], p: pp[k], pp };
       });
-      return { intento: M.intenti[ordine[0][1]], p: ordine[0][0], secondo: M.intenti[ordine[1][1]], p2: ordine[1][0], ruoli, pc, intenti: M.intenti };
+      const pt = M.temi ? morbida(lineare(media, 1, D, M.outT, M.outTB, M.temi.length), 1) : null;
+      return { intento: M.intenti[ordine[0][1]], p: ordine[0][0], secondo: M.intenti[ordine[1][1]], p2: ordine[1][0], ruoli, pc, intenti: M.intenti, pt, temi: M.temi };
     }
     /* Come EonLettore.classifica: { intento, p, secondo, p2 } */
     function classifica(segni) {

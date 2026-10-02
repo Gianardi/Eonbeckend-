@@ -1,1461 +1,367 @@
-{
- "personaggio": "Tecnico caldaie e condizionatori abruzzese di 31 anni, di Pescara: giovane, frasi brevi e spesso senza verbo, mischia parole inglesi (call, meeting, slot, check, ok bro), qualche uè e mo', nomina sempre le marche (Vaillant, Ariston, Daikin, Baxi, Immergas) che sono il lavoro, non il cliente.",
- "frasi": [
-  [
-   "segna [domani]{GIO} [alle 8]{ORA} [check Vaillant]{LAV} da [Di Cintio]{CHI} in [via dei Mandorli 7]{IND}",
-   "calendario"
-  ],
-  [
-   "ok bro mettimi [giovedì]{GIO} [verso le 10]{ORA} la [prova fumi]{LAV} dalla [signora Ciammaichella]{CHI}",
-   "calendario"
-  ],
-  [
-   "[lunedì]{GIO} [alle otto e mezza]{ORA} [sanificazione split Daikin]{LAV} da [Tracanna]{CHI}",
-   "calendario"
-  ],
-  [
-   "[alle 14 e 30]{ORA} [dopodomani]{GIO} call con [Termoidraulica Saline]{CHI} per la [fornitura caldaie]{LAV}",
-   "calendario"
-  ],
-  [
-   "mettimi uno slot [venerdì]{GIO} [in mattinata]{ORA} per la [sostituzione circolatore]{LAV} da [Faieta]{CHI}",
-   "calendario"
-  ],
-  [
-   "meeting [mercoledì]{GIO} [alle 18]{ORA} con [il geometra Pomilio]{CHI} per la [centrale termica]{LAV} del [Condominio Le Saline]{CHI}",
-   "calendario"
-  ],
-  [
-   "ricordami [domani]{GIO} [prima delle 9]{ORA} [di ritirare il kit fumi al magazzino]{TESTO}",
-   "calendario"
-  ],
-  [
-   "[il 14 ottobre]{GIO} [nel primo pomeriggio]{ORA} [installazione dual split]{LAV} da [Zuccarini]{CHI} a [Montesilvano]{IND}",
-   "calendario"
-  ],
-  [
-   "uè segnami [sabato]{GIO} [alle nove meno un quarto]{ORA} la [caldaia Ariston]{LAV} di [Masciarelli]{CHI} che perde",
-   "calendario"
-  ],
-  [
-   "appuntamento [martedì prossimo]{GIO} [dopo pranzo]{ORA} con [Ranalli]{CHI} per [ricarica gas]{LAV} al condizionatore",
-   "calendario"
-  ],
-  [
-   "[alle 7 e 45]{ORA} [giovedì]{GIO} parto per [Chieti Scalo]{IND} [manutenzione annuale]{LAV} da [Di Nisio]{CHI}",
-   "calendario"
-  ],
-  [
-   "fissa con [Scurti]{CHI} [fra tre giorni]{GIO} [verso mezzogiorno]{ORA} il [sopralluogo pompa di calore]{LAV}",
-   "calendario"
-  ],
-  [
-   "check [Immergas]{LAV} [domani pomeriggio]{GIO} [verso le 4]{ORA} da [Tinari]{CHI} in [via Saline Alte 22]{IND}",
-   "calendario"
-  ],
-  [
-   "ricordami [stasera]{GIO} [alle 21]{ORA} [di mandare il listino a mio cugino]{TESTO}",
-   "calendario"
-  ],
-  [
-   "[il 3 novembre]{GIO} [alle 11]{ORA} corso aggiornamento [F-gas]{LAV} a Pescara segna",
-   "calendario"
-  ],
-  [
-   "metti [venerdì]{GIO} [all'una]{ORA} pranzo con [Daniele della Frigo Adriatica]{CHI}",
-   "calendario"
-  ],
-  [
-   "bro segna [la settimana prossima]{GIO} [di mattina presto]{ORA} [cambio scambiatore Baxi]{LAV} da [D'Ercole]{CHI}",
-   "calendario"
-  ],
-  [
-   "[domani]{GIO} [ore 15]{ORA} [pulizia bruciatore]{LAV} [Hotel Pineta Blu]{CHI}",
-   "calendario"
-  ],
-  [
-   "[mercoledì]{GIO} slot [delle 16]{ORA} libero mettici [Di Giandomenico]{CHI} [termostato wifi]{LAV}",
-   "calendario"
-  ],
-  [
-   "[alle dieci e un quarto]{ORA} [lunedì]{GIO} no anzi [martedì]{GIO} [installazione Mitsubishi]{LAV} da [Pantalone]{CHI}",
-   "calendario"
-  ],
-  [
-   "promemoria [giovedì]{GIO} [verso le 6 di sera]{ORA} [richiamare il fornitore delle valvole]{TESTO}",
-   "calendario"
-  ],
-  [
-   "segna [il 20]{GIO} [alle 9 e 10]{ORA} [analisi combustione]{LAV} al [Bar Lu Murette]{CHI}",
-   "calendario"
-  ],
-  [
-   "[dopodomani]{GIO} [sul tardi]{ORA} passo da [Cipollone]{CHI} per lo [scaldabagno]{LAV}",
-   "calendario"
-  ],
-  [
-   "mettimi [sabato mattina]{GIO} [alle 8 in punto]{ORA} [check Riello]{LAV} da [nonna Iezzi]{CHI}",
-   "calendario"
-  ],
-  [
-   "[oggi]{GIO} [alle 17 e 40]{ORA} call con [Idrotek Spoltore]{CHI} segnala",
-   "calendario"
-  ],
-  [
-   "appuntamento [il 7 dicembre]{GIO} [nella tarda mattinata]{ORA} per [preventivo climatizzazione]{LAV} [Pizzeria Tre Archi]{CHI}",
-   "calendario"
-  ],
-  [
-   "[fra una settimana]{GIO} [alle 13 e 15]{ORA} [installazione pompa di calore]{LAV} da [Natarelli]{CHI} a [Pianella]{IND}",
-   "calendario"
-  ],
-  [
-   "ricordami [domattina]{GIO} [alle 6]{ORA} [di caricare il furgone col vaso di espansione]{TESTO}",
-   "calendario"
-  ],
-  [
-   "[martedì]{GIO} [ore 10]{ORA} meeting con [Sciarra]{CHI} e [Montebello]{CHI} per la [ditta nuova]{LAV}",
-   "calendario"
-  ],
-  [
-   "segna [giovedì 9]{GIO} [nel pomeriggio]{ORA} [Ferroli]{LAV} di [Carusi]{CHI} in blocco",
-   "calendario"
-  ],
-  [
-   "ok mettici [lunedì]{GIO} [tra le 2 e le 3]{ORA} [check Daikin]{LAV} da [D'Orazio]{CHI}",
-   "calendario"
-  ],
-  [
-   "[alle undici e mezza]{ORA} [domani]{GIO} [sopralluogo]{LAV} [Residence Gabbiano]{CHI} [via del Faro Vecchio 3]{IND}",
-   "calendario"
-  ],
-  [
-   "[il 28]{GIO} [alle 19]{ORA} ricordami [la partita di calcetto con i ragazzi]{TESTO}",
-   "calendario"
-  ],
-  [
-   "[venerdì prossimo]{GIO} [prima di pranzo]{ORA} [libretto impianto]{LAV} da compilare da [Ricciuti]{CHI}",
-   "calendario"
-  ],
-  [
-   "segnami [mercoledì]{GIO} [verso le 15 e 30]{ORA} [sostituzione caldaia Beretta]{LAV} da [Di Marzio]{CHI}",
-   "calendario"
-  ],
-  [
-   "[domani]{GIO} [alle 9]{ORA} e [alle 14]{ORA} due slot da [Mancinelli]{CHI} per la [manutenzione condizionatori]{LAV}",
-   "calendario"
-  ],
-  [
-   "bro [il 2 novembre]{GIO} [alle 10 e 20]{ORA} [visita ASL]{LAV} in [via Colle Sereno 15]{IND}",
-   "calendario"
-  ],
-  [
-   "mettimi [tra due giorni]{GIO} [a metà mattina]{ORA} [revisione Hermann]{LAV} di [Spadaccini]{CHI}",
-   "calendario"
-  ],
-  [
-   "[stasera]{GIO} [dopo le 8]{ORA} call con [mio fratello]{CHI} per il [furgone]{LAV}",
-   "calendario"
-  ],
-  [
-   "segna appuntamento con [Taraborrelli]{CHI} [giovedì]{GIO} [alle quattro e venti]{ORA} [valvola gas]{LAV}",
-   "calendario"
-  ],
-  [
-   "[lunedì 13]{GIO} [alle 8 e un quarto]{ORA} [primo avvio]{LAV} [Junkers]{LAV} da [Giancristofaro]{CHI}",
-   "calendario"
-  ],
-  [
-   "ricordami [venerdì]{GIO} [nel pomeriggio]{ORA} [di pagare il bollo del Doblò]{TESTO}",
-   "calendario"
-  ],
-  [
-   "[dopo pranzo]{ORA} [sabato]{GIO} [sanificazione Samsung]{LAV} dalla [signora Di Lullo]{CHI}",
-   "calendario"
-  ],
-  [
-   "[il 15 novembre]{GIO} [alle 8]{ORA} [pulizia canna fumaria]{LAV} [Condominio Riviera Nord 40]{CHI}",
-   "calendario"
-  ],
-  [
-   "mettimi uno slot [domani]{GIO} [all'ora di pranzo]{ORA} per [Verrocchio]{CHI} [check perdita]{LAV}",
-   "calendario"
-  ],
-  [
-   "[mercoledì prossimo]{GIO} [alle 9 e 45]{ORA} [incontro]{LAV} col [rappresentante Lorenzetti]{CHI}",
-   "calendario"
-  ],
-  [
-   "segna [giovedì]{GIO} [verso le cinque]{ORA} [scarico condensa]{LAV} da [Liberatore]{CHI}",
-   "calendario"
-  ],
-  [
-   "[fine mese]{GIO} [la mattina]{ORA} [verifica impianto]{LAV} alla [palestra Fit Majella]{CHI}",
-   "calendario"
-  ],
-  [
-   "[tra 10 giorni]{GIO} [alle 16]{ORA} [installazione split LG]{LAV} da [Pelusi]{CHI} in [via Fonte Chiara 9]{IND}",
-   "calendario"
-  ],
-  [
-   "ricordami [domani sera]{GIO} [alle 22]{ORA} [di scaricare le foto del cantiere sul pc]{TESTO}",
-   "calendario"
-  ],
-  [
-   "[alle 7]{ORA} [martedì]{GIO} parto presto [caldaia a condensazione]{LAV} [Nardone]{CHI} [Penne]{IND}",
-   "calendario"
-  ],
-  [
-   "ok bro [venerdì 17]{GIO} [ore 12]{ORA} meeting [Clima Majella srl]{CHI}",
-   "calendario"
-  ],
-  [
-   "mettimi [lunedì]{GIO} [nella prima mattinata]{ORA} [cambio pressostato]{LAV} da [Antonucci]{CHI}",
-   "calendario"
-  ],
-  [
-   "[il 30 ottobre]{GIO} [verso le 15]{ORA} [verifica fughe]{LAV} da [Fusilli]{CHI} a [Francavilla]{IND}",
-   "calendario"
-  ],
-  [
-   "appuntamento [dopodomani]{GIO} [alle 10]{ORA} per [preventivo caldaia]{LAV} dalla [famiglia Sborgia]{CHI}",
-   "calendario"
-  ],
-  [
-   "[oggi pomeriggio]{GIO} [alle 3 e mezza]{ORA} passo da [Caldarelli]{CHI} per lo [split che gocciola]{LAV}",
-   "calendario"
-  ],
-  [
-   "segna [mercoledì]{GIO} [alle 11 e 40]{ORA} [revisione Chaffoteaux]{LAV} [Di Clemente]{CHI}",
-   "calendario"
-  ],
-  [
-   "[giovedì]{GIO} slot [dalle 2 alle 4]{ORA} [manutenzione]{LAV} [B&B La Conchiglia]{CHI}",
-   "calendario"
-  ],
-  [
-   "ricordami [lunedì]{GIO} [alle 9]{ORA} [che scade l'assicurazione del furgone]{TESTO}",
-   "calendario"
-  ],
-  [
-   "[la settimana dopo]{GIO} [di pomeriggio]{ORA} [sopralluogo]{LAV} da [Ronzitti]{CHI} per [impianto a pavimento]{LAV}",
-   "calendario"
-  ],
-  [
-   "metti [sabato 25]{GIO} [verso le 10 e mezza]{ORA} [check Ariston]{LAV} da [Petaccia]{CHI} che è fuori casa fino alle dieci",
-   "calendario"
-  ],
-  [
-   "[domani]{GIO} [appena apre]{ORA} vado da [Colantonio Ricambi]{CHI} a prendere la [scheda elettronica]{LAV}",
-   "calendario"
-  ],
-  [
-   "[alle 8 e 50]{ORA} [martedì]{GIO} [prova tenuta gas]{LAV} da [Di Biase]{CHI}",
-   "calendario"
-  ],
-  [
-   "segnami [il 5]{GIO} [verso sera]{ORA} [cena con la squadra]{LAV}",
-   "calendario"
-  ],
-  [
-   "mettimi [giovedì prossimo]{GIO} [alle due]{ORA} la [Daikin]{LAV} di [Basilavecchia]{CHI} che fa rumore",
-   "calendario"
-  ],
-  [
-   "[venerdì]{GIO} [ore 17]{ORA} [consegna libretto]{LAV} a [Cerasoli]{CHI} in [via Torre Piccola 31]{IND}",
-   "calendario"
-  ],
-  [
-   "sposta la [prova fumi]{LAV} di [Lanciaprima]{CHI} da [domani]{GIO} a [giovedì]{NGIO} [alle 10]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "bro il [check Vaillant]{LAV} di [lunedì]{GIO} spostalo a [mercoledì]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "[Di Fabio]{CHI} non c'è [venerdì]{GIO} metti a [sabato]{NGIO} [alle 9]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "annulla la call di [oggi]{GIO} [alle 15]{ORA} con [Thermo Service Ortona]{CHI}",
-   "calendario_modifica"
-  ],
-  [
-   "la [sanificazione]{LAV} da [Paolini]{CHI} spostala [alle 4]{NORA} invece che [alle 2]{ORA}",
-   "calendario_modifica"
-  ],
-  [
-   "cancella il [meeting]{LAV} di [martedì]{GIO} con [Cardinale]{CHI}",
-   "calendario_modifica"
-  ],
-  [
-   "slitta [l'installazione Daikin]{LAV} di [Ruscitti]{CHI} alla [settimana prossima]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "[domani]{GIO} [alle 8]{ORA} da [Di Censo]{CHI} portalo [alle 11]{NORA} che devo passare dal magazzino",
-   "calendario_modifica"
-  ],
-  [
-   "ok sposta tutto quello di [giovedì]{GIO} a [venerdì]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "[Rapino]{CHI} ha chiamato vuole la [caldaia Ariston]{LAV} [il 12]{NGIO} [di pomeriggio]{NORA} non [il 10]{GIO}",
-   "calendario_modifica"
-  ],
-  [
-   "no anzi la [manutenzione]{LAV} [Hotel Pineta Blu]{CHI} spostala a [lunedì]{NGIO} [verso le 9]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "togli il [sopralluogo]{LAV} di [mercoledì]{GIO} da [Odoardi]{CHI} ha disdetto",
-   "calendario_modifica"
-  ],
-  [
-   "anticipa [l'analisi combustione]{LAV} di [Di Lizia]{CHI} a [oggi]{NGIO} [alle 17]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "posticipa di un'ora [la call]{LAV} con [Idrotherm Cepagatti]{CHI} di [domani]{GIO}",
-   "calendario_modifica"
-  ],
-  [
-   "il [check Baxi]{LAV} di [Pace]{CHI} da [venerdì]{GIO} [alle 9]{ORA} a [venerdì]{NGIO} [alle 14]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "spostami [il meeting]{LAV} col [geometra Speranza]{CHI} [al 20 ottobre]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "[Tatasciore]{CHI} rimanda a [dopodomani]{NGIO} [stessa ora]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "cancella [domani]{GIO} [alle 18]{ORA} [il calcetto]{LAV} che piove",
-   "calendario_modifica"
-  ],
-  [
-   "bro sposta [Di Renzo]{CHI} [ricarica gas]{LAV} a [giovedì]{NGIO} [nel primo pomeriggio]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "la [pompa di calore]{LAV} di [D'Angelo]{CHI} non più [lunedì]{GIO} ma [martedì 14]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "annulla [il sopralluogo]{LAV} [Pizzeria Tre Archi]{CHI} e rimettilo [fra due settimane]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "[alle 10]{NORA} invece che [alle 8]{ORA} [domani]{GIO} da [Ferrante]{CHI}",
-   "calendario_modifica"
-  ],
-  [
-   "sposta [lo slot delle 11]{ORA} di [mercoledì]{GIO} [alle 12 e 30]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "[Di Tommaso]{CHI} ha la febbre spostiamo la [revisione Immergas]{LAV} alla [settimana dopo]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "cambia [l'appuntamento]{LAV} di [Pantalone]{CHI} da [sabato]{GIO} a [lunedì]{NGIO} [verso le 8 e mezza]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "elimina [il promemoria]{LAV} [del bollo]{TESTO} l'ho già pagato",
-   "calendario_modifica"
-  ],
-  [
-   "rimanda [la sostituzione]{LAV} [Riello]{LAV} di [Di Sciascio]{CHI} a [fine mese]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "ok il [check]{LAV} da [Ianni]{CHI} mettilo [prima]{NORA} tipo [alle 7 e mezza]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "[giovedì]{GIO} da [Cocco]{CHI} saltato, ripianifica [venerdì]{NGIO} [in mattinata]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "sposta la call di [oggi]{GIO} con [Rossetti Clima]{CHI} a [domani]{NGIO} [alle 9 e 15]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "annulla tutti gli appuntamenti di [sabato]{GIO} che vado al matrimonio",
-   "calendario_modifica"
-  ],
-  [
-   "la [prova tenuta]{LAV} da [Di Zio]{CHI} da [il 4]{GIO} al [6]{NGIO} [stessa ora]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "[Mancini Lucio]{CHI} vuole spostare [lo scaldabagno]{LAV} a [mercoledì]{NGIO} [dopo pranzo]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "il [meeting]{LAV} con [Clima Majella srl]{CHI} è saltato toglilo",
-   "calendario_modifica"
-  ],
-  [
-   "anticipa [il primo avvio]{LAV} di [Giancristofaro]{CHI} [alle 7]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "sposta [martedì]{GIO} [Pelusi]{CHI} a [giovedì]{NGIO} e [Antonucci]{CHI} a [venerdì]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "rimandami [la cena]{LAV} con la squadra a [sabato prossimo]{NGIO} [alle 20 e 30]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "[la Daikin]{LAV} di [Basilavecchia]{CHI} mettila [il 16]{NGIO} invece che [il 9]{GIO}",
-   "calendario_modifica"
-  ],
-  [
-   "spostamento: [Natarelli]{CHI} [pompa di calore]{LAV} [domani]{GIO} → [dopodomani]{NGIO} [alle 13]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "cancella la [visita ASL]{LAV} del [2 novembre]{GIO} l'hanno rinviata loro",
-   "calendario_modifica"
-  ],
-  [
-   "[venerdì]{GIO} [all'una]{ORA} col [rappresentante Di Vittorio]{CHI} portalo [alle 3]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "spostami [Faieta]{CHI} [circolatore]{LAV} [nel pomeriggio]{NORA} che la mattina sono da [Masciarelli]{CHI}",
-   "calendario_modifica"
-  ],
-  [
-   "il corso [F-gas]{LAV} l'hanno spostato [al 10 novembre]{NGIO} [alle 14]{NORA} aggiorna",
-   "calendario_modifica"
-  ],
-  [
-   "bro slitta di mezz'ora [la prova fumi]{LAV} di [domani]{GIO} da [Tinari]{CHI}",
-   "calendario_modifica"
-  ],
-  [
-   "no aspetta [Scurti]{CHI} non [mercoledì]{GIO} ma [giovedì]{NGIO} [verso le 11]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "togli [il pranzo]{LAV} con [Daniele]{CHI} di [venerdì]{GIO}",
-   "calendario_modifica"
-  ],
-  [
-   "[la pulizia bruciatore]{LAV} [Hotel Pineta Blu]{CHI} spostala [al 22]{NGIO} [di mattina]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "annulla [Zuccarini]{CHI} che ha comprato [la Daikin]{LAV} da un altro",
-   "calendario_modifica"
-  ],
-  [
-   "sposta [il check]{LAV} [Hermann]{LAV} a [lunedì 20]{NGIO} [alle 8 e 40]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "[D'Orazio]{CHI} da [oggi]{GIO} a [domani]{NGIO} [alla stessa ora]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "rimanda [l'incontro]{LAV} col [rappresentante Lorenzetti]{CHI} a [data da destinarsi]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "mettimi [lo slot delle 16]{ORA} [alle 17 e 30]{NORA} che faccio tardi da [Verrocchio]{CHI}",
-   "calendario_modifica"
-  ],
-  [
-   "[Caldarelli]{CHI} lo split lo vediamo [sabato]{NGIO} non [oggi]{GIO} spostalo",
-   "calendario_modifica"
-  ],
-  [
-   "la [revisione Chaffoteaux]{LAV} di [mercoledì]{GIO} anticipala a [martedì]{NGIO} [stesso orario]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "cancella il [promemoria]{LAV} [della partita]{TESTO} del [28]{GIO}",
-   "calendario_modifica"
-  ],
-  [
-   "sposta [il B&B La Conchiglia]{CHI} [dalle 2]{ORA} [alle 5]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "[Cerasoli]{CHI} il libretto glielo porto [lunedì]{NGIO} [dopo le 18]{NORA} sposta",
-   "calendario_modifica"
-  ],
-  [
-   "bro annulla la [sostituzione Beretta]{LAV} da [Di Marzio]{CHI} ci ha ripensato",
-   "calendario_modifica"
-  ],
-  [
-   "[il 15 novembre]{GIO} [canna fumaria]{LAV} [Condominio Riviera Nord 40]{CHI} spostalo a [il 18]{NGIO} [alle 9]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "posticipa [la verifica impianto]{LAV} [palestra Fit Majella]{CHI} [a inizio dicembre]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "[Fusilli]{CHI} a [Francavilla]{IND} rimandalo [di una settimana]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "il [termostato wifi]{LAV} di [Di Giandomenico]{CHI} portalo [alle 9]{NORA} [domani]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "sposta [Petaccia]{CHI} [sabato 25]{GIO} [alle 10 e mezza]{ORA} a [domenica]{NGIO} [alle 10 e mezza]{NORA} che sabato non c'è",
-   "calendario_modifica"
-  ],
-  [
-   "[domani]{GIO} libera la mattina, sposta tutto [al pomeriggio]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "[Ricciuti]{CHI} [libretto impianto]{LAV} rinviato [al 3 dicembre]{NGIO} [verso le 11]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "annulla [la consegna]{LAV} a [Cerasoli]{CHI} e mettila [martedì]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "il [meeting]{LAV} di [martedì]{GIO} [ore 10]{ORA} con [Sciarra]{CHI} fallo [mercoledì]{NGIO} [ore 16]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "spostami [la ricarica gas]{LAV} di [Ranalli]{CHI} [alle quattro]{NORA} [stesso giorno]{NGIO}",
-   "calendario_modifica"
-  ],
-  [
-   "scrivi a [Di Cintio]{CHI} [che arrivo verso le 8 e un quarto]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "whatsapp a [Masciarelli]{CHI} [ok bro passo domani per la Ariston]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "manda un [sms]{CAN} a [Tracanna]{CHI} [che lo split Daikin va sanificato ogni anno]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "scrivi su [whatsapp]{CAN} a [Faieta]{CHI} [di lasciarmi le chiavi dal vicino]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "messaggio a [mia madre]{CHI} [stasera non vengo a cena]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "dì a [Ranalli]{CHI} su [telegram]{CAN} [che il gas l'ho ordinato]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "scrivi a [Ciammaichella]{CHI} e a [D'Ercole]{CHI} [che domani sono in ritardo di mezz'ora]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "[whatsapp]{CAN} [Zuccarini]{CHI} [il dual split arriva lunedì]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "manda un vocale a [Scurti]{CHI} [che per la pompa di calore serve il permesso del condominio]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "avvisa [Di Nisio]{CHI} con un [messaggino]{CAN} [che sono sotto casa]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "scrivi a [Marco del magazzino]{CHI} [se ha due vasi di espansione da 8 litri]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "[sms]{CAN} a [Cipollone]{CHI} [lo scaldabagno è pronto domani]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "scrivigli a [Tinari]{CHI} [che il check Immergas è ok tutto a posto]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "bro scrivi nel gruppo [Squadra Clima]{CHI} [domani si parte alle 7 dal capannone]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "manda su [whatsapp]{CAN} a [la signora Di Lullo]{CHI} [di tenere spento il condizionatore fino a sabato]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "scrivi a [Verrocchio]{CHI} [no anzi lo chiamo io]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "messaggio a [Liberatore]{CHI} [lo scarico condensa va rifatto serve un'ora]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "[Pelusi]{CHI} [whatsapp]{CAN} [ci vediamo alle 4 per l'LG]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "scrivi a [Daniele della Frigo Adriatica]{CHI} [mi servono 3 bombole R32 entro venerdì]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "rispondi a [Antonucci]{CHI} [sì il pressostato è in garanzia]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "manda un [sms]{CAN} a [Nardone]{CHI} [che a Penne arrivo verso le 9 e mezza]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "scrivi a [mia sorella Chiara]{CHI} [mi presti la macchina sabato]{TESTO}",
-   "messaggio"
-  ],
-  [
-   "manda una [mail]{CAN} a [Termoidraulica Saline]{CHI} [per chiedere il listino caldaie 2027]{TESTO}",
-   "email"
-  ],
-  [
-   "scrivi [per mail]{CAN} al [geometra Pomilio]{CHI} [che la centrale termica ha bisogno del nuovo vaso]{TESTO}",
-   "email"
-  ],
-  [
-   "[email]{CAN} a [Hotel Pineta Blu]{CHI} [con il riepilogo degli interventi della stagione]{TESTO}",
-   "email"
-  ],
-  [
-   "manda [una mail]{CAN} a [assistenza@climamajella.it]{MAIL} [che la Daikin è ancora in garanzia]{TESTO}",
-   "email"
-  ],
-  [
-   "scrivi una [mail]{CAN} formale a [Condominio Le Saline]{CHI} [sul controllo fumi obbligatorio]{TESTO}",
-   "email"
-  ],
-  [
-   "[mail]{CAN} a [Idrotek Spoltore]{CHI} [ok per il meeting di martedì]{TESTO}",
-   "email"
-  ],
-  [
-   "manda [per email]{CAN} a [Rossetti Clima]{CHI} [l'ordine delle valvole gas]{TESTO}",
-   "email"
-  ],
-  [
-   "scrivi [una mail]{CAN} all'[amministratore Di Pasquale]{CHI} [che servono le chiavi del locale caldaia]{TESTO}",
-   "email"
-  ],
-  [
-   "[mail]{CAN} a [info@bblaconchiglia.it]{MAIL} [con le date per la manutenzione]{TESTO}",
-   "email"
-  ],
-  [
-   "mandagli [una mail]{CAN} a [Marcantonio]{CHI} [per confermare l'installazione di giovedì]{TESTO}",
-   "email"
-  ],
-  [
-   "[via mail]{CAN} a [Thermo Service Ortona]{CHI} [che il call di oggi salta]{TESTO}",
-   "email"
-  ],
-  [
-   "manda una [mail]{CAN} al [commercialista De Iuliis]{CHI} [per le fatture di settembre]{TESTO}",
-   "email"
-  ],
-  [
-   "scrivi a [Crisante]{CHI} [per mail]{CAN} [che il preventivo vale 30 giorni]{TESTO}",
-   "email"
-  ],
-  [
-   "[email]{CAN} a [Pizzeria Tre Archi]{CHI} [per spiegare i costi della climatizzazione]{TESTO}",
-   "email"
-  ],
-  [
-   "mail all'[ufficio tecnico di Spoltore]{CHI} [per la pratica della canna fumaria]{TESTO}",
-   "email"
-  ],
-  [
-   "manda a [Di Cintio]{CHI} il [preventivo]{DOC} della [Vaillant]{LAV} su [whatsapp]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "inviagli la [fattura]{DOC} [43]{NUM} a [Masciarelli]{CHI} [per mail]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "bro manda il [rapporto di controllo]{DOC} a [Tinari]{CHI}",
-   "invio_documento"
-  ],
-  [
-   "le [foto]{DOC} della [caldaia Baxi]{LAV} mandale a [D'Ercole]{CHI} su [whatsapp]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "manda la [DiCo]{DOC} a [Zuccarini]{CHI} [via mail]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "[whatsapp]{CAN} a [Faieta]{CHI} col [preventivo]{DOC} [circolatore]{LAV}",
-   "invio_documento"
-  ],
-  [
-   "invia il [libretto impianto]{DOC} a [Ricciuti]{CHI} [per email]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "manda la [scheda tecnica]{DOC} della [Daikin Perfera]{LAV} a [Ranalli]{CHI}",
-   "invio_documento"
-  ],
-  [
-   "[fattura]{DOC} [51]{NUM} a [Hotel Pineta Blu]{CHI} [con la pec]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "girami il [certificato F-gas]{DOC} a [Clima Majella srl]{CHI} [su telegram]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "manda il [preventivo]{DOC} [pompa di calore]{LAV} a [Scurti]{CHI} e anche a [sua moglie]{CHI}",
-   "invio_documento"
-  ],
-  [
-   "[sms]{CAN} a [Cipollone]{CHI} col [link della fattura]{DOC}",
-   "invio_documento"
-  ],
-  [
-   "invia [la garanzia]{DOC} [Ariston]{LAV} a [Petaccia]{CHI} [su whatsapp]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "manda all'[amministratore Di Pasquale]{CHI} il [preventivo]{DOC} [centrale termica]{LAV} [per mail]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "la [fattura]{DOC} del [check Immergas]{LAV} a [Di Biase]{CHI} mandala",
-   "invio_documento"
-  ],
-  [
-   "manda le [foto]{DOC} [prima e dopo]{LAV} a [B&B La Conchiglia]{CHI} [su whatsapp]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "[mail]{CAN} a [Pizzeria Tre Archi]{CHI} col [preventivo]{DOC} [44]{NUM}",
-   "invio_documento"
-  ],
-  [
-   "mandagli la [DiCo]{DOC} e il [libretto]{DOC} a [Natarelli]{CHI}",
-   "invio_documento"
-  ],
-  [
-   "invia [l'RCEE]{DOC} di [Liberatore]{CHI} [per posta elettronica]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "manda il [preventivo]{DOC} [split LG]{LAV} a [Pelusi]{CHI} [con un messaggio]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "[whatsapp]{CAN} [la fattura]{DOC} [12]{NUM} a [Ferrante]{CHI}",
-   "invio_documento"
-  ],
-  [
-   "ok mandale a [Montebello]{CHI} la [visura]{DOC} della ditta [per mail]{CAN}",
-   "invio_documento"
-  ],
-  [
-   "fai un [preventivo]{DOC} per [Di Cintio]{CHI} [sostituzione caldaia Vaillant ecoTEC]{LAV} 2200 euro",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} a [Masciarelli]{CHI} per [riparazione Ariston]{LAV} 180 più iva",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [installazione dual split Daikin]{LAV} per [Zuccarini]{CHI} 2.650",
-   "documento"
-  ],
-  [
-   "fammi la [fattura]{DOC} del [check annuale]{LAV} a [Tinari]{CHI} 90 euro",
-   "documento"
-  ],
-  [
-   "bro [preventivo]{DOC} [pompa di calore Mitsubishi]{LAV} [Scurti]{CHI} 8.400 con lo sconto del 5",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [Hotel Pineta Blu]{CHI} [pulizia bruciatore]{LAV} 320 euro",
-   "documento"
-  ],
-  [
-   "fai [preventivo]{DOC} a [Pantalone]{CHI} per [climatizzatore Samsung trial split]{LAV} 3.900",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [sostituzione scambiatore Baxi]{LAV} [D'Ercole]{CHI} 450 manodopera compresa",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [Faieta]{CHI} [circolatore Grundfos]{LAV} 260 più 80 di manodopera",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} a [Pizzeria Tre Archi]{CHI} [canalizzato Daikin]{LAV} 6.200",
-   "documento"
-  ],
-  [
-   "fai la [fattura]{DOC} a [Ranalli]{CHI} [ricarica gas R32]{LAV} 140",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} per [condominio Le Saline]{CHI} [nuova centrale termica Riello]{LAV} 24.000",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} con acconto del 30 per cento a [Natarelli]{CHI} per la [pompa di calore]{LAV}",
-   "documento"
-  ],
-  [
-   "fammi un [preventivo]{DOC} [scaldabagno Ariston Velis]{LAV} per [Cipollone]{CHI} 520",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [sanificazione 4 split]{LAV} [B&B La Conchiglia]{CHI} 200 euro",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [caldaia Immergas Victrix]{LAV} a [Liberatore]{CHI} 1.950 installata",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} a [Di Nisio]{CHI} per [manutenzione Beretta]{LAV} 95",
-   "documento"
-  ],
-  [
-   "fai un [preventivo]{DOC} a [Ronzitti]{CHI} per [impianto a pavimento]{LAV} da 12.500 no anzi 13.000",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [termostato wifi Netatmo]{LAV} [Di Giandomenico]{CHI} 230",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [Caldarelli]{CHI} [riparazione split Hisense]{LAV} 110 contanti",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} per la [famiglia Sborgia]{CHI} [caldaia a condensazione Ferroli]{LAV} con detrazione 65",
-   "documento"
-  ],
-  [
-   "bro fai [fattura]{DOC} [Basilavecchia]{CHI} [assistenza Daikin]{LAV} 75 euro diritto di chiamata",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [Bar Lu Murette]{CHI} [sostituzione caldaia Hermann]{LAV} 1.700",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} a [palestra Fit Majella]{CHI} [verifica impianto]{LAV} 380 più iva al 22",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [Verrocchio]{CHI} [riparazione perdita]{LAV} 160",
-   "documento"
-  ],
-  [
-   "fammi un [preventivo]{DOC} per [Spadaccini]{CHI} [revisione Hermann]{LAV} e [cambio valvola]{LAV} 210",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [D'Orazio]{CHI} [check Daikin]{LAV} 85",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [due split Mitsubishi]{LAV} [Antonucci]{CHI} 2.300 iva compresa",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [Giancristofaro]{CHI} [primo avvio Junkers]{LAV} gratis no mettici 60",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} a [Odoardi]{CHI} per [sostituzione caldaia Chaffoteaux]{LAV} 1.800",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [saldo]{LAV} [Natarelli]{CHI} 5.880",
-   "documento"
-  ],
-  [
-   "fai [preventivo]{DOC} [Di Lizia]{CHI} [scarico fumi a parete]{LAV} 650",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} [Residence Gabbiano]{CHI} [manutenzione 12 caldaie Vaillant]{LAV} 1.080 l'anno",
-   "documento"
-  ],
-  [
-   "[fattura]{DOC} [Petaccia]{CHI} [check Ariston]{LAV} e [kit pulizia]{LAV} 120",
-   "documento"
-  ],
-  [
-   "[preventivo]{DOC} per [Ferrante]{CHI} [condizionatore portatile De'Longhi]{LAV} 480",
-   "documento"
-  ],
-  [
-   "segnati [che la caldaia Vaillant di Di Cintio ha il pressostato rifatto nel 2024]{TESTO}",
-   "mente"
-  ],
-  [
-   "appunto [da Tracanna il cane morde, citofonare prima]{TESTO}",
-   "mente"
-  ],
-  [
-   "ricorda [che Masciarelli vuole solo ricambi originali Ariston]{TESTO}",
-   "mente"
-  ],
-  [
-   "annota [la Daikin del bar è sul tetto serve la scala lunga]{TESTO}",
-   "mente"
-  ],
-  [
-   "bro tienti a mente [che Faieta paga sempre in ritardo]{TESTO}",
-   "mente"
-  ],
-  [
-   "segna [codice errore F28 sulla Baxi di D'Ercole]{TESTO}",
-   "mente"
-  ],
-  [
-   "ricordati [che il B&B La Conchiglia chiude a novembre]{TESTO}",
-   "mente"
-  ],
-  [
-   "appunto veloce [da Pelusi il parcheggio è in via laterale]{TESTO}",
-   "mente"
-  ],
-  [
-   "segnati [che Scurti preferisce essere chiamato dopo le 6]{TESTO}",
-   "mente"
-  ],
-  [
-   "tieni a mente [la chiave del locale caldaia Riviera Nord è dal portiere]{TESTO}",
-   "mente"
-  ],
-  [
-   "trova il [preventivo]{DOC} della [Vaillant]{LAV} di [Di Cintio]{CHI}",
-   "cerca_documento"
-  ],
-  [
-   "aprimi la [fattura]{DOC} [43]{NUM}",
-   "cerca_documento"
-  ],
-  [
-   "dov'è il [libretto impianto]{DOC} di [Ricciuti]{CHI}",
-   "cerca_documento"
-  ],
-  [
-   "fammi vedere le [foto]{DOC} della [Daikin]{LAV} di [Basilavecchia]{CHI}",
-   "cerca_documento"
-  ],
-  [
-   "cerca la [DiCo]{DOC} di [Zuccarini]{CHI}",
-   "cerca_documento"
-  ],
-  [
-   "bro apri il [rapporto fumi]{DOC} [Hotel Pineta Blu]{CHI}",
-   "cerca_documento"
-  ],
-  [
-   "trovami la [scheda tecnica]{DOC} della [Immergas Victrix]{LAV}",
-   "cerca_documento"
-  ],
-  [
-   "dove sta il [preventivo]{DOC} [canalizzato]{LAV} [Pizzeria Tre Archi]{CHI}",
-   "cerca_documento"
-  ],
-  [
-   "apri [il certificato F-gas]{DOC} mio",
-   "cerca_documento"
-  ],
-  [
-   "tirami fuori le [foto]{DOC} del [locale caldaia]{LAV} del [Condominio Riviera Nord 40]{CHI}",
-   "cerca_documento"
-  ],
-  [
-   "nuovo cliente [Di Febo Marco]{CHI} [347 2251908]{TEL}",
-   "cliente"
-  ],
-  [
-   "aggiungi [la signora Pallini]{CHI} [via Coste Rosse 4 Spoltore]{IND}",
-   "cliente"
-  ],
-  [
-   "salva [Clima Pescara Nord snc]{CHI} mail [ordini@climapescaranord.it]{MAIL}",
-   "cliente"
-  ],
-  [
-   "crea scheda [Taraborrelli Gino]{CHI} [339 7781203]{TEL} [via del Gelso 19]{IND}",
-   "cliente"
-  ],
-  [
-   "bro aggiorna il numero di [Rapino]{CHI} [328 4410957]{TEL}",
-   "cliente"
-  ],
-  [
-   "nuovo cliente [Bar Due Fontane]{CHI} [caldaia Ferroli]{LAV}",
-   "cliente"
-  ],
-  [
-   "cambia indirizzo di [Di Zio]{CHI} adesso sta in [via Piano Grande 11 Cepagatti]{IND}",
-   "cliente"
-  ],
-  [
-   "aggiungi [Odoardi Sara]{CHI} mail [sara.odoardi@mail.it]{MAIL}",
-   "cliente"
-  ],
-  [
-   "registrami [Ianni Pasquale]{CHI} [366 1029384]{TEL} ha [la Vaillant vecchia]{LAV}",
-   "cliente"
-  ],
-  [
-   "bro quanto ho fatturato a settembre tra caldaie e clima",
-   "dati"
-  ],
-  [
-   "che c'ho in agenda [domani]{GIO} [mattina]{ORA} tipo slot liberi",
-   "dati"
-  ],
-  [
-   "quanti [check]{LAV} [Vaillant]{LAV} ho fatto quest'anno",
-   "dati"
-  ],
-  [
-   "chi mi deve ancora soldi",
-   "dati"
-  ],
-  [
-   "[giovedì]{GIO} ho slot liberi [nel pomeriggio]{ORA}",
-   "dati"
-  ],
-  [
-   "qual è il numero di [Caldarelli]{CHI}",
-   "dati"
-  ],
-  [
-   "indirizzo di [Pelusi]{CHI}",
-   "dati"
-  ],
-  [
-   "quanto mi deve [Faieta]{CHI}",
-   "dati"
-  ],
-  [
-   "quante [fatture]{DOC} non pagate ho",
-   "dati"
-  ],
-  [
-   "quando ho fatto l'ultima [manutenzione]{LAV} da [Di Nisio]{CHI}",
-   "dati"
-  ],
-  [
-   "bro com'è messa l'agenda [la settimana prossima]{GIO}",
-   "dati"
-  ],
-  [
-   "quanto ho incassato dall'[Hotel Pineta Blu]{CHI} quest'anno",
-   "dati"
-  ],
-  [
-   "quanti [preventivi]{DOC} ho in attesa",
-   "dati"
-  ],
-  [
-   "che marca di caldaia ha [Spadaccini]{CHI}",
-   "dati"
-  ],
-  [
-   "a che ora ho [Tinari]{CHI} [domani]{GIO}",
-   "dati"
-  ],
-  [
-   "quante [Daikin]{LAV} ho installato da gennaio",
-   "dati"
-  ],
-  [
-   "mail di [Termoidraulica Saline]{CHI}",
-   "dati"
-  ],
-  [
-   "quanto ho speso di gas refrigerante questo mese",
-   "dati"
-  ],
-  [
-   "ogni quanto va fatta la prova fumi su una caldaia a condensazione",
-   "domanda"
-  ],
-  [
-   "l'R32 si può mettere in un impianto che era R410",
-   "domanda"
-  ],
-  [
-   "che pressione deve avere una caldaia a freddo",
-   "domanda"
-  ],
-  [
-   "la detrazione per la pompa di calore quest'anno a quanto sta",
-   "domanda"
-  ],
-  [
-   "bro il codice F75 su una [Vaillant]{LAV} cosa vuol dire",
-   "domanda"
-  ],
-  [
-   "quanto dura il patentino [F-gas]{DOC}",
-   "domanda"
-  ],
-  [
-   "conviene di più un monosplit da 12000 o da 9000 per una camera da 18 metri",
-   "domanda"
-  ],
-  [
-   "come si spurga l'aria da un termosifone in ghisa",
-   "domanda"
-  ],
-  [
-   "[Masciarelli]{CHI} ha pagato 180 in contanti",
-   "incasso"
-  ],
-  [
-   "arrivato bonifico da [Hotel Pineta Blu]{CHI} per la [fattura]{DOC} [51]{NUM}",
-   "incasso"
-  ],
-  [
-   "[Zuccarini]{CHI} mi ha dato l'acconto di 800",
-   "incasso"
-  ],
-  [
-   "segna pagata la [fattura]{DOC} [12]{NUM} di [Ferrante]{CHI}",
-   "incasso"
-  ],
-  [
-   "ok bro [Tinari]{CHI} ha saldato",
-   "incasso"
-  ],
-  [
-   "incassati 75 da [Basilavecchia]{CHI} col pos",
-   "incasso"
-  ],
-  [
-   "[Natarelli]{CHI} ha fatto il bonifico del saldo",
-   "incasso"
-  ],
-  [
-   "soldi arrivati dal [B&B La Conchiglia]{CHI} per le [sanificazioni]{LAV}",
-   "incasso"
-  ],
-  [
-   "uè scatta una [foto]{DOC} alla [targhetta]{LAV} della [Beretta]{LAV} di [Pallini]{CHI}",
-   "foto"
-  ],
-  [
-   "fai foto al [display]{LAV} della [Ariston]{LAV} con l'errore",
-   "foto"
-  ],
-  [
-   "bro foto veloce allo [split]{LAV} di [Caldarelli]{CHI}",
-   "foto"
-  ],
-  [
-   "apri la fotocamera che fotografo il [contatore gas]{LAV}",
-   "foto"
-  ],
-  [
-   "fotografa la [canna fumaria]{LAV} da [Di Lizia]{CHI}",
-   "foto"
-  ],
-  [
-   "scatta [foto]{DOC} [prima dell'intervento]{LAV} da [Verrocchio]{CHI}",
-   "foto"
-  ],
-  [
-   "metti il [preventivo]{DOC} di [Scurti]{CHI} nella cartella [Pompe di calore]{CART}",
-   "cartella"
-  ],
-  [
-   "crea la cartella [Manutenzioni 2027]{CART}",
-   "cartella"
-  ],
-  [
-   "sposta le [foto]{DOC} del [Hotel Pineta Blu]{CHI} in [Clienti Hotel]{CART}",
-   "cartella"
-  ],
-  [
-   "salva il [certificato F-gas]{DOC} nella cartella [Documenti ditta]{CART}",
-   "cartella"
-  ],
-  [
-   "bro rinomina la cartella [Varie clima]{CART} in [Condizionatori]{CART}",
-   "cartella"
-  ],
-  [
-   "metti tutti i [libretti]{DOC} nella cartella [Libretti impianto]{CART}",
-   "cartella"
-  ],
-  [
-   "aiuto c'è odore di gas forte da [Di Biase]{CHI} che faccio",
-   "urgenza"
-  ],
-  [
-   "emergenza la caldaia di [nonna Iezzi]{CHI} è in blocco e fuori fa freddo",
-   "urgenza"
-  ],
-  [
-   "bro si è allagato il locale caldaia del [Condominio Le Saline]{CHI}",
-   "urgenza"
-  ],
-  [
-   "mi sono tagliato la mano in cantiere in [via Colle Sereno 15]{IND}",
-   "urgenza"
-  ],
-  [
-   "subito la [Vaillant]{LAV} di [Di Cintio]{CHI} perde acqua dappertutto",
-   "urgenza"
-  ],
-  [
-   "[Hotel Pineta Blu]{CHI} senza acqua calda con gli ospiti dentro urgente",
-   "urgenza"
-  ],
-  [
-   "il furgone si è fermato in autostrada e ho tre interventi dopo",
-   "urgenza"
-  ],
-  [
-   "scintille dallo [split]{LAV} di [Caldarelli]{CHI} ha staccato la corrente",
-   "urgenza"
-  ],
-  [
-   "[SAL]{DOC} [Condominio Le Saline]{CHI} [centrale termica]{LAV} siamo al [40 per cento]{AVANZ}",
-   "sal"
-  ],
-  [
-   "fai il [secondo SAL]{DOC} per [Residence Gabbiano]{CHI} [70%]{AVANZ}",
-   "sal"
-  ],
-  [
-   "bro [SAL]{DOC} [2]{NUM} [impianto a pavimento]{LAV} [Ronzitti]{CHI} [metà lavori]{AVANZ}",
-   "sal"
-  ],
-  [
-   "prepara lo [stato avanzamento]{DOC} per [palestra Fit Majella]{CHI} siamo a [tre quarti]{AVANZ}",
-   "sal"
-  ],
-  [
-   "[SAL]{DOC} [Condominio Riviera Nord 40]{CHI} [canne fumarie]{LAV} [25%]{AVANZ}",
-   "sal"
-  ],
-  [
-   "col [canalizzato]{LAV} della [Pizzeria Tre Archi]{CHI} siamo all'[80 per cento]{AVANZ} fai il [SAL]{DOC}",
-   "sal"
-  ],
-  [
-   "[primo SAL]{DOC} [pompa di calore]{LAV} [Natarelli]{CHI} [30 per cento]{AVANZ}",
-   "sal"
-  ],
-  [
-   "fai la [DiCo]{DOC} per la [caldaia Vaillant]{LAV} di [Di Cintio]{CHI}",
-   "dico"
-  ],
-  [
-   "[dichiarazione di conformità]{DOC} [impianto gas]{LAV} [Liberatore]{CHI}",
-   "dico"
-  ],
-  [
-   "bro manca la [DiCo]{DOC} della [Immergas]{LAV} di [Tinari]{CHI}",
-   "dico"
-  ],
-  [
-   "prepara [DiCo]{DOC} [centrale termica]{LAV} [Condominio Le Saline]{CHI}",
-   "dico"
-  ],
-  [
-   "[DiCo]{DOC} [Sborgia]{CHI} [caldaia a condensazione]{LAV}",
-   "dico"
-  ],
-  [
-   "fammi la [conformità]{DOC} per [l'impianto a pavimento]{LAV} di [Ronzitti]{CHI}",
-   "dico"
-  ],
-  [
-   "[DiCo]{DOC} [scaldabagno]{LAV} [Cipollone]{CHI} falla oggi",
-   "dico"
-  ],
-  [
-   "serve la [DiCo]{DOC} della [Hermann]{LAV} al [Bar Lu Murette]{CHI}",
-   "dico"
-  ],
-  [
-   "preparami due righe per [l'assemblea]{LAV} del [Condominio Le Saline]{CHI} sulla caldaia centralizzata",
-   "assemblea"
-  ],
-  [
-   "[assemblea]{LAV} [Condominio Riviera Nord 40]{CHI} [giovedì 20]{GIO} [alle 18 e 30]{ORA} convoca",
-   "assemblea"
-  ],
-  [
-   "bro cosa porto all'[assemblea]{LAV} del [Residence Gabbiano]{CHI}",
-   "assemblea"
-  ],
-  [
-   "convoca l'[assemblea straordinaria]{LAV} del [Condominio Villa Cerasa]{CHI} per [il cambio caldaia]{TESTO}",
-   "assemblea"
-  ],
-  [
-   "fai il verbale dell'[assemblea]{LAV} di ieri [Condominio Le Saline]{CHI}",
-   "assemblea"
-  ],
-  [
-   "ordine del giorno per l'[assemblea]{LAV} del [Condominio Pineto Alto]{CHI} [contabilizzatori di calore]{TESTO}",
-   "assemblea"
-  ],
-  [
-   "ok bro buongiorno eccomi operativo",
-   "saluto"
-  ],
-  [
-   "uè EON come butta stamattina",
-   "saluto"
-  ],
-  [
-   "buonanotte EON chiudo baracca",
-   "saluto"
-  ],
-  [
-   "ciao bella giornata piena oggi eh",
-   "saluto"
-  ],
-  [
-   "hey EON grazie mille per oggi top",
-   "saluto"
-  ],
-  [
-   "bella EON mo' si parte",
-   "saluto"
-  ],
-  [
-   "[Di Cintio]{CHI} ha detto ok per la [Vaillant]{LAV}",
-   "accettato"
-  ],
-  [
-   "[preventivo]{DOC} [Zuccarini]{CHI} accettato",
-   "accettato"
-  ],
-  [
-   "bro il [preventivo]{DOC} [44]{NUM} [Pizzeria Tre Archi]{CHI} firmato",
-   "accettato"
-  ],
-  [
-   "[Scurti]{CHI} ha accettato la [pompa di calore]{LAV}",
-   "accettato"
-  ],
-  [
-   "la [signora Pallini]{CHI} va bene per il [condizionatore]{LAV}",
-   "accettato"
-  ],
-  [
-   "segna accettato il [preventivo]{DOC} di [Liberatore]{CHI}",
-   "accettato"
-  ],
-  [
-   "[famiglia Sborgia]{CHI} ok [preventivo]{DOC} [Ferroli]{LAV}",
-   "accettato"
-  ],
-  [
-   "[Residence Gabbiano]{CHI} ha confermato il contratto di [manutenzione]{LAV}",
-   "accettato"
-  ],
-  [
-   "[Faieta]{CHI} non ha ancora pagato mandagli un sollecito",
-   "sollecito"
-  ],
-  [
-   "sollecita [Ranalli]{CHI} per la [fattura]{DOC} [38]{NUM}",
-   "sollecito"
-  ],
-  [
-   "bro ricorda a [Caldarelli]{CHI} che deve ancora i 110",
-   "sollecito"
-  ],
-  [
-   "manda sollecito [per mail]{CAN} a [palestra Fit Majella]{CHI}",
-   "sollecito"
-  ],
-  [
-   "sollecito gentile a [D'Orazio]{CHI} [su whatsapp]{CAN} per il [check Daikin]{LAV}",
-   "sollecito"
-  ],
-  [
-   "[Di Lizia]{CHI} la [fattura]{DOC} è scaduta da un mese sollecitalo",
-   "sollecito"
-  ],
-  [
-   "fai un sollecito a [Bar Lu Murette]{CHI} per il saldo",
-   "sollecito"
-  ],
-  [
-   "[Odoardi]{CHI} deve l'acconto, sollecita con un [sms]{CAN}",
-   "sollecito"
-  ],
-  [
-   "chiama [Di Cintio]{CHI}",
-   "chiamata"
-  ],
-  [
-   "fai partire una call con [Termoidraulica Saline]{CHI}",
-   "chiamata"
-  ],
-  [
-   "telefona a [Masciarelli]{CHI} no anzi a [suo figlio]{CHI}",
-   "chiamata"
-  ],
-  [
-   "bro chiamami [Daniele della Frigo Adriatica]{CHI}",
-   "chiamata"
-  ],
-  [
-   "chiama [Gelsomina in ufficio]{CHI}",
-   "chiamata"
-  ],
-  [
-   "chiama [il geometra Pomilio]{CHI} in vivavoce",
-   "chiamata"
-  ],
-  [
-   "telefonata a [Hotel Pineta Blu]{CHI}",
-   "chiamata"
-  ],
-  [
-   "chiama il [339 5512047]{TEL}",
-   "chiamata"
-  ],
-  [
-   "fammi parlare con [Marco del magazzino]{CHI}",
-   "chiamata"
-  ],
-  [
-   "richiama [Tatasciore]{CHI} che mi ha cercato",
-   "chiamata"
-  ]
- ]
-}
+{ "personaggio": "Tecnico caldaie e condizionatori abruzzese di 31 anni, di Pescara: giovane, frasi brevi e spesso senza verbo, mischia parole inglesi (call, meeting, slot, check, ok bro), qualche uè e mo', nomina sempre le marche (Vaillant, Ariston, Daikin, Baxi, Immergas) che sono il lavoro, non il cliente.",
+  "frasi": [
+    ["segna [domani]{GIO} [alle 8]{ORA} [check Vaillant]{LAV} da [Di Cintio]{CHI} in [via dei Mandorli 7]{IND}","calendario"],
+    ["ok bro mettimi [giovedì]{GIO} [verso le 10]{ORA} la [prova fumi]{LAV} dalla [signora Ciammaichella]{CHI}","calendario"],
+    ["[lunedì]{GIO} [alle otto e mezza]{ORA} [sanificazione split Daikin]{LAV} da [Tracanna]{CHI}","calendario"],
+    ["[alle 14 e 30]{ORA} [dopodomani]{GIO} call con [Termoidraulica Saline]{CHI} per la [fornitura caldaie]{LAV}","calendario"],
+    ["mettimi uno slot [venerdì]{GIO} [in mattinata]{ORA} per la [sostituzione circolatore]{LAV} da [Faieta]{CHI}","calendario"],
+    ["meeting [mercoledì]{GIO} [alle 18]{ORA} con [il geometra Pomilio]{CHI} per la [centrale termica]{LAV} del [Condominio Le Saline]{CHI}","calendario"],
+    ["ricordami [domani]{GIO} [prima delle 9]{ORA} [di ritirare il kit fumi al magazzino]{TESTO}","calendario"],
+    ["[il 14 ottobre]{GIO} [nel primo pomeriggio]{ORA} [installazione dual split]{LAV} da [Zuccarini]{CHI} a [Montesilvano]{IND}","calendario"],
+    ["uè segnami [sabato]{GIO} [alle nove meno un quarto]{ORA} la [caldaia Ariston]{LAV} di [Masciarelli]{CHI} che perde","calendario"],
+    ["appuntamento [martedì prossimo]{GIO} [dopo pranzo]{ORA} con [Ranalli]{CHI} per [ricarica gas]{LAV} al condizionatore","calendario"],
+    ["[alle 7 e 45]{ORA} [giovedì]{GIO} parto per [Chieti Scalo]{IND} [manutenzione annuale]{LAV} da [Di Nisio]{CHI}","calendario"],
+    ["fissa con [Scurti]{CHI} [fra tre giorni]{GIO} [verso mezzogiorno]{ORA} il [sopralluogo pompa di calore]{LAV}","calendario"],
+    ["check [Immergas]{LAV} [domani pomeriggio]{GIO} [verso le 4]{ORA} da [Tinari]{CHI} in [via Saline Alte 22]{IND}","calendario"],
+    ["ricordami [stasera]{GIO} [alle 21]{ORA} [di mandare il listino a mio cugino]{TESTO}","calendario"],
+    ["[il 3 novembre]{GIO} [alle 11]{ORA} corso aggiornamento [F-gas]{LAV} a Pescara segna","calendario"],
+    ["metti [venerdì]{GIO} [all'una]{ORA} pranzo con [Daniele della Frigo Adriatica]{CHI}","calendario"],
+    ["bro segna [la settimana prossima]{GIO} [di mattina presto]{ORA} [cambio scambiatore Baxi]{LAV} da [D'Ercole]{CHI}","calendario"],
+    ["[domani]{GIO} [ore 15]{ORA} [pulizia bruciatore]{LAV} [Hotel Pineta Blu]{CHI}","calendario"],
+    ["[mercoledì]{GIO} slot [delle 16]{ORA} libero mettici [Di Giandomenico]{CHI} [termostato wifi]{LAV}","calendario"],
+    ["[alle dieci e un quarto]{ORA} [lunedì]{GIO} no anzi [martedì]{GIO} [installazione Mitsubishi]{LAV} da [Pantalone]{CHI}","calendario"],
+    ["promemoria [giovedì]{GIO} [verso le 6 di sera]{ORA} [richiamare il fornitore delle valvole]{TESTO}","calendario"],
+    ["segna [il 20]{GIO} [alle 9 e 10]{ORA} [analisi combustione]{LAV} al [Bar Lu Murette]{CHI}","calendario"],
+    ["[dopodomani]{GIO} [sul tardi]{ORA} passo da [Cipollone]{CHI} per lo [scaldabagno]{LAV}","calendario"],
+    ["mettimi [sabato mattina]{GIO} [alle 8 in punto]{ORA} [check Riello]{LAV} da [nonna Iezzi]{CHI}","calendario"],
+    ["[oggi]{GIO} [alle 17 e 40]{ORA} call con [Idrotek Spoltore]{CHI} segnala","calendario"],
+    ["appuntamento [il 7 dicembre]{GIO} [nella tarda mattinata]{ORA} per [preventivo climatizzazione]{LAV} [Pizzeria Tre Archi]{CHI}","calendario"],
+    ["[fra una settimana]{GIO} [alle 13 e 15]{ORA} [installazione pompa di calore]{LAV} da [Natarelli]{CHI} a [Pianella]{IND}","calendario"],
+    ["ricordami [domattina]{GIO} [alle 6]{ORA} [di caricare il furgone col vaso di espansione]{TESTO}","calendario"],
+    ["[martedì]{GIO} [ore 10]{ORA} meeting con [Sciarra]{CHI} e [Montebello]{CHI} per la [ditta nuova]{LAV}","calendario"],
+    ["segna [giovedì 9]{GIO} [nel pomeriggio]{ORA} [Ferroli]{LAV} di [Carusi]{CHI} in blocco","calendario"],
+    ["ok mettici [lunedì]{GIO} [tra le 2 e le 3]{ORA} [check Daikin]{LAV} da [D'Orazio]{CHI}","calendario"],
+    ["[alle undici e mezza]{ORA} [domani]{GIO} [sopralluogo]{LAV} [Residence Gabbiano]{CHI} [via del Faro Vecchio 3]{IND}","calendario"],
+    ["[il 28]{GIO} [alle 19]{ORA} ricordami [la partita di calcetto con i ragazzi]{TESTO}","calendario"],
+    ["[venerdì prossimo]{GIO} [prima di pranzo]{ORA} [libretto impianto]{LAV} da compilare da [Ricciuti]{CHI}","calendario"],
+    ["segnami [mercoledì]{GIO} [verso le 15 e 30]{ORA} [sostituzione caldaia Beretta]{LAV} da [Di Marzio]{CHI}","calendario"],
+    ["[domani]{GIO} [alle 9]{ORA} e [alle 14]{ORA} due slot da [Mancinelli]{CHI} per la [manutenzione condizionatori]{LAV}","calendario"],
+    ["bro [il 2 novembre]{GIO} [alle 10 e 20]{ORA} [visita ASL]{LAV} in [via Colle Sereno 15]{IND}","calendario"],
+    ["mettimi [tra due giorni]{GIO} [a metà mattina]{ORA} [revisione Hermann]{LAV} di [Spadaccini]{CHI}","calendario"],
+    ["[stasera]{GIO} [dopo le 8]{ORA} call con [mio fratello]{CHI} per il [furgone]{LAV}","calendario"],
+    ["segna appuntamento con [Taraborrelli]{CHI} [giovedì]{GIO} [alle quattro e venti]{ORA} [valvola gas]{LAV}","calendario"],
+    ["[lunedì 13]{GIO} [alle 8 e un quarto]{ORA} [primo avvio]{LAV} [Junkers]{LAV} da [Giancristofaro]{CHI}","calendario"],
+    ["ricordami [venerdì]{GIO} [nel pomeriggio]{ORA} [di pagare il bollo del Doblò]{TESTO}","calendario"],
+    ["[dopo pranzo]{ORA} [sabato]{GIO} [sanificazione Samsung]{LAV} dalla [signora Di Lullo]{CHI}","calendario"],
+    ["[il 15 novembre]{GIO} [alle 8]{ORA} [pulizia canna fumaria]{LAV} [Condominio Riviera Nord 40]{CHI}","calendario"],
+    ["mettimi uno slot [domani]{GIO} [all'ora di pranzo]{ORA} per [Verrocchio]{CHI} [check perdita]{LAV}","calendario"],
+    ["[mercoledì prossimo]{GIO} [alle 9 e 45]{ORA} [incontro]{LAV} col [rappresentante Lorenzetti]{CHI}","calendario"],
+    ["segna [giovedì]{GIO} [verso le cinque]{ORA} [scarico condensa]{LAV} da [Liberatore]{CHI}","calendario"],
+    ["[fine mese]{GIO} [la mattina]{ORA} [verifica impianto]{LAV} alla [palestra Fit Majella]{CHI}","calendario"],
+    ["[tra 10 giorni]{GIO} [alle 16]{ORA} [installazione split LG]{LAV} da [Pelusi]{CHI} in [via Fonte Chiara 9]{IND}","calendario"],
+    ["ricordami [domani sera]{GIO} [alle 22]{ORA} [di scaricare le foto del cantiere sul pc]{TESTO}","calendario"],
+    ["[alle 7]{ORA} [martedì]{GIO} parto presto [caldaia a condensazione]{LAV} [Nardone]{CHI} [Penne]{IND}","calendario"],
+    ["ok bro [venerdì 17]{GIO} [ore 12]{ORA} meeting [Clima Majella srl]{CHI}","calendario"],
+    ["mettimi [lunedì]{GIO} [nella prima mattinata]{ORA} [cambio pressostato]{LAV} da [Antonucci]{CHI}","calendario"],
+    ["[il 30 ottobre]{GIO} [verso le 15]{ORA} [verifica fughe]{LAV} da [Fusilli]{CHI} a [Francavilla]{IND}","calendario"],
+    ["appuntamento [dopodomani]{GIO} [alle 10]{ORA} per [preventivo caldaia]{LAV} dalla [famiglia Sborgia]{CHI}","calendario"],
+    ["[oggi pomeriggio]{GIO} [alle 3 e mezza]{ORA} passo da [Caldarelli]{CHI} per lo [split che gocciola]{LAV}","calendario"],
+    ["segna [mercoledì]{GIO} [alle 11 e 40]{ORA} [revisione Chaffoteaux]{LAV} [Di Clemente]{CHI}","calendario"],
+    ["[giovedì]{GIO} slot [dalle 2 alle 4]{ORA} [manutenzione]{LAV} [B&B La Conchiglia]{CHI}","calendario"],
+    ["ricordami [lunedì]{GIO} [alle 9]{ORA} [che scade l'assicurazione del furgone]{TESTO}","calendario"],
+    ["[la settimana dopo]{GIO} [di pomeriggio]{ORA} [sopralluogo]{LAV} da [Ronzitti]{CHI} per [impianto a pavimento]{LAV}","calendario"],
+    ["metti [sabato 25]{GIO} [verso le 10 e mezza]{ORA} [check Ariston]{LAV} da [Petaccia]{CHI} che è fuori casa fino alle dieci","calendario"],
+    ["[domani]{GIO} [appena apre]{ORA} vado da [Colantonio Ricambi]{CHI} a prendere la [scheda elettronica]{LAV}","calendario"],
+    ["[alle 8 e 50]{ORA} [martedì]{GIO} [prova tenuta gas]{LAV} da [Di Biase]{CHI}","calendario"],
+    ["segnami [il 5]{GIO} [verso sera]{ORA} [cena con la squadra]{LAV}","calendario"],
+    ["mettimi [giovedì prossimo]{GIO} [alle due]{ORA} la [Daikin]{LAV} di [Basilavecchia]{CHI} che fa rumore","calendario"],
+    ["[venerdì]{GIO} [ore 17]{ORA} [consegna libretto]{LAV} a [Cerasoli]{CHI} in [via Torre Piccola 31]{IND}","calendario"],
+    ["sposta la [prova fumi]{LAV} di [Lanciaprima]{CHI} da [domani]{GIO} a [giovedì]{NGIO} [alle 10]{NORA}","calendario_modifica"],
+    ["bro il [check Vaillant]{LAV} di [lunedì]{GIO} spostalo a [mercoledì]{NGIO}","calendario_modifica"],
+    ["[Di Fabio]{CHI} non c'è [venerdì]{GIO} metti a [sabato]{NGIO} [alle 9]{NORA}","calendario_modifica"],
+    ["annulla la call di [oggi]{GIO} [alle 15]{ORA} con [Thermo Service Ortona]{CHI}","calendario_modifica"],
+    ["la [sanificazione]{LAV} da [Paolini]{CHI} spostala [alle 4]{NORA} invece che [alle 2]{ORA}","calendario_modifica"],
+    ["cancella il [meeting]{LAV} di [martedì]{GIO} con [Cardinale]{CHI}","calendario_modifica"],
+    ["slitta [l'installazione Daikin]{LAV} di [Ruscitti]{CHI} alla [settimana prossima]{NGIO}","calendario_modifica"],
+    ["[domani]{GIO} [alle 8]{ORA} da [Di Censo]{CHI} portalo [alle 11]{NORA} che devo passare dal magazzino","calendario_modifica"],
+    ["ok sposta tutto quello di [giovedì]{GIO} a [venerdì]{NGIO}","calendario_modifica"],
+    ["[Rapino]{CHI} ha chiamato vuole la [caldaia Ariston]{LAV} [il 12]{NGIO} [di pomeriggio]{NORA} non [il 10]{GIO}","calendario_modifica"],
+    ["no anzi la [manutenzione]{LAV} [Hotel Pineta Blu]{CHI} spostala a [lunedì]{NGIO} [verso le 9]{NORA}","calendario_modifica"],
+    ["togli il [sopralluogo]{LAV} di [mercoledì]{GIO} da [Odoardi]{CHI} ha disdetto","calendario_modifica"],
+    ["anticipa [l'analisi combustione]{LAV} di [Di Lizia]{CHI} a [oggi]{NGIO} [alle 17]{NORA}","calendario_modifica"],
+    ["posticipa di un'ora [la call]{LAV} con [Idrotherm Cepagatti]{CHI} di [domani]{GIO}","calendario_modifica"],
+    ["il [check Baxi]{LAV} di [Pace]{CHI} da [venerdì]{GIO} [alle 9]{ORA} a [venerdì]{NGIO} [alle 14]{NORA}","calendario_modifica"],
+    ["spostami [il meeting]{LAV} col [geometra Speranza]{CHI} [al 20 ottobre]{NGIO}","calendario_modifica"],
+    ["[Tatasciore]{CHI} rimanda a [dopodomani]{NGIO} [stessa ora]{NORA}","calendario_modifica"],
+    ["cancella [domani]{GIO} [alle 18]{ORA} [il calcetto]{LAV} che piove","calendario_modifica"],
+    ["bro sposta [Di Renzo]{CHI} [ricarica gas]{LAV} a [giovedì]{NGIO} [nel primo pomeriggio]{NORA}","calendario_modifica"],
+    ["la [pompa di calore]{LAV} di [D'Angelo]{CHI} non più [lunedì]{GIO} ma [martedì 14]{NGIO}","calendario_modifica"],
+    ["annulla [il sopralluogo]{LAV} [Pizzeria Tre Archi]{CHI} e rimettilo [fra due settimane]{NGIO}","calendario_modifica"],
+    ["[alle 10]{NORA} invece che [alle 8]{ORA} [domani]{GIO} da [Ferrante]{CHI}","calendario_modifica"],
+    ["sposta [lo slot delle 11]{ORA} di [mercoledì]{GIO} [alle 12 e 30]{NORA}","calendario_modifica"],
+    ["[Di Tommaso]{CHI} ha la febbre spostiamo la [revisione Immergas]{LAV} alla [settimana dopo]{NGIO}","calendario_modifica"],
+    ["cambia [l'appuntamento]{LAV} di [Pantalone]{CHI} da [sabato]{GIO} a [lunedì]{NGIO} [verso le 8 e mezza]{NORA}","calendario_modifica"],
+    ["elimina [il promemoria]{LAV} [del bollo]{TESTO} l'ho già pagato","calendario_modifica"],
+    ["rimanda [la sostituzione]{LAV} [Riello]{LAV} di [Di Sciascio]{CHI} a [fine mese]{NGIO}","calendario_modifica"],
+    ["ok il [check]{LAV} da [Ianni]{CHI} mettilo [prima]{NORA} tipo [alle 7 e mezza]{NORA}","calendario_modifica"],
+    ["[giovedì]{GIO} da [Cocco]{CHI} saltato, ripianifica [venerdì]{NGIO} [in mattinata]{NORA}","calendario_modifica"],
+    ["sposta la call di [oggi]{GIO} con [Rossetti Clima]{CHI} a [domani]{NGIO} [alle 9 e 15]{NORA}","calendario_modifica"],
+    ["annulla tutti gli appuntamenti di [sabato]{GIO} che vado al matrimonio","calendario_modifica"],
+    ["la [prova tenuta]{LAV} da [Di Zio]{CHI} da [il 4]{GIO} al [6]{NGIO} [stessa ora]{NORA}","calendario_modifica"],
+    ["[Mancini Lucio]{CHI} vuole spostare [lo scaldabagno]{LAV} a [mercoledì]{NGIO} [dopo pranzo]{NORA}","calendario_modifica"],
+    ["il [meeting]{LAV} con [Clima Majella srl]{CHI} è saltato toglilo","calendario_modifica"],
+    ["anticipa [il primo avvio]{LAV} di [Giancristofaro]{CHI} [alle 7]{NORA}","calendario_modifica"],
+    ["sposta [martedì]{GIO} [Pelusi]{CHI} a [giovedì]{NGIO} e [Antonucci]{CHI} a [venerdì]{NGIO}","calendario_modifica"],
+    ["rimandami [la cena]{LAV} con la squadra a [sabato prossimo]{NGIO} [alle 20 e 30]{NORA}","calendario_modifica"],
+    ["[la Daikin]{LAV} di [Basilavecchia]{CHI} mettila [il 16]{NGIO} invece che [il 9]{GIO}","calendario_modifica"],
+    ["spostamento: [Natarelli]{CHI} [pompa di calore]{LAV} [domani]{GIO} → [dopodomani]{NGIO} [alle 13]{NORA}","calendario_modifica"],
+    ["cancella la [visita ASL]{LAV} del [2 novembre]{GIO} l'hanno rinviata loro","calendario_modifica"],
+    ["[venerdì]{GIO} [all'una]{ORA} col [rappresentante Di Vittorio]{CHI} portalo [alle 3]{NORA}","calendario_modifica"],
+    ["spostami [Faieta]{CHI} [circolatore]{LAV} [nel pomeriggio]{NORA} che la mattina sono da [Masciarelli]{CHI}","calendario_modifica"],
+    ["il corso [F-gas]{LAV} l'hanno spostato [al 10 novembre]{NGIO} [alle 14]{NORA} aggiorna","calendario_modifica"],
+    ["bro slitta di mezz'ora [la prova fumi]{LAV} di [domani]{GIO} da [Tinari]{CHI}","calendario_modifica"],
+    ["no aspetta [Scurti]{CHI} non [mercoledì]{GIO} ma [giovedì]{NGIO} [verso le 11]{NORA}","calendario_modifica"],
+    ["togli [il pranzo]{LAV} con [Daniele]{CHI} di [venerdì]{GIO}","calendario_modifica"],
+    ["[la pulizia bruciatore]{LAV} [Hotel Pineta Blu]{CHI} spostala [al 22]{NGIO} [di mattina]{NORA}","calendario_modifica"],
+    ["annulla [Zuccarini]{CHI} che ha comprato [la Daikin]{LAV} da un altro","calendario_modifica"],
+    ["sposta [il check]{LAV} [Hermann]{LAV} a [lunedì 20]{NGIO} [alle 8 e 40]{NORA}","calendario_modifica"],
+    ["[D'Orazio]{CHI} da [oggi]{GIO} a [domani]{NGIO} [alla stessa ora]{NORA}","calendario_modifica"],
+    ["rimanda [l'incontro]{LAV} col [rappresentante Lorenzetti]{CHI} a [data da destinarsi]{NGIO}","calendario_modifica"],
+    ["mettimi [lo slot delle 16]{ORA} [alle 17 e 30]{NORA} che faccio tardi da [Verrocchio]{CHI}","calendario_modifica"],
+    ["[Caldarelli]{CHI} lo split lo vediamo [sabato]{NGIO} non [oggi]{GIO} spostalo","calendario_modifica"],
+    ["la [revisione Chaffoteaux]{LAV} di [mercoledì]{GIO} anticipala a [martedì]{NGIO} [stesso orario]{NORA}","calendario_modifica"],
+    ["cancella il [promemoria]{LAV} [della partita]{TESTO} del [28]{GIO}","calendario_modifica"],
+    ["sposta [il B&B La Conchiglia]{CHI} [dalle 2]{ORA} [alle 5]{NORA}","calendario_modifica"],
+    ["[Cerasoli]{CHI} il libretto glielo porto [lunedì]{NGIO} [dopo le 18]{NORA} sposta","calendario_modifica"],
+    ["bro annulla la [sostituzione Beretta]{LAV} da [Di Marzio]{CHI} ci ha ripensato","calendario_modifica"],
+    ["[il 15 novembre]{GIO} [canna fumaria]{LAV} [Condominio Riviera Nord 40]{CHI} spostalo a [il 18]{NGIO} [alle 9]{NORA}","calendario_modifica"],
+    ["posticipa [la verifica impianto]{LAV} [palestra Fit Majella]{CHI} [a inizio dicembre]{NGIO}","calendario_modifica"],
+    ["[Fusilli]{CHI} a [Francavilla]{IND} rimandalo [di una settimana]{NGIO}","calendario_modifica"],
+    ["il [termostato wifi]{LAV} di [Di Giandomenico]{CHI} portalo [alle 9]{NORA} [domani]{NGIO}","calendario_modifica"],
+    ["sposta [Petaccia]{CHI} [sabato 25]{GIO} [alle 10 e mezza]{ORA} a [domenica]{NGIO} [alle 10 e mezza]{NORA} che sabato non c'è","calendario_modifica"],
+    ["[domani]{GIO} libera la mattina, sposta tutto [al pomeriggio]{NORA}","calendario_modifica"],
+    ["[Ricciuti]{CHI} [libretto impianto]{LAV} rinviato [al 3 dicembre]{NGIO} [verso le 11]{NORA}","calendario_modifica"],
+    ["annulla [la consegna]{LAV} a [Cerasoli]{CHI} e mettila [martedì]{NGIO}","calendario_modifica"],
+    ["il [meeting]{LAV} di [martedì]{GIO} [ore 10]{ORA} con [Sciarra]{CHI} fallo [mercoledì]{NGIO} [ore 16]{NORA}","calendario_modifica"],
+    ["spostami [la ricarica gas]{LAV} di [Ranalli]{CHI} [alle quattro]{NORA} [stesso giorno]{NGIO}","calendario_modifica"],
+    ["scrivi a [Di Cintio]{CHI} [che arrivo verso le 8 e un quarto]{TESTO}","messaggio"],
+    ["whatsapp a [Masciarelli]{CHI} [ok bro passo domani per la Ariston]{TESTO}","messaggio"],
+    ["manda un [sms]{CAN} a [Tracanna]{CHI} [che lo split Daikin va sanificato ogni anno]{TESTO}","messaggio"],
+    ["scrivi su [whatsapp]{CAN} a [Faieta]{CHI} [di lasciarmi le chiavi dal vicino]{TESTO}","messaggio"],
+    ["messaggio a [mia madre]{CHI} [stasera non vengo a cena]{TESTO}","messaggio"],
+    ["dì a [Ranalli]{CHI} su [telegram]{CAN} [che il gas l'ho ordinato]{TESTO}","messaggio"],
+    ["scrivi a [Ciammaichella]{CHI} e a [D'Ercole]{CHI} [che domani sono in ritardo di mezz'ora]{TESTO}","messaggio"],
+    ["[whatsapp]{CAN} [Zuccarini]{CHI} [il dual split arriva lunedì]{TESTO}","messaggio"],
+    ["manda un vocale a [Scurti]{CHI} [che per la pompa di calore serve il permesso del condominio]{TESTO}","messaggio"],
+    ["avvisa [Di Nisio]{CHI} con un [messaggino]{CAN} [che sono sotto casa]{TESTO}","messaggio"],
+    ["scrivi a [Marco del magazzino]{CHI} [se ha due vasi di espansione da 8 litri]{TESTO}","messaggio"],
+    ["[sms]{CAN} a [Cipollone]{CHI} [lo scaldabagno è pronto domani]{TESTO}","messaggio"],
+    ["scrivigli a [Tinari]{CHI} [che il check Immergas è ok tutto a posto]{TESTO}","messaggio"],
+    ["bro scrivi nel gruppo [Squadra Clima]{CHI} [domani si parte alle 7 dal capannone]{TESTO}","messaggio"],
+    ["manda su [whatsapp]{CAN} a [la signora Di Lullo]{CHI} [di tenere spento il condizionatore fino a sabato]{TESTO}","messaggio"],
+    ["scrivi a [Verrocchio]{CHI} [no anzi lo chiamo io]{TESTO}","messaggio"],
+    ["messaggio a [Liberatore]{CHI} [lo scarico condensa va rifatto serve un'ora]{TESTO}","messaggio"],
+    ["[Pelusi]{CHI} [whatsapp]{CAN} [ci vediamo alle 4 per l'LG]{TESTO}","messaggio"],
+    ["scrivi a [Daniele della Frigo Adriatica]{CHI} [mi servono 3 bombole R32 entro venerdì]{TESTO}","messaggio"],
+    ["rispondi a [Antonucci]{CHI} [sì il pressostato è in garanzia]{TESTO}","messaggio"],
+    ["manda un [sms]{CAN} a [Nardone]{CHI} [che a Penne arrivo verso le 9 e mezza]{TESTO}","messaggio"],
+    ["scrivi a [mia sorella Chiara]{CHI} [mi presti la macchina sabato]{TESTO}","messaggio"],
+    ["manda una [mail]{CAN} a [Termoidraulica Saline]{CHI} [per chiedere il listino caldaie 2027]{TESTO}","email"],
+    ["scrivi [per mail]{CAN} al [geometra Pomilio]{CHI} [che la centrale termica ha bisogno del nuovo vaso]{TESTO}","email"],
+    ["[email]{CAN} a [Hotel Pineta Blu]{CHI} [con il riepilogo degli interventi della stagione]{TESTO}","email"],
+    ["manda [una mail]{CAN} a [assistenza@climamajella.it]{MAIL} [che la Daikin è ancora in garanzia]{TESTO}","email"],
+    ["scrivi una [mail]{CAN} formale a [Condominio Le Saline]{CHI} [sul controllo fumi obbligatorio]{TESTO}","email"],
+    ["[mail]{CAN} a [Idrotek Spoltore]{CHI} [ok per il meeting di martedì]{TESTO}","email"],
+    ["manda [per email]{CAN} a [Rossetti Clima]{CHI} [l'ordine delle valvole gas]{TESTO}","email"],
+    ["scrivi [una mail]{CAN} all'[amministratore Di Pasquale]{CHI} [che servono le chiavi del locale caldaia]{TESTO}","email"],
+    ["[mail]{CAN} a [info@bblaconchiglia.it]{MAIL} [con le date per la manutenzione]{TESTO}","email"],
+    ["mandagli [una mail]{CAN} a [Marcantonio]{CHI} [per confermare l'installazione di giovedì]{TESTO}","email"],
+    ["[via mail]{CAN} a [Thermo Service Ortona]{CHI} [che il call di oggi salta]{TESTO}","email"],
+    ["manda una [mail]{CAN} al [commercialista De Iuliis]{CHI} [per le fatture di settembre]{TESTO}","email"],
+    ["scrivi a [Crisante]{CHI} [per mail]{CAN} [che il preventivo vale 30 giorni]{TESTO}","email"],
+    ["[email]{CAN} a [Pizzeria Tre Archi]{CHI} [per spiegare i costi della climatizzazione]{TESTO}","email"],
+    ["mail all'[ufficio tecnico di Spoltore]{CHI} [per la pratica della canna fumaria]{TESTO}","email"],
+    ["manda a [Di Cintio]{CHI} il [preventivo]{DOC} della [Vaillant]{LAV} su [whatsapp]{CAN}","invio_documento"],
+    ["inviagli la [fattura]{DOC} [43]{NUM} a [Masciarelli]{CHI} [per mail]{CAN}","invio_documento"],
+    ["bro manda il [rapporto di controllo]{DOC} a [Tinari]{CHI}","invio_documento"],
+    ["le [foto]{DOC} della [caldaia Baxi]{LAV} mandale a [D'Ercole]{CHI} su [whatsapp]{CAN}","invio_documento"],
+    ["manda la [DiCo]{DOC} a [Zuccarini]{CHI} [via mail]{CAN}","invio_documento"],
+    ["[whatsapp]{CAN} a [Faieta]{CHI} col [preventivo]{DOC} [circolatore]{LAV}","invio_documento"],
+    ["invia il [libretto impianto]{DOC} a [Ricciuti]{CHI} [per email]{CAN}","invio_documento"],
+    ["manda la [scheda tecnica]{DOC} della [Daikin Perfera]{LAV} a [Ranalli]{CHI}","invio_documento"],
+    ["[fattura]{DOC} [51]{NUM} a [Hotel Pineta Blu]{CHI} [con la pec]{CAN}","invio_documento"],
+    ["girami il [certificato F-gas]{DOC} a [Clima Majella srl]{CHI} [su telegram]{CAN}","invio_documento"],
+    ["manda il [preventivo]{DOC} [pompa di calore]{LAV} a [Scurti]{CHI} e anche a [sua moglie]{CHI}","invio_documento"],
+    ["[sms]{CAN} a [Cipollone]{CHI} col [link della fattura]{DOC}","invio_documento"],
+    ["invia [la garanzia]{DOC} [Ariston]{LAV} a [Petaccia]{CHI} [su whatsapp]{CAN}","invio_documento"],
+    ["manda all'[amministratore Di Pasquale]{CHI} il [preventivo]{DOC} [centrale termica]{LAV} [per mail]{CAN}","invio_documento"],
+    ["la [fattura]{DOC} del [check Immergas]{LAV} a [Di Biase]{CHI} mandala","invio_documento"],
+    ["manda le [foto]{DOC} [prima e dopo]{LAV} a [B&B La Conchiglia]{CHI} [su whatsapp]{CAN}","invio_documento"],
+    ["[mail]{CAN} a [Pizzeria Tre Archi]{CHI} col [preventivo]{DOC} [44]{NUM}","invio_documento"],
+    ["mandagli la [DiCo]{DOC} e il [libretto]{DOC} a [Natarelli]{CHI}","invio_documento"],
+    ["invia [l'RCEE]{DOC} di [Liberatore]{CHI} [per posta elettronica]{CAN}","invio_documento"],
+    ["manda il [preventivo]{DOC} [split LG]{LAV} a [Pelusi]{CHI} [con un messaggio]{CAN}","invio_documento"],
+    ["[whatsapp]{CAN} [la fattura]{DOC} [12]{NUM} a [Ferrante]{CHI}","invio_documento"],
+    ["ok mandale a [Montebello]{CHI} la [visura]{DOC} della ditta [per mail]{CAN}","invio_documento"],
+    ["fai un [preventivo]{DOC} per [Di Cintio]{CHI} [sostituzione caldaia Vaillant ecoTEC]{LAV} 2200 euro","documento"],
+    ["[fattura]{DOC} a [Masciarelli]{CHI} per [riparazione Ariston]{LAV} 180 più iva","documento"],
+    ["[preventivo]{DOC} [installazione dual split Daikin]{LAV} per [Zuccarini]{CHI} 2.650","documento"],
+    ["fammi la [fattura]{DOC} del [check annuale]{LAV} a [Tinari]{CHI} 90 euro","documento"],
+    ["bro [preventivo]{DOC} [pompa di calore Mitsubishi]{LAV} [Scurti]{CHI} 8.400 con lo sconto del 5","documento"],
+    ["[fattura]{DOC} [Hotel Pineta Blu]{CHI} [pulizia bruciatore]{LAV} 320 euro","documento"],
+    ["fai [preventivo]{DOC} a [Pantalone]{CHI} per [climatizzatore Samsung trial split]{LAV} 3.900","documento"],
+    ["[preventivo]{DOC} [sostituzione scambiatore Baxi]{LAV} [D'Ercole]{CHI} 450 manodopera compresa","documento"],
+    ["[fattura]{DOC} [Faieta]{CHI} [circolatore Grundfos]{LAV} 260 più 80 di manodopera","documento"],
+    ["[preventivo]{DOC} a [Pizzeria Tre Archi]{CHI} [canalizzato Daikin]{LAV} 6.200","documento"],
+    ["fai la [fattura]{DOC} a [Ranalli]{CHI} [ricarica gas R32]{LAV} 140","documento"],
+    ["[preventivo]{DOC} per [condominio Le Saline]{CHI} [nuova centrale termica Riello]{LAV} 24.000","documento"],
+    ["[fattura]{DOC} con acconto del 30 per cento a [Natarelli]{CHI} per la [pompa di calore]{LAV}","documento"],
+    ["fammi un [preventivo]{DOC} [scaldabagno Ariston Velis]{LAV} per [Cipollone]{CHI} 520","documento"],
+    ["[fattura]{DOC} [sanificazione 4 split]{LAV} [B&B La Conchiglia]{CHI} 200 euro","documento"],
+    ["[preventivo]{DOC} [caldaia Immergas Victrix]{LAV} a [Liberatore]{CHI} 1.950 installata","documento"],
+    ["[fattura]{DOC} a [Di Nisio]{CHI} per [manutenzione Beretta]{LAV} 95","documento"],
+    ["fai un [preventivo]{DOC} a [Ronzitti]{CHI} per [impianto a pavimento]{LAV} da 12.500 no anzi 13.000","documento"],
+    ["[preventivo]{DOC} [termostato wifi Netatmo]{LAV} [Di Giandomenico]{CHI} 230","documento"],
+    ["[fattura]{DOC} [Caldarelli]{CHI} [riparazione split Hisense]{LAV} 110 contanti","documento"],
+    ["[preventivo]{DOC} per la [famiglia Sborgia]{CHI} [caldaia a condensazione Ferroli]{LAV} con detrazione 65","documento"],
+    ["bro fai [fattura]{DOC} [Basilavecchia]{CHI} [assistenza Daikin]{LAV} 75 euro diritto di chiamata","documento"],
+    ["[preventivo]{DOC} [Bar Lu Murette]{CHI} [sostituzione caldaia Hermann]{LAV} 1.700","documento"],
+    ["[fattura]{DOC} a [palestra Fit Majella]{CHI} [verifica impianto]{LAV} 380 più iva al 22","documento"],
+    ["[preventivo]{DOC} [Verrocchio]{CHI} [riparazione perdita]{LAV} 160","documento"],
+    ["fammi un [preventivo]{DOC} per [Spadaccini]{CHI} [revisione Hermann]{LAV} e [cambio valvola]{LAV} 210","documento"],
+    ["[fattura]{DOC} [D'Orazio]{CHI} [check Daikin]{LAV} 85","documento"],
+    ["[preventivo]{DOC} [due split Mitsubishi]{LAV} [Antonucci]{CHI} 2.300 iva compresa","documento"],
+    ["[fattura]{DOC} [Giancristofaro]{CHI} [primo avvio Junkers]{LAV} gratis no mettici 60","documento"],
+    ["[preventivo]{DOC} a [Odoardi]{CHI} per [sostituzione caldaia Chaffoteaux]{LAV} 1.800","documento"],
+    ["[fattura]{DOC} [saldo]{LAV} [Natarelli]{CHI} 5.880","documento"],
+    ["fai [preventivo]{DOC} [Di Lizia]{CHI} [scarico fumi a parete]{LAV} 650","documento"],
+    ["[preventivo]{DOC} [Residence Gabbiano]{CHI} [manutenzione 12 caldaie Vaillant]{LAV} 1.080 l'anno","documento"],
+    ["[fattura]{DOC} [Petaccia]{CHI} [check Ariston]{LAV} e [kit pulizia]{LAV} 120","documento"],
+    ["[preventivo]{DOC} per [Ferrante]{CHI} [condizionatore portatile De'Longhi]{LAV} 480","documento"],
+    ["segnati [che la caldaia Vaillant di Di Cintio ha il pressostato rifatto nel 2024]{TESTO}","mente"],
+    ["appunto [da Tracanna il cane morde, citofonare prima]{TESTO}","mente"],
+    ["ricorda [che Masciarelli vuole solo ricambi originali Ariston]{TESTO}","mente"],
+    ["annota [la Daikin del bar è sul tetto serve la scala lunga]{TESTO}","mente"],
+    ["bro tienti a mente [che Faieta paga sempre in ritardo]{TESTO}","mente"],
+    ["segna [codice errore F28 sulla Baxi di D'Ercole]{TESTO}","mente"],
+    ["ricordati [che il B&B La Conchiglia chiude a novembre]{TESTO}","mente"],
+    ["appunto veloce [da Pelusi il parcheggio è in via laterale]{TESTO}","mente"],
+    ["segnati [che Scurti preferisce essere chiamato dopo le 6]{TESTO}","mente"],
+    ["tieni a mente [la chiave del locale caldaia Riviera Nord è dal portiere]{TESTO}","mente"],
+    ["trova il [preventivo]{DOC} della [Vaillant]{LAV} di [Di Cintio]{CHI}","cerca_documento"],
+    ["aprimi la [fattura]{DOC} [43]{NUM}","cerca_documento"],
+    ["dov'è il [libretto impianto]{DOC} di [Ricciuti]{CHI}","cerca_documento"],
+    ["fammi vedere le [foto]{DOC} della [Daikin]{LAV} di [Basilavecchia]{CHI}","cerca_documento"],
+    ["cerca la [DiCo]{DOC} di [Zuccarini]{CHI}","cerca_documento"],
+    ["bro apri il [rapporto fumi]{DOC} [Hotel Pineta Blu]{CHI}","cerca_documento"],
+    ["trovami la [scheda tecnica]{DOC} della [Immergas Victrix]{LAV}","cerca_documento"],
+    ["dove sta il [preventivo]{DOC} [canalizzato]{LAV} [Pizzeria Tre Archi]{CHI}","cerca_documento"],
+    ["apri [il certificato F-gas]{DOC} mio","cerca_documento"],
+    ["tirami fuori le [foto]{DOC} del [locale caldaia]{LAV} del [Condominio Riviera Nord 40]{CHI}","cerca_documento"],
+    ["nuovo cliente [Di Febo Marco]{CHI} [347 2251908]{TEL}","cliente"],
+    ["aggiungi [la signora Pallini]{CHI} [via Coste Rosse 4 Spoltore]{IND}","cliente"],
+    ["salva [Clima Pescara Nord snc]{CHI} mail [ordini@climapescaranord.it]{MAIL}","cliente"],
+    ["crea scheda [Taraborrelli Gino]{CHI} [339 7781203]{TEL} [via del Gelso 19]{IND}","cliente"],
+    ["bro aggiorna il numero di [Rapino]{CHI} [328 4410957]{TEL}","cliente"],
+    ["nuovo cliente [Bar Due Fontane]{CHI} [caldaia Ferroli]{LAV}","cliente"],
+    ["cambia indirizzo di [Di Zio]{CHI} adesso sta in [via Piano Grande 11 Cepagatti]{IND}","cliente"],
+    ["aggiungi [Odoardi Sara]{CHI} mail [sara.odoardi@mail.it]{MAIL}","cliente"],
+    ["registrami [Ianni Pasquale]{CHI} [366 1029384]{TEL} ha [la Vaillant vecchia]{LAV}","cliente"],
+    ["bro quanto ho fatturato a settembre tra caldaie e clima","dati:incassi"],
+    ["che c'ho in agenda [domani]{GIO} [mattina]{ORA} tipo slot liberi","dati:agenda"],
+    ["quanti [check]{LAV} [Vaillant]{LAV} ho fatto quest'anno","dati:cantieri"],
+    ["chi mi deve ancora soldi","dati:crediti"],
+    ["[giovedì]{GIO} ho slot liberi [nel pomeriggio]{ORA}","dati:agenda"],
+    ["qual è il numero di [Caldarelli]{CHI}","dati:telefono"],
+    ["indirizzo di [Pelusi]{CHI}","dati:indirizzo"],
+    ["quanto mi deve [Faieta]{CHI}","dati:crediti"],
+    ["quante [fatture]{DOC} non pagate ho","dati:crediti"],
+    ["quando ho fatto l'ultima [manutenzione]{LAV} da [Di Nisio]{CHI}","dati:ultima_visita"],
+    ["bro com'è messa l'agenda [la settimana prossima]{GIO}","dati:agenda"],
+    ["quanto ho incassato dall'[Hotel Pineta Blu]{CHI} quest'anno","dati:incassi"],
+    ["quanti [preventivi]{DOC} ho in attesa","dati:documenti"],
+    ["che marca di caldaia ha [Spadaccini]{CHI}","dati:note_cliente"],
+    ["a che ora ho [Tinari]{CHI} [domani]{GIO}","dati:agenda"],
+    ["quante [Daikin]{LAV} ho installato da gennaio","dati:cantieri"],
+    ["mail di [Termoidraulica Saline]{CHI}","dati:email"],
+    ["quanto ho speso di gas refrigerante questo mese","dati:spese"],
+    ["ogni quanto va fatta la prova fumi su una caldaia a condensazione","domanda"],
+    ["l'R32 si può mettere in un impianto che era R410","domanda"],
+    ["che pressione deve avere una caldaia a freddo","domanda"],
+    ["la detrazione per la pompa di calore quest'anno a quanto sta","domanda"],
+    ["bro il codice F75 su una [Vaillant]{LAV} cosa vuol dire","domanda"],
+    ["quanto dura il patentino [F-gas]{DOC}","domanda"],
+    ["conviene di più un monosplit da 12000 o da 9000 per una camera da 18 metri","domanda"],
+    ["come si spurga l'aria da un termosifone in ghisa","domanda"],
+    ["[Masciarelli]{CHI} ha pagato 180 in contanti","incasso"],
+    ["arrivato bonifico da [Hotel Pineta Blu]{CHI} per la [fattura]{DOC} [51]{NUM}","incasso"],
+    ["[Zuccarini]{CHI} mi ha dato l'acconto di 800","incasso"],
+    ["segna pagata la [fattura]{DOC} [12]{NUM} di [Ferrante]{CHI}","incasso"],
+    ["ok bro [Tinari]{CHI} ha saldato","incasso"],
+    ["incassati 75 da [Basilavecchia]{CHI} col pos","incasso"],
+    ["[Natarelli]{CHI} ha fatto il bonifico del saldo","incasso"],
+    ["soldi arrivati dal [B&B La Conchiglia]{CHI} per le [sanificazioni]{LAV}","incasso"],
+    ["uè scatta una [foto]{DOC} alla [targhetta]{LAV} della [Beretta]{LAV} di [Pallini]{CHI}","foto"],
+    ["fai foto al [display]{LAV} della [Ariston]{LAV} con l'errore","foto"],
+    ["bro foto veloce allo [split]{LAV} di [Caldarelli]{CHI}","foto"],
+    ["apri la fotocamera che fotografo il [contatore gas]{LAV}","foto"],
+    ["fotografa la [canna fumaria]{LAV} da [Di Lizia]{CHI}","foto"],
+    ["scatta [foto]{DOC} [prima dell'intervento]{LAV} da [Verrocchio]{CHI}","foto"],
+    ["metti il [preventivo]{DOC} di [Scurti]{CHI} nella cartella [Pompe di calore]{CART}","cartella"],
+    ["crea la cartella [Manutenzioni 2027]{CART}","cartella"],
+    ["sposta le [foto]{DOC} del [Hotel Pineta Blu]{CHI} in [Clienti Hotel]{CART}","cartella"],
+    ["salva il [certificato F-gas]{DOC} nella cartella [Documenti ditta]{CART}","cartella"],
+    ["bro rinomina la cartella [Varie clima]{CART} in [Condizionatori]{CART}","cartella"],
+    ["metti tutti i [libretti]{DOC} nella cartella [Libretti impianto]{CART}","cartella"],
+    ["aiuto c'è odore di gas forte da [Di Biase]{CHI} che faccio","urgenza"],
+    ["emergenza la caldaia di [nonna Iezzi]{CHI} è in blocco e fuori fa freddo","urgenza"],
+    ["bro si è allagato il locale caldaia del [Condominio Le Saline]{CHI}","urgenza"],
+    ["mi sono tagliato la mano in cantiere in [via Colle Sereno 15]{IND}","urgenza"],
+    ["subito la [Vaillant]{LAV} di [Di Cintio]{CHI} perde acqua dappertutto","urgenza"],
+    ["[Hotel Pineta Blu]{CHI} senza acqua calda con gli ospiti dentro urgente","urgenza"],
+    ["il furgone si è fermato in autostrada e ho tre interventi dopo","urgenza"],
+    ["scintille dallo [split]{LAV} di [Caldarelli]{CHI} ha staccato la corrente","urgenza"],
+    ["[SAL]{DOC} [Condominio Le Saline]{CHI} [centrale termica]{LAV} siamo al [40 per cento]{AVANZ}","sal"],
+    ["fai il [secondo SAL]{DOC} per [Residence Gabbiano]{CHI} [70%]{AVANZ}","sal"],
+    ["bro [SAL]{DOC} [2]{NUM} [impianto a pavimento]{LAV} [Ronzitti]{CHI} [metà lavori]{AVANZ}","sal"],
+    ["prepara lo [stato avanzamento]{DOC} per [palestra Fit Majella]{CHI} siamo a [tre quarti]{AVANZ}","sal"],
+    ["[SAL]{DOC} [Condominio Riviera Nord 40]{CHI} [canne fumarie]{LAV} [25%]{AVANZ}","sal"],
+    ["col [canalizzato]{LAV} della [Pizzeria Tre Archi]{CHI} siamo all'[80 per cento]{AVANZ} fai il [SAL]{DOC}","sal"],
+    ["[primo SAL]{DOC} [pompa di calore]{LAV} [Natarelli]{CHI} [30 per cento]{AVANZ}","sal"],
+    ["fai la [DiCo]{DOC} per la [caldaia Vaillant]{LAV} di [Di Cintio]{CHI}","dico"],
+    ["[dichiarazione di conformità]{DOC} [impianto gas]{LAV} [Liberatore]{CHI}","dico"],
+    ["bro manca la [DiCo]{DOC} della [Immergas]{LAV} di [Tinari]{CHI}","dico"],
+    ["prepara [DiCo]{DOC} [centrale termica]{LAV} [Condominio Le Saline]{CHI}","dico"],
+    ["[DiCo]{DOC} [Sborgia]{CHI} [caldaia a condensazione]{LAV}","dico"],
+    ["fammi la [conformità]{DOC} per [l'impianto a pavimento]{LAV} di [Ronzitti]{CHI}","dico"],
+    ["[DiCo]{DOC} [scaldabagno]{LAV} [Cipollone]{CHI} falla oggi","dico"],
+    ["serve la [DiCo]{DOC} della [Hermann]{LAV} al [Bar Lu Murette]{CHI}","dico"],
+    ["preparami due righe per [l'assemblea]{LAV} del [Condominio Le Saline]{CHI} sulla caldaia centralizzata","assemblea"],
+    ["[assemblea]{LAV} [Condominio Riviera Nord 40]{CHI} [giovedì 20]{GIO} [alle 18 e 30]{ORA} convoca","assemblea"],
+    ["bro cosa porto all'[assemblea]{LAV} del [Residence Gabbiano]{CHI}","assemblea"],
+    ["convoca l'[assemblea straordinaria]{LAV} del [Condominio Villa Cerasa]{CHI} per [il cambio caldaia]{TESTO}","assemblea"],
+    ["fai il verbale dell'[assemblea]{LAV} di ieri [Condominio Le Saline]{CHI}","assemblea"],
+    ["ordine del giorno per l'[assemblea]{LAV} del [Condominio Pineto Alto]{CHI} [contabilizzatori di calore]{TESTO}","assemblea"],
+    ["ok bro buongiorno eccomi operativo","saluto"],
+    ["uè EON come butta stamattina","saluto"],
+    ["buonanotte EON chiudo baracca","saluto"],
+    ["ciao bella giornata piena oggi eh","saluto"],
+    ["hey EON grazie mille per oggi top","saluto"],
+    ["bella EON mo' si parte","saluto"],
+    ["[Di Cintio]{CHI} ha detto ok per la [Vaillant]{LAV}","accettato"],
+    ["[preventivo]{DOC} [Zuccarini]{CHI} accettato","accettato"],
+    ["bro il [preventivo]{DOC} [44]{NUM} [Pizzeria Tre Archi]{CHI} firmato","accettato"],
+    ["[Scurti]{CHI} ha accettato la [pompa di calore]{LAV}","accettato"],
+    ["la [signora Pallini]{CHI} va bene per il [condizionatore]{LAV}","accettato"],
+    ["segna accettato il [preventivo]{DOC} di [Liberatore]{CHI}","accettato"],
+    ["[famiglia Sborgia]{CHI} ok [preventivo]{DOC} [Ferroli]{LAV}","accettato"],
+    ["[Residence Gabbiano]{CHI} ha confermato il contratto di [manutenzione]{LAV}","accettato"],
+    ["[Faieta]{CHI} non ha ancora pagato mandagli un sollecito","sollecito"],
+    ["sollecita [Ranalli]{CHI} per la [fattura]{DOC} [38]{NUM}","sollecito"],
+    ["bro ricorda a [Caldarelli]{CHI} che deve ancora i 110","sollecito"],
+    ["manda sollecito [per mail]{CAN} a [palestra Fit Majella]{CHI}","sollecito"],
+    ["sollecito gentile a [D'Orazio]{CHI} [su whatsapp]{CAN} per il [check Daikin]{LAV}","sollecito"],
+    ["[Di Lizia]{CHI} la [fattura]{DOC} è scaduta da un mese sollecitalo","sollecito"],
+    ["fai un sollecito a [Bar Lu Murette]{CHI} per il saldo","sollecito"],
+    ["[Odoardi]{CHI} deve l'acconto, sollecita con un [sms]{CAN}","sollecito"],
+    ["chiama [Di Cintio]{CHI}","chiamata"],
+    ["fai partire una call con [Termoidraulica Saline]{CHI}","chiamata"],
+    ["telefona a [Masciarelli]{CHI} no anzi a [suo figlio]{CHI}","chiamata"],
+    ["bro chiamami [Daniele della Frigo Adriatica]{CHI}","chiamata"],
+    ["chiama [Gelsomina in ufficio]{CHI}","chiamata"],
+    ["chiama [il geometra Pomilio]{CHI} in vivavoce","chiamata"],
+    ["telefonata a [Hotel Pineta Blu]{CHI}","chiamata"],
+    ["chiama il [339 5512047]{TEL}","chiamata"],
+    ["fammi parlare con [Marco del magazzino]{CHI}","chiamata"],
+    ["richiama [Tatasciore]{CHI} che mi ha cercato","chiamata"]
+  ] }

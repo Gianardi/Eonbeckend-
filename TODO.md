@@ -4999,6 +4999,24 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 2/10 sera: PASSO A, terzo pacchetto — le domande sui dati (ROADMAP 0b.19)
+- Terza uscita del modello (`outT`, media delle parole come il cassetto): l'argomento della domanda.
+  `TEMI` in `verifica.mjs` e `allena.py`; formato degli scrittori `"dati:incassi"` (ISTRUZIONI.md).
+  Le 530 domande di s01-s28 segnate a mano una per una (17 argomenti); s30 (argomenti rari: assemblea,
+  urgenze, IVA, ultima visita, appunti, clienti, scadenze, spese, email, indirizzo, cantieri, più
+  comandi di contrasto), s31 (morosi, fatture scadute, soldi da prendere, riepilogo incassi,
+  consegne), s32 (pagato? contro incasso, "me l'ero segnato?", quanti condomini, "l'avevo messa
+  martedì o mercoledì?"). Tolte dagli scrittori le frasi uguali a quelle dei giri.
+- `neurale.js leggi` dà `pt`/`temi`; `lettore.mediaLetture` fa la media; `leggiConModello` dà
+  `tema`/`pTema` (solo col cassetto "dati") e `quando.etichetta`.
+- Lettore: `temaDelModello` (sotto 0,6 → nessun argomento) al posto di `temaDomanda` in `leggi`;
+  tolte `leggiDomandaDati`, `temaDomanda`, `NOTE_SEGNATE`, `DOMANDA_DATI_FORTE`.
+- App: `datiDalModello` → `rispondiSuiDati` (un solo ingresso, prima del vecchio lettore);
+  `rispondiIndirizzo`, `rispondiEmail` (nuovo: la mail di un cliente), `rispondiAssemblea` al posto di
+  `provaIndirizzoCliente` / `provaQuandoAssemblea` (regole); `clientiDaPiuTempo` ("quali clienti non
+  sento da più tempo?": il modello lo capiva, l'app rispondeva solo con un nome); `mostraDati`.
+- `simulatore.test.mjs` carica `modello-lettura.json` (l'argomento lo dice il modello, come nell'app).
+
 ### 2/10: PASSO A, secondo pacchetto (ROADMAP 0b.19)
 - `provaPreventivoAccettato`: cassetto `accettato` del modello (≥ 0,95) + `clienteDelModello`; tolta
   la regola. `provaSal`: `documentiDelModello` (DOC sal) e cassetto documento/cerca/invio; tolte

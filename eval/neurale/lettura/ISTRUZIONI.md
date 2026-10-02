@@ -40,6 +40,15 @@ cliente (nuovo cliente / dati del cliente) · dati (domanda sui tuoi dati: soldi
 domanda (domanda generale, consiglio) · incasso (qualcuno ha pagato) · foto (scattare) · cartella · urgenza ·
 sal · dico · assemblea · saluto · **accettato** (un cliente ha accettato un preventivo) · **sollecito** (sollecitare un pagamento).
 
+## L'argomento delle domande sui dati (2/10/2026)
+Per il cassetto **dati** scrivi anche l'argomento, dopo i due punti: `"dati:incassi"`.
+agenda (impegni, quando vado da…, sono libero?) · incassi (quanto ho incassato/fatturato, X ha pagato?) ·
+crediti (chi/quanto mi deve, fatture non pagate) · documenti (preventivi e fatture: accettato?, quanti, quant'era) ·
+telefono · email · indirizzo · ultima_visita (quando sono stato l'ultima volta da…) · note_cliente (cosa mi ero
+segnato su…) · iva · cantieri (lavori in corso, a che punto è, quanti impianti ho fatto) · clienti (quanti clienti,
+X è tra i clienti?) · urgenze (urgenze aperte) · assemblea (quand'è l'assemblea di…) · spese (quanto ho speso) ·
+scadenze (DURC, assicurazione, revisione) · altro (tutto il resto: IBAN, fondo cassa, codice fiscale…).
+
 ## Regole
 - Parla come il tuo personaggio: frasi corte e lunghe, errori di dettatura, dialetto leggero, niente punteggiatura a volte.
 - Nomi, ditte, vie, lavori **sempre diversi**: inventali, niente nomi famosi, niente dati veri.

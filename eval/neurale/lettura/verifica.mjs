@@ -1,14 +1,18 @@
 /* Controllo delle frasi segnate (passo A): legge i file degli scrittori (scritte/*.json), tiene solo
    le frasi segnate bene e le scrive nel formato dell'allenamento: { frase, intento, parole, ruoli }.
-   Scartate: cassetto sconosciuto, ruolo sconosciuto, parentesi rotte o accavallate, frase vuota,
+   Il cassetto "dati" può avere l'argomento: "dati:incassi". Scartate: cassetto sconosciuto, ruolo sconosciuto, parentesi rotte o accavallate, frase vuota,
    doppioni. Uso: node verifica.mjs > dati/scritte.jsonl  (il riepilogo va su stderr) */
 import fs from "node:fs";
 import path from "node:path";
 const QUI = path.dirname(new URL(import.meta.url).pathname);
 export const RUOLI = ["O", "CHI", "GIO", "ORA", "NGIO", "NORA", "LAV", "TESTO", "CAN", "DOC", "NUM", "TEL", "MAIL", "IND", "AVANZ", "CART"];
+/* L'argomento di una domanda sui dati (2/10/2026): "dati:incassi", "dati:indirizzo"… lo impara il
+   modello (una terza uscita), così l'app non deve più indovinarlo con le regole. */
+export const TEMI = ["agenda", "incassi", "crediti", "documenti", "telefono", "email", "indirizzo", "ultima_visita", "note_cliente", "iva", "cantieri", "clienti", "urgenze", "assemblea", "spese", "scadenze", "altro"];
 export const CASSETTI = ["calendario", "calendario_modifica", "mente", "documento", "cerca_documento", "invio_documento", "messaggio", "email", "chiamata", "cliente", "dati", "domanda", "incasso", "foto", "cartella", "urgenza", "sal", "dico", "assemblea", "saluto", "accettato", "sollecito"];
-// parole come le divide il modello: spazi e apostrofi ("l'ho" → "l'" "ho")
-export const dividi = (t) => String(t).replace(/([’'])/g, "$1 ").split(/\s+/).filter(Boolean);
+// parole come le divide il modello: spazi e apostrofi ("l'ho" → "l'" "ho"); il punto di domanda è
+// una parola a sé ("agosto?" → "agosto" "?"), così il modello lo vede sempre uguale (2/10/2026)
+export const dividi = (t) => String(t).replace(/([’'])/g, "$1 ").replace(/\?/g, " ? ").split(/\s+/).filter(Boolean);
 export function leggiSegnata(s) {
   const parole = [], ruoli = [];
   const re = /\[([^\[\]{}]+)\]\{([A-Z]+)\}|([^\[\]{}]+)/g;
@@ -29,15 +33,16 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   const visti = new Set(); let ok = 0; const scarti = {};
   for (const f of fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith(".json")).sort() : []) {
     let j; try { j = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")); } catch (e) { scarti["file rotto " + f] = 1; continue; }
-    for (const [segnata, intento] of j.frasi || []) {
-      const perche = !CASSETTI.includes(intento) ? "cassetto" : null;
+    for (const [segnata, cassetto] of j.frasi || []) {
+      const [intento, tema] = String(cassetto || "").split(":");
+      const perche = !CASSETTI.includes(intento) || (tema !== undefined && (intento !== "dati" || !TEMI.includes(tema))) ? "cassetto" : null;
       const l = perche ? null : leggiSegnata(String(segnata || "").trim());
       if (!l) { const k = perche || "segni"; scarti[k] = (scarti[k] || 0) + 1; continue; }
       const frase = l.parole.join(" ").replace(/([’']) /g, "$1");
       const chiave = frase.toLowerCase();
       if (visti.has(chiave)) { scarti.doppioni = (scarti.doppioni || 0) + 1; continue; }
       visti.add(chiave); ok++;
-      console.log(JSON.stringify({ fonte: "scritte/" + f, frase, intento, parole: l.parole, ruoli: l.ruoli }));
+      console.log(JSON.stringify({ fonte: "scritte/" + f, frase, intento, ...(tema ? { tema } : {}), parole: l.parole, ruoli: l.ruoli }));
     }
   }
   console.error(`frasi tenute: ${ok} · scartate: ${JSON.stringify(scarti)}`);

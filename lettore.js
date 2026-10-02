@@ -880,7 +880,16 @@
   function mediaLetture(letture) {
     letture = letture.filter(Boolean);
     if (!letture.length) return null;
-    if (letture.length === 1) return letture[0];
+    // l'argomento (domande sui dati): media delle probabilità, come per il cassetto
+    const conTema = letture.filter((l) => l.pt && l.temi);
+    let tema = null, pTema = 0;
+    if (conTema.length) {
+      const pt = new Array(conTema[0].temi.length).fill(0);
+      conTema.forEach((l) => l.pt.forEach((v, i) => { pt[i] += v / conTema.length; }));
+      let k = 0; for (let i = 1; i < pt.length; i++) if (pt[i] > pt[k]) k = i;
+      tema = conTema[0].temi[k]; pTema = pt[k];
+    }
+    if (letture.length === 1) return { ...letture[0], tema, pTema };
     const intenti = letture[0].intenti, K = intenti.length;
     const pc = new Array(K).fill(0);
     letture.forEach((l) => l.pc.forEach((v, i) => { pc[i] += v / letture.length; }));
@@ -892,7 +901,7 @@
       let k = 0; for (let i = 1; i < pp.length; i++) if (pp[i] > pp[k]) k = i;
       return { ruolo: ruoliNomi[k], p: pp[k] };
     });
-    return { intento: intenti[ordine[0][1]], p: ordine[0][0], secondo: intenti[ordine[1][1]], p2: ordine[1][0], ruoli };
+    return { intento: intenti[ordine[0][1]], p: ordine[0][0], secondo: intenti[ordine[1][1]], p2: ordine[1][0], ruoli, tema, pTema };
   }
   const LETTURA_RUOLI = ["O", "CHI", "GIO", "ORA", "NGIO", "NORA", "LAV", "TESTO", "CAN", "DOC", "NUM", "TEL", "MAIL", "IND", "AVANZ", "CART"];
   const CANALI = { whatsapp: "whatsapp", whats: "whatsapp", wa: "whatsapp", app: "whatsapp", mail: "email", email: "email", "e-mail": "email", posta: "email", sms: "sms", messaggino: "sms", pec: "email", eon: "eon", chat: "eon" };
@@ -903,6 +912,7 @@
     for (const ch of String(testo || "")) {
       if (SPAZI.has(ch)) { if (w) out.push(w); w = ""; }
       else if (ch === "'" || ch === "’") { out.push(w + ch); w = ""; }
+      else if (ch === "?") { if (w) out.push(w); out.push("?"); w = ""; } // il punto di domanda è una parola a sé
       else w += ch;
     }
     if (w) out.push(w);
@@ -936,7 +946,7 @@
       const pg = pezzi[rg] ? pezzi[rg].flatMap((x) => x.parole) : [], po = pezzi[ro] ? pezzi[ro].flatMap((x) => x.parole) : [];
       if (!pg.length && !po.length) return null;
       const q = trovaQuando(parole(pulisci([...pg, ...po].join(" ")).testo), ctx.oggi || new Date());
-      return { giornoIso: q.giornoIso || null, ora: q.ora || null, fascia: q.fascia || null, detto: [...pg, ...po].join(" ") };
+      return { giornoIso: q.giornoIso || null, etichetta: q.etichetta || null, ora: q.ora || null, fascia: q.fascia || null, detto: [...pg, ...po].join(" ") };
     };
     const chi = (pezzi.CHI || []).map((x) => {
       const nome = unisci(x.parole);
@@ -949,6 +959,7 @@
     const num = cifre ? parseInt(cifre, 10) : null;
     return {
       intento: c ? c.intento : null, p: c ? c.p : 0, secondo: c ? c.secondo : null, p2: c ? c.p2 : 0,
+      tema: c && c.intento === "dati" ? c.tema || null : null, pTema: c && c.intento === "dati" ? c.pTema || 0 : 0,
       chi, quando: quandoDi("GIO", "ORA"), nuovoQuando: quandoDi("NGIO", "NORA"),
       lavoro: lavoroDi() || null, testo: testoDi("TESTO") || null, canale: can, documento: testoDi("DOC").toLowerCase() || null, numero: num,
       telefono: testoDi("TEL") || null, email: testoDi("MAIL") || null, indirizzo: testoDi("IND") || null, avanzamento: testoDi("AVANZ") || null, cartella: testoDi("CART") || null,
@@ -1690,32 +1701,19 @@
     return { ...l, voci: [{ descrizione: descr, quantita: 1, prezzo }], importo: prezzo, manca: (l.manca || []).filter((x) => x !== "importo"), percentualeSuBase: { perc, base } };
   }
 
-  /* ---------------- Domande sui propri dati (passo 3, 30/09/2026) ----------------
-     Il modello neurale ha deciso che è una domanda sui TUOI dati (agenda, soldi,
-     documenti). Qui si capisce solo il tema e di chi/quando si parla; risponde
-     il codice di sempre (rispondiSuiDati). Nessun tema sicuro = null (decide chi
-     viene dopo, al massimo l'AI). */
-  function leggiDomandaDati(testoOriginale, ctx) {
-    ctx = ctx || {};
-    const p = pulisci(testoOriginale);
-    const pp = parole(p.testo);
-    const n = pp.map((x) => x.n).join(" ");
-    const q = trovaQuando(pp, ctx.oggi);
-    const cl = trovaCliente(pp, ctx.clienti || [], new Set(q.usate));
-    const cliente = cl.stato === "trovato" ? cl.cliente : null;
-    const quando = { giornoIso: q.giornoIso, etichetta: q.etichetta, ora: q.ora, fascia: q.fascia };
-    let tema = null;
-    if (/\b(?:preventiv[oi]|fattur[ae])\b/.test(n) && /\b(?:accettat\w*|rispost\w*|risposto|mandat[oi]|inviat[oi]|fatt[oa]|fatte|apert[oi]|firmat[oi])\b/.test(n)) tema = "documenti";
-    else if (/\bnon\s+(?:mi\s+|m\s+)?(?:paga|pagano|ha\s+(?:ancora\s+)?pagato|hanno\s+(?:ancora\s+)?pagato|(?:ha|hanno)\s+(?:ancora\s+)?dato)\b|\bda\s+riscuotere\b|\briscuot\w*\b|\bmi\s+deve\w*\b/.test(n)) tema = "crediti";
-    else if (/\b(?:quanto|cosa)\b.*\b(?:dato|versato|pagato|preso|saldato)\b|\b(?:ha|hanno)\s+(?:gia\s+)?(?:saldato|pagato)\b|\bacconto\b.*\b(?:dato|dat[oi]|versat[oi])\b|\b(?:riepilogo|riassunto|resoconto)\s+degli\s+incassi\b|\bquanto\s+ho\s+(?:preso|incassato)\b/.test(n)) tema = "incassi";
-    else if (/\b(?:lavori|giri|appuntament\w*|impegn\w*|consegn\w*)\b.*\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|mese)\b|\b(?:settimana|domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\b.*\b(?:lavori|giri|appuntament\w*|impegn\w*)\b|\bc\s*ho\b|\bcom\s*e\s+messa\b|\b(?:riepilogo|punto|riassunto)\s+dei\s+lavori\b|\bquand\s*e\s+che\s+devo\b|\bin\s+agenda\b/.test(n)) tema = "agenda";
-    else if ((/\b(?:cosa|che)\s+(?:mi\s+)?(?:ero|avevo)\s+segnat\w*\b/.test(n) || NOTE_SEGNATE.test(n)) && cliente) tema = "note_cliente";
-    if (!tema) tema = temaDomanda(n);
-    // un comando ("annulla gli appuntamenti di domani", "segna…") non è mai una domanda
-    const forte = (DOMANDA_DATI_FORTE.test(n) || tema === "note_cliente") && !/^(?:annull\w*|cancell\w*|elimin\w*|togli\w*|spost\w*|rimand\w*|anticip\w*|segna\w*|metti\w*|fissa\w*|crea\w*|aggiung\w*|scriv\w*|manda\w*|chiama\w*)\b/.test(n);
-    // per "l'ultima volta dai Tosi", "il numero del Merlo": il nome detto, anche se non è in rubrica
-    const nomeDetto = !cliente && /^(?:ultima_visita|contatto)$/.test(tema || "") ? ((p.testo.match(/\b(?:da|dal|dalla|dai|dalle|dallo|del|della|dello|dei|delle|di)\s+((?:l['’]\s*)?\p{Lu}[\p{L}'’]+(?:\s+\p{Lu}[\p{L}'’]+)?|[\p{L}'’]+)/u) || [])[1] || "").replace(/^l['’]\s*/, "") : "";
-    return tema ? { azione: "dati", tema, cliente, quando, testo: p.testo, originale: String(testoOriginale || "").trim(), forte, nomeDetto } : null;
+  /* ---------------- Domande sui propri dati ----------------
+     PASSO A (2/10/2026): che sia una domanda sui tuoi dati e l'argomento (agenda, incassi, chi ti
+     deve, indirizzo, assemblea…) li dice il modello (cassetto "dati" e la sua terza uscita). Prima
+     c'erano leggiDomandaDati, temaDomanda, NOTE_SEGNATE e DOMANDA_DATI_FORTE: una cinquantina di
+     espressioni regolari. "telefono" si chiama "contatto" nell'app, come prima. */
+  const TEMI_NON_CARTELLA = new Set(["incassi", "crediti", "documenti", "iva", "spese", "contatto", "email", "indirizzo"]);
+  const SICURO_TEMA = 0.5; // le risposte sui dati leggono soltanto, non scrivono niente
+  function temaDelModello(testoOriginale, ctx) {
+    if (!LETTURA) return null;
+    const m = leggiConModello(testoOriginale, ctx);
+    // poco sicuro dell'argomento (sotto 0,5): nessun argomento (decide chi viene dopo, al massimo l'AI)
+    if (!m || m.intento !== "dati" || !m.tema || m.tema === "altro" || m.pTema < SICURO_TEMA) return null;
+    return m.tema === "telefono" ? "contatto" : m.tema;
   }
 
   /* ---------------- SAL: stato avanzamento lavori (passo 3, 30/09/2026) ----------------
@@ -1978,40 +1976,6 @@
   const IMPERATIVI = /^(?:svuota|ripristina|recupera|importa|esporta|attiva|disattiva|imposta|condividi|stampa|scarica|carica|invia|inviami|manda|mandami|apri|aprimi|mostra|mostrami|dammi|trova|trovami|cerca|cercami|leggi|leggimi|calcola|confronta|analizza|riassumi|riassumimi|spiegami|spiega|traduci|controlla|verifica|dimmi|aiutami|aggiungi|aggiungimi|crea|creami|fai|fammi|prepara|preparami|segna|segnami|metti|mettimi|registra|inserisci|annota|salva|scrivi|scrivimi|vai|portami|chiudi|esci|accedi|entra|ricarica|aggiorna|rispondi|mandalo|mandala|mandali|invialo|inviala|fallo|falla|chiamalo|chiamala|scrivilo|scrivila|segnalo|segnala|mettilo|mettila|spostalo|spostala|cancellalo|cancellala|toglilo|toglila|aprilo|aprila|leggilo|leggila|rifallo|rifalla|correggilo|correggila)$/;
   const DOC_IMPRESA = /^(?:durc|visura|camerale|dvr|pos|polizza|assicurazione|rct|rc|soa|f24|unilav|dico)$/;
 
-  /* Temi delle domande sui dati: basta che ci sia la parola del tema */
-  // "cosa mi ero scritto sull'Endrizzi", "le misure della cucina Pedrotti me le ero segnate?" (giro 19)
-  const NOTE_SEGNATE = /^(?:\S+\s+){0,2}(?:cosa|che|che\s+cosa|quant\w*|quale|quali)\b(?:\s+\S+){0,3}\s+(?:mi\s+|m\s+)?avevo\s+(?:detto|dett[aoie])\b|\b(?:cosa|che\s+cosa|che)\s+(?:mi\s+|m\s+)?(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:me\s+)?l[aoie]?\s+(?:ero|avevo)\s+(?:segnat|scritt|annotat|appuntat)\w*|\b(?:avevo|ero)\s+(?:segnat|scritt|annotat|appuntat)\w*\s+qualcosa/;
-  /* Domande sui propri dati dette chiare (1/10/2026, giro 16-20: andavano all'AI). Vale anche
-     quando il modello pensa ad altro ("fammi vedé le fatture non pagate"): lo dice la forma */
-  const DOMANDA_DATI_FORTE = /\bl\s+ultima\s+volta\s+che\s+(?:sono|siamo)\s+(?:stat|andat|passat)\w*|\bquant\s*e\s+che\s+(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b|\bda\s+quanto\s+(?:tempo\s+)?(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b|\b(?:numero|telefono|cellulare)\s+(?:di|del|della|dello|dei|dell)\b.*\b(?:ce\s+l\s+ho|c\s+l\s+ho|ce\s+l\s+hai|ce\s+l\s+abbiamo)\b|\bche\s+numero\s+ha\b|\b(?:soldi|contanti)\b.*\b(?:preso|presi|dato|dati|incassat\w*|entrat\w*)\b|\b(?:fatture|preventivi)\b.*\b(?:non\s+pagat\w*|non\s+firmat\w*|ancora\s+aperti)\b|\bschei\b.*\bricever|\bdevo\s+(?:ancora\s+)?ricevere\b|\bquanto\s+sto\s+(?:pien|impegnat|caric)\w*|\bchi\s+(?:e\s+che\s+)?deve\s+pass\w*|\bdovevo\s+ricordar\w*|\bpunto\s+dei\s+lavori\b|\bl\s+avevo\s+mess[aoie]\b|\bappuntamenti\s+(?:della|di\s+questa|di)\s+(?:settimana|domani|oggi)|\bultim[oa]\s+(?:preventivo|fattura)\b.*\bquanto\b|^l\s+ho\s+(?:gia\s+)?fatt[ao]\s+(?:la|il)\s+(?:fattura|preventivo)\b|^ho\s+(?:gia\s+)?mandato\s+(?:la|il)\s+(?:fattura|preventivo)\b/;
-  function temaDomanda(n) {
-    if (/\bl\s+ultima\s+volta\s+che\s+(?:sono|siamo)\s+(?:stat|andat|passat)\w*|\bquant\s*e\s+che\s+(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b|\bda\s+quanto\s+(?:tempo\s+)?(?:non|nu|un)\s+(?:vado|passo|vedo|sento)\b/.test(n)) return "ultima_visita";
-    if (/\b(?:numero|telefono|cellulare)\s+(?:di|del|della|dello|dei|dell)\b.*\b(?:ce\s+l\s+ho|c\s+l\s+ho|ce\s+l\s+hai|ce\s+l\s+abbiamo)\b|\bche\s+numero\s+ha\b/.test(n)) return "contatto";
-    if (/\b(?:fatture|preventivi)\b.*\bnon\s+pagat\w*|\bschei\b.*\bricever|\bdevo\s+(?:ancora\s+)?ricevere\b/.test(n)) return "crediti";
-    if (/\b(?:soldi|contanti)\b.*\b(?:preso|presi|dato|dati|incassat\w*|entrat\w*)\b/.test(n)) return "incassi";
-    if (/\b(?:preventivi|fatture)\b.*\b(?:non\s+firmat\w*|ancora\s+aperti)\b|\bultim[oa]\s+(?:preventivo|fattura)\b.*\bquanto\b|^l\s+ho\s+(?:gia\s+)?fatt[ao]\s+(?:la|il)\s+(?:fattura|preventivo)\b|^ho\s+(?:gia\s+)?mandato\s+(?:la|il)\s+(?:fattura|preventivo)\b/.test(n)) return "documenti";
-    if (/\bquanto\s+sto\s+(?:pien|impegnat|caric)\w*|\bchi\s+(?:e\s+che\s+)?deve\s+pass\w*|\bdovevo\s+ricordar\w*|\bpunto\s+dei\s+lavori\b|\bl\s+avevo\s+mess[aoie]\b/.test(n)) return "agenda";
-    if (NOTE_SEGNATE.test(n)) return "note_cliente";
-    if (/\biva\b/.test(n)) return "iva";
-    if (/\b(?:incassar\w*|pagar\w*|pagat\w*|pagament\w*|devono|quanto\s+(?:mi\s+|ci\s+|m\s+)?dev(?:e|ono)|(?:mi|ci)\s+dev(?:e|ono)|dev(?:e|ono)\s+(?:ancora|dare|pagare|saldare)|deb\w*|credit\w*|sospes\w*|scadut\w*|insolut\w*|da\s+prendere|prendere\s+ancora|ancora\s+da\s+prendere|devo\s+(?:ancora\s+)?prendere|moros\w*|mi\s+devono)\b/.test(n) && !/\bincassato\b/.test(n)) return "crediti";
-    if (/\b(?:incassato|incassi|entrat[oaie]|guadagnat[oaie]|guadagno|fatturato|tirato\s+su|preso\s+di\s+acconto|acconti?\s+(?:ho|mi)\b)\b/.test(n)) return "incassi";
-    // giro 15: "quali preventivi ho ancora aperti", "il preventivo più alto", "ho già fatto la fattura a…?"
-    if (/\b(?:preventiv[oi]|fattur[ae])\s+(?:(?:sono|ho|abbiamo)\s+)?(?:ancora\s+)?(?:aperti|apert[oa]|in\s+attesa|da\s+accettare|non\s+accettat\w*)\b|\b(?:preventiv[oi]|fattur[ae])\s+piu\s+(?:alt[oa]|grande|car[oa])\b|^ho\s+(?:gia\s+)?fatto\s+(?:la|il)\s+(?:fattura|preventivo)\b|\bquanto\s+valgono\b.*\bpreventiv|\b(?:a\s+)?quanto\s+(?:era|e|viene|veniva|avevo\s+fatto)\s+(?:il|la)\s+(?:preventivo|fattura)\b/.test(n)) return "documenti";
-    // "a che ora devo essere dal Gabbiano domani?", "c'ho qualcosa venerdì?", "a che ora è il getto di sabato?"
-    if (/^(?:ma\s+)?(?:io\s+)?a\s+che\s+ora\b|\b(?:c\s*ho|ho)\s+qualcosa\b|\bsono\s+liber[oa]\b/.test(n)) return "agenda";
-    if (/\b(?:cantier[ie]|interventi|impianti|condomini|lavori\s+(?:in\s+corso|aperti|attivi)|lavori\s+(?:ho|abbiamo)\s+(?:in\s+corso|aperti|attivi))\b/.test(n)) return "cantieri";
-    // "quanti preventivi ho fatto questo mese?", "quante fatture ho fatto?" (giro 5)
-    if (/^(?:quanti|quante)\s+(?:preventivi|fatture)\b|\b(?:preventivi|fatture)\s+(?:ho|abbiamo)\s+(?:fatto|fatte|mandato|mandate|emesso|emesse)\b/.test(n)) return "documenti";
-    if (/\b(?:impegn[oi]|appuntament[oi]|programma|agenda|liber[oaie]|occupat[oa]|da\s+fare|calendario|giornata)\b/.test(n)) return "agenda";
-    // "che lavori ho domani?", "cosa ho la prossima settimana?", "cosa devo fare dopodomani?"
-    if (/^(?:cosa|che\s+cosa|che|che\s+lavori|che\s+impegni|che\s+giri)\s+(?:ho|abbiamo|devo\s+fare|dobbiamo\s+fare|faccio|facciamo)\b/.test(n)) return "agenda";
-    if (/^(?:\w+\s+)?(?:cosa|che)\s+c\s*e\s*$/.test(n) || /^(?:domani|oggi|dopodomani|lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica)\s+(?:cosa|che)\s+(?:c\s*e|ho)\b/.test(n)) return "agenda"; // "domani cosa c'è?"
-    if (/^quando\s+(?:devo|dovrei|ho|vedo|incontro|vado|passo|sento|chiamo)\b|\bdevo\s+vedere\b/.test(n)) return "agenda";
-    if (/\b(?:clienti)\b/.test(n)) return "clienti";
-    if (/\b(?:urgenz[ae]|urgenti)\b/.test(n)) return "urgenze";
-    return null;
-  }
-
   /* ---------------- Più comandi ---------------- */
   const VERBI_COMANDO = "(?:cancella|annulla|elimina|segna|segnami|metti|fissa|vai|andare|passa|passare|sentire|senti|chiama|chiamare|richiama|telefona|telefonare|manda|mandare|inviare|invia|scrivi|scrivere|fai|fare|crea|prepara|compra|comprare|ritira|ritirare|porta|portare|ricordami|devo|appuntamento|sopralluogo|riunione|incontro|visita)";
   const ORE_A_PAROLE = "(?:una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|venti)";
@@ -2064,7 +2028,7 @@
     const primo = pp[0].n;
     // "ho sostituito il miscelatore, pagati in contanti": un fatto, non una domanda (ho + participio)
     const canaleInTesta = /^(?:whatsapp|sms|messaggio|mail|email|scrivi|scrivigli|scrivile|manda\s+(?:un|una)\s+(?:messaggio|whatsapp|sms|mail|email))\b/.test(n) && /\b(?:a|al|alla|ad|allo)\b/.test(n);
-    const domanda = !canaleInTesta && (p.domanda || PAROLE_DOMANDA.test(n)) || (/^(?:ho|sono|hai|e)\b/.test(n) && !!temaDomanda(n) && !/^(?:ho|abbiamo)\s+(?:gia\s+)?\w+(?:ato|uto|ito|ata|uta|ita|ati|iti|ute)\b/.test(n) && !/^sono\s+(?:stato|stata|andato|andata|passato|passata)\b/.test(n));
+    const domanda = !canaleInTesta && (p.domanda || PAROLE_DOMANDA.test(n)) || (/^(?:ho|sono|hai|e)\b/.test(n) && !!temaDelModello(testoOriginale, ctx) && !/^(?:ho|abbiamo)\s+(?:gia\s+)?\w+(?:ato|uto|ito|ata|uta|ita|ati|iti|ute)\b/.test(n) && !/^sono\s+(?:stato|stata|andato|andata|passato|passata)\b/.test(n));
 
     /* Un cliente nuovo (giro 15): "metti in rubrica…", "salva la signora X
        339…", "c'è un cliente nuovo, X, 0521…", "registra la ditta X come
@@ -2089,7 +2053,7 @@
 
     /* Domanda sui dati (regola 4) */
     if (domanda) {
-      const tema = temaDomanda(n);
+      const tema = temaDelModello(testoOriginale, ctx);
       /* Una domanda che chiede un giudizio ("è pesante?", "conviene?",
          "cosa mi consigli?") non è solo un dato: la fa l'AI */
       /* ...e anche un consiglio ("come posso aumentare il guadagno?") o un
@@ -2099,10 +2063,12 @@
       // la cartella solo se si chiede cosa c'è dentro ("cosa c'è in Lerici?"), non "quanto può valere EON?"
       let cartDom = trovaCartella(pp, ctx.cartelle, usate);
       if (cartDom && !(cartDom.usate[0] > 0 && /^(?:cartella|per|in|nella|nel|di|della|del|dentro|su|sulla|sul|da)$/.test(pp[cartDom.usate[0] - 1].n))) cartDom = null;
-      if (cartDom && !giudizio && (!tema || tema === "agenda")) return { ...base, domanda: true, azione: "dati", tema: "cartella", cartella: cartDom.cartella, quando };
+      // una cartella nominata ("cosa c'è in Fornitori?") vince, tranne sulle domande di soldi e contatti
+      if (cartDom && !giudizio && !TEMI_NON_CARTELLA.has(tema)) return { ...base, domanda: true, azione: "dati", tema: "cartella", cartella: cartDom.cartella, quando };
       if (tema && !giudizio) {
         const cl = trovaCliente(pp, ctx.clienti, usate);
-        return { ...base, domanda: true, azione: "dati", tema, quando, cliente: cl.stato === "trovato" ? cl.cliente : null };
+        // un nome che vale per più clienti ("quale Dini…?"): la domanda la fa chi può chiedere quale
+        if (cl.stato !== "ambiguo") return { ...base, domanda: true, azione: "dati", tema, quando, cliente: cl.stato === "trovato" ? cl.cliente : null };
       }
       return { ...base, domanda: true, azione: "domanda", quando };
     }
@@ -2574,7 +2540,7 @@
     do { prima = x; x = x.replace(/^(?:(?:ehi|hey|ok|okay|allora|dunque)\s*,?\s+)*(?:(?:senti|ascolta)\s*,\s*)?(?:eon\s*,?\s+)?(?:(?:per\s+favore|perfavore|per\s+cortesia|scusa)\s*,?\s+)?/i, "").replace(FINE_CORTESIA, "").trim(); } while (x !== prima && x);
     return x ? x + fine.replace(/[.!]+/, "") : t;
   }
-  const EonLettore = { usaLettura, leggiConModello, letturaAttiva: () => !!LETTURA, leggi, segni, senzaMisure, anonimizza, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, leggiDomandaDati, leggiSal, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, temaDomanda, dividi, norm, NOMI };
+  const EonLettore = { usaLettura, leggiConModello, letturaAttiva: () => !!LETTURA, leggi, segni, senzaMisure, anonimizza, segniDettagli, componiImporti, RUOLI_DETTAGLI, usaDettagli, dettagliNeurali, leggiModificaImpegno, leggiDocumento, temaDelModello, leggiSal, leggiDestinatario, leggiCartella, leggiDico, leggiAssemblea, tempiDetti, usaNeurale, neuraleAttivo: () => !!NEURALE, leggiNuovoCliente, trovaTelefono, trovaVoci, leggiModifica, caricaModello, caratteristiche, classifica, parafrasi, riscrivi, togliCortesie, leggiDidascalia, pulisci, parole, trovaQuando, trovaImporto, trovaCliente, trovaNomeNuovo, preparaMessaggio, dividi, norm, NOMI };
   if (typeof module !== "undefined" && module.exports) module.exports = EonLettore;
   else root.EonLettore = EonLettore;
 })(typeof window !== "undefined" ? window : globalThis);
