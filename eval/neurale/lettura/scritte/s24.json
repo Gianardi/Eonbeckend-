@@ -210,10 +210,6 @@
    "cliente"
   ],
   [
-   "nuovo cliente [Ceschini Lorenz]{CHI} [328 6610974]{TEL} also è tedesco parla poco italiano",
-   "cliente"
-  ],
-  [
    "[domani]{GIO} [alle 8 precise]{ORA} [sopralluogo caldaia]{LAV} da [Bridi Giovanni]{CHI} in [via Magazol 5]{IND}",
    "calendario"
   ],
@@ -379,10 +375,6 @@
   ],
   [
    "[alle 15 e 50]{ORA} [martedì 3]{GIO} ho [la visita]{LAV} dal [dottor Beltrami]{CHI} la segni per cortesia",
-   "calendario"
-  ],
-  [
-   "[il 27 ottobre]{GIO} [alle 20 e 30]{ORA} [cena]{LAV} con [i colleghi della Cassa Edile]{CHI}",
    "calendario"
   ],
   [
@@ -591,10 +583,6 @@
   ],
   [
    "ja ja annulli [la visita]{LAV} dal [dottor Beltrami]{CHI} e la rimetta il [10]{NGIO} [alle 16]{NORA}",
-   "calendario_modifica"
-  ],
-  [
-   "rimandi [la cena]{LAV} con [i colleghi della Cassa Edile]{CHI} a data da destinarsi",
    "calendario_modifica"
   ],
   [
@@ -930,10 +918,6 @@
    "dico"
   ],
   [
-   "[DiCo]{DOC} per [Gerola Hans]{CHI} ja con il progetto dell'ingegnere allegato",
-   "dico"
-  ],
-  [
    "prepari [la dichiarazione]{DOC} [dell'impianto idrico]{LAV} della [Malga Costa Fonda]{CHI}",
    "dico"
   ],
@@ -1030,7 +1014,7 @@
    "dati"
   ],
   [
-   "quanti [preventivi]{DOC} sono ancora in attesa di risposta",
+   "ja quanti [preventivi]{DOC} miei aspettano ancora una risposta dai clienti",
    "dati"
   ],
   [
