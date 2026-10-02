@@ -4999,6 +4999,28 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 2/10 notte: PASSO A, il modello che legge tutta la frase — primo pacchetto (ROADMAP 0b.19)
+- Regola n. 1 in CLAUDE.md (Andrea: niente regole scritte a mano per capire). `eval/regole-conta.mjs`
+  conta le righe con espressioni regolari nel lettore e nelle funzioni dell'app/server che leggono le
+  frasi (893 il 1/10 → 870).
+- Dati: `eval/neurale/lettura/ISTRUZIONI.md` (ruoli CHI, GIO, ORA, NGIO, NORA, LAV, TESTO, CAN, DOC,
+  NUM, TEL, MAIL, IND, AVANZ, CART; 22 cassetti, nuovi `accettato` e `sollecito`), `scritte/s01…s26`
+  (s21 e s27 in `scartate/`: generate da un programma), `verifica.mjs` (scarta segni rotti e doppioni),
+  `varia.mjs` (varianti con nomi, ditte, lavori, giorni, ore, indirizzi, telefoni).
+- Modello: `allena.py` (transformer 3 strati, D 128, 1,4 M parametri; due uscite: cassetto e ruolo
+  di ogni parola; ingresso "rubrica"; frasi dei cassetti di oggi solo per il cassetto), int8,
+  `modello-lettura.json`. `neurale.js leggi(parole, rubrica)`. `lettore.leggiConModello(testo, ctx)`:
+  normalizza soltanto (cliente in rubrica, trovaQuando sui pezzi GIO/ORA, canale, numero, lavoro senza
+  articoli in testa). `confronto.mjs`: modello contro regole sulle stesse frasi mai viste.
+- Integrazione "manda il documento / le foto a…": `invioDalModello` → `provaInvioDocumento` /
+  `inviaLetto` / `mandaFotoA`; domanda "già fatta o nuova?" quando il modello è incerto (< 0,85 tra
+  documento e invio_documento). L'app carica `modello-lettura.json` dopo l'apertura.
+- Attenzione: in questo ambiente i programmi in sottofondo si fermano quando la sessione è ferma;
+  gli allenamenti vanno seguiti con attese attive.
+- Prove: `invio-privacy`, `documento-da-fare-app`, `non-ce-facciamolo-app` (date calcolate da oggi),
+  `lettore-server` ("di' a Rita… venerdì" falliva di venerdì anche su main: ora un giorno né oggi né
+  domani). Giri 5-20 tutti al minimo o sopra; frasi vere 134/136; tutti.sh 83/83.
+
 ### 1/10 notte: modello c25 adottato, misure finali (ROADMAP 0b.19 passo 5)
 - `modello-neurale.json` = studente distillato con confini c24 + c25 (maestri in scratchpad). Con
   tutto il codice del pacchetto, app: g5 186 (+2), g15 1053 (=), g16 1047 (+3), g17 1040, g18 1000

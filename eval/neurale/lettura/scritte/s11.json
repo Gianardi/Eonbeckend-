@@ -1,0 +1,1445 @@
+{
+ "personaggio": "Giardiniere e manutentore sardo di 58 anni, di Sassari: cura ville, B&B e condomini. Parla corto e telegrafico, spesso senza verbi (nome, giorno, ora, lavoro), qualche parola sarda (eja, ajò), niente punteggiatura.",
+ "frasi": [
+  [
+   "[Sanna]{CHI} [domani]{GIO} [8]{ORA} [siepe]{LAV}",
+   "calendario"
+  ],
+  [
+   "[Cossu]{CHI} [lunedì]{GIO} [potatura ulivi]{LAV}",
+   "calendario"
+  ],
+  [
+   "[giovedì]{GIO} [alle 7]{ORA} [taglio prato]{LAV} villa [Deiana]{CHI}",
+   "calendario"
+  ],
+  [
+   "segna [sopralluogo]{LAV} [B&B Sa Tanca Ruja]{CHI} [venerdì]{GIO} [mattina]{ORA}",
+   "calendario"
+  ],
+  [
+   "[dopodomani]{GIO} [Condominio Le Agavi]{CHI} [pulizia aiuole]{LAV}",
+   "calendario"
+  ],
+  [
+   "ricordami [martedì]{GIO} [concime]{LAV} [Fois]{CHI}",
+   "calendario"
+  ],
+  [
+   "[alle 6 e mezza]{ORA} [domani]{GIO} [irrigazione]{LAV} [Mura]{CHI}",
+   "calendario"
+  ],
+  [
+   "[la settimana prossima]{GIO} [abbattimento pino]{LAV} [Dettori]{CHI}",
+   "calendario"
+  ],
+  [
+   "[Pinna]{CHI} [sabato]{GIO} [verso le 9]{ORA} [processionaria]{LAV}",
+   "calendario"
+  ],
+  [
+   "metti [il 12 ottobre]{GIO} [rotoli prato]{LAV} villa [Marras]{CHI}",
+   "calendario"
+  ],
+  [
+   "[Satta]{CHI} e [Porcu]{CHI} [mercoledì]{GIO} [potatura]{LAV} tutti e due",
+   "calendario"
+  ],
+  [
+   "domani no anzi [dopodomani]{GIO} [Melis]{CHI} [decespugliamento]{LAV}",
+   "calendario"
+  ],
+  [
+   "[oggi]{GIO} [nel pomeriggio]{ORA} [ritiro piante]{LAV} [Vivai Badde Alva]{CHI}",
+   "calendario"
+  ],
+  [
+   "[Spanu]{CHI} [fra tre giorni]{GIO} [pulizia grondaie]{LAV}",
+   "calendario"
+  ],
+  [
+   "appuntamento [il geometra Tedde]{CHI} [lunedì]{GIO} [alle 10]{ORA} [sopralluogo]{LAV}",
+   "calendario"
+  ],
+  [
+   "[venerdì]{GIO} [ore 15]{ORA} [B&B Lu Lizzu]{CHI} [taglio erba]{LAV}",
+   "calendario"
+  ],
+  [
+   "ricordami [giovedì]{GIO} [di passare dal ferramenta per il filo]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[domani]{GIO} [alle 8]{ORA} [Condominio Monte Oro]{CHI} [via delle Sughere 14]{IND} [potatura oleandri]{LAV}",
+   "calendario"
+  ],
+  [
+   "[Chessa]{CHI} [il 3 novembre]{GIO} [impianto a goccia]{LAV}",
+   "calendario"
+  ],
+  [
+   "[mattina presto]{ORA} [martedì]{GIO} [Manca]{CHI} [palme]{LAV}",
+   "calendario"
+  ],
+  [
+   "[Loi]{CHI} [domenica]{GIO} niente lavoro solo [giro di controllo]{LAV}",
+   "calendario"
+  ],
+  [
+   "[Ledda]{CHI} [mercoledì]{GIO} [la Honda]{LAV} da sistemare",
+   "calendario"
+  ],
+  [
+   "[tra una settimana]{GIO} [semina prato]{LAV} [Saba]{CHI} [alle 8]{ORA}",
+   "calendario"
+  ],
+  [
+   "[Sechi]{CHI} [14]{ORA} [domani]{GIO} [potatura agrumi]{LAV}",
+   "calendario"
+  ],
+  [
+   "ricordami [lunedì]{GIO} [di chiamare il vivaio per le lavande]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[il 20]{GIO} [Condominio Sa Rocca]{CHI} [taglio siepe alloro]{LAV} [alle 7 e mezza]{ORA}",
+   "calendario"
+  ],
+  [
+   "[giovedì prossimo]{GIO} [pulizia terreno]{LAV} [Brundu]{CHI} [località Sa Mandra Ezza]{IND}",
+   "calendario"
+  ],
+  [
+   "[Usai]{CHI} [dopodomani]{GIO} [pomeriggio]{ORA} [trattamento rame]{LAV} vigna",
+   "calendario"
+  ],
+  [
+   "metti [fine mese]{GIO} [potatura carrubo]{LAV} [Solinas]{CHI}",
+   "calendario"
+  ],
+  [
+   "[domani]{GIO} [8]{ORA} [Masia]{CHI} poi [9 e mezza]{ORA} [Contini]{CHI}",
+   "calendario"
+  ],
+  [
+   "[sabato]{GIO} [verso le 10]{ORA} [B&B Villa Corbezzolo]{CHI} [pulizia piscina]{LAV}",
+   "calendario"
+  ],
+  [
+   "[Pintus]{CHI} [venerdì]{GIO} [muretto a secco]{LAV} [tutta la giornata]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [oggi]{GIO} [alle 17]{ORA} [di ritirare la ghiaia]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[Delogu]{CHI} [lunedì 13]{GIO} [manutenzione cancello]{LAV}",
+   "calendario"
+  ],
+  [
+   "[la signora Tola]{CHI} [mercoledì]{GIO} [alle 4]{ORA} [aiuola rose]{LAV}",
+   "calendario"
+  ],
+  [
+   "[martedì]{GIO} [Nieddu]{CHI} [cambio lampadine scale]{LAV}",
+   "calendario"
+  ],
+  [
+   "il primo novembre no [il 2]{GIO} [Fadda]{CHI} [pulizia viale]{LAV}",
+   "calendario"
+  ],
+  [
+   "segna [Condominio Is Laccheddos]{CHI} [giovedì]{GIO} [verso le 2]{ORA} [svuotare pozzetti]{LAV} e [Brau]{CHI} dopo",
+   "calendario"
+  ],
+  [
+   "sposta [Cubeddu]{CHI} da [domani]{GIO} a [giovedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[Arru]{CHI} [siepe]{LAV} da [lunedì]{GIO} a [martedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [Calvia]{CHI} [sabato]{GIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [potatura]{LAV} [Deriu]{CHI} [alle 10]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "salta [Canu]{CHI} [domani]{GIO} piove",
+   "calendario_modifica"
+  ],
+  [
+   "[taglio prato]{LAV} [Condominio I Lentischi]{CHI} [venerdì]{GIO} a [lunedì]{NGIO} [8]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[Lai]{CHI} da [8]{ORA} a [9]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [mercoledì]{GIO} [Fresu]{CHI} a [settimana prossima]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "cancella [sopralluogo]{LAV} [Mossa]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "[Pala]{CHI} [domani]{GIO} rimanda [fra due giorni]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[Oggiano]{CHI} non [giovedì]{GIO} ma [venerdì]{NGIO} stessa ora",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [irrigazione]{LAV} [B&B Li Ghjanni]{CHI} a [domani]{NGIO} [alle 7]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[Puggioni]{CHI} anticipa [alle 6]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[Medda]{CHI} [giovedì]{GIO} [alle 15]{ORA} spostare [alle 17]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[venerdì]{GIO} tutto annullato vento",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [processionaria]{LAV} [Carta]{CHI} [il 10]{GIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[Serra]{CHI} lunedì no [martedì]{NGIO} [pomeriggio]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[Pes]{CHI} e [Tanda]{CHI} tutti e due a [domani]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[abbattimento pino]{LAV} [Virdis]{CHI} rinviato al [25 ottobre]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[Zara]{CHI} disdetto cancella",
+   "calendario_modifica"
+  ],
+  [
+   "[alle 9]{ORA} [Langiu]{CHI} diventa [alle 11]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [potatura ulivi]{LAV} [Sotgiu]{CHI} da [la settimana prossima]{GIO} a [quella dopo]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[domani]{GIO} [Rassu]{CHI} spostare [sabato]{NGIO} [mattina]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "togli [pulizia grondaie]{LAV} [Condominio Pineta Alta]{CHI} [giovedì]{GIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[Lutzu]{CHI} da [8]{ORA} a [8 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[Unali]{CHI} [domenica]{GIO} meglio [lunedì]{NGIO} [presto]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [semina]{LAV} [Tilocca]{CHI} [di una settimana]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla tutto [domani]{GIO} [pomeriggio]{ORA} sto male",
+   "calendario_modifica"
+  ],
+  [
+   "segna [Fois vuole siepe più bassa]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunto [cancello Condominio Le Agavi cigola]{TESTO}",
+   "mente"
+  ],
+  [
+   "[la signora Arru allergica ai cipressi]{TESTO} ricordatelo",
+   "mente"
+  ],
+  [
+   "ricorda [chiave villa Mulas sotto vaso limone]{TESTO}",
+   "mente"
+  ],
+  [
+   "segnati [Porcheddu niente diserbante]{TESTO}",
+   "mente"
+  ],
+  [
+   "nota [pompa pozzo Muroni uno e mezzo cavalli]{TESTO}",
+   "mente"
+  ],
+  [
+   "[al B&B Sa Rundine niente soffiatore prima delle 9]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunto [Pirisi paga sempre in ritardo]{TESTO}",
+   "mente"
+  ],
+  [
+   "segna [concime ulivi Saba granulare non liquido]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati [cane Pani morde]{TESTO}",
+   "mente"
+  ],
+  [
+   "[rubinetto irrigazione Cocco dietro garage]{TESTO} segna",
+   "mente"
+  ],
+  [
+   "nota [Demontis vuole solo piante nostre mirto lentisco corbezzolo]{TESTO}",
+   "mente"
+  ],
+  [
+   "tienilo a mente [codice cancello Condominio Gli Olivastri 4471]{TESTO}",
+   "mente"
+  ],
+  [
+   "segna [mi servono forbici nuove e filo decespugliatore]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunto [Scanu prato a rotoli non seminato]{TESTO}",
+   "mente"
+  ],
+  [
+   "[villa Bua acqua pozzo salmastra]{TESTO} segnalo",
+   "mente"
+  ],
+  [
+   "ricordati [Mastino ha detto che ci pensa per la palma]{TESTO}",
+   "mente"
+  ],
+  [
+   "annota [pino Condominio Su Pinu inclinato verso strada]{TESTO}",
+   "mente"
+  ],
+  [
+   "[preventivo]{DOC} [Masia]{CHI} [siepe]{LAV} 400",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [B&B Sas Jannas]{CHI} [taglio prato settembre]{LAV}",
+   "documento"
+  ],
+  [
+   "fai [preventivo]{DOC} [Condominio Le Mimose]{CHI} [potatura pini]{LAV} 12 piante",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [Sias]{CHI} 250 più iva [pulizia terreno]{LAV}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [impianto a goccia]{LAV} [Medas]{CHI} 30 metri",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [14]{NUM} a [Sotgiu]{CHI}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [abbattimento eucalipto]{LAV} [Farina]{CHI} 600 tutto compreso",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [la signora Useli]{CHI} [rifacimento giardino]{LAV} [via dei Corbezzoli 9]{IND}",
+   "documento"
+  ],
+  [
+   "fammi [fattura]{DOC} [Condominio Monte Agellu]{CHI} [manutenzione trimestrale]{LAV} 900",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [Tolu]{CHI} [ghiaia vialetto]{LAV} e [bordure]{LAV}",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [Mulas]{CHI} acconto 200 [prato]{LAV}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [B&B Su Ghiddiu]{CHI} [palme punteruolo]{LAV} 3 palme 80 l'una",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [Edilverde Logudoro]{CHI} [pulizia cantiere]{LAV}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [cancello]{LAV} Langiu no [Lostia]{CHI}",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [Moro]{CHI} [potatura agrumi]{LAV} 180 contanti",
+   "documento"
+  ],
+  [
+   "fai [preventivo]{DOC} [tinteggiatura ringhiera]{LAV} [Condominio Le Querce]{CHI}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [Pilo]{CHI} [taglio prato]{LAV} annuale 70 al mese",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [Calvia]{CHI} [trattamento processionaria]{LAV}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} per [il dottor Ruiu]{CHI} [aiuole ingresso]{LAV}",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [B&B Cala Ruia]{CHI} [lavori settembre]{LAV} 1200",
+   "documento"
+  ],
+  [
+   "preparami [preventivo]{DOC} [Tedde]{CHI} [sistemazione scarpata]{LAV}",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [Condominio Corte Antica]{CHI} [cambio lampadine]{LAV} e [pulizia pozzetti]{LAV}",
+   "documento"
+  ],
+  [
+   "[preventivo]{DOC} [Cherchi]{CHI} [muretto a secco]{LAV} 15 metri",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} [Arca]{CHI} [taglio siepe]{LAV} sconto 10 per cento",
+   "documento"
+  ],
+  [
+   "trova [preventivo]{DOC} [Truddaiu]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "apri [fattura]{DOC} [22]{NUM}",
+   "cerca_documento"
+  ],
+  [
+   "[foto]{DOC} [palma]{LAV} [Medda]{CHI} dove sono",
+   "cerca_documento"
+  ],
+  [
+   "cerca [DURC]{DOC}",
+   "cerca_documento"
+  ],
+  [
+   "[fattura]{DOC} [Condominio Gli Ulivi]{CHI} [agosto]{GIO}",
+   "cerca_documento"
+  ],
+  [
+   "fammi vedere [preventivo]{DOC} [potatura]{LAV} [Pes]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "dov'è [visura]{DOC} [Sassu]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "[foto]{DOC} prima e dopo [giardino]{LAV} [Marongiu]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "apri [contratto manutenzione]{DOC} [B&B Su Sole]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "cerca [fattura]{DOC} [8]{NUM} [Figus]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "[preventivo]{DOC} [luglio]{GIO} [Vacca]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "trova [bolla]{DOC} [Vivai Su Padru]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "[DiCo]{DOC} [pompa]{LAV} [Masala]{CHI} ritrovala",
+   "cerca_documento"
+  ],
+  [
+   "manda [preventivo]{DOC} [Atzori]{CHI} [whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[fattura]{DOC} [Becciu]{CHI} [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[foto]{DOC} [siepe]{LAV} a [Cadeddu]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "invia [preventivo]{DOC} [potatura]{LAV} [Condominio Le Palme Nane]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda [DURC]{DOC} [Impresa Congiu]{CHI} [mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[fattura]{DOC} [31]{NUM} a [Corda]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "gira [foto]{DOC} [palme]{LAV} a [Cuccu]{CHI} e [Dore]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "[preventivo]{DOC} [B&B Sa Pischina]{CHI} [whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[verbale]{DOC} [ragionier Floris]{CHI} [mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[foto]{DOC} [prato nuovo]{LAV} manda [Frau]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "[fattura]{DOC} [settembre]{GIO} [Garau]{CHI} mandagliela",
+   "invio_documento"
+  ],
+  [
+   "invia [DiCo]{DOC} [impianto irrigazione]{LAV} [Ibba]{CHI} [pec]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[preventivo]{DOC} aggiornato [Lecca]{CHI} [whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [Locci]{CHI} [fattura]{DOC} [17]{NUM} [per email]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[foto]{DOC} [pino caduto]{LAV} [Condominio Sa Serra]{CHI} subito",
+   "invio_documento"
+  ],
+  [
+   "a [Mameli]{CHI} il [preventivo]{DOC} [prato e siepe]{LAV}",
+   "invio_documento"
+  ],
+  [
+   "[visura]{DOC} [geometra Marcia]{CHI} [mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [contratto]{DOC} [B&B Su Cuile]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "[fattura]{DOC} Melas no aspetta [Mereu]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "[preventivo]{DOC} [potatura olivastri]{LAV} [Murru]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [foto]{DOC} [lavoro finito]{LAV} [Obinu]{CHI} [whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "[SAL]{DOC} [Condominio Sa Ena]{CHI} amministratore [mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia [ricevuta]{DOC} [Palmas]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "[preventivo]{DOC} [9]{NUM} e [fattura]{DOC} [12]{NUM} a [Pisanu]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "scrivi [Podda]{CHI} [arrivo alle 8]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[Puddu]{CHI} [whatsapp]{CAN} [domani non vengo piove]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "di' a [Putzu]{CHI} [che lasci aperto il cancello]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio [Sedda]{CHI} [porto le piante giovedì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[Serreli]{CHI} [ritardo mezz'ora]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi [B&B Li Muri]{CHI} [taglio prato fatto]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [Sini]{CHI} [che chiudo l'acqua un'ora]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[sms]{CAN} [Spiga]{CHI} [ok per sabato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi [mia moglie]{CHI} [faccio tardi]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[Tidu]{CHI} e [Uras]{CHI} [domani si lavora in condominio]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "dì a [Vargiu]{CHI} [di togliere la macchina dal cortile]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio [amministratore Zedda]{CHI} [pino pericoloso va tagliato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[whatsapp]{CAN} [Zucca]{CHI} [mandami la posizione]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi [Angioi]{CHI} [grazie del caffè]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[Biddau]{CHI} [servono le chiavi del magazzino]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [Condominio Funtana Noa]{CHI} [lunedì niente auto nel cortile]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [mio figlio]{CHI} [prendi il furgone alle 7]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[Branca]{CHI} [sms]{CAN} [passo verso le 4]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio [Careddu]{CHI} [il prato va bagnato due volte al giorno]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "di a [Chighine]{CHI} [che il preventivo è pronto]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[Corrias]{CHI} [arrivo]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi Cotza no [Dessena]{CHI} [che domani manco]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[whatsapp]{CAN} [B&B S'Ena Arrubia]{CHI} [mettete via i cuscini arriva vento]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "avvisa [Fenu]{CHI} [il cane chiudetelo]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "mail a [Giua]{CHI} [mandami planimetria giardino]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi [mail]{CAN} [Logudoro Immobili]{CHI} [lavori finiti]{TESTO}",
+   "email"
+  ],
+  [
+   "[email]{CAN} [Idda]{CHI} [confermo sopralluogo]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi mail a [pietro.mattana@posta.it]{MAIL} [preventivo in arrivo]{TESTO}",
+   "email"
+  ],
+  [
+   "[mail]{CAN} [Condominio Le Fontane]{CHI} [chiedo autorizzazione abbattimento]{TESTO}",
+   "email"
+  ],
+  [
+   "[Ruiu Antonio]{CHI} [email]{CAN} [quando passo a ritirare l'assegno]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi [mail]{CAN} [vivaio Sa Matta]{CHI} [ordine 50 lavande]{TESTO}",
+   "email"
+  ],
+  [
+   "[mail]{CAN} a [Tavera]{CHI} [ringrazio per il lavoro]{TESTO}",
+   "email"
+  ],
+  [
+   "[email]{CAN} [Ziranu]{CHI} [rimando potatura per pioggia]{TESTO}",
+   "email"
+  ],
+  [
+   "mail [ingegner Sale]{CHI} [mi serve il progetto irrigazione]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi [mail]{CAN} [B&B Corte Sughera]{CHI} [prezzi nuovi dal mese prossimo]{TESTO}",
+   "email"
+  ],
+  [
+   "[email]{CAN} [Meloni]{CHI} [salvatore.meloni.ss@mail.it]{MAIL} [confermo lunedì]{TESTO}",
+   "email"
+  ],
+  [
+   "chiama [Pinna Giuseppe]{CHI}",
+   "chiamata"
+  ],
+  [
+   "telefona [Condominio Le Ginestre]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [mia sorella Peppina]{CHI}",
+   "chiamata"
+  ],
+  [
+   "[Arras]{CHI} chiamalo",
+   "chiamata"
+  ],
+  [
+   "chiama [333 4418207]{TEL}",
+   "chiamata"
+  ],
+  [
+   "telefona [vivaio Badde Alva]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [amministratore Pirastru]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [Sassu Giovanni]{CHI}",
+   "chiamata"
+  ],
+  [
+   "telefona [Ferramenta Su Ferru]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [il geometra Dessì]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [Uda]{CHI} subito",
+   "chiamata"
+  ],
+  [
+   "chiama [347 2290115]{TEL} è [Muroni]{CHI}",
+   "chiamata"
+  ],
+  [
+   "nuovo cliente [Salvatore Murgia]{CHI} [339 5521784]{TEL}",
+   "cliente"
+  ],
+  [
+   "aggiungi [B&B Su Mirtu]{CHI} [via Sa Ruta 3]{IND}",
+   "cliente"
+  ],
+  [
+   "cliente nuovo [Giovanna Langasco]{CHI} [328 1196340]{TEL} [via degli Oleandri 22]{IND}",
+   "cliente"
+  ],
+  [
+   "[Condominio Le Saline Vecchie]{CHI} nuovo cliente amministratore [Fozzi]{CHI}",
+   "cliente"
+  ],
+  [
+   "salva [Antonio Pilia]{CHI} [antonio.pilia@mail.it]{MAIL}",
+   "cliente"
+  ],
+  [
+   "indirizzo [Carboni]{CHI} [località Su Crastu]{IND} aggiorna",
+   "cliente"
+  ],
+  [
+   "[Lecca]{CHI} cambiato numero [340 7781223]{TEL}",
+   "cliente"
+  ],
+  [
+   "nuovo cliente [Spanedda]{CHI} villa [strada vicinale Sa Coa 7]{IND}",
+   "cliente"
+  ],
+  [
+   "aggiungi [Tola Gavino]{CHI} B&B",
+   "cliente"
+  ],
+  [
+   "cliente [Maria Grazia Piredda]{CHI} [349 8812004]{TEL}",
+   "cliente"
+  ],
+  [
+   "[Condominio Sas Codinas]{CHI} [via Monte Lerno 40]{IND} nuovo",
+   "cliente"
+  ],
+  [
+   "inserisci [Bastianina Era]{CHI}",
+   "cliente"
+  ],
+  [
+   "[Mannu]{CHI} [via dei Gelsi 18]{IND} e [329 6610458]{TEL} nuovo cliente",
+   "cliente"
+  ],
+  [
+   "quanto incassato [settembre]{GIO}",
+   "dati"
+  ],
+  [
+   "chi ho [domani]{GIO}",
+   "dati"
+  ],
+  [
+   "numero [Farris]{CHI}",
+   "dati"
+  ],
+  [
+   "indirizzo [Lubinu]{CHI}",
+   "dati"
+  ],
+  [
+   "[Condominio Su Lillu]{CHI} quanto mi deve",
+   "dati"
+  ],
+  [
+   "lavori [giovedì]{GIO}",
+   "dati"
+  ],
+  [
+   "[oggi]{GIO} dove vado",
+   "dati"
+  ],
+  [
+   "quante fatture non pagate",
+   "dati"
+  ],
+  [
+   "[Masu]{CHI} quanto ha pagato quest'anno",
+   "dati"
+  ],
+  [
+   "telefono [B&B Sa Barca]{CHI}",
+   "dati"
+  ],
+  [
+   "quando ho [Nurra]{CHI}",
+   "dati"
+  ],
+  [
+   "[la settimana prossima]{GIO} libero quando",
+   "dati"
+  ],
+  [
+   "ultimo [preventivo]{DOC} [Pira]{CHI} quanto era",
+   "dati"
+  ],
+  [
+   "[fattura]{DOC} [19]{NUM} pagata",
+   "dati"
+  ],
+  [
+   "quanti condomini ho",
+   "dati"
+  ],
+  [
+   "mail [Ruggiu]{CHI}",
+   "dati"
+  ],
+  [
+   "[sabato]{GIO} [mattina]{ORA} ho qualcosa",
+   "dati"
+  ],
+  [
+   "quanto fatturato [quest'anno]{GIO}",
+   "dati"
+  ],
+  [
+   "[Salaris]{CHI} che lavori gli ho fatto",
+   "dati"
+  ],
+  [
+   "ultima volta [siepe]{LAV} [Serusi]{CHI}",
+   "dati"
+  ],
+  [
+   "chi mi deve soldi",
+   "dati"
+  ],
+  [
+   "[domani]{GIO} [alle 8]{ORA} dove sono",
+   "dati"
+  ],
+  [
+   "quanto ho speso al [vivaio Su Padru]{CHI}",
+   "dati"
+  ],
+  [
+   "[Spada]{CHI} indirizzo e telefono",
+   "dati"
+  ],
+  [
+   "[Cappai]{CHI} pagato 300",
+   "incasso"
+  ],
+  [
+   "[Carai]{CHI} ha pagato [fattura]{DOC} [23]{NUM}",
+   "incasso"
+  ],
+  [
+   "incassati 450 [Condominio Is Olias]{CHI}",
+   "incasso"
+  ],
+  [
+   "[Caria]{CHI} acconto 200 contanti",
+   "incasso"
+  ],
+  [
+   "bonifico arrivato [Cuguttu]{CHI}",
+   "incasso"
+  ],
+  [
+   "[B&B Sa Murta]{CHI} saldato",
+   "incasso"
+  ],
+  [
+   "[Daga]{CHI} pagato metà",
+   "incasso"
+  ],
+  [
+   "[Dedola]{CHI} 150 [siepe]{LAV} pagato",
+   "incasso"
+  ],
+  [
+   "preso assegno [Ena]{CHI} 800",
+   "incasso"
+  ],
+  [
+   "[fattura]{DOC} [5]{NUM} [Fancello]{CHI} incassata",
+   "incasso"
+  ],
+  [
+   "[Fiori]{CHI} e [Frongia]{CHI} pagato tutti e due",
+   "incasso"
+  ],
+  [
+   "pagato [Gaias]{CHI} [potatura]{LAV} 120",
+   "incasso"
+  ],
+  [
+   "[Gallus]{CHI} saldo [prato]{LAV}",
+   "incasso"
+  ],
+  [
+   "arrivati soldi [amministratore Ghisu]{CHI}",
+   "incasso"
+  ],
+  [
+   "[Lampis]{CHI} pagato cash",
+   "incasso"
+  ],
+  [
+   "[Lixi]{CHI} mi ha dato 60 per [taglio erba]{LAV}",
+   "incasso"
+  ],
+  [
+   "incassato [oggi]{GIO} [Maccioni]{CHI} 90",
+   "incasso"
+  ],
+  [
+   "[Marceddu]{CHI} bonifico 1100 [fattura]{DOC} [27]{NUM}",
+   "incasso"
+  ],
+  [
+   "foto",
+   "foto"
+  ],
+  [
+   "scatta [foto]{DOC} [siepe]{LAV} [Matta]{CHI}",
+   "foto"
+  ],
+  [
+   "fai [foto]{DOC} prima",
+   "foto"
+  ],
+  [
+   "foto [palma malata]{LAV}",
+   "foto"
+  ],
+  [
+   "[foto]{DOC} [cantiere]{LAV} [Condominio Sas Ortas]{CHI}",
+   "foto"
+  ],
+  [
+   "apri fotocamera",
+   "foto"
+  ],
+  [
+   "scatta [aiuola]{LAV} finita",
+   "foto"
+  ],
+  [
+   "[foto]{DOC} [pozzetto rotto]{LAV}",
+   "foto"
+  ],
+  [
+   "fotografa [pino]{LAV} [Mocci]{CHI}",
+   "foto"
+  ],
+  [
+   "[foto]{DOC} dopo [Monni]{CHI} [lavoro finito]{LAV}",
+   "foto"
+  ],
+  [
+   "crea cartella [Vivai]{CART}",
+   "cartella"
+  ],
+  [
+   "metti [foto]{DOC} in [Condomini]{CART}",
+   "cartella"
+  ],
+  [
+   "nuova cartella [B&B]{CART}",
+   "cartella"
+  ],
+  [
+   "sposta [fattura]{DOC} [Nonnis]{CHI} cartella [Pagate]{CART}",
+   "cartella"
+  ],
+  [
+   "cartella [Attrezzi]{CART}",
+   "cartella"
+  ],
+  [
+   "apri cartella [Garanzie]{CART}",
+   "cartella"
+  ],
+  [
+   "[preventivo]{DOC} [Pau]{CHI} in [Da fare]{CART}",
+   "cartella"
+  ],
+  [
+   "crea [Ville Costa]{CART} cartella",
+   "cartella"
+  ],
+  [
+   "metti nella [Lavori 2026]{CART}",
+   "cartella"
+  ],
+  [
+   "[foto]{DOC} [Perra]{CHI} nella cartella [Prima e dopo]{CART}",
+   "cartella"
+  ],
+  [
+   "urgente [Pibiri]{CHI} [albero caduto]{LAV}",
+   "urgenza"
+  ],
+  [
+   "[Condominio Badde Ruia]{CHI} [tubo rotto]{LAV} allagato",
+   "urgenza"
+  ],
+  [
+   "corri [Piludu]{CHI} [ramo sul tetto]{LAV}",
+   "urgenza"
+  ],
+  [
+   "urgenza [B&B Lu Saltu]{CHI} [pompa piscina ferma]{LAV}",
+   "urgenza"
+  ],
+  [
+   "subito [Pirina]{CHI} [cancello bloccato]{LAV}",
+   "urgenza"
+  ],
+  [
+   "emergenza [irrigazione]{LAV} [Pistis]{CHI} acqua dappertutto",
+   "urgenza"
+  ],
+  [
+   "[Pittalis]{CHI} urgente [vespe]{LAV} nel giardino",
+   "urgenza"
+  ],
+  [
+   "aiuto [pino]{LAV} sulla strada [via dei Lecci 6]{IND}",
+   "urgenza"
+  ],
+  [
+   "urgente [allagamento garage]{LAV} [Condominio Sa Pedra]{CHI}",
+   "urgenza"
+  ],
+  [
+   "[Rocca]{CHI} [incendio sterpaglie]{LAV} vicino casa corri",
+   "urgenza"
+  ],
+  [
+   "subito subito [Scano]{CHI} [palma pericolante]{LAV}",
+   "urgenza"
+  ],
+  [
+   "urgenza [luce scale saltata]{LAV} [Condominio Sas Domos]{CHI}",
+   "urgenza"
+  ],
+  [
+   "[SAL]{DOC} [Condominio Monte Pedrosu]{CHI} [40 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "stato avanzamento [Secci]{CHI} [70 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [giardino]{LAV} [Soddu]{CHI} siamo al [50 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[Sulis]{CHI} [SAL]{DOC} [ottanta per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "fai [SAL]{DOC} [Condominio Sa Corte]{CHI} [rifacimento verde]{LAV} [30 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [2]{NUM} [Tatti]{CHI} [90 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "avanzamento [impianto irrigazione]{LAV} [Testoni]{CHI} [60%]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [B&B Sa Nughe]{CHI} [venticinque per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [Todde]{CHI} siamo al [40 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [Usala]{CHI} [100 per cento]{AVANZ} finito",
+   "sal"
+  ],
+  [
+   "prepara [SAL]{DOC} [Vinci]{CHI} [sistemazione parco]{LAV} [75 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[SAL]{DOC} [3]{NUM} [Condominio Li Pini Mannu]{CHI} [85 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[DiCo]{DOC} [pompa pozzo]{LAV} [Zanda]{CHI}",
+   "dico"
+  ],
+  [
+   "[dico]{DOC} [impianto irrigazione]{LAV} [Zonca]{CHI}",
+   "dico"
+  ],
+  [
+   "fai [dichiarazione conformità]{DOC} [centralina]{LAV} [B&B Sa Rosa Ruja]{CHI}",
+   "dico"
+  ],
+  [
+   "[DiCo]{DOC} [luci giardino]{LAV} [Mattu]{CHI}",
+   "dico"
+  ],
+  [
+   "[dico]{DOC} [Condominio Sas Abbas]{CHI} [autoclave]{LAV}",
+   "dico"
+  ],
+  [
+   "prepara [DiCo]{DOC} [Mascia]{CHI} [faretti]{LAV}",
+   "dico"
+  ],
+  [
+   "[DiCo]{DOC} [elettropompa]{LAV} [Columbu]{CHI}",
+   "dico"
+  ],
+  [
+   "[dico]{DOC} [cancello automatico]{LAV} [Condominio Funtanazza]{CHI}",
+   "dico"
+  ],
+  [
+   "serve [DiCo]{DOC} [Desole]{CHI} [irrigazione interrata]{LAV}",
+   "dico"
+  ],
+  [
+   "[DiCo]{DOC} [quadro pompa]{LAV} [Oppo]{CHI}",
+   "dico"
+  ],
+  [
+   "assemblea [Condominio Li Ulumi]{CHI} [giovedì]{GIO} [alle 21]{ORA}",
+   "assemblea"
+  ],
+  [
+   "convoca assemblea [Condominio Sa Turre]{CHI} [taglio pini]{TESTO}",
+   "assemblea"
+  ],
+  [
+   "assemblea straordinaria [Condominio Is Cannas]{CHI} [lunedì]{GIO} [abbattimento palma]{TESTO}",
+   "assemblea"
+  ],
+  [
+   "assemblea [via Sa Funtana 11]{IND} [il 18]{GIO} [ore 18]{ORA}",
+   "assemblea"
+  ],
+  [
+   "segna assemblea [Condominio Le Robinie]{CHI} [venerdì]{GIO} [preventivo verde]{TESTO}",
+   "assemblea"
+  ],
+  [
+   "assemblea [Condominio Monte Agudu]{CHI} [la settimana prossima]{GIO} [sera]{ORA}",
+   "assemblea"
+  ],
+  [
+   "fissa assemblea [Condominio Sa Pala]{CHI} [nuovo contratto manutenzione]{TESTO}",
+   "assemblea"
+  ],
+  [
+   "assemblea [martedì]{GIO} [alle 20 e 30]{ORA} [Condominio Su Fossu]{CHI}",
+   "assemblea"
+  ],
+  [
+   "assemblea [Condominio Gli Ontani]{CHI} [irrigazione comune]{TESTO} [il 9 novembre]{GIO}",
+   "assemblea"
+  ],
+  [
+   "convoca assemblea [Condominio Sa Mendula]{CHI} [mercoledì]{GIO} [alle 19]{ORA} [spese giardino]{TESTO}",
+   "assemblea"
+  ],
+  [
+   "ciao",
+   "saluto"
+  ],
+  [
+   "buongiorno eon",
+   "saluto"
+  ],
+  [
+   "eja ciao",
+   "saluto"
+  ],
+  [
+   "grazie eh",
+   "saluto"
+  ],
+  [
+   "ajò",
+   "saluto"
+  ],
+  [
+   "bonasera eon",
+   "saluto"
+  ],
+  [
+   "salve salve",
+   "saluto"
+  ],
+  [
+   "grazie mille a domani",
+   "saluto"
+  ],
+  [
+   "ajò ciao a domani",
+   "saluto"
+  ],
+  [
+   "bondì eon",
+   "saluto"
+  ],
+  [
+   "[Agus]{CHI} ha accettato",
+   "accettato"
+  ],
+  [
+   "[preventivo]{DOC} [siepe]{LAV} [Altana]{CHI} ok",
+   "accettato"
+  ],
+  [
+   "[Condominio Sa Iscia]{CHI} accettato [preventivo]{DOC} [potatura]{LAV}",
+   "accettato"
+  ],
+  [
+   "[Anedda]{CHI} dice sì",
+   "accettato"
+  ],
+  [
+   "accettato [preventivo]{DOC} [15]{NUM}",
+   "accettato"
+  ],
+  [
+   "[B&B Sa Ruga]{CHI} va bene [prato]{LAV}",
+   "accettato"
+  ],
+  [
+   "[Argiolas]{CHI} firmato [preventivo]{DOC}",
+   "accettato"
+  ],
+  [
+   "eja [Atzeni]{CHI} accetta",
+   "accettato"
+  ],
+  [
+   "[preventivo]{DOC} [Baingiu]{CHI} approvato",
+   "accettato"
+  ],
+  [
+   "[Barria]{CHI} ok per [impianto a goccia]{LAV}",
+   "accettato"
+  ],
+  [
+   "[Bellu]{CHI} ha detto sì [abbattimento]{LAV}",
+   "accettato"
+  ],
+  [
+   "[preventivo]{DOC} [11]{NUM} [Boi]{CHI} accettato con sconto",
+   "accettato"
+  ],
+  [
+   "sollecita [Cadoni]{CHI}",
+   "sollecito"
+  ],
+  [
+   "[Carzedda]{CHI} non ha pagato scrivigli",
+   "sollecito"
+  ],
+  [
+   "sollecito [fattura]{DOC} [9]{NUM} [Cocco]{CHI}",
+   "sollecito"
+  ],
+  [
+   "ricorda a [Condominio Sa Pruna]{CHI} [fattura]{DOC} [agosto]{GIO}",
+   "sollecito"
+  ],
+  [
+   "[Contu]{CHI} deve ancora 300 sollecita",
+   "sollecito"
+  ],
+  [
+   "manda sollecito [Corona]{CHI} [whatsapp]{CAN}",
+   "sollecito"
+  ],
+  [
+   "[B&B Sa Cresia]{CHI} paga o no sollecita",
+   "sollecito"
+  ],
+  [
+   "sollecita [fattura]{DOC} [potatura]{LAV} [Cubadda]{CHI}",
+   "sollecito"
+  ],
+  [
+   "[Dau]{CHI} sollecito gentile",
+   "sollecito"
+  ],
+  [
+   "[amministratore Demuro]{CHI} sollecito [mail]{CAN}",
+   "sollecito"
+  ],
+  [
+   "[Delrio]{CHI} sono due mesi fagli sollecito",
+   "sollecito"
+  ],
+  [
+   "sollecita tutti quelli che devono",
+   "sollecito"
+  ],
+  [
+   "[Fenudi]{CHI} [fattura]{DOC} [13]{NUM} scaduta sollecita",
+   "sollecito"
+  ],
+  [
+   "sollecito [Lilloni]{CHI} [sms]{CAN}",
+   "sollecito"
+  ],
+  [
+   "quando si pota l'olivo",
+   "domanda"
+  ],
+  [
+   "che concime per prato",
+   "domanda"
+  ],
+  [
+   "processionaria che prodotto",
+   "domanda"
+  ],
+  [
+   "iva giardinaggio quanto",
+   "domanda"
+  ],
+  [
+   "meglio goccia o pioggia",
+   "domanda"
+  ],
+  [
+   "punteruolo rosso si salva la palma",
+   "domanda"
+  ],
+  [
+   "quanto costa rotolo prato al metro",
+   "domanda"
+  ],
+  [
+   "serve permesso per tagliare pino",
+   "domanda"
+  ],
+  [
+   "bonus verde c'è ancora",
+   "domanda"
+  ],
+  [
+   "che siepe cresce veloce col maestrale",
+   "domanda"
+  ],
+  [
+   "quando seminare prato qui da noi",
+   "domanda"
+  ],
+  [
+   "rame sulle viti quando",
+   "domanda"
+  ]
+ ]
+}

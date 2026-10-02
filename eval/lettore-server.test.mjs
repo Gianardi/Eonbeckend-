@@ -164,9 +164,11 @@ verifica("messaggio senza orario: solo il messaggio, zero AI", chiamateAI.length
 
 preparaDb();
 aggiungiCliente("Rita Ambrosini");
-r = await chiedi("di a Rita che ci vediamo venerdì ore 18 da lei");
+// un giorno che non è né oggi né domani (detto di venerdì, "venerdì" è ambiguo: la prova dipendeva dal giorno)
+const GIORNO_RITA = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"][(new Date().getDay() + 3) % 7];
+r = await chiedi("di a Rita che ci vediamo " + GIORNO_RITA + " ore 18 da lei");
 msg = (r.corpo.azioni || []).find((a) => a.tool === "manda_messaggio");
-verifica("\"di' a Rita che…\" come prima (percorso rapido)", chiamateAI.length === 0 && msg && /^Ciao Rita, ci vediamo venerdì ore 18 da lei \(.+\)\. Mi confermi\?$/.test(msg.esito.testo), msg && msg.esito.testo);
+verifica("\"di' a Rita che…\" come prima (percorso rapido)", chiamateAI.length === 0 && msg && new RegExp("^Ciao Rita, ci vediamo " + GIORNO_RITA + " ore 18 da lei \\(.+\\)\\. Mi confermi\\?$").test(msg.esito.testo), msg && msg.esito.testo);
 
 console.log(falliti ? `\n${falliti} controlli falliti` : "\nTutti i controlli passati.");
 process.exit(falliti ? 1 : 0);

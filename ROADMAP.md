@@ -455,6 +455,43 @@ sporca, dialetti, chat, anziano, straniero.
 **Prove:** 70 prove su 70 passano; giri vecchi uguali o +1 (tranne il giro 5,
 -2).
 
+**PASSO A (deciso il 1/10/2026 sera, dopo l'errore del 1/10): il modello legge TUTTA la frase.**
+Andrea: "il codice scritto a mano stile 2015-2018 non va bene. Noi dobbiamo creare il modello
+neurale". Il 1/10 avevo aggiunto ~20 regole a mano per capire frasi nuove: errore mio, contro
+questa linea guida. Regola scritta in cima a CLAUDE.md. Oggi il modello capisce solo il cassetto
+(20 tipi, 97-98%) e gli importi; il resto lo leggono **893 regole a mano** (`eval/regole-conta.mjs`:
+lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai peggio.
+- A1. Ruoli di ogni parola (oltre agli importi, che restano al modello dei dettagli): CHI (la persona
+  o ditta nominata), GIO e ORA (quando), NGIO e NORA (il nuovo quando, negli spostamenti), LAV (il
+  lavoro o l'impegno), TESTO (cosa scrivere o ricordare), CAN (canale), DOC (documento nominato),
+  NUM (numero del documento), TEL, MAIL, IND, AVANZ (percentuale del SAL), CART (cartella).
+- A2. Dati: scrittori AI con personaggi diversi scrivono frasi già segnate parola per parola
+  ("manda a [Rossi]{CHI} il preventivo del [bagno]{LAV}"), anche per le cose nuove del 1/10
+  (preventivo accettato, sollecito, foto da mandare, indirizzo, "ricordami di chiedere…"); un
+  controllo automatico scarta quelle segnate male. Poi frasi "d'argento" dai dati di oggi.
+- A3. Un modello unico: cassetto + ruoli di ogni parola. Allenato qui (CPU), int8, nel telefono.
+- A4. Cassetto per cassetto: i dettagli li prende dal modello, il codice normalizza ("giovedì" →
+  data, il nome → il cliente in rubrica); si cancellano le regole che li cercavano. Si tiene solo
+  se nessun giro peggiora (prove-frasi, frasi vere di Andrea).
+- A5. A ogni pacchetto il numero delle regole a mano, ad Andrea.
+- **Fatto (1-2/10/2026, primo pacchetto del passo A):**
+  - 24 scrittori (personaggi e mestieri diversi, 2 gruppi) + 2 di confine: **8.986 frasi segnate a mano**
+    parola per parola (2 scrittori scartati: avevano generato le frasi con un programma). `varia.mjs`
+    le moltiplica cambiando nomi, ditte, lavori, giorni e ore (~60 mila varianti).
+  - Il modello (`modello-lettura.json`, 2 MB, nel telefono) riceve anche la **rubrica** (quali parole
+    sono nomi di clienti): un dato in ingresso, come i contatti per Siri.
+  - Su 2 scrittori MAI visti (i più difficili): cassetto 95,3%; cliente giusto **95,6% (regole 78%)**;
+    giorno e ora **94,5% (regole 93,2%)**. Sui giri 16-20 il cassetto, leggendo la frase così com'è:
+    97,8% (il modello di oggi 97-98% con le frasi pulite dalle regole).
+  - **Primo cassetto passato al modello: "manda il documento / le foto a…".** Tolte VERBO_INVIO,
+    capisciInvioDocumento, invioDalLettore, lavoroDaFraseInvio, provaInvioFoto, leggiInvioDocumento.
+    Se il modello è incerto tra mandare un documento già fatto e farne uno nuovo, EON chiede.
+  - **Regole a mano: 893 → 870.** Giri: nessuno peggiora; frasi vere di Andrea 134/136 (+1).
+  - Prossimo: gli altri cassetti, uno alla volta (le regole del 1/10 per primi: preventivo accettato,
+    indirizzo, assemblea, SAL/DiCo, scheda di chi non è cliente; poi messaggi, impegni, documenti).
+- Poi (da decidere coi numeri): B, partire da un modello che sa già l'italiano (serve sbloccare
+  huggingface.co nella rete dell'ambiente); C, un modello che "scrive" il comando (serve una GPU).
+
 **La strada, in ordine:**
 1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
 2. Rete di sicurezza automatica: le prove partono da sole a ogni pacchetto e

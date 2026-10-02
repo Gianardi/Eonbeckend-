@@ -2574,6 +2574,11 @@
     if(typeof EonNeurale !== "undefined") fetch("/modello-neurale.json").then(r => r.ok ? r.json() : null).then(m => { if(m && EonNeurale.carica(m)) EonLettore.usaNeurale(EonNeurale); }).catch(() => {});
     /* Passo 4: il modello dei dettagli (che ruolo ha ogni numero di un preventivo): più
        modelli piccoli, la media dei loro voti. Finché non c'è, gli importi li leggono le regole. */
+    /* PASSO A (2/10/2026): il modello che legge tutta la frase (cassetto + ruolo di ogni parola) */
+    if(typeof EonNeurale !== "undefined" && EonNeurale.crea && EonLettore.usaLettura) fetch("/modello-lettura.json").then(r => r.ok ? r.json() : null).then(m => {
+      const x = m ? EonNeurale.crea() : null;
+      if(x && x.carica(m)) EonLettore.usaLettura(x);
+    }).catch(() => {});
     if(typeof EonNeurale !== "undefined" && EonNeurale.crea && EonLettore.usaDettagli) fetch("/modello-dettagli.json").then(r => r.ok ? r.json() : null).then(j => {
       if(!j || !Array.isArray(j.modelli)) return;
       EonLettore.usaDettagli(j.modelli.map(m => { const x = EonNeurale.crea(); return x.carica(m) ? x : null; }).filter(Boolean));
@@ -13234,12 +13239,7 @@ function offriDiMettereImpegno(cliente, testo, giornoIso, ora){
 /* "Manda le foto del cantiere al Bar Aurora": le ultime foto del cliente, con WhatsApp, Email
    o EON (il telefono non lascia allegare le foto da un link: vanno i link alle foto);
    se non ce ne sono, "Le scattiamo adesso?" (1/10/2026) */
-function provaInvioFoto(testo){
-  const n = normalizzaComando(testo);
-  const m = n.match(/^(?:mi\s+)?(?:manda|mandagli|mandale|invia|inviagli|gira|girale|giragli|inoltra)\s+(?:(?:le|delle|un\s+po\s+di|tutte\s+le)\s+)?(?:foto|fotografie)(?:\s+(?:del|dei|della|dello|di)\s+(?:cantiere|lavoro|lavori))?\s+(?:a|al|alla|allo|ad|all)\s+(.+)$/)
-    || n.match(/^(?:manda|invia|gira)\s+(?:a|al|alla|allo|ad|all)\s+(.+?)\s+(?:le\s+)?(?:foto|fotografie)(?:\s+(?:del|dei|della|di)\s+(?:cantiere|lavoro|lavori))?$/);
-  if(!m) return false;
-  const c = clienteDaNomeDetto(m[1]);
+function mandaFotoA(c){
   if(!c) return false;
   const foto = cantiereFoto.filter(f => f.clientId === c.id && f.url).sort((a, b) => new Date(b.created) - new Date(a.created)).slice(0, 6);
   if(!foto.length){ offriDiFareFoto(c, "Di " + c.name + " non ci sono ancora foto da mandare."); return true; }
@@ -16672,23 +16672,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     }
     /* Foto da mandare, indirizzo, assemblea, preventivo accettato: col codice, e se manca
        qualcosa "Lo facciamo adesso?" (1/10/2026) */
-    if(!inContinuazione && (provaInvioFoto(testo) || provaIndirizzoCliente(testo) || provaQuandoAssemblea(testo))){
+    if(!inContinuazione && (provaIndirizzoCliente(testo) || provaQuandoAssemblea(testo))){
       campo.value = "";
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "codice_offerta");
       return;
-    }
-    /* Il modello dice "manda un documento" (passo 3) e le regole non l'hanno letto
-       ("spedisci al condominio il preventivo…", "il preventivo della palestra mandalo al
-       titolare"): tipo e cliente dal lettore, poi lo stesso invio di sempre */
-    if(!inContinuazione && cassettoNeurale(testo) === "invio_documento"){
-      const li = EonLettore.leggiInvioDocumento(testo, contestoLettore());
-      if(li && provaInvioDocumento(li.testo)){
-        campo.value = "";
-        hint.textContent = hintBaseDi();
-        ricordaEsitoCodice(testo, "invio_documento_neurale");
-        return;
-      }
     }
 
     /* Stesso principio, per le piccole domande di lettura rispondibili
@@ -18968,81 +18956,77 @@ function mailtoDocumento(d, cliente){
      l'indirizzo del cliente: resta solo "Invia" (il telefono non permette
      a un'app di mandare al posto tuo). Sempre una card con gli altri modi
      (PDF, WhatsApp, Email, EON) se preferisci un altro canale. */
-const VERBO_INVIO = "(?:mi\\s+)?(?:invia|inviare|invialo|inviala|manda|mandare|mandalo|mandala|mandagli|mandale|spedisci|spedire|gira|girare|inoltra|inoltrare)";
-const CANALE_INVIO = "(?:\\s+(?:su|con|per|via|tramite|in|col)\\s+(whatsapp|whats app|wa|email|e mail|mail|posta|eon|chat))?";
-function capisciInvioDocumento(testo){
-  /* Un indirizzo email o un numero scritti nella frase ("invia il preventivo
-     di Possa a mario@gmail.com"): si manda lì (prova di Andrea, 27/09/2026) */
-  let t = String(testo || "");
-  const mail = t.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
-  if(mail) t = t.replace(mail[0], " ");
-  const tel = !mail && t.match(/\+?\d[\d ./-]{7,}\d/);
-  if(tel) t = t.replace(tel[0], " ");
-  if(mail || tel) t = t.replace(/\s+(?:a|al|alla|ad|allo|per|su|via|tramite|all'indirizzo|al numero)\s*$/i, "");
-  let n = normalizzaComando(t);
-  // "manda il preventivo per whatsapp a Sartori" = "manda il preventivo a Sartori su whatsapp" (29/09/2026)
-  const perCanale = n.match(/^(.*?)\s+(?:su|per|via|con|tramite|col)\s+(whatsapp|whats app|wa|email|mail|posta)\s+((?:a|al|alla|allo|all|ad)\s+.+)$/);
-  if(perCanale) n = perCanale[1] + " " + perCanale[3] + " su " + perCanale[2];
-  let m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:(?:il|la|l|lo|un|una)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:(?:a|al|alla|allo|all|ad|per|di|del|della|dello)\\s+)?(.+?))?" + CANALE_INVIO + "$"));
-  let tipo, numero, nome, canale;
-  if(m){ [, , tipo, numero, nome, canale] = m; }
-  else {
-    /* "manda per mail al condominio I Pini il preventivo del cornicione": il lavoro detto
-       dopo il documento (1/10/2026); con un numero ("del bagno da 500") è un documento nuovo */
-    m = n.match(new RegExp("^" + VERBO_INVIO + "\\s+(?:a|al|alla|allo|ad)\\s+(.+?)\\s+(?:(?:il|la|l|lo)\\s+)?(?:(ultimo|ultima)\\s+)?(preventivo|fattura)(?:\\s+(?:n|nr|numero)?\\s*(\\d+))?(?:\\s+(?:del|della|dello|dell|dei|degli|delle|di|per)\\s+(?:(?:il|la|lo|l|i|gli|le)\\s+)?[^\\d]+?)?" + CANALE_INVIO + "$"));
-    if(!m) return null;
-    [, nome, , tipo, numero, canale] = m;
-  }
-  // "invia il preventivo su whatsapp": è il canale, non un nome
-  const soloCanale = nome && nome.match(/^(?:su|con|per|via|tramite|in|col)\s+(whatsapp|whats app|wa|email|mail|posta|eon|chat)$/);
-  if(soloCanale){ canale = soloCanale[1]; nome = ""; }
-  // "manda la fattura da 500 a Rossi": è un documento nuovo, decide chi lo crea; ma "via Roma 22" è il nome del cliente
-  if(nome && /\d/.test(nome) && !clients.some(c => /\d/.test(c.name) && (" " + nome + " ").includes(" " + normalizzaComando(c.name).split(" ").slice(-2).join(" ") + " "))) return null;
-  const parole = (nome || "").split(" ").filter(p => p && !/^(il|la|lo|i|gli|le|l|all|sig|signor|signora|cliente)$/.test(p));
-  if(!parole.length && !numero && !mail && !tel) return null;
-  let c = canale ? (/whats|^wa$/.test(canale) ? "whatsapp" : /mail|posta/.test(canale) ? "email" : "eon") : "";
-  if(mail) c = "email"; else if(tel && !c) c = "whatsapp";
-  return { tipo, numero: numero ? parseInt(numero, 10) : null, parole, canale: c, destEmail: mail ? mail[0] : "", destTel: tel ? tel[0] : "" };
+/* PASSO A (2/10/2026): la frase la legge il modello neurale (modello-lettura.json): il
+   documento, il cliente, il numero, il canale, il lavoro, la mail o il telefono detti. Qui il
+   codice normalizza (la parola del documento → "fattura" / "preventivo" / "foto") e fa. Prima
+   c'erano espressioni regolari (VERBO_INVIO, capisciInvioDocumento, invioDalLettore,
+   lavoroDaFraseInvio, provaInvioFoto): tolte. */
+const SICURO_INVIO = 0.85;
+function tipoDiDocumento(detto){
+  const w = String(detto || "").toLowerCase();
+  if(w.startsWith("fatt") || w === "ft") return "fattura";
+  if(w.startsWith("prev")) return "preventivo";
+  if(w.startsWith("foto") || w.startsWith("immagin")) return "foto";
+  return null;
+}
+function invioDalModello(testo){
+  if(typeof EonLettore === "undefined" || !EonLettore.letturaAttiva || !EonLettore.letturaAttiva()) return null;
+  const m = EonLettore.leggiConModello(testo, contestoLettore());
+  if(!m) return null;
+  /* Il modello è incerto tra MANDARE un documento già fatto e FARNE uno nuovo ("manda la fattura
+     del compenso a Torre Marina"): si chiede, come le app grandi quando non sono sicure */
+  const incerto = [m.intento, m.secondo].includes("invio_documento") && [m.intento, m.secondo].includes("documento") && m.p < SICURO_INVIO;
+  if(!incerto && (m.intento !== "invio_documento" || m.p < SICURO_INVIO)) return null;
+  const tipo = (m.pezzi.DOC || []).flatMap(x => x.parole).map(tipoDiDocumento).find(Boolean) || null;
+  const chi = m.chi.find(c => c.cliente) || m.chi[0] || null;
+  return { incerto, tipo, numero: m.numero, cliente: chi && chi.cliente ? (clients.find(c => c.id === chi.cliente.id) || chi.cliente) : null,
+    nomeDetto: chi ? chi.detto : "", candidati: chi && !chi.cliente ? chi.candidati : null, lavoro: m.lavoro || "",
+    // una mail o un numero detti nella frase: si manda lì (prova di Andrea, 27/09/2026)
+    canale: m.email ? "email" : m.telefono && !m.canale ? "whatsapp" : m.canale === "sms" ? "whatsapp" : m.canale || "", destEmail: m.email || "", destTel: m.telefono || "" };
 }
 function documentoDaInviare(r){
-  const nomeDi = d => normalizzaComando(d.dati.cliente || d.clienteChat || "").split(" ").filter(Boolean);
+  const suo = d => !r.cliente || [d.clienteChat, d.dati.cliente].some(n => n && nomeChiave(n) === nomeChiave(r.cliente.name));
   return documentiVeri().filter(d => d.dati.tipo === r.tipo)
     .filter(d => !r.numero || parseInt(d.dati.numero, 10) === r.numero)
-    .find(d => r.parole.every(p => nomeDi(d).includes(p))) || null; // documentiVeri: dal più recente
-}
-/* Giro 15: "invia a Scaglia la fattura del montaggio", "spedisci la fattura del
-   getto a Tommasini", "mandale il preventivo del bagno alla Ferraresi su whatsapp":
-   la forma non è quella fissa, ma il lettore ha capito documento e cliente */
-function invioDalLettore(testo){
-  const l = leggiConLettore(testo);
-  if(!l || l.azione !== "invio_documento" || !l.cliente) return null;
-  const n = normalizzaComando(testo);
-  const tipo = l.tipo === "fattura" || (!l.tipo && /\bfattur/.test(n)) ? "fattura" : "preventivo";
-  const canale = /\bwhats ?app\b|\bwa\b/.test(n) ? "whatsapp" : /\be ?mail\b|\bposta\b/.test(n) ? "email" : "";
-  return { tipo, numero: null, parole: normalizzaComando(l.cliente.name).split(" ").filter(Boolean), canale, destEmail: "", destTel: "" };
+    .find(suo) || null; // documentiVeri: dal più recente
 }
 function provaInvioDocumento(testo, primaDiAprire){
-  const r = capisciInvioDocumento(testo) || invioDalLettore(testo);
-  if(!r) return false;
-  const d = documentoDaInviare(r);
-  // Parole che non sono un cliente né un documento ("il preventivo di ieri"): decide EON come prima
-  const nominaCliente = r.parole.length && clients.some(c => r.parole.every(p => normalizzaComando(c.name).split(" ").includes(p)));
-  /* Giro 15: "invia a Scaglia la fattura del montaggio": c'è anche il lavoro, ma il cliente è nominato */
-  const GENERICHE_INV = new Set(["condominio", "ristorante", "pizzeria", "studio", "hotel", "officina", "palestra", "villa", "agriturismo", "signor", "signora", "residenza", "supercondominio"]);
-  const clienteNominato = !nominaCliente && r.parole.length ? (() => { const tr = clients.filter(c => normalizzaComando(c.name).split(" ").some(w => w.length >= 4 && !GENERICHE_INV.has(w) && r.parole.includes(w))); return tr.length === 1 ? tr[0] : null; })() : null;
-  if(!d && r.parole.length && !nominaCliente && !clienteNominato) return false;
+  const r = invioDalModello(testo);
+  if(!r || !r.tipo) return false;
+  // due clienti con quel nome: prima si sceglie quale
+  if(!r.cliente && r.candidati && r.candidati.length){
+    if(typeof primaDiAprire === "function") primaDiAprire();
+    scegliCliente(r.tipo === "foto" ? "Foto" : "Invio", "A quale cliente?", r.candidati, (c) => { if(c) inviaLetto({ ...r, cliente: c }, testo); });
+    return true;
+  }
+  if(!r.cliente && !r.numero) return false; // chi non è tra i clienti: decide chi viene dopo
+  if(r.incerto && (r.tipo === "fattura" || r.tipo === "preventivo") && r.cliente){
+    if(typeof primaDiAprire === "function") primaDiAprire();
+    const fattura = r.tipo === "fattura";
+    domandaDelCodice({ titolo: (fattura ? "Fattura · " : "Preventivo · ") + r.cliente.name, senzaCampo: true,
+      domanda: (fattura ? "Mando la fattura già fatta a " : "Mando il preventivo già fatto a ") + r.cliente.name + (fattura ? ", o ne facciamo una nuova?" : ", o ne facciamo uno nuovo?"),
+      scelte: [{ etichetta: fattura ? "Manda quella fatta" : "Manda quello fatto", valore: "manda" }, { etichetta: fattura ? "Fanne una nuova" : "Fanne uno nuovo", valore: "nuovo" }],
+      onRisposta: (v) => {
+        if(v === "manda"){ chiudiRisorsaCard(); return inviaLetto(r, testo); }
+        const frase = (fattura ? "Fattura per " : "Preventivo per ") + r.cliente.name;
+        const invia = (f, p) => { if(typeof window.eonInviaHome === "function") window.eonInviaHome(f, p); };
+        const esito = gestisciDocumento({ tipo: r.tipo, modo: "crea", cliente: r.cliente, importo: null, lavoro: r.lavoro || null, invio: true }, frase, invia);
+        if(esito && esito.comando){ chiudiRisorsaCard(); invia(frase, esito); }
+      } });
+    return true;
+  }
+  if(r.incerto) return false;
   if(typeof primaDiAprire === "function") primaDiAprire();
+  return inviaLetto(r, testo);
+}
+function inviaLetto(r, testo){
+  if(r.tipo === "foto") return mandaFotoA(r.cliente);
+  const d = documentoDaInviare(r);
   const cosa = r.tipo === "fattura" ? "fattura" : "preventivo";
   if(!d){
-    /* Andrea (1/10/2026): "manda per mail al condominio I Pini il preventivo del cornicione",
-       e il preventivo non c'è ancora: si dice e si offre di farlo subito (poi si manda) */
-    const perNome = nominaCliente ? clients.filter(c => r.parole.every(p => normalizzaComando(c.name).split(" ").includes(p))) : [];
-    const clienteDoc = clienteNominato || (perNome.length === 1 ? perNome[0] : null);
-    if(clienteDoc && !r.numero){
-      offriDiFareDocumento(testo, r.tipo, clienteDoc);
-      return true;
-    }
-    const chi = clienteNominato ? " per " + clienteNominato.name : r.parole.length ? " per " + r.parole.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ") : "";
+    /* Andrea (1/10/2026): il documento da mandare non c'è ancora: si dice e si offre di farlo subito */
+    if(r.cliente && !r.numero){ offriDiFareDocumento(testo, r.tipo, r.cliente, r.lavoro); return true; }
+    const chi = r.cliente ? " per " + r.cliente.name : r.nomeDetto ? " per " + r.nomeDetto : "";
     mostraRispostaEON(testo, "Non trovo " + (r.tipo === "fattura" ? "una fattura" : "un preventivo") + (r.numero ? " n. " + r.numero : "") + chi + ". Se vuoi, fallo prima: «" + cosa + " da 500 per" + (chi ? chi.slice(4) : " Rossi") + "».", { titolo: "Documento non trovato" });
     return true;
   }
@@ -19076,22 +19060,9 @@ function provaInvioDocumento(testo, primaDiAprire){
   return true;
 }
 
-/* Il lavoro detto nella frase d'invio: "il preventivo del cornicione" → "Cornicione".
-   Il nome del cliente e il canale non sono il lavoro. */
-function lavoroDaFraseInvio(testo, tipo, cliente){
-  const n = normalizzaComando(String(testo || "").replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, " "));
-  const m = n.match(new RegExp("\\b" + tipo + "\\s+(?:(?:per|di|del|della|dello|dell|dei|degli|delle)\\s+)?(?:(?:il|la|lo|l|i|gli|le)\\s+)?(.+)$"));
-  if(!m) return "";
-  const resto = (" " + m[1]).split(/\s+(?:a|al|alla|allo|all|ad|ai|alle|su|via|tramite|con|col|in|e|che|mandal\w*|invial\w*)\s+/)[0];
-  const nomeCli = new Set(normalizzaComando(cliente ? cliente.name : "").split(" "));
-  const parole = resto.split(" ").filter(w => w && !nomeCli.has(w) && !/^(?:whatsapp|wa|email|mail|posta|eon|chat|per|il|la|lo|l|i|gli|le|cliente|condominio|signor|signora|sig)$/.test(w));
-  if(!parole.length || /^(?:ultim[oa]|nuov[oa]|solito|stesso)$/.test(parole[0])) return "";
-  const lav = parole.join(" ");
-  return lav.charAt(0).toUpperCase() + lav.slice(1);
-}
 function offriDiFareDocumento(testo, tipo, cliente, lavoroDetto, conEon){
   const fattura = tipo === "fattura";
-  const lavoro = lavoroDetto !== undefined ? String(lavoroDetto || "") : lavoroDaFraseInvio(testo, fattura ? "fattura" : "preventivo", cliente);
+  const lavoro = String(lavoroDetto || "");
   domandaDelCodice({
     titolo: fattura ? "La fattura non c'è ancora" : "Il preventivo non c'è ancora",
     domanda: typeof conEon === "string" ? conEon + " " + (fattura ? "La facciamo adesso?" : "Lo facciamo adesso?")
