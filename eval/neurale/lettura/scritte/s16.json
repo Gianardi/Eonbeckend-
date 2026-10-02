@@ -247,7 +247,7 @@
 
     ["quanto m'ha da dà ancora [Brandoni]{CHI}", "dati"],
     ["che c'ho [domani]{GIO} adè", "dati"],
-    ["quanto ho fatturato [a settembre]{GIO}", "dati"],
+    ["quanto ho fatturato [a settembre]{GIO} co' tutti i lavori de Macerata", "dati"],
     ["qual è il numero de [Ciarapica]{CHI}", "dati"],
     ["dov'abita [Montecchiari]{CHI}", "dati"],
     ["quanti [preventivi]{DOC} c'ho ancora aperti cuscì a occhio", "dati"],
@@ -255,7 +255,7 @@
     ["a che ora c'ho [Natalini]{CHI} [giovedì]{GIO}", "dati"],
     ["quanto ho incassato dal [Condominio Il Pino]{CHI} quest'anno", "dati"],
     ["che appuntamenti c'ho [la settimana prossima]{GIO}", "dati"],
-    ["la [fattura]{DOC} [23]{NUM} è stata pagata?", "dati"],
+    ["ma la [fattura]{DOC} [23]{NUM} della [Bellesi]{CHI} l'hanno pagata o no", "dati"],
     ["quante ore ho fatto da [Lattanzi]{CHI}", "dati"],
     ["qual è l'indirizzo de [Pigini]{CHI}", "dati"],
     ["quanto ho speso de materiale [questo mese]{GIO}", "dati"],
