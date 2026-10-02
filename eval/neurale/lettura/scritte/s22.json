@@ -254,7 +254,7 @@
     ["tieni a mente [che ingegnera rosignoli preferisce essere chiamata dopo le 5]{TESTO}", "mente"],
 
     ["trova [preventivo]{DOC} [stucco]{LAV} [mencaroni]{CHI}", "cerca_documento"],
-    ["apri [fattura]{DOC} [22]{NUM}", "cerca_documento"],
+    ["mo apri [fattura]{DOC} [22]{NUM} di [signora bucefari]{CHI}", "cerca_documento"],
     ["dove sta [foto]{DOC} [affresco]{LAV} [oratorio santa lucilla]{CHI}", "cerca_documento"],
     ["fammi vedere [durc]{DOC}", "cerca_documento"],
     ["cerca [foto prima]{DOC} [cornice]{LAV} [palazzo ceccarini]{CHI}", "cerca_documento"],
@@ -286,7 +286,7 @@
     ["mail di [cenciarini]{CHI} e [cenciarini.f@webmail.it]{MAIL}", "cliente"],
     ["crea scheda [condominio i lecci]{CHI} [via del tasso 2]{IND} amministratore [rag rocchini]{CHI}", "cliente"],
 
-    ["quanto ho fatturato a settembre", "dati"],
+    ["quanto ho fatturato a settembre co restauri", "dati"],
     ["[fattura]{DOC} [12]{NUM} e stata pagata", "dati"],
     ["cosa ho [domani]{GIO}", "dati"],
     ["quanto mi deve [palmerini]{CHI}", "dati"],
@@ -295,7 +295,7 @@
     ["numero di [geometra rondelli]{CHI}", "dati"],
     ["quanto era [preventivo]{DOC} [marmorino]{LAV} [crispolti]{CHI}", "dati"],
     ["chi non mi ha ancora pagato", "dati"],
-    ["che impegni ho [la settimana prossima]{GIO}", "dati"],
+    ["che impegni c ho [la settimana prossima]{GIO} pomeriggio", "dati"],
     ["quante ore ho fatto da [villa marcantoni]{CHI}", "dati"],
     ["quando ho [dentista]{LAV}", "dati"],
     ["quanto ho speso di pigmenti quest anno", "dati"],
@@ -321,7 +321,7 @@
 
     ["scatta foto", "foto"],
     ["fai foto a [affresco]{LAV} prima di pulire", "foto"],
-    ["apri fotocamera", "foto"],
+    ["apri fotocamera che devo fotografa campione", "foto"],
     ["fotografa [cornice]{LAV} e mettila in [restauri]{CART}", "foto"],
     ["foto a [crepa parete nord]{LAV} [villa corradi]{CHI}", "foto"],
     ["fai foto [stato di fatto]{LAV} [oratorio della misericordia]{CHI}", "foto"],
@@ -364,12 +364,12 @@
     ["[riunione condominio]{LAV} [condominio i cipressi]{CHI} [lunedi]{GIO} [di sera]{ORA} devo presentare colori", "assemblea"],
     ["com e andata [assemblea]{LAV} [condominio le ginestre]{CHI}", "assemblea"],
 
-    ["ciao", "saluto"],
-    ["bongiorno", "saluto"],
+    ["ciao eon so io", "saluto"],
+    ["bongiorno eon tutto bene", "saluto"],
     ["ehi eon", "saluto"],
-    ["buonasera", "saluto"],
-    ["ciao bella come va", "saluto"],
-    ["salve", "saluto"],
+    ["buonasera stella", "saluto"],
+    ["ciao bella come va oggi", "saluto"],
+    ["salve salve eon", "saluto"],
 
     ["[crispolti]{CHI} ha accettato [preventivo]{DOC}", "accettato"],
     ["[villa sargentini]{CHI} conferma [preventivo]{DOC} [soffitto]{LAV}", "accettato"],
