@@ -2575,9 +2575,11 @@
     /* Passo 4: il modello dei dettagli (che ruolo ha ogni numero di un preventivo): più
        modelli piccoli, la media dei loro voti. Finché non c'è, gli importi li leggono le regole. */
     /* PASSO A (2/10/2026): il modello che legge tutta la frase (cassetto + ruolo di ogni parola) */
-    if(typeof EonNeurale !== "undefined" && EonNeurale.crea && EonLettore.usaLettura) fetch("/modello-lettura.json").then(r => r.ok ? r.json() : null).then(m => {
-      const x = m ? EonNeurale.crea() : null;
-      if(x && x.carica(m)) EonLettore.usaLettura(x);
+    /* tre copie allenate con partenze diverse: si fa la media dei loro voti (come le app grandi) */
+    if(typeof EonNeurale !== "undefined" && EonNeurale.crea && EonLettore.usaLettura) fetch("/modello-lettura.json").then(r => r.ok ? r.json() : null).then(j => {
+      if(!j) return;
+      const lista = Array.isArray(j.modelli) ? j.modelli : [j];
+      EonLettore.usaLettura(lista.map(m => { const x = EonNeurale.crea(); return x.carica(m) ? x : null; }).filter(Boolean));
     }).catch(() => {});
     if(typeof EonNeurale !== "undefined" && EonNeurale.crea && EonLettore.usaDettagli) fetch("/modello-dettagli.json").then(r => r.ok ? r.json() : null).then(j => {
       if(!j || !Array.isArray(j.modelli)) return;

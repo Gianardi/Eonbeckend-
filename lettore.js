@@ -870,7 +870,31 @@
      quello che il modello ha segnato (il nome → il cliente in rubrica, "giovedì alle 9" → data e
      ora, il canale e il documento → la loro parola di sistema). */
   let LETTURA = null;
-  function usaLettura(n) { LETTURA = n && n.pronto && n.pronto() && n.ruoli && n.ruoli() ? n : null; return !!LETTURA; }
+  /* uno o più modelli (2/10/2026: tre copie allenate con partenze diverse; si fa la media dei voti,
+     così una copia che sbaglia da sola non decide) */
+  function usaLettura(n) {
+    const lista = (Array.isArray(n) ? n : [n]).filter((x) => x && x.pronto && x.pronto() && x.ruoli && x.ruoli());
+    LETTURA = lista.length ? { lista, leggi: (pp, rub) => mediaLetture(lista.map((x) => x.leggi(pp, rub))) } : null;
+    return !!LETTURA;
+  }
+  function mediaLetture(letture) {
+    letture = letture.filter(Boolean);
+    if (!letture.length) return null;
+    if (letture.length === 1) return letture[0];
+    const intenti = letture[0].intenti, K = intenti.length;
+    const pc = new Array(K).fill(0);
+    letture.forEach((l) => l.pc.forEach((v, i) => { pc[i] += v / letture.length; }));
+    const ordine = pc.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]);
+    const ruoliNomi = LETTURA_RUOLI;
+    const ruoli = letture[0].ruoli.map((_, j) => {
+      const pp = new Array(ruoliNomi.length).fill(0);
+      letture.forEach((l) => { const r = l.ruoli[j]; if (r && r.pp) r.pp.forEach((v, i) => { pp[i] += v / letture.length; }); });
+      let k = 0; for (let i = 1; i < pp.length; i++) if (pp[i] > pp[k]) k = i;
+      return { ruolo: ruoliNomi[k], p: pp[k] };
+    });
+    return { intento: intenti[ordine[0][1]], p: ordine[0][0], secondo: intenti[ordine[1][1]], p2: ordine[1][0], ruoli };
+  }
+  const LETTURA_RUOLI = ["O", "CHI", "GIO", "ORA", "NGIO", "NORA", "LAV", "TESTO", "CAN", "DOC", "NUM", "TEL", "MAIL", "IND", "AVANZ", "CART"];
   const CANALI = { whatsapp: "whatsapp", whats: "whatsapp", wa: "whatsapp", app: "whatsapp", mail: "email", email: "email", "e-mail": "email", posta: "email", sms: "sms", messaggino: "sms", pec: "email", eon: "eon", chat: "eon" };
   // parole come le divide il modello (spazi e apostrofi: "l'ho" → "l'" "ho"), senza regole
   const SPAZI = new Set([" ", "\t", "\n", "\r"]);
@@ -892,9 +916,9 @@
     // la rubrica: per ogni parola, se fa parte del nome di un cliente (un dato per il modello, non una regola)
     const nomiRubrica = new Set();
     (ctx.clienti || []).forEach((cl) => paroleModello(String(cl.name || "").toLowerCase()).forEach((w) => { if (w.length >= 3) nomiRubrica.add(w); }));
-    const letto = LETTURA.leggi ? LETTURA.leggi(pp, pp.map((w) => (nomiRubrica.has(w.toLowerCase()) ? 1 : 0))) : null;
-    const c = letto || LETTURA.classifica(pp.join(" "));
-    const ruoli = letto ? letto.ruoli : LETTURA.etichetta(pp);
+    const letto = LETTURA.leggi(pp, pp.map((w) => (nomiRubrica.has(w.toLowerCase()) ? 1 : 0)));
+    if (!letto) return null;
+    const c = letto, ruoli = letto.ruoli;
     // parole vicine con lo stesso ruolo = un pezzo; la sicurezza del pezzo = la più bassa delle sue parole
     const pezzi = {};
     let prima = null;

@@ -4999,6 +4999,25 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 2/10: PASSO A, secondo pacchetto (ROADMAP 0b.19)
+- `provaPreventivoAccettato`: cassetto `accettato` del modello (≥ 0,95) + `clienteDelModello`; tolta
+  la regola. `provaSal`: `documentiDelModello` (DOC sal) e cassetto documento/cerca/invio; tolte
+  CERCA_SAL e FATTURA_SAL. `provaDico`: cerca/invio + DOC dico → `mostraOFaiDico`; tolta CERCA_DICO.
+- `creaFatturaSal` manda un comando diretto (`eonInviaHome(frase, {comando, dopo})`): prima la frase
+  "fattura X SAL…" veniva riletta e finiva altrove (`funzioni-mestieri` lo ha trovato).
+- Insieme di 3 modelli: `modello-lettura.json` = `{tipo:"insieme", modelli:[…]}` (ognuno col suo
+  vocabolario: il tokenizer non è deterministico); `neurale.js leggi` dà le probabilità (`pc`, `pp`),
+  `lettore.usaLettura(lista)` fa la media. Caricamento nell'app e `confronto.mjs` accettano anche
+  il modello singolo. Peso: 6,4 MB (4,6 MB compressi), scaricato una volta dopo l'apertura.
+- Giro 15 scendeva a 1052 (min 1053): "all'Agriturismo Il Poggio gli sposi vogliono le foto anche
+  col drone" → invio_documento in tutte e 3 le copie (non è caso: mancavano esempi). Scrittore s29:
+  "X vuole le foto/il preventivo/la fattura" = mente, contro "manda a X le foto" = invio e "dove sono
+  le foto di X" = cerca. Varianti 8 per frase.
+- Allenate 3 copie nuove (semi 1, 11, 23; 12 epoche) con s29: la frase del giro 15 → mente 1,00.
+  Scrittori mai visti (s11, s12): cassetto 95,3%, cliente 98%, quando 92,5% (regole 93,2%).
+  App: giri 5-20 tutti ≥ minimo (g15 1053), frasi vere 134/136, tutti.sh 83/83. Regole 860.
+- Da guardare coi dati: GIO contro NGIO in "salta Canu domani" (annullare: il giorno è quello vecchio).
+
 ### 2/10 notte: PASSO A, il modello che legge tutta la frase — primo pacchetto (ROADMAP 0b.19)
 - Regola n. 1 in CLAUDE.md (Andrea: niente regole scritte a mano per capire). `eval/regole-conta.mjs`
   conta le righe con espressioni regolari nel lettore e nelle funzioni dell'app/server che leggono le
