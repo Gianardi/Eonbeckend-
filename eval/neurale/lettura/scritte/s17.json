@@ -1,0 +1,1497 @@
+{
+ "personaggio": "Amministratrice di condominio romana di 45 anni: tanti solleciti ai condòmini morosi e ai fornitori, comunicazioni per email, PEC, WhatsApp e SMS, assemblee da convocare e spostare. Parla svelta, un po di romanesco (aò, nun, mo), frasi senza punteggiatura.",
+ "frasi": [
+  [
+   "manda un sollecito a [Ceccarelli]{CHI} del [Condominio Villa Agrifoglio]{CHI} che deve ancora le rate",
+   "sollecito"
+  ],
+  [
+   "sollecita [la signora Paolucci]{CHI} per le spese condominiali di [settembre]{GIO}",
+   "sollecito"
+  ],
+  [
+   "aò [il Sbardella]{CHI} nun ha pagato manco stavolta mandagli il sollecito [su whatsapp]{CAN}",
+   "sollecito"
+  ],
+  [
+   "fai partire i solleciti per tutti i morosi del [Condominio Le Ginestre Alte]{CHI}",
+   "sollecito"
+  ],
+  [
+   "sollecito di pagamento a [Proietti]{CHI} interno 4 scala B",
+   "sollecito"
+  ],
+  [
+   "ricorda a [Mastrangeli]{CHI} che è indietro di tre rate [via pec]{CAN}",
+   "sollecito"
+  ],
+  [
+   "[il dottor Felici]{CHI} deve ancora 1.200 euro di conguaglio sollecitalo",
+   "sollecito"
+  ],
+  [
+   "sollecita [Santucci]{CHI} [per mail]{CAN} la quota straordinaria per [il rifacimento del tetto]{LAV}",
+   "sollecito"
+  ],
+  [
+   "secondo sollecito a [Cerroni]{CHI} e stavolta mettici che passo all'avvocato",
+   "sollecito"
+  ],
+  [
+   "mandami un sollecito [con la pec]{CAN} a [Pompili]{CHI} per le rate arretrate del [2025]{GIO}",
+   "sollecito"
+  ],
+  [
+   "[la famiglia Ruggeri]{CHI} non ha versato il fondo cassa sollecitali [per sms]{CAN}",
+   "sollecito"
+  ],
+  [
+   "sollecita [la Gualtieri]{CHI} del terzo piano che sta a zero da [giugno]{GIO}",
+   "sollecito"
+  ],
+  [
+   "fai un sollecito cumulativo per il [Condominio Parco dei Mirti]{CHI} a tutti quelli che non hanno pagato",
+   "sollecito"
+  ],
+  [
+   "manda il sollecito a [Bonifazi]{CHI} e dagli tempo fino a [venerdì]{GIO}",
+   "sollecito"
+  ],
+  [
+   "sollecita [l'impresa Edil Coccia]{CHI} che ci deve restituire l'anticipo di 800 euro",
+   "sollecito"
+  ],
+  [
+   "[Lucarelli]{CHI} scala C ancora niente mandagli un sollecito [su whatsapp]{CAN}",
+   "sollecito"
+  ],
+  [
+   "aò scrivi un sollecito garbato alla [vedova Tomassetti]{CHI}",
+   "sollecito"
+  ],
+  [
+   "sollecito per i morosi di [via delle Acacie Nane 14]{IND}",
+   "sollecito"
+  ],
+  [
+   "mandagli il terzo sollecito a [Marinangeli]{CHI} con diffida [per pec]{CAN}",
+   "sollecito"
+  ],
+  [
+   "[il condomino Di Giacomo]{CHI} deve due rate ordinarie sollecitalo",
+   "sollecito"
+  ],
+  [
+   "sollecita i pagamenti arretrati di [Pierantoni]{CHI} e [Venanzi]{CHI}",
+   "sollecito"
+  ],
+  [
+   "ricordagli a [Scarpellini]{CHI} il bonifico della rata di [ottobre]{GIO} [con un sms]{CAN}",
+   "sollecito"
+  ],
+  [
+   "fai il sollecito a [Ciarlantini]{CHI} per la quota del [riscaldamento]{LAV}",
+   "sollecito"
+  ],
+  [
+   "manda il promemoria di pagamento a tutti i morosi del [Condominio Torre dei Falchetti]{CHI}",
+   "sollecito"
+  ],
+  [
+   "sollecita [Amatucci]{CHI} per le spese di [manutenzione ascensore]{LAV}",
+   "sollecito"
+  ],
+  [
+   "[la Rinaldi]{CHI} non ha ancora saldato il conguaglio mandale un sollecito [per email]{CAN}",
+   "sollecito"
+  ],
+  [
+   "sollecito alla [ditta Giardini Pratoverde]{CHI} per la penale che ci devono",
+   "sollecito"
+  ],
+  [
+   "ultimo avviso a [Fabbrocini]{CHI} poi si va per vie legali",
+   "sollecito"
+  ],
+  [
+   "sollecita [l'avvocato Mezzanotte]{CHI} per il rimborso delle spese legali anticipate dal condominio",
+   "sollecito"
+  ],
+  [
+   "[Spaziani]{CHI} è moroso da un anno fagli il sollecito formale",
+   "sollecito"
+  ],
+  [
+   "manda sollecito [whatsapp]{CAN} a [Cipolloni]{CHI} e [sms]{CAN} a [Fratarcangeli]{CHI}",
+   "sollecito"
+  ],
+  [
+   "sollecita le quote non pagate del [Condominio Giardino delle Ortensie]{CHI} scala A",
+   "sollecito"
+  ],
+  [
+   "ricordami no anzi sollecita direttamente [Pacifici]{CHI} per la rata",
+   "sollecito"
+  ],
+  [
+   "devi sollecità [er Mancinelli]{CHI} che nun paga da [marzo]{GIO}",
+   "sollecito"
+  ],
+  [
+   "sollecita il pagamento della mia [fattura]{DOC} [45]{NUM} di compenso al [Condominio Villa Corbezzolo]{CHI}",
+   "sollecito"
+  ],
+  [
+   "[i Tarquini]{CHI} devono ancora la quota della cantina sollecitali",
+   "sollecito"
+  ],
+  [
+   "sollecita [Brancaleoni]{CHI} cortesemente che ci mancano 340 euro",
+   "sollecito"
+  ],
+  [
+   "manda ai morosi del [Condominio Monte Cedrino]{CHI} il sollecito [via pec]{CAN}",
+   "sollecito"
+  ],
+  [
+   "fai sollecito a [Vespignani]{CHI} interno 12 per le rate [di luglio e agosto]{GIO}",
+   "sollecito"
+  ],
+  [
+   "sollecita [la Caporossi]{CHI} [su whatsapp]{CAN} che aveva detto che pagava [lunedì]{GIO} e niente",
+   "sollecito"
+  ],
+  [
+   "mettime un sollecito pe' [Ottaviani]{CHI}",
+   "sollecito"
+  ],
+  [
+   "sollecita il pagamento a [Zuccaro]{CHI} per [i lavori della facciata]{LAV}",
+   "sollecito"
+  ],
+  [
+   "[Iacobucci]{CHI} sta in ritardo con le spese straordinarie mandagli due righe di sollecito [per mail]{CAN}",
+   "sollecito"
+  ],
+  [
+   "sollecito ai fornitori [la Lavanderia Biancaluna]{CHI} ci deve ancora il rimborso",
+   "sollecito"
+  ],
+  [
+   "convoca [l'assemblea]{LAV} del [Condominio Villa Agrifoglio]{CHI} per [il 20 ottobre]{GIO} [alle 18]{ORA}",
+   "assemblea"
+  ],
+  [
+   "prepara la convocazione dell'[assemblea straordinaria]{LAV} per il [Condominio Le Ginestre Alte]{CHI}",
+   "assemblea"
+  ],
+  [
+   "fai l'ordine del giorno per [l'assemblea]{LAV} di [giovedì]{GIO} rifacimento facciata e nomina del revisore",
+   "assemblea"
+  ],
+  [
+   "aò [l'assemblea]{LAV} del [Parco dei Mirti]{CHI} va spostata a [martedì]{NGIO}",
+   "assemblea"
+  ],
+  [
+   "scrivi il verbale dell'[assemblea]{LAV} di [ieri sera]{GIO} del [Condominio Torre dei Falchetti]{CHI}",
+   "assemblea"
+  ],
+  [
+   "manda la convocazione dell'[assemblea]{LAV} a tutti i condòmini di [via dei Gelsomini Selvatici 8]{IND} [per pec]{CAN}",
+   "assemblea"
+  ],
+  [
+   "[assemblea ordinaria]{LAV} [Condominio Corte dei Melograni]{CHI} [il 5 novembre]{GIO} seconda convocazione [alle 18 e 30]{ORA}",
+   "assemblea"
+  ],
+  [
+   "quanti millesimi servono per approvare [il cappotto]{LAV} in [assemblea]{LAV}",
+   "assemblea"
+  ],
+  [
+   "rinvia [l'assemblea]{LAV} del [Condominio Villa Corbezzolo]{CHI} a data da destinarsi",
+   "assemblea"
+  ],
+  [
+   "chi ha delegato chi per [l'assemblea]{LAV} di [domani]{GIO}",
+   "assemblea"
+  ],
+  [
+   "prepara il rendiconto da portare all'[assemblea]{LAV} del [Condominio Monte Cedrino]{CHI}",
+   "assemblea"
+  ],
+  [
+   "metti nell'ordine del giorno dell'[assemblea]{LAV} anche [la sostituzione dell'autoclave]{LAV}",
+   "assemblea"
+  ],
+  [
+   "[assemblea]{LAV} [Giardino delle Ortensie]{CHI} seconda convocazione [sabato]{GIO} [alle 10]{ORA} nella sala parrocchiale",
+   "assemblea"
+  ],
+  [
+   "convoca [l'assemblea]{LAV} straordinaria per [l'infiltrazione]{LAV} al [Condominio Le Ciliegie Nere]{CHI}",
+   "assemblea"
+  ],
+  [
+   "com'è finita la votazione all'[assemblea]{LAV} di [via Fosso del Tasso 33]{IND}",
+   "assemblea"
+  ],
+  [
+   "aò sposta [l'assemblea]{LAV} di [mercoledì]{GIO} a [giovedì]{NGIO} [alle 21]{NORA} che la sala è occupata",
+   "assemblea"
+  ],
+  [
+   "manda il verbale dell'[assemblea]{LAV} ai consiglieri del [Condominio Villa Rosmarino]{CHI}",
+   "assemblea"
+  ],
+  [
+   "fai la delega per [l'assemblea]{LAV} per [il signor Ricciotti]{CHI}",
+   "assemblea"
+  ],
+  [
+   "[l'assemblea]{LAV} del [Condominio Fontana dei Lecci]{CHI} non ha raggiunto il quorum riconvocala",
+   "assemblea"
+  ],
+  [
+   "che maggioranza ci vuole in [assemblea]{LAV} per cambiare l'amministratore",
+   "assemblea"
+  ],
+  [
+   "preparami la bozza di convocazione per [l'assemblea annuale]{LAV} del [Condominio Le Tamerici]{CHI}",
+   "assemblea"
+  ],
+  [
+   "[assemblea]{LAV} [Condominio Borgo Sant'Eufemio]{CHI} [la settimana prossima]{GIO} [di sera]{ORA} trova tu il giorno",
+   "assemblea"
+  ],
+  [
+   "ricordami cosa hanno deciso all'ultima [assemblea]{LAV} del [Condominio Colle Tasso]{CHI} sull'ascensore",
+   "assemblea"
+  ],
+  [
+   "fai l'avviso da appendere in portineria per [l'assemblea]{LAV} di [lunedì 12]{GIO}",
+   "assemblea"
+  ],
+  [
+   "anticipa [l'assemblea]{LAV} del [Condominio Villa Lentisco]{CHI} a [venerdì]{NGIO}",
+   "assemblea"
+  ],
+  [
+   "convoca [l'assemblea]{LAV} in videoconferenza per il [Condominio Casale dei Pini Marittimi]{CHI}",
+   "assemblea"
+  ],
+  [
+   "i preventivi da presentare in [assemblea]{LAV} per [il rifacimento del lastrico solare]{LAV} sono pronti",
+   "assemblea"
+  ],
+  [
+   "manda la convocazione [su whatsapp]{CAN} nel gruppo del [Condominio Le Peonie]{CHI} e [per pec]{CAN} a chi non ce l'ha",
+   "assemblea"
+  ],
+  [
+   "[assemblea]{LAV} straordinaria [Condominio Poggio delle Rondini]{CHI} [il 3 dicembre]{GIO} [alle 17 e 30]{ORA}",
+   "assemblea"
+  ],
+  [
+   "chi è che presiede [l'assemblea]{LAV} di [stasera]{GIO}",
+   "assemblea"
+  ],
+  [
+   "segna nel verbale dell'[assemblea]{LAV} che [il signor Morbidelli]{CHI} ha votato contrario",
+   "assemblea"
+  ],
+  [
+   "fai il foglio presenze per [l'assemblea]{LAV} del [Condominio Villa Biancospino]{CHI}",
+   "assemblea"
+  ],
+  [
+   "rimanda [l'assemblea]{LAV} di [via Casale Fiorito 19]{IND} di una settimana",
+   "assemblea"
+  ],
+  [
+   "[l'assemblea]{LAV} del [Condominio Valle dei Noccioli]{CHI} ha approvato il bilancio aggiornami",
+   "assemblea"
+  ],
+  [
+   "prepara il riparto da approvare all'[assemblea]{LAV} di [novembre]{GIO}",
+   "assemblea"
+  ],
+  [
+   "convoca [l'assemblea dei consiglieri]{LAV} [martedì]{GIO} [verso le 7 di sera]{ORA}",
+   "assemblea"
+  ],
+  [
+   "in [assemblea]{LAV} [Rocchegiani]{CHI} ha chiesto di cambiare ditta delle pulizie mettilo a verbale",
+   "assemblea"
+  ],
+  [
+   "manda l'ordine del giorno dell'[assemblea]{LAV} [per mail]{CAN} ai condòmini del [Condominio Le Corbezzole]{CHI}",
+   "assemblea"
+  ],
+  [
+   "quante deleghe ho per [l'assemblea]{LAV} del [Condominio Torre Gaia Vecchia]{CHI}",
+   "assemblea"
+  ],
+  [
+   "fai la seconda convocazione dell'[assemblea]{LAV} per [il 14]{GIO} [alle 18]{ORA}",
+   "assemblea"
+  ],
+  [
+   "aò [l'assemblea]{LAV} de [Villa Lauretana]{CHI} [giovedì]{GIO} salta la rifacciamo [il 22]{NGIO}",
+   "assemblea"
+  ],
+  [
+   "metti a verbale che l'[assemblea]{LAV} ha approvato [la nuova caldaia centralizzata]{LAV} con 650 millesimi",
+   "assemblea"
+  ],
+  [
+   "convoca [l'assemblea]{LAV} urgente per [il distacco dell'intonaco]{LAV} al [Condominio Le Fratte]{CHI}",
+   "assemblea"
+  ],
+  [
+   "prepara l'informativa privacy da allegare alla convocazione dell'[assemblea]{LAV}",
+   "assemblea"
+  ],
+  [
+   "scrivi [su whatsapp]{CAN} a [Ceccarelli]{CHI} [che domani manca l'acqua dalle 9 alle 13]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un [sms]{CAN} al [portiere Gianfranco]{CHI} [che passo a ritirare le chiavi]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio [whatsapp]{CAN} al gruppo del [Condominio Le Peonie]{CHI} [lunedì puliscono le scale non lasciate niente sui pianerottoli]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Marisa la consigliera]{CHI} [che l'assemblea è confermata]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "dì all'[idraulico Benvenuti]{CHI} [su whatsapp]{CAN} [di passare in via Fosso del Tasso entro venerdì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un messaggino a [Pacifici]{CHI} [ti ho mandato il riparto controlla]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[sms]{CAN} a tutti i condòmini di [via Casale Fiorito 19]{IND} [domani taglio siepi spostate le macchine]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Fabrizio dell'ascensore]{CHI} [per sms]{CAN} [che la cabina della scala B è di nuovo bloccata]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "rispondi a [Gualtieri]{CHI} [su whatsapp]{CAN} [che il conguaglio glielo mando stasera]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi [su telegram]{CAN} a [Venanzi]{CHI} [che le chiavi del locale caldaia le ha la portiera]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[whatsapp]{CAN} a [mio marito]{CHI} [faccio tardi c'ho l'assemblea]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un messaggio a [Rocchegiani]{CHI} e a [Morbidelli]{CHI} [che il consiglio è spostato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi [per messaggio]{CAN} alla [ditta Pulizie Lucente]{CHI} [che il cortile non l'hanno lavato]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Tarquini]{CHI} [che il tecnico del citofono arriva alle 3]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[sms]{CAN} al [geometra Pallottini]{CHI} [mi richiami quando puoi]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi [su whatsapp]{CAN} alla [signora Ricciotti]{CHI} [che il pacco l'ha preso il portiere]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio [whatsapp]{CAN} ai condòmini della [Villa Biancospino]{CHI} [giovedì disinfestazione topi in cantina]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "dì a [Lorella]{CHI} [con un sms]{CAN} [che stasera non ce la faccio]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Amatucci]{CHI} [su whatsapp]{CAN} [che il bonifico l'ho ricevuto grazie]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda un [sms]{CAN} al [fabbro Olindo]{CHI} [serve una copia della chiave del portone]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "[whatsapp]{CAN} alla [Caporossi]{CHI} [ho girato la sua richiesta al consiglio]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Daniele il giardiniere]{CHI} [che la potatura si fa martedì no anzi mercoledì]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "messaggio a [Fratarcangeli]{CHI} [via sms]{CAN} [lunedì manca la luce nelle parti comuni]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "rispondi [su whatsapp]{CAN} a [Bonifazi]{CHI} [sì la lavatrice in terrazzo non si può mettere]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "scrivi a [Cipolloni]{CHI} [che il verbale gliel'ho mandato ieri]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "aò manda un [messaggio whatsapp]{CAN} a [Proietti]{CHI} [che domani vengono a cambiare le lampadine delle scale]{TESTO}",
+   "messaggio"
+  ],
+  [
+   "manda una mail a [Termoidraulica Bellucci]{CHI} [per chiedere quando vengono a fare la manutenzione della caldaia]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi [una pec]{CAN} all'[avvocato Mezzanotte]{CHI} [per il decreto ingiuntivo contro Spaziani]{TESTO}",
+   "email"
+  ],
+  [
+   "email a [Ceccarelli]{CHI} [con oggetto lavori in cortile da lunedì]{TESTO}",
+   "email"
+  ],
+  [
+   "rispondi alla mail di [Edil Coccia]{CHI} [che il preventivo va rivisto]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi [per mail]{CAN} al [consiglio del Condominio Le Tamerici]{CHI} [che il bilancio è pronto]{TESTO}",
+   "email"
+  ],
+  [
+   "manda una mail ad [Assicurazioni Fidelia]{CHI} [per aprire il sinistro dell'infiltrazione]{TESTO}",
+   "email"
+  ],
+  [
+   "[pec]{CAN} all'[ufficio tecnico del municipio]{CHI} [per l'occupazione suolo del ponteggio]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una mail all'[ingegner Cavalcanti]{CHI} [chiedendo la relazione sulle crepe]{TESTO}",
+   "email"
+  ],
+  [
+   "rispondi [via email]{CAN} a [Pierantoni]{CHI} [che le spese di scala le paga anche il piano terra]{TESTO}",
+   "email"
+  ],
+  [
+   "mail a [Lucarelli]{CHI} [che la riunione con il tecnico è confermata]{TESTO}",
+   "email"
+  ],
+  [
+   "manda [una pec]{CAN} ad [Ascensori Vettori Srl]{CHI} [contestando il ritardo nella riparazione]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una email a [Giardini Pratoverde]{CHI} [che il contratto non lo rinnoviamo]{TESTO}",
+   "email"
+  ],
+  [
+   "rispondi alla [pec]{CAN} di [Scarpellini]{CHI} [che la sua contestazione verrà discussa in assemblea]{TESTO}",
+   "email"
+  ],
+  [
+   "manda [posta certificata]{CAN} a [Marinangeli]{CHI} [con la messa in mora]{TESTO}",
+   "email"
+  ],
+  [
+   "email al [revisore dei conti Ottaviani]{CHI} [per fissare un incontro sul consuntivo]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi [per email]{CAN} alla [Lavanderia Biancaluna]{CHI} [che i carrelli in cortile non si possono lasciare]{TESTO}",
+   "email"
+  ],
+  [
+   "manda una mail a [Fontanelli]{CHI} e in copia [Brancaleoni]{CHI} [sul guasto della pompa]{TESTO}",
+   "email"
+  ],
+  [
+   "rispondi [per mail]{CAN} all'[impresa Vigneri Costruzioni]{CHI} [che aspettiamo il cronoprogramma]{TESTO}",
+   "email"
+  ],
+  [
+   "[pec]{CAN} a [Iacobucci]{CHI} [che la tenda da sole va rimossa entro 30 giorni]{TESTO}",
+   "email"
+  ],
+  [
+   "scrivi una mail allo [Studio Tecnico Albanesi]{CHI} [per la pratica del superbonus]{TESTO}",
+   "email"
+  ],
+  [
+   "manda [email]{CAN} all'[amministratore uscente Desideri]{CHI} [per avere il passaggio di consegne]{TESTO}",
+   "email"
+  ],
+  [
+   "manda a [Galeazzi]{CHI} [il riparto]{DOC} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia [il verbale]{DOC} dell'assemblea a tutti i condòmini del [Condominio Fontana dei Lecci]{CHI} [per pec]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [il bilancio consuntivo]{DOC} [2025]{GIO} al [Condominio Valle dei Noccioli]{CHI} [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "inoltra [la fattura]{DOC} [312]{NUM} di [Ascensori Vettori]{CHI} al [consigliere Rosatelli]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda [le foto]{DOC} [dell'infiltrazione]{LAV} all'[assicurazione]{CHI} [via email]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [il preventivo]{DOC} [della facciata]{LAV} a [Morbidelli]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia [l'estratto conto]{DOC} alla [signora Lupattelli]{CHI} [per email]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [la convocazione]{DOC} [per pec]{CAN} a [Desideri]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "mandagli [il regolamento condominiale]{DOC} a [Pacelli]{CHI} il nuovo inquilino [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia [il DURC]{DOC} di [Edil Coccia]{CHI} all'[ingegner Cavalcanti]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda [la ricevuta]{DOC} del bonifico ad [Amatucci]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "gira [il verbale]{DOC} [di ieri]{GIO} [via pec]{CAN} all'[avvocato Mezzanotte]{CHI}",
+   "invio_documento"
+  ],
+  [
+   "manda [il preventivo]{DOC} [numero 27]{NUM} di [Termoidraulica Bellucci]{CHI} ai consiglieri [per email]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "inviami [la visura]{DOC} del [Condominio Le Fratte]{CHI} [per mail]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [la tabella millesimale]{DOC} a [Venanzi]{CHI} [su telegram]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "mandagli [il rendiconto]{DOC} [del riscaldamento]{LAV} a [Ciarlantini]{CHI} [per posta elettronica]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [le foto]{DOC} [del cornicione]{LAV} allo [Studio Tecnico Albanesi]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "invia [la mia fattura]{DOC} [di settembre]{GIO} al [Condominio Villa Lentisco]{CHI} [per pec]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [il contratto]{DOC} [delle pulizie]{LAV} a [Pulizie Lucente]{CHI} [per mail]{CAN} da firmare",
+   "invio_documento"
+  ],
+  [
+   "manda [il verbale di verifica]{DOC} [dell'ascensore]{LAV} a [Rocchegiani]{CHI} [con whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "inoltra [la nota spese]{DOC} a [Pierantoni]{CHI} [per sms]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [il SAL]{DOC} [numero 2]{NUM} della [Vigneri Costruzioni]{CHI} al [Condominio Poggio delle Rondini]{CHI} [via email]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [la polizza]{DOC} del [Condominio Corte dei Melograni]{CHI} a [Lucarelli]{CHI} [su whatsapp]{CAN}",
+   "invio_documento"
+  ],
+  [
+   "manda [l'APE]{DOC} a [Tarquini]{CHI} [per mail]{CAN} che vende l'appartamento",
+   "invio_documento"
+  ],
+  [
+   "sposta [l'assemblea]{LAV} del [Condominio Le Ginestre Alte]{CHI} da [giovedì]{GIO} a [lunedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [il sopralluogo]{LAV} con [l'ingegner Cavalcanti]{CHI} [alle 11]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "l'appuntamento con [Galeazzi]{CHI} di [domani]{GIO} spostalo a [dopodomani]{NGIO} stessa ora",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [la riunione del consiglio]{LAV} del [Condominio Villa Rosmarino]{CHI} a [martedì prossimo]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [il sopralluogo]{LAV} di [venerdì]{GIO} con [Termoidraulica Bellucci]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "[la lettura dei contatori]{LAV} spostala [alle 8 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "aò l'incontro con [l'avvocato Mezzanotte]{CHI} [alle 4]{ORA} portalo [alle 5]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [l'appuntamento]{LAV} col [geometra Pallottini]{CHI} da [mercoledì]{GIO} [alle 10]{ORA} a [giovedì]{NGIO} [alle 15]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[la disinfestazione]{LAV} in [via Fosso del Tasso 33]{IND} slitta [al 18]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "rinvia [la verifica dell'ascensore]{LAV} [al mese prossimo]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "metti [la riunione con i consiglieri]{LAV} [alle 19]{NORA} invece che [alle 18]{ORA}",
+   "calendario_modifica"
+  ],
+  [
+   "no anzi [il sopralluogo del tetto]{LAV} fallo [sabato]{NGIO} [di mattina]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "anticipa [la pulizia delle grondaie]{LAV} a [domani]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "spostami [l'incontro]{LAV} con [Rosatelli]{CHI} [a fine mese]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[l'assemblea]{LAV} del [Condominio Le Tamerici]{CHI} [il 9]{GIO} spostala [al 16]{NGIO} [alle 18 e 30]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "cambia l'orario della [manutenzione caldaia]{LAV} al [Condominio Villa Agrifoglio]{CHI} mettila [dalle 14]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[la consegna delle chiavi]{LAV} a [Pacelli]{CHI} falla [lunedì]{NGIO} [verso le 10]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [il dentista]{LAV} a [giovedì 15]{NGIO} [alle 17]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[l'incontro con la ditta delle pulizie]{LAV} va [alla settimana prossima]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "aò [dopodomani]{GIO} nun ce la faccio sposta [il giro dei condomini]{LAV} a [venerdì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la riunione]{LAV} con [Desideri]{CHI} [alle 9]{NORA} di [martedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[il collaudo dell'autoclave]{LAV} in [via Casale Fiorito 19]{IND} rimandalo [al 3 novembre]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [il tecnico del citofono]{CHI} [dalle 3]{ORA} [alle 4 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[la firma dal notaio]{LAV} spostala a [mercoledì]{NGIO} [nel pomeriggio]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [il sopralluogo]{LAV} al [Condominio Le Fratte]{CHI} a [dopo le feste]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "metti [la potatura]{LAV} [al 25 ottobre]{NGIO} invece che [al 20]{GIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[la riunione]{LAV} con [Vigneri Costruzioni]{CHI} anticipala [alle 8]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta tutti gli appuntamenti di [domani]{GIO} [pomeriggio]{ORA} a [lunedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[giovedì]{GIO} con [Lupattelli]{CHI} fallo diventare [venerdì]{NGIO} [alle 11 e un quarto]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "posticipa [l'ispezione antincendio]{LAV} del [Condominio Torre dei Falchetti]{CHI} [di una settimana]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "cambia [l'appuntamento]{LAV} dal [commercialista]{CHI} [alle 12]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[la cena]{LAV} con [le amiche]{CHI} spostala a [sabato]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la lettura dei contatori dell'acqua]{LAV} a [lunedì 20]{NGIO} [la mattina presto]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[il consiglio]{LAV} del [Condominio Villa Biancospino]{CHI} va [alle 20]{NORA} non [alle 21]{ORA}",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [il sopralluogo]{LAV} con [Edil Coccia]{CHI} a [giovedì]{NGIO} che piove",
+   "calendario_modifica"
+  ],
+  [
+   "aò [stasera]{GIO} [alle 6]{ORA} c'avevo [Scarpellini]{CHI} mettilo [domani]{NGIO} [alla stessa ora]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [il promemoria]{LAV} del pagamento [F24]{DOC} a [lunedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[l'incontro con l'assicuratore]{LAV} facciamolo [venerdì]{NGIO} [alle 10 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la riunione]{LAV} con [Rocchegiani]{CHI} e [Morbidelli]{CHI} a [dopodomani]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[l'appuntamento]{LAV} della [signora Gualtieri]{CHI} da [mattina]{ORA} a [pomeriggio]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "rinvia [la pulizia straordinaria del cortile]{LAV} [al 30]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [l'assemblea straordinaria]{LAV} [del 7]{GIO} [al 14]{NGIO} [alle 18]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "anticipa [la manutenzione del cancello automatico]{LAV} a [oggi]{NGIO} [alle 15]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[il sopralluogo]{LAV} con lo [Studio Tecnico Albanesi]{CHI} mettilo [la settimana dopo]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[il parrucchiere]{LAV} spostalo [alle 6 e mezza]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[il passaggio di consegne]{LAV} con [l'amministratore Valerio Pucci]{CHI} slitta a [inizio novembre]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "[mercoledì]{GIO} [alle 9]{ORA} con [Bonifazi]{CHI} no spostalo [alle 11]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "rimanda [la visita del tecnico della luce]{LAV} a [martedì 21]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [l'incontro]{LAV} in [via dei Gelsomini Selvatici 8]{IND} [alle tre del pomeriggio]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "cambia data alla [riunione dei consiglieri]{LAV} [il 28]{NGIO} [alle 19 e 30]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[la ditta dello spurgo]{CHI} non viene più [lunedì]{GIO} ma [mercoledì]{NGIO} [verso mezzogiorno]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "[la revisione degli estintori]{LAV} al [Condominio Corte dei Melograni]{CHI} spostala a [inizio dicembre]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "posticipa [di un'ora]{NORA} [la riunione]{LAV} con [Iacobucci]{CHI}",
+   "calendario_modifica"
+  ],
+  [
+   "sposta [la telefonata]{LAV} con [Pierantoni]{CHI} a [stasera]{NGIO} [verso le 8]{NORA}",
+   "calendario_modifica"
+  ],
+  [
+   "annulla [la riunione]{LAV} di [domani]{GIO} con [Galeazzi]{CHI} e rifissala [giovedì]{NGIO}",
+   "calendario_modifica"
+  ],
+  [
+   "segna [sopralluogo]{LAV} al [Condominio Valle dei Noccioli]{CHI} [giovedì]{GIO} [alle 10]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami di chiamare [Fontanelli]{CHI} [domani]{GIO} [alle 9 e mezza]{ORA}",
+   "calendario"
+  ],
+  [
+   "[alle 15]{ORA} di [lunedì]{GIO} metti [la riunione]{LAV} con [Vigneri Costruzioni]{CHI}",
+   "calendario"
+  ],
+  [
+   "appuntamento con [il notaio Ferrazzi]{CHI} [il 19]{GIO} [alle undici]{ORA}",
+   "calendario"
+  ],
+  [
+   "metti in agenda [lettura contatori]{LAV} in [via Casale Fiorito 19]{IND} [venerdì]{GIO} [di mattina presto]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [stasera]{GIO} [verso le 8]{ORA} [di preparare il riparto]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[martedì]{GIO} [nel pomeriggio]{ORA} passa [il tecnico dell'ascensore]{CHI} al [Condominio Monte Cedrino]{CHI}",
+   "calendario"
+  ],
+  [
+   "segnami [il dentista]{LAV} [il 23]{GIO} [alle 17 e 45]{ORA}",
+   "calendario"
+  ],
+  [
+   "[consiglio di condominio]{LAV} [Villa Lauretana]{CHI} [mercoledì]{GIO} [alle 21]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [fra tre giorni]{GIO} [di sera]{ORA} [di sollecitare Spaziani]{TESTO}",
+   "calendario"
+  ],
+  [
+   "metti [la disinfestazione]{LAV} al [Condominio Le Corbezzole]{CHI} [il 4 novembre]{GIO} [dalle 8 alle 12]{ORA}",
+   "calendario"
+  ],
+  [
+   "[domani]{GIO} [all'ora di pranzo]{ORA} vedo [Lorella]{CHI}",
+   "calendario"
+  ],
+  [
+   "appuntamento col [perito Mariottini]{CHI} per [l'infiltrazione]{LAV} [lunedì]{GIO} [verso le 11]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami di pagare [l'F24]{DOC} [il 16]{GIO} [entro mezzogiorno]{ORA}",
+   "calendario"
+  ],
+  [
+   "segna [la potatura dei pini]{LAV} al [Condominio Casale dei Pini Marittimi]{CHI} [sabato]{GIO} [alle 7 e mezza]{ORA}",
+   "calendario"
+  ],
+  [
+   "[giovedì]{GIO} [tardo pomeriggio]{ORA} [riunione con i consiglieri]{LAV}",
+   "calendario"
+  ],
+  [
+   "metti [manutenzione cancello]{LAV} in [via Fosso del Tasso 33]{IND} [la settimana prossima]{GIO} [di mattina]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [alle 6]{ORA} [di mandare la convocazione]{TESTO}",
+   "calendario"
+  ],
+  [
+   "segna [visita]{LAV} da [Rosatelli]{CHI} [il 2 dicembre]{GIO} [alle 16]{ORA}",
+   "calendario"
+  ],
+  [
+   "[venerdì]{GIO} [alle 9 meno un quarto]{ORA} [verifica estintori]{LAV} al [Condominio Le Fratte]{CHI}",
+   "calendario"
+  ],
+  [
+   "aò metti che [dopodomani]{GIO} [verso le 10 e mezza]{ORA} viene [l'idraulico Benvenuti]{CHI}",
+   "calendario"
+  ],
+  [
+   "ricordami [domattina]{GIO} [alle 8]{ORA} [di ritirare la posta in studio]{TESTO}",
+   "calendario"
+  ],
+  [
+   "[incontro]{LAV} con lo [Studio Tecnico Albanesi]{CHI} [mercoledì 14]{GIO} [alle 2 e mezza]{ORA}",
+   "calendario"
+  ],
+  [
+   "segna [la scadenza della polizza]{LAV} del [Condominio Villa Rosmarino]{CHI} [il 31 ottobre]{GIO}",
+   "calendario"
+  ],
+  [
+   "metti [lezione di pilates]{LAV} [ogni martedì]{GIO} [alle 19]{ORA}",
+   "calendario"
+  ],
+  [
+   "[stasera]{GIO} [alle 20 e 15]{ORA} [cena]{LAV} da [mia sorella]{CHI}",
+   "calendario"
+  ],
+  [
+   "ricordami [lunedì]{GIO} [di prima mattina]{ORA} [di controllare i bonifici]{TESTO}",
+   "calendario"
+  ],
+  [
+   "segna [lo spurgo]{LAV} in [via delle Acacie Nane 14]{IND} [il 10]{GIO} [verso mezzogiorno]{ORA}",
+   "calendario"
+  ],
+  [
+   "[alle 4]{ORA} [giovedì]{GIO} [sopralluogo terrazzo]{LAV} con [l'ingegner Cavalcanti]{CHI}",
+   "calendario"
+  ],
+  [
+   "[appuntamento in banca]{LAV} [martedì]{GIO} [alle dieci meno dieci]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [fra un'ora]{ORA} [di richiamare la Gualtieri]{TESTO}",
+   "calendario"
+  ],
+  [
+   "segna [colloquio]{LAV} col [nuovo portiere]{CHI} [venerdì 17]{GIO} [alle 11 e 20]{ORA}",
+   "calendario"
+  ],
+  [
+   "[il 28]{GIO} [in serata]{ORA} [festa del condominio]{LAV} al [Condominio Giardino delle Ortensie]{CHI}",
+   "calendario"
+  ],
+  [
+   "[pulizia vetri androne]{LAV} [Condominio Le Peonie]{CHI} [ogni primo lunedì del mese]{GIO} [alle 7]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [sabato]{GIO} [verso le 10]{ORA} [che devo portare la macchina dal meccanico]{TESTO}",
+   "calendario"
+  ],
+  [
+   "segna [il collaudo del cappotto]{LAV} al [Condominio Poggio delle Rondini]{CHI} [il 12 gennaio]{GIO} [alle 9]{ORA}",
+   "calendario"
+  ],
+  [
+   "[domani]{GIO} [a metà mattina]{ORA} [consegna chiavi]{LAV} a [Pacelli]{CHI}",
+   "calendario"
+  ],
+  [
+   "fissami [un appuntamento]{LAV} con [la Lupattelli]{CHI} [giovedì]{GIO} [dopo pranzo]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [alle 13 e 30]{ORA} [di prendere mia figlia a scuola]{TESTO}",
+   "calendario"
+  ],
+  [
+   "segna [la riunione]{LAV} con [l'amministratore Valerio Pucci]{CHI} [il 5]{GIO} [alle 18 e 10]{ORA}",
+   "calendario"
+  ],
+  [
+   "[mercoledì]{GIO} [alle 8 di sera]{ORA} [videochiamata]{LAV} con il [consiglio del Condominio Le Tamerici]{CHI}",
+   "calendario"
+  ],
+  [
+   "metti [sopralluogo cantine allagate]{LAV} in [via Monte Arsiccio 41]{IND} [oggi]{GIO} [alle 17]{ORA}",
+   "calendario"
+  ],
+  [
+   "aò segnami [parrucchiera]{LAV} [sabato]{GIO} [alle nove]{ORA}",
+   "calendario"
+  ],
+  [
+   "ricordami [il primo del mese]{GIO} [alle 10]{ORA} [di emettere le rate]{TESTO}",
+   "calendario"
+  ],
+  [
+   "segnati [che il signor Morbidelli è allergico ai prodotti della disinfestazione]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati [che al Condominio Le Peonie il codice del portone è 4471]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunta [che la Caporossi paga sempre in ritardo ma paga]{TESTO}",
+   "mente"
+  ],
+  [
+   "tieni a mente [che la chiave del locale contatori ce l'ha il portiere di via Fosso del Tasso]{TESTO}",
+   "mente"
+  ],
+  [
+   "segnati [che Rosatelli preferisce essere contattato solo per mail]{TESTO}",
+   "mente"
+  ],
+  [
+   "nota [l'idraulico Benvenuti fa lo sconto se paghiamo subito]{TESTO}",
+   "mente"
+  ],
+  [
+   "aò segnati [che al Villa Biancospino il consiglio vuole cambiare ditta delle pulizie]{TESTO}",
+   "mente"
+  ],
+  [
+   "ricordati [che la signora Tomassetti ha il cane che abbaia e i vicini si lamentano]{TESTO}",
+   "mente"
+  ],
+  [
+   "appunto [il lastrico del Condominio Le Fratte va rifatto entro due anni]{TESTO}",
+   "mente"
+  ],
+  [
+   "fai [la fattura]{DOC} del mio compenso al [Condominio Villa Agrifoglio]{CHI} per il trimestre",
+   "documento"
+  ],
+  [
+   "prepara [un preventivo]{DOC} per la gestione del [Condominio Le Corbezzole]{CHI}",
+   "documento"
+  ],
+  [
+   "fammi [la fattura]{DOC} al [Condominio Monte Cedrino]{CHI} per [la pratica del superbonus]{LAV}",
+   "documento"
+  ],
+  [
+   "crea [preventivo]{DOC} di amministrazione per [via Monte Arsiccio 41]{IND} 18 unità",
+   "documento"
+  ],
+  [
+   "[fattura]{DOC} al [Condominio Valle dei Noccioli]{CHI} per le spese postali anticipate",
+   "documento"
+  ],
+  [
+   "prepara [il preventivo]{DOC} per [la gestione straordinaria del cappotto]{LAV} del [Condominio Poggio delle Rondini]{CHI}",
+   "documento"
+  ],
+  [
+   "fai [una nota di credito]{DOC} sulla [fattura]{DOC} [38]{NUM}",
+   "documento"
+  ],
+  [
+   "emetti [fattura]{DOC} al [Condominio Le Fratte]{CHI} 450 euro più iva",
+   "documento"
+  ],
+  [
+   "fammi [un preventivo]{DOC} per [la signora Lupattelli]{CHI} per la gestione della sua palazzina",
+   "documento"
+  ],
+  [
+   "trovami [il verbale]{DOC} dell'assemblea di [marzo]{GIO} del [Condominio Fontana dei Lecci]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "dov'è [la polizza]{DOC} del [Condominio Villa Lentisco]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "apri [la fattura]{DOC} [312]{NUM} di [Ascensori Vettori]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "cerca [le foto]{DOC} [della crepa]{LAV} in [via dei Gelsomini Selvatici 8]{IND}",
+   "cerca_documento"
+  ],
+  [
+   "fammi vedere [il regolamento]{DOC} del [Condominio Torre dei Falchetti]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "aò dove ho messo [il preventivo]{DOC} [del lastrico solare]{LAV}",
+   "cerca_documento"
+  ],
+  [
+   "ritrova [il DURC]{DOC} di [Vigneri Costruzioni]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "cerca [la tabella millesimale]{DOC} del [Condominio Le Tamerici]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "apri [il contratto]{DOC} [delle pulizie]{LAV} con [Pulizie Lucente]{CHI}",
+   "cerca_documento"
+  ],
+  [
+   "chiama [Termoidraulica Bellucci]{CHI}",
+   "chiamata"
+  ],
+  [
+   "telefona all'[ingegner Cavalcanti]{CHI}",
+   "chiamata"
+  ],
+  [
+   "aò chiamami [la Gualtieri]{CHI} al fisso",
+   "chiamata"
+  ],
+  [
+   "chiama [il portiere Gianfranco]{CHI}",
+   "chiamata"
+  ],
+  [
+   "fai il numero [339 4417820]{TEL}",
+   "chiamata"
+  ],
+  [
+   "chiama [l'avvocato Mezzanotte]{CHI} sul cellulare",
+   "chiamata"
+  ],
+  [
+   "telefona ad [Ascensori Vettori]{CHI} per il fermo cabina",
+   "chiamata"
+  ],
+  [
+   "chiama [mio marito]{CHI}",
+   "chiamata"
+  ],
+  [
+   "chiama [il fabbro Olindo]{CHI} che si è rotta la serratura del portone",
+   "chiamata"
+  ],
+  [
+   "richiama [Pierantoni]{CHI}",
+   "chiamata"
+  ],
+  [
+   "nuovo cliente [Condominio Le Lantane]{CHI} in [via Prato Lungo 22]{IND}",
+   "cliente"
+  ],
+  [
+   "salva [Galeazzi]{CHI} numero [347 2210986]{TEL}",
+   "cliente"
+  ],
+  [
+   "aggiungi la mail di [Rosatelli]{CHI} [rosatelli.p@mailfinta.it]{MAIL}",
+   "cliente"
+  ],
+  [
+   "[la signora Lupattelli]{CHI} si è trasferita in [via Selva dei Cerri 5]{IND}",
+   "cliente"
+  ],
+  [
+   "aggiungi [il signor Pacelli]{CHI} come condòmino del [Condominio Le Fratte]{CHI} interno 7",
+   "cliente"
+  ],
+  [
+   "nuovo condòmino [Ernesto Varricchio]{CHI} telefono [328 5503172]{TEL}",
+   "cliente"
+  ],
+  [
+   "il numero della [Caporossi]{CHI} è cambiato mettici [366 9981034]{TEL}",
+   "cliente"
+  ],
+  [
+   "crea scheda per [Condominio Borgo dei Cipressi]{CHI} in [largo dei Vetrai 3]{IND} 24 appartamenti",
+   "cliente"
+  ],
+  [
+   "quanto devono ancora i morosi del [Condominio Villa Agrifoglio]{CHI}",
+   "dati"
+  ],
+  [
+   "che c'ho in agenda [domani]{GIO}",
+   "dati"
+  ],
+  [
+   "quanto ho fatturato [a settembre]{GIO}",
+   "dati"
+  ],
+  [
+   "qual è l'indirizzo del [Condominio Borgo dei Cipressi]{CHI}",
+   "dati"
+  ],
+  [
+   "aò quanti condòmini non hanno pagato la rata di [ottobre]{GIO}",
+   "dati"
+  ],
+  [
+   "che numero ha [l'idraulico Benvenuti]{CHI}",
+   "dati"
+  ],
+  [
+   "quali appuntamenti ho [la settimana prossima]{GIO}",
+   "dati"
+  ],
+  [
+   "quanto ha pagato [Pacifici]{CHI} quest'anno",
+   "dati"
+  ],
+  [
+   "quanti soldi ci sono nel fondo cassa del [Condominio Le Lantane]{CHI}",
+   "dati"
+  ],
+  [
+   "quante [fatture]{DOC} non incassate ho",
+   "dati"
+  ],
+  [
+   "la mail dello [Studio Tecnico Albanesi]{CHI} qual è",
+   "dati"
+  ],
+  [
+   "un condòmino può mettere il condizionatore sulla facciata senza chiedere",
+   "domanda"
+  ],
+  [
+   "come si calcolano i millesimi del riscaldamento",
+   "domanda"
+  ],
+  [
+   "entro quando va presentato il 770 per i condomini",
+   "domanda"
+  ],
+  [
+   "si può fare l'assemblea solo online",
+   "domanda"
+  ],
+  [
+   "aò ma il cane in ascensore è vietato o no",
+   "domanda"
+  ],
+  [
+   "che differenza c'è tra spese ordinarie e straordinarie",
+   "domanda"
+  ],
+  [
+   "quanto tempo ho per impugnare una delibera",
+   "domanda"
+  ],
+  [
+   "conviene il cappotto termico in un palazzo degli anni sessanta",
+   "domanda"
+  ],
+  [
+   "[Galeazzi]{CHI} ha pagato la rata",
+   "incasso"
+  ],
+  [
+   "è arrivato il bonifico di [Pacifici]{CHI} 280 euro",
+   "incasso"
+  ],
+  [
+   "[la Caporossi]{CHI} finalmente ha saldato tutto",
+   "incasso"
+  ],
+  [
+   "segna incassato 1.500 euro dal [Condominio Le Lantane]{CHI} per [la fattura]{DOC} [41]{NUM}",
+   "incasso"
+  ],
+  [
+   "aò [er Mancinelli]{CHI} ha pagato pure gli arretrati",
+   "incasso"
+  ],
+  [
+   "incassata la quota straordinaria di [Tarquini]{CHI}",
+   "incasso"
+  ],
+  [
+   "[Ciarlantini]{CHI} ha versato il conguaglio [del riscaldamento]{LAV}",
+   "incasso"
+  ],
+  [
+   "pagata [la fattura]{DOC} [45]{NUM} dal [Condominio Villa Corbezzolo]{CHI}",
+   "incasso"
+  ],
+  [
+   "fai una foto [alla crepa]{LAV} nel vano scale",
+   "foto"
+  ],
+  [
+   "scatta una foto [al contatore dell'acqua]{LAV}",
+   "foto"
+  ],
+  [
+   "fotografa [la macchia di umidità]{LAV} e mettila in [Condominio Le Fratte]{CART}",
+   "foto"
+  ],
+  [
+   "fai na foto [ai rifiuti lasciati in cortile]{LAV}",
+   "foto"
+  ],
+  [
+   "foto [al citofono rotto]{LAV}",
+   "foto"
+  ],
+  [
+   "fotografami [l'avviso]{DOC} affisso in portineria",
+   "foto"
+  ],
+  [
+   "crea la cartella [Condominio Le Lantane]{CART}",
+   "cartella"
+  ],
+  [
+   "metti [il verbale]{DOC} nella cartella [Assemblee 2026]{CART}",
+   "cartella"
+  ],
+  [
+   "fai una cartella [Morosi]{CART}",
+   "cartella"
+  ],
+  [
+   "sposta [le foto]{DOC} nella cartella [Infiltrazioni Le Fratte]{CART}",
+   "cartella"
+  ],
+  [
+   "nuova cartella [Fornitori Ascensori]{CART}",
+   "cartella"
+  ],
+  [
+   "metti [la polizza]{DOC} in [Assicurazioni]{CART}",
+   "cartella"
+  ],
+  [
+   "urgente si è allagata la cantina del [Condominio Monte Cedrino]{CHI}",
+   "urgenza"
+  ],
+  [
+   "emergenza è rimasto chiuso uno nell'ascensore in [via Prato Lungo 22]{IND}",
+   "urgenza"
+  ],
+  [
+   "aò subito è caduto [un pezzo di intonaco]{LAV} sul marciapiede in [via Selva dei Cerri 9]{IND}",
+   "urgenza"
+  ],
+  [
+   "urgenza c'è puzza di gas nell'androne del [Condominio Borgo dei Cipressi]{CHI}",
+   "urgenza"
+  ],
+  [
+   "presto [il portone]{LAV} non si chiude più e entra chiunque",
+   "urgenza"
+  ],
+  [
+   "emergenza perdita d'acqua dal soffitto dai [Varricchio]{CHI}",
+   "urgenza"
+  ],
+  [
+   "subito senza riscaldamento tutto il [Condominio Le Lantane]{CHI}",
+   "urgenza"
+  ],
+  [
+   "urgente albero caduto sulle macchine nel cortile di [via Monte Arsiccio 41]{IND}",
+   "urgenza"
+  ],
+  [
+   "fai [il SAL]{DOC} del [cappotto]{LAV} al [Condominio Poggio delle Rondini]{CHI} siamo [al 40 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[Vigneri Costruzioni]{CHI} dice che sono [a metà]{AVANZ} prepara [il SAL]{DOC}",
+   "sal"
+  ],
+  [
+   "[secondo SAL]{DOC} [facciata]{LAV} [Condominio Villa Lentisco]{CHI} [70 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "aggiorna [lo stato avanzamento]{DOC} [del tetto]{LAV} [all'85]{AVANZ}",
+   "sal"
+  ],
+  [
+   "prepara [SAL]{DOC} [numero 3]{NUM} per il [Condominio Le Corbezzole]{CHI} [al 90 per cento]{AVANZ}",
+   "sal"
+  ],
+  [
+   "[i lavori dell'ascensore]{LAV} stanno [a un terzo]{AVANZ} fai [il SAL]{DOC}",
+   "sal"
+  ],
+  [
+   "serve [la DiCo]{DOC} [dell'impianto elettrico]{LAV} del [Condominio Le Lantane]{CHI}",
+   "dico"
+  ],
+  [
+   "prepara [la dichiarazione di conformità]{DOC} [della caldaia centralizzata]{LAV}",
+   "dico"
+  ],
+  [
+   "fai [la DiCo]{DOC} per [Termoidraulica Bellucci]{CHI} [del gas]{LAV}",
+   "dico"
+  ],
+  [
+   "[DiCo]{DOC} [autoclave]{LAV} [via Monte Arsiccio 41]{IND}",
+   "dico"
+  ],
+  [
+   "manca [la dichiarazione di conformità]{DOC} [del citofono]{LAV} al [Condominio Borgo dei Cipressi]{CHI} preparala",
+   "dico"
+  ],
+  [
+   "buongiorno EON",
+   "saluto"
+  ],
+  [
+   "ciao bella come va",
+   "saluto"
+  ],
+  [
+   "aò EON ce sei",
+   "saluto"
+  ],
+  [
+   "grazie mille sei un tesoro",
+   "saluto"
+  ],
+  [
+   "buonasera eccomi",
+   "saluto"
+  ],
+  [
+   "ok grazie a domani",
+   "saluto"
+  ],
+  [
+   "il [Condominio Le Lantane]{CHI} ha accettato [il preventivo]{DOC} di gestione",
+   "accettato"
+  ],
+  [
+   "[il preventivo]{DOC} [19]{NUM} è stato approvato",
+   "accettato"
+  ],
+  [
+   "[la signora Lupattelli]{CHI} ha detto sì per l'amministrazione della palazzina",
+   "accettato"
+  ],
+  [
+   "il consiglio del [Condominio Le Corbezzole]{CHI} ha accettato la mia offerta",
+   "accettato"
+  ],
+  [
+   "aò [il Borgo dei Cipressi]{CHI} c'ha preso ha firmato [il preventivo]{DOC}",
+   "accettato"
+  ],
+  [
+   "accettato [il preventivo]{DOC} per [la gestione straordinaria]{LAV} del [Condominio Poggio delle Rondini]{CHI}",
+   "accettato"
+  ]
+ ]
+}
