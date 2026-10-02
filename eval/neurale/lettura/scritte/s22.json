@@ -366,9 +366,9 @@
 
     ["ciao eon so io", "saluto"],
     ["bongiorno eon tutto bene", "saluto"],
-    ["ehi eon", "saluto"],
+    ["ehi eon so la decoratrice", "saluto"],
     ["buonasera stella", "saluto"],
-    ["ciao bella come va oggi", "saluto"],
+    ["ciao bella mia come butta stamattina", "saluto"],
     ["salve salve eon", "saluto"],
 
     ["[crispolti]{CHI} ha accettato [preventivo]{DOC}", "accettato"],
