@@ -379,7 +379,7 @@
     ["ricorda ai [Ferino]{CHI} che la [fattura]{DOC} [12]{NUM} è scaduta", "sollecito"],
     ["manda un sollecito agli [Arredi Sutrio Nord]{CHI}", "sollecito"],
     ["il [Pozzo]{CHI} non ha ancora saldato la [levigatura]{LAV} mandagli un sollecito", "sollecito"],
-    ["sollecita il pagamento della [fattura]{DOC} [27]{NUM}", "sollecito"],
+    ["sollecita il pagamento della [fattura]{DOC} [27]{NUM} che è ferma da agosto", "sollecito"],
     ["fai presente al [Comisso]{CHI} che aspetto ancora i 900 euro", "sollecito"],
     ["sollecito [su whatsapp]{CAN} al [Bianchini]{CHI} per il saldo del parquet", "sollecito"],
     ["scrivi alla [signora Gerussi]{CHI} che è passato un mese e la [fattura]{DOC} è ancora da pagare", "sollecito"],

@@ -366,7 +366,7 @@
    "messaggio"
   ],
   [
-   "scrivi a [Marisa la consigliera]{CHI} [che l'assemblea è confermata]{TESTO}",
+   "scrivi [su whatsapp]{CAN} a [Marisa la consigliera]{CHI} [che l'assemblea è confermata]{TESTO}",
    "messaggio"
   ],
   [
@@ -398,7 +398,7 @@
    "messaggio"
   ],
   [
-   "manda un messaggio a [Rocchegiani]{CHI} e a [Morbidelli]{CHI} [che il consiglio è spostato]{TESTO}",
+   "manda un [sms]{CAN} a [Rocchegiani]{CHI} e a [Morbidelli]{CHI} [che il consiglio è spostato]{TESTO}",
    "messaggio"
   ],
   [
@@ -406,7 +406,7 @@
    "messaggio"
   ],
   [
-   "scrivi a [Tarquini]{CHI} [che il tecnico del citofono arriva alle 3]{TESTO}",
+   "scrivi a [Tarquini]{CHI} [col messaggio]{CAN} [che il tecnico del citofono arriva alle 3]{TESTO}",
    "messaggio"
   ],
   [
@@ -438,7 +438,7 @@
    "messaggio"
   ],
   [
-   "scrivi a [Daniele il giardiniere]{CHI} [che la potatura si fa martedì no anzi mercoledì]{TESTO}",
+   "scrivi [in chat]{CAN} a [Daniele il giardiniere]{CHI} [che la potatura si fa martedì no anzi mercoledì]{TESTO}",
    "messaggio"
   ],
   [
@@ -458,7 +458,7 @@
    "messaggio"
   ],
   [
-   "manda una mail a [Termoidraulica Bellucci]{CHI} [per chiedere quando vengono a fare la manutenzione della caldaia]{TESTO}",
+   "manda una [mail]{CAN} a [Termoidraulica Bellucci]{CHI} [per chiedere quando vengono a fare la manutenzione della caldaia]{TESTO}",
    "email"
   ],
   [
@@ -466,11 +466,11 @@
    "email"
   ],
   [
-   "email a [Ceccarelli]{CHI} [con oggetto lavori in cortile da lunedì]{TESTO}",
+   "[email]{CAN} a [Ceccarelli]{CHI} [con oggetto lavori in cortile da lunedì]{TESTO}",
    "email"
   ],
   [
-   "rispondi alla mail di [Edil Coccia]{CHI} [che il preventivo va rivisto]{TESTO}",
+   "rispondi alla [mail]{CAN} di [Edil Coccia]{CHI} [che il preventivo va rivisto]{TESTO}",
    "email"
   ],
   [
@@ -478,7 +478,7 @@
    "email"
   ],
   [
-   "manda una mail ad [Assicurazioni Fidelia]{CHI} [per aprire il sinistro dell'infiltrazione]{TESTO}",
+   "manda una [mail]{CAN} ad [Assicurazioni Fidelia]{CHI} [per aprire il sinistro dell'infiltrazione]{TESTO}",
    "email"
   ],
   [
@@ -486,7 +486,7 @@
    "email"
   ],
   [
-   "scrivi una mail all'[ingegner Cavalcanti]{CHI} [chiedendo la relazione sulle crepe]{TESTO}",
+   "scrivi una [mail]{CAN} all'[ingegner Cavalcanti]{CHI} [chiedendo la relazione sulle crepe]{TESTO}",
    "email"
   ],
   [
@@ -494,7 +494,7 @@
    "email"
   ],
   [
-   "mail a [Lucarelli]{CHI} [che la riunione con il tecnico è confermata]{TESTO}",
+   "[mail]{CAN} a [Lucarelli]{CHI} [che la riunione con il tecnico è confermata]{TESTO}",
    "email"
   ],
   [
@@ -502,7 +502,7 @@
    "email"
   ],
   [
-   "scrivi una email a [Giardini Pratoverde]{CHI} [che il contratto non lo rinnoviamo]{TESTO}",
+   "scrivi una [email]{CAN} a [Giardini Pratoverde]{CHI} [che il contratto non lo rinnoviamo]{TESTO}",
    "email"
   ],
   [
@@ -514,7 +514,7 @@
    "email"
   ],
   [
-   "email al [revisore dei conti Ottaviani]{CHI} [per fissare un incontro sul consuntivo]{TESTO}",
+   "[email]{CAN} al [revisore dei conti Ottaviani]{CHI} [per fissare un incontro sul consuntivo]{TESTO}",
    "email"
   ],
   [
@@ -522,7 +522,7 @@
    "email"
   ],
   [
-   "manda una mail a [Fontanelli]{CHI} e in copia [Brancaleoni]{CHI} [sul guasto della pompa]{TESTO}",
+   "manda una [mail]{CAN} a [Fontanelli]{CHI} e in copia [Brancaleoni]{CHI} [sul guasto della pompa]{TESTO}",
    "email"
   ],
   [
@@ -554,7 +554,7 @@
    "invio_documento"
   ],
   [
-   "inoltra [la fattura]{DOC} [312]{NUM} di [Ascensori Vettori]{CHI} al [consigliere Rosatelli]{CHI}",
+   "inoltra [la fattura]{DOC} [312]{NUM} di [Ascensori Vettori]{CHI} al [consigliere Rosatelli]{CHI} [su whatsapp]{CAN}",
    "invio_documento"
   ],
   [
@@ -578,7 +578,7 @@
    "invio_documento"
   ],
   [
-   "invia [il DURC]{DOC} di [Edil Coccia]{CHI} all'[ingegner Cavalcanti]{CHI}",
+   "invia [il DURC]{DOC} di [Edil Coccia]{CHI} all'[ingegner Cavalcanti]{CHI} [per pec]{CAN}",
    "invio_documento"
   ],
   [
@@ -1170,7 +1170,7 @@
    "chiamata"
   ],
   [
-   "chiama [mio marito]{CHI}",
+   "chiama [mia cognata Ornella]{CHI}",
    "chiamata"
   ],
   [
@@ -1222,7 +1222,7 @@
    "dati"
   ],
   [
-   "quanto ho fatturato [a settembre]{GIO}",
+   "quanto ho incassato di compensi [ad agosto]{GIO}",
    "dati"
   ],
   [
@@ -1350,7 +1350,7 @@
    "cartella"
   ],
   [
-   "metti [il verbale]{DOC} nella cartella [Assemblee 2026]{CART}",
+   "metti [i verbali]{DOC} nella cartella [Verbali Assemblee Villa Lentisco]{CART}",
    "cartella"
   ],
   [
@@ -1446,11 +1446,11 @@
    "dico"
   ],
   [
-   "buongiorno EON",
+   "buongiorno EON sono io eccomi in studio",
    "saluto"
   ],
   [
-   "ciao bella come va",
+   "aò ciao bella come butta oggi",
    "saluto"
   ],
   [

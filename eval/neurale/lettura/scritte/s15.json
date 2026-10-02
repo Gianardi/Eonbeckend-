@@ -296,7 +296,7 @@
     ["quando è il [getto]{LAV} dai [Zambelli]{CHI}", "dati"],
     ["chi c'è sul cantiere di [via Cinque Archi 2]{IND} [lunedì]{GIO}", "dati"],
 
-    ["serve la CILA per spostare un tramezzo", "domanda"],
+    ["scusa ma per spostare un tramezzo in cucina serve la CILA o basta l'edilizia libera", "domanda"],
     ["che differenza c'è tra SAL e acconto", "domanda"],
     ["sotto che temperatura non si può gettare il calcestruzzo", "domanda"],
     ["quanto ci mette ad asciugare un massetto di 5 centimetri", "domanda"],
@@ -360,11 +360,11 @@
     ["segna che l'[assemblea]{LAV} del [condominio Siepe Verde]{CHI} ha approvato i lavori del tetto", "assemblea"],
     ["ci invitano all'[assemblea]{LAV} del [condominio Il Ciliegio Nero]{CHI} [giovedì]{GIO} [alle 20 e 30]{ORA}", "assemblea"],
 
-    ["buongiorno EON", "saluto"],
+    ["buongiorno EON eccomi in ufficio", "saluto"],
     ["ciao eccomi", "saluto"],
     ["grazie mille sei stata velocissima", "saluto"],
     ["buonasera scusa ho finito tardi", "saluto"],
-    ["ok perfetto grazie", "saluto"],
+    ["ok perfetto grazie mille ci sentiamo dopo", "saluto"],
     ["ciao ci sei", "saluto"],
     ["buongiorno cara buona giornata", "saluto"],
 
