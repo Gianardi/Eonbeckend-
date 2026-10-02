@@ -489,6 +489,23 @@ lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai pe
   - **Regole a mano: 893 → 870.** Giri: nessuno peggiora; frasi vere di Andrea 134/136 (+1).
   - Prossimo: gli altri cassetti, uno alla volta (le regole del 1/10 per primi: preventivo accettato,
     indirizzo, assemblea, SAL/DiCo, scheda di chi non è cliente; poi messaggi, impegni, documenti).
+- **Fatto (2/10/2026, secondo pacchetto del passo A):**
+  - Passati al modello altri 3 cassetti: **preventivo accettato** (tolta la regola che lo
+    riconosceva), **SAL** e **DiCo** (cerca / manda / fattura del SAL: il tipo di documento e il
+    cliente li dà il modello; tolte CERCA_SAL, FATTURA_SAL, CERCA_DICO). La fattura del SAL ora
+    parte come comando diretto, senza far rileggere a EON la frase che si era scritto da solo.
+  - **Tre copie del modello** allenate con partenze diverse, nel telefono si fa la media dei voti
+    (come le app grandi). Scrittore s28 (SAL, accettato) e s29 (confine "il cliente VUOLE le foto"
+    = appunto, "MANDA le foto al cliente" = invio).
+  - Su 2 scrittori MAI visti: cassetto **95,3%** (era 93,7%), cliente giusto **98%** (regole 78%),
+    giorno e ora 92,5% (regole 93,2%: qui il modello confonde ancora a volte il giorno vecchio col
+    nuovo, "salta Canu domani"; da sistemare con frasi, non con regole).
+  - **Regole a mano: 870 → 860.** Giri 5-20 tutti al minimo o sopra (giro 15 tornato a 1053);
+    frasi vere di Andrea 134/136 (=); suite 83/83.
+  - Il file del modello pesa di più: 6,4 MB (4,6 MB compressi), scaricato una volta dopo
+    l'apertura. Da tenere d'occhio se si aggiungono altre copie.
+  - Restano a regole (servono nuovi ruoli o una "testa" per il tema della domanda): indirizzo di
+    un cliente, quando è l'assemblea, scheda di chi non è cliente, domande sui dati.
 - Poi (da decidere coi numeri): B, partire da un modello che sa già l'italiano (serve sbloccare
   huggingface.co nella rete dell'ambiente); C, un modello che "scrive" il comando (serve una GPU).
 

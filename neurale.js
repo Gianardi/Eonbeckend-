@@ -176,9 +176,9 @@
         if (j >= primi.length) return { ruolo: "O", p: 0 };
         const pp = morbida(lineare(xn.subarray(primi[j] * D, primi[j] * D + D), 1, D, M.outR, M.outRB, K), 1);
         let k = 0; for (let i = 1; i < K; i++) if (pp[i] > pp[k]) k = i;
-        return { ruolo: M.ruoli[k], p: pp[k] };
+        return { ruolo: M.ruoli[k], p: pp[k], pp };
       });
-      return { intento: M.intenti[ordine[0][1]], p: ordine[0][0], secondo: M.intenti[ordine[1][1]], p2: ordine[1][0], ruoli };
+      return { intento: M.intenti[ordine[0][1]], p: ordine[0][0], secondo: M.intenti[ordine[1][1]], p2: ordine[1][0], ruoli, pc, intenti: M.intenti };
     }
     /* Come EonLettore.classifica: { intento, p, secondo, p2 } */
     function classifica(segni) {
