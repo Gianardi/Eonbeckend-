@@ -924,7 +924,7 @@
     const cifre = [...testoDi("NUM")].filter((ch) => ch >= "0" && ch <= "9").join("");
     const num = cifre ? parseInt(cifre, 10) : null;
     return {
-      intento: c ? c.intento : null, p: c ? c.p : 0, secondo: c ? c.secondo : null,
+      intento: c ? c.intento : null, p: c ? c.p : 0, secondo: c ? c.secondo : null, p2: c ? c.p2 : 0,
       chi, quando: quandoDi("GIO", "ORA"), nuovoQuando: quandoDi("NGIO", "NORA"),
       lavoro: lavoroDi() || null, testo: testoDi("TESTO") || null, canale: can, documento: testoDi("DOC").toLowerCase() || null, numero: num,
       telefono: testoDi("TEL") || null, email: testoDi("MAIL") || null, indirizzo: testoDi("IND") || null, avanzamento: testoDi("AVANZ") || null, cartella: testoDi("CART") || null,

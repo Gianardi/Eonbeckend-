@@ -1,0 +1,965 @@
+{
+"personaggio": "Artigiani (idraulici, elettricisti, muratori, giardinieri, imprese di pulizia) e amministratori di condominio di tutta Italia che dettano di fretta, a volte in dialetto; frasi di confine: mandare un documento già fatto indicato con il suo lavoro o la sua voce, senza importo (invio_documento), oppure farne uno nuovo con un importo o con un verbo di creazione (documento).",
+"frasi": [
+[
+"mandale la [fattura di acconto]{DOC} del [condizionatore]{LAV}",
+"invio_documento"
+],
+[
+"allora senti manda il [preventivo]{DOC} dello [spurgo fognatura]{LAV} a [palazzo ruschetti]{CHI} che me l'ha chiesto",
+"invio_documento"
+],
+[
+"[fattura]{DOC} [Pedrazzoli]{CHI} [scala esterna]{LAV} 3.600 euro",
+"documento"
+],
+[
+"[fattura]{DOC} dei [lampioni del cortile]{LAV} per il [signor Ruggeri Adelmo]{CHI} 700 euro",
+"documento"
+],
+[
+"devi inviare la [fattura]{DOC} della [posa piastrelle]{LAV} al [condominio stella polare tre]{CHI} [per messaggio]{CAN} grazie",
+"invio_documento"
+],
+[
+"manda la [fattura]{DOC} del [pozzetto]{LAV} alle [camelie]{CHI} [via whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"fai avere [via pec]{CAN} al [panificio Grano Antico]{CHI} la [fattura]{DOC} dell'[antenna centralizzata]{LAV}",
+"invio_documento"
+],
+[
+"eon fammi una [fattura di saldo]{DOC} dell'[androne]{LAV} per la [signora Dell'Orco]{CHI} metti 2.750",
+"documento"
+],
+[
+"eon fammi una [fattura]{DOC} della [bonifica amianto]{LAV} per lo [zio Fiorenzo]{CHI} metti millecento",
+"documento"
+],
+[
+"[preventivo]{DOC} dei [lampioni del cortile]{LAV} al [signor cardarelli pio]{CHI} 8.400",
+"documento"
+],
+[
+"inoltra alla [ditta Idrotermica Saletti]{CHI} la [nota spese]{DOC} dell'[impermeabilizzazione terrazzo]{LAV} che è già pronta",
+"invio_documento"
+],
+[
+"manda la [fattura]{DOC} del [rifacimento intonaco]{LAV} sia al [ristorante Da Gigetto Rosso]{CHI} che al [geometra Taddeucci]{CHI}",
+"invio_documento"
+],
+[
+"inoltra il [preventivo]{DOC} dello [scaldabagno]{LAV} al [dottor cavazzuti]{CHI}",
+"invio_documento"
+],
+[
+"emetti la [fattura]{DOC} del [cambio serratura]{LAV} alla [parrocchia San Lucifredo]{CHI} di 190 euro",
+"documento"
+],
+[
+"manda la [fattura]{DOC} della [tettoia]{LAV} all'[hotel Belvedere Alto]{CHI} [su whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"la [fattura]{DOC} del [giardino condominiale]{LAV} l'abbiamo già fatta mandala alle [sorelle Bianconi]{CHI}",
+"invio_documento"
+],
+[
+"la [fattura]{DOC} delle [persiane]{LAV} mandala alla [ditta Verde Brianza]{CHI}",
+"invio_documento"
+],
+[
+"mi fai la [fattura]{DOC} della [facciata nord]{LAV} per i [fratelli Lombardozzi]{CHI}? 880 euro",
+"documento"
+],
+[
+"eon manda all'[officina Marchesin]{CHI} il [preventivo]{DOC} dei [corrimano]{LAV}",
+"invio_documento"
+],
+[
+"inoltra all'[architetto Melis]{CHI} la [nota spese]{DOC} del [cappotto termico]{LAV} che è già pronta",
+"invio_documento"
+],
+[
+"per favore manda la [fattura]{DOC} del [rendiconto straordinario]{LAV} a [gilda sbarufatti]{CHI}",
+"invio_documento"
+],
+[
+"inviagli la [parcella]{DOC} della [pratica catastale]{LAV} [con whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"la [fattura]{DOC} dei [pluviali]{LAV} girala alla [signora Tamburini]{CHI} [per mail]{CAN}",
+"invio_documento"
+],
+[
+"quel [preventivo]{DOC} delle [grate]{LAV} mandalo al [bonvicini]{CHI} subito",
+"invio_documento"
+],
+[
+"allora senti manda la [fattura]{DOC} della [sostituzione contatori]{LAV} al [condominio le querce di sopra]{CHI} che me l'ha chiesta",
+"invio_documento"
+],
+[
+"mandeghe la [fattura]{DOC} della [messa a terra]{LAV} ai [Tulipani]{CHI}",
+"invio_documento"
+],
+[
+"[pierobon]{CHI} vuole la [fattura]{DOC} dell'[impianto elettrico]{LAV} mandagliela [per messaggio]{CAN}",
+"invio_documento"
+],
+[
+"fai avere all'[ingegner Cappadona]{CHI} la [fattura di acconto]{DOC} della [linea dati]{LAV} che è già pronta",
+"invio_documento"
+],
+[
+"spedisci [con whatsapp]{CAN} la [fattura]{DOC} del [vialetto]{LAV} all'[ingegner fiorucci]{CHI}",
+"invio_documento"
+],
+[
+"prepara il [preventivo]{DOC} del [bagno al primo piano]{LAV} per la [signora Marangoni]{CHI}, 375",
+"documento"
+],
+[
+"la [fattura di acconto]{DOC} del [massetto]{LAV} l'abbiamo già fatta mandala alla [merceria Lucia]{CHI}",
+"invio_documento"
+],
+[
+"c'è da mandare la [fattura]{DOC} del [compenso straordinario]{LAV} al [condominio il faggeto]{CHI}",
+"invio_documento"
+],
+[
+"mandeghe la [fattura di acconto]{DOC} della [derattizzazione]{LAV} al [condominio il rododendro]{CHI}",
+"invio_documento"
+],
+[
+"allora senti manda la [nota spese]{DOC} dell'[assemblea straordinaria]{LAV} alla [signora Bortolussi]{CHI} che me l'ha chiesta",
+"invio_documento"
+],
+[
+"fai la [fattura di saldo]{DOC} a [Ottavio Ciampolini]{CHI} della [videosorveglianza]{LAV} 1.400 grazie",
+"documento"
+],
+[
+"mandeghe la [fattura]{DOC} del [condizionatore]{LAV} a [Zanettin]{CHI}",
+"invio_documento"
+],
+[
+"nuova [fattura]{DOC} ai [glicini]{CHI} per le [tapparelle elettriche]{LAV} 1.725",
+"documento"
+],
+[
+"rimanda alla [ditta Coperture Benassi]{CHI} il [preventivo]{DOC} della [manutenzione ascensore]{LAV} che dice che non gli è arrivato",
+"invio_documento"
+],
+[
+"crea una [fattura]{DOC} della [caldaia centralizzata]{LAV} per [Parco Lauretano]{CHI} da duemila",
+"documento"
+],
+[
+"manda il [preventivo]{DOC} dell'[androne]{LAV} a [Torre Scirocco]{CHI}",
+"invio_documento"
+],
+[
+"[preventivo]{DOC} della [derattizzazione]{LAV} per la [signora tamburini]{CHI} 12.500",
+"documento"
+],
+[
+"fammi la [fattura]{DOC} del [rifacimento grondaie]{LAV} alla [signora Lucchesini]{CHI}",
+"documento"
+],
+[
+"manda ai [Glicini]{CHI} la [fattura]{DOC} del [bagno al primo piano]{LAV} anzi no quella del [compenso trimestrale]{LAV}",
+"invio_documento"
+],
+[
+"fai la [fattura di saldo]{DOC} della [messa a terra]{LAV} al [condominio Il Ciclamino]{CHI} 9.900",
+"documento"
+],
+[
+"emetti la [fattura]{DOC} dell'[ascensore]{LAV} alla [signora Ventrella]{CHI} di 3.600 euro",
+"documento"
+],
+[
+"fammi il [preventivo]{DOC} dei [serramenti]{LAV} alle [Magnolie]{CHI}",
+"documento"
+],
+[
+"spedisci [per mail]{CAN} la [fattura]{DOC} dell'[assemblea straordinaria]{LAV} al [geometra ronchetti]{CHI}",
+"invio_documento"
+],
+[
+"fai la [fattura]{DOC} a [corte albarella]{CHI} dello [spurgo fognatura]{LAV} 700 euro grazie",
+"documento"
+],
+[
+"eon fammi una [fattura]{DOC} del [box doccia]{LAV} per la [signora petrucci ada]{CHI} metti 600 più iva al 10",
+"documento"
+],
+[
+"la [fattura]{DOC} dell'[antenna centralizzata]{LAV} mandala alla [signora Pastrengo]{CHI}",
+"invio_documento"
+],
+[
+"[fattura]{DOC} della [pratica catastale]{LAV} a [brambillasca]{CHI} 600 più iva al 10",
+"documento"
+],
+[
+"scrivimi una [fattura di saldo]{DOC} per la [posa del linoleum]{LAV} per [nando quarantotto]{CHI}",
+"documento"
+],
+[
+"devi inviare la [nota spese]{DOC} della [soletta]{LAV} all'[agenzia Casamia Sud]{CHI} [per messaggio]{CAN} grazie",
+"invio_documento"
+],
+[
+"quella [fattura di saldo]{DOC} della [pergola]{LAV} mandala al [condominio Le Vigne Basse]{CHI} subito",
+"invio_documento"
+],
+[
+"[preventivo]{DOC} della [linea dati]{LAV} all'[officina marchesin]{CHI} quattrocentottanta",
+"documento"
+],
+[
+"manda pure [su whatsapp]{CAN} alla [ditta Elettrosud Farina]{CHI} la [fattura]{DOC} del [muro di cinta]{LAV}",
+"invio_documento"
+],
+[
+"mi fai la [fattura di acconto]{DOC} del [frontalino dei balconi]{LAV} per la [maestra Caporali]{CHI}? millecento",
+"documento"
+],
+[
+"eon fammi un [preventivo]{DOC} dell'[ascensore]{LAV} per il [geometra Taddeucci]{CHI} metti 950 euro",
+"documento"
+],
+[
+"nuova [fattura]{DOC} alle [Camelie]{CHI} per l'[intervento sul citofono]{LAV} 5.200 euro",
+"documento"
+],
+[
+"per favore manda [via mail]{CAN} allo [studio Zampieri]{CHI} la [fattura]{DOC} del [lucernario]{LAV}",
+"invio_documento"
+],
+[
+"eon fammi un [preventivo]{DOC} del [cancello automatico]{LAV} per la [signora Quaglierini]{CHI} metti 1200 più iva",
+"documento"
+],
+[
+"fammi il [preventivo]{DOC} del [taglio siepi]{LAV} a [rosetta mancuso]{CHI}",
+"documento"
+],
+[
+"fammi la [fattura]{DOC} del [massetto]{LAV} alla [signora Barbagallo]{CHI}",
+"documento"
+],
+[
+"puoi mandare al [condominio le querce di sopra]{CHI} il [preventivo]{DOC} della [manutenzione ascensore]{LAV}",
+"invio_documento"
+],
+[
+"fai il [preventivo]{DOC} della [cucina in muratura]{LAV} a [Gilda Sbarufatti]{CHI} 325 più iva",
+"documento"
+],
+[
+"fai la [fattura]{DOC} alle [Palme Nane]{CHI} della [recinzione]{LAV} 6.000 più iva grazie",
+"documento"
+],
+[
+"prepara il [preventivo]{DOC} della [pompa di calore]{LAV} per i [signori Dal Molin]{CHI}, 220 euro",
+"documento"
+],
+[
+"la [fattura]{DOC} del [cancello automatico]{LAV} l'abbiamo già fatta mandala al [condominio Corte Bassanina]{CHI}",
+"invio_documento"
+],
+[
+"allora senti manda la [fattura]{DOC} della [disinfestazione]{LAV} a [Brambillasca]{CHI} che me l'ha chiesta",
+"invio_documento"
+],
+[
+"fai un [preventivo]{DOC} dello [scaldabagno]{LAV} per l'[amministratore Grisanti]{CHI} sui 1.050 euro",
+"documento"
+],
+[
+"emetti la [parcella]{DOC} della [sostituzione contatori]{LAV} alla [ditta verde brianza]{CHI} di 880 euro",
+"documento"
+],
+[
+"scrivimi una [fattura]{DOC} per i [lavori in facciata]{LAV} per la [signora Pastrengo]{CHI}",
+"documento"
+],
+[
+"spedisci [via mail]{CAN} la [fattura]{DOC} del [sopralluogo]{LAV} ai [signori Vannucchi]{CHI}",
+"invio_documento"
+],
+[
+"mi fai il [preventivo]{DOC} della [sostituzione contatori]{LAV} per il [geometra bellomunno]{CHI}? 2.750",
+"documento"
+],
+[
+"preparami la [fattura]{DOC} della [manutenzione ascensore]{LAV} per il [Bergamaschi]{CHI}",
+"documento"
+],
+[
+"manda ai [Pini Marittimi]{CHI} la [fattura]{DOC} dei [serramenti]{LAV} anzi no quella della [revisione estintori]{LAV}",
+"invio_documento"
+],
+[
+"fagli il [preventivo]{DOC} della [gestione ordinaria]{LAV}, mettici 5.200 euro",
+"documento"
+],
+[
+"eon fammi un [preventivo]{DOC} dei [serramenti]{LAV} per lo [studio lanfranchi]{CHI} metti duecentocinquanta",
+"documento"
+],
+[
+"mi fai la [fattura di acconto]{DOC} dei [lavori in cantina]{LAV} per la [dottoressa Belcastro]{CHI}? 800 iva compresa",
+"documento"
+],
+[
+"fai avere alla [signora Bortolussi]{CHI} il [preventivo]{DOC} della [verifica antincendio]{LAV}",
+"invio_documento"
+],
+[
+"fammi la [parcella]{DOC} della [rasatura pareti]{LAV} al [ristorante Da Gigetto Rosso]{CHI}",
+"documento"
+],
+[
+"c'è da mandare la [fattura di acconto]{DOC} della [manutenzione del verde]{LAV} alla [farmacia Santa Rita Nuova]{CHI}",
+"invio_documento"
+],
+[
+"fagli il [preventivo]{DOC} dell'[impianto idraulico]{LAV}, mettici 1.725",
+"documento"
+],
+[
+"la [fattura]{DOC} della [revisione estintori]{LAV} girala allo [zio Fiorenzo]{CHI} [via pec]{CAN}",
+"invio_documento"
+],
+[
+"eon manda [per posta elettronica]{CAN} all'[amministratore del condominio Le Calle]{CHI} il [preventivo]{DOC} dei [lavori in cantina]{LAV}",
+"invio_documento"
+],
+[
+"prepara la [fattura di acconto]{DOC} del [rendiconto straordinario]{LAV} per i [pini marittimi]{CHI}, 9.900",
+"documento"
+],
+[
+"[architetta Pellegatta]{CHI} vuole il [preventivo]{DOC} del [pavimento in resina]{LAV} mandaglielo [via pec]{CAN}",
+"invio_documento"
+],
+[
+"devi inviare la [nota spese]{DOC} della [pompa di calore]{LAV} a [Agnese Tribuzio]{CHI} [per messaggio]{CAN} grazie",
+"invio_documento"
+],
+[
+"per favore manda al [dottor Pelagatti]{CHI} la [fattura]{DOC} del [box doccia]{LAV}",
+"invio_documento"
+],
+[
+"crea una [fattura]{DOC} del [pozzetto]{LAV} per lo [studio Zampieri]{CHI} da 3.600 euro",
+"documento"
+],
+[
+"[fratelli Scaglioni]{CHI} vuole la [fattura di saldo]{DOC} del [tetto del garage]{LAV} mandagliela [per posta elettronica]{CAN}",
+"invio_documento"
+],
+[
+"fai la [fattura]{DOC} della [tinteggiatura vano scale]{LAV} all'[avvocato Spadoni]{CHI} 600 più iva al 10",
+"documento"
+],
+[
+"eon fammi una [fattura]{DOC} del [gazebo]{LAV} per l'[amministratrice Gallina]{CHI} metti 3.600 euro",
+"documento"
+],
+[
+"eon manda alla [signora Fumagalli Ines]{CHI} la [nota spese]{DOC} del [balcone]{LAV} che è già pronta",
+"invio_documento"
+],
+[
+"spedisci il [preventivo]{DOC} del [taglio siepi]{LAV} alle [ortensie blu]{CHI} [su whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"fai la [fattura]{DOC} del [rifacimento intonaco]{LAV} al [geometra Scoccimarro]{CHI} 1.150",
+"documento"
+],
+[
+"c'è da mandare la [parcella]{DOC} della [consulenza tecnica]{LAV} al [condominio Le Mimose Alte]{CHI}",
+"invio_documento"
+],
+[
+"[fattura]{DOC} della [potatura dei tigli]{LAV} a [ferruccio lollobrigo]{CHI} novecento euro",
+"documento"
+],
+[
+"eon fammi un [preventivo]{DOC} del [cancello automatico]{LAV} per il [dottor Cavazzuti]{CHI} metti quindicimila",
+"documento"
+],
+[
+"[fattura di saldo]{DOC} [signori vannucchi]{CHI} [quadro elettrico]{LAV} 1.400",
+"documento"
+],
+[
+"[preventivo]{DOC} [Villa Ortensia Due]{CHI} [fossa biologica]{LAV} 1.980 iva esclusa",
+"documento"
+],
+[
+"rimanda al [negozio Fiori di Pina]{CHI} il [preventivo]{DOC} del [rifacimento cordoli]{LAV} che dice che non gli è arrivato",
+"invio_documento"
+],
+[
+"scrivimi una [fattura di saldo]{DOC} per i [pluviali]{LAV} per [Ilario Fumelli]{CHI}",
+"documento"
+],
+[
+"[fattura di saldo]{DOC} del [lucernario]{LAV} a [Agnese Tribuzio]{CHI} 1.150",
+"documento"
+],
+[
+"fagli la [fattura]{DOC} della [manutenzione del verde]{LAV} da 190 euro",
+"documento"
+],
+[
+"mandeghe la [fattura]{DOC} del [compenso trimestrale]{LAV} al [signor mazzucchelli]{CHI}",
+"invio_documento"
+],
+[
+"fai un [preventivo]{DOC} della [soletta]{LAV} per il [condominio Le Mimose Alte]{CHI} sui 8.400",
+"documento"
+],
+[
+"prepara la [fattura]{DOC} della [controsoffittatura]{LAV} per l'[hotel belvedere alto]{CHI}, trecento euro",
+"documento"
+],
+[
+"allora senti manda la [fattura]{DOC} del [vialetto]{LAV} al [bar Il Pellicano]{CHI} che me l'ha chiesta",
+"invio_documento"
+],
+[
+"fai la [fattura]{DOC} degli [infissi]{LAV} ai [castagni]{CHI} trecento euro",
+"documento"
+],
+[
+"mi fai la [fattura]{DOC} del [gazebo]{LAV} per l'[architetta pellegatta]{CHI}? 1.400",
+"documento"
+],
+[
+"preparami la [fattura]{DOC} dell'[intervento sul citofono]{LAV} per il [condominio Villa Serenella]{CHI}",
+"documento"
+],
+[
+"allora senti manda la [fattura]{DOC} del [termostato]{LAV} allo [studio Lanfranchi]{CHI} che me l'ha chiesta",
+"invio_documento"
+],
+[
+"eon fammi una [fattura]{DOC} delle [grate]{LAV} per il [Tremolada]{CHI} metti 800 iva compresa",
+"documento"
+],
+[
+"[fattura di acconto]{DOC} [Villa Calicanti]{CHI} [videosorveglianza]{LAV} 880 euro",
+"documento"
+],
+[
+"devo fare il [preventivo]{DOC} dei [lavori in cantina]{LAV} per [Settimio Ballarin]{CHI} viene 2.750",
+"documento"
+],
+[
+"prepara il [preventivo]{DOC} del [compenso trimestrale]{LAV} per [Palazzo Ruschetti]{CHI}, novecento euro",
+"documento"
+],
+[
+"mi fai la [fattura di acconto]{DOC} dei [corrimano]{LAV} per le [Ortensie Blu]{CHI}? 1.050 euro",
+"documento"
+],
+[
+"[fattura]{DOC} dell'[antenna centralizzata]{LAV} ai [Tulipani]{CHI} 9.900",
+"documento"
+],
+[
+"spedisci la [fattura di saldo]{DOC} del [parquet]{LAV} a [Pedrazzoli]{CHI} [per posta elettronica]{CAN}",
+"invio_documento"
+],
+[
+"inoltra [via whatsapp]{CAN} a [Casa Albatros]{CHI} la [fattura]{DOC} della [videosorveglianza]{LAV}",
+"invio_documento"
+],
+[
+"crea una [fattura]{DOC} delle [grate]{LAV} per il [negozio Fiori di Pina]{CHI} da novecento euro",
+"documento"
+],
+[
+"fai un [preventivo]{DOC} della [verifica antincendio]{LAV} per il [dottor Pelagatti]{CHI} sui milleottocento euro",
+"documento"
+],
+[
+"eon fammi un [preventivo]{DOC} della [recinzione]{LAV} per la [dottoressa ianniello]{CHI} metti 700 euro",
+"documento"
+],
+[
+"[fattura]{DOC} dell'[autoclave]{LAV} al [condominio Il Carpino]{CHI} 3.000",
+"documento"
+],
+[
+"mandeghe la [parcella]{DOC} della [pergola]{LAV} al [condominio Il Rododendro]{CHI}",
+"invio_documento"
+],
+[
+"ehi eon invia al [condominio Le Tamerici]{CHI} il [preventivo]{DOC} del [rifacimento camino]{LAV} che è già pronto",
+"invio_documento"
+],
+[
+"la [fattura]{DOC} del [quadro elettrico]{LAV} girala ai [coniugi ferrabò]{CHI} [via whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"[fattura]{DOC} [ditta idrotermica saletti]{CHI} [soppalco]{LAV} 700 euro",
+"documento"
+],
+[
+"per favore manda al [condominio Le Acacie Nord]{CHI} il [preventivo]{DOC} del [pavimento in resina]{LAV} che è già pronto",
+"invio_documento"
+],
+[
+"manda pure al [condominio le rondinelle]{CHI} la [fattura]{DOC} del [lucernario]{LAV} che è già pronta",
+"invio_documento"
+],
+[
+"la [fattura di saldo]{DOC} della [facciata nord]{LAV} l'abbiamo già fatta mandala al [condominio il melograno]{CHI}",
+"invio_documento"
+],
+[
+"mandeghe la [fattura]{DOC} del [rifacimento grondaie]{LAV} al [condominio il carpino]{CHI}",
+"invio_documento"
+],
+[
+"scrivimi una [fattura]{DOC} per il [compenso annuale]{LAV} per il [panificio grano antico]{CHI}",
+"documento"
+],
+[
+"la [fattura]{DOC} della [posa del linoleum]{LAV} mandala a [Villa Ortensia Due]{CHI}",
+"invio_documento"
+],
+[
+"prepara il [preventivo]{DOC} del [tetto del garage]{LAV} per [borgo cardellino]{CHI}, 6.000 più iva",
+"documento"
+],
+[
+"[Marisa Coccimiglio]{CHI} vuole la [fattura]{DOC} dei [vetri della scala]{LAV} mandagliela [per messaggio]{CAN}",
+"invio_documento"
+],
+[
+"manda il [preventivo]{DOC} dell'[ascensore]{LAV} sia all'[avvocato Spadoni]{CHI} che alla [signora Scarabelli]{CHI}",
+"invio_documento"
+],
+[
+"c'è da mandare la [nota spese]{DOC} del [lastrico solare]{LAV} a [Residence Gabbiano]{CHI}",
+"invio_documento"
+],
+[
+"prepara la [fattura]{DOC} della [tettoia]{LAV} per i [Ciclamini Rossi]{CHI}, millequattro",
+"documento"
+],
+[
+"manda [su whatsapp]{CAN} al [geometra Scoccimarro]{CHI} la [fattura]{DOC} dei [sanitari]{LAV}",
+"invio_documento"
+],
+[
+"manda pure la [fattura di acconto]{DOC} del [termostato]{LAV} al [geometra Lazzerini]{CHI}",
+"invio_documento"
+],
+[
+"manda alla [signora Marangoni]{CHI} il [preventivo]{DOC} dei [lavori in facciata]{LAV} dei [Castagni]{CHI}",
+"invio_documento"
+],
+[
+"preparami il [preventivo]{DOC} della [cucina in muratura]{LAV} per [Residence Gabbiano]{CHI}",
+"documento"
+],
+[
+"fammi la [fattura]{DOC} dell'[autoclave]{LAV} alla [signora crisafulli]{CHI}",
+"documento"
+],
+[
+"manda [per posta elettronica]{CAN} ai [fratelli scaglioni]{CHI} la [fattura]{DOC} del [rifacimento camino]{LAV}",
+"invio_documento"
+],
+[
+"fagli il [preventivo]{DOC} della [scala esterna]{LAV}, mettici 1.400",
+"documento"
+],
+[
+"preparami la [fattura di acconto]{DOC} del [rendiconto straordinario]{LAV} per il [Pierobon]{CHI}",
+"documento"
+],
+[
+"rimanda allo [studio tecnico gherardi]{CHI} la [fattura di acconto]{DOC} della [manutenzione del verde]{LAV} che dice che non gli è arrivata",
+"invio_documento"
+],
+[
+"inoltra al [Spinazzè]{CHI} la [fattura]{DOC} della [messa a terra]{LAV}",
+"invio_documento"
+],
+[
+"prepara il [preventivo]{DOC} del [rifacimento grondaie]{LAV} per la [ditta elettrosud farina]{CHI}, milleottocento euro",
+"documento"
+],
+[
+"quel [preventivo]{DOC} dei [lavori in facciata]{LAV} mandalo a [Lorenza Pisciottano]{CHI} subito",
+"invio_documento"
+],
+[
+"[fattura]{DOC} della [piscina condominiale]{LAV} per la [merceria lucia]{CHI} novecento euro",
+"documento"
+],
+[
+"manda al [signor Mazzucchelli]{CHI} la [parcella]{DOC} delle [tapparelle elettriche]{LAV} del [Cappelletto]{CHI}",
+"invio_documento"
+],
+[
+"eon manda [per mail]{CAN} al [condominio il ciclamino]{CHI} la [fattura]{DOC} dello [scaldabagno]{LAV}",
+"invio_documento"
+],
+[
+"manda il [preventivo]{DOC} della [pulizia scale]{LAV} sia all'[amministratrice Gallina]{CHI} che ai [signori Dal Molin]{CHI}",
+"invio_documento"
+],
+[
+"mandeghe la [fattura di saldo]{DOC} del [rifacimento cordoli]{LAV} a [corte dei mughetti]{CHI}",
+"invio_documento"
+],
+[
+"mandeghe la [nota spese]{DOC} della [consulenza tecnica]{LAV} al [condominio I Platani Due]{CHI}",
+"invio_documento"
+],
+[
+"devo fare il [preventivo]{DOC} dei [sanitari]{LAV} per la [ditta Coperture Benassi]{CHI} viene 6.000 più iva",
+"documento"
+],
+[
+"[fattura]{DOC} [agenzia casamia sud]{CHI} [persiane]{LAV} millequattro",
+"documento"
+],
+[
+"[preventivo]{DOC} dell'[impianto elettrico]{LAV} a [Casa Albatros]{CHI} 3.000",
+"documento"
+],
+[
+"fai la [fattura]{DOC} al [condominio Le Ginestrelle]{CHI} del [muro di cinta]{LAV} 220 euro grazie",
+"documento"
+],
+[
+"rimanda al [Gualtierotti]{CHI} la [fattura]{DOC} delle [siepi di lauro]{LAV} che dice che non gli è arrivata",
+"invio_documento"
+],
+[
+"rimanda al [ragionier Fabbrocini]{CHI} la [fattura di saldo]{DOC} della [caldaia centralizzata]{LAV} che dice che non gli è arrivata",
+"invio_documento"
+],
+[
+"manda alla [dottoressa Belcastro]{CHI} la [fattura]{DOC} della [scala esterna]{LAV} anzi no quella della [bonifica amianto]{LAV}",
+"invio_documento"
+],
+[
+"devi inviare la [fattura]{DOC} del [prato a rotoli]{LAV} al [condominio Corte Bassanina]{CHI} [su whatsapp]{CAN} grazie",
+"invio_documento"
+],
+[
+"fammi il [preventivo]{DOC} della [disinfestazione]{LAV} al [condominio le acacie nord]{CHI}",
+"documento"
+],
+[
+"manda all'[avvocato Trentadue]{CHI} la [fattura]{DOC} della [canna fumaria]{LAV} anzi no quella del [soppalco]{LAV}",
+"invio_documento"
+],
+[
+"spedisci [su whatsapp]{CAN} la [fattura di saldo]{DOC} del [compenso straordinario]{LAV} al [condominio Villa Serenella]{CHI}",
+"invio_documento"
+],
+[
+"invia alla [signora petrucci ada]{CHI} la [fattura]{DOC} del [sottotetto]{LAV} che è già pronta",
+"invio_documento"
+],
+[
+"devi inviare la [fattura]{DOC} del [quadro elettrico]{LAV} a [borgo cardellino]{CHI} [con whatsapp]{CAN} grazie",
+"invio_documento"
+],
+[
+"devi inviare il [preventivo]{DOC} della [gestione ordinaria]{LAV} alla [signora Barbagallo]{CHI} [via mail]{CAN} grazie",
+"invio_documento"
+],
+[
+"scrivimi una [fattura]{DOC} per le [tapparelle elettriche]{LAV} per il [condominio i platani due]{CHI}",
+"documento"
+],
+[
+"[Nando Quarantotto]{CHI} vuole la [fattura]{DOC} delle [siepi di lauro]{LAV} mandagliela [per posta elettronica]{CAN}",
+"invio_documento"
+],
+[
+"la [fattura di saldo]{DOC} del [cambio serratura]{LAV} mandala alla [cooperativa la spiga]{CHI}",
+"invio_documento"
+],
+[
+"inoltra all'[ingegner Brocchetti]{CHI} la [fattura]{DOC} della [tinteggiatura vano scale]{LAV}",
+"invio_documento"
+],
+[
+"mi fai la [fattura di saldo]{DOC} dell'[impianto idraulico]{LAV} per le [sorelle Bianconi]{CHI}? 1.050 euro",
+"documento"
+],
+[
+"allora senti manda il [preventivo]{DOC} dell'[allaccio gas]{LAV} al [condominio Il Gelsomino]{CHI} che me l'ha chiesto",
+"invio_documento"
+],
+[
+"inviagli il [preventivo]{DOC} della [tinteggiatura vano scale]{LAV} [con whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"manda alla [signora Dell'Orco]{CHI} la [fattura]{DOC} del [prato a rotoli]{LAV} anzi no quella del [frontalino dei balconi]{LAV}",
+"invio_documento"
+],
+[
+"fammi la [fattura]{DOC} dell'[allaccio gas]{LAV} al [condominio Le Tamerici]{CHI}",
+"documento"
+],
+[
+"[fattura]{DOC} della [pratica catastale]{LAV} all'[ingegner brocchetti]{CHI} 700 euro",
+"documento"
+],
+[
+"invia [via mail]{CAN} ai [Ciclamini Rossi]{CHI} il [preventivo]{DOC} dell'[irrigazione]{LAV}",
+"invio_documento"
+],
+[
+"nuovo [preventivo]{DOC} al [condominio Le Rondinelle]{CHI} per il [box doccia]{LAV} 8.400",
+"documento"
+],
+[
+"la [fattura di acconto]{DOC} del [gazebo]{LAV} l'abbiamo già fatta mandala alla [palestra fitlandia due]{CHI}",
+"invio_documento"
+],
+[
+"manda il [preventivo]{DOC} delle [pulizie di fine cantiere]{LAV} sia all'[impresa edilnova corradi]{CHI} che alla [dottoressa ianniello]{CHI}",
+"invio_documento"
+],
+[
+"manda la [fattura]{DOC} dell'[autoclave]{LAV} sia ai [coniugi Ferrabò]{CHI} che a [Ottavio Ciampolini]{CHI}",
+"invio_documento"
+],
+[
+"il [preventivo]{DOC} dell'[intervento sul citofono]{LAV} mandalo al [Tremolada]{CHI}",
+"invio_documento"
+],
+[
+"eon manda la [fattura]{DOC} dello [sgombero soffitta]{LAV} all'[ingegner fiorucci]{CHI} [per posta elettronica]{CAN}",
+"invio_documento"
+],
+[
+"prepara la [parcella]{DOC} dei [sanitari]{LAV} per il [bar Il Pellicano]{CHI}, 880 euro",
+"documento"
+],
+[
+"[preventivo]{DOC} del [taglio siepi]{LAV} al [signor Zuliani]{CHI} 8.400",
+"documento"
+],
+[
+"allora senti manda la [fattura]{DOC} della [fossa biologica]{LAV} alla [signora ventrella]{CHI} che me l'ha chiesta",
+"invio_documento"
+],
+[
+"preparami il [preventivo]{DOC} dei [vetri della scala]{LAV} per il [condominio il gelsomino]{CHI}",
+"documento"
+],
+[
+"mandagli il [preventivo]{DOC} della [posa piastrelle]{LAV}",
+"invio_documento"
+],
+[
+"inviagli il [preventivo]{DOC} della [sostituzione caldaia]{LAV} [su whatsapp]{CAN}",
+"invio_documento"
+],
+[
+"fammi il [preventivo]{DOC} dell'[irrigazione]{LAV} al [condominio Stella Polare Tre]{CHI}",
+"documento"
+],
+[
+"quel [preventivo]{DOC} dei [lampioni del cortile]{LAV} mandalo a [Villa Calicanti]{CHI} subito",
+"invio_documento"
+],
+[
+"nuova [fattura di acconto]{DOC} alla [signora Scarabelli]{CHI} per il [bagno al primo piano]{LAV} 9.900",
+"documento"
+],
+[
+"[preventivo]{DOC} [condominio Il Tamarindo]{CHI} [pluviali]{LAV} 1.725",
+"documento"
+],
+[
+"quella [fattura]{DOC} del [compenso annuale]{LAV} mandala a [Corte Albarella]{CHI} subito",
+"invio_documento"
+],
+[
+"la [fattura]{DOC} della [piscina condominiale]{LAV} girala a [rosetta mancuso]{CHI} [per email]{CAN}",
+"invio_documento"
+],
+[
+"[fattura]{DOC} [signora Fumagalli Ines]{CHI} [spurgo fognatura]{LAV} duecentocinquanta",
+"documento"
+],
+[
+"mi fai la [fattura]{DOC} della [ringhiera]{LAV} per il [condominio Le Vigne Basse]{CHI}? 190 euro",
+"documento"
+],
+[
+"[parcella]{DOC} [condominio Il Faggeto]{CHI} [canna fumaria]{LAV} duecentocinquanta",
+"documento"
+],
+[
+"devo fare la [fattura]{DOC} della [lavanderia condominiale]{LAV} per la [cooperativa La Spiga]{CHI} viene 1.400",
+"documento"
+],
+[
+"mandale la [fattura]{DOC} del [rifacimento intonaco]{LAV}",
+"invio_documento"
+],
+[
+"manda la [fattura]{DOC} del [parquet]{LAV} sia al [geometra pirovano]{CHI} che al [geometra bellomunno]{CHI}",
+"invio_documento"
+],
+[
+"nuovo [preventivo]{DOC} a [Corte dei Mughetti]{CHI} per la [sostituzione caldaia]{LAV} 1200 più iva",
+"documento"
+],
+[
+"eon fammi una [fattura]{DOC} della [lavanderia condominiale]{LAV} per [Torre Scirocco]{CHI} metti milleottocento euro",
+"documento"
+],
+[
+"fai la [fattura]{DOC} della [pulizia scale]{LAV} a [residenza pontevecchio]{CHI} 2.300 più iva",
+"documento"
+],
+[
+"scrivimi una [fattura di acconto]{DOC} per i [vetri della scala]{LAV} per il [geometra Ronchetti]{CHI}",
+"documento"
+],
+[
+"mandeghe la [fattura]{DOC} del [portone d'ingresso]{LAV} al [signor Cardarelli Pio]{CHI}",
+"invio_documento"
+],
+[
+"puoi mandare alla [maestra caporali]{CHI} la [fattura]{DOC} della [cucina in muratura]{LAV}",
+"invio_documento"
+],
+[
+"mandeghe la [fattura]{DOC} degli [infissi]{LAV} al [condominio Il Pioppeto]{CHI}",
+"invio_documento"
+],
+[
+"manda al [signor zuliani]{CHI} la [fattura]{DOC} della [rasatura pareti]{LAV}",
+"invio_documento"
+],
+[
+"fagli il [preventivo]{DOC} della [revisione estintori]{LAV}, mettici novecento euro",
+"documento"
+],
+[
+"la [fattura]{DOC} degli [scarichi]{LAV} mandala a [settimio ballarin]{CHI}",
+"invio_documento"
+],
+[
+"[parcella]{DOC} [condominio il pioppeto]{CHI} [sopralluogo]{LAV} quattrocentottanta",
+"documento"
+],
+[
+"c'è da mandare la [fattura]{DOC} della [potatura dei tigli]{LAV} all'[amministratore Grisanti]{CHI}",
+"invio_documento"
+],
+[
+"crea una [fattura di saldo]{DOC} delle [pulizie di fine cantiere]{LAV} per [tiberio galeazzi]{CHI} da 3.600 euro",
+"documento"
+],
+[
+"nuovo [preventivo]{DOC} al [Gualtierotti]{CHI} per la [consulenza tecnica]{LAV} 1.150",
+"documento"
+],
+[
+"c'è da mandare il [preventivo]{DOC} dei [corrimano]{LAV} al [geometra Morabito]{CHI}",
+"invio_documento"
+],
+[
+"inviagli il [preventivo]{DOC} della [lavanderia condominiale]{LAV} [per messaggio]{CAN}",
+"invio_documento"
+],
+[
+"fagli la [fattura]{DOC} del [portone d'ingresso]{LAV} da 220 euro",
+"documento"
+],
+[
+"manda la [fattura]{DOC} del [sottotetto]{LAV} ai [fratelli Lombardozzi]{CHI}",
+"invio_documento"
+],
+[
+"manda a [residenza pontevecchio]{CHI} il [preventivo]{DOC} della [controsoffittatura]{LAV} anzi no quello dello [sgombero soffitta]{LAV}",
+"invio_documento"
+],
+[
+"manda alle [magnolie]{CHI} la [fattura]{DOC} della [gestione straordinaria]{LAV} del [bergamaschi]{CHI}",
+"invio_documento"
+],
+[
+"fai la [fattura]{DOC} della [gestione straordinaria]{LAV} a [marisa coccimiglio]{CHI} 2.000 di acconto",
+"documento"
+],
+[
+"mandale la [fattura]{DOC} del [giardino condominiale]{LAV}",
+"invio_documento"
+],
+[
+"fai la [fattura]{DOC} degli [scarichi]{LAV} alla [palestra Fitlandia Due]{CHI} 9.900",
+"documento"
+],
+[
+"la [fattura di acconto]{DOC} del [cappotto termico]{LAV} mandala a [Ilario Fumelli]{CHI}",
+"invio_documento"
+],
+[
+"inoltra [su whatsapp]{CAN} al [condominio le ginestrelle]{CHI} la [fattura]{DOC} dell'[impianto idraulico]{LAV}",
+"invio_documento"
+],
+[
+"mandeghe la [fattura]{DOC} del [lastrico solare]{LAV} alla [signora Crisafulli]{CHI}",
+"invio_documento"
+],
+[
+"mandale la [fattura]{DOC} della [ringhiera]{LAV}",
+"invio_documento"
+],
+[
+"mandagli la [fattura]{DOC} della [linea dati]{LAV}",
+"invio_documento"
+],
+[
+"fai avere il [preventivo]{DOC} dell'[impermeabilizzazione terrazzo]{LAV} a [Parco Lauretano]{CHI} [via mail]{CAN}",
+"invio_documento"
+],
+[
+"invia [per email]{CAN} alla [signora quaglierini]{CHI} il [preventivo]{DOC} della [recinzione]{LAV}",
+"invio_documento"
+],
+[
+"fagli il [preventivo]{DOC} del [compenso annuale]{LAV}, mettici 1.400",
+"documento"
+],
+[
+"c'è da mandare la [fattura]{DOC} del [balcone]{LAV} a [Lorenza Pisciottano]{CHI}",
+"invio_documento"
+],
+[
+"fammi il [preventivo]{DOC} del [portone d'ingresso]{LAV} allo [studio tecnico Gherardi]{CHI}",
+"documento"
+]
+]
+}

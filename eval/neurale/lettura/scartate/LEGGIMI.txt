@@ -1,1 +1,2 @@
 Frasi NON usate per allenare. s21.json: generate con un programma a modelli fissi (frasi "a stampino") invece che scritte a mano dallo scrittore: scartate il 2/10/2026.
+s27.json: anche queste generate con un programma a modelli fissi: scartate il 2/10/2026.
