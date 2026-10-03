@@ -16709,13 +16709,6 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       ricordaEsitoCodice(testo, "azione_diretta");
       return;
     }
-    /* Una sezione dell'app detta in qualunque modo ("metti EON sulla home", "voglio aiutare EON a
-       crescere"): la riconosce il modello, la apre il codice (catalogo, 3/10/2026). Dopo le pagine
-       dette per nome e le cartelle, che restano com'erano. */
-    if(!inContinuazione && provaSezioneDalModello(testo)){
-      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "sezione_app");
-      return;
-    }
     /* "Chiama Rita", "scrivi a Rita", "nuovo cliente": subito, senza AI */
     if(!inContinuazione && provaComandiSemplici(testo, viaVoce)){
       campo.value = "";
@@ -16770,6 +16763,15 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       campo.value = "";
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "cancella_appunto");
+      return;
+    }
+
+    /* Una sezione dell'app detta in qualunque modo ("metti EON sulla home", "voglio aiutare EON a
+       crescere"): la riconosce il modello, la apre il codice (catalogo, 3/10/2026). Dopo le pagine
+       dette per nome, le cartelle e i comandi che l'app sa già fare ("cancella tutti gli appunti"),
+       prima di chi farebbe della frase un appunto ("Devo mettere EON sulla home" non è un da fare). */
+    if(!inContinuazione && provaSezioneDalModello(testo)){
+      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "sezione_app");
       return;
     }
 
@@ -19208,7 +19210,7 @@ const SICURO_APP = 0.45, SICURO_SEZIONE = 0.6, SICURO_APP_SCELTA = 0.6;
 const SEZIONI_APP = {
   home: { nome: "Home", pagina: "home" }, oggi: { nome: "Oggi", pagina: "oggi" }, clienti: { nome: "Clienti", pagina: "clienti" },
   calendario: { nome: "Calendario", pagina: "calendario" }, messaggi: { nome: "Messaggi", pagina: "chat" }, chiamate: { nome: "Chiamate", pagina: "chiamate" },
-  cestino: { nome: "Cestino", pagina: "cestino" }, menu: { nome: "Menu", pagina: "gestisci-azienda" }, obiettivi: { nome: "Obiettivi", pagina: "cresci" },
+  cestino: { nome: "Cestino", apri: () => { navigateTo("cestino"); showAIToast("Cestino", "Tocca «Svuota cestino» per eliminare tutto per sempre."); } }, menu: { nome: "Menu", pagina: "gestisci-azienda" }, obiettivi: { nome: "Obiettivi", pagina: "cresci" },
   compiti: { nome: "Compiti alla squadra", pagina: "assegna-compiti" }, documenti_impresa: { nome: "Documenti dell'impresa", pagina: "documenti-impresa" },
   documenti: { nome: "Documenti", pagina: "cantiere-documenti" }, carta_intestata: { nome: "Carta intestata", pagina: "carta-intestata" },
   lettere: { nome: "Lettere", pagina: "crea-lettera" }, cartello: { nome: "Cartello di cantiere", pagina: "crea-cartello" },

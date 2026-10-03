@@ -71,7 +71,8 @@ async function main() {
     await prepara(app("installa"));
     richiesteAI.length = 0;
     await scrivi("Devo mettere EON sulla schermata home");
-    verifica("\"Devo mettere EON sulla schermata home\" → le istruzioni per metterla sulla Home, senza AI", (await page.evaluate(() => window.__installa)) === 1 && richiesteAI.length === 0);
+    const inst = await page.evaluate(() => ({ n: window.__installa, t: document.getElementById("risorsaTitolo").textContent, toast: document.getElementById("aiToastContainer").innerText }));
+    verifica("\"Devo mettere EON sulla schermata home\" → le istruzioni per metterla sulla Home, senza AI", inst.n === 1 && richiesteAI.length === 0, JSON.stringify({ inst, ai: richiesteAI.length }));
 
     await prepara(app("migliora"));
     await scrivi("Voglio aiutare EON a crescere");
