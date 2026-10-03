@@ -5028,6 +5028,17 @@ ROADMAP 0b.11.
 - Promemoria: `SCELTE_ANTICIPO`, `minutiPromemoria`, `salvaMinutiPromemoria` (tutti i telefoni
   dell'utente); server `handleInviaPromemoria` legge `push_iscrizioni?select=*` e usa `minuti_prima`
   (o 30), finestra fino a 2 ore + 5 minuti; titolo "Tra 2 ore".
+- Modello: v15 → v16 (s36: "mi dai [l'assicurazione del camion]{DOC}" = cerca_documento contro "dove
+  carico i documenti della ditta" = app; "quando vedo X?" = agenda contro "quando l'ho visto
+  l'ultima volta" = ultima_visita; "esporta i miei dati" = app:privacy).
+- Posto del catalogo nel flusso: dopo `provaCancellaAppunto` (le regole di prima: nomi di pagina,
+  cartelle, azioni dirette, "cancella tutti gli appunti") e prima del cassetto Mente del modello e
+  dei "da fare" ("Devo mettere EON sulla home" non è un da fare). Nella card AI dopo
+  `provaAzioneDiretta`. Il cestino aperto dal catalogo dice "Tocca «Svuota cestino»…" come prima.
+- Prove adattate alla scheda nuova (le sezioni si aprono a tocco): scheda-cliente,
+  cartelle-cliente-app, foto-galleria-app, scorri-ovunque, funzioni-mestieri; clienti-chat
+  ("Nessun lavoro scritto"); lettore-app (l'ordine con l'AI ferma ora è "Rinomina la cartella
+  Fornitori in Materiali": "Esporta i dati" apre la Privacy).
 - Prove nuove: `catalogo-app.test.js`, controlli in `scheda-cliente`, `foto-galleria-app`
   (condivisione come file), `promemoria-app`, `promemoria.test.mjs`; job `regole` in prove.yml.
   Misura: `node eval/neurale/lettura/catalogo-cieco.mjs` (esame cieco del catalogo).

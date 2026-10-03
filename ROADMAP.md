@@ -538,8 +538,14 @@ lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai pe
     "ho delle spese?" è una domanda sui dati). Il codice apre e basta; se il modello non è sicuro di
     quale sezione, 2-3 tasti (niente AI); "Esci" chiede sempre prima.
   - Esame cieco del catalogo (40 frasi nuove, `eval/dati/frasi-app-cieco.json`): **33 aperte giuste,
-    2 con la scelta giusta tra i tasti, 5 all'AI come prima**. Su 7.390 frasi dei giri 5-20 nessuna
-    sezione aperta per sbaglio.
+    7 vanno avanti come prima** (all'AI o a un'altra risposta: "fammi vedere i soldi che sono
+    entrati" risponde con gli incassi). Su 7.390 frasi dei giri 5-20 nessuna sezione aperta per
+    sbaglio. Le frasi di Andrea ("Devo mettere EON sulla schermata home", "Voglio aiutare EON a
+    crescere") aprono la sezione giusta (prova delle frasi vere: 136/138).
+  - Modello v16 (tre copie). Scrittori mai visti: cassetto 94,4% (prima 95,5%), giorno e ora 91,8%
+    (=), cliente 96,8% (prima 97,8%): un po' giù perché c'è un cassetto in più; nell'app i giri 5-20
+    restano tutti al minimo o sopra. Due frasi che la prima versione (v15) sbagliava ("mi dai
+    l'assicurazione del furgone", "quando vedo il Bar Aurora?") insegnate con frasi simili (s36).
   - "Ho delle spese?" risponde dai dati (da pagare, totale del mese) e apre Uscite.
   - Scheda del cliente rifatta come la **proposta 4 "Prossima cosa"** (scelta da Andrea): in alto,
     nel blu, nome, indirizzo, stato, la prossima cosa da fare e i contatti; ⋯ (modifica, link,
