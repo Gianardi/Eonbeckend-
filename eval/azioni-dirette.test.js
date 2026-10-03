@@ -52,6 +52,7 @@ async function main() {
     });
     await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => typeof EonLettore !== "undefined" && EonLettore.letturaAttiva && EonLettore.letturaAttiva(), null, { timeout: 20000 });
+    await page.waitForTimeout(1200); // la card "Termini e privacy" del primo accesso si apre da sola dopo 0,9 s: che arrivi prima delle prove
 
     /* 1 — riconoscimento: cosa è un'azione diretta e cosa no */
     const casi = await page.evaluate(() => {
