@@ -5011,8 +5011,12 @@ ROADMAP 0b.11.
   tasti con `domandaDelCodice`), prima delle domande sui dati e nel flusso della card AI.
   "esci" con `showAIToastConDecisione`; "migliora" apre Privacy e scorre a `#impMigliora`;
   "abbonamento": oggi non c'è niente da gestire, lo dice (da rivedere quando ci saranno i prezzi).
-- Le vecchie regole di navigazione (`provaNavigazioneDiretta`, `capisciAzioneDiretta`) restano per
-  ora: si tolgono nel prossimo giro, dopo aver visto il catalogo sulle frasi vere dei tester.
+- Tolti da `capisciAzioneDiretta` / `provaAzioneDiretta` password, email, profilo, faceid, installa,
+  importa, esci (e `VERBO_CAMBIO`, `soloParoleAccount`, `PAROLE_RICHIESTA_ACCOUNT`): li fa il catalogo.
+  Restano feedback e compito (prendono il testo) e `provaNavigazioneDiretta` (nomi di pagina e
+  cartelle): da togliere nel prossimo giro, dopo aver visto il catalogo sulle frasi vere dei tester.
+  Il catalogo viene DOPO le regole rimaste (le cartelle con nome di pagina restano cartelle).
+  Regole 826 → 819, tetto 819.
 - `rispondiSuiDati` tema `spese`: da pagare (fino a 6) e uscite/pagate del mese, pagina Uscite.
 - Scheda cliente (`mostraSchedaCliente`): classe `sc4-aperta` sull'overlay (nasconde la testata
   generica; `apriRisorsaCard` la toglie a ogni apertura); `sc4-testa`, `sc4-elenco` con

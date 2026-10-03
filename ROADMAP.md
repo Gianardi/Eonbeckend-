@@ -555,6 +555,8 @@ lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai pe
     produzione va messa prima del merge** (il server funziona anche senza: resta a 30 minuti).
   - Prove automatiche: **il numero di regole a mano non può salire** (`eval/regole-conta.mjs
     --controlla`, tetto in `eval/dati/regole-tetto.json`): se sale, la PR diventa rossa.
+  - Tolte le regole scritte a mano per password, email dell'account, nome dell'attività, Face ID,
+    EON sulla Home, importa clienti ed esci: ora le legge il modello. **Regole a mano: 826 → 819.**
 - **Il piano deciso con Andrea (3/10/2026): da piccola AI a AI vera.**
   1. **Finire il passo A.** EON è una piccola AI che capisce e fa (impegni, messaggi, preventivi,
      fatture, domande sui dati): nel telefono, veloce, gratis, anche senza rete. Resta anche dopo.
