@@ -10465,7 +10465,7 @@ function collegaHubRacconta(){
        calendario") non ha bisogno né di rete né di login — si
        riconosce qui, prima di tutto, e si evita del tutto la chiamata
        all'AI. Vedi provaNavigazioneDiretta più sotto nel file. */
-    if(provaNavigazioneDiretta(testo) || provaSezioneDalModello(testo)){
+    if(provaNavigazioneDiretta(testo)){
       campo.value = "";
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
@@ -10473,6 +10473,11 @@ function collegaHubRacconta(){
     /* "Voglio cambiare password", "manda un feedback", "assegna un compito":
        la schermata giusta, subito, senza AI */
     if(provaAzioneDiretta(testo, chiudiHubAI)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      return;
+    }
+    if(provaSezioneDalModello(testo)){
       campo.value = "";
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
@@ -16618,11 +16623,6 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* PASSO A (2/10/2026): la domanda sui dati la legge il modello: che è una domanda, l'argomento
        (agenda, incassi, chi ti deve, indirizzo, assemblea…), di chi e quando. Il codice cerca nei
        dati e risponde. */
-    /* Una sezione dell'app ("metti EON sulla home", "voglio aiutare EON a crescere"): la apre il codice */
-    if(testo && !inCorso && !inContinuazione && provaSezioneDalModello(testo)){
-      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "sezione_app");
-      return;
-    }
     const datiM = testo && !inCorso && !inContinuazione ? datiDalModello(testo) : null;
     // "incassi", "apri clienti": è il nome di una pagina, si apre quella (come più sotto per tutte le frasi)
     if(datiM && provaNavigazioneDiretta(testo)){
@@ -16739,6 +16739,13 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       campo.value = "";
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "azione_diretta");
+      return;
+    }
+    /* Una sezione dell'app detta in qualunque modo ("metti EON sulla home", "voglio aiutare EON a
+       crescere"): la riconosce il modello, la apre il codice (catalogo, 3/10/2026). Dopo le pagine
+       dette per nome e le cartelle, che restano com'erano. */
+    if(!inContinuazione && provaSezioneDalModello(testo)){
+      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "sezione_app");
       return;
     }
     /* "Chiama Rita", "scrivi a Rita", "nuovo cliente": subito, senza AI */
