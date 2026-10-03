@@ -1,0 +1,165 @@
+{
+ "nota": "Esame cieco del catalogo dell'app (3/10/2026): frasi scritte dopo gli scrittori s34/s35, mai usate per allenare. Atteso: cassetto app e la sezione.",
+ "frasi": [
+  [
+   "mettimi l'icona di EON sul cellulare",
+   "installa"
+  ],
+  [
+   "voglio dare una mano a far diventare EON più brava",
+   "migliora"
+  ],
+  [
+   "come si fa a avere EON tra le app del telefono",
+   "installa"
+  ],
+  [
+   "si può scaricare EON come applicazione?",
+   "installa"
+  ],
+  [
+   "acconsento a usare le mie frasi per migliorarvi",
+   "migliora"
+  ],
+  [
+   "dove scelgo se EON può imparare dalle mie frasi",
+   "migliora"
+  ],
+  [
+   "cambiami la password che quella vecchia non me la ricordo",
+   "password"
+  ],
+  [
+   "devo rifare la password",
+   "password"
+  ],
+  [
+   "voglio sbloccare l'app con la faccia come la banca",
+   "faceid"
+  ],
+  [
+   "non mi arrivano gli avvisi degli appuntamenti",
+   "promemoria"
+  ],
+  [
+   "fammi avvisare un quarto d'ora prima",
+   "promemoria"
+  ],
+  [
+   "voglio uscire da EON",
+   "esci"
+  ],
+  [
+   "chiudi la sessione",
+   "esci"
+  ],
+  [
+   "vorrei cancellare il mio account per sempre",
+   "elimina_account"
+  ],
+  [
+   "c'è una guida per usare EON?",
+   "aiuto"
+  ],
+  [
+   "ho cambiato ragione sociale, dove la aggiorno",
+   "profilo"
+  ],
+  [
+   "la mail con cui entro la devo cambiare",
+   "email_account"
+  ],
+  [
+   "quanto costa EON al mese",
+   "abbonamento"
+  ],
+  [
+   "vorrei proporvi un'idea per l'app",
+   "feedback"
+  ],
+  [
+   "c'è un problema nel calendario, ve lo segnalo",
+   "feedback"
+  ],
+  [
+   "portami i contatti dalla rubrica dentro EON",
+   "importa_clienti"
+  ],
+  [
+   "ho un file excel con i clienti, come lo carico",
+   "importa_clienti"
+  ],
+  [
+   "devo caricare la visura camerale",
+   "documenti_impresa"
+  ],
+  [
+   "dove metto il durc nuovo che mi è arrivato",
+   "documenti_impresa"
+  ],
+  [
+   "voglio mettere il mio logo sui preventivi",
+   "carta_intestata"
+  ],
+  [
+   "devo fare una lettera di sollecito all'amministratore, dove si fa",
+   "lettere"
+  ],
+  [
+   "fammi vedere le cose che ho cancellato",
+   "cestino"
+  ],
+  [
+   "recupera la foto che ho eliminato",
+   "cestino"
+  ],
+  [
+   "apri l'agenda",
+   "calendario"
+  ],
+  [
+   "portami ai messaggi",
+   "messaggi"
+  ],
+  [
+   "voglio vedere tutte le fatture",
+   "fatture_preventivi"
+  ],
+  [
+   "apri le spese",
+   "uscite"
+  ],
+  [
+   "dove segno quello che ho pagato al fornitore",
+   "uscite"
+  ],
+  [
+   "fammi vedere i soldi che sono entrati",
+   "entrate"
+  ],
+  [
+   "voglio dare un lavoro da fare al mio operaio",
+   "compiti"
+  ],
+  [
+   "mostrami le mie note",
+   "mente"
+  ],
+  [
+   "fammi vedere la galleria",
+   "foto"
+  ],
+  [
+   "vai nelle impostazioni dell'app",
+   "impostazioni"
+  ],
+  [
+   "torna alla home",
+   "home"
+  ],
+  [
+   "dove vedo quanto guadagna la ditta",
+   "conti"
+  ]
+ ]
+}

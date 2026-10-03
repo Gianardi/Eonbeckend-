@@ -42,6 +42,20 @@ jobs:
           TZ: UTC
         run: bash eval/tutti.sh
 
+  regole:
+    name: Regole a mano (non devono aumentare)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      # REGOLA N. 1 (Andrea, 1/10/2026): a capire le frasi è il modello neurale.
+      # Se le regole scritte a mano superano il tetto, la PR diventa rossa.
+      - name: Conta le regole
+        run: node eval/regole-conta.mjs --controlla
+
   frasi:
     name: Frasi etichettate (modello e app)
     runs-on: ubuntu-latest

@@ -1,5 +1,5 @@
 {
- "nota": "Frasi vere scritte o dettate da Andrea (fondatore) a EON dal 3 al 29/09/2026, dal registro richieste. Nomi dei clienti cambiati, numeri ed email tolti. atteso: cosa deve succedere; ai: true = va bene che risponda l'AI (consigli, domande tecniche, chiacchiere).",
+ "nota": "Frasi vere scritte o dettate da Andrea (fondatore) a EON dal 3 al 29/09/2026, dal registro richieste. Nomi dei clienti cambiati, numeri ed email tolti. atteso: cosa deve succedere; ai: true = va bene che risponda l'AI (consigli, domande tecniche, chiacchiere). + 2 frasi di Andrea del 3/10/2026 (catalogo dell'app: devono aprire la sezione giusta).",
  "clienti": [
   "Mario Rossi",
   "Hunter",
@@ -584,6 +584,14 @@
   [
    "Mi fai preventivo 10000 Simone Masi per ristrutturazione bagno",
    "documento"
+  ],
+  [
+   "Devo mettere EON sulla schermata home",
+   "pagina"
+  ],
+  [
+   "Voglio aiutare EON a crescere",
+   "pagina"
   ]
  ]
 }

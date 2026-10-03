@@ -864,7 +864,7 @@
   .client-search-row .icon-btn svg{ width:18px; height:18px; }
   /* Descrizione breve del lavoro, al massimo due righe */
   .client-lavoro{ font-size:13.5px; line-height:1.4; color:var(--muted); margin-top:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
-  .client-lavoro.vuoto{ display:inline-block; background:none; border:none; padding:0; font:inherit; font-size:13px; font-weight:700; color:var(--indigo); cursor:pointer; text-align:left; }
+  .client-lavoro.vuoto{ color:var(--faint); }
   .client-archive-card{
     padding:14px 14px; border-radius:14px; border:1px solid var(--border);
     margin:6px 6px; transition:background .12s, border-color .12s;
@@ -1517,6 +1517,8 @@
   .faceid-si{ background:var(--indigo); color:#fff; }
   .faceid-esito{ min-height:18px; font-size:13px; font-weight:600; color:var(--coral); }
   .imp-testo{ margin:0 0 12px; font-size:14px; line-height:1.5; color:var(--text); }
+  .imp-etichetta{ font-size:12px; font-weight:700; color:var(--muted); margin:0 0 6px; }
+  .imp-anticipo{ flex-wrap:wrap; margin-bottom:14px; }
   #impVoceFaceId[hidden], #impVoceProva[hidden]{ display:none; }
 
   /* ===== Annullare impegni: conferma (27/09/2026) ===== */
@@ -2096,6 +2098,64 @@
   .sc-modi{ display:flex; gap:6px; }
   .sc-modi button{ border:1px solid var(--border); background:var(--card); color:var(--muted); font:inherit; font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; cursor:pointer; }
   .sc-modi button.attivo{ background:var(--text); border-color:var(--text); color:#fff; }
+  /* Scheda cliente, proposta 4 "Prossima cosa" (3/10/2026) */
+  .risorsa-overlay.sc4-aperta .doc-head{ display:none; }
+  .risorsa-overlay.sc4-aperta .risorsa-panel{ background:var(--bg); }
+  .risorsa-overlay.sc4-aperta .doc-corpo{ padding:0; }
+  .risorsa-overlay.sc4-aperta .scheda-piede{ background:var(--bg); border-top:0; }
+  .scheda-cliente:has(.sc4-testa){ gap:0; }
+  .sc4-testa{ --sc4-blu:#2050D8; background:var(--sc4-blu); color:#fff; padding:10px 12px 18px; border-radius:0 0 26px 26px; display:flex; flex-direction:column; position:relative; }
+  .sc4-barra{ display:flex; align-items:center; }
+  .sc4-spazio{ flex:1; }
+  .sc4-tasto{ width:44px; height:44px; border:0; background:none; color:#fff; display:grid; place-items:center; cursor:pointer; border-radius:50%; }
+  .sc4-tasto svg{ width:22px; height:22px; }
+  .sc4-tasto svg.spesso{ stroke-width:3; }
+  .sc4-tasto:focus-visible, .sc4-prossima:focus-visible, .sc4-contatti .sc-contatto:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .sc4-nome{ font-family:'Manrope', 'Inter', -apple-system, sans-serif; font-weight:800; font-size:23px; line-height:1.2; padding:2px 8px 0; overflow-wrap:anywhere; text-wrap:balance; }
+  .sc4-sotto{ font-size:13px; opacity:.85; padding:3px 8px 0; overflow-wrap:anywhere; }
+  .sc4-prossima{ margin:14px 8px 0; border:0; background:rgba(255,255,255,.14); color:#fff; border-radius:16px; padding:11px 14px; text-align:left; font:inherit; display:flex; flex-direction:column; gap:2px; cursor:pointer; }
+  .sc4-etichetta{ font-size:11.5px; font-weight:600; letter-spacing:.05em; opacity:.8; }
+  .sc4-prossima-testo{ font-size:15.5px; font-weight:600; overflow-wrap:anywhere; }
+  .sc4-contatti{ margin:14px 8px 0; gap:6px; }
+  .sc4-contatti .sc-contatto{ color:#fff; font-weight:600; font-size:10.5px; gap:4px; white-space:nowrap; min-width:0; }
+  .sc4-contatti .sc-contatto-icona{ width:100%; height:46px; border-radius:14px; background:rgba(255,255,255,.16); color:#fff; }
+  .sc4-contatti .sc-contatto.wa .sc-contatto-icona{ background:rgba(255,255,255,.16); color:#fff; }
+  .sc4-contatti .sc-contatto.manca{ color:rgba(255,255,255,.55); }
+  .sc4-contatti .sc-contatto.manca .sc-contatto-icona{ background:rgba(255,255,255,.07); color:rgba(255,255,255,.55); }
+  .sc4-dentro{ padding:16px 16px 6px; display:flex; flex-direction:column; gap:12px; }
+  .sc4-elenco{ background:var(--card); border-radius:16px; box-shadow:0 1px 2px rgba(20,23,29,.05); overflow:hidden; }
+  .sc4-voce{ width:100%; display:flex; align-items:center; gap:12px; padding:14px 16px; border:0; background:none; font:inherit; font-size:15px; font-weight:600; color:var(--text); text-align:left; cursor:pointer; }
+  .sc4-voce ~ .sc4-voce{ border-top:1px solid var(--border); }
+  .sc4-voce-icona{ width:22px; height:22px; color:var(--indigo); flex:none; }
+  .sc4-voce-titolo{ flex:1; min-width:0; }
+  .sc4-voce-conta{ font-size:13px; font-weight:500; color:var(--muted); white-space:nowrap; }
+  .sc4-freccia{ width:16px; height:16px; color:var(--faint); flex:none; transition:transform .18s ease; }
+  .sc4-voce[aria-expanded="true"] .sc4-freccia{ transform:rotate(90deg); }
+  .sc4-pannello{ padding:0 14px 14px; display:flex; flex-direction:column; gap:10px; }
+  .sc4-pannello[hidden]{ display:none; }
+  .sc4-pannello .sc-lista, .sc4-pannello .sc-foto{ margin-top:0; }
+  .sc4-tasti{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+  .sc4-bottone{ border:1px solid var(--border); background:var(--card); color:var(--indigo); font:inherit; font-size:13.5px; font-weight:700; border-radius:12px; padding:10px; cursor:pointer; }
+  .sc4-pallino{ width:18px; height:18px; flex:none; border-radius:50%; border:2px solid var(--amber); background:none; padding:0; cursor:pointer; align-self:center; }
+  .sc4-pallino:hover, .sc4-pallino:focus-visible{ background:var(--amber); }
+  .sc4-info{ align-items:baseline; }
+  .sc4-info-etichetta{ width:78px; flex:none; font-size:12px; font-weight:600; color:var(--muted); }
+  .sc4-info .sc-riga-testo.vuoto{ color:var(--indigo); font-weight:600; }
+  .sc4-menu{ background:var(--card); border-radius:16px; box-shadow:var(--shadow-md); padding:6px; display:flex; flex-direction:column; }
+  .sc4-menu[hidden]{ display:none; }
+  .sc4-menu-altro{ position:absolute; top:52px; right:12px; z-index:2; min-width:200px; color:var(--text); }
+  .sc4-menu-piu{ margin-bottom:8px; }
+  .sc4-menu .sc-azione{ border:0; padding:10px; border-radius:12px; background:none; gap:12px; }
+  .sc4-menu .sc-azione b{ font-size:14.5px; font-weight:600; color:var(--text); }
+  .sc4-menu .sc-azione-icona{ background:var(--indigo-soft); color:var(--indigo); }
+  .sc4-menu .sc-azione.evidenziata{ box-shadow:0 0 0 2px var(--indigo); }
+  .sc4-menu .sc-azione.evidenziata .sc-azione-icona{ background:var(--indigo); color:#fff; }
+  .sc4-piu{ width:38px; height:38px; flex:none; border-radius:50%; border:0; background:var(--card); color:var(--indigo); display:grid; place-items:center; cursor:pointer; box-shadow:0 1px 2px rgba(20,23,29,.08); }
+  .sc4-piu svg{ width:20px; height:20px; }
+  .sc4-piu[aria-expanded="true"] svg{ transform:rotate(45deg); }
+  .sc-modi[hidden]{ display:none; }
+  .sc-modi{ align-items:center; justify-content:space-between; }
+  .sc4-modo{ font-size:12.5px; font-weight:700; color:#8A5D00; }
   .scheda-foto-descrizione{ font-size:12.5px; line-height:1.45; color:var(--muted); padding:0 2px; }
   .cantiere-foto-nota-segno{ position:absolute; left:6px; bottom:6px; width:22px; height:22px; border-radius:7px; background:rgba(20,23,29,.62); color:#fff; display:flex; align-items:center; justify-content:center; pointer-events:none; }
   .cantiere-foto-nota-segno svg{ width:13px; height:13px; }
@@ -4184,7 +4244,7 @@
           </div>
           <div class="azienda-link-card-body">
             <div class="module-title">Promemoria</div>
-            <div class="module-sub" id="impPromemoriaSotto">Un avviso 30 minuti prima degli impegni</div>
+            <div class="module-sub" id="impPromemoriaSotto">Un avviso prima degli impegni</div>
           </div>
           <svg class="azienda-link-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
         </div>
@@ -7691,7 +7751,7 @@ function buildClientCard(c){
       <div class="row-name">${escapeHtml(c.name)}</div>
       ${c.desc && c.desc.trim()
         ? '<div class="client-lavoro">' + escapeHtml(c.desc.trim()) + '</div>'
-        : '<button type="button" class="client-lavoro vuoto">+ Scrivi cosa c\'è da fare</button>'}
+        : '<div class="client-lavoro vuoto">Nessun lavoro scritto</div>'}
     </div>
     <div class="cl-destra">
       ${c.value > 0 ? '<div class="row-value">€ ' + c.value.toLocaleString("it-IT") + '</div>' : ""}
@@ -7700,12 +7760,8 @@ function buildClientCard(c){
   `;
   card.addEventListener("click", () => mostraSchedaCliente(c));
   card.addEventListener("keydown", (e) => { if(e.key === "Enter"){ e.preventDefault(); mostraSchedaCliente(c); } });
-  const aggiungiLavoro = card.querySelector(".client-lavoro.vuoto");
-  if(aggiungiLavoro) aggiungiLavoro.addEventListener("click", (e) => {
-    e.stopPropagation();
-    openSheet("cliente", c);
-    setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="desc"]'); if(d) d.focus(); }, 50);
-  });
+  /* Tutta la riga apre la scheda (3/10/2026, tester n.2: "deve aprirsi
+     ovunque tocchi"); il lavoro si scrive da lì, in Info e note */
   return card;
 }
 
@@ -10417,6 +10473,11 @@ function collegaHubRacconta(){
     /* "Voglio cambiare password", "manda un feedback", "assegna un compito":
        la schermata giusta, subito, senza AI */
     if(provaAzioneDiretta(testo, chiudiHubAI)){
+      campo.value = "";
+      stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
+      return;
+    }
+    if(provaSezioneDalModello(testo)){
       campo.value = "";
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
@@ -13253,7 +13314,8 @@ function mandaFotoA(c){
   const testoFoto = "Ciao " + c.name.split(/\s+/)[0] + ", ti mando le foto del lavoro:\n" + foto.map(f => f.url).join("\n");
   const riga = document.createElement("div");
   riga.className = "scheda-invio";
-  [["WhatsApp", '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', () => window.open("https://wa.me/" + numeroWhatsApp(c.phone) + "?text=" + encodeURIComponent(testoFoto), "_blank")],
+  const comeFile = preparaFotoDaCondividere(foto.map(f => f.url));
+  [["WhatsApp", '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', () => { if(!comeFile.condividi()) window.open("https://wa.me/" + numeroWhatsApp(c.phone) + "?text=" + encodeURIComponent(testoFoto), "_blank"); }],
    ["Email", '<path d="M4 5h16v14H4z"/><path d="M4 6l8 7 8-7"/>', () => apriLinkEsterno("mailto:" + (c.email ? encodeURIComponent(c.email).replace(/%40/g, "@") : "") + "?subject=" + encodeURIComponent("Foto del lavoro") + "&body=" + encodeURIComponent(testoFoto))],
    ["EON", '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/>', () => inviaRisorsaEonInterna(c.name, testoFoto)]].forEach(([nome, icona, azione]) => {
     const b = document.createElement("button");
@@ -13736,6 +13798,17 @@ function rispondiSuiDati(l){
     if(!sue.length) return { titolo: cl.name, testo: "Nessuna entrata per " + cl.name + "." };
     return { titolo: cl.name, testo: (deve > 0 ? "Ti deve ancora **" + euroConti(deve) + "**" : "Ha pagato tutto") + "\nIncassati " + euroConti(pagato) };
   };
+  /* "Ho delle spese?" (3/10/2026, tester n.2: rispondeva l'AI): le uscite segnate, prima quelle
+     ancora da pagare, e il totale del mese. Si apre anche la pagina Uscite. */
+  if(l.tema === "spese"){
+    navigateTo("pagamenti");
+    if(!payments.length) return { titolo: "Spese", testo: "Nessuna spesa segnata. Dimmi per esempio \"spesa 120 euro gasolio\"." };
+    const daPagare = payments.filter(p => p.status !== "pagato");
+    const totDa = daPagare.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    const mese = contiAzienda("mese", oggi);
+    const riga = p => (p.supplier || p.desc || "Spesa") + " – " + euroConti(Number(p.amount) || 0) + (p.due ? " · " + p.due : "") + (p.status === "ritardo" ? " · in ritardo" : "");
+    return { titolo: "Spese", testo: (daPagare.length ? "Da pagare **" + euroConti(totDa) + "** (" + daPagare.length + ")\n" + daPagare.slice(0, 6).map(riga).join("\n") : "Niente da pagare: sono tutte pagate.") + "\nQuesto mese: uscite " + euroConti(mese.uscite) + ", pagate " + euroConti(mese.pagate) };
+  }
   if(l.tema === "crediti"){
     if(l.cliente) return soldiDi(l.cliente);
     return capisciDomandaSoldi("chi mi deve");
@@ -14461,11 +14534,6 @@ function normalizzaComando(t){
   return String(t || "").toLowerCase().replace(/\be-mail\b/g, "email").normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[’']/g, " ").replace(/[.!?,;:]+/g, " ").replace(/\s+/g, " ").trim();
 }
-const PAROLE_RICHIESTA_ACCOUNT = new Set(["voglio","vorrei","devo","posso","puoi","come","faccio","si","fa","a","ad","per","favore","eon","ehi","mi","me","la","il","lo","l","mia","mio","una","un","nuova","nuovo","di","del","dell","della","account","accesso","mettere","metti","impostare","imposta","cambiare","cambia","cambio","cambiami","modificare","modifica","aggiornare","aggiorna","reimpostare","reimposta","resettare","resetta","sostituire","ho","dimenticato","non","ricordo","piu","e","che","uso","usare","entrare","sistemare","sistema"]);
-function soloParoleAccount(n, chiavi){
-  return n.split(" ").every(p => PAROLE_RICHIESTA_ACCOUNT.has(p) || chiavi.includes(p) || /^(cambi|modific|aggiorn|reimpost|resett|sostitu|impost)\w*$/.test(p));
-}
-const VERBO_CAMBIO = /\b(cambi\w*|modific\w*|reimpost\w*|resett\w*|aggiorn\w*|nuov[ao]|dimenticat\w*|sostitui\w*|impost\w*|metter\w*|metti|sistem\w*)\b/;
 function apriVoceImpostazioni(id){
   navigateTo("impostazioni");
   const el = document.getElementById(id);
@@ -14477,20 +14545,8 @@ function capisciAzioneDiretta(testo){
   const n = normalizzaComando(testo);
   if(!n) return null;
   const parole = n.split(" ");
-  // Password
-  if(/\bpassword\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 12 && soloParoleAccount(n, ["password","chiave"])) return { tipo: "password" };
-  // Email (la propria: "cambia l'email di Rossi" ha una parola in più → AI)
-  if(/\b(email|mail|posta)\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 12 && soloParoleAccount(n, ["email","mail","e","indirizzo","posta","elettronica"])) return { tipo: "email" };
-  // Nome / nome dell'attività
-  if(/\bnome\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 10 && soloParoleAccount(n, ["nome","attivita","ditta","azienda","impresa","societa","profilo","cognome","mio"])) return { tipo: "profilo" };
-  // Face ID
-  if(/\b(face ?id|impronta|riconoscimento facciale)\b/.test(n) && parole.length <= 8 && /^(attiva|attivare|attivami|disattiva|disattivare|togli|togliere|metti|mettere|voglio|vorrei|usa|usare|imposta|impostare|face)\b/.test(n)) return { tipo: "faceid" };
-  // EON sulla Home del telefono
-  if(/^(?:come (?:faccio a |si fa a )?)?(?:metti|mettere|metto|installa|installare|installo|aggiungi|aggiungere)\s+(?:l app\s+)?(?:eon\s+)?(?:l app\s+)?(?:sulla|nella|alla)\s+(?:schermata\s+)?home\b/.test(n) || /^(?:come (?:faccio a )?)?(?:installa|installare|installo)\s+(?:l app\s+)?eon$/.test(n)) return { tipo: "installa" };
-  // Importa i clienti dalla rubrica o da Excel
-  if(/^(?:voglio |vorrei |devo |come (?:faccio a |posso )?)?(?:importa|importare|importo|carica|caricare|porta|portare|prendi|prendere|aggiungi|aggiungere)\s+(?:(?:i|tutti i|le|la|il|dei|miei|mie)\s+)*(?:clienti|contatti|rubrica|anagrafica)(?:\s+(?:dalla|dal|da|della|del)\s+(?:rubrica|telefono|excel|file|csv|fatture in cloud|gestionale|cellulare))?$/.test(n)) return { tipo: "importa" };
-  // Esci
-  if(/^(?:esci|uscire|voglio uscire|fammi uscire|disconnettiti|disconnetti|logout)(?: dall account| da eon| dall app)?$/.test(n)) return { tipo: "esci" };
+  /* Password, email dell'account, nome dell'attività, Face ID, EON sulla Home, importa i clienti,
+     esci: dal 3/10/2026 li riconosce il modello (catalogo dell'app, provaSezioneDalModello). */
   // Feedback, suggerimenti, "dovreste aggiungere…"
   let m = n.match(/^(?:voglio |vorrei |devo )?(?:mandare|manda|mando|inviare|invia|lasciare|lascia|scrivere|scrivi|fare|fai|dare|dai)\s+(?:un |una |il |la )?(?:feedback|suggerimento|segnalazione)\b\s*(?:a eon\s*)?(?:che\s+|su\s+|per\s+)?(.*)$/);
   if(m) return { tipo: "feedback", testo: pulisciTestoFeedback(testo, m[1]) };
@@ -14514,22 +14570,7 @@ function provaAzioneDiretta(testo, primaDiAprire){
   const a = capisciAzioneDiretta(testo);
   if(!a) return false;
   if(typeof primaDiAprire === "function") primaDiAprire();
-  if(a.tipo === "password"){
-    apriVoceImpostazioni("impVocePassword");
-    const c = document.getElementById("impCampoPassword"); if(c) c.focus();
-  } else if(a.tipo === "email"){
-    navigateTo("impostazioni"); apriAccount(true);
-  } else if(a.tipo === "profilo"){
-    apriVoceImpostazioni("impVoceProfilo");
-  } else if(a.tipo === "faceid"){
-    if(!apriVoceImpostazioni("impVoceFaceId")) showAIToast("Face ID", "Su questo telefono non si può usare: entra con email e password.");
-  } else if(a.tipo === "installa"){
-    mostraComeInstallare();
-  } else if(a.tipo === "importa"){
-    navigateTo("clienti"); apriImportaClienti();
-  } else if(a.tipo === "esci"){
-    esciDallAccount();
-  } else if(a.tipo === "feedback"){
+  if(a.tipo === "feedback"){
     apriFeedback(a.testo);
   } else if(a.tipo === "compito"){
     navigateTo("assegna-compiti");
@@ -16725,6 +16766,15 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       return;
     }
 
+    /* Una sezione dell'app detta in qualunque modo ("metti EON sulla home", "voglio aiutare EON a
+       crescere"): la riconosce il modello, la apre il codice (catalogo, 3/10/2026). Dopo le pagine
+       dette per nome, le cartelle e i comandi che l'app sa già fare ("cancella tutti gli appunti"),
+       prima di chi farebbe della frase un appunto ("Devo mettere EON sulla home" non è un da fare). */
+    if(!inContinuazione && provaSezioneDalModello(testo)){
+      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "sezione_app");
+      return;
+    }
+
     /* "Annulla gli appuntamenti di domani": lista e conferma, senza AI.
        Col verbo detto dando del tu ("mi cancelli l'appuntamento con Belle")
        letto dal lettore come comando (29/09/2026). */
@@ -17957,7 +18007,9 @@ function apriRisorsaCard(titolo, corpoEl, piedeEl){
   piede.innerHTML = "";
   if(piedeEl){ piede.appendChild(piedeEl); piede.style.display = ""; }
   else piede.style.display = "none";
-  document.getElementById("risorsaOverlay").style.display = "flex";
+  const overlay = document.getElementById("risorsaOverlay");
+  overlay.classList.remove("sc4-aperta"); // la scheda cliente la rimette dopo
+  overlay.style.display = "flex";
   corpo.scrollTop = 0; // una card nuova parte dall'inizio, non da dove era la precedente
 }
 function chiudiRisorsaCard(){
@@ -18051,22 +18103,58 @@ function mostraSchedaCliente(c, opzioni){
   const corpo = document.createElement("div");
   corpo.className = "scheda-cliente";
 
-  // Chi è e a che punto è il lavoro
+  /* Scheda come la proposta 4 "Prossima cosa" (3/10/2026, scelta da Andrea
+     dopo il tester n.2: "troppo confusionaria"). In alto, nel blu: nome,
+     indirizzo e stato, la prossima cosa da fare e i contatti; ⋯ (modifica,
+     link, archivia) e il cestino. Sotto un solo elenco che si apre a tocco:
+     Impegni, Foto e cartelle, Appunti, Documenti, Info e note. In fondo
+     "+" (foto, galleria, appunto, cartella) e "Chiedi a EON". */
+  const nomeBreve = c.name.split(" ")[0];
+  const ico = (path, cls) => `<svg${cls ? ' class="' + cls + '"' : ""} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
   const testa = document.createElement("div");
-  testa.className = "sc-testa";
-  const iniziali = c.name.split(" ").slice(0, 2).map(w => w[0] || "").join("").toUpperCase();
-  testa.innerHTML = `<div class="sc-avatar" style="background:${coloreCliente(c)}">${escapeHtml(iniziali)}</div>
-    <div class="sc-testa-testo">
-      <div class="sc-stato"><span class="sc-pallino ${escapeHtml(c.status || "attivo")}"></span>${escapeHtml(ETICHETTA_STATO_CLIENTE[c.status] || "Lavoro in corso")}${c.value > 0 ? " · €" + c.value.toLocaleString("it-IT") : ""}${c.archived ? " · archiviato" : ""}</div>
-      <div class="sc-lavoro${c.desc && c.desc.trim() ? "" : " vuoto"}">${c.desc && c.desc.trim() ? escapeHtml(c.desc.trim()) : "Tocca per scrivere il lavoro da fare"}</div>
-    </div>`;
-  testa.querySelector(".sc-lavoro").addEventListener("click", () => { chiudiRisorsaCard(); openSheet("cliente", c); setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="desc"]'); if(d) d.focus(); }, 50); });
-  corpo.appendChild(testa);
+  testa.className = "sc4-testa";
+  const barra = document.createElement("div");
+  barra.className = "sc4-barra";
+  barra.innerHTML = `<button type="button" class="sc4-tasto" data-sc4="chiudi" aria-label="Chiudi la scheda">${ico('<path d="M18 6L6 18M6 6l12 12"/>')}</button>
+    <span class="sc4-spazio"></span>
+    <button type="button" class="sc4-tasto" data-sc4="altro" aria-label="Altro: modifica, link cliente, archivia" aria-expanded="false">${ico('<path d="M5 12h.01M12 12h.01M19 12h.01"/>', "spesso")}</button>
+    <button type="button" class="sc4-tasto" data-sc4="elimina" aria-label="Elimina cliente">${ico('<path d="M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/>')}</button>`;
+  testa.appendChild(barra);
+  const menuAltro = document.createElement("div");
+  menuAltro.className = "sc4-menu sc4-menu-altro"; menuAltro.hidden = true;
+  testa.appendChild(menuAltro);
+  barra.querySelector('[data-sc4="chiudi"]').addEventListener("click", chiudiRisorsaCard);
+  barra.querySelector('[data-sc4="altro"]').addEventListener("click", (e) => {
+    menuAltro.hidden = !menuAltro.hidden;
+    e.currentTarget.setAttribute("aria-expanded", String(!menuAltro.hidden));
+  });
+  barra.querySelector('[data-sc4="elimina"]').addEventListener("click", () => chiediEliminaCliente(c));
+
+  const nome = document.createElement("div");
+  nome.className = "sc4-nome"; nome.textContent = c.name;
+  const sotto = document.createElement("div");
+  sotto.className = "sc4-sotto";
+  sotto.textContent = [c.address && c.address.trim(), ETICHETTA_STATO_CLIENTE[c.status] || "Lavoro in corso", c.value > 0 ? "€\u00a0" + c.value.toLocaleString("it-IT") : "", c.archived ? "archiviato" : ""].filter(Boolean).join(" · ");
+  testa.appendChild(nome); testa.appendChild(sotto);
+
+  // La prossima cosa: il primo impegno da oggi in poi (come lo legge il Calendario)
+  const oggi0 = new Date(); oggi0.setHours(0, 0, 0, 0);
+  const impegni = impegniDelCliente(c).map(i => ({ ...i, data: interpretaQuando(i.quando) }))
+    .filter(i => !i.data || i.data >= oggi0)
+    .sort((a, b) => (a.data ? a.data.getTime() : Infinity) - (b.data ? b.data.getTime() : Infinity));
+  const prossima = document.createElement("button");
+  prossima.type = "button"; prossima.className = "sc4-prossima";
+  prossima.innerHTML = '<span class="sc4-etichetta">PROSSIMA COSA</span><span class="sc4-prossima-testo"></span>';
+  prossima.querySelector(".sc4-prossima-testo").textContent = impegni.length
+    ? [impegni[0].quando, impegni[0].titolo].filter(Boolean).join(" · ") + (impegni.length > 1 ? "  (+" + (impegni.length - 1) + ")" : "")
+    : "Niente in programma";
+  prossima.addEventListener("click", () => apriSezione("impegni"));
+  testa.appendChild(prossima);
 
   // Contatti in un tocco
   const tel = numeroPerLink(c.phone);
   const contatti = document.createElement("div");
-  contatti.className = "sc-contatti";
+  contatti.className = "sc-contatti sc4-contatti";
   const aggiungiContatto = (campo) => { chiudiRisorsaCard(); openSheet("cliente", c); setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="' + campo + '"]'); if(d) d.focus(); }, 50); };
   [
     { nome: "Chiama", icona: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2z"/>', href: tel ? "tel:" + tel : "", manca: "phone" },
@@ -18080,54 +18168,98 @@ function mostraSchedaCliente(c, opzioni){
     if(k.href){ el.href = k.href; if(/^https/.test(k.href)){ el.target = "_blank"; el.rel = "noopener"; } }
     else el.type = "button";
     el.dataset.contatto = k.nome;
-    el.innerHTML = `<span class="sc-contatto-icona"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${k.icona}</svg></span><span>${k.nome}</span>`;
+    el.innerHTML = `<span class="sc-contatto-icona">${ico(k.icona)}</span><span>${k.nome}</span>`;
     if(k.azione) el.addEventListener("click", k.azione);
     else if(!k.href) el.addEventListener("click", () => aggiungiContatto(k.manca));
     contatti.appendChild(el);
   });
-  corpo.appendChild(contatti);
+  testa.appendChild(contatti);
+  corpo.appendChild(testa);
 
-  // Azioni sul cantiere
+  const dentro = document.createElement("div");
+  dentro.className = "sc4-dentro";
+  corpo.appendChild(dentro);
+
   const fotoCliente = cantiereFoto.filter(f => f.clientId === c.id).slice().sort((a, b) => new Date(b.created) - new Date(a.created));
-  const appuntiCliente = cantiereAppunti.filter(a => a.clientId === c.id).slice().sort((a, b) => new Date(b.created) - new Date(a.created));
   const chat = chatDelCliente(c);
   const documentiCliente = chat ? chat.messages.filter(m => m.eventType === "doc" || m.fileUrl) : [];
-  const azioni = document.createElement("div");
-  azioni.className = "sc-azioni";
-  const azione = (id, nome, sotto, icona, fn) => {
+  const cartelleCliente = cartelle.filter(x => x.clientId === c.id);
+
+  // Le azioni (stesse di prima) nei due menu: "⋯" in alto e "+" in fondo
+  const azione = (menu, id, nomeAz, icona, fn) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "sc-azione"; b.dataset.azione = id;
-    b.innerHTML = `<span class="sc-azione-icona"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${icona}</svg></span><span class="sc-azione-testo"><b>${nome}</b><small>${sotto}</small></span>`;
-    b.addEventListener("click", fn);
-    azioni.appendChild(b);
+    b.innerHTML = `<span class="sc-azione-icona">${ico(icona)}</span><b>${nomeAz}</b>`;
+    b.addEventListener("click", () => { menu.hidden = true; fn(); });
+    menu.appendChild(b);
     return b;
   };
-  azione("foto", "Scatta foto", fotoCliente.length ? fotoCliente.length + (fotoCliente.length === 1 ? " foto" : " foto") : "Nessuna foto", '<path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/>', () => {
-    clienteIdPerSchedaFoto = c.id;
-    document.getElementById("schedaClienteFotoInput").click();
-  });
-  azione("galleria", "Galleria", "Più foto insieme", '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>', () => apriGalleriaFoto({ clienteId: c.id }));
-  azione("appunto", "Appunto", appuntiCliente.length ? appuntiCliente.length + (appuntiCliente.length === 1 ? " appunto" : " appunti") : "Scrivi o detta", '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', () => impostaModo("appunto", true));
-  azione("documenti", "Documenti", documentiCliente.length ? documentiCliente.length + (documentiCliente.length === 1 ? " documento" : " documenti") : "Nessun documento", '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>', () => {
-    const docs = documentiCliente.slice().reverse().slice(0, 10).map(m => m.eventType === "doc"
-      ? { id: m.id, tipo: "preventivo_o_fattura", titolo: m.title, riepilogo: m.text || null, importoTesto: m.amount || null, url: null, quandoTesto: m.time, dati: m.docDati || null }
-      : { id: m.id, tipo: "allegato", titolo: m.fileName || "(senza nome)", url: m.fileUrl, quandoTesto: m.time });
-    mostraRisorsaDocumenti(docs, c.name);
-  });
-  azione("modifica", "Modifica", "Dati del cliente", '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>', () => { chiudiRisorsaCard(); openSheet("cliente", c); });
-  /* Dalla lista Clienti semplice (27/09/2026) queste due stanno qui */
-  azione("link", "Link cliente", "La sua pagina con lavori e documenti", '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>', async () => { await shareClientLink(c); });
-  azione("archivia", c.archived ? "Riattiva" : "Archivia", c.archived ? "Torna tra i clienti" : "Lavoro finito: toglilo dalle liste", c.archived ? '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>' : '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>', () => chiediArchivioCliente(c));
-  corpo.appendChild(azioni);
+  const scattaFoto = () => { clienteIdPerSchedaFoto = c.id; document.getElementById("schedaClienteFotoInput").click(); };
+  const dallaGalleria = () => apriGalleriaFoto({ clienteId: c.id });
+  const nuovaCartella = () => chiediNomeCartella(null, (nuova) => apriCardAppunti(nuova), c.id);
+  azione(menuAltro, "modifica", "Modifica dati", '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>', () => { chiudiRisorsaCard(); openSheet("cliente", c); });
+  azione(menuAltro, "link", "Link cliente", '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>', async () => { await shareClientLink(c); });
+  azione(menuAltro, "archivia", c.archived ? "Riattiva" : "Archivia", c.archived ? '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>' : '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>', () => chiediArchivioCliente(c));
 
-  // Stato lavori: impegni, appunti, foto
-  const sezione = (titolo) => { const s = document.createElement("div"); s.className = "risorsa-sezione"; s.textContent = titolo; corpo.appendChild(s); };
-  /* Le cartelle del cliente (30/09/2026, tester Simone: dentro "viale Italia 171" una
-     cartella "foto sinistro Del Santo" con solo quelle foto): foto e appunti insieme */
-  sezione("Cartelle");
+  // L'elenco: ogni voce si apre e si chiude sotto di sé
+  const elenco = document.createElement("div");
+  elenco.className = "sc4-elenco";
+  dentro.appendChild(elenco);
+  const sezioni = {};
+  const voce = (id, titolo, icona, conta) => {
+    const r = document.createElement("button");
+    r.type = "button"; r.className = "sc4-voce"; r.dataset.sezione = id; r.setAttribute("aria-expanded", "false");
+    r.innerHTML = `${ico(icona, "sc4-voce-icona")}<span class="sc4-voce-titolo"></span><span class="sc4-voce-conta"></span>${ico('<path d="M9 6l6 6-6 6"/>', "sc4-freccia")}`;
+    r.querySelector(".sc4-voce-titolo").textContent = titolo;
+    r.querySelector(".sc4-voce-conta").textContent = conta || "";
+    const pannello = document.createElement("div");
+    pannello.className = "sc4-pannello"; pannello.hidden = true;
+    r.addEventListener("click", () => apriSezione(id));
+    elenco.appendChild(r); elenco.appendChild(pannello);
+    sezioni[id] = { r, pannello };
+    return pannello;
+  };
+  function apriSezione(id){
+    const s = sezioni[id];
+    if(!s) return;
+    const apri = s.pannello.hidden;
+    Object.values(sezioni).forEach(x => { x.pannello.hidden = true; x.r.setAttribute("aria-expanded", "false"); });
+    if(apri){ s.pannello.hidden = false; s.r.setAttribute("aria-expanded", "true"); s.r.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+  }
+  const bottone = (testo, fai, classe) => { const b = document.createElement("button"); b.type = "button"; b.className = "sc4-bottone" + (classe ? " " + classe : ""); b.textContent = testo; b.addEventListener("click", fai); return b; };
+
+  // Impegni
+  const pImpegni = voce("impegni", "Impegni", '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>', impegni.length ? String(impegni.length) : "");
+  const listaImpegni = document.createElement("div");
+  listaImpegni.className = "sc-lista";
+  if(impegni.length) impegni.slice(0, 8).forEach(i => {
+    const r = document.createElement("div"); r.className = "sc-riga";
+    r.innerHTML = `<span class="sc-riga-punto"></span><span class="sc-riga-testo">${escapeHtml(i.titolo)}</span><span class="sc-riga-quando">${escapeHtml(i.quando)}</span>`;
+    // scorri a sinistra per eliminare, anche nella scheda (30/09/2026)
+    const w = i.id ? rendiScorrevole(r, () => { w.remove(); eliminaVoceCalendario({ tabella: i.tabella, id: i.id, title: i.titolo }); }) : r;
+    listaImpegni.appendChild(w);
+  });
+  else listaImpegni.innerHTML = '<div class="sc-vuoto">Nessun impegno. Dimmi "domani alle 9 sopralluogo" qui sotto.</div>';
+  pImpegni.appendChild(listaImpegni);
+
+  // Foto e cartelle (30/09/2026, tester Simone: dentro "viale Italia 171" una
+  // cartella "foto sinistro Del Santo" con solo quelle foto)
+  const pFoto = voce("foto", "Foto e cartelle", '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+    [fotoCliente.length ? fotoCliente.length + " foto" : "", cartelleCliente.length ? cartelleCliente.length + (cartelleCliente.length === 1 ? " cartella" : " cartelle") : ""].filter(Boolean).join(" · "));
+  if(fotoCliente.length){
+    const striscia = document.createElement("div");
+    striscia.className = "sc-foto";
+    fotoCliente.slice(0, 12).forEach(f => {
+      const img = document.createElement("img");
+      img.src = f.url; img.alt = f.nota || "Foto"; img.loading = "lazy";
+      img.addEventListener("click", () => mostraSchedaFoto(f, c.name));
+      striscia.appendChild(img);
+    });
+    pFoto.appendChild(striscia);
+  }
   const listaCartelle = document.createElement("div");
   listaCartelle.className = "cl-filtri sc-cartelle"; listaCartelle.id = "scCartelle";
-  cartelle.filter(x => x.clientId === c.id).forEach(x => {
+  cartelleCliente.forEach(x => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "cl-filtro";
     const n = cantiereFoto.filter(f => f.cartellaId === x.id).length + cantiereAppunti.filter(a => a.cartellaId === x.id).length;
@@ -18138,29 +18270,62 @@ function mostraSchedaCliente(c, opzioni){
   });
   const nuovaC = document.createElement("button");
   nuovaC.type = "button"; nuovaC.className = "cl-filtro"; nuovaC.id = "scCartellaNuova"; nuovaC.textContent = "+ Cartella";
-  nuovaC.addEventListener("click", () => chiediNomeCartella(null, (nuova) => apriCardAppunti(nuova), c.id));
+  nuovaC.addEventListener("click", nuovaCartella);
   listaCartelle.appendChild(nuovaC);
-  corpo.appendChild(listaCartelle);
-  const impegni = impegniDelCliente(c);
-  sezione("Impegni");
-  const listaImpegni = document.createElement("div");
-  listaImpegni.className = "sc-lista";
-  if(impegni.length) impegni.slice(0, 5).forEach(i => {
-    const r = document.createElement("div"); r.className = "sc-riga";
-    r.innerHTML = `<span class="sc-riga-punto"></span><span class="sc-riga-testo">${escapeHtml(i.titolo)}</span><span class="sc-riga-quando">${escapeHtml(i.quando)}</span>`;
-    // scorri a sinistra per eliminare, anche nella scheda (30/09/2026)
-    const w = i.id ? rendiScorrevole(r, () => { w.remove(); eliminaVoceCalendario({ tabella: i.tabella, id: i.id, title: i.titolo }); }) : r;
-    listaImpegni.appendChild(w);
-  });
-  else listaImpegni.innerHTML = '<div class="sc-vuoto">Nessun impegno. Dimmi "domani alle 9 sopralluogo" qui sotto.</div>';
-  corpo.appendChild(listaImpegni);
+  pFoto.appendChild(listaCartelle);
+  const tastiFoto = document.createElement("div");
+  tastiFoto.className = "sc4-tasti";
+  tastiFoto.appendChild(bottone("Scatta foto", scattaFoto));
+  tastiFoto.appendChild(bottone("Dalla galleria", dallaGalleria));
+  pFoto.appendChild(tastiFoto);
+
+  // Appunti: il pallino davanti all'appunto lo cancella (con "Annulla"), oppure scorri a sinistra
+  const appuntiCliente = () => cantiereAppunti.filter(a => a.clientId === c.id).slice().sort((a, b) => new Date(b.created) - new Date(a.created));
+  const pAppunti = voce("appunti", "Appunti", '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', appuntiCliente().length ? String(appuntiCliente().length) : "");
+  const listaAppunti = document.createElement("div");
+  listaAppunti.className = "sc-lista";
+  const disegnaAppunti = () => {
+    const tutti = appuntiCliente();
+    sezioni.appunti.r.querySelector(".sc4-voce-conta").textContent = tutti.length ? String(tutti.length) : "";
+    listaAppunti.innerHTML = "";
+    if(!tutti.length){ listaAppunti.innerHTML = '<div class="sc-vuoto">Nessun appunto. Tocca + qui sotto e scegli Appunto.</div>'; return; }
+    tutti.slice(0, 8).forEach(a => {
+      const r = document.createElement("div"); r.className = "sc-riga";
+      r.innerHTML = `<button type="button" class="sc4-pallino" aria-label="Elimina l'appunto"></button><span class="sc-riga-testo">${escapeHtml(a.testo)}</span><span class="sc-riga-quando">${a.created ? new Date(a.created).toLocaleDateString("it-IT", { day: "2-digit", month: "short" }) : ""}</span>`;
+      const togli = async () => { await cancellaAppuntiScelti([a]); disegnaAppunti(); };
+      r.querySelector(".sc4-pallino").addEventListener("click", (e) => { e.stopPropagation(); togli(); });
+      listaAppunti.appendChild(a.id ? rendiScorrevole(r, togli) : r);
+    });
+  };
+  disegnaAppunti();
+  pAppunti.appendChild(listaAppunti);
+  pAppunti.appendChild(bottone("Scrivi un appunto", () => impostaModo("appunto", true)));
+
+  // Documenti
+  const pDocumenti = voce("documenti", "Documenti", '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>', documentiCliente.length ? String(documentiCliente.length) : "");
+  if(documentiCliente.length){
+    const listaDoc = document.createElement("div");
+    listaDoc.className = "sc-lista";
+    const docs = documentiCliente.slice().reverse().slice(0, 10).map(m => m.eventType === "doc"
+      ? { id: m.id, tipo: "preventivo_o_fattura", titolo: m.title, riepilogo: m.text || null, importoTesto: m.amount || null, url: null, quandoTesto: m.time, dati: m.docDati || null }
+      : { id: m.id, tipo: "allegato", titolo: m.fileName || "(senza nome)", url: m.fileUrl, quandoTesto: m.time });
+    docs.forEach(d => {
+      const r = document.createElement("button"); r.type = "button"; r.className = "sc-riga";
+      r.innerHTML = `<span class="sc-riga-punto"></span><span class="sc-riga-testo"></span><span class="sc-riga-quando"></span>`;
+      r.querySelector(".sc-riga-testo").textContent = d.titolo || "Documento";
+      r.querySelector(".sc-riga-quando").textContent = d.quandoTesto || "";
+      r.addEventListener("click", () => mostraRisorsaDocumenti([d], c.name));
+      listaDoc.appendChild(r);
+    });
+    pDocumenti.appendChild(listaDoc);
+  }else pDocumenti.innerHTML = '<div class="sc-vuoto">Nessun documento. Dimmi "fai un preventivo a ' + escapeHtml(nomeBreve) + '".</div>';
 
   // Edile: i SAL del cantiere (28/09/2026)
   if(currentProfession === "edile"){
-    sezione("SAL");
+    const suoi = salDelCliente(c.id);
+    const pSal = voce("sal", "SAL", '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>', suoi.length ? String(suoi.length) : "");
     const listaSal = document.createElement("div");
     listaSal.className = "sc-lista"; listaSal.id = "scSal";
-    const suoi = salDelCliente(c.id);
     if(!suoi.length) listaSal.innerHTML = '<div class="sc-vuoto">Nessun SAL. Dimmi "SAL 30% ' + escapeHtml(c.name) + '".</div>';
     suoi.forEach(x => {
       const r = document.createElement("div"); r.className = "sc-riga sc-sal";
@@ -18179,52 +18344,46 @@ function mostraSchedaCliente(c, opzioni){
     nuovo.type = "button"; nuovo.className = "sc-sal-nuovo"; nuovo.textContent = "+ Nuovo SAL";
     nuovo.addEventListener("click", () => nuovoSalDaScheda(c));
     listaSal.appendChild(nuovo);
-    corpo.appendChild(listaSal);
+    pSal.appendChild(listaSal);
   }
 
   // Elettricista: le dichiarazioni di conformità del cliente (28/09/2026)
   if(currentProfession === "elettricista"){
-    sezione("Dichiarazioni di conformità");
+    const sue = dicoDelCliente(c.id);
+    const pDico = voce("dico", "Dichiarazioni di conformità", '<path d="M13 2L3 14h9l-1 8 10-12h-9z"/>', sue.length ? String(sue.length) : "");
     const listaDico = document.createElement("div");
     listaDico.className = "sc-lista"; listaDico.id = "scDico";
-    const sue = dicoDelCliente(c.id);
     if(!sue.length) listaDico.innerHTML = '<div class="sc-vuoto">Nessuna. Dimmi "fai la DiCo per ' + escapeHtml(c.name) + '".</div>';
     sue.forEach(x => { const r = rigaDico(x, false); const w = x.id ? rendiScorrevole(r, () => { w.remove(); cestinaConAnnulla({ array: dichiarazioni, voce: x, tabella: "dichiarazioni_conformita", ridisegna: () => {}, titolo: "Dichiarazione nel cestino", testo: "n. " + x.numero + " · " + c.name }); }) : r; listaDico.appendChild(w); });
     const nuova = document.createElement("button");
     nuova.type = "button"; nuova.className = "sc-sal-nuovo"; nuova.textContent = "+ Nuova dichiarazione";
     nuova.addEventListener("click", () => { chiudiRisorsaCard(); apriDico(c, ""); });
     listaDico.appendChild(nuova);
-    corpo.appendChild(listaDico);
+    pDico.appendChild(listaDico);
   }
 
-  sezione("Appunti");
-  const listaAppunti = document.createElement("div");
-  listaAppunti.className = "sc-lista";
-  const disegnaAppunti = () => {
-    const elenco = cantiereAppunti.filter(a => a.clientId === c.id).slice().sort((a, b) => new Date(b.created) - new Date(a.created));
-    listaAppunti.innerHTML = "";
-    if(!elenco.length){ listaAppunti.innerHTML = '<div class="sc-vuoto">Nessun appunto per questo cliente.</div>'; return; }
-    elenco.slice(0, 5).forEach(a => {
-      const r = document.createElement("div"); r.className = "sc-riga";
-      r.innerHTML = `<span class="sc-riga-punto appunto"></span><span class="sc-riga-testo">${escapeHtml(a.testo)}</span><span class="sc-riga-quando">${a.created ? new Date(a.created).toLocaleDateString("it-IT", { day: "2-digit", month: "short" }) : ""}</span>`;
-      listaAppunti.appendChild(a.id ? rendiScorrevole(r, async () => { await cancellaAppuntiScelti([a]); disegnaAppunti(); }) : r);
-    });
-  };
-  disegnaAppunti();
-  corpo.appendChild(listaAppunti);
-
-  if(fotoCliente.length){
-    sezione("Foto");
-    const striscia = document.createElement("div");
-    striscia.className = "sc-foto";
-    fotoCliente.slice(0, 8).forEach(f => {
-      const img = document.createElement("img");
-      img.src = f.url; img.alt = f.nota || "Foto"; img.loading = "lazy";
-      img.addEventListener("click", () => mostraSchedaFoto(f, c.name));
-      striscia.appendChild(img);
-    });
-    corpo.appendChild(striscia);
-  }
+  // Info e note: il lavoro da fare e i dati del cliente; tocco → modifica
+  const pInfo = voce("info", "Info e note", '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>', "");
+  const info = document.createElement("div");
+  info.className = "sc-lista";
+  const modificaCampo = (campo) => { chiudiRisorsaCard(); openSheet("cliente", c); setTimeout(() => { const d = document.querySelector('#sheetBody [data-field="' + campo + '"]'); if(d) d.focus(); }, 50); };
+  [
+    ["Lavoro", c.desc && c.desc.trim(), "desc", "Scrivi il lavoro da fare"],
+    ["Telefono", c.phone && c.phone.trim(), "phone", "Aggiungi il telefono"],
+    ["Email", c.email && c.email.trim(), "email", "Aggiungi l'email"],
+    ["Indirizzo", c.address && c.address.trim(), "address", "Aggiungi l'indirizzo"],
+    ["Valore", c.value > 0 ? "€ " + c.value.toLocaleString("it-IT") : "", "value", "Aggiungi il valore del lavoro"],
+  ].forEach(([etichetta, valore, campo, vuoto]) => {
+    const r = document.createElement("button"); r.type = "button"; r.className = "sc-riga sc4-info";
+    r.innerHTML = '<span class="sc4-info-etichetta"></span><span class="sc-riga-testo"></span>';
+    r.querySelector(".sc4-info-etichetta").textContent = etichetta;
+    const v = r.querySelector(".sc-riga-testo");
+    v.textContent = valore || vuoto;
+    if(!valore) v.classList.add("vuoto");
+    r.addEventListener("click", () => modificaCampo(campo));
+    info.appendChild(r);
+  });
+  pInfo.appendChild(info);
 
   const chatScheda = document.createElement("div");
   chatScheda.className = "scheda-chat";
@@ -18239,24 +18398,34 @@ function mostraSchedaCliente(c, opzioni){
   };
   if(opzioni.messaggio) bolla("eon", opzioni.messaggio);
 
-  // In fondo: parla con EON di questo cliente, oppure prendi un appunto
+  // In fondo: "+" (foto, galleria, appunto, cartella) e parla con EON di questo cliente
   const piede = document.createElement("div");
   piede.className = "sc-piede";
+  const menuPiu = document.createElement("div");
+  menuPiu.className = "sc4-menu sc4-menu-piu"; menuPiu.hidden = true;
+  azione(menuPiu, "foto", "Scatta foto", '<path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/>', scattaFoto);
+  azione(menuPiu, "galleria", "Foto dalla galleria", '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>', dallaGalleria);
+  azione(menuPiu, "appunto", "Appunto", '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', () => impostaModo("appunto", true));
+  azione(menuPiu, "cartella", "Nuova cartella", '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5"/>', nuovaCartella);
   const modi = document.createElement("div");
-  modi.className = "sc-modi";
-  modi.innerHTML = '<button type="button" data-modo="eon">Chiedi a EON</button><button type="button" data-modo="appunto">Appunto</button>';
+  modi.className = "sc-modi"; modi.hidden = true;
+  modi.innerHTML = '<span class="sc4-modo"></span><button type="button" data-modo="eon" aria-label="Torna a Chiedi a EON">Annulla</button>';
   const composer = document.createElement("div");
   composer.className = "scheda-composer";
+  const piu = document.createElement("button");
+  piu.type = "button"; piu.className = "sc4-piu"; piu.setAttribute("aria-label", "Aggiungi: foto, galleria, appunto, cartella"); piu.setAttribute("aria-expanded", "false");
+  piu.innerHTML = ico('<path d="M12 5v14M5 12h14"/>');
+  piu.addEventListener("click", () => { menuPiu.hidden = !menuPiu.hidden; piu.setAttribute("aria-expanded", String(!menuPiu.hidden)); });
   const campo = document.createElement("textarea");
   campo.rows = 1; campo.className = "scheda-campo"; campo.id = "schedaClienteCampo";
   const invia = document.createElement("button");
   invia.type = "button"; invia.className = "scheda-invia"; invia.setAttribute("aria-label", "Invia");
   invia.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
-  const nomeBreve = c.name.split(" ")[0];
   function impostaModo(modo, focus){
     stato.modo = modo;
-    modi.querySelectorAll("button").forEach(b => b.classList.toggle("attivo", b.dataset.modo === modo));
-    campo.placeholder = modo === "appunto" ? "Appunto per " + nomeBreve + "…" : "Chiedi a EON per " + nomeBreve + "…";
+    modi.hidden = modo !== "appunto";
+    modi.querySelector(".sc4-modo").textContent = "Appunto per " + nomeBreve;
+    campo.placeholder = modo === "appunto" ? "Scrivi o detta l'appunto…" : "Chiedi a EON…";
     if(focus) campo.focus();
   }
   modi.addEventListener("click", (e) => { const b = e.target.closest("button[data-modo]"); if(b) impostaModo(b.dataset.modo, true); });
@@ -18315,15 +18484,28 @@ function mostraSchedaCliente(c, opzioni){
   const mic = creaMicRapido((t) => manda(t));
   mic.classList.add("scheda-mic");
   mic.setAttribute("aria-label", "Parla");
-  composer.appendChild(mic); composer.appendChild(campo); composer.appendChild(invia);
-  piede.appendChild(modi); piede.appendChild(composer);
+  composer.appendChild(piu); composer.appendChild(campo); composer.appendChild(mic); composer.appendChild(invia);
+  piede.appendChild(menuPiu); piede.appendChild(modi); piede.appendChild(composer);
   impostaModo(stato.modo, false);
 
   apriRisorsaCard(c.name, corpo, piede);
+  document.getElementById("risorsaOverlay").classList.add("sc4-aperta");
+  // Cliente appena creato e "fagli una foto": il "+" si apre con "Scatta foto" in evidenza
   if(opzioni.evidenziaFoto){
-    const b = corpo.querySelector('.sc-azione[data-azione="foto"]');
+    menuPiu.hidden = false; piu.setAttribute("aria-expanded", "true");
+    const b = menuPiu.querySelector('.sc-azione[data-azione="foto"]');
     if(b) b.classList.add("evidenziata");
   }
+}
+
+/* Il cestino nella scheda (3/10/2026, tester n.2: "eliminazione cliente,
+   ancora non si riesce"): prima chiede, poi cliente e chat vanno nel
+   Cestino con "Annulla". */
+function chiediEliminaCliente(c){
+  showAIToastConDecisione("Eliminare il cliente?", 'Elimino "' + escapeHtml(c.name) + '" con la sua chat? Lo ritrovi nel Cestino.', async () => {
+    chiudiRisorsaCard();
+    await eliminaClienteConAnnulla(c);
+  }, null, "Elimina", "Annulla");
 }
 
 let clienteIdPerSchedaFoto = null;
@@ -18601,8 +18783,38 @@ function mostraSchedaFoto(foto, clienteNome, opzioni){
   apriRisorsaCard(clienteNome ? "Foto — " + clienteNome : "Foto", corpo, piede);
 }
 
-/* Invio della foto: WhatsApp ed Email con il link e la nota, EON nella
-   chat del cliente. */
+/* Foto mandata come foto vera, non come link (3/10/2026, tester n.2): il
+   file si prepara appena si apre la card (il telefono vuole che
+   "condividi" parta subito dal tocco), poi si apre il foglio di
+   condivisione del telefono, dove c'è WhatsApp. Se il telefono non lo
+   permette (o il file non è arrivato): il link, come prima. */
+function preparaFotoDaCondividere(urls){
+  const pronti = [];
+  Promise.all(urls.map(async (u, i) => {
+    try{
+      const firmato = window.EonFile ? await EonFile.firma(u) : u;
+      const r = await fetch(firmato || u);
+      if(!r.ok) return null;
+      const blob = await r.blob();
+      const tipo = blob.type && blob.type.startsWith("image/") ? blob.type : "image/jpeg";
+      return new File([blob], "foto-" + (i + 1) + "." + (tipo.split("/")[1] || "jpg").replace("jpeg", "jpg"), { type: tipo });
+    }catch(_){ return null; }
+  })).then(files => files.forEach(f => { if(f) pronti.push(f); }));
+  return {
+    // true se è partito il foglio di condivisione del telefono con le foto
+    condividi(){
+      if(!pronti.length || !navigator.share || !navigator.canShare) return false;
+      const dati = { files: pronti.slice() };
+      if(!navigator.canShare(dati)) return false;
+      navigator.share(dati).catch(() => {});
+      return true;
+    }
+  };
+}
+
+/* Invio della foto: WhatsApp (la foto vera, se il telefono lo permette;
+   altrimenti il link) ed Email con il link e la nota, EON nella chat del
+   cliente. */
 function creaRigaInvioFoto(foto, clienteNome, getNota){
   const riga = document.createElement("div");
   riga.className = "scheda-invio";
@@ -18613,8 +18825,10 @@ function creaRigaInvioFoto(foto, clienteNome, getNota){
      giorni. La finestra di WhatsApp si apre subito (vale il tocco), il
      messaggio arriva appena il link è pronto. */
   const linkFoto = () => window.EonFile ? EonFile.perCondividere(foto.url) : Promise.resolve(foto.url);
+  const comeFile = preparaFotoDaCondividere([foto.url]);
   const voci = [
     { nome: "WhatsApp", icona: '<path d="M20 12a8 8 0 0 1-11.8 7l-4.2 1 1.1-4A8 8 0 1 1 20 12z"/>', azione: () => {
+      if(comeFile.condividi()) return;
       const w = window.open("", "_blank");
       linkFoto().then(link => { const u = "https://wa.me/" + numeroWhatsApp(cliente && cliente.phone) + "?text=" + encodeURIComponent(testo(link)); if(w) w.location.href = u; else window.location.href = u; });
     } },
@@ -18984,6 +19198,68 @@ function datiDalModello(testo){
   const cliente = clienteDelModello(m) || (detto ? clienteDaNomeDetto(detto) : null);
   return { azione: "dati", tema: m.tema === "telefono" ? "contatto" : m.tema, cliente: cliente || null, nomeDetto: cliente ? "" : detto,
     luogo: detto || m.indirizzo || "", quando: m.quando || {}, testo: String(testo || "").trim(), originale: String(testo || "").trim(), forte: true, modello: m };
+}
+/* CATALOGO DELL'APP (3/10/2026, Andrea: "Devo mettere EON sulla schermata home" → la sezione
+   giusta, subito, "e deve valere per tutto"). Che la frase chieda una sezione dell'app, e quale,
+   lo dice il modello (cassetto "app" e la sua terza uscita, 40 sezioni). Il codice la apre e
+   basta. Se il modello non è sicuro di quale: 2-3 tasti, niente AI. "Esci" chiede sempre prima. */
+/* Soglie misurate su 7.390 frasi dei giri 5-20 (3/10/2026): aprire con cassetto ≥ 0,45 e sezione
+   ≥ 0,6 non sbaglia mai; i tasti di scelta (sezione incerta) solo con cassetto ≥ 0,6 ("voglio
+   provare quei tessuti idrorepellenti…" era "app" a 0,55 con la sezione a 0,2). */
+const SICURO_APP = 0.45, SICURO_SEZIONE = 0.6, SICURO_APP_SCELTA = 0.6;
+const SEZIONI_APP = {
+  home: { nome: "Home", pagina: "home" }, oggi: { nome: "Oggi", pagina: "oggi" }, clienti: { nome: "Clienti", pagina: "clienti" },
+  calendario: { nome: "Calendario", pagina: "calendario" }, messaggi: { nome: "Messaggi", pagina: "chat" }, chiamate: { nome: "Chiamate", pagina: "chiamate" },
+  cestino: { nome: "Cestino", apri: () => { navigateTo("cestino"); showAIToast("Cestino", "Tocca «Svuota cestino» per eliminare tutto per sempre."); } }, menu: { nome: "Menu", pagina: "gestisci-azienda" }, obiettivi: { nome: "Obiettivi", pagina: "cresci" },
+  compiti: { nome: "Compiti alla squadra", pagina: "assegna-compiti" }, documenti_impresa: { nome: "Documenti dell'impresa", pagina: "documenti-impresa" },
+  documenti: { nome: "Documenti", pagina: "cantiere-documenti" }, carta_intestata: { nome: "Carta intestata", pagina: "carta-intestata" },
+  lettere: { nome: "Lettere", pagina: "crea-lettera" }, cartello: { nome: "Cartello di cantiere", pagina: "crea-cartello" },
+  mente: { nome: "Mente (appunti)", apri: () => apriCardAppunti(null) }, foto: { nome: "Foto", pagina: "cantiere-foto" },
+  cantieri: { nome: "Cantieri", pagina: "cantiere-cliente" }, impostazioni: { nome: "Impostazioni", pagina: "impostazioni" },
+  fatture_preventivi: { nome: "Fatture e preventivi", pagina: "fatture-preventivi", prima: () => { filtroFatturePreventivi = "tutti"; } },
+  conti: { nome: "Conti dell'azienda", pagina: "azienda" }, uscite: { nome: "Uscite e spese", pagina: "pagamenti" }, entrate: { nome: "Entrate e incassi", pagina: "entrate" },
+  assemblee: { nome: "Assemblee", pagina: "assemblee" }, urgenze: { nome: "Urgenze", apri: () => apriUrgenze() },
+  dico: { nome: "Dichiarazioni di conformità", mestiere: "elettricista", apri: () => { navigateTo("cantiere-documenti"); apriElencoDico(); } },
+  installa: { nome: "EON sulla schermata Home", apri: () => mostraComeInstallare() },
+  migliora: { nome: "Aiuta EON a crescere", apri: () => { apriVoceImpostazioni("impVocePrivacy"); setTimeout(() => { const m = document.getElementById("impMigliora"); if(m) m.scrollIntoView({ block: "center", behavior: "smooth" }); }, 80); } },
+  privacy: { nome: "Privacy e dati", apri: () => apriVoceImpostazioni("impVocePrivacy") },
+  promemoria: { nome: "Promemoria", apri: () => apriVoceImpostazioni("impVocePromemoria") },
+  faceid: { nome: "Face ID", apri: () => { if(!apriVoceImpostazioni("impVoceFaceId")) showAIToast("Face ID", "Su questo telefono non si può usare: entra con email e password."); } },
+  password: { nome: "Password", apri: () => { apriVoceImpostazioni("impVocePassword"); const c = document.getElementById("impCampoPassword"); if(c) c.focus(); } },
+  email_account: { nome: "Email dell'account", apri: () => { navigateTo("impostazioni"); apriAccount(true); } },
+  profilo: { nome: "Profilo e nome dell'attività", apri: () => apriVoceImpostazioni("impVoceProfilo") },
+  aiuto: { nome: "Aiuto", apri: () => apriVoceImpostazioni("impVoceAiuto") },
+  elimina_account: { nome: "Elimina l'account", apri: () => apriVoceImpostazioni("impVoceElimina") },
+  esci: { nome: "Esci", apri: () => showAIToastConDecisione("Uscire da EON?", "Per rientrare ti serviranno email e password (o Face ID).", async () => { await esciDallAccount(); }, null, "Esci", "Annulla") },
+  abbonamento: { nome: "Abbonamento", apri: () => mostraRispostaEON("", "Per ora EON non ha un abbonamento da gestire: lo usi così com'è. Quando arriveranno i prezzi li troverai qui.", { titolo: "Abbonamento" }) },
+  feedback: { nome: "Scrivi a EON (feedback)", apri: (m) => apriFeedback(m && m.testo ? m.testo : "") },
+  importa_clienti: { nome: "Importa i clienti", apri: () => { navigateTo("clienti"); apriImportaClienti(); } },
+};
+function sezioneDisponibile(dest){
+  const s = SEZIONI_APP[dest];
+  return !!s && (!s.pagina || sezionePermessa(s.pagina)) && (!s.mestiere || s.mestiere === currentProfession);
+}
+function apriSezioneApp(dest, m){
+  const s = SEZIONI_APP[dest];
+  if(!s) return false;
+  chiudiRisorsaCard();
+  if(s.prima) s.prima();
+  if(s.apri) s.apri(m); else navigateTo(s.pagina);
+  return true;
+}
+/* true se la frase chiedeva una sezione dell'app ed è stata aperta (o offerta con i tasti) */
+function provaSezioneDalModello(testo){
+  const m = letturaModello(testo);
+  if(!m || m.intento !== "app" || m.p < SICURO_APP || !m.dest) return false;
+  const possibili = [{ tema: m.dest, p: m.pDest }, ...(m.altreDest || [])].filter(x => sezioneDisponibile(x.tema));
+  if(!possibili.length) return false;
+  if(possibili[0].tema === m.dest && m.pDest >= SICURO_SEZIONE) return apriSezioneApp(m.dest, m);
+  if(m.p < SICURO_APP_SCELTA) return false;
+  // non è sicuro di quale: le 2-3 più probabili, scegli tu
+  domandaDelCodice({ titolo: "Dove vuoi andare?", domanda: "Cosa vuoi aprire?", senzaCampo: true,
+    scelte: possibili.slice(0, 3).map(x => ({ etichetta: SEZIONI_APP[x.tema].nome, valore: x.tema })),
+    onRisposta: (dest) => apriSezioneApp(dest, m) });
+  return true;
 }
 /* la risposta di rispondiSuiDati sullo schermo (e a voce, se la domanda era a voce) */
 function mostraDati(r, testo, viaVoce){
@@ -21391,7 +21667,7 @@ async function proponiFaceId(){
 }
 
 /* ===== Promemoria degli impegni sul telefono (29/09/2026) =====
-   Una notifica vera 30 minuti prima di ogni impegno con l'ora, anche ad app
+   Una notifica vera 30 minuti prima (o quanto sceglie) di ogni impegno con l'ora, anche ad app
    chiusa: il server la manda (web push) quando l'orologio del database lo
    sveglia. Qui: il permesso, il "postino" (sw.js) e l'iscrizione di questo
    telefono. Su iPhone funziona solo con EON aggiunta alla schermata Home. */
@@ -21399,6 +21675,17 @@ const VAPID_PUBBLICA = "BPDuqEMYlTdRJ1TVplWxUa3BBTlD8t6MtZISlOLaKXIivjVrt2DRaIsL
 function promemoriaPossibili(){ return "serviceWorker" in navigator && !!window.PushManager && "Notification" in window; }
 function iphoneSenzaHome(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)); }
 function promemoriaAttivi(){ return promemoriaPossibili() && Notification.permission === "granted" && !!leggiLocale("eon-promemoria"); }
+/* Quanto prima avvisare (3/10/2026, tester n.2: "scegliere i minuti prima"):
+   vale per tutti i telefoni dell'utente; senza scelta, 30 minuti */
+const SCELTE_ANTICIPO = [10, 15, 30, 60, 120];
+function minutiPromemoria(){ const n = Number(leggiLocale("eon-promemoria-minuti")); return SCELTE_ANTICIPO.includes(n) ? n : 30; }
+function testoAnticipo(m){ m = m || minutiPromemoria(); return m === 60 ? "un'ora" : m === 120 ? "2 ore" : m + " minuti"; }
+async function salvaMinutiPromemoria(m){
+  scriviLocale("eon-promemoria-minuti", String(m));
+  if(!isDbReady()) return;
+  const { error } = await supabaseClient.from("push_iscrizioni").update({ minuti_prima: m }).eq("owner_id", currentSession.user.id);
+  if(error) console.warn("Minuti dei promemoria:", error.message);
+}
 function chiaveInByte(b64){ const pad = "=".repeat((4 - b64.length % 4) % 4); const raw = atob((b64 + pad).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from([...raw].map(c => c.charCodeAt(0))); }
 async function salvaIscrizionePromemoria(sub){
   const j = sub.toJSON();
@@ -21406,6 +21693,7 @@ async function salvaIscrizionePromemoria(sub){
   const { error } = await supabaseClient.from("push_iscrizioni").upsert({ endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, owner_id: currentSession.user.id }, { onConflict: "endpoint" });
   if(error){ console.warn("Iscrizione promemoria:", error.message); return false; }
   scriviLocale("eon-promemoria", j.endpoint);
+  if(leggiLocale("eon-promemoria-minuti")) await salvaMinutiPromemoria(minutiPromemoria()); // anche il telefono nuovo
   return true;
 }
 async function attivaPromemoria(){
@@ -21431,21 +21719,31 @@ async function ricontrollaPromemoria(){
 }
 function vocePromemoriaImpostazioni(){
   const sotto = document.getElementById("impPromemoriaSotto");
-  if(sotto) sotto.textContent = promemoriaAttivi() ? "Attivi: un avviso 30 minuti prima degli impegni" : "Un avviso 30 minuti prima degli impegni";
+  if(sotto) sotto.textContent = (promemoriaAttivi() ? "Attivi: un avviso " : "Un avviso ") + testoAnticipo() + " prima degli impegni";
 }
 suTocco("impVocePromemoria", () => {
   const attivi = promemoriaAttivi();
-  const corpo = schedaImpostazione("Promemoria", attivi
-    ? `<p class="imp-testo">Attivi su questo telefono: 30 minuti prima di ogni impegno con l'ora ti arriva una notifica, anche con EON chiusa.</p>
-       <button type="button" class="imp-btn imp-btn-pericolo" id="impPromemoriaSpegni">Disattiva i promemoria</button><div class="imp-esito" id="impEsitoPromemoria"></div>`
-    : `<p class="imp-testo">30 minuti prima di ogni impegno con l'ora ti arriva una notifica, come un messaggio, anche con EON chiusa.${iphoneSenzaHome() ? " Su iPhone funziona con EON aggiunta alla schermata Home (Condividi → Aggiungi alla schermata Home): poi apri EON da lì e attivali." : ""}</p>
-       <button type="button" class="imp-btn" id="impPromemoriaAccendi">Attiva i promemoria</button><div class="imp-esito" id="impEsitoPromemoria"></div>`);
+  const testoCard = () => attivi
+    ? `Attivi su questo telefono: ${testoAnticipo()} prima di ogni impegno con l'ora ti arriva una notifica, anche con EON chiusa.`
+    : `${testoAnticipo()[0].toUpperCase() + testoAnticipo().slice(1)} prima di ogni impegno con l'ora ti arriva una notifica, come un messaggio, anche con EON chiusa.${iphoneSenzaHome() ? " Su iPhone funziona con EON aggiunta alla schermata Home (Condividi → Aggiungi alla schermata Home): poi apri EON da lì e attivali." : ""}`;
+  const scelte = `<div class="imp-etichetta">Quanto prima avvisarti</div><div class="cl-filtri imp-anticipo" id="impPromemoriaAnticipo">${SCELTE_ANTICIPO.map(m => `<button type="button" class="cl-filtro${m === minutiPromemoria() ? " on" : ""}" data-minuti="${m}" aria-pressed="${m === minutiPromemoria()}">${m === 60 ? "1 ora" : m === 120 ? "2 ore" : m + " min"}</button>`).join("")}</div>`;
+  const corpo = schedaImpostazione("Promemoria", `<p class="imp-testo" id="impPromemoriaTesto">${testoCard()}</p>${scelte}` + (attivi
+    ? `<button type="button" class="imp-btn imp-btn-pericolo" id="impPromemoriaSpegni">Disattiva i promemoria</button><div class="imp-esito" id="impEsitoPromemoria"></div>`
+    : `<button type="button" class="imp-btn" id="impPromemoriaAccendi">Attiva i promemoria</button><div class="imp-esito" id="impEsitoPromemoria"></div>`));
+  corpo.querySelector("#impPromemoriaAnticipo").addEventListener("click", async (e) => {
+    const s = e.target.closest("button[data-minuti]");
+    if(!s) return;
+    corpo.querySelectorAll("#impPromemoriaAnticipo button").forEach(x => { x.classList.toggle("on", x === s); x.setAttribute("aria-pressed", String(x === s)); });
+    await salvaMinutiPromemoria(Number(s.dataset.minuti));
+    corpo.querySelector("#impPromemoriaTesto").textContent = testoCard();
+    vocePromemoriaImpostazioni();
+  });
   const b = corpo.querySelector("#impPromemoriaAccendi, #impPromemoriaSpegni");
   b.addEventListener("click", async () => {
     b.disabled = true;
     try{
       if(attivi){ await disattivaPromemoria(); esitoImp("impEsitoPromemoria", "Promemoria disattivati.", true); }
-      else { await attivaPromemoria(); esitoImp("impEsitoPromemoria", "Fatto: 30 minuti prima di ogni impegno ti avviso.", true); }
+      else { await attivaPromemoria(); esitoImp("impEsitoPromemoria", "Fatto: " + testoAnticipo() + " prima di ogni impegno ti avviso.", true); }
       vocePromemoriaImpostazioni();
     }catch(e){ esitoImp("impEsitoPromemoria", e.message, false); b.disabled = false; }
   });
@@ -21454,8 +21752,8 @@ suTocco("impVocePromemoria", () => {
 function proponiPromemoria(){
   if(!promemoriaPossibili() || promemoriaAttivi() || Notification.permission === "denied" || leggiLocale("eon-promemoria-proposto") || iphoneSenzaHome()) return;
   scriviLocale("eon-promemoria-proposto", "1");
-  showAIToastConDecisione("Vuoi un avviso prima?", "30 minuti prima di ogni impegno ti arriva una notifica sul telefono.", async () => {
-    try{ await attivaPromemoria(); showAIToast("Promemoria attivi", "Ti avviso 30 minuti prima di ogni impegno."); vocePromemoriaImpostazioni(); }
+  showAIToastConDecisione("Vuoi un avviso prima?", "30 minuti prima di ogni impegno ti arriva una notifica sul telefono (lo cambi in Impostazioni → Promemoria).", async () => {
+    try{ await attivaPromemoria(); showAIToast("Promemoria attivi", "Ti avviso " + testoAnticipo() + " prima di ogni impegno."); vocePromemoriaImpostazioni(); }
     catch(e){ showAIToast("Promemoria non attivati", e.message); }
   }, () => {}, "Sì, avvisami", "No");
 }

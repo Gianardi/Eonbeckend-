@@ -9,7 +9,10 @@ export const RUOLI = ["O", "CHI", "GIO", "ORA", "NGIO", "NORA", "LAV", "TESTO", 
 /* L'argomento di una domanda sui dati (2/10/2026): "dati:incassi", "dati:indirizzo"… lo impara il
    modello (una terza uscita), così l'app non deve più indovinarlo con le regole. */
 export const TEMI = ["agenda", "incassi", "crediti", "documenti", "telefono", "email", "indirizzo", "ultima_visita", "note_cliente", "iva", "cantieri", "clienti", "urgenze", "assemblea", "spese", "scadenze", "altro"];
-export const CASSETTI = ["calendario", "calendario_modifica", "mente", "documento", "cerca_documento", "invio_documento", "messaggio", "email", "chiamata", "cliente", "dati", "domanda", "incasso", "foto", "cartella", "urgenza", "sal", "dico", "assemblea", "saluto", "accettato", "sollecito"];
+/* Le sezioni dell'app (3/10/2026, Andrea: "richiesta → collegamento diretto alla sezione"): il
+   cassetto "app" con la destinazione, "app:installa", "app:migliora"… */
+export const DESTINAZIONI = ["home", "oggi", "clienti", "calendario", "messaggi", "chiamate", "cestino", "menu", "obiettivi", "compiti", "documenti_impresa", "documenti", "carta_intestata", "lettere", "cartello", "mente", "foto", "cantieri", "impostazioni", "fatture_preventivi", "conti", "uscite", "entrate", "assemblee", "urgenze", "dico", "installa", "migliora", "privacy", "promemoria", "faceid", "password", "email_account", "profilo", "aiuto", "elimina_account", "esci", "abbonamento", "feedback", "importa_clienti"];
+export const CASSETTI = ["calendario", "calendario_modifica", "mente", "documento", "cerca_documento", "invio_documento", "messaggio", "email", "chiamata", "cliente", "dati", "domanda", "incasso", "foto", "cartella", "urgenza", "sal", "dico", "assemblea", "saluto", "accettato", "sollecito", "app"];
 // parole come le divide il modello: spazi e apostrofi ("l'ho" → "l'" "ho"); il punto di domanda è
 // una parola a sé ("agosto?" → "agosto" "?"), così il modello lo vede sempre uguale (2/10/2026)
 export const dividi = (t) => String(t).replace(/([’'])/g, "$1 ").replace(/\?/g, " ? ").split(/\s+/).filter(Boolean);
@@ -35,14 +38,15 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     let j; try { j = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")); } catch (e) { scarti["file rotto " + f] = 1; continue; }
     for (const [segnata, cassetto] of j.frasi || []) {
       const [intento, tema] = String(cassetto || "").split(":");
-      const perche = !CASSETTI.includes(intento) || (tema !== undefined && (intento !== "dati" || !TEMI.includes(tema))) ? "cassetto" : null;
+      const valido = tema === undefined ? intento !== "app" : intento === "dati" ? TEMI.includes(tema) : intento === "app" && DESTINAZIONI.includes(tema);
+      const perche = !CASSETTI.includes(intento) || !valido ? "cassetto" : null;
       const l = perche ? null : leggiSegnata(String(segnata || "").trim());
       if (!l) { const k = perche || "segni"; scarti[k] = (scarti[k] || 0) + 1; continue; }
       const frase = l.parole.join(" ").replace(/([’']) /g, "$1");
       const chiave = frase.toLowerCase();
       if (visti.has(chiave)) { scarti.doppioni = (scarti.doppioni || 0) + 1; continue; }
       visti.add(chiave); ok++;
-      console.log(JSON.stringify({ fonte: "scritte/" + f, frase, intento, ...(tema ? { tema } : {}), parole: l.parole, ruoli: l.ruoli }));
+      console.log(JSON.stringify({ fonte: "scritte/" + f, frase, intento, ...(tema ? { tema: intento === "app" ? "app_" + tema : tema } : {}), parole: l.parole, ruoli: l.ruoli }));
     }
   }
   console.error(`frasi tenute: ${ok} · scartate: ${JSON.stringify(scarti)}`);

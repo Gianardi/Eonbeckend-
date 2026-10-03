@@ -38,7 +38,8 @@ mente (appunto da ricordare, senza data) · documento (fare preventivo o fattura
 un documento o foto) · invio_documento (mandare un documento o foto a qualcuno) · messaggio · email · chiamata ·
 cliente (nuovo cliente / dati del cliente) · dati (domanda sui tuoi dati: soldi, agenda, numeri, indirizzi…) ·
 domanda (domanda generale, consiglio) · incasso (qualcuno ha pagato) · foto (scattare) · cartella · urgenza ·
-sal · dico · assemblea · saluto · **accettato** (un cliente ha accettato un preventivo) · **sollecito** (sollecitare un pagamento).
+sal · dico · assemblea · saluto · **accettato** (un cliente ha accettato un preventivo) · **sollecito** (sollecitare un pagamento) ·
+**app** (andare in una sezione dell'app o in un'impostazione: "metti EON sulla home", "cambia la password").
 
 ## L'argomento delle domande sui dati (2/10/2026)
 Per il cassetto **dati** scrivi anche l'argomento, dopo i due punti: `"dati:incassi"`.
@@ -48,6 +49,17 @@ telefono · email · indirizzo · ultima_visita (quando sono stato l'ultima volt
 segnato su…) · iva · cantieri (lavori in corso, a che punto è, quanti impianti ho fatto) · clienti (quanti clienti,
 X è tra i clienti?) · urgenze (urgenze aperte) · assemblea (quand'è l'assemblea di…) · spese (quanto ho speso) ·
 scadenze (DURC, assicurazione, revisione) · altro (tutto il resto: IBAN, fondo cassa, codice fiscale…).
+
+## La sezione dell'app (3/10/2026)
+Per il cassetto **app** scrivi anche la sezione, dopo i due punti: `"app:installa"`. Senza ruoli.
+home · oggi · clienti · calendario · messaggi · chiamate · cestino · menu · obiettivi · compiti (squadra) ·
+documenti_impresa (DURC, visura, assicurazione della ditta) · documenti · carta_intestata · lettere · cartello ·
+mente (appunti) · foto · cantieri · impostazioni · fatture_preventivi · conti · uscite · entrate · assemblee ·
+urgenze · dico · installa (EON sulla schermata Home) · migliora (aiutare EON a crescere, registro delle frasi) ·
+privacy · promemoria (notifiche, quanto prima avvisare) · faceid · password · email_account · profilo (nome
+dell'attività, mestiere) · aiuto · elimina_account · esci · abbonamento · feedback (suggerimenti, segnalazioni) ·
+importa_clienti. Confini: "mostrami le foto di Galli" è cerca_documento; "ho delle spese?" è dati:spese;
+"promemoria domani alle 8…" è calendario.
 
 ## Regole
 - Parla come il tuo personaggio: frasi corte e lunghe, errori di dettatura, dialetto leggero, niente punteggiatura a volte.

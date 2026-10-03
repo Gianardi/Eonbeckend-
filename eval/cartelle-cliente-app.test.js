@@ -63,8 +63,9 @@ async function main() {
     // 1) Nella scheda del cliente la sezione "Cartelle" con "+ Cartella"
     await pulisci();
     await page.evaluate(() => mostraSchedaCliente(clients[0]));
-    const sez = await page.evaluate(() => ({ titoli: [...document.querySelectorAll("#risorsaCorpo .risorsa-sezione")].map((x) => x.textContent), nuova: !!document.getElementById("scCartellaNuova") }));
-    verifica("scheda del cliente: sezione \"Cartelle\" con \"+ Cartella\"", sez.titoli.includes("Cartelle") && sez.nuova, JSON.stringify(sez));
+    const sez = await page.evaluate(() => ({ titoli: [...document.querySelectorAll("#risorsaCorpo .sc4-voce-titolo")].map((x) => x.textContent), nuova: !!document.getElementById("scCartellaNuova") }));
+    verifica("scheda del cliente: sezione \"Foto e cartelle\" con \"+ Cartella\"", sez.titoli.includes("Foto e cartelle") && sez.nuova, JSON.stringify(sez));
+    await page.click('.sc4-voce[data-sezione="foto"]');
     await page.click("#scCartellaNuova");
     await page.fill("#cartellaNome", "foto sinistro Del Santo");
     await page.click("#cartellaNomeSalva");

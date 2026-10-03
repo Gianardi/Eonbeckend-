@@ -772,7 +772,8 @@ async function assicuraChatDelCliente(cliente, ctx) {
 /* ============================================================
    Promemoria sul telefono (29/09/2026): notifiche web push
    ------------------------------------------------------------
-   Come WhatsApp: 30 minuti prima di un impegno con l'ora arriva la
+   Come WhatsApp: 30 minuti prima (o quanto sceglie l'utente: da 10
+   minuti a 2 ore) di un impegno con l'ora arriva la
    notifica, anche ad app chiusa (Android; iPhone con EON aggiunta alla
    schermata Home, iOS 16.4+). Lo standard (RFC 8291 e 8292) scritto con
    node:crypto, senza librerie: la notifica è cifrata per quel telefono
@@ -823,7 +824,8 @@ function adessoARomaComeUtc(adesso) {
     .formatToParts(adesso || new Date()).map((x) => [x.type, x.value]));
   return new Date(Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second));
 }
-const MINUTI_PRIMA = 30;
+const MINUTI_PRIMA = 30;      // se l'utente non ha scelto (push_iscrizioni.minuti_prima)
+const MINUTI_PRIMA_MAX = 120; // la scelta più lunga nelle Impostazioni (2 ore)
 async function handleInviaPromemoria(req, res) {
   const segreti = await servizio("eon_segreti?select=nome,valore&nome=in.(cron_promemoria,vapid_jwk)", { method: "GET" });
   const segreto = (segreti || []).find((x) => x.nome === "cron_promemoria");
@@ -832,7 +834,7 @@ async function handleInviaPromemoria(req, res) {
   const jwk = JSON.parse((segreti.find((x) => x.nome === "vapid_jwk") || {}).valore || "null");
   if (!jwk) throw fail("Chiave delle notifiche mancante", 500);
   const adesso = adessoARomaComeUtc();
-  const da = adesso.toISOString(), a = new Date(adesso.getTime() + (MINUTI_PRIMA + 5) * 60000).toISOString();
+  const da = adesso.toISOString(), a = new Date(adesso.getTime() + (MINUTI_PRIMA_MAX + 5) * 60000).toISOString();
   const [impegni, appuntamenti] = await Promise.all([
     servizio(`tasks?select=id,owner_id,title,time,scheduled_at&deleted_at=is.null&status=neq.done&scheduled_at=gt.${encodeURIComponent(da)}&scheduled_at=lte.${encodeURIComponent(a)}&limit=500`, { method: "GET" }),
     servizio(`messages?select=id,title,scheduled_at,conversations!inner(owner_id)&event_type=eq.appt&deleted_at=is.null&scheduled_at=gt.${encodeURIComponent(da)}&scheduled_at=lte.${encodeURIComponent(a)}&limit=500`, { method: "GET" }),
@@ -843,12 +845,20 @@ async function handleInviaPromemoria(req, res) {
     ...(appuntamenti || []).filter((m) => m.conversations && !/^❌/.test(m.title || "")).map((m) => ({ rif: "messages:" + m.id, owner: m.conversations.owner_id, titolo: m.title, quando: m.scheduled_at })),
   ];
   if (!voci.length) return send(res, 200, { inviati: 0 });
-  const gia = await servizio(`promemoria_inviati?select=rif&rif=in.(${voci.map((v) => encodeURIComponent('"' + v.rif + '"')).join(",")})`, { method: "GET" });
+  /* Quanto prima avvisare lo sceglie l'utente (3/10/2026, tester n.2):
+     10, 15, 30 minuti, 1 o 2 ore; vale per tutti i suoi telefoni. "select=*"
+     così funziona anche prima che la colonna minuti_prima esista. */
+  const iscrizioni = await servizio(`push_iscrizioni?select=*&owner_id=in.(${[...new Set(voci.map((v) => v.owner))].join(",")})`, { method: "GET" });
+  const anticipo = (owner) => {
+    const m = (iscrizioni || []).filter((x) => x.owner_id === owner).map((x) => Number(x.minuti_prima) || 0).filter((x) => x > 0);
+    return Math.min(MINUTI_PRIMA_MAX, m.length ? Math.max(...m) : MINUTI_PRIMA);
+  };
+  const vociOra = voci.filter((v) => new Date(v.quando) - adesso <= (anticipo(v.owner) + 5) * 60000);
+  if (!vociOra.length) return send(res, 200, { inviati: 0 });
+  const gia = await servizio(`promemoria_inviati?select=rif&rif=in.(${vociOra.map((v) => encodeURIComponent('"' + v.rif + '"')).join(",")})`, { method: "GET" });
   const giaFatti = new Set((gia || []).map((x) => x.rif));
-  const daFare = voci.filter((v) => !giaFatti.has(v.rif));
+  const daFare = vociOra.filter((v) => !giaFatti.has(v.rif));
   if (!daFare.length) return send(res, 200, { inviati: 0 });
-  const owners = [...new Set(daFare.map((v) => v.owner))];
-  const iscrizioni = await servizio(`push_iscrizioni?select=id,owner_id,endpoint,p256dh,auth,errori&owner_id=in.(${owners.join(",")})`, { method: "GET" });
   let inviati = 0;
   for (const v of daFare) {
     const suoi = (iscrizioni || []).filter((x) => x.owner_id === v.owner);
@@ -856,7 +866,7 @@ async function handleInviaPromemoria(req, res) {
     const quando = new Date(v.quando);
     const ora = String(quando.getUTCHours()).padStart(2, "0") + ":" + String(quando.getUTCMinutes()).padStart(2, "0");
     const minuti = Math.max(1, Math.round((quando - adesso) / 60000));
-    const messaggio = { title: minuti >= 55 ? "Tra un'ora" : "Tra " + minuti + " minuti", body: ora + " · " + String(v.titolo || "Impegno").replace(/\s*\(da confermare\)\s*$/, " (da confermare)"), tag: v.rif, url: "/index.html" };
+    const messaggio = { title: minuti >= 90 ? "Tra " + Math.round(minuti / 60) + " ore" : minuti >= 55 ? "Tra un'ora" : "Tra " + minuti + " minuti", body: ora + " · " + String(v.titolo || "Impegno").replace(/\s*\(da confermare\)\s*$/, " (da confermare)"), tag: v.rif, url: "/index.html" };
     let arrivato = false;
     for (const isc of suoi) {
       let stato = 0;

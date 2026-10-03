@@ -51,11 +51,20 @@ async function main() {
       };
     });
     await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: "networkidle" });
-    await page.waitForTimeout(600);
+    await page.waitForFunction(() => typeof EonLettore !== "undefined" && EonLettore.letturaAttiva && EonLettore.letturaAttiva(), null, { timeout: 20000 });
+    await page.waitForTimeout(1200); // la card "Termini e privacy" del primo accesso si apre da sola dopo 0,9 s: che arrivi prima delle prove
 
     /* 1 — riconoscimento: cosa è un'azione diretta e cosa no */
     const casi = await page.evaluate(() => {
-      const c = (t) => { const a = capisciAzioneDiretta(t); return a ? a.tipo : null; };
+      /* Dal 3/10/2026 password, email, nome dell'attività, Face ID, EON sulla Home ed esci li legge
+         il modello (catalogo dell'app: cassetto "app" e la sezione); feedback e compiti restano qui. */
+      const SEZIONE = { password: "password", email_account: "email", profilo: "profilo", faceid: "faceid", installa: "installa", esci: "esci" };
+      const c = (t) => {
+        const a = capisciAzioneDiretta(t);
+        if (a) return a.tipo;
+        const m = letturaModello(t);
+        return m && m.intento === "app" && m.p >= SICURO_APP && m.pDest >= SICURO_SEZIONE ? SEZIONE[m.dest] || "app:" + m.dest : null;
+      };
       return {
         "Voglio cambiare password": c("Voglio cambiare password"),
         "cambia la password": c("cambia la password"),

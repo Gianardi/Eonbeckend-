@@ -86,7 +86,7 @@ async function main() {
       tel: document.querySelector('[data-contatto="Chiama"]').getAttribute("href"),
       wa: document.querySelector('[data-contatto="WhatsApp"]').getAttribute("href"),
       mail: document.querySelector('[data-contatto="Email"]').getAttribute("href"),
-      lavoro: document.querySelector(".sc-lavoro").textContent,
+      lavoro: [...document.querySelectorAll(".sc4-info")].find((r) => r.querySelector(".sc4-info-etichetta").textContent === "Lavoro").querySelector(".sc-riga-testo").textContent,
       appunti: [...document.querySelectorAll(".sc-riga-testo")].map((e) => e.textContent),
     }));
     verifica("contatti pronti: chiama, WhatsApp, email", contenuto.tel === "tel:+393331234567" && contenuto.wa === "https://wa.me/393331234567" && contenuto.mail === "mailto:rita@esempio.it", JSON.stringify(contenuto));
@@ -126,7 +126,7 @@ async function main() {
 
     await prepara();
     await scrivi("#homeHeroCampo", "#homeHeroSend", "Rita Ambrosini");
-    const [scelta] = await Promise.all([page.waitForEvent("filechooser", { timeout: 2000 }).catch(() => null), page.click('.sc-azione[data-azione="foto"]')]);
+    const [scelta] = await Promise.all([page.waitForEvent("filechooser", { timeout: 2000 }).catch(() => null), page.click(".sc4-piu").then(() => page.click('.sc-azione[data-azione="foto"]'))]);
     verifica("\"Scatta foto\" apre la fotocamera (input con capture)", !!scelta && (await page.getAttribute("#schedaClienteFotoInput", "capture")) === "environment");
     if (scelta) await scelta.setFiles({ name: "cantiere.jpg", mimeType: "image/jpeg", buffer: Buffer.from([0xff, 0xd8, 0xff, 0xd9]) });
     await page.waitForTimeout(400);
@@ -136,6 +136,7 @@ async function main() {
     await prepara();
     richiesteAI.length = 0;
     await scrivi("#homeHeroCampo", "#homeHeroSend", "Rita Ambrosini");
+    await page.click(".sc4-piu");
     await page.click('.sc-azione[data-azione="appunto"]');
     await page.fill("#schedaClienteCampo", "Portare il silicone bianco");
     await page.press("#schedaClienteCampo", "Enter");
@@ -188,6 +189,33 @@ async function main() {
     // "...e crea il cliente": non uno scatto subito, ma prima il cliente (creaCliente) e la sua scheda
     const nonFoto = await page.evaluate(() => ["fammi vedere le foto di Rita", "fammi la foto al cantiere e crea il cliente pinco", "fai fattura a Rossi da 300"].map((f) => { const r = capisciFotoRapida(f); return !!r && !r.creaCliente; }));
     verifica("\"fammi vedere le foto\", \"...e crea il cliente\", fatture: non sono scatti", nonFoto.every((x) => !x), JSON.stringify(nonFoto));
+
+    /* ---- Scheda "Prossima cosa" (3/10/2026): elenco che si apre, cestino con conferma, pallino che cancella ---- */
+    await prepara();
+    await page.evaluate(() => { tasks.length = 0; tasks.push({ id: "t1", title: "Sopralluogo Ambrosini", time: "domani 9:00", status: "todo" }); mostraSchedaCliente(clients[0]); });
+    const testa = await page.evaluate(() => ({ prossima: document.querySelector(".sc4-prossima-testo").textContent, voci: [...document.querySelectorAll(".sc4-voce-titolo")].map((x) => x.textContent), aperte: [...document.querySelectorAll(".sc4-pannello")].filter((p) => !p.hidden).length }));
+    verifica("in alto la prossima cosa; sotto Impegni, Foto e cartelle, Appunti, Documenti, Info e note, tutte chiuse", /domani 9:00 · Sopralluogo Ambrosini/.test(testa.prossima) && ["Impegni", "Foto e cartelle", "Appunti", "Documenti", "Info e note"].every((v) => testa.voci.includes(v)) && testa.aperte === 0, JSON.stringify(testa));
+    await page.click('.sc4-voce[data-sezione="appunti"]');
+    const visibile = await page.isVisible("text=Chiavi dal portinaio");
+    await page.click('.sc4-voce[data-sezione="info"]');
+    const dopo = await page.evaluate(() => [...document.querySelectorAll(".sc4-pannello")].filter((p) => !p.hidden).length);
+    verifica("tocco su Appunti: si apre; tocco su Info: si apre quella e si chiude l'altra", visibile && dopo === 1 && !(await page.isVisible("text=Chiavi dal portinaio")));
+    await page.click('.sc4-voce[data-sezione="appunti"]');
+    await page.evaluate(() => document.querySelector(".sc4-pallino").click());
+    await page.waitForTimeout(200);
+    const tolto = await page.evaluate(() => ({ rimasti: cantiereAppunti.filter((a) => a.clientId === "c1").length, toast: document.getElementById("aiToastContainer").innerText }));
+    verifica("il pallino davanti all'appunto lo cancella (con Annulla)", tolto.rimasti === 0 && /Appunto cancellato/.test(tolto.toast), JSON.stringify(tolto));
+    await page.evaluate(() => { document.getElementById("aiToastContainer").innerHTML = ""; });
+    await page.click('[data-sc4="elimina"]');
+    const chiede = await page.evaluate(() => ({ t: document.getElementById("aiToastContainer").innerText, ancora: clients.some((c) => c.id === "c1") }));
+    verifica("cestino: prima chiede \"Eliminare il cliente?\" e non tocca niente", /Eliminare il cliente\?/.test(chiede.t) && chiede.ancora, JSON.stringify(chiede));
+    await page.click(".ai-toast.decisione .ai-toast-yes");
+    await page.waitForTimeout(300);
+    const eliminato = await page.evaluate(() => ({ ancora: clients.some((c) => c.id === "c1"), chiusa: document.getElementById("risorsaOverlay").style.display === "none", toast: document.getElementById("aiToastContainer").innerText }));
+    verifica("\"Elimina\": cliente nel Cestino, scheda chiusa, con Annulla", !eliminato.ancora && eliminato.chiusa && /nel cestino/i.test(eliminato.toast), JSON.stringify(eliminato));
+    await page.evaluate(() => { mostraSchedaCliente(clients[0]); document.querySelector('[data-sc4="altro"]').click(); });
+    const altro = await page.evaluate(() => [...document.querySelectorAll(".sc4-menu-altro .sc-azione")].map((b) => b.dataset.azione));
+    verifica("⋯ in alto: Modifica, Link cliente, Archivia", altro.join(",") === "modifica,link,archivia", JSON.stringify(altro));
 
     verifica("nessun errore nella pagina", errori.length === 0, errori.join(" | "));
   } finally {

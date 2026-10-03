@@ -4999,6 +4999,53 @@ ROADMAP 0b.11.
   etichetto (cassetto giusto; per "annullato" il cassetto del modello era sbagliato) e le
   aggiungo ai dati; le frasi di un tester NON vanno negli esami ciechi.
 
+### 3/10: quarto pacchetto — catalogo dell'app e richieste del tester n. 2 (ROADMAP 0b.19)
+- Modello: cassetto `app` (CASSETTI in verifica.mjs e allena.py) e 40 `DESTINAZIONI` nella stessa
+  terza uscita degli argomenti (`TEMI + "app_"+d`). Formato degli scrittori `"app:installa"`
+  (ISTRUZIONI.md). s34, s35 (~390 frasi). `varia.mjs`: le frasi app senza ruoli prendono varianti
+  con parole di cortesia davanti e dietro (3120 varianti). v15, tre copie (semi 1/11/23, 12 epoche).
+- Lettore: `mediaLetture` dà `pt`/`temi`; `temiInOrdine(l, app)` sceglie dentro la famiglia del
+  cassetto (argomenti o sezioni); `leggiConModello` dà `dest`, `pDest`, `altreDest` (le 2 dopo).
+- App: `SEZIONI_APP` (sezione → pagina o funzione), `sezioneDisponibile` (mestiere),
+  `apriSezioneApp`, `provaSezioneDalModello` (cassetto ≥ 0,45, sezione ≥ 0,6 → apre; sotto → 2-3
+  tasti con `domandaDelCodice`), prima delle domande sui dati e nel flusso della card AI.
+  "esci" con `showAIToastConDecisione`; "migliora" apre Privacy e scorre a `#impMigliora`;
+  "abbonamento": oggi non c'è niente da gestire, lo dice (da rivedere quando ci saranno i prezzi).
+- Tolti da `capisciAzioneDiretta` / `provaAzioneDiretta` password, email, profilo, faceid, installa,
+  importa, esci (e `VERBO_CAMBIO`, `soloParoleAccount`, `PAROLE_RICHIESTA_ACCOUNT`): li fa il catalogo.
+  Restano feedback e compito (prendono il testo) e `provaNavigazioneDiretta` (nomi di pagina e
+  cartelle): da togliere nel prossimo giro, dopo aver visto il catalogo sulle frasi vere dei tester.
+  Il catalogo viene DOPO le regole rimaste (le cartelle con nome di pagina restano cartelle).
+  Regole 826 → 819, tetto 819.
+- `rispondiSuiDati` tema `spese`: da pagare (fino a 6) e uscite/pagate del mese, pagina Uscite.
+- Scheda cliente (`mostraSchedaCliente`): classe `sc4-aperta` sull'overlay (nasconde la testata
+  generica; `apriRisorsaCard` la toglie a ogni apertura); `sc4-testa`, `sc4-elenco` con
+  `sc4-voce[data-sezione]` + `sc4-pannello` (uno aperto alla volta), menu `sc4-menu-altro` e
+  `sc4-menu-piu` con gli stessi `.sc-azione[data-azione]` di prima; `chiediEliminaCliente` →
+  `eliminaClienteConAnnulla`. `evidenziaFoto` apre il "+" con "Scatta foto" in evidenza.
+- `preparaFotoDaCondividere(urls)`: scarica le foto quando si apre la card (Safari vuole la
+  condivisione dentro il tocco), poi `navigator.share({ files })`; altrimenti il link.
+- Promemoria: `SCELTE_ANTICIPO`, `minutiPromemoria`, `salvaMinutiPromemoria` (tutti i telefoni
+  dell'utente); server `handleInviaPromemoria` legge `push_iscrizioni?select=*` e usa `minuti_prima`
+  (o 30), finestra fino a 2 ore + 5 minuti; titolo "Tra 2 ore".
+- Modello: v15 → v16 (s36: "mi dai [l'assicurazione del camion]{DOC}" = cerca_documento contro "dove
+  carico i documenti della ditta" = app; "quando vedo X?" = agenda contro "quando l'ho visto
+  l'ultima volta" = ultima_visita; "esporta i miei dati" = app:privacy).
+- Posto del catalogo nel flusso: dopo `provaCancellaAppunto` (le regole di prima: nomi di pagina,
+  cartelle, azioni dirette, "cancella tutti gli appunti") e prima del cassetto Mente del modello e
+  dei "da fare" ("Devo mettere EON sulla home" non è un da fare). Nella card AI dopo
+  `provaAzioneDiretta`. Il cestino aperto dal catalogo dice "Tocca «Svuota cestino»…" come prima.
+- Prove adattate alla scheda nuova (le sezioni si aprono a tocco): scheda-cliente,
+  cartelle-cliente-app, foto-galleria-app, scorri-ovunque, funzioni-mestieri; clienti-chat
+  ("Nessun lavoro scritto"); lettore-app (l'ordine con l'AI ferma ora è "Rinomina la cartella
+  Fornitori in Materiali": "Esporta i dati" apre la Privacy).
+- Prove nuove: `catalogo-app.test.js`, controlli in `scheda-cliente`, `foto-galleria-app`
+  (condivisione come file), `promemoria-app`, `promemoria.test.mjs`; job `regole` in prove.yml.
+  Misura: `node eval/neurale/lettura/catalogo-cieco.mjs` (esame cieco del catalogo).
+- Da fare dopo: le 5 frasi sbagliate dell'esame cieco ("si può scaricare EON come applicazione?",
+  "chiudi la sessione", "ragione sociale", "quarto d'ora prima", "recupera la foto che ho
+  eliminato") vanno insegnate con frasi simili (non quelle), poi un esame cieco nuovo.
+
 ### 2/10 sera: PASSO A, terzo pacchetto — le domande sui dati (ROADMAP 0b.19)
 - Terza uscita del modello (`outT`, media delle parole come il cassetto): l'argomento della domanda.
   `TEMI` in `verifica.mjs` e `allena.py`; formato degli scrittori `"dati:incassi"` (ISTRUZIONI.md).

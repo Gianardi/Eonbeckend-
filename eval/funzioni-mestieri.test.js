@@ -155,6 +155,7 @@ async function main() {
     verifica("nella scheda di Rossi la sezione SAL: 2 righe, \"Crea fattura\" e \"+ Nuovo SAL\"", scheda.righe.length === 2 && /SAL 1 · 30%/.test(scheda.righe[0]) && /da fatturare/.test(scheda.righe[0]) && scheda.fatture === 2 && scheda.nuovo, JSON.stringify(scheda));
 
     // "+ Nuovo SAL" dalla scheda: 80% → rata (80 − 50)% di 12.000 = 3.600
+    await page.click('.sc4-voce[data-sezione="sal"]');
     await page.click("#scSal .sc-sal-nuovo");
     await page.fill("#salPerc", "80");
     await page.fill("#salNota", "fatto il tetto");

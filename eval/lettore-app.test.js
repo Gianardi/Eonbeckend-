@@ -203,7 +203,7 @@ async function main() {
     verifica("…\"Era una richiesta a EON\": toglie l'appunto e la chiede all'AI", richieste.length === 1 && !richieste[0].comando && (await page.evaluate(() => window.__aggiornamenti.some((a) => a.tabella === "cantiere_appunti" && a.patch.deleted_at))), JSON.stringify(richieste.map((r) => r.messaggio)));
 
     /* 8. Rete di sicurezza: l'AI è ferma */
-    await scrivi("Esporta tutti i dati dei clienti"); // ("svuota il cestino" dal 29/09 lo fa il codice)
+    await scrivi("Rinomina la cartella Fornitori in Materiali"); // ("svuota il cestino" dal 29/09 lo fa il codice; "esporta i dati" dal 3/10 apre la Privacy)
     s = await stato();
     verifica("un ordine a EON + AI ferma → \"Adesso non riesco a farlo\", niente appunto", s.card && /Adesso non riesco a farlo/.test(s.card) && !s.scritture.length, JSON.stringify(s));
     await scrivi("Domani alle 10 sopralluogo da Rossi per le tegole");

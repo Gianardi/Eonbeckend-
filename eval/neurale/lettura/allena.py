@@ -26,9 +26,12 @@ random.seed(SEME); np.random.seed(SEME); torch.manual_seed(SEME)
 torch.set_num_threads(int(os.environ.get("THREADS", "4")))
 
 RUOLI = ["O", "CHI", "GIO", "ORA", "NGIO", "NORA", "LAV", "TESTO", "CAN", "DOC", "NUM", "TEL", "MAIL", "IND", "AVANZ", "CART"]
-CASSETTI = ["calendario", "calendario_modifica", "mente", "documento", "cerca_documento", "invio_documento", "messaggio", "email", "chiamata", "cliente", "dati", "domanda", "incasso", "foto", "cartella", "urgenza", "sal", "dico", "assemblea", "saluto", "accettato", "sollecito"]
+CASSETTI = ["calendario", "calendario_modifica", "mente", "documento", "cerca_documento", "invio_documento", "messaggio", "email", "chiamata", "cliente", "dati", "domanda", "incasso", "foto", "cartella", "urgenza", "sal", "dico", "assemblea", "saluto", "accettato", "sollecito", "app"]
 # l'argomento di una domanda sui dati (2/10/2026): terza uscita, solo per le frasi "dati:tema"
 TEMI = ["agenda", "incassi", "crediti", "documenti", "telefono", "email", "indirizzo", "ultima_visita", "note_cliente", "iva", "cantieri", "clienti", "urgenze", "assemblea", "spese", "scadenze", "altro"]
+# le sezioni dell'app (3/10/2026): stessa uscita, per le frasi "app:destinazione"
+DESTINAZIONI = ["home", "oggi", "clienti", "calendario", "messaggi", "chiamate", "cestino", "menu", "obiettivi", "compiti", "documenti_impresa", "documenti", "carta_intestata", "lettere", "cartello", "mente", "foto", "cantieri", "impostazioni", "fatture_preventivi", "conti", "uscite", "entrate", "assemblee", "urgenze", "dico", "installa", "migliora", "privacy", "promemoria", "faceid", "password", "email_account", "profilo", "aiuto", "elimina_account", "esci", "abbonamento", "feedback", "importa_clienti"]
+TEMI = TEMI + ["app_" + d for d in DESTINAZIONI]
 R = {r: i for i, r in enumerate(RUOLI)}; C = {c: i for i, c in enumerate(CASSETTI)}; TM = {t: i for i, t in enumerate(TEMI)}
 leggi = lambda f: [json.loads(r) for r in open(f) if r.strip()]
 

@@ -137,9 +137,11 @@ async function main() {
     await page.evaluate(() => { navigateTo("home"); mostraSchedaCliente(clients.find((c) => c.id === "c1")); });
     await page.waitForTimeout(400);
     await pulisci();
+    await page.click('.sc4-voce[data-sezione="appunti"]'); // la scheda "Prossima cosa": le sezioni si aprono a tocco
     const wa = await elimina("#risorsaCorpo", "piastrelle chiare");
     verifica("Scheda cliente: l'appunto si elimina scorrendo (nel Cestino)", wa > 60 && await page.evaluate(() => !cantiereAppunti.length) && await cestinato("cantiere_appunti", "a1"), String(wa));
     await pulisci();
+    await page.click('.sc4-voce[data-sezione="impegni"]');
     const wim = await elimina("#risorsaCorpo", "Sopralluogo Mario Rossi");
     verifica("Scheda cliente: l'impegno si elimina scorrendo (nel Cestino)", wim > 60 && await page.evaluate(() => !tasks.some((t) => t.id === "t1")) && await cestinato("tasks", "t1"), String(wim));
     await page.evaluate(() => chiudiRisorsaCard());
