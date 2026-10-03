@@ -3,7 +3,8 @@
      prova la decifra "dal lato del telefono", con un codice scritto a parte;
    - la firma VAPID (RFC 8292) si verifica con la chiave pubblica;
    - l'orologio (action=invia_promemoria) senza il segreto giusto → 403;
-   - manda solo gli impegni con l'ora tra adesso e 35 minuti (non quelli
+   - manda solo gli impegni con l'ora tra adesso e 35 minuti, o quanto ha
+     scelto l'utente (fino a 2 ore) (non quelli
      fatti, senza ora, lontani, annullati), una volta sola;
    - un telefono che non c'è più (410) viene tolto.
    Gira senza rete: vero handler, database finto, servizio di notifiche finto.
@@ -174,6 +175,15 @@ verifica("il telefono che non c'è più (410) viene tolto", !tabelle.push_iscriz
 const primaSeconda = inviiPush.length;
 r = await orologio("segreto-dell-orologio");
 verifica("al giro dopo (5 minuti) non ripete gli stessi promemoria", r.status === 200 && inviiPush.length === primaSeconda && r.corpo.inviati === 0, JSON.stringify({ r, invii: inviiPush.length - primaSeconda }));
+
+/* ---------- 3. Quanto prima: lo sceglie l'utente (3/10/2026) ---------- */
+console.log("\n=== Quanto prima avvisare: scelto dall'utente ===");
+tabelle.push_iscrizioni.find((x) => x.id === "p1").minuti_prima = 120;
+const primaTerza = inviiPush.length;
+r = await orologio("segreto-dell-orologio");
+const nuovi = inviiPush.slice(primaTerza).filter((x) => /telefono-a/.test(x.url)).map((x) => JSON.parse(decifraComeIlTelefono(Buffer.from(x.init.body), telA.t, telA.auth).testo));
+verifica("con \"2 ore prima\": parte anche l'impegno tra due ore, col titolo \"Tra 2 ore\"", nuovi.length === 1 && /Tra due ore$/.test(nuovi[0].body) && /^Tra (2 ore|un'ora)$/.test(nuovi[0].title), JSON.stringify(nuovi));
+verifica("l'altro utente (scelta non fatta) resta a 30 minuti", !inviiPush.slice(primaTerza).some((x) => /\/altro$/.test(x.url)));
 
 console.log(falliti ? `\n${falliti} controlli falliti` : "\nTutti i controlli passati.");
 process.exit(falliti ? 1 : 0);

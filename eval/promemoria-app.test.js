@@ -27,7 +27,7 @@ function preparaPagina(conPush) {
     const catena = (tabella) => {
       const q = {
         select: () => q, not: () => q, is: () => q, eq: () => q, order: () => q, limit: () => q, in: () => q, gt: () => q,
-        update: () => ({ eq: async () => ({ error: null }) }),
+        update: (patch) => ({ eq: async (c, v) => { window.__db.push({ tabella, op: "update", patch, c, v }); return { error: null }; } }),
         delete: () => ({ eq: async (c, v) => { window.__db.push({ tabella, op: "delete", c, v }); return { error: null }; } }),
         upsert: async (riga, opz) => { window.__db.push({ tabella, op: "upsert", riga, opz }); return { error: null }; },
         insert: (riga) => { window.__db.push({ tabella, op: "insert", riga }); const r = { id: "n" + window.__db.length, created_at: new Date().toISOString(), ...riga }; return { select: () => ({ single: async () => ({ data: r, error: null }) }) }; },
@@ -107,6 +107,14 @@ async function main() {
     const up = dopo.db.find((x) => x.op === "upsert") || {};
     verifica("salva il telefono in push_iscrizioni (endpoint, chiavi, proprietario, senza doppioni)", up.riga && up.riga.endpoint === "https://fcm.googleapis.com/fcm/send/telefono-1" && up.riga.p256dh === "BPubblicaDelTelefono" && up.riga.auth === "segretoAuth" && up.riga.owner_id === "u1" && up.opz && up.opz.onConflict === "endpoint", JSON.stringify(up));
     verifica("dice che è fatto e la voce diventa \"Attivi\"", /30 minuti prima/.test(dopo.esito) && /^Attivi/.test(dopo.sotto), JSON.stringify(dopo));
+
+    // Quanto prima: 1 ora (3/10/2026)
+    await page.evaluate(() => chiudiRisorsaCard());
+    await page.click("#impVocePromemoria");
+    await page.click('#impPromemoriaAnticipo [data-minuti="60"]');
+    await page.waitForTimeout(200);
+    const ora = await page.evaluate(() => ({ up: window.__db.filter((x) => x.tabella === "push_iscrizioni" && x.op === "update").pop(), testo: document.getElementById("impPromemoriaTesto").textContent, sotto: document.getElementById("impPromemoriaSotto").textContent, on: document.querySelector("#impPromemoriaAnticipo .on").dataset.minuti }));
+    verifica("\"1 ora\": salvato per tutti i telefoni dell'utente, la card e la voce dicono \"un'ora prima\"", ora.up && ora.up.patch.minuti_prima === 60 && ora.up.c === "owner_id" && ora.up.v === "u1" && /un'ora prima/.test(ora.testo) && /un'ora prima/.test(ora.sotto) && ora.on === "60", JSON.stringify(ora));
 
     // Disattiva
     await page.evaluate(() => chiudiRisorsaCard());

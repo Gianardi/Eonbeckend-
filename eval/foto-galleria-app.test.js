@@ -53,7 +53,7 @@ async function main() {
     await page.evaluate(async () => {
       document.getElementById("onboardingScreen").style.display = "none";
       currentSession = { access_token: "t", user: { id: "u1", email: "a@b.it" } };
-      loadUserDataFromDB = async () => {}; tokenValido = async () => "t"; descriviFoto = () => {};
+      loadUserDataFromDB = async () => {}; tokenValido = async () => "t"; descriviFoto = async () => null;
       await applyProfession("amministratore", true);
       clients.length = 0;
       clients.push({ id: "c1", name: "Condominio Viale Italia 171", phone: "", status: "attivo", value: 0, desc: "", archived: false });
@@ -66,11 +66,11 @@ async function main() {
     // 1) Scheda del cliente: "Dalla galleria", 3 foto insieme
     await pulisci();
     await page.evaluate(() => mostraSchedaCliente(clients[0]));
-    const tasti = await page.evaluate(() => [...document.querySelectorAll("#risorsaCorpo .sc-azione b")].map((b) => b.textContent));
-    verifica("nella scheda del cliente ci sono \"Scatta foto\" e \"Galleria\"", tasti.includes("Scatta foto") && tasti.includes("Galleria"), JSON.stringify(tasti));
+    const tasti = await page.evaluate(() => [...document.querySelectorAll("#risorsaPiede .sc-azione b")].map((b) => b.textContent));
+    verifica("nella scheda del cliente, nel \"+\", ci sono \"Scatta foto\" e \"Foto dalla galleria\"", tasti.includes("Scatta foto") && tasti.includes("Foto dalla galleria"), JSON.stringify(tasti));
     const multipla = await page.evaluate(() => document.getElementById("galleriaFotoInput").multiple && !document.getElementById("galleriaFotoInput").hasAttribute("capture"));
     verifica("la galleria permette di scegliere più foto (e non apre solo la fotocamera)", multipla);
-    await page.evaluate(() => document.querySelector('#risorsaCorpo .sc-azione[data-azione="galleria"]').click());
+    await page.evaluate(() => document.querySelector('#risorsaPiede .sc-azione[data-azione="galleria"]').click());
     await page.setInputFiles("#galleriaFotoInput", foto(3));
     await page.waitForTimeout(800);
     let ins = await scritte("insert", "cantiere_foto"), upd = await scritte("update", "cantiere_foto");
@@ -109,6 +109,24 @@ async function main() {
     await page.waitForTimeout(600);
     const una = await page.evaluate(() => document.getElementById("cantiereFotoTagHint").textContent);
     verifica("una foto sola: come prima", /^A quale cliente/.test(una), una);
+    // 4) WhatsApp manda la foto vera (file), non il link, se il telefono lo permette (3/10/2026)
+    const comeFile = await page.evaluate(async () => {
+      const blob = await new Promise((ok) => { const k = document.createElement("canvas"); k.width = k.height = 4; k.toBlob(ok, "image/jpeg"); });
+      const f = { id: "fw", url: URL.createObjectURL(blob), clientId: "c1", created: new Date().toISOString(), nota: "" };
+      cantiereFoto.push(f);
+      window.__condivisi = null; window.__aperte = 0;
+      const apri = window.open; window.open = () => { window.__aperte++; return null; };
+      Object.defineProperty(navigator, "canShare", { configurable: true, value: (d) => !!(d.files && d.files.length) });
+      Object.defineProperty(navigator, "share", { configurable: true, value: async (d) => { window.__condivisi = d.files.map((x) => x.type); } });
+      mostraSchedaFoto(f, clients[0].name);
+      await new Promise((r) => setTimeout(r, 300));
+      document.querySelector('#risorsaCorpo .scheda-invio-btn[data-canale="WhatsApp"]').click();
+      await new Promise((r) => setTimeout(r, 50));
+      window.open = apri;
+      return { condivisi: window.__condivisi, aperte: window.__aperte };
+    });
+    verifica("WhatsApp: parte la foto vera (file) dal foglio di condivisione, non il link", JSON.stringify(comeFile.condivisi) === '["image/jpeg"]' && comeFile.aperte === 0, JSON.stringify(comeFile));
+
     verifica("nessun errore nella pagina", errori.length === 0, JSON.stringify(errori));
   } finally {
     await browser.close();

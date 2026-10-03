@@ -198,7 +198,7 @@ async function main() {
       const testo = document.getElementById("page-clienti").innerText;
       return { ultimo: /Ultimo contatto/.test(testo), pill: document.querySelectorAll(".client-archive-card .pill").length, lavoro: [...document.querySelectorAll(".client-archive-card .client-lavoro")].map((e) => e.textContent.trim()) };
     });
-    verifica("card cliente: niente stato né \"Ultimo contatto\", solo il lavoro da fare", !card.ultimo && card.pill === 0 && card.lavoro.includes("Rifacimento bagno: piastrelle e sanitari") && card.lavoro.includes("+ Scrivi cosa c'è da fare"), JSON.stringify(card));
+    verifica("card cliente: niente stato né \"Ultimo contatto\", solo il lavoro da fare", !card.ultimo && card.pill === 0 && card.lavoro.includes("Rifacimento bagno: piastrelle e sanitari") && card.lavoro.includes("Nessun lavoro scritto"), JSON.stringify(card));
 
     /* ---- Foto: la nota non diventa un cliente ---- */
     const note = await page.evaluate(() => ({
