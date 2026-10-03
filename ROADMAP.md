@@ -529,6 +529,32 @@ lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai pe
     viste, poche). Giri 5-20 tutti al minimo o sopra (giro 15: 1055, +2; giro 20: 1014, +1); frasi
     vere di Andrea 134/136 (=); suite 83/83; simulatore 2935/2935.
   - **Regole a mano: 860 → 826.**
+- **Fatto (3/10/2026, quarto pacchetto): il catalogo dell'app e le richieste del tester n. 2.**
+  - **Ogni sezione si apre chiedendola** (Andrea: "Devo mettere EON sulla schermata home" → le
+    istruzioni, "Voglio aiutare EON a crescere" → Privacy, "e deve valere per tutto"). Il modello ha
+    un cassetto nuovo, **app**, e 40 sezioni (Home, Clienti, Calendario, Cestino, Documenti
+    dell'impresa, Carta intestata, Promemoria, Password, Face ID, Esci, Feedback, Importa clienti…).
+    ~390 frasi nuove (s34, s35) con i confini ("mostrami le foto di Galli" è cercare un documento,
+    "ho delle spese?" è una domanda sui dati). Il codice apre e basta; se il modello non è sicuro di
+    quale sezione, 2-3 tasti (niente AI); "Esci" chiede sempre prima.
+  - Esame cieco del catalogo (40 frasi nuove, `eval/dati/frasi-app-cieco.json`): **33 aperte giuste,
+    2 con la scelta giusta tra i tasti, 5 all'AI come prima**. Su 7.390 frasi dei giri 5-20 nessuna
+    sezione aperta per sbaglio.
+  - "Ho delle spese?" risponde dai dati (da pagare, totale del mese) e apre Uscite.
+  - Scheda del cliente rifatta come la **proposta 4 "Prossima cosa"** (scelta da Andrea): in alto,
+    nel blu, nome, indirizzo, stato, la prossima cosa da fare e i contatti; ⋯ (modifica, link,
+    archivia) e il **cestino con la conferma**; sotto un elenco che si apre a tocco (Impegni, Foto e
+    cartelle, Appunti, Documenti, Info e note, e SAL / DiCo per chi li ha); in fondo "+" (scatta
+    foto, **più foto dalla galleria**, appunto, nuova cartella) e "Chiedi a EON". Il pallino davanti
+    a un appunto lo cancella (con Annulla). Nella lista Clienti tutta la riga apre la scheda.
+  - Foto su WhatsApp **come foto vera**, non come link: si apre il foglio di condivisione del
+    telefono (dove c'è WhatsApp). Se il telefono non lo permette, il link come prima. Non provato
+    su un telefono vero.
+  - Promemoria: si sceglie **quanto prima** (10, 15, 30 minuti, 1 o 2 ore). Colonna nuova
+    `push_iscrizioni.minuti_prima` (`supabase/promemoria-minuti.sql`): **messa in staging; in
+    produzione va messa prima del merge** (il server funziona anche senza: resta a 30 minuti).
+  - Prove automatiche: **il numero di regole a mano non può salire** (`eval/regole-conta.mjs
+    --controlla`, tetto in `eval/dati/regole-tetto.json`): se sale, la PR diventa rossa.
 - **Il piano deciso con Andrea (3/10/2026): da piccola AI a AI vera.**
   1. **Finire il passo A.** EON è una piccola AI che capisce e fa (impegni, messaggi, preventivi,
      fatture, domande sui dati): nel telefono, veloce, gratis, anche senza rete. Resta anche dopo.

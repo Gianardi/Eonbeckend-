@@ -108,6 +108,11 @@ async function main() {
     await page.click("#risorsaCorpo .scheda-scelta >> nth=1");
     verifica("…tocco su \"Documenti dell'impresa\": si apre quella", (await pagina()) === "documenti-impresa");
 
+    await prepara(app("profilo", 0.55, 0.2, [{ tema: "obiettivi", p: 0.15 }]));
+    await scrivi("voglio provare quei tessuti idrorepellenti per le sedie da esterno");
+    const nienteTasti = await page.evaluate(() => ({ aperta: document.getElementById("risorsaOverlay").style.display, titolo: document.getElementById("risorsaTitolo").textContent }));
+    verifica("cassetto \"app\" poco sicuro e sezione incerta (giro 16): niente tasti \"Dove vuoi andare?\"", !(nienteTasti.aperta === "flex" && /Dove vuoi andare/.test(nienteTasti.titolo)), JSON.stringify(nienteTasti));
+
     await prepara(app("installa", 0.4));
     richiesteAI.length = 0;
     await scrivi("boh vediamo un po'");
