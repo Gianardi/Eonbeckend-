@@ -63,7 +63,21 @@ for (const x of righe) {
   // i pezzi della frase: [ruolo, parole]
   const pezzi = [];
   x.parole.forEach((w, i) => { const r = x.ruoli[i]; if (pezzi.length && pezzi[pezzi.length - 1][0] === r && r !== "O") pezzi[pezzi.length - 1][1].push(w); else pezzi.push([r, [w]]); });
-  if (!pezzi.some(([r]) => nuovo(r) !== null)) continue;
+  if (!pezzi.some(([r]) => nuovo(r) !== null)) {
+    /* frasi senza pezzi da cambiare (le richieste di una sezione dell'app, 3/10/2026): varianti
+       con un saluto o una cortesia davanti o dietro, come le direbbe la gente */
+    if (x.intento !== "app") continue;
+    const DAVANTI = ["", "", "EON ", "senti ", "ehi EON ", "scusa ", "per favore ", "mi ", "allora ", "ok ", "dai "];
+    const DIETRO = ["", "", " per favore", " grazie", " dai", " subito", " please", " EON"];
+    for (let k = 0; k < QUANTE; k++) {
+      const d = DAVANTI[Math.floor(caso() * DAVANTI.length)], t = DIETRO[Math.floor(caso() * DIETRO.length)];
+      const pd = dividi(d), pt = dividi(t);
+      const parole = [...pd, ...x.parole, ...pt], ruoli = [...pd.map(() => "O"), ...x.ruoli, ...pt.map(() => "O")];
+      n++;
+      console.log(JSON.stringify({ fonte: x.fonte + "#v", frase: parole.join(" ").replace(/([’']) /g, "$1"), intento: x.intento, ...(x.tema ? { tema: x.tema } : {}), parole, ruoli }));
+    }
+    continue;
+  }
   for (let k = 0; k < QUANTE; k++) {
     const parole = [], ruoli = [];
     for (const [r, pp] of pezzi) {
