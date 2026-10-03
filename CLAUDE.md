@@ -53,3 +53,8 @@ telefono** e parla **italiano**.
 - Vercel pubblica solo `main` (i rami `claude/*` no: limite del piano).
 - Frontend: `index.html` (app) e `cliente.html` (pagina del cliente, legge
   i dati solo tramite le funzioni `portale_*`). Backend: `api/index.js`.
+- **Allenamenti del modello (Andrea, 3/10/2026):** in questo ambiente i programmi in
+  sottofondo vanno avanti solo mentre io sto lavorando (un mio turno in corso). Quando
+  aspetto un messaggio di Andrea si fermano. Quindi: mentre il modello si allena, lavorare
+  su altro (codice, rifiniture, prove) o seguirlo con attese attive; mai lasciarlo "in
+  sottofondo" e chiudere il turno pensando che vada avanti da solo.
