@@ -14534,11 +14534,6 @@ function normalizzaComando(t){
   return String(t || "").toLowerCase().replace(/\be-mail\b/g, "email").normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[’']/g, " ").replace(/[.!?,;:]+/g, " ").replace(/\s+/g, " ").trim();
 }
-const PAROLE_RICHIESTA_ACCOUNT = new Set(["voglio","vorrei","devo","posso","puoi","come","faccio","si","fa","a","ad","per","favore","eon","ehi","mi","me","la","il","lo","l","mia","mio","una","un","nuova","nuovo","di","del","dell","della","account","accesso","mettere","metti","impostare","imposta","cambiare","cambia","cambio","cambiami","modificare","modifica","aggiornare","aggiorna","reimpostare","reimposta","resettare","resetta","sostituire","ho","dimenticato","non","ricordo","piu","e","che","uso","usare","entrare","sistemare","sistema"]);
-function soloParoleAccount(n, chiavi){
-  return n.split(" ").every(p => PAROLE_RICHIESTA_ACCOUNT.has(p) || chiavi.includes(p) || /^(cambi|modific|aggiorn|reimpost|resett|sostitu|impost)\w*$/.test(p));
-}
-const VERBO_CAMBIO = /\b(cambi\w*|modific\w*|reimpost\w*|resett\w*|aggiorn\w*|nuov[ao]|dimenticat\w*|sostitui\w*|impost\w*|metter\w*|metti|sistem\w*)\b/;
 function apriVoceImpostazioni(id){
   navigateTo("impostazioni");
   const el = document.getElementById(id);
@@ -14550,20 +14545,8 @@ function capisciAzioneDiretta(testo){
   const n = normalizzaComando(testo);
   if(!n) return null;
   const parole = n.split(" ");
-  // Password
-  if(/\bpassword\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 12 && soloParoleAccount(n, ["password","chiave"])) return { tipo: "password" };
-  // Email (la propria: "cambia l'email di Rossi" ha una parola in più → AI)
-  if(/\b(email|mail|posta)\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 12 && soloParoleAccount(n, ["email","mail","e","indirizzo","posta","elettronica"])) return { tipo: "email" };
-  // Nome / nome dell'attività
-  if(/\bnome\b/.test(n) && VERBO_CAMBIO.test(n) && parole.length <= 10 && soloParoleAccount(n, ["nome","attivita","ditta","azienda","impresa","societa","profilo","cognome","mio"])) return { tipo: "profilo" };
-  // Face ID
-  if(/\b(face ?id|impronta|riconoscimento facciale)\b/.test(n) && parole.length <= 8 && /^(attiva|attivare|attivami|disattiva|disattivare|togli|togliere|metti|mettere|voglio|vorrei|usa|usare|imposta|impostare|face)\b/.test(n)) return { tipo: "faceid" };
-  // EON sulla Home del telefono
-  if(/^(?:come (?:faccio a |si fa a )?)?(?:metti|mettere|metto|installa|installare|installo|aggiungi|aggiungere)\s+(?:l app\s+)?(?:eon\s+)?(?:l app\s+)?(?:sulla|nella|alla)\s+(?:schermata\s+)?home\b/.test(n) || /^(?:come (?:faccio a )?)?(?:installa|installare|installo)\s+(?:l app\s+)?eon$/.test(n)) return { tipo: "installa" };
-  // Importa i clienti dalla rubrica o da Excel
-  if(/^(?:voglio |vorrei |devo |come (?:faccio a |posso )?)?(?:importa|importare|importo|carica|caricare|porta|portare|prendi|prendere|aggiungi|aggiungere)\s+(?:(?:i|tutti i|le|la|il|dei|miei|mie)\s+)*(?:clienti|contatti|rubrica|anagrafica)(?:\s+(?:dalla|dal|da|della|del)\s+(?:rubrica|telefono|excel|file|csv|fatture in cloud|gestionale|cellulare))?$/.test(n)) return { tipo: "importa" };
-  // Esci
-  if(/^(?:esci|uscire|voglio uscire|fammi uscire|disconnettiti|disconnetti|logout)(?: dall account| da eon| dall app)?$/.test(n)) return { tipo: "esci" };
+  /* Password, email dell'account, nome dell'attività, Face ID, EON sulla Home, importa i clienti,
+     esci: dal 3/10/2026 li riconosce il modello (catalogo dell'app, provaSezioneDalModello). */
   // Feedback, suggerimenti, "dovreste aggiungere…"
   let m = n.match(/^(?:voglio |vorrei |devo )?(?:mandare|manda|mando|inviare|invia|lasciare|lascia|scrivere|scrivi|fare|fai|dare|dai)\s+(?:un |una |il |la )?(?:feedback|suggerimento|segnalazione)\b\s*(?:a eon\s*)?(?:che\s+|su\s+|per\s+)?(.*)$/);
   if(m) return { tipo: "feedback", testo: pulisciTestoFeedback(testo, m[1]) };
@@ -14587,22 +14570,7 @@ function provaAzioneDiretta(testo, primaDiAprire){
   const a = capisciAzioneDiretta(testo);
   if(!a) return false;
   if(typeof primaDiAprire === "function") primaDiAprire();
-  if(a.tipo === "password"){
-    apriVoceImpostazioni("impVocePassword");
-    const c = document.getElementById("impCampoPassword"); if(c) c.focus();
-  } else if(a.tipo === "email"){
-    navigateTo("impostazioni"); apriAccount(true);
-  } else if(a.tipo === "profilo"){
-    apriVoceImpostazioni("impVoceProfilo");
-  } else if(a.tipo === "faceid"){
-    if(!apriVoceImpostazioni("impVoceFaceId")) showAIToast("Face ID", "Su questo telefono non si può usare: entra con email e password.");
-  } else if(a.tipo === "installa"){
-    mostraComeInstallare();
-  } else if(a.tipo === "importa"){
-    navigateTo("clienti"); apriImportaClienti();
-  } else if(a.tipo === "esci"){
-    esciDallAccount();
-  } else if(a.tipo === "feedback"){
+  if(a.tipo === "feedback"){
     apriFeedback(a.testo);
   } else if(a.tipo === "compito"){
     navigateTo("assegna-compiti");
