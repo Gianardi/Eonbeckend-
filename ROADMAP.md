@@ -177,6 +177,10 @@ l'iPhone vero: da ricontrollare sul telefono).
 
 Tester: il 29/09 l'account di Simone (Massari) passato da "Altra attività"
 a "Amministratore di condominio" (a mano nel database, su richiesta di Andrea).
+Tester n. 2 (3/10, su richiesta di Andrea): account di Tatiana (amministratrice di condominio)
+creato a mano in produzione, email confermata, password provvisoria data ad Andrea (da cambiare
+al primo accesso); i termini li accetta lei al primo accesso. Login vero non provato da qui (la
+rete dell'ambiente non raggiunge Supabase): verificato nel database.
 
 Sul ramo `claude/ciao-ipc3fm`, non ancora in una PR: ROADMAP 0b.12 e
 0b.13. Andranno col prossimo pacchetto.
