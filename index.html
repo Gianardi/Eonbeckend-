@@ -10465,7 +10465,7 @@ function collegaHubRacconta(){
        calendario") non ha bisogno né di rete né di login — si
        riconosce qui, prima di tutto, e si evita del tutto la chiamata
        all'AI. Vedi provaNavigazioneDiretta più sotto nel file. */
-    if(provaNavigazioneDiretta(testo)){
+    if(provaNavigazioneDiretta(testo) || provaSezioneDalModello(testo)){
       campo.value = "";
       stato("attesa", "Raccontami la giornata", "Scrivi o detta cosa devi fare");
       return;
@@ -13793,6 +13793,17 @@ function rispondiSuiDati(l){
     if(!sue.length) return { titolo: cl.name, testo: "Nessuna entrata per " + cl.name + "." };
     return { titolo: cl.name, testo: (deve > 0 ? "Ti deve ancora **" + euroConti(deve) + "**" : "Ha pagato tutto") + "\nIncassati " + euroConti(pagato) };
   };
+  /* "Ho delle spese?" (3/10/2026, tester n.2: rispondeva l'AI): le uscite segnate, prima quelle
+     ancora da pagare, e il totale del mese. Si apre anche la pagina Uscite. */
+  if(l.tema === "spese"){
+    navigateTo("pagamenti");
+    if(!payments.length) return { titolo: "Spese", testo: "Nessuna spesa segnata. Dimmi per esempio \"spesa 120 euro gasolio\"." };
+    const daPagare = payments.filter(p => p.status !== "pagato");
+    const totDa = daPagare.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    const mese = contiAzienda("mese", oggi);
+    const riga = p => (p.supplier || p.desc || "Spesa") + " – " + euroConti(Number(p.amount) || 0) + (p.due ? " · " + p.due : "") + (p.status === "ritardo" ? " · in ritardo" : "");
+    return { titolo: "Spese", testo: (daPagare.length ? "Da pagare **" + euroConti(totDa) + "** (" + daPagare.length + ")\n" + daPagare.slice(0, 6).map(riga).join("\n") : "Niente da pagare: sono tutte pagate.") + "\nQuesto mese: uscite " + euroConti(mese.uscite) + ", pagate " + euroConti(mese.pagate) };
+  }
   if(l.tema === "crediti"){
     if(l.cliente) return soldiDi(l.cliente);
     return capisciDomandaSoldi("chi mi deve");
@@ -16607,6 +16618,11 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     /* PASSO A (2/10/2026): la domanda sui dati la legge il modello: che è una domanda, l'argomento
        (agenda, incassi, chi ti deve, indirizzo, assemblea…), di chi e quando. Il codice cerca nei
        dati e risponde. */
+    /* Una sezione dell'app ("metti EON sulla home", "voglio aiutare EON a crescere"): la apre il codice */
+    if(testo && !inCorso && !inContinuazione && provaSezioneDalModello(testo)){
+      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "sezione_app");
+      return;
+    }
     const datiM = testo && !inCorso && !inContinuazione ? datiDalModello(testo) : null;
     // "incassi", "apri clienti": è il nome di una pagina, si apre quella (come più sotto per tutte le frasi)
     if(datiM && provaNavigazioneDiretta(testo)){
@@ -19205,6 +19221,64 @@ function datiDalModello(testo){
   const cliente = clienteDelModello(m) || (detto ? clienteDaNomeDetto(detto) : null);
   return { azione: "dati", tema: m.tema === "telefono" ? "contatto" : m.tema, cliente: cliente || null, nomeDetto: cliente ? "" : detto,
     luogo: detto || m.indirizzo || "", quando: m.quando || {}, testo: String(testo || "").trim(), originale: String(testo || "").trim(), forte: true, modello: m };
+}
+/* CATALOGO DELL'APP (3/10/2026, Andrea: "Devo mettere EON sulla schermata home" → la sezione
+   giusta, subito, "e deve valere per tutto"). Che la frase chieda una sezione dell'app, e quale,
+   lo dice il modello (cassetto "app" e la sua terza uscita, 40 sezioni). Il codice la apre e
+   basta. Se il modello non è sicuro di quale: 2-3 tasti, niente AI. "Esci" chiede sempre prima. */
+const SICURO_APP = 0.7, SICURO_SEZIONE = 0.6;
+const SEZIONI_APP = {
+  home: { nome: "Home", pagina: "home" }, oggi: { nome: "Oggi", pagina: "oggi" }, clienti: { nome: "Clienti", pagina: "clienti" },
+  calendario: { nome: "Calendario", pagina: "calendario" }, messaggi: { nome: "Messaggi", pagina: "chat" }, chiamate: { nome: "Chiamate", pagina: "chiamate" },
+  cestino: { nome: "Cestino", pagina: "cestino" }, menu: { nome: "Menu", pagina: "gestisci-azienda" }, obiettivi: { nome: "Obiettivi", pagina: "cresci" },
+  compiti: { nome: "Compiti alla squadra", pagina: "assegna-compiti" }, documenti_impresa: { nome: "Documenti dell'impresa", pagina: "documenti-impresa" },
+  documenti: { nome: "Documenti", pagina: "cantiere-documenti" }, carta_intestata: { nome: "Carta intestata", pagina: "carta-intestata" },
+  lettere: { nome: "Lettere", pagina: "crea-lettera" }, cartello: { nome: "Cartello di cantiere", pagina: "crea-cartello" },
+  mente: { nome: "Mente (appunti)", apri: () => apriCardAppunti(null) }, foto: { nome: "Foto", pagina: "cantiere-foto" },
+  cantieri: { nome: "Cantieri", pagina: "cantiere-cliente" }, impostazioni: { nome: "Impostazioni", pagina: "impostazioni" },
+  fatture_preventivi: { nome: "Fatture e preventivi", pagina: "fatture-preventivi", prima: () => { filtroFatturePreventivi = "tutti"; } },
+  conti: { nome: "Conti dell'azienda", pagina: "azienda" }, uscite: { nome: "Uscite e spese", pagina: "pagamenti" }, entrate: { nome: "Entrate e incassi", pagina: "entrate" },
+  assemblee: { nome: "Assemblee", pagina: "assemblee" }, urgenze: { nome: "Urgenze", apri: () => apriUrgenze() },
+  dico: { nome: "Dichiarazioni di conformità", mestiere: "elettricista", apri: () => { navigateTo("cantiere-documenti"); apriElencoDico(); } },
+  installa: { nome: "EON sulla schermata Home", apri: () => mostraComeInstallare() },
+  migliora: { nome: "Aiuta EON a crescere", apri: () => { apriVoceImpostazioni("impVocePrivacy"); setTimeout(() => { const m = document.getElementById("impMigliora"); if(m) m.scrollIntoView({ block: "center", behavior: "smooth" }); }, 80); } },
+  privacy: { nome: "Privacy e dati", apri: () => apriVoceImpostazioni("impVocePrivacy") },
+  promemoria: { nome: "Promemoria", apri: () => apriVoceImpostazioni("impVocePromemoria") },
+  faceid: { nome: "Face ID", apri: () => { if(!apriVoceImpostazioni("impVoceFaceId")) showAIToast("Face ID", "Su questo telefono non si può usare: entra con email e password."); } },
+  password: { nome: "Password", apri: () => { apriVoceImpostazioni("impVocePassword"); const c = document.getElementById("impCampoPassword"); if(c) c.focus(); } },
+  email_account: { nome: "Email dell'account", apri: () => { navigateTo("impostazioni"); apriAccount(true); } },
+  profilo: { nome: "Profilo e nome dell'attività", apri: () => apriVoceImpostazioni("impVoceProfilo") },
+  aiuto: { nome: "Aiuto", apri: () => apriVoceImpostazioni("impVoceAiuto") },
+  elimina_account: { nome: "Elimina l'account", apri: () => apriVoceImpostazioni("impVoceElimina") },
+  esci: { nome: "Esci", apri: () => showAIToastConDecisione("Uscire da EON?", "Per rientrare ti serviranno email e password (o Face ID).", async () => { await esciDallAccount(); }, null, "Esci", "Annulla") },
+  abbonamento: { nome: "Abbonamento", apri: () => mostraRispostaEON("", "Per ora EON non ha un abbonamento da gestire: lo usi così com'è. Quando arriveranno i prezzi li troverai qui.", { titolo: "Abbonamento" }) },
+  feedback: { nome: "Scrivi a EON (feedback)", apri: (m) => apriFeedback(m && m.testo ? m.testo : "") },
+  importa_clienti: { nome: "Importa i clienti", apri: () => { navigateTo("clienti"); apriImportaClienti(); } },
+};
+function sezioneDisponibile(dest){
+  const s = SEZIONI_APP[dest];
+  return !!s && (!s.pagina || sezionePermessa(s.pagina)) && (!s.mestiere || s.mestiere === currentProfession);
+}
+function apriSezioneApp(dest, m){
+  const s = SEZIONI_APP[dest];
+  if(!s) return false;
+  chiudiRisorsaCard();
+  if(s.prima) s.prima();
+  if(s.apri) s.apri(m); else navigateTo(s.pagina);
+  return true;
+}
+/* true se la frase chiedeva una sezione dell'app ed è stata aperta (o offerta con i tasti) */
+function provaSezioneDalModello(testo){
+  const m = letturaModello(testo);
+  if(!m || m.intento !== "app" || m.p < SICURO_APP || !m.dest) return false;
+  const possibili = [{ tema: m.dest, p: m.pDest }, ...(m.altreDest || [])].filter(x => sezioneDisponibile(x.tema));
+  if(!possibili.length) return false;
+  if(possibili[0].tema === m.dest && m.pDest >= SICURO_SEZIONE) return apriSezioneApp(m.dest, m);
+  // non è sicuro di quale: le 2-3 più probabili, scegli tu
+  domandaDelCodice({ titolo: "Dove vuoi andare?", domanda: "Cosa vuoi aprire?", senzaCampo: true,
+    scelte: possibili.slice(0, 3).map(x => ({ etichetta: SEZIONI_APP[x.tema].nome, valore: x.tema })),
+    onRisposta: (dest) => apriSezioneApp(dest, m) });
+  return true;
 }
 /* la risposta di rispondiSuiDati sullo schermo (e a voce, se la domanda era a voce) */
 function mostraDati(r, testo, viaVoce){

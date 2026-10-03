@@ -882,14 +882,13 @@
     if (!letture.length) return null;
     // l'argomento (domande sui dati): media delle probabilità, come per il cassetto
     const conTema = letture.filter((l) => l.pt && l.temi);
-    let tema = null, pTema = 0;
+    let pt = null, temi = null;
     if (conTema.length) {
-      const pt = new Array(conTema[0].temi.length).fill(0);
+      temi = conTema[0].temi;
+      pt = new Array(temi.length).fill(0);
       conTema.forEach((l) => l.pt.forEach((v, i) => { pt[i] += v / conTema.length; }));
-      let k = 0; for (let i = 1; i < pt.length; i++) if (pt[i] > pt[k]) k = i;
-      tema = conTema[0].temi[k]; pTema = pt[k];
     }
-    if (letture.length === 1) return { ...letture[0], tema, pTema };
+    if (letture.length === 1) return { ...letture[0], pt, temi };
     const intenti = letture[0].intenti, K = intenti.length;
     const pc = new Array(K).fill(0);
     letture.forEach((l) => l.pc.forEach((v, i) => { pc[i] += v / letture.length; }));
@@ -901,7 +900,16 @@
       let k = 0; for (let i = 1; i < pp.length; i++) if (pp[i] > pp[k]) k = i;
       return { ruolo: ruoliNomi[k], p: pp[k] };
     });
-    return { intento: intenti[ordine[0][1]], p: ordine[0][0], secondo: intenti[ordine[1][1]], p2: ordine[1][0], ruoli, tema, pTema };
+    return { intento: intenti[ordine[0][1]], p: ordine[0][0], secondo: intenti[ordine[1][1]], p2: ordine[1][0], ruoli, pt, temi };
+  }
+  /* La terza uscita del modello ha due famiglie: gli argomenti delle domande sui dati
+     ("incassi", "agenda"…) e le sezioni dell'app ("app_installa", "app_privacy"…).
+     Si sceglie dentro la famiglia del cassetto, dalla più probabile in giù. */
+  function temiInOrdine(l, app) {
+    if (!l || !l.pt || !l.temi) return [];
+    const somma = l.temi.reduce((s, x, i) => s + ((x.indexOf("app_") === 0) === app ? l.pt[i] : 0), 0) || 1;
+    return l.temi.map((x, i) => ({ tema: app ? x.slice(4) : x, p: l.pt[i] / somma, app: x.indexOf("app_") === 0 }))
+      .filter((x) => x.app === app).sort((a, b) => b.p - a.p).map(({ tema, p }) => ({ tema, p }));
   }
   const LETTURA_RUOLI = ["O", "CHI", "GIO", "ORA", "NGIO", "NORA", "LAV", "TESTO", "CAN", "DOC", "NUM", "TEL", "MAIL", "IND", "AVANZ", "CART"];
   const CANALI = { whatsapp: "whatsapp", whats: "whatsapp", wa: "whatsapp", app: "whatsapp", mail: "email", email: "email", "e-mail": "email", posta: "email", sms: "sms", messaggino: "sms", pec: "email", eon: "eon", chat: "eon" };
@@ -957,9 +965,13 @@
     const can = paroleModello(testoDi("CAN").toLowerCase()).map((w) => CANALI[soloLettere(w)]).find(Boolean) || null;
     const cifre = [...testoDi("NUM")].filter((ch) => ch >= "0" && ch <= "9").join("");
     const num = cifre ? parseInt(cifre, 10) : null;
+    const temiDati = c && c.intento === "dati" ? temiInOrdine(c, false) : [];
+    const sezioni = c && c.intento === "app" ? temiInOrdine(c, true) : [];
     return {
       intento: c ? c.intento : null, p: c ? c.p : 0, secondo: c ? c.secondo : null, p2: c ? c.p2 : 0,
-      tema: c && c.intento === "dati" ? c.tema || null : null, pTema: c && c.intento === "dati" ? c.pTema || 0 : 0,
+      tema: temiDati.length ? temiDati[0].tema : null, pTema: temiDati.length ? temiDati[0].p : 0,
+      // "app": la sezione dell'app chiesta (dest) e le altre più probabili, per offrire una scelta
+      dest: sezioni.length ? sezioni[0].tema : null, pDest: sezioni.length ? sezioni[0].p : 0, altreDest: sezioni.slice(1, 3),
       chi, quando: quandoDi("GIO", "ORA"), nuovoQuando: quandoDi("NGIO", "NORA"),
       lavoro: lavoroDi() || null, testo: testoDi("TESTO") || null, canale: can, documento: testoDi("DOC").toLowerCase() || null, numero: num,
       telefono: testoDi("TEL") || null, email: testoDi("MAIL") || null, indirizzo: testoDi("IND") || null, avanzamento: testoDi("AVANZ") || null, cartella: testoDi("CART") || null,

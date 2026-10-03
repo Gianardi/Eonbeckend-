@@ -5,7 +5,9 @@
    - in lettore.js: tutte (il lettore serve solo a capire);
    - in index.html e api/index.js: solo dentro le funzioni che leggono le frasi
      (prova…, capisci…, leggi…, cerca…, rispondiSuiDati, gestisci…, lavoroDa…).
-   Uso: node eval/regole-conta.mjs */
+   Uso: node eval/regole-conta.mjs
+   Con --controlla (nelle prove automatiche, 3/10/2026): fallisce se il numero supera il tetto
+   in eval/dati/regole-tetto.json. Il tetto si abbassa a ogni pacchetto, mai si alza. */
 import fs from "node:fs";
 import path from "node:path";
 const RADICE = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
@@ -28,3 +30,12 @@ const lettore = fs.readFileSync(path.join(RADICE, "lettore.js"), "utf8").split("
 const app = dentroFunzioni("index.html"), server = dentroFunzioni("api/index.js");
 console.log(`Regole a mano che capiscono le frasi: ${lettore + app + server}`);
 console.log(`  lettore.js ${lettore} · app ${app} · server ${server}`);
+const totale = lettore + app + server;
+if (process.argv.includes("--controlla")) {
+  const tetto = JSON.parse(fs.readFileSync(path.join(RADICE, "eval/dati/regole-tetto.json"), "utf8")).massimo;
+  if (totale > tetto) {
+    console.error(`FAIL: ${totale} regole, più del tetto di ${tetto}. Una frase nuova da capire va insegnata al modello (frasi + riallenamento), non scritta come regola.`);
+    process.exit(1);
+  }
+  console.log(`OK: ${totale} ≤ tetto ${tetto}` + (totale < tetto ? ` (abbassa il tetto a ${totale} in eval/dati/regole-tetto.json)` : ""));
+}
