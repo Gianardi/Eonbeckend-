@@ -13267,17 +13267,12 @@ function mandaFotoA(c){
   apriRisorsaCard("Foto · " + c.name, corpo);
   return true;
 }
-/* "L'indirizzo del Bar Aurora ce l'ho?", "qual è l'indirizzo di Rossi": c'è (con Portami lì) o
-   "Me lo dici? Lo salvo" (1/10/2026) */
-function provaIndirizzoCliente(testo){
-  const n = normalizzaComando(testo);
-  const m = n.match(/^(?:ce\s+l\s+ho\s+)?l?\s*indirizzo\s+(?:del|della|dello|dell|di|dei)\s+(.+?)(?:\s+(?:ce\s+l\s+ho|ce\s+l\s+abbiamo|l\s+ho|lo\s+ho|ce\s+lo\s+ho))?$/)
-    || n.match(/^(?:qual\s+e|qual\s+è|com\s+e|dammi|mi\s+dai|mandami|dimmi|mi\s+dici)\s+l?\s*indirizzo\s+(?:del|della|dello|dell|di|dei)\s+(.+)$/);
-  if(!m) return false;
-  const nome = m[1].replace(/\s+(?:per\s+favore|grazie)$/, "").trim();
-  const c = clienteDaNomeDetto(nome);
+/* "L'indirizzo del Bar Aurora ce l'ho?", "dove abita Rossi": c'è (con Portami lì) o "Me lo dici?
+   Lo salvo" (1/10/2026). PASSO A (2/10): che sia una domanda sull'indirizzo, e di chi, lo dice il
+   modello (argomento "indirizzo", pezzo CHI); prima era un'espressione regolare. */
+function rispondiIndirizzo(c, nome){
   if(!c){
-    if(!nome || /\d/.test(nome) || nome.split(" ").length > 4 || clients.some(x => nome.split(" ").every(p => normalizzaComando(x.name).split(" ").includes(p)))) return false;
+    if(!nome || [...nome].some(ch => ch >= "0" && ch <= "9")) return false;
     offriDiAggiungereCliente(nome, (nuovo) => chiediContatto(nuovo, "indirizzo", "", (c2) => { chiudiRisorsaCard(); showAIToast("Indirizzo salvato", c2.name + ": " + c2.address + "."); }));
     return true;
   }
@@ -13297,15 +13292,24 @@ function provaIndirizzoCliente(testo){
   chiediContatto(c, "indirizzo", "", (c2) => { chiudiRisorsaCard(); showAIToast("Indirizzo salvato", c2.name + ": " + c2.address + "."); });
   return true;
 }
+/* "La mail dello Studio Rigoni ce l'ho?" (2/10/2026): sì (e qual è) o "Me la dici? La salvo" */
+function rispondiEmail(c, nome){
+  const salvata = (c2) => { chiudiRisorsaCard(); showAIToast("Email salvata", c2.name + ": " + c2.email + "."); };
+  if(!c){
+    if(!nome) return null;
+    offriDiAggiungereCliente(nome, (nuovo) => chiediContatto(nuovo, "email", "", salvata));
+    return { gestito: true, titolo: nome, testo: "" };
+  }
+  if(c.email) return { titolo: c.name, testo: "Sì: **" + c.email + "**" };
+  chiediContatto(c, "email", "", salvata);
+  return { gestito: true, titolo: c.name, testo: "" };
+}
 /* Amministratore: "quando è l'assemblea di via Roma 12?": la data, o "Non è ancora convocata.
-   La convochiamo?" (1/10/2026) */
-function provaQuandoAssemblea(testo){
-  if(currentProfession !== "amministratore") return false;
-  const n = normalizzaComando(testo);
-  const m = n.match(/^(?:quando|a\s+che\s+ora|che\s+giorno)\s+(?:e|è|c\s+e|ho|abbiamo|faccio|facciamo|si\s+fa|sara)\s+(?:l\s+|la\s+)?(?:prossima\s+)?assemblea\s+(?:di|del|della|dello|dell|in|a|al|alla)?\s*(.+)$/);
-  if(!m) return false;
-  const detto = m[1].trim();
-  const parole = detto.split(" ").filter(w => w.length > 1 && !/^(?:condominio|via|viale|piazza|corso|il|la|lo|di|del|della)$/.test(w));
+   La convochiamo?" (1/10/2026). PASSO A (2/10): la domanda e il condominio li legge il modello. */
+const PAROLE_DEL_NOME = new Set(["condominio", "via", "viale", "piazza", "corso", "il", "la", "lo", "di", "del", "della"]);
+function rispondiAssemblea(detto, testo){
+  if(currentProfession !== "amministratore" || !detto) return false;
+  const parole = normalizzaComando(detto).split(" ").filter(w => w.length > 1 && !PAROLE_DEL_NOME.has(w));
   if(!parole.length) return false;
   const oggiIso = new Date().toISOString().slice(0, 16);
   const sue = assemblee.filter(a => { const w = normalizzaComando(a.condominio || "").split(" "); return parole.every(p => w.includes(p)); });
@@ -13704,6 +13708,22 @@ function offriFatturaSeMaiFatta(cl){
   offriDiFareDocumento("", "fattura", cl, "", "Per " + cl.name + " non risultano né incassi né soldi da avere: con EON non gli abbiamo ancora fatto fatture.");
   return true;
 }
+/* "Quali sono i clienti che non sento da più tempo?" (2/10/2026): per ogni cliente l'ultimo impegno
+   passato in agenda col suo nome; i 6 più lontani. Chi non ha impegni non si conta (EON non lo sa). */
+function clientiDaPiuTempo(){
+  const oggiD = new Date(); oggiD.setHours(0, 0, 0, 0);
+  const impegni = [];
+  tasks.forEach(t => { if(t.time && t.status !== "annullato") impegni.push({ testo: t.title || "", d: interpretaQuando(t.time) }); });
+  chats.forEach(c => (c.messages || []).forEach(m => { if(m.eventType === "appt") impegni.push({ testo: (m.title || "") + " " + (c.name || ""), d: interpretaQuando(m.text) }); }));
+  const passati = impegni.filter(v => v.d && v.d < oggiD).map(v => ({ d: v.d, parole: EonLettore.norm(v.testo).split(" ") }));
+  const righe = clients.filter(c => !c.archived).map(c => {
+    const nomi = EonLettore.norm(c.name || "").split(" ").filter(w => w.length > 2);
+    const suoi = passati.filter(v => nomi.length && nomi.every(w => v.parole.includes(w)));
+    return suoi.length ? { c, d: suoi.reduce((a, v) => (v.d > a ? v.d : a), suoi[0].d) } : null;
+  }).filter(Boolean).sort((a, b) => a.d - b.d).slice(0, 6);
+  if(!righe.length) return { titolo: "Clienti", testo: "Non trovo appuntamenti passati con i tuoi clienti in agenda." };
+  return { titolo: "Da più tempo", testo: righe.map(r => "**" + r.c.name + "** – " + r.d.toLocaleDateString("it-IT", { day: "numeric", month: "long" }) + " (" + Math.round((oggiD - r.d) / 86400000) + " giorni fa)").join("\n") };
+}
 function rispondiSuiDati(l){
   const oggi = new Date();
   const n = EonLettore.norm(l.testo);
@@ -13747,7 +13767,8 @@ function rispondiSuiDati(l){
      l'ultimo impegno passato con quel nome (e il prossimo, se c'è) */
   if(l.tema === "ultima_visita"){
     const chi = l.cliente ? l.cliente.name : l.nomeDetto;
-    if(!chi) return null;
+    // "quali clienti non sento da più tempo?" (nessun nome): quelli con l'ultimo impegno più lontano
+    if(!chi) return clientiDaPiuTempo();
     const nomi = EonLettore.norm(chi).split(" ").filter(w => w.length > 2 && !/^(?:condominio|signora|signor|ditta|bar|hotel|ristorante|studio|impresa)$/.test(w));
     if(!nomi.length) return null;
     const oggiD = new Date(); oggiD.setHours(0, 0, 0, 0);
@@ -13876,6 +13897,9 @@ function rispondiSuiDati(l){
     return { titolo: "Clienti", testo: attivi === 1 ? "Hai 1 cliente in anagrafica." : "Hai " + attivi + " clienti in anagrafica." };
   }
   if(l.tema === "urgenze"){ apriUrgenze(); return { gestito: true }; }
+  if(l.tema === "indirizzo") return rispondiIndirizzo(l.cliente ? (clients.find(c => c.id === l.cliente.id) || l.cliente) : null, l.nomeDetto) ? { gestito: true } : null;
+  if(l.tema === "email") return rispondiEmail(l.cliente ? (clients.find(c => c.id === l.cliente.id) || l.cliente) : null, l.nomeDetto);
+  if(l.tema === "assemblea") return rispondiAssemblea(l.luogo || (l.cliente && l.cliente.name) || l.nomeDetto, l.originale || l.testo) ? { gestito: true } : null;
   // "Cosa c'è in Fornitori?", "cosa devo fare per Lerici?": la cartella, aperta
   if(l.tema === "cartella" && l.cartella){ apriCardAppunti(cartelle.find(c => c.id === l.cartella.id) || l.cartella); return { gestito: true }; }
   return null;
@@ -14090,11 +14114,7 @@ async function provaLettore(testo, viaVoce, invia, senzaModello){
     case "dati": {
       const r = rispondiSuiDati(l);
       if(!r) return null;
-      if(!r.gestito){
-        const righe = String(r.testo || "").split("\n").filter(Boolean);
-        mostraRispostaEON(testo, righe.length > 1 ? righe.map(x => "- " + x).join("\n") : r.testo, { titolo: r.titolo });
-        if(viaVoce) parlaRisposta(r.titolo + (r.testo ? ": " + r.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
-      }
+      mostraDati(r, testo, viaVoce);
       return { fatto: "dati_" + l.tema };
     }
     case "documento": return gestisciDocumento(l, testo, invia);
@@ -16527,25 +16547,20 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
     if(testo && !inCorso && !inContinuazione && provaPreventivoAccettato(testo)){
       campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "preventivo_accettato"); return;
     }
-    /* Il modello dice "domanda sui tuoi dati" (passo 3): il lettore capisce il tema
-       (agenda, soldi di un cliente, chi ti deve, incassi, documenti) e risponde il codice */
-    // (una o due parole, "apri…", "vai…": è il nome di una pagina, non una domanda)
-    /* …o una domanda sui dati detta chiara ("quanti soldi ho preso in contanti questa settimana",
-       "il numero del Merlo ce l'ho?", "fammi vedé le fatture non pagate"): risponde il codice
-       anche se il modello pensa ad altro (1/10/2026, giri 16-20: andavano all'AI) */
-    const domandaDatiForte = testo && !inCorso && !inContinuazione && (!chiedeDiFare(testo) || /^\s*fammi\s+(?:il|un)\s+punto\b/i.test(testo)) ? EonLettore.leggiDomandaDati(testo, contestoLettore()) : null;
-    if(testo && !inCorso && !inContinuazione && testo.trim().split(/\s+/).length >= 3 && ((domandaDatiForte && domandaDatiForte.forte) || (!/^\s*(?:apri|aprimi|vai|mostra|mostrami|fammi\s+vedere)\b/i.test(testo) && cassettoNeurale(testo) === "dati"))){
-      const ld = domandaDatiForte || EonLettore.leggiDomandaDati(testo, contestoLettore());
-      const r = ld ? rispondiSuiDati(ld) : null;
-      if(r){
-        if(!r.gestito){
-          const righe = String(r.testo || "").split("\n").filter(Boolean);
-          mostraRispostaEON(testo, righe.length > 1 ? righe.map(x => "- " + x).join("\n") : r.testo, { titolo: r.titolo });
-          if(viaVoce) parlaRisposta(r.titolo + (r.testo ? ": " + r.testo.replace(/\*\*/g, "").replace(/\n+/g, ". ") : ""));
-        }
-        campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "dati_neurale_" + ld.tema);
-        return;
-      }
+    /* PASSO A (2/10/2026): la domanda sui dati la legge il modello: che è una domanda, l'argomento
+       (agenda, incassi, chi ti deve, indirizzo, assemblea…), di chi e quando. Il codice cerca nei
+       dati e risponde. */
+    const datiM = testo && !inCorso && !inContinuazione ? datiDalModello(testo) : null;
+    // "incassi", "apri clienti": è il nome di una pagina, si apre quella (come più sotto per tutte le frasi)
+    if(datiM && provaNavigazioneDiretta(testo)){
+      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "pagina");
+      return;
+    }
+    const rM = datiM ? rispondiSuiDati(datiM) : null;
+    if(rM){
+      mostraDati(rM, testo, viaVoce);
+      campo.value = ""; hint.textContent = hintBaseDi(); ricordaEsitoCodice(testo, "dati_lettura_" + datiM.tema);
+      return;
     }
     /* Il modello dice "messaggio", "email" o "chiamata" (passo 3) e le regole non l'avevano
        letto per intero: a chi (anche chi non è tra i clienti: "i ragazzi della squadra", "il
@@ -16667,14 +16682,6 @@ function collegaMicTesto({ micId, campoId, sendId, hintId, hintBase, costruisciP
       campo.value = "";
       hint.textContent = hintBaseDi();
       ricordaEsitoCodice(testo, "invio_documento");
-      return;
-    }
-    /* Foto da mandare, indirizzo, assemblea, preventivo accettato: col codice, e se manca
-       qualcosa "Lo facciamo adesso?" (1/10/2026) */
-    if(!inContinuazione && (provaIndirizzoCliente(testo) || provaQuandoAssemblea(testo))){
-      campo.value = "";
-      hint.textContent = hintBaseDi();
-      ricordaEsitoCodice(testo, "codice_offerta");
       return;
     }
 
@@ -18961,6 +18968,30 @@ function mailtoDocumento(d, cliente){
    c'erano espressioni regolari (VERBO_INVIO, capisciInvioDocumento, invioDalLettore,
    lavoroDaFraseInvio, provaInvioFoto): tolte. */
 const SICURO_INVIO = 0.85;
+/* PASSO A (2/10/2026): una domanda sui dati letta dal modello → la stessa forma che usa
+   rispondiSuiDati. Il modello dice il cassetto ("dati"), l'argomento e i pezzi; qui solo il
+   cliente in rubrica (o il nome detto) e il giorno normalizzato. */
+const SICURO_DATI = 0.8, SICURO_TEMA = 0.5; // risposte che leggono soltanto (niente si scrive)
+function datiDalModello(testo){
+  const m = letturaModello(testo);
+  if(!m || m.intento !== "dati" || m.p < SICURO_DATI || !m.tema || m.pTema < SICURO_TEMA) return null;
+  // un nome che in rubrica vale per più clienti ("Dini": Sara o Giampiero?): come prima, decide chi viene dopo
+  if(m.chi.some(c => c.stato === "ambiguo")) return null;
+  // una cartella nominata ("cosa c'è in Fornitori?"): la cartella, come nel lettore
+  const lc = leggiConLettore(testo);
+  if(lc && lc.azione === "dati" && lc.tema === "cartella" && lc.cartella) return lc;
+  const detto = m.chi[0] ? m.chi[0].detto : "";
+  const cliente = clienteDelModello(m) || (detto ? clienteDaNomeDetto(detto) : null);
+  return { azione: "dati", tema: m.tema === "telefono" ? "contatto" : m.tema, cliente: cliente || null, nomeDetto: cliente ? "" : detto,
+    luogo: detto || m.indirizzo || "", quando: m.quando || {}, testo: String(testo || "").trim(), originale: String(testo || "").trim(), forte: true, modello: m };
+}
+/* la risposta di rispondiSuiDati sullo schermo (e a voce, se la domanda era a voce) */
+function mostraDati(r, testo, viaVoce){
+  if(r.gestito) return;
+  const righe = String(r.testo || "").split("\n").filter(Boolean);
+  mostraRispostaEON(testo, righe.length > 1 ? righe.map(x => "- " + x).join("\n") : r.testo, { titolo: r.titolo });
+  if(viaVoce) parlaRisposta(r.titolo + (r.testo ? ": " + r.testo.split("**").join("").split("\n").filter(Boolean).join(". ") : ""));
+}
 /* PASSO A: la lettura del modello per una frase, se il modello è caricato (null se no) */
 function letturaModello(testo){
   if(typeof EonLettore === "undefined" || !EonLettore.letturaAttiva || !EonLettore.letturaAttiva()) return null;

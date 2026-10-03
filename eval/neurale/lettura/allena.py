@@ -27,11 +27,13 @@ torch.set_num_threads(int(os.environ.get("THREADS", "4")))
 
 RUOLI = ["O", "CHI", "GIO", "ORA", "NGIO", "NORA", "LAV", "TESTO", "CAN", "DOC", "NUM", "TEL", "MAIL", "IND", "AVANZ", "CART"]
 CASSETTI = ["calendario", "calendario_modifica", "mente", "documento", "cerca_documento", "invio_documento", "messaggio", "email", "chiamata", "cliente", "dati", "domanda", "incasso", "foto", "cartella", "urgenza", "sal", "dico", "assemblea", "saluto", "accettato", "sollecito"]
-R = {r: i for i, r in enumerate(RUOLI)}; C = {c: i for i, c in enumerate(CASSETTI)}
+# l'argomento di una domanda sui dati (2/10/2026): terza uscita, solo per le frasi "dati:tema"
+TEMI = ["agenda", "incassi", "crediti", "documenti", "telefono", "email", "indirizzo", "ultima_visita", "note_cliente", "iva", "cantieri", "clienti", "urgenze", "assemblea", "spese", "scadenze", "altro"]
+R = {r: i for i, r in enumerate(RUOLI)}; C = {c: i for i, c in enumerate(CASSETTI)}; TM = {t: i for i, t in enumerate(TEMI)}
 leggi = lambda f: [json.loads(r) for r in open(f) if r.strip()]
 
 # parole come in verifica.mjs (spazi e apostrofi), minuscole
-def dividi(t): return [w for w in re.sub(r"([’'])", r"\1 ", str(t)).split() if w]
+def dividi(t): return [w for w in re.sub(r"\?", " ? ", re.sub(r"([’'])", r"\1 ", str(t))).split() if w]  # "?" parola a sé
 def norm(w): return w.lower().replace("’", "'")
 
 scritte = leggi(os.path.join(QUI, "dati", "scritte.jsonl"))
@@ -130,6 +132,7 @@ class Modello(nn.Module):
         s.ln = nn.LayerNorm(D)
         s.out = nn.Linear(D, len(CASSETTI))   # il cassetto (media delle parole, come il modello di oggi)
         s.outR = nn.Linear(D, len(RUOLI))     # il ruolo di ogni parola
+        s.outT = nn.Linear(D, len(TEMI))      # l'argomento, se la frase è una domanda sui dati
         s.drop = nn.Dropout(0.1)
     def forward(s, ids, maschera, segnali):
         x = s.drop(s.emb(ids) + s.pos(torch.arange(ids.shape[1])[None]) + s.rub(segnali))
@@ -137,16 +140,16 @@ class Modello(nn.Module):
         x = s.ln(x)
         m = maschera.float()[..., None]
         media = (x * m).sum(1) / m.sum(1)
-        return s.out(media), s.outR(x)
+        return s.out(media), s.outR(x), s.outT(media)
 
 def lotto(esempi, rumore):
-    seq, pos, lab, cas, seg = [], [], [], [], []
+    seq, pos, lab, cas, seg, tem = [], [], [], [], [], []
     for x in esempi:
         pr, rl = x["parole"], x.get("ruoli")
         if rumore: pr, rl = sporca(pr, rl or ["O"] * len(pr))
         rub = rubrica_finta(pr, rl) if x.get("ruoli") else None
         ids, primi, segn = codifica(pr, rub)
-        seq.append(ids); pos.append(primi); cas.append(C[x["intento"]]); seg.append(segn)
+        seq.append(ids); pos.append(primi); cas.append(C[x["intento"]]); seg.append(segn); tem.append(TM[x["tema"]] if x.get("tema") in TM else -100)
         lab.append([R[r] for r in rl[:len(primi)]] if x.get("ruoli") else None)
     T = max(len(q) for q in seq)
     ids = torch.zeros(len(seq), T, dtype=torch.long)
@@ -156,19 +159,19 @@ def lotto(esempi, rumore):
         ids[i, :len(q)] = torch.tensor(q); sg[i, :len(q)] = torch.tensor(seg[i])
         if l is not None:
             for j, k in enumerate(p): y[i, k] = l[j]
-    return ids, ids != 0, y, torch.tensor(cas), pos, sg
+    return ids, ids != 0, y, torch.tensor(cas), pos, sg, torch.tensor(tem)
 
 def predici(esempi):
     modello.eval(); out = []
     with torch.no_grad():
         for i in range(0, len(esempi), 256):
             b = esempi[i:i + 256]
-            ids, m, _, _, pos, sg = lotto(b, False)
-            zc, zr = modello(ids, m, sg)
-            pc, pr = F.softmax(zc, -1), F.softmax(zr, -1)
+            ids, m, _, _, pos, sg, _ = lotto(b, False)
+            zc, zr, zt = modello(ids, m, sg)
+            pc, pr, pt = F.softmax(zc, -1), F.softmax(zr, -1), F.softmax(zt, -1)
             for k, x in enumerate(b):
                 ruoli = [RUOLI[int(pr[k, pos[k][j]].argmax())] if j < len(pos[k]) else "O" for j in range(len(x["parole"]))]
-                out.append({"intento": CASSETTI[int(pc[k].argmax())], "p": float(pc[k].max()), "ruoli": ruoli})
+                out.append({"intento": CASSETTI[int(pc[k].argmax())], "p": float(pc[k].max()), "ruoli": ruoli, "tema": TEMI[int(pt[k].argmax())]})
     return out
 def pezzi_di(parole, ruoli):
     """i pezzi (ruolo, parole) di una frase: parole vicine con lo stesso ruolo = un pezzo"""
@@ -182,6 +185,9 @@ def pezzi_di(parole, ruoli):
 def misura(esempi, con_ruoli):
     pr = predici(esempi)
     cas = sum(p["intento"] == x["intento"] for x, p in zip(esempi, pr)) / max(1, len(esempi))
+    global ULTIMO_TEMA
+    con_tema = [(x, p) for x, p in zip(esempi, pr) if x.get("tema")]
+    ULTIMO_TEMA = (sum(p["tema"] == x["tema"] for x, p in con_tema) / len(con_tema), len(con_tema)) if con_tema else (0, 0)
     if not con_ruoli: return cas, None, None
     giusti = tot_oro = tot_pred = 0; frasi = 0
     for x, p in zip(esempi, pr):
@@ -203,16 +209,19 @@ t0 = time.time()
 for ep in range(EPOCHE):
     modello.train(); dati = solo_cassetto + segnate * RIPETI; random.shuffle(dati); tot = 0
     for i in range(0, len(dati), BS):
-        ids, m, y, c, _, sg = lotto(dati[i:i + BS], True)
-        zc, zr = modello(ids, m, sg)
+        ids, m, y, c, _, sg, t = lotto(dati[i:i + BS], True)
+        zc, zr, zt = modello(ids, m, sg)
         perdita = F.cross_entropy(zc, c)
+        if (t != -100).any(): perdita = perdita + F.cross_entropy(zt, t, ignore_index=-100)
         if (y != -100).any(): perdita = perdita + F.cross_entropy(zr.reshape(-1, len(RUOLI)), y.reshape(-1), weight=pesi, ignore_index=-100)
         opt.zero_grad(); perdita.backward(); nn.utils.clip_grad_norm_(modello.parameters(), 1.0); opt.step(); sched.step()
         tot += perdita.item()
     cf, f1, fi = misura(prova_ruoli, True) if prova_ruoli else (0, 0, 0)
+    tema_fuori = ULTIMO_TEMA if prova_ruoli else (0, 0)
     ce, _, _ = misura(esame, False) if esame else (0, None, None)
-    print(f"epoca {ep + 1}: perdita {tot / math.ceil(len(dati) / BS):.4f} · scrittori tenuti fuori: cassetto {cf:.3f}, pezzi F1 {f1:.3f}, frasi intere {fi:.3f} · giri 16-20 cassetto {ce:.3f} · {time.time() - t0:.0f}s", flush=True)
+    print(f"epoca {ep + 1}: perdita {tot / math.ceil(len(dati) / BS):.4f} · scrittori tenuti fuori: cassetto {cf:.3f}, pezzi F1 {f1:.3f}, frasi intere {fi:.3f}, argomento {tema_fuori[0]:.3f} su {tema_fuori[1]} · giri 16-20 cassetto {ce:.3f} · {time.time() - t0:.0f}s", flush=True)
 
+ULTIMO_TEMA = (0, 0)
 if os.environ.get("ERRORI"):
     with open(os.environ["ERRORI"], "w") as f:
         for x, p in zip(prova_ruoli, predici(prova_ruoli)):
@@ -230,7 +239,7 @@ if SALVA:
         else:
             pz[nome] = {"forma": list(a.shape), "v": [round(float(x), 6) for x in a.ravel()]}
     vocab = sorted(VOC.items(), key=lambda kv: kv[1])
-    out = {"versione": time.strftime("%Y-%m-%d"), "tipo": "transformer", "intenti": CASSETTI, "ruoli": RUOLI, "minuscolo": True,
+    out = {"versione": time.strftime("%Y-%m-%d"), "tipo": "transformer", "intenti": CASSETTI, "ruoli": RUOLI, "temi": TEMI, "minuscolo": True,
            "D": D, "strati": STRATI, "teste": TESTE, "ff": FF, "maxlen": MAXLEN, "vocab": [w for w, _ in vocab], "pesi": pz}
     f = os.path.join(RADICE, os.environ.get("USCITA", "modello-lettura.json"))
     json.dump(out, open(f, "w"), separators=(",", ":"))

@@ -18,6 +18,12 @@
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const L = require("../lettore.js");
+// PASSO A (2/10/2026): l'argomento delle domande sui dati lo dice il modello, come nell'app
+{
+  const N = require("../neurale.js"), fs = require("fs");
+  const j = JSON.parse(fs.readFileSync(new URL("../modello-lettura.json", import.meta.url), "utf8"));
+  L.usaLettura((Array.isArray(j.modelli) ? j.modelli : [j]).map((m) => { const x = N.crea(); return x.carica(m) ? x : null; }).filter(Boolean));
+}
 
 const OGGI = new Date("2026-09-29T10:00:00"); // un martedì
 const CLIENTI = [

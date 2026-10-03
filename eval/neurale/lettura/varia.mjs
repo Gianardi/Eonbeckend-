@@ -72,7 +72,7 @@ for (const x of righe) {
       ww.forEach((w) => { parole.push(w); ruoli.push(r); });
     }
     n++;
-    console.log(JSON.stringify({ fonte: x.fonte + "#v", frase: parole.join(" ").replace(/([’']) /g, "$1"), intento: x.intento, parole, ruoli }));
+    console.log(JSON.stringify({ fonte: x.fonte + "#v", frase: parole.join(" ").replace(/([’']) /g, "$1"), intento: x.intento, ...(x.tema ? { tema: x.tema } : {}), parole, ruoli }));
   }
 }
 console.error(`frasi variate: ${n}`);
