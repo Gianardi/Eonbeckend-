@@ -525,8 +525,25 @@ lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai pe
     viste, poche). Giri 5-20 tutti al minimo o sopra (giro 15: 1055, +2; giro 20: 1014, +1); frasi
     vere di Andrea 134/136 (=); suite 83/83; simulatore 2935/2935.
   - **Regole a mano: 860 → 826.**
-- Poi (da decidere coi numeri): B, partire da un modello che sa già l'italiano (serve sbloccare
-  huggingface.co nella rete dell'ambiente); C, un modello che "scrive" il comando (serve una GPU).
+- **Il piano deciso con Andrea (3/10/2026): da piccola AI a AI vera.**
+  1. **Finire il passo A.** EON è una piccola AI che capisce e fa (impegni, messaggi, preventivi,
+     fatture, domande sui dati): nel telefono, veloce, gratis, anche senza rete. Resta anche dopo.
+  2. **Schede del mestiere + raccolta delle conversazioni.** L'AI grande di oggi risponde con prezzi,
+     materiali e norme verificati da noi (consigli migliori subito); intanto si raccolgono le
+     conversazioni buone (tester con consenso, risposte ideali scritte da un'AI grande e controllate):
+     sono il "libro" su cui studierà la AI vera.
+  3. **La AI vera di EON (conversa e consiglia).** Un modello aperto che sa già l'italiano (gratis,
+     da Hugging Face, licenza commerciale controllata), specializzato sugli artigiani con un computer
+     con scheda grafica **noleggiato a ore solo per l'allenamento** (stima: qualche decina di euro per
+     allenamento). Per rispondere agli utenti serve un **server**: ogni risposta va calcolata sul
+     momento e un modello che conversa è troppo grande per il telefono. All'inizio a consumo (si paga
+     solo quando qualcuno chiede: pochi euro con pochi utenti); un server sempre acceso solo con tanti
+     utenti (stima: centinaia di euro al mese). Entra nell'app solo se, sulle stesse domande, risponde
+     bene quanto l'AI grande, e se costa meno di lei.
+  - Cosa serve da Andrea quando ci arriviamo: sbloccare `huggingface.co` nella rete dell'ambiente;
+    account del noleggio con carta e tetto di spesa; la chiave messa nelle impostazioni
+    dell'ambiente (mai in chat).
+  - Consigli su norme e sicurezza (gas, impianti, DiCo): solo da schede verificate, con la fonte.
 
 **La strada, in ordine:**
 1. Il neurale al centro dell'app, solo se migliora l'app intera sull'esame.
