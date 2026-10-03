@@ -18977,6 +18977,9 @@ function datiDalModello(testo){
   if(!m || m.intento !== "dati" || m.p < SICURO_DATI || !m.tema || m.pTema < SICURO_TEMA) return null;
   // un nome che in rubrica vale per più clienti ("Dini": Sara o Giampiero?): come prima, decide chi viene dopo
   if(m.chi.some(c => c.stato === "ambiguo")) return null;
+  // una cartella nominata ("cosa c'è in Fornitori?"): la cartella, come nel lettore
+  const lc = leggiConLettore(testo);
+  if(lc && lc.azione === "dati" && lc.tema === "cartella" && lc.cartella) return lc;
   const detto = m.chi[0] ? m.chi[0].detto : "";
   const cliente = clienteDelModello(m) || (detto ? clienteDaNomeDetto(detto) : null);
   return { azione: "dati", tema: m.tema === "telefono" ? "contatto" : m.tema, cliente: cliente || null, nomeDetto: cliente ? "" : detto,

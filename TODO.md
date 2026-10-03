@@ -5016,6 +5016,14 @@ ROADMAP 0b.11.
   `provaIndirizzoCliente` / `provaQuandoAssemblea` (regole); `clientiDaPiuTempo` ("quali clienti non
   sento da più tempo?": il modello lo capiva, l'app rispondeva solo con un nome); `mostraDati`.
 - `simulatore.test.mjs` carica `modello-lettura.json` (l'argomento lo dice il modello, come nell'app).
+- "?" parola a sé (`dividi` in verifica.mjs e allena.py, `paroleModello` nel lettore): prima
+  "agosto?" era un'altra parola e il modello non vedeva la domanda.
+- Soglia dell'argomento 0,5 (`SICURO_TEMA`, lettore e app). Nomi ambigui in rubrica ("quale Dini…?")
+  → come prima, all'AI che chiede quale. Un nome di pagina ("incassi", "apri clienti") apre la pagina.
+  Una cartella nominata ("cosa c'è in Fornitori?") vince tranne su soldi e contatti
+  (`TEMI_NON_CARTELLA`).
+- Allenamenti: v8 → v14 (tre copie ciascuno, semi 1/11/23, 12 epoche). Ogni giro di errori → frasi
+  nuove (s31, s32, s33), mai copiate dai giri (controllo automatico delle frasi uguali).
 
 ### 2/10: PASSO A, secondo pacchetto (ROADMAP 0b.19)
 - `provaPreventivoAccettato`: cassetto `accettato` del modello (≥ 0,95) + `clienteDelModello`; tolta

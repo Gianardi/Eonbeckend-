@@ -515,7 +515,16 @@ lettore 516, app 317, server 60). Obiettivo: quel numero verso zero, giri mai pe
     DOMANDA_DATI_FORTE) e quelle dell'indirizzo e dell'assemblea (provaIndirizzoCliente,
     provaQuandoAssemblea): ora c'è un solo ingresso, `datiDalModello`. Nuova risposta: la mail di
     un cliente ("ce l'ho?" → sì, o "me la dici? la salvo").
-  - Se il modello non è sicuro dell'argomento (sotto 0,6), la domanda va all'AI come prima.
+  - Se il modello non è sicuro dell'argomento (sotto 0,5), la domanda va all'AI come prima. Le
+    risposte sui dati leggono soltanto: niente si scrive.
+  - Il punto di domanda è ora una parola a sé per il modello ("agosto?" → "agosto" "?"): così
+    distingue "la pizzeria m'ha pagato la fattura?" (domanda) da "…m'ha pagato la fattura, segnalo"
+    (incasso).
+  - Numeri: scrittori mai visti, cassetto 95,5%, cliente 97,8% (regole 78,8%), giorno e ora 91,8%
+    (regole 93,2%: qui il modello è ancora un po' sotto); argomento giusto ~94% (su 48 domande mai
+    viste, poche). Giri 5-20 tutti al minimo o sopra (giro 15: 1055, +2; giro 20: 1014, +1); frasi
+    vere di Andrea 134/136 (=); suite 83/83; simulatore 2935/2935.
+  - **Regole a mano: 860 → 826.**
 - Poi (da decidere coi numeri): B, partire da un modello che sa già l'italiano (serve sbloccare
   huggingface.co nella rete dell'ambiente); C, un modello che "scrive" il comando (serve una GPU).
 
